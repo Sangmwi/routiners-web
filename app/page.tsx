@@ -1,65 +1,54 @@
-import Image from "next/image";
-
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-col gap-6 p-6">
+      <header className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-khaki-900">오늘의 운동</h1>
+        <div className="h-10 w-10 rounded-full bg-khaki-200"></div>
+      </header>
+
+      <section className="rounded-2xl bg-white p-6 shadow-sm">
+        <h2 className="mb-2 text-lg font-semibold text-khaki-800">활동 요약</h2>
+        <div className="flex justify-between text-center">
+          <div>
+            <p className="text-sm text-muted-foreground">걸음 수</p>
+            <p className="text-xl font-bold text-primary">5,240</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">칼로리</p>
+            <p className="text-xl font-bold text-primary">320</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">운동 시간</p>
+            <p className="text-xl font-bold text-primary">45분</p>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      <section>
+        <h2 className="mb-4 text-lg font-semibold text-khaki-800">추천 루틴</h2>
+        <div className="flex flex-col gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex items-center gap-4 rounded-xl bg-white p-4 shadow-sm transition-colors hover:bg-khaki-50">
+              <div className="h-16 w-16 rounded-lg bg-khaki-200"></div>
+              <div>
+                <h3 className="font-medium text-khaki-900">전신 지방 연소 {i}</h3>
+                <p className="text-sm text-muted-foreground">20분 • 중급</p>
+              </div>
+            </div>
+          ))}
         </div>
-      </main>
+      </section>
+      
+      {/* Scroll test content */}
+      <section className="space-y-4">
+         <h2 className="text-lg font-semibold text-khaki-800">최근 기록</h2>
+         {Array.from({ length: 5 }).map((_, i) => (
+           <div key={`history-${i}`} className="rounded-xl border border-khaki-200 bg-white p-4">
+             <p className="font-medium">저녁 러닝</p>
+             <p className="text-sm text-muted-foreground">어제</p>
+           </div>
+         ))}
+      </section>
     </div>
   );
 }

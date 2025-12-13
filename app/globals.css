@@ -1,26 +1,100 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Khaki Theme Palette */
+  --color-khaki-50: #f7f8f4;
+  --color-khaki-100: #ecede6;
+  --color-khaki-200: #dadccf;
+  --color-khaki-300: #c1c5ad;
+  --color-khaki-400: #a5aa87;
+  --color-khaki-500: #888e6a;
+  --color-khaki-600: #6d7253;
+  --color-khaki-700: #575b44;
+  --color-khaki-800: #484b3a;
+  --color-khaki-900: #3e4033;
+  --color-khaki-950: #21231a;
+
+  --background: #f7f8f4; /* khaki-50 */
+  --foreground: #21231a; /* khaki-950 */
+  
+  --primary: #888e6a; /* khaki-500 */
+  --primary-foreground: #ffffff;
+  
+  --secondary: #ecede6; /* khaki-100 */
+  --secondary-foreground: #3e4033; /* khaki-900 */
+  
+  --muted: #dadccf; /* khaki-200 */
+  --muted-foreground: #575b44; /* khaki-700 */
+
+  --card: #ffffff;
+  --card-foreground: #21231a;
+  
+  --border: #dadccf; /* khaki-200 */
+  --input: #dadccf;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  
+  --color-khaki-50: var(--color-khaki-50);
+  --color-khaki-100: var(--color-khaki-100);
+  --color-khaki-200: var(--color-khaki-200);
+  --color-khaki-300: var(--color-khaki-300);
+  --color-khaki-400: var(--color-khaki-400);
+  --color-khaki-500: var(--color-khaki-500);
+  --color-khaki-600: var(--color-khaki-600);
+  --color-khaki-700: var(--color-khaki-700);
+  --color-khaki-800: var(--color-khaki-800);
+  --color-khaki-900: var(--color-khaki-900);
+  --color-khaki-950: var(--color-khaki-950);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Dark mode could use darker shades, keeping simple for now or inverting logic */
+    --background: #21231a; /* khaki-950 */
+    --foreground: #f7f8f4; /* khaki-50 */
+    
+    --primary: #888e6a; /* khaki-500 */
+    --primary-foreground: #ffffff;
+    
+    --secondary: #3e4033; /* khaki-900 */
+    --secondary-foreground: #ecede6; /* khaki-100 */
+    
+    --muted: #484b3a; /* khaki-800 */
+    --muted-foreground: #c1c5ad; /* khaki-300 */
+
+    --card: #2c2e24; /* slight variation */
+    --card-foreground: #f7f8f4;
+    
+    --border: #484b3a;
+    --input: #484b3a;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  overscroll-behavior: none; /* Prevent pull-to-refresh on mobile web if not handled */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+::-webkit-scrollbar {
+  display: none;
 }
