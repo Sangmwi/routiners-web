@@ -1,36 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  /* Khaki Theme Palette */
-  --color-khaki-50: #f7f8f4;
-  --color-khaki-100: #ecede6;
-  --color-khaki-200: #dadccf;
-  --color-khaki-300: #c1c5ad;
-  --color-khaki-400: #a5aa87;
-  --color-khaki-500: #888e6a;
-  --color-khaki-600: #6d7253;
-  --color-khaki-700: #575b44;
-  --color-khaki-800: #484b3a;
-  --color-khaki-900: #3e4033;
-  --color-khaki-950: #21231a;
+  /* Green Brand Palette */
+  --color-green-50: #f0faf3;
+  --color-green-100: #dbf5e2;
+  --color-green-200: #b9eac8;
+  --color-green-300: #88d9a2;
+  --color-green-400: #5fc07f;
+  --color-green-500: #50A76C; /* 메인 브랜드 컬러 */
+  --color-green-600: #328a4d;
+  --color-green-700: #1B6523; /* 다크 브랜드 컬러 */
+  --color-green-800: #1a5421;
+  --color-green-900: #17451c;
+  --color-green-950: #0a2610;
 
-  --background: #f7f8f4; /* khaki-50 */
-  --foreground: #21231a; /* khaki-950 */
+  --background: #f8faf8;
+  --foreground: #0a2610; /* green-950 */
   
-  --primary: #888e6a; /* khaki-500 */
+  --primary: #50A76C; /* green-500 */
   --primary-foreground: #ffffff;
   
-  --secondary: #ecede6; /* khaki-100 */
-  --secondary-foreground: #3e4033; /* khaki-900 */
+  --secondary: #dbf5e2; /* green-100 */
+  --secondary-foreground: #17451c; /* green-900 */
   
-  --muted: #dadccf; /* khaki-200 */
-  --muted-foreground: #575b44; /* khaki-700 */
+  --muted: #e8f4eb;
+  --muted-foreground: #328a4d; /* green-600 */
 
   --card: #ffffff;
-  --card-foreground: #21231a;
+  --card-foreground: #0a2610;
   
-  --border: #dadccf; /* khaki-200 */
-  --input: #dadccf;
+  --border: #b9eac8; /* green-200 */
+  --input: #dbf5e2;
 }
 
 @theme inline {
@@ -47,42 +47,42 @@
   --color-border: var(--border);
   --color-input: var(--input);
   
-  --color-khaki-50: var(--color-khaki-50);
-  --color-khaki-100: var(--color-khaki-100);
-  --color-khaki-200: var(--color-khaki-200);
-  --color-khaki-300: var(--color-khaki-300);
-  --color-khaki-400: var(--color-khaki-400);
-  --color-khaki-500: var(--color-khaki-500);
-  --color-khaki-600: var(--color-khaki-600);
-  --color-khaki-700: var(--color-khaki-700);
-  --color-khaki-800: var(--color-khaki-800);
-  --color-khaki-900: var(--color-khaki-900);
-  --color-khaki-950: var(--color-khaki-950);
+  /* Green Brand Scale - Tailwind에서 green-500 등으로 사용 가능 */
+  --color-green-50: var(--color-green-50);
+  --color-green-100: var(--color-green-100);
+  --color-green-200: var(--color-green-200);
+  --color-green-300: var(--color-green-300);
+  --color-green-400: var(--color-green-400);
+  --color-green-500: var(--color-green-500);
+  --color-green-600: var(--color-green-600);
+  --color-green-700: var(--color-green-700);
+  --color-green-800: var(--color-green-800);
+  --color-green-900: var(--color-green-900);
+  --color-green-950: var(--color-green-950);
 
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-pretendard-variable);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Dark mode could use darker shades, keeping simple for now or inverting logic */
-    --background: #21231a; /* khaki-950 */
-    --foreground: #f7f8f4; /* khaki-50 */
+    --background: #0a2610; /* green-950 */
+    --foreground: #f0faf3; /* green-50 */
     
-    --primary: #888e6a; /* khaki-500 */
-    --primary-foreground: #ffffff;
+    --primary: #5fc07f; /* green-400 - 다크모드에서 더 밝게 */
+    --primary-foreground: #0a2610;
     
-    --secondary: #3e4033; /* khaki-900 */
-    --secondary-foreground: #ecede6; /* khaki-100 */
+    --secondary: #17451c; /* green-900 */
+    --secondary-foreground: #dbf5e2; /* green-100 */
     
-    --muted: #484b3a; /* khaki-800 */
-    --muted-foreground: #c1c5ad; /* khaki-300 */
+    --muted: #1a5421; /* green-800 */
+    --muted-foreground: #88d9a2; /* green-300 */
 
-    --card: #2c2e24; /* slight variation */
-    --card-foreground: #f7f8f4;
+    --card: #0f3015;
+    --card-foreground: #f0faf3;
     
-    --border: #484b3a;
-    --input: #484b3a;
+    --border: #1a5421;
+    --input: #17451c;
   }
 }
 

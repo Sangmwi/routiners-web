@@ -1,22 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
-import BottomNav from "./components/BottomNav";
-import WebViewBridge from "./components/WebViewBridge";
+import BottomNav from "@/components/BottomNav";
+import WebViewBridge from "@/components/WebViewBridge";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const pretendardVariable = localFont({
+  src: '../assets/fonts/PretendardVariable.woff2',
+  display: 'swap',
+  weight: '100 900',
+  variable: '--font-pretendard-variable',
+})
 
 export const metadata: Metadata = {
-  title: "삼평오 - AI 헬스 트레이너",
-  description: "당신의 AI 헬스 파트너",
+  title: "루티너스 - 매일의 루틴이 만드는 Evolution",
+  description: "당신의 AI 헬스 파트너, 루티너스와 함께하세요.",
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-stone-100`}
+        className={`${pretendardVariable.variable} antialiased bg-background`}
       >
         <WebViewBridge />
         <div className="mx-auto flex min-h-screen max-w-md flex-col bg-background shadow-2xl">
