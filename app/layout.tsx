@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import BottomNav from "@/components/BottomNav";
+import BottomNav from "@/components/common/BottomNav";
 import WebViewBridge from "@/components/WebViewBridge";
 
 const pretendardVariable = localFont({
