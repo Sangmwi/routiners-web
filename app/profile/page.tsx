@@ -1,7 +1,9 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useCurrentUserProfile } from '@/lib/hooks/useProfile';
+import { createClient } from '@/utils/supabase/client';
 import ProfileHeroSection from '@/components/profile/ProfileHeroSection';
 import ProfileLocationCard from '@/components/profile/ProfileLocationCard';
 import ProfileBioSection from '@/components/profile/ProfileBioSection';
@@ -10,11 +12,13 @@ import ProfileInterestsTags from '@/components/profile/ProfileInterestsTags';
 import ProfileInbodySection from '@/components/profile/ProfileInbodySection';
 import ProfileMilitarySection from '@/components/profile/ProfileMilitarySection';
 import ProfileLocationsSection from '@/components/profile/ProfileLocationsSection';
-import { Loader2, ArrowLeft, Settings } from 'lucide-react';
+import { Loader2, ArrowLeft, Settings, LogOut } from 'lucide-react';
 
 export default function ProfilePage() {
   const router = useRouter();
   const { data: user, isLoading, error } = useCurrentUserProfile();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const supabase = createClient();
 
   const handleEdit = () => {
     router.push('/profile/edit');
@@ -22,6 +26,17 @@ export default function ProfilePage() {
 
   const handleBack = () => {
     router.back();
+  };
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await supabase.auth.signOut();
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      setIsLoggingOut(false);
+    }
   };
 
   if (isLoading) {
@@ -108,6 +123,27 @@ export default function ProfilePage() {
 
         {/* Interests */}
         <ProfileInterestsTags interests={user.interestedExercises} />
+
+        {/* Logout Button */}
+        <div className="pt-8">
+          <button
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoggingOut ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>로그아웃 중...</span>
+              </>
+            ) : (
+              <>
+                <LogOut className="w-4 h-4" />
+                <span>로그아웃</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Floating Chat Button - NOT shown for own profile */}

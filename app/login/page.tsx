@@ -25,7 +25,15 @@ function LoginContent() {
     setIsLoading(true);
     setError(null);
     try {
-      const redirectUrl = `${window.location.origin}/auth/callback`;
+      // Use production URL for OAuth callback
+      // In development, use localhost. In production/app, use the deployed URL
+      const isLocalhost = window.location.hostname === 'localhost' ||
+                          window.location.hostname === '127.0.0.1' ||
+                          window.location.hostname === '10.0.2.2';
+
+      const redirectUrl = isLocalhost
+        ? `${window.location.origin}/auth/callback`
+        : 'https://routiners-web.vercel.app/auth/callback';
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
@@ -45,12 +53,12 @@ function LoginContent() {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-green-50 via-white to-green-100">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-green-200/40 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-green-300/30 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-green-100/50 blur-3xl" />
+        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-primary/20 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
       </div>
 
       {/* Content */}
@@ -68,7 +76,7 @@ function LoginContent() {
         </div>
 
         {error && (
-          <div className="mb-4 rounded-xl bg-red-50 p-3 text-center text-sm text-red-600 ring-1 ring-red-100">
+          <div className="mb-4 rounded-xl bg-destructive/10 p-3 text-center text-sm text-destructive ring-1 ring-destructive/20">
             {error}
           </div>
         )}
@@ -77,10 +85,10 @@ function LoginContent() {
         <button
           onClick={handleGoogleLogin}
           disabled={isLoading}
-          className="group relative flex w-full items-center justify-center gap-3 rounded-2xl bg-white px-6 py-4 text-sm font-medium text-gray-700 shadow-md shadow-gray-200/50 ring-1 ring-gray-200 transition-all duration-200 hover:shadow-lg hover:shadow-gray-200/50 hover:ring-gray-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="group relative flex w-full items-center justify-center gap-3 rounded-2xl bg-card px-6 py-4 text-sm font-medium text-card-foreground shadow-md ring-1 ring-border transition-all duration-200 hover:shadow-lg hover:ring-primary/50 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
-            <Loader2 className="h-5 w-5 animate-spin text-green-600" />
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
           ) : (
             <>
               <GoogleLogo className="h-5 w-5" />
@@ -91,24 +99,24 @@ function LoginContent() {
 
         {/* Divider */}
         <div className="my-6 flex items-center gap-4">
-          <div className="h-px flex-1 bg-linear-to-r from-transparent via-green-200 to-transparent" />
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
         </div>
 
         {/* Terms */}
-        <p className="text-center text-xs text-green-600/50 leading-relaxed">
+        <p className="text-center text-xs text-muted-foreground leading-relaxed">
           로그인 시{" "}
-          <span className="text-green-600/70 underline underline-offset-2">
+          <span className="text-foreground/70 underline underline-offset-2">
             서비스 이용약관
           </span>{" "}
           및{" "}
-          <span className="text-green-600/70 underline underline-offset-2">
+          <span className="text-foreground/70 underline underline-offset-2">
             개인정보 처리방침
           </span>
           에 동의합니다.
         </p>
 
         {/* Footer */}
-        <p className="mt-8 text-center text-xs text-green-600/40">
+        <p className="mt-8 text-center text-xs text-muted-foreground/60">
           © 2024 루티너스. All rights reserved.
         </p>
       </div>
@@ -120,8 +128,8 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-100">
-          <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+        <div className="flex min-h-screen items-center justify-center bg-background">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       }
     >
