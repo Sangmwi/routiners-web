@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCurrentUserProfile, useUpdateProfile, useProfileProgress } from '@/lib/hooks/useProfile';
 import { ArrowLeft } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
-import ProfilePhotoUploadSection from '@/components/profile/edit/ProfilePhotoUploadSection';
+import ProfilePhotoGallery from '@/components/profile/edit/ProfilePhotoGallery';
 import ProfileNicknameInput from '@/components/profile/edit/ProfileNicknameInput';
 import ProfileBioInput from '@/components/profile/edit/ProfileBioInput';
 import ProfileHeightWeightInput from '@/components/profile/edit/ProfileHeightWeightInput';
@@ -33,10 +33,8 @@ export default function ProfileEditPage() {
     interestedExercises: [] as string[],
   });
 
-  // Photo upload state - stored separately to upload on save
-  const [pendingMainPhoto, setPendingMainPhoto] = useState<File | null>(null);
-  const [pendingAdditionalPhotos, setPendingAdditionalPhotos] = useState<(File | null)[]>([null, null, null]);
-  const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
+  // Photo state - now managed by ProfilePhotoGallery component
+  const [profileImages, setProfileImages] = useState<string[]>([]);
 
   // User 데이터가 로드되면 form 초기화
   useEffect(() => {
@@ -53,6 +51,7 @@ export default function ProfileEditPage() {
         interestedLocations: user.interestedLocations || [],
         interestedExercises: user.interestedExercises || [],
       });
+      setProfileImages(user.profileImages || []);
     }
   }, [user]);
 
@@ -66,68 +65,30 @@ export default function ProfileEditPage() {
   const handleSave = async () => {
     if (!user) return;
 
-    try {
-      setIsUploadingPhotos(true);
+    // Build update object (photos are now saved immediately via ProfilePhotoGallery)
+    const updates: Record<string, unknown> = {
+      nickname: formData.nickname.trim() || undefined,
+      bio: formData.bio.trim() || undefined,
+      height: formData.height ? Number(formData.height) : undefined,
+      weight: formData.weight ? Number(formData.weight) : undefined,
+      muscleMass: formData.muscleMass ? Number(formData.muscleMass) : undefined,
+      bodyFatPercentage: formData.bodyFatPercentage ? Number(formData.bodyFatPercentage) : undefined,
+      showInbodyPublic: formData.showInbodyPublic,
+      isSmoker: formData.isSmoker,
+      interestedLocations: formData.interestedLocations,
+      interestedExercises: formData.interestedExercises,
+    };
 
-      // 1. Upload main photo if changed
-      let mainPhotoUrl: string | undefined;
-      if (pendingMainPhoto) {
-        const formData = new FormData();
-        formData.append('file', pendingMainPhoto);
-        formData.append('type', 'main');
-
-        const response = await fetch('/api/user/profile/image', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to upload main photo');
-        }
-
-        const data = await response.json();
-        mainPhotoUrl = data.url;
-      }
-
-      // 2. Upload additional photos if changed
-      // Note: Additional photos are not yet stored in DB, so we'll skip for now
-      // TODO: Implement additional photos storage when DB schema is ready
-
-      // 3. Update profile with all data
-      const updates: any = {
-        nickname: formData.nickname.trim() || undefined,
-        bio: formData.bio.trim() || undefined,
-        height: formData.height ? Number(formData.height) : undefined,
-        weight: formData.weight ? Number(formData.weight) : undefined,
-        muscleMass: formData.muscleMass ? Number(formData.muscleMass) : undefined,
-        bodyFatPercentage: formData.bodyFatPercentage ? Number(formData.bodyFatPercentage) : undefined,
-        showInbodyPublic: formData.showInbodyPublic,
-        isSmoker: formData.isSmoker,
-        interestedLocations: formData.interestedLocations,
-        interestedExercises: formData.interestedExercises,
-      };
-
-      // Add photo URL if uploaded
-      if (mainPhotoUrl) {
-        updates.profileImage = mainPhotoUrl;
-      }
-
-      // Mutation 실행
-      updateProfile.mutate(updates, {
-        onSuccess: () => {
-          router.push('/profile');
-        },
-        onError: (error) => {
-          console.error('Failed to update profile:', error);
-          alert('프로필 저장에 실패했습니다. 다시 시도해주세요.');
-        },
-      });
-    } catch (error) {
-      console.error('Failed to save profile:', error);
-      alert('프로필 저장에 실패했습니다. 다시 시도해주세요.');
-    } finally {
-      setIsUploadingPhotos(false);
-    }
+    // Mutation 실행
+    updateProfile.mutate(updates, {
+      onSuccess: () => {
+        router.push('/profile');
+      },
+      onError: (err: Error) => {
+        console.error('Failed to update profile:', err);
+        alert('프로필 저장에 실패했습니다. 다시 시도해주세요.');
+      },
+    });
   };
 
   if (isLoading) {
@@ -188,15 +149,10 @@ export default function ProfileEditPage() {
 
       {/* Content */}
       <div className="px-5 pb-32 space-y-8">
-        {/* Profile Photo Upload */}
-        <ProfilePhotoUploadSection
+        {/* Profile Photo Gallery */}
+        <ProfilePhotoGallery
           user={user}
-          onMainPhotoChange={(file) => setPendingMainPhoto(file)}
-          onAdditionalPhotosChange={(index, file) => {
-            const newPhotos = [...pendingAdditionalPhotos];
-            newPhotos[index] = file;
-            setPendingAdditionalPhotos(newPhotos);
-          }}
+          onImagesChange={setProfileImages}
         />
 
         {/* Nickname Input */}
@@ -252,11 +208,11 @@ export default function ProfileEditPage() {
       <div className="fixed bottom-0 left-0 right-0 p-5 bg-background border-t border-border/50">
         <button
           onClick={handleSave}
-          disabled={updateProfile.isPending || isUploadingPhotos}
+          disabled={updateProfile.isPending}
           className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          {(updateProfile.isPending || isUploadingPhotos) && <Loader2 className="h-4 w-4 animate-spin" />}
-          {isUploadingPhotos ? '사진 업로드 중...' : updateProfile.isPending ? '저장 중...' : '저장하기'}
+          {updateProfile.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+          {updateProfile.isPending ? '저장 중...' : '저장하기'}
         </button>
       </div>
     </div>

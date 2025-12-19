@@ -1,14 +1,20 @@
 'use client';
 
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { User } from '@/lib/types';
 import ImageWithFallback from '@/components/ui/ImageWithFallback';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ProfileHeroSectionProps {
   user: User;
 }
 
 export default function ProfileHeroSection({ user }: ProfileHeroSectionProps) {
+  const images = user.profileImages || [];
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const getAge = (birthDate: string) => {
     const birth = new Date(birthDate);
     const today = new Date();
@@ -20,31 +26,127 @@ export default function ProfileHeroSection({ user }: ProfileHeroSectionProps) {
     return age;
   };
 
-  const getRankDisplay = (rank: string) => {
-    return rank.split('-')[0]; // "병장-1호봉" → "병장"
-  };
+  const goToNext = useCallback(() => {
+    if (images.length > 1) {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+    }
+  }, [images.length]);
+
+  const goToPrev = useCallback(() => {
+    if (images.length > 1) {
+      setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+    }
+  }, [images.length]);
+
+  // Touch handlers for swipe
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    setTouchStart(e.touches[0].clientX);
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStart === null) return;
+
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart - touchEnd;
+
+    // Swipe threshold of 50px
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        goToNext();
+      } else {
+        goToPrev();
+      }
+    }
+
+    setTouchStart(null);
+  }, [touchStart, goToNext, goToPrev]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') goToPrev();
+      if (e.key === 'ArrowRight') goToNext();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [goToNext, goToPrev]);
 
   return (
-    <div className="relative h-[600px] rounded-[20px] overflow-hidden bg-card shadow-sm border border-border/50">
-      {/* Background Image */}
-      <div className="absolute inset-0">
-        <ImageWithFallback
-          src={user.profileImage}
-          alt={user.nickname}
-          fill
-          className="object-cover"
-          fallbackClassName="bg-gradient-to-br from-muted via-muted/80 to-muted/60"
-        />
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80" />
+    <div
+      ref={containerRef}
+      className="relative h-[600px] rounded-[20px] overflow-hidden bg-card shadow-sm border border-border/50"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Images Container */}
+      <div
+        className="absolute inset-0 flex transition-transform duration-300 ease-out"
+        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+      >
+        {images.length > 0 ? (
+          images.map((imageUrl, index) => (
+            <div key={index} className="relative w-full h-full flex-shrink-0">
+              <ImageWithFallback
+                src={imageUrl}
+                alt={`${user.nickname} 사진 ${index + 1}`}
+                fill
+                className="object-cover"
+                fallbackClassName="bg-gradient-to-br from-muted via-muted/80 to-muted/60"
+              />
+            </div>
+          ))
+        ) : (
+          <div className="relative w-full h-full flex-shrink-0 bg-gradient-to-br from-muted via-muted/80 to-muted/60" />
+        )}
       </div>
+
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 pointer-events-none" />
+
+      {/* Navigation Arrows (Desktop) */}
+      {images.length > 1 && (
+        <>
+          <button
+            onClick={goToPrev}
+            className="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-black/30 hover:bg-black/50 rounded-full transition-colors hidden sm:block"
+            aria-label="이전 사진"
+          >
+            <ChevronLeft className="w-6 h-6 text-white" />
+          </button>
+          <button
+            onClick={goToNext}
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-black/30 hover:bg-black/50 rounded-full transition-colors hidden sm:block"
+            aria-label="다음 사진"
+          >
+            <ChevronRight className="w-6 h-6 text-white" />
+          </button>
+        </>
+      )}
+
+      {/* Pagination Dots */}
+      {images.length > 1 && (
+        <div className="absolute top-4 left-0 right-0 flex justify-center gap-1.5">
+          {images.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentIndex(index)}
+              className={`
+                h-1 rounded-full transition-all duration-200
+                ${index === currentIndex ? 'w-6 bg-white' : 'w-1.5 bg-white/50 hover:bg-white/70'}
+              `}
+              aria-label={`사진 ${index + 1}로 이동`}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Content */}
       <div className="absolute bottom-0 left-0 right-0 p-5">
         {/* Name and Age */}
         <div className="flex items-center gap-2 mb-3">
           <h1 className="text-2xl font-bold text-white">
-            {getRankDisplay(user.rank)} {user.nickname}, {getAge(user.birthDate)}
+            {user.rank} {user.nickname}, {getAge(user.birthDate)}
           </h1>
           <CheckCircle2 className="w-6 h-6 text-white" fill="currentColor" />
         </div>

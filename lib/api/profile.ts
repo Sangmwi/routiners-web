@@ -83,15 +83,16 @@ export const profileApi = {
    *
    * @param file - 업로드할 이미지 파일
    * @param type - 이미지 타입 ('main' | 'additional')
-   * @returns 업로드된 이미지 URL
+   * @returns 업로드 결과 (url, index, profileImages)
    */
   async uploadProfileImage(
     file: File,
     type: 'main' | 'additional'
-  ): Promise<string> {
+  ): Promise<{ url: string; index: number; profileImages: string[] }> {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('type', type);
+    // type을 index로 변환: main = 0, additional = 현재 이미지 수
+    formData.append('index', type === 'main' ? '0' : '1');
 
     const response = await fetch('/api/user/profile/image', {
       method: 'POST',
@@ -103,16 +104,16 @@ export const profileApi = {
       throw new Error(error.message || 'Failed to upload image');
     }
 
-    const { url } = await response.json();
-    return url;
+    return response.json();
   },
 
   /**
    * 프로필 이미지 삭제
    *
    * @param imageUrl - 삭제할 이미지 URL
+   * @returns 삭제 결과 (success, profileImages)
    */
-  async deleteProfileImage(imageUrl: string): Promise<void> {
+  async deleteProfileImage(imageUrl: string): Promise<{ success: boolean; profileImages: string[] }> {
     const response = await fetch('/api/user/profile/image', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -123,6 +124,8 @@ export const profileApi = {
       const error = await response.json().catch(() => ({}));
       throw new Error(error.message || 'Failed to delete image');
     }
+
+    return response.json();
   },
 };
 

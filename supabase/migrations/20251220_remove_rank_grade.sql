@@ -1,6 +1,47 @@
--- 사용자 추천 알고리즘을 PostgreSQL 함수로 구현
--- 200명 데이터를 Node.js로 가져와서 처리하는 대신 DB에서 직접 스코어링
+-- Migration: Remove rank_grade column from users table
+-- Date: 2024-12-20
+-- Description: Simplify rank system by removing 호봉 (rank_grade)
+--              Keep only simple ranks: 이병, 일병, 상병, 병장
 
+-- Step 1: Drop the rank_grade column from users table
+ALTER TABLE users DROP COLUMN IF EXISTS rank_grade;
+
+-- Step 2: Update rank column to use simple Korean rank names directly
+-- Convert existing enum-style values to Korean
+UPDATE users SET rank = '이병' WHERE rank = 'private';
+UPDATE users SET rank = '일병' WHERE rank = 'private_first_class';
+UPDATE users SET rank = '상병' WHERE rank = 'corporal';
+UPDATE users SET rank = '병장' WHERE rank = 'sergeant';
+
+-- Step 3: Add check constraint to validate rank values
+ALTER TABLE users DROP CONSTRAINT IF EXISTS users_rank_check;
+ALTER TABLE users ADD CONSTRAINT users_rank_check
+  CHECK (rank IN ('이병', '일병', '상병', '병장'));
+
+-- Step 4: Update the public_user_profiles view to remove rank_grade
+DROP VIEW IF EXISTS public_user_profiles;
+
+CREATE VIEW public_user_profiles AS
+SELECT
+  id,
+  nickname,
+  gender,
+  rank,
+  unit_name,
+  specialty,
+  profile_images[1] as profile_image_url,
+  bio,
+  height_cm,
+  weight_kg,
+  CASE WHEN show_body_metrics THEN skeletal_muscle_mass_kg ELSE NULL END as skeletal_muscle_mass_kg,
+  CASE WHEN show_body_metrics THEN body_fat_percentage ELSE NULL END as body_fat_percentage,
+  interested_exercise_locations,
+  interested_exercise_types,
+  is_smoker,
+  created_at
+FROM users;
+
+-- Step 5: Recreate the recommendations function without rank_grade
 CREATE OR REPLACE FUNCTION get_user_recommendations(
   p_user_id UUID,
   p_unit_id TEXT,
@@ -104,39 +145,39 @@ BEGIN
     WHERE u.id != p_user_id
   )
   SELECT
-    id,
-    provider_id,
-    email,
-    real_name,
-    phone_number,
-    birth_date,
-    gender,
-    nickname,
-    enlistment_month,
-    rank,
-    unit_id,
-    unit_name,
-    specialty,
-    profile_images,
-    bio,
-    height_cm,
-    weight_kg,
-    skeletal_muscle_mass_kg,
-    body_fat_percentage,
-    interested_exercise_locations,
-    interested_exercise_types,
-    is_smoker,
-    show_body_metrics,
-    created_at,
-    updated_at,
-    similarity_score
+    scored_users.id,
+    scored_users.provider_id,
+    scored_users.email,
+    scored_users.real_name,
+    scored_users.phone_number,
+    scored_users.birth_date,
+    scored_users.gender,
+    scored_users.nickname,
+    scored_users.enlistment_month,
+    scored_users.rank,
+    scored_users.unit_id,
+    scored_users.unit_name,
+    scored_users.specialty,
+    scored_users.profile_images,
+    scored_users.bio,
+    scored_users.height_cm,
+    scored_users.weight_kg,
+    scored_users.skeletal_muscle_mass_kg,
+    scored_users.body_fat_percentage,
+    scored_users.interested_exercise_locations,
+    scored_users.interested_exercise_types,
+    scored_users.is_smoker,
+    scored_users.show_body_metrics,
+    scored_users.created_at,
+    scored_users.updated_at,
+    scored_users.similarity_score
   FROM scored_users
-  ORDER BY similarity_score DESC
+  ORDER BY scored_users.similarity_score DESC
   LIMIT p_limit;
 END;
 $$ LANGUAGE plpgsql STABLE;
 
--- 함수 실행 권한 부여
+-- Grant execute permission
 GRANT EXECUTE ON FUNCTION get_user_recommendations TO authenticated;
 
-COMMENT ON FUNCTION get_user_recommendations IS '사용자 추천 알고리즘 - DB에서 직접 스코어링하여 성능 최적화';
+COMMENT ON FUNCTION get_user_recommendations IS '사용자 추천 알고리즘 - DB에서 직접 스코어링하여 성능 최적화 (rank_grade 제거됨)';

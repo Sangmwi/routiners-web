@@ -84,19 +84,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Nickname already taken' }, { status: 409 });
     }
 
-    // Parse rank and rank_grade from combined format (e.g., "이병-1호봉" -> rank: "private", rank_grade: 1)
-    const rankMap: Record<string, string> = {
-      '이병': 'private',
-      '일병': 'private_first_class',
-      '상병': 'corporal',
-      '병장': 'sergeant',
-    };
-
-    const [rankKorean, gradeStr] = body.rank.split('-');
-    const rankGrade = parseInt(gradeStr.replace('호봉', ''));
-    const rankEnum = rankMap[rankKorean];
-
-    if (!rankEnum || !rankGrade) {
+    // Validate rank (이병/일병/상병/병장)
+    const validRanks = ['이병', '일병', '상병', '병장'];
+    if (!validRanks.includes(body.rank)) {
       return NextResponse.json({ error: 'Invalid rank format' }, { status: 400 });
     }
 
@@ -117,8 +107,7 @@ export async function POST(request: NextRequest) {
         gender: body.gender,
         nickname: body.nickname,
         enlistment_month: enlistmentDate,
-        rank: rankEnum,
-        rank_grade: rankGrade,
+        rank: body.rank,
         unit_id: body.unitId,
         unit_name: body.unitName,
         specialty: body.specialty,
@@ -133,19 +122,12 @@ export async function POST(request: NextRequest) {
 
     console.log('User created successfully:', newUser.id);
 
-    // Transform response to camelCase and reconstruct rank format
-    const rankKoreanMap: Record<string, string> = {
-      'private': '이병',
-      'private_first_class': '일병',
-      'corporal': '상병',
-      'sergeant': '병장',
-    };
-
     // Convert enlistment_month back to YYYY-MM format (from YYYY-MM-DD)
     const enlistmentMonthFormatted = newUser.enlistment_month
       ? newUser.enlistment_month.substring(0, 7) // "2023-06-01" -> "2023-06"
       : newUser.enlistment_month;
 
+    // Transform response to camelCase
     const transformedUser = {
       id: newUser.id,
       providerId: newUser.provider_id,
@@ -156,7 +138,7 @@ export async function POST(request: NextRequest) {
       gender: newUser.gender,
       nickname: newUser.nickname,
       enlistmentMonth: enlistmentMonthFormatted,
-      rank: `${rankKoreanMap[newUser.rank]}-${newUser.rank_grade}호봉`,
+      rank: newUser.rank,
       unitId: newUser.unit_id,
       unitName: newUser.unit_name,
       specialty: newUser.specialty,

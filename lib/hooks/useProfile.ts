@@ -221,20 +221,17 @@ export function useUploadProfileImage() {
     mutationFn: ({ file, type }: { file: File; type: 'main' | 'additional' }) =>
       profileApi.uploadProfileImage(file, type),
 
-    onSuccess: (imageUrl, { type }) => {
-      if (type === 'main') {
-        // 메인 프로필 이미지 업데이트 - 낙관적 업데이트만 수행
-        // 즉시 invalidate하지 않고 캐시만 업데이트하여 불필요한 리페치 방지
-        const currentUser = queryClient.getQueryData<User>(queryKeys.user.me());
+    onSuccess: (result, { type }) => {
+      // 메인 프로필 이미지 업데이트 - 낙관적 업데이트만 수행
+      // 즉시 invalidate하지 않고 캐시만 업데이트하여 불필요한 리페치 방지
+      const currentUser = queryClient.getQueryData<User>(queryKeys.user.me());
 
-        if (currentUser) {
-          queryClient.setQueryData<User>(queryKeys.user.me(), {
-            ...currentUser,
-            profileImage: imageUrl,
-          });
-        }
+      if (currentUser && result.profileImages) {
+        queryClient.setQueryData<User>(queryKeys.user.me(), {
+          ...currentUser,
+          profileImages: result.profileImages,
+        });
       }
-      // additional 이미지는 별도 배열로 관리 필요 (User 타입 확장 필요)
     },
   });
 }
@@ -257,13 +254,13 @@ export function useDeleteProfileImage() {
   return useMutation({
     mutationFn: profileApi.deleteProfileImage,
 
-    onSuccess: (_, deletedImageUrl) => {
+    onSuccess: (result) => {
       const currentUser = queryClient.getQueryData<User>(queryKeys.user.me());
 
-      if (currentUser && currentUser.profileImage === deletedImageUrl) {
+      if (currentUser && result.profileImages) {
         queryClient.setQueryData<User>(queryKeys.user.me(), {
           ...currentUser,
-          profileImage: undefined,
+          profileImages: result.profileImages,
         });
       }
     },
@@ -290,7 +287,7 @@ export function useProfileProgress(user: User | null | undefined): number {
   if (!user) return 0;
 
   const fields = [
-    user.profileImage,
+    user.profileImages?.[0],
     user.bio,
     user.height,
     user.weight,

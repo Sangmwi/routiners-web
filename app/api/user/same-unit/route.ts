@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { withOptionalAuth } from '@/utils/supabase/auth';
 import { User } from '@/lib/types';
 
 /**
@@ -13,88 +13,93 @@ import { User } from '@/lib/types';
  * - unitId: unit ID (required)
  * - limit: number of users (default 20, max 50)
  */
-export async function GET(request: NextRequest) {
-  try {
-    const supabase = await createClient();
-    const searchParams = request.nextUrl.searchParams;
+export const GET = withOptionalAuth(async (request: NextRequest, auth) => {
+  const searchParams = request.nextUrl.searchParams;
 
-    const unitId = searchParams.get('unitId');
-    const limit = Math.min(Number(searchParams.get('limit')) || 20, 50);
+  const unitId = searchParams.get('unitId');
+  const limit = Math.min(Number(searchParams.get('limit')) || 20, 50);
 
-    if (!unitId) {
-      return NextResponse.json(
-        { error: 'unitId parameter is required' },
-        { status: 400 }
-      );
-    }
+  if (!unitId) {
+    return NextResponse.json(
+      { error: 'unitId parameter is required' },
+      { status: 400 }
+    );
+  }
 
-    // Get current authenticated user to exclude self
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
+  // Use the supabase client from auth context if available, or create new one
+  const supabase = auth?.supabase;
+  if (!supabase) {
+    // If no auth context, we need to create a client manually for this public endpoint
+    const { createClient } = await import('@/utils/supabase/server');
+    const publicSupabase = await createClient();
 
-    // Query same unit users - O(log n) with idx_users_unit_id
-    let query = supabase
+    const { data: usersData, error: queryError } = await publicSupabase
       .from('users')
       .select('*')
       .eq('unit_id', unitId)
       .order('created_at', { ascending: false })
       .limit(limit);
 
-    // Exclude current user if authenticated
-    if (authUser) {
-      const { data: currentUser } = await supabase
-        .from('users')
-        .select('id')
-        .eq('provider_id', authUser.id)
-        .single();
-
-      if (currentUser) {
-        query = query.neq('id', currentUser.id);
-      }
-    }
-
-    const { data: usersData, error: queryError } = await query;
-
     if (queryError) {
       throw queryError;
     }
 
-    // Map to User type
-    const users: User[] = (usersData || []).map((userData) => ({
-      id: userData.id,
-      providerId: userData.provider_id,
-      email: userData.email,
-      realName: userData.real_name,
-      phoneNumber: userData.phone_number,
-      birthDate: userData.birth_date,
-      gender: userData.gender,
-      nickname: userData.nickname,
-      enlistmentMonth: userData.enlistment_month,
-      rank: `${userData.rank}-${userData.rank_grade}호봉` as any,
-      unitId: userData.unit_id,
-      unitName: userData.unit_name,
-      specialty: userData.specialty,
-      profileImage: userData.profile_image_url,
-      bio: userData.bio,
-      height: userData.height_cm,
-      weight: userData.weight_kg,
-      muscleMass: userData.show_body_metrics ? userData.skeletal_muscle_mass_kg : undefined,
-      bodyFatPercentage: userData.show_body_metrics ? userData.body_fat_percentage : undefined,
-      interestedLocations: userData.interested_exercise_locations,
-      interestedExercises: userData.interested_exercise_types,
-      isSmoker: userData.is_smoker,
-      showInbodyPublic: userData.show_body_metrics,
-      createdAt: userData.created_at,
-      updatedAt: userData.updated_at,
-    }));
-
+    const users: User[] = (usersData || []).map((userData) => mapUserData(userData));
     return NextResponse.json(users);
-  } catch (error) {
-    console.error('[GET /api/user/same-unit]', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
   }
+
+  // Query same unit users - O(log n) with idx_users_unit_id
+  let query = supabase
+    .from('users')
+    .select('*')
+    .eq('unit_id', unitId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  // Exclude current user if authenticated
+  if (auth?.userId) {
+    query = query.neq('id', auth.userId);
+  }
+
+  const { data: usersData, error: queryError } = await query;
+
+  if (queryError) {
+    throw queryError;
+  }
+
+  // Map to User type
+  const users: User[] = (usersData || []).map((userData) => mapUserData(userData));
+
+  return NextResponse.json(users);
+});
+
+// Helper function to map DB data to User type
+function mapUserData(userData: any): User {
+  return {
+    id: userData.id,
+    providerId: userData.provider_id,
+    email: userData.email,
+    realName: userData.real_name,
+    phoneNumber: userData.phone_number,
+    birthDate: userData.birth_date,
+    gender: userData.gender,
+    nickname: userData.nickname,
+    enlistmentMonth: userData.enlistment_month,
+    rank: userData.rank,
+    unitId: userData.unit_id,
+    unitName: userData.unit_name,
+    specialty: userData.specialty,
+    profileImages: userData.profile_images || [],
+    bio: userData.bio,
+    height: userData.height_cm,
+    weight: userData.weight_kg,
+    muscleMass: userData.show_body_metrics ? userData.skeletal_muscle_mass_kg : undefined,
+    bodyFatPercentage: userData.show_body_metrics ? userData.body_fat_percentage : undefined,
+    interestedLocations: userData.interested_exercise_locations,
+    interestedExercises: userData.interested_exercise_types,
+    isSmoker: userData.is_smoker,
+    showInbodyPublic: userData.show_body_metrics,
+    createdAt: userData.created_at,
+    updatedAt: userData.updated_at,
+  };
 }

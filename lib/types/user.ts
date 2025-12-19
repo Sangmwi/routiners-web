@@ -2,11 +2,7 @@
 
 export type Gender = 'male' | 'female';
 
-export type Rank =
-  | '이병-1호봉' | '이병-2호봉' | '이병-3호봉' | '이병-4호봉' | '이병-5호봉' | '이병-6호봉'
-  | '일병-1호봉' | '일병-2호봉' | '일병-3호봉' | '일병-4호봉' | '일병-5호봉' | '일병-6호봉'
-  | '상병-1호봉' | '상병-2호봉' | '상병-3호봉' | '상병-4호봉' | '상병-5호봉' | '상병-6호봉'
-  | '병장-1호봉' | '병장-2호봉' | '병장-3호봉' | '병장-4호봉' | '병장-5호봉' | '병장-6호봉';
+export type Rank = '이병' | '일병' | '상병' | '병장';
 
 export type Specialty =
   | '보병'
@@ -45,7 +41,7 @@ export interface User {
   specialty: Specialty;
 
   // Profile additional fields
-  profileImage?: string;
+  profileImages?: string[]; // Array of profile image URLs (max 4). First image is the main profile photo.
   bio?: string;
   height?: number;
   weight?: number;
@@ -85,7 +81,7 @@ export interface SignupCompleteData extends PassVerificationData, MilitaryInfoDa
 // Profile update data
 export interface ProfileUpdateData {
   nickname?: string;
-  profileImage?: string;
+  profileImages?: string[];
   bio?: string;
   height?: number;
   weight?: number;

@@ -1,35 +1,11 @@
 import { Rank, Specialty } from '@/lib/types';
 
-// Rank options with labels
+// Rank options (이병/일병/상병/병장)
 export const RANK_OPTIONS: { value: Rank; label: string }[] = [
-  // 이병
-  { value: '이병-1호봉', label: '이병 1호봉' },
-  { value: '이병-2호봉', label: '이병 2호봉' },
-  { value: '이병-3호봉', label: '이병 3호봉' },
-  { value: '이병-4호봉', label: '이병 4호봉' },
-  { value: '이병-5호봉', label: '이병 5호봉' },
-  { value: '이병-6호봉', label: '이병 6호봉' },
-  // 일병
-  { value: '일병-1호봉', label: '일병 1호봉' },
-  { value: '일병-2호봉', label: '일병 2호봉' },
-  { value: '일병-3호봉', label: '일병 3호봉' },
-  { value: '일병-4호봉', label: '일병 4호봉' },
-  { value: '일병-5호봉', label: '일병 5호봉' },
-  { value: '일병-6호봉', label: '일병 6호봉' },
-  // 상병
-  { value: '상병-1호봉', label: '상병 1호봉' },
-  { value: '상병-2호봉', label: '상병 2호봉' },
-  { value: '상병-3호봉', label: '상병 3호봉' },
-  { value: '상병-4호봉', label: '상병 4호봉' },
-  { value: '상병-5호봉', label: '상병 5호봉' },
-  { value: '상병-6호봉', label: '상병 6호봉' },
-  // 병장
-  { value: '병장-1호봉', label: '병장 1호봉' },
-  { value: '병장-2호봉', label: '병장 2호봉' },
-  { value: '병장-3호봉', label: '병장 3호봉' },
-  { value: '병장-4호봉', label: '병장 4호봉' },
-  { value: '병장-5호봉', label: '병장 5호봉' },
-  { value: '병장-6호봉', label: '병장 6호봉' },
+  { value: '이병', label: '이병' },
+  { value: '일병', label: '일병' },
+  { value: '상병', label: '상병' },
+  { value: '병장', label: '병장' },
 ];
 
 // Specialty options
@@ -72,27 +48,24 @@ export const validateEnlistmentAndRank = (
     (now.getFullYear() - enlistmentDate.getFullYear()) * 12 +
     (now.getMonth() - enlistmentDate.getMonth());
 
-  const rankBase = rank.split('-')[0];
-  const gradeNumber = parseInt(rank.split('-')[1].replace('호봉', ''));
-
   // Basic validation rules (simplified)
   if (monthsDiff < 0) {
     return { valid: false, message: '입대 시기가 미래일 수 없습니다.' };
   }
 
-  if (rankBase === '이병' && monthsDiff > 6) {
+  if (rank === '이병' && monthsDiff > 6) {
     return { valid: false, message: '입대 시기와 계급이 맞지 않습니다.' };
   }
 
-  if (rankBase === '일병' && (monthsDiff < 6 || monthsDiff > 12)) {
+  if (rank === '일병' && (monthsDiff < 6 || monthsDiff > 12)) {
     return { valid: false, message: '입대 시기와 계급이 맞지 않습니다.' };
   }
 
-  if (rankBase === '상병' && (monthsDiff < 12 || monthsDiff > 18)) {
+  if (rank === '상병' && (monthsDiff < 12 || monthsDiff > 18)) {
     return { valid: false, message: '입대 시기와 계급이 맞지 않습니다.' };
   }
 
-  if (rankBase === '병장' && monthsDiff < 18) {
+  if (rank === '병장' && monthsDiff < 18) {
     return { valid: false, message: '입대 시기와 계급이 맞지 않습니다.' };
   }
 

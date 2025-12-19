@@ -35,14 +35,14 @@ export default function ProfileHeader({ user, onEdit }: ProfileHeaderProps) {
         <div className="group relative">
           <div className="relative h-24 w-24 overflow-hidden rounded-full bg-gradient-to-br from-primary to-primary/70 ring-4 ring-card">
             <ImageWithFallback
-              src={user.profileImage}
+              src={user.profileImages?.[0]}
               alt={user.nickname}
               fill
               className="object-cover"
               fallbackClassName="bg-gradient-to-br from-primary to-primary/70"
               showFallbackIcon={false}
             />
-            {!user.profileImage && (
+            {!user.profileImages?.[0] && (
               <div className="absolute inset-0 flex items-center justify-center text-3xl font-bold text-primary-foreground">
                 {user.nickname.charAt(0)}
               </div>

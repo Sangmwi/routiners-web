@@ -11,6 +11,64 @@ export interface ImageCompressionOptions {
   quality?: number;
 }
 
+const MAX_COMPRESSION_RETRIES = 3;
+
+/**
+ * Blob을 압축된 Blob으로 변환합니다. (내부 헬퍼)
+ */
+function compressBlob(
+  img: HTMLImageElement,
+  maxWidthOrHeight: number,
+  quality: number
+): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    try {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) {
+        reject(new Error('Canvas context not supported'));
+        return;
+      }
+
+      // 리사이징 비율 계산
+      let { width, height } = img;
+
+      if (width > maxWidthOrHeight || height > maxWidthOrHeight) {
+        if (width > height) {
+          height = (height / width) * maxWidthOrHeight;
+          width = maxWidthOrHeight;
+        } else {
+          width = (width / height) * maxWidthOrHeight;
+          height = maxWidthOrHeight;
+        }
+      }
+
+      // Canvas 크기 설정
+      canvas.width = Math.round(width);
+      canvas.height = Math.round(height);
+
+      // 이미지 그리기
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      // Blob으로 변환
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(new Error('Failed to compress image'));
+            return;
+          }
+          resolve(blob);
+        },
+        'image/jpeg',
+        quality
+      );
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
 /**
  * 이미지 파일을 압축합니다.
  *
@@ -25,8 +83,16 @@ export async function compressImage(
   const {
     maxSizeMB = 1, // 1MB 제한
     maxWidthOrHeight = 1920, // 1920px 제한
-    quality = 0.8, // 80% 품질
+    quality: initialQuality = 0.8, // 80% 품질
   } = options;
+
+  const maxSizeBytes = maxSizeMB * 1024 * 1024;
+
+  // Canvas API 지원 확인
+  if (typeof document === 'undefined' || !document.createElement) {
+    console.warn('Canvas API not supported, returning original file');
+    return file;
+  }
 
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -34,76 +100,65 @@ export async function compressImage(
     reader.onload = (e) => {
       const img = new Image();
 
-      img.onload = () => {
-        // Canvas 생성
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
+      img.onload = async () => {
+        try {
+          let quality = initialQuality;
+          let retries = 0;
+          let blob: Blob | null = null;
 
-        if (!ctx) {
-          reject(new Error('Canvas context not supported'));
-          return;
-        }
+          // 품질을 낮추면서 목표 크기 달성할 때까지 반복
+          while (retries < MAX_COMPRESSION_RETRIES) {
+            blob = await compressBlob(img, maxWidthOrHeight, quality);
 
-        // 리사이징 비율 계산
-        let { width, height } = img;
+            // 목표 크기 달성 또는 최소 품질 도달
+            if (blob.size <= maxSizeBytes || quality <= 0.5) {
+              break;
+            }
 
-        if (width > maxWidthOrHeight || height > maxWidthOrHeight) {
-          if (width > height) {
-            height = (height / width) * maxWidthOrHeight;
-            width = maxWidthOrHeight;
-          } else {
-            width = (width / height) * maxWidthOrHeight;
-            height = maxWidthOrHeight;
+            // 품질 낮추고 재시도
+            quality -= 0.15;
+            retries++;
+            console.log(`압축 재시도 (${retries}/${MAX_COMPRESSION_RETRIES}): quality=${quality.toFixed(2)}`);
           }
+
+          if (!blob) {
+            reject(new Error('Failed to compress image after retries'));
+            return;
+          }
+
+          // 압축 후에도 너무 크면 경고 로그 (업로드는 진행)
+          if (blob.size > maxSizeBytes) {
+            console.warn(`압축 후에도 파일이 ${formatFileSize(blob.size)}입니다. 서버 업로드를 진행합니다.`);
+          }
+
+          // File 객체로 변환
+          const compressedFile = new File([blob], file.name, {
+            type: 'image/jpeg',
+            lastModified: Date.now(),
+          });
+
+          resolve(compressedFile);
+        } catch (error) {
+          console.error('Compression error:', error);
+          // 압축 실패 시 원본 파일 반환 (업로드 시도는 계속)
+          console.warn('압축 실패, 원본 파일로 업로드를 시도합니다.');
+          resolve(file);
         }
-
-        // Canvas 크기 설정
-        canvas.width = width;
-        canvas.height = height;
-
-        // 이미지 그리기
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Blob으로 변환
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) {
-              reject(new Error('Failed to compress image'));
-              return;
-            }
-
-            // 압축된 파일이 목표 크기보다 큰 경우 품질을 더 낮춤
-            if (blob.size > maxSizeMB * 1024 * 1024 && quality > 0.5) {
-              // 재귀적으로 품질을 낮춰서 다시 압축
-              compressImage(file, {
-                ...options,
-                quality: quality - 0.1,
-              }).then(resolve).catch(reject);
-              return;
-            }
-
-            // File 객체로 변환
-            const compressedFile = new File([blob], file.name, {
-              type: 'image/jpeg',
-              lastModified: Date.now(),
-            });
-
-            resolve(compressedFile);
-          },
-          'image/jpeg',
-          quality
-        );
       };
 
       img.onerror = () => {
-        reject(new Error('Failed to load image'));
+        // 이미지 로드 실패 시에도 원본 파일 반환
+        console.warn('이미지 로드 실패, 원본 파일로 업로드를 시도합니다.');
+        resolve(file);
       };
 
       img.src = e.target?.result as string;
     };
 
     reader.onerror = () => {
-      reject(new Error('Failed to read file'));
+      // 파일 읽기 실패 시에도 원본 파일 반환
+      console.warn('파일 읽기 실패, 원본 파일로 업로드를 시도합니다.');
+      resolve(file);
     };
 
     reader.readAsDataURL(file);

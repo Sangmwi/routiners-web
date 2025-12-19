@@ -81,10 +81,9 @@ export type Database = {
           is_smoker: boolean | null
           nickname: string
           phone_number: string
-          profile_image_url: string | null
+          profile_images: string[] | null
           provider_id: string
           rank: string
-          rank_grade: number | null
           real_name: string
           show_body_metrics: boolean | null
           skeletal_muscle_mass_kg: number | null
@@ -109,10 +108,9 @@ export type Database = {
           is_smoker?: boolean | null
           nickname: string
           phone_number: string
-          profile_image_url?: string | null
+          profile_images?: string[] | null
           provider_id: string
           rank: string
-          rank_grade?: number | null
           real_name: string
           show_body_metrics?: boolean | null
           skeletal_muscle_mass_kg?: number | null
@@ -137,10 +135,9 @@ export type Database = {
           is_smoker?: boolean | null
           nickname?: string
           phone_number?: string
-          profile_image_url?: string | null
+          profile_images?: string[] | null
           provider_id?: string
           rank?: string
-          rank_grade?: number | null
           real_name?: string
           show_body_metrics?: boolean | null
           skeletal_muscle_mass_kg?: number | null
@@ -168,55 +165,54 @@ export type Database = {
           nickname: string | null
           profile_image_url: string | null
           rank: string | null
-          rank_grade: number | null
           skeletal_muscle_mass_kg: number | null
           specialty: string | null
           unit_name: string | null
           weight_kg: number | null
         }
-        Insert: {
-          bio?: string | null
-          body_fat_percentage?: never
-          created_at?: string | null
-          gender?: string | null
-          height_cm?: never
-          id?: string | null
-          interested_exercise_locations?: string[] | null
-          interested_exercise_types?: string[] | null
-          is_smoker?: boolean | null
-          nickname?: string | null
-          profile_image_url?: string | null
-          rank?: string | null
-          rank_grade?: number | null
-          skeletal_muscle_mass_kg?: never
-          specialty?: string | null
-          unit_name?: string | null
-          weight_kg?: never
-        }
-        Update: {
-          bio?: string | null
-          body_fat_percentage?: never
-          created_at?: string | null
-          gender?: string | null
-          height_cm?: never
-          id?: string | null
-          interested_exercise_locations?: string[] | null
-          interested_exercise_types?: string[] | null
-          is_smoker?: boolean | null
-          nickname?: string | null
-          profile_image_url?: string | null
-          rank?: string | null
-          rank_grade?: number | null
-          skeletal_muscle_mass_kg?: never
-          specialty?: string | null
-          unit_name?: string | null
-          weight_kg?: never
-        }
         Relationships: []
       }
     }
     Functions: {
-      [_ in never]: never
+      get_user_recommendations: {
+        Args: {
+          p_height: number
+          p_interested_exercises: string[]
+          p_interested_locations: string[]
+          p_limit?: number
+          p_unit_id: string
+          p_user_id: string
+          p_weight: number
+        }
+        Returns: {
+          bio: string
+          birth_date: string
+          body_fat_percentage: number
+          created_at: string
+          email: string
+          enlistment_month: string
+          gender: string
+          height_cm: number
+          id: string
+          interested_exercise_locations: string[]
+          interested_exercise_types: string[]
+          is_smoker: boolean
+          nickname: string
+          phone_number: string
+          profile_images: string[]
+          provider_id: string
+          rank: string
+          real_name: string
+          show_body_metrics: boolean
+          similarity_score: number
+          skeletal_muscle_mass_kg: number
+          specialty: string
+          unit_id: string
+          unit_name: string
+          updated_at: string
+          weight_kg: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

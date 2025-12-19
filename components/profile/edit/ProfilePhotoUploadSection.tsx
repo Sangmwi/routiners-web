@@ -18,7 +18,7 @@ export default function ProfilePhotoUploadSection({
   onMainPhotoChange,
   onAdditionalPhotosChange
 }: ProfilePhotoUploadSectionProps) {
-  const [mainPhoto, setMainPhoto] = useState(user.profileImage);
+  const [mainPhoto, setMainPhoto] = useState(user.profileImages?.[0]);
   const [additionalPhotos, setAdditionalPhotos] = useState<(string | null)[]>([null, null, null]);
   const [isCompressing, setIsCompressing] = useState(false);
 
