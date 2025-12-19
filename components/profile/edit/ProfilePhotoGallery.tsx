@@ -91,6 +91,26 @@ export default function ProfilePhotoGallery({
     };
   }, []);
 
+  // 터치 드래그 중 스크롤 방지 (passive: false 필요)
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+
+    const preventScroll = (e: TouchEvent) => {
+      // touchDragIndex가 설정되어 있으면 스크롤 방지
+      if (touchDragIndex !== null) {
+        e.preventDefault();
+      }
+    };
+
+    // passive: false로 등록해야 preventDefault() 작동
+    grid.addEventListener('touchmove', preventScroll, { passive: false });
+
+    return () => {
+      grid.removeEventListener('touchmove', preventScroll);
+    };
+  }, [touchDragIndex]);
+
   const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -359,25 +379,33 @@ export default function ProfilePhotoGallery({
     }
 
     // 터치 드래그 중이면 drop 타겟 계산
-    if (touchDragIndex !== null && gridRef.current) {
-      const gridItems = gridRef.current.children;
+    // (스크롤 방지는 useEffect의 native event listener에서 처리)
+    if (touchDragIndex !== null) {
+      if (gridRef.current) {
+        const gridItems = gridRef.current.children;
 
-      // 각 그리드 아이템의 위치 확인
-      for (let i = 0; i < gridItems.length; i++) {
-        const item = gridItems[i] as HTMLElement;
-        const rect = item.getBoundingClientRect();
+        // 각 그리드 아이템의 위치 확인
+        let foundTarget = false;
+        for (let i = 0; i < gridItems.length; i++) {
+          const item = gridItems[i] as HTMLElement;
+          const rect = item.getBoundingClientRect();
 
-        if (
-          touch.clientX >= rect.left &&
-          touch.clientX <= rect.right &&
-          touch.clientY >= rect.top &&
-          touch.clientY <= rect.bottom
-        ) {
-          if (i !== touchDragIndex && images[i]) {
-            setDragOverIndex(i);
+          if (
+            touch.clientX >= rect.left &&
+            touch.clientX <= rect.right &&
+            touch.clientY >= rect.top &&
+            touch.clientY <= rect.bottom
+          ) {
+            if (i !== touchDragIndex && images[i]) {
+              setDragOverIndex(i);
+            } else {
+              setDragOverIndex(null);
+            }
+            foundTarget = true;
+            break;
           }
-          break;
-        } else {
+        }
+        if (!foundTarget) {
           setDragOverIndex(null);
         }
       }
