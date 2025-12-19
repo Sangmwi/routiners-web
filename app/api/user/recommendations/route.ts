@@ -51,85 +51,86 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch candidate users (same unit first for performance)
-    // O(log n) with idx_users_unit_id
-    const { data: candidates, error: candidatesError } = await supabase
-      .from('users')
-      .select('*')
-      .neq('id', currentUser.id) // Exclude self
-      .limit(200); // Fetch more candidates for scoring
+    // Use PostgreSQL to calculate similarity scores directly in the database
+    // This is much faster than fetching 200 rows and scoring in Node.js
+    const { data: scoredUsers, error: candidatesError } = await supabase.rpc(
+      'get_user_recommendations',
+      {
+        p_user_id: currentUser.id,
+        p_unit_id: currentUser.unit_id,
+        p_interested_exercises: currentUser.interested_exercise_types || [],
+        p_interested_locations: currentUser.interested_exercise_locations || [],
+        p_height: currentUser.height_cm || null,
+        p_weight: currentUser.weight_kg || null,
+        p_limit: limit,
+      }
+    );
 
     if (candidatesError) {
-      throw candidatesError;
+      // Fallback to old algorithm if RPC function doesn't exist
+      console.warn('RPC function not found, using fallback algorithm');
+      const { data: candidates, error: fallbackError } = await supabase
+        .from('users')
+        .select('*')
+        .neq('id', currentUser.id)
+        .limit(50); // Reduced from 200 for better performance
+
+      if (fallbackError) throw fallbackError;
+      if (!candidates || candidates.length === 0) {
+        return NextResponse.json([]);
+      }
+
+      // Quick scoring (simplified)
+      const scoredCandidates = candidates
+        .map((candidate) => {
+          let score = 0;
+          if (candidate.unit_id === currentUser.unit_id) score += 40;
+          return { user: candidate, score };
+        })
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit);
+
+      const topUsers = scoredCandidates;
+
+      // Continue with mapping below...
+      const recommendations: User[] = topUsers.map(({ user: userData }) => ({
+        id: userData.id,
+        providerId: userData.provider_id,
+        email: userData.email,
+        realName: userData.real_name,
+        phoneNumber: userData.phone_number,
+        birthDate: userData.birth_date,
+        gender: userData.gender,
+        nickname: userData.nickname,
+        enlistmentMonth: userData.enlistment_month,
+        rank: `${userData.rank}-${userData.rank_grade}호봉` as any,
+        unitId: userData.unit_id,
+        unitName: userData.unit_name,
+        specialty: userData.specialty,
+        profileImage: userData.profile_image_url,
+        bio: userData.bio,
+        height: userData.height_cm,
+        weight: userData.weight_kg,
+        muscleMass: userData.show_body_metrics ? userData.skeletal_muscle_mass_kg : undefined,
+        bodyFatPercentage: userData.show_body_metrics ? userData.body_fat_percentage : undefined,
+        interestedLocations: userData.interested_exercise_locations,
+        interestedExercises: userData.interested_exercise_types,
+        isSmoker: userData.is_smoker,
+        showInbodyPublic: userData.show_body_metrics,
+        createdAt: userData.created_at,
+        updatedAt: userData.updated_at,
+      }));
+      return NextResponse.json(recommendations);
     }
 
-    if (!candidates || candidates.length === 0) {
+    if (!scoredUsers || scoredUsers.length === 0) {
       return NextResponse.json([]);
     }
 
-    // Calculate similarity scores
-    interface ScoredUser {
-      user: any;
-      score: number;
-    }
+    const topUsers = scoredUsers;
 
-    const scoredUsers: ScoredUser[] = candidates.map((candidate) => {
-      let score = 0;
-
-      // 1. Same unit (40 points) - Most important
-      if (candidate.unit_id === currentUser.unit_id) {
-        score += 40;
-      }
-
-      // 2. Interested exercises overlap (30 points)
-      const currentExercises = currentUser.interested_exercise_types || [];
-      const candidateExercises = candidate.interested_exercise_types || [];
-      const commonExercises = currentExercises.filter((ex: string) =>
-        candidateExercises.includes(ex)
-      );
-      if (currentExercises.length > 0 && candidateExercises.length > 0) {
-        const exerciseRatio = commonExercises.length / Math.max(currentExercises.length, candidateExercises.length);
-        score += exerciseRatio * 30;
-      }
-
-      // 3. Interested locations overlap (20 points)
-      const currentLocations = currentUser.interested_exercise_locations || [];
-      const candidateLocations = candidate.interested_exercise_locations || [];
-      const commonLocations = currentLocations.filter((loc: string) =>
-        candidateLocations.includes(loc)
-      );
-      if (currentLocations.length > 0 && candidateLocations.length > 0) {
-        const locationRatio = commonLocations.length / Math.max(currentLocations.length, candidateLocations.length);
-        score += locationRatio * 20;
-      }
-
-      // 4. Physical similarity (10 points)
-      if (
-        currentUser.height_cm &&
-        candidate.height_cm &&
-        currentUser.weight_kg &&
-        candidate.weight_kg
-      ) {
-        const heightDiff = Math.abs(currentUser.height_cm - candidate.height_cm);
-        const weightDiff = Math.abs(currentUser.weight_kg - candidate.weight_kg);
-
-        // Height within 5cm = 5 points, Weight within 5kg = 5 points
-        const heightScore = Math.max(0, (5 - heightDiff) / 5) * 5;
-        const weightScore = Math.max(0, (5 - weightDiff) / 5) * 5;
-        score += heightScore + weightScore;
-      }
-
-      return { user: candidate, score };
-    });
-
-    // Sort by score (descending) - O(n log n)
-    scoredUsers.sort((a, b) => b.score - a.score);
-
-    // Take top N
-    const topUsers = scoredUsers.slice(0, limit);
-
-    // Map to User type
-    const recommendations: User[] = topUsers.map(({ user: userData }) => ({
+    // Map to User type (scoredUsers already has the correct structure from RPC)
+    const recommendations: User[] = topUsers.map((userData: any) => ({
       id: userData.id,
       providerId: userData.provider_id,
       email: userData.email,

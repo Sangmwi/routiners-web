@@ -9,10 +9,12 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 60 * 1000, // 1 minute
-            gcTime: 5 * 60 * 1000, // 5 minutes (formerly cacheTime)
+            staleTime: 5 * 60 * 1000, // 5 minutes (increased from 1 min for better caching)
+            gcTime: 10 * 60 * 1000, // 10 minutes (increased from 5 min)
             refetchOnWindowFocus: false,
             retry: 1,
+            // Optimize for WebView performance
+            networkMode: 'offlineFirst',
           },
         },
       })

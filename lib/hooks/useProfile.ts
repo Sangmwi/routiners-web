@@ -190,8 +190,12 @@ export function useUpdateProfile() {
       // 현재 사용자 캐시 업데이트
       queryClient.setQueryData(queryKeys.user.me(), updatedUser);
 
-      // 검색 결과 무효화 (프로필 정보 변경으로 검색 결과 영향 받을 수 있음)
-      queryClient.invalidateQueries({ queryKey: queryKeys.user.all });
+      // 검색 결과만 무효화 (추천/같은부대 등 다른 쿼리는 유지)
+      // 전체 무효화 대신 검색 쿼리만 타겟팅하여 불필요한 리페치 방지
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.user.search(),
+        exact: false
+      });
     },
   });
 }
@@ -219,7 +223,8 @@ export function useUploadProfileImage() {
 
     onSuccess: (imageUrl, { type }) => {
       if (type === 'main') {
-        // 메인 프로필 이미지 업데이트 - 낙관적 업데이트
+        // 메인 프로필 이미지 업데이트 - 낙관적 업데이트만 수행
+        // 즉시 invalidate하지 않고 캐시만 업데이트하여 불필요한 리페치 방지
         const currentUser = queryClient.getQueryData<User>(queryKeys.user.me());
 
         if (currentUser) {
@@ -228,9 +233,6 @@ export function useUploadProfileImage() {
             profileImage: imageUrl,
           });
         }
-
-        // 서버에서 최신 데이터 다시 가져오기 (DB 업데이트 확인)
-        queryClient.invalidateQueries({ queryKey: queryKeys.user.me() });
       }
       // additional 이미지는 별도 배열로 관리 필요 (User 타입 확장 필요)
     },

@@ -19,7 +19,7 @@ export const profileApi = {
    */
   async getCurrentUserProfile(): Promise<User | null> {
     const response = await fetch('/api/user/me', {
-      method: 'GET',
+      method: 'GET',  
       headers: { 'Content-Type': 'application/json' },
     });
 

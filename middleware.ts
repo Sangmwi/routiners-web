@@ -47,43 +47,44 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // If user is authenticated, check if they have completed signup
-  if (user && !isPublicRoute && !isSignupRoute) {
-    // Check if user exists in database
-    const { data: dbUser, error } = await supabase
-      .from('users')
-      .select('id')
-      .eq('provider_id', user.id)
-      .maybeSingle()
+  // Only check DB user status when necessary (login/signup pages or first access)
+  // This reduces DB queries on every route navigation
+  if (user) {
+    const needsDbCheck =
+      pathname === '/login' ||
+      pathname === '/signup' ||
+      (!isPublicRoute && !isSignupRoute);
 
-    // If user doesn't exist in DB and not on signup page, redirect to signup
-    if (!dbUser && !error) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/signup'
-      return NextResponse.redirect(url)
-    }
-  }
+    if (needsDbCheck) {
+      // Single DB query for all scenarios
+      const { data: dbUser, error } = await supabase
+        .from('users')
+        .select('id')
+        .eq('provider_id', user.id)
+        .maybeSingle()
 
-  // If user is authenticated and has completed signup, prevent access to login/signup
-  if (user && (pathname === '/login' || pathname === '/signup')) {
-    const { data: dbUser } = await supabase
-      .from('users')
-      .select('id')
-      .eq('provider_id', user.id)
-      .maybeSingle()
+      const userExistsInDb = !!dbUser && !error;
 
-    // If user exists in DB, redirect to home
-    if (dbUser) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/'
-      return NextResponse.redirect(url)
-    }
+      // Scenario 1: User exists, trying to access login/signup -> redirect home
+      if (userExistsInDb && (pathname === '/login' || pathname === '/signup')) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/'
+        return NextResponse.redirect(url)
+      }
 
-    // If user doesn't exist but on login page, redirect to signup
-    if (!dbUser && pathname === '/login') {
-      const url = request.nextUrl.clone()
-      url.pathname = '/signup'
-      return NextResponse.redirect(url)
+      // Scenario 2: User doesn't exist, trying to access protected route -> redirect signup
+      if (!userExistsInDb && !isPublicRoute && !isSignupRoute) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/signup'
+        return NextResponse.redirect(url)
+      }
+
+      // Scenario 3: User doesn't exist, on login page -> redirect signup
+      if (!userExistsInDb && pathname === '/login') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/signup'
+        return NextResponse.redirect(url)
+      }
     }
   }
 

@@ -69,15 +69,21 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100">
-      <div className="mx-auto max-w-md px-6 py-8">
+    <div className="relative min-h-screen bg-background overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0">
+        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-primary/20 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-md px-6 py-8">
         {/* Step Indicator */}
         <div className="mb-8">
           <StepIndicator steps={STEPS} currentStep={currentStep} />
         </div>
 
         {/* Step Content */}
-        <div className="rounded-3xl bg-white p-8 shadow-xl">
+        <div className="rounded-3xl bg-card border border-border p-8 shadow-lg">
           {currentStep === 1 && <PassVerificationStep onVerified={handlePassVerified} />}
 
           {currentStep === 2 && militaryData === null && (
@@ -96,11 +102,12 @@ export default function SignupPage() {
         </div>
 
         {/* Footer */}
-        <p className="mt-6 text-center text-xs text-gray-400">
+        <p className="mt-6 text-center text-xs text-muted-foreground/60">
           © 2024 루티너스. All rights reserved.
         </p>
       </div>
     </div>
   );
 }
+
 

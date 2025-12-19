@@ -6,6 +6,7 @@ import ImageWithFallback from '@/components/ui/ImageWithFallback';
 import FormSection from '@/components/ui/FormSection';
 import { Plus, Loader2 } from 'lucide-react';
 import { useUploadProfileImage } from '@/lib/hooks/useProfile';
+import { compressImage, isImageFile, formatFileSize } from '@/lib/utils/imageCompression';
 
 interface ProfilePhotoUploadSectionProps {
   user: User;
@@ -32,20 +33,34 @@ export default function ProfilePhotoUploadSection({ user }: ProfilePhotoUploadSe
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('파일 크기는 5MB 이하여야 합니다.');
-      return;
-    }
-
     // Validate file type
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      alert('JPEG, PNG, WebP 형식만 지원됩니다.');
+    if (!isImageFile(file)) {
+      alert('이미지 파일만 업로드할 수 있습니다.');
       return;
     }
 
     try {
-      const imageUrl = await uploadImage.mutateAsync({ file, type: 'main' });
+      // 압축 전 파일 크기 체크 (10MB 초과 시 거부)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('파일 크기는 10MB 이하여야 합니다.');
+        return;
+      }
+
+      const originalSize = formatFileSize(file.size);
+      console.log(`압축 전 크기: ${originalSize}`);
+
+      // 이미지 압축 (1MB, 1920px, 80% 품질)
+      const compressedFile = await compressImage(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        quality: 0.8,
+      });
+
+      const compressedSize = formatFileSize(compressedFile.size);
+      console.log(`압축 후 크기: ${compressedSize}`);
+
+      // 압축된 파일 업로드
+      const imageUrl = await uploadImage.mutateAsync({ file: compressedFile, type: 'main' });
       setMainPhoto(imageUrl);
     } catch (error) {
       console.error('Failed to upload main photo:', error);
@@ -60,20 +75,34 @@ export default function ProfilePhotoUploadSection({ user }: ProfilePhotoUploadSe
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('파일 크기는 5MB 이하여야 합니다.');
-      return;
-    }
-
     // Validate file type
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      alert('JPEG, PNG, WebP 형식만 지원됩니다.');
+    if (!isImageFile(file)) {
+      alert('이미지 파일만 업로드할 수 있습니다.');
       return;
     }
 
     try {
-      const imageUrl = await uploadImage.mutateAsync({ file, type: 'additional' });
+      // 압축 전 파일 크기 체크 (10MB 초과 시 거부)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('파일 크기는 10MB 이하여야 합니다.');
+        return;
+      }
+
+      const originalSize = formatFileSize(file.size);
+      console.log(`압축 전 크기: ${originalSize}`);
+
+      // 이미지 압축 (1MB, 1920px, 80% 품질)
+      const compressedFile = await compressImage(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        quality: 0.8,
+      });
+
+      const compressedSize = formatFileSize(compressedFile.size);
+      console.log(`압축 후 크기: ${compressedSize}`);
+
+      // 압축된 파일 업로드
+      const imageUrl = await uploadImage.mutateAsync({ file: compressedFile, type: 'additional' });
       const newPhotos = [...additionalPhotos];
       newPhotos[index] = imageUrl;
       setAdditionalPhotos(newPhotos);
