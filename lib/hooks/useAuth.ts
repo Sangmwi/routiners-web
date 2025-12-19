@@ -140,21 +140,6 @@ export function useCompleteSignup() {
 }
 
 /**
- * Update profile mutation
- */
-export function useUpdateProfile() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: api.updateProfile,
-    onSuccess: (data) => {
-      // 캐시 업데이트
-      queryClient.setQueryData(queryKeys.user.me(), data);
-    },
-  });
-}
-
-/**
  * Sign out mutation
  */
 export function useSignOut() {
