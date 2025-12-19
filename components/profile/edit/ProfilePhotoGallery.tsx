@@ -187,11 +187,11 @@ function PhotoSlot({
 
   const slotClassName = `
     group relative aspect-[2/3] rounded-2xl overflow-hidden
-    transition-all duration-200
-    ${isDragging ? 'opacity-50 scale-95' : ''}
-    ${isDragOver ? 'ring-2 ring-primary ring-offset-2' : ''}
-    ${isLongPressed && !isTouchDragging ? 'ring-2 ring-destructive ring-offset-2' : ''}
-    ${isTouchDragging ? 'ring-2 ring-primary ring-offset-2 z-10' : ''}
+    transition-[transform,opacity,box-shadow] duration-150 ease-out
+    ${isDragging ? 'opacity-60 scale-[0.97] shadow-lg' : ''}
+    ${isDragOver ? 'ring-2 ring-primary ring-offset-2 scale-[1.02] bg-primary/5' : ''}
+    ${isLongPressed && !isTouchDragging ? 'ring-2 ring-primary/50 ring-offset-2' : ''}
+    ${isTouchDragging ? 'opacity-70 scale-[0.97] shadow-xl z-10' : ''}
   `;
 
   return (
@@ -345,14 +345,19 @@ export default function ProfilePhotoGallery({
   }, []);
 
   const handleDrop = useCallback(
-    async (e: React.DragEvent, dropIndex: number) => {
+    (e: React.DragEvent, dropIndex: number) => {
       e.preventDefault();
+
+      const fromIndex = draggedIndex;
+
+      // 드래그 상태를 즉시 해제 (API 응답 대기 전)
+      setDraggedIndex(null);
       setDragOverIndex(null);
 
-      if (draggedIndex !== null && draggedIndex !== dropIndex) {
-        await handleReorder(draggedIndex, dropIndex);
+      // 백그라운드에서 순서 변경 실행
+      if (fromIndex !== null && fromIndex !== dropIndex) {
+        handleReorder(fromIndex, dropIndex);
       }
-      setDraggedIndex(null);
     },
     [draggedIndex, handleReorder]
   );
@@ -425,25 +430,25 @@ export default function ProfilePhotoGallery({
     [touchDragIndex, images]
   );
 
-  const handleTouchEnd = useCallback(async () => {
+  const handleTouchEnd = useCallback(() => {
     if (longPressTimerRef.current) {
       clearTimeout(longPressTimerRef.current);
       longPressTimerRef.current = null;
     }
     touchStartRef.current = null;
 
-    // 터치 드래그로 순서 변경
-    if (
-      touchDragIndex !== null &&
-      dragOverIndex !== null &&
-      touchDragIndex !== dragOverIndex
-    ) {
-      await handleReorder(touchDragIndex, dragOverIndex);
-    }
+    const fromIndex = touchDragIndex;
+    const toIndex = dragOverIndex;
 
+    // 터치 상태를 즉시 해제 (API 응답 대기 전)
     setTouchDragIndex(null);
     setDragOverIndex(null);
     setLongPressIndex(null);
+
+    // 백그라운드에서 순서 변경 실행
+    if (fromIndex !== null && toIndex !== null && fromIndex !== toIndex) {
+      handleReorder(fromIndex, toIndex);
+    }
   }, [touchDragIndex, dragOverIndex, handleReorder]);
 
   const handleTouchCancel = useCallback(() => {
