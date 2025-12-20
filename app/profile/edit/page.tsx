@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCurrentUserProfile, useUpdateProfile, useProfileProgress } from '@/lib/hooks/useProfile';
-import { ArrowLeft } from 'lucide-react';
-import { Loader2 } from 'lucide-react';
+import { useProfileImagesDraft } from '@/lib/hooks';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import ProfilePhotoGallery from '@/components/profile/edit/ProfilePhotoGallery';
 import ProfileNicknameInput from '@/components/profile/edit/ProfileNicknameInput';
 import ProfileBioInput from '@/components/profile/edit/ProfileBioInput';
@@ -14,29 +14,85 @@ import ProfileSmokingInput from '@/components/profile/edit/ProfileSmokingInput';
 import ProfileLocationsInput from '@/components/profile/edit/ProfileLocationsInput';
 import ProfileInterestsInput from '@/components/profile/edit/ProfileInterestsInput';
 
+// ============================================================
+// Types
+// ============================================================
+
+interface FormData {
+  nickname: string;
+  bio: string;
+  height: string;
+  weight: string;
+  muscleMass: string;
+  bodyFatPercentage: string;
+  showInbodyPublic: boolean;
+  isSmoker: boolean | undefined;
+  interestedLocations: string[];
+  interestedExercises: string[];
+}
+
+const initialFormData: FormData = {
+  nickname: '',
+  bio: '',
+  height: '',
+  weight: '',
+  muscleMass: '',
+  bodyFatPercentage: '',
+  showInbodyPublic: true,
+  isSmoker: undefined,
+  interestedLocations: [],
+  interestedExercises: [],
+};
+
+// ============================================================
+// API Functions
+// ============================================================
+
+async function uploadImage(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch('/api/upload/profile-image', {
+    method: 'POST',
+    credentials: 'include',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error || 'Upload failed');
+  }
+
+  const data = await response.json();
+  return data.url;
+}
+
+async function deleteImage(imageUrl: string): Promise<void> {
+  await fetch('/api/user/profile/image', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ imageUrl }),
+  });
+}
+
+// ============================================================
+// Main Component
+// ============================================================
+
 export default function ProfileEditPage() {
   const router = useRouter();
   const { data: user, isLoading, error } = useCurrentUserProfile();
   const updateProfile = useUpdateProfile();
 
-  // Form state - 모든 입력 필드를 한 곳에서 관리
-  const [formData, setFormData] = useState({
-    nickname: '',
-    bio: '',
-    height: '',
-    weight: '',
-    muscleMass: '',
-    bodyFatPercentage: '',
-    showInbodyPublic: true,
-    isSmoker: undefined as boolean | undefined,
-    interestedLocations: [] as string[],
-    interestedExercises: [] as string[],
-  });
+  // Form state
+  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Photo state - now managed by ProfilePhotoGallery component
-  const [profileImages, setProfileImages] = useState<string[]>([]);
+  // Image draft ref (받은 draft를 저장)
+  const imageDraftRef = useRef<ReturnType<typeof useProfileImagesDraft> | null>(null);
 
-  // User 데이터가 로드되면 form 초기화
+  // User 데이터 로드 시 form 초기화
   useEffect(() => {
     if (user) {
       setFormData({
@@ -51,46 +107,106 @@ export default function ProfileEditPage() {
         interestedLocations: user.interestedLocations || [],
         interestedExercises: user.interestedExercises || [],
       });
-      setProfileImages(user.profileImages || []);
     }
   }, [user]);
 
-  // 프로필 완성도 계산
+  // 프로필 완성도
   const progress = useProfileProgress(user);
 
-  const handleBack = () => {
-    router.back();
-  };
+  // Draft 변경 핸들러
+  const handleDraftChange = useCallback(
+    (draft: ReturnType<typeof useProfileImagesDraft>) => {
+      imageDraftRef.current = draft;
+    },
+    []
+  );
 
-  const handleSave = async () => {
+  // 뒤로가기
+  const handleBack = useCallback(() => {
+    const hasImageChanges = imageDraftRef.current?.hasChanges;
+    if (hasImageChanges) {
+      if (confirm('저장하지 않은 변경사항이 있습니다. 정말 나가시겠습니까?')) {
+        router.back();
+      }
+    } else {
+      router.back();
+    }
+  }, [router]);
+
+  // 저장하기
+  const handleSave = useCallback(async () => {
     if (!user) return;
 
-    // Build update object (photos are now saved immediately via ProfilePhotoGallery)
-    const updates: Record<string, unknown> = {
-      nickname: formData.nickname.trim() || undefined,
-      bio: formData.bio.trim() || undefined,
-      height: formData.height ? Number(formData.height) : undefined,
-      weight: formData.weight ? Number(formData.weight) : undefined,
-      muscleMass: formData.muscleMass ? Number(formData.muscleMass) : undefined,
-      bodyFatPercentage: formData.bodyFatPercentage ? Number(formData.bodyFatPercentage) : undefined,
-      showInbodyPublic: formData.showInbodyPublic,
-      isSmoker: formData.isSmoker,
-      interestedLocations: formData.interestedLocations,
-      interestedExercises: formData.interestedExercises,
-    };
+    setIsSaving(true);
 
-    // Mutation 실행
-    updateProfile.mutate(updates, {
-      onSuccess: () => {
-        router.push('/profile');
-      },
-      onError: (err: Error) => {
-        console.error('Failed to update profile:', err);
-        alert('프로필 저장에 실패했습니다. 다시 시도해주세요.');
-      },
-    });
-  };
+    try {
+      const draft = imageDraftRef.current;
+      let finalImageUrls: string[] = [];
 
+      if (draft) {
+        const changes = draft.getChanges();
+
+        // 1. 새 이미지들 업로드
+        const uploadedUrls = new Map<string, string>();
+        for (const { file, id } of changes.newImages) {
+          try {
+            const url = await uploadImage(file);
+            uploadedUrls.set(id, url);
+          } catch (err) {
+            console.error('Image upload failed:', err);
+            throw new Error('이미지 업로드에 실패했습니다.');
+          }
+        }
+
+        // 2. 최종 이미지 URL 배열 생성
+        finalImageUrls = changes.finalOrder.map((img) => {
+          if (img.isNew && uploadedUrls.has(img.id)) {
+            return uploadedUrls.get(img.id)!;
+          }
+          return img.originalUrl || img.displayUrl;
+        });
+
+        // 3. 삭제할 이미지들 처리 (백그라운드)
+        for (const url of changes.deletedUrls) {
+          deleteImage(url).catch(console.error);
+        }
+      }
+
+      // 4. 프로필 업데이트
+      const updates: Record<string, unknown> = {
+        nickname: formData.nickname.trim() || undefined,
+        bio: formData.bio.trim() || undefined,
+        height: formData.height ? Number(formData.height) : undefined,
+        weight: formData.weight ? Number(formData.weight) : undefined,
+        muscleMass: formData.muscleMass ? Number(formData.muscleMass) : undefined,
+        bodyFatPercentage: formData.bodyFatPercentage
+          ? Number(formData.bodyFatPercentage)
+          : undefined,
+        showInbodyPublic: formData.showInbodyPublic,
+        isSmoker: formData.isSmoker,
+        interestedLocations: formData.interestedLocations,
+        interestedExercises: formData.interestedExercises,
+        profileImages: finalImageUrls,
+      };
+
+      updateProfile.mutate(updates, {
+        onSuccess: () => {
+          router.push('/profile');
+        },
+        onError: (err: Error) => {
+          console.error('Failed to update profile:', err);
+          alert('프로필 저장에 실패했습니다. 다시 시도해주세요.');
+          setIsSaving(false);
+        },
+      });
+    } catch (err) {
+      console.error('Save failed:', err);
+      alert(err instanceof Error ? err.message : '저장에 실패했습니다.');
+      setIsSaving(false);
+    }
+  }, [user, formData, updateProfile, router]);
+
+  // Loading state
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -99,11 +215,14 @@ export default function ProfileEditPage() {
     );
   }
 
+  // Error state
   if (error || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center p-6 bg-background">
         <div className="text-center">
-          <p className="mb-4 text-sm text-muted-foreground">프로필을 불러올 수 없습니다</p>
+          <p className="mb-4 text-sm text-muted-foreground">
+            프로필을 불러올 수 없습니다
+          </p>
           <button
             onClick={() => router.push('/login')}
             className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground"
@@ -115,10 +234,12 @@ export default function ProfileEditPage() {
     );
   }
 
+  const isPending = isSaving || updateProfile.isPending;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-background border-b border-border/50">
+      <header className="sticky top-0 z-40 bg-background border-b border-border/50">
         <div className="flex items-center justify-between px-5 py-4">
           <button
             onClick={handleBack}
@@ -127,16 +248,20 @@ export default function ProfileEditPage() {
           >
             <ArrowLeft className="w-6 h-6 text-card-foreground" />
           </button>
-          <h1 className="text-base font-bold text-card-foreground">프로필 만들기</h1>
+          <h1 className="text-base font-bold text-card-foreground">
+            프로필 만들기
+          </h1>
           <div className="w-9" />
         </div>
-      </div>
+      </header>
 
       {/* Progress Bar */}
       <div className="px-5 py-4">
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">프로필 완성도: {progress}%</span>
+            <span className="text-muted-foreground">
+              프로필 완성도: {progress}%
+            </span>
           </div>
           <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
             <div
@@ -149,70 +274,72 @@ export default function ProfileEditPage() {
 
       {/* Content */}
       <div className="px-5 pb-32 space-y-8">
-        {/* Profile Photo Gallery */}
         <ProfilePhotoGallery
-          user={user}
-          onImagesChange={setProfileImages}
+          initialImages={user.profileImages || []}
+          onDraftChange={handleDraftChange}
         />
 
-        {/* Nickname Input */}
         <ProfileNicknameInput
           value={formData.nickname}
-          onChange={(value) => setFormData({ ...formData, nickname: value })}
+          onChange={(value) => setFormData((prev) => ({ ...prev, nickname: value }))}
         />
 
-        {/* Bio Input */}
         <ProfileBioInput
           value={formData.bio}
-          onChange={(value) => setFormData({ ...formData, bio: value })}
+          onChange={(value) => setFormData((prev) => ({ ...prev, bio: value }))}
         />
 
-        {/* Height & Weight Input */}
         <ProfileHeightWeightInput
           height={formData.height}
           weight={formData.weight}
-          onHeightChange={(value) => setFormData({ ...formData, height: value })}
-          onWeightChange={(value) => setFormData({ ...formData, weight: value })}
+          onHeightChange={(value) => setFormData((prev) => ({ ...prev, height: value }))}
+          onWeightChange={(value) => setFormData((prev) => ({ ...prev, weight: value }))}
         />
 
-        {/* Inbody Input */}
         <ProfileInbodyInput
           muscleMass={formData.muscleMass}
           bodyFatPercentage={formData.bodyFatPercentage}
           showInbodyPublic={formData.showInbodyPublic}
-          onMuscleMassChange={(value) => setFormData({ ...formData, muscleMass: value })}
-          onBodyFatPercentageChange={(value) => setFormData({ ...formData, bodyFatPercentage: value })}
-          onShowInbodyPublicChange={(value) => setFormData({ ...formData, showInbodyPublic: value })}
+          onMuscleMassChange={(value) =>
+            setFormData((prev) => ({ ...prev, muscleMass: value }))
+          }
+          onBodyFatPercentageChange={(value) =>
+            setFormData((prev) => ({ ...prev, bodyFatPercentage: value }))
+          }
+          onShowInbodyPublicChange={(value) =>
+            setFormData((prev) => ({ ...prev, showInbodyPublic: value }))
+          }
         />
 
-        {/* Smoking Input */}
         <ProfileSmokingInput
           value={formData.isSmoker}
-          onChange={(value) => setFormData({ ...formData, isSmoker: value })}
+          onChange={(value) => setFormData((prev) => ({ ...prev, isSmoker: value }))}
         />
 
-        {/* Favorite Locations Input */}
         <ProfileLocationsInput
           value={formData.interestedLocations}
-          onChange={(value) => setFormData({ ...formData, interestedLocations: value })}
+          onChange={(value) =>
+            setFormData((prev) => ({ ...prev, interestedLocations: value }))
+          }
         />
 
-        {/* Interests Input */}
         <ProfileInterestsInput
           value={formData.interestedExercises}
-          onChange={(value) => setFormData({ ...formData, interestedExercises: value })}
+          onChange={(value) =>
+            setFormData((prev) => ({ ...prev, interestedExercises: value }))
+          }
         />
       </div>
 
-      {/* Save Button - Fixed at bottom */}
+      {/* Save Button */}
       <div className="fixed bottom-0 left-0 right-0 p-5 bg-background border-t border-border/50">
         <button
           onClick={handleSave}
-          disabled={updateProfile.isPending}
+          disabled={isPending}
           className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          {updateProfile.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-          {updateProfile.isPending ? '저장 중...' : '저장하기'}
+          {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+          {isPending ? '저장 중...' : '저장하기'}
         </button>
       </div>
     </div>

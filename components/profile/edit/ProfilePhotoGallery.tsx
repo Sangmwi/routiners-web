@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { User } from '@/lib/types';
-import { useProfileImages, UploadingState } from '@/lib/hooks';
+import { useProfileImagesDraft, DraftImage } from '@/lib/hooks';
 import ImageWithFallback from '@/components/ui/ImageWithFallback';
 import FormSection from '@/components/ui/FormSection';
 import { Plus, Loader2, X, GripVertical, Star, Move } from 'lucide-react';
@@ -12,29 +11,26 @@ import { Plus, Loader2, X, GripVertical, Star, Move } from 'lucide-react';
 // ============================================================
 
 const MAX_IMAGES = 4;
-const MAX_RETRIES = 2;
 
 // ============================================================
 // Types
 // ============================================================
 
-interface ProfilePhotoGalleryProps {
-  user: User;
-  onImagesChange?: (images: string[]) => void;
+export interface ProfilePhotoGalleryProps {
+  initialImages: string[];
+  onDraftChange?: (draft: ReturnType<typeof useProfileImagesDraft>) => void;
 }
 
 interface PhotoSlotProps {
-  imageUrl: string | null;
+  image: DraftImage | null;
   index: number;
   isFirst: boolean;
-  isUploading: boolean;
-  isDeleting: boolean;
+  isProcessing: boolean;
   isDragging: boolean;
   isDragOver: boolean;
   isLongPressed: boolean;
   isTouchDragging: boolean;
   isMobile: boolean;
-  uploadingState: UploadingState | null;
   onAddClick: () => void;
   onDelete: () => void;
   onDragStart: (e: React.DragEvent) => void;
@@ -46,14 +42,12 @@ interface PhotoSlotProps {
   onTouchMove: (e: React.TouchEvent) => void;
   onTouchEnd: () => void;
   onTouchCancel: () => void;
-  disabled: boolean;
 }
 
 // ============================================================
 // Sub Components
 // ============================================================
 
-/** 대표 사진 배지 */
 function MainPhotoBadge() {
   return (
     <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-2 py-0.5 rounded-full text-xs font-medium flex items-center gap-1">
@@ -63,7 +57,6 @@ function MainPhotoBadge() {
   );
 }
 
-/** 드래그 핸들 (데스크톱) */
 function DragHandle() {
   return (
     <div className="absolute top-2 right-2 p-1.5 bg-black/50 rounded-lg cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block">
@@ -72,57 +65,29 @@ function DragHandle() {
   );
 }
 
-/** 삭제 버튼 */
-function DeleteButton({
-  isDeleting,
-  isVisible,
-  onClick,
-}: {
-  isDeleting: boolean;
-  isVisible: boolean;
-  onClick: () => void;
-}) {
+function DeleteButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       type="button"
-      onClick={onClick}
-      disabled={isDeleting}
-      className={`
-        absolute bottom-2 right-2 p-1.5 bg-destructive text-destructive-foreground rounded-full
-        transition-opacity disabled:opacity-50
-        ${isVisible ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
-      `}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      className="absolute bottom-2 right-2 p-1.5 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
     >
-      {isDeleting ? (
-        <Loader2 className="w-4 h-4 animate-spin" />
-      ) : (
-        <X className="w-4 h-4" />
-      )}
+      <X className="w-4 h-4" />
     </button>
   );
 }
 
-/** 업로드 중 오버레이 */
-function UploadingOverlay({ state }: { state: UploadingState }) {
-  const progressText = {
-    compressing: '압축 중...',
-    uploading: '업로드 중...',
-    retrying: `재시도 중... (${(state.retryCount || 0) + 1}/${MAX_RETRIES})`,
-  };
-
+function ProcessingOverlay() {
   return (
     <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-      <div className="text-center">
-        <Loader2 className="w-8 h-8 text-white animate-spin mx-auto" />
-        <span className="text-sm text-white mt-2 block">
-          {progressText[state.progress]}
-        </span>
-      </div>
+      <Loader2 className="w-8 h-8 text-white animate-spin" />
     </div>
   );
 }
 
-/** 터치 드래그 인디케이터 */
 function TouchDragIndicator() {
   return (
     <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
@@ -131,25 +96,13 @@ function TouchDragIndicator() {
   );
 }
 
-/** 빈 슬롯 - 추가 버튼 */
-function EmptySlot({
-  onClick,
-  disabled,
-}: {
-  onClick: () => void;
-  disabled: boolean;
-}) {
+function EmptySlot({ onClick, disabled }: { onClick: () => void; disabled: boolean }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`
-        w-full h-full bg-muted/50 border-2 border-dashed border-border rounded-2xl
-        hover:border-primary hover:bg-muted/80 transition-colors
-        flex flex-col items-center justify-center gap-2
-        disabled:opacity-50 disabled:cursor-not-allowed
-      `}
+      className="w-full h-full bg-muted/50 border-2 border-dashed border-border rounded-2xl hover:border-primary hover:bg-muted/80 transition-colors flex flex-col items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <Plus className="w-8 h-8 text-muted-foreground" />
       <span className="text-sm text-muted-foreground">사진 추가</span>
@@ -157,19 +110,16 @@ function EmptySlot({
   );
 }
 
-/** 사진 슬롯 */
 function PhotoSlot({
-  imageUrl,
+  image,
   index,
   isFirst,
-  isUploading,
-  isDeleting,
+  isProcessing,
   isDragging,
   isDragOver,
   isLongPressed,
   isTouchDragging,
   isMobile,
-  uploadingState,
   onAddClick,
   onDelete,
   onDragStart,
@@ -181,9 +131,8 @@ function PhotoSlot({
   onTouchMove,
   onTouchEnd,
   onTouchCancel,
-  disabled,
 }: PhotoSlotProps) {
-  const hasImage = !!imageUrl;
+  const hasImage = !!image;
 
   const slotClassName = `
     group relative aspect-[2/3] rounded-2xl overflow-hidden
@@ -197,7 +146,7 @@ function PhotoSlot({
   return (
     <div
       className={slotClassName}
-      draggable={hasImage && !isUploading && !isDeleting && !isMobile}
+      draggable={hasImage && !isProcessing && !isMobile}
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
@@ -211,30 +160,20 @@ function PhotoSlot({
       {hasImage ? (
         <>
           <ImageWithFallback
-            src={imageUrl}
+            src={image.displayUrl}
             alt={`프로필 사진 ${index + 1}`}
             fill
             sizes="(max-width: 768px) 50vw, 200px"
             className="object-cover"
           />
-
           {isFirst && <MainPhotoBadge />}
-          {!isUploading && !isDeleting && <DragHandle />}
-
-          <DeleteButton
-            isDeleting={isDeleting}
-            isVisible={isLongPressed}
-            onClick={onDelete}
-          />
-
-          {isUploading && uploadingState && (
-            <UploadingOverlay state={uploadingState} />
-          )}
-
+          {!isProcessing && <DragHandle />}
+          {!isProcessing && <DeleteButton onClick={onDelete} />}
+          {isProcessing && <ProcessingOverlay />}
           {isTouchDragging && <TouchDragIndicator />}
         </>
       ) : (
-        <EmptySlot onClick={onAddClick} disabled={disabled} />
+        <EmptySlot onClick={onAddClick} disabled={isProcessing} />
       )}
     </div>
   );
@@ -245,10 +184,14 @@ function PhotoSlot({
 // ============================================================
 
 export default function ProfilePhotoGallery({
-  user,
-  onImagesChange,
+  initialImages,
+  onDraftChange,
 }: ProfilePhotoGalleryProps) {
-  // ========== State ==========
+  // ========== Draft Hook ==========
+  const draft = useProfileImagesDraft(initialImages);
+  const { images, isProcessing, addImage, removeImage, reorderImages } = draft;
+
+  // ========== Drag State ==========
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [longPressIndex, setLongPressIndex] = useState<number | null>(null);
@@ -262,18 +205,12 @@ export default function ProfilePhotoGallery({
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
-  // ========== Hooks ==========
-  const {
-    images,
-    uploadingState,
-    deletingIndex,
-    handleFileSelect,
-    handleDelete,
-    handleReorder,
-    syncImages,
-  } = useProfileImages(user.profileImages || [], { onImagesChange });
-
   // ========== Effects ==========
+
+  // Draft 변경 시 부모에게 알림
+  useEffect(() => {
+    onDraftChange?.(draft);
+  }, [draft, onDraftChange]);
 
   // 모바일 감지
   useEffect(() => {
@@ -284,11 +221,6 @@ export default function ProfilePhotoGallery({
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-  // user.profileImages 동기화
-  useEffect(() => {
-    syncImages(user.profileImages || []);
-  }, [user.profileImages, syncImages]);
 
   // 터치 드래그 중 스크롤 방지
   useEffect(() => {
@@ -317,12 +249,19 @@ export default function ProfilePhotoGallery({
       const file = e.target.files?.[0];
       if (!file) return;
       e.target.value = '';
-      await handleFileSelect(file, uploadIndexRef.current);
+      await addImage(file, uploadIndexRef.current);
     },
-    [handleFileSelect]
+    [addImage]
   );
 
-  // Drag & Drop Handlers (Desktop)
+  const handleDelete = useCallback(
+    (index: number) => {
+      removeImage(index);
+    },
+    [removeImage]
+  );
+
+  // Desktop Drag & Drop
   const handleDragStart = useCallback((e: React.DragEvent, index: number) => {
     setDraggedIndex(index);
     e.dataTransfer.effectAllowed = 'move';
@@ -333,11 +272,11 @@ export default function ProfilePhotoGallery({
     (e: React.DragEvent, index: number) => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
-      if (draggedIndex !== null && draggedIndex !== index) {
+      if (draggedIndex !== null && draggedIndex !== index && images[index]) {
         setDragOverIndex(index);
       }
     },
-    [draggedIndex]
+    [draggedIndex, images]
   );
 
   const handleDragLeave = useCallback(() => {
@@ -347,19 +286,15 @@ export default function ProfilePhotoGallery({
   const handleDrop = useCallback(
     (e: React.DragEvent, dropIndex: number) => {
       e.preventDefault();
-
       const fromIndex = draggedIndex;
-
-      // 드래그 상태를 즉시 해제 (API 응답 대기 전)
       setDraggedIndex(null);
       setDragOverIndex(null);
 
-      // 백그라운드에서 순서 변경 실행
-      if (fromIndex !== null && fromIndex !== dropIndex) {
-        handleReorder(fromIndex, dropIndex);
+      if (fromIndex !== null && fromIndex !== dropIndex && images[dropIndex]) {
+        reorderImages(fromIndex, dropIndex);
       }
     },
-    [draggedIndex, handleReorder]
+    [draggedIndex, images, reorderImages]
   );
 
   const handleDragEnd = useCallback(() => {
@@ -367,7 +302,7 @@ export default function ProfilePhotoGallery({
     setDragOverIndex(null);
   }, []);
 
-  // Touch Handlers (Mobile)
+  // Mobile Touch
   const handleTouchStart = useCallback((e: React.TouchEvent, index: number) => {
     const touch = e.touches[0];
     touchStartRef.current = { x: touch.clientX, y: touch.clientY };
@@ -389,7 +324,6 @@ export default function ProfilePhotoGallery({
       const deltaX = Math.abs(touch.clientX - touchStartRef.current.x);
       const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
 
-      // 이동 감지시 long press 취소
       if (deltaX > 10 || deltaY > 10) {
         if (longPressTimerRef.current) {
           clearTimeout(longPressTimerRef.current);
@@ -397,7 +331,6 @@ export default function ProfilePhotoGallery({
         }
       }
 
-      // 터치 드래그 중 drop 타겟 계산
       if (touchDragIndex !== null && gridRef.current) {
         const gridItems = gridRef.current.children;
         let foundTarget = false;
@@ -440,16 +373,14 @@ export default function ProfilePhotoGallery({
     const fromIndex = touchDragIndex;
     const toIndex = dragOverIndex;
 
-    // 터치 상태를 즉시 해제 (API 응답 대기 전)
     setTouchDragIndex(null);
     setDragOverIndex(null);
     setLongPressIndex(null);
 
-    // 백그라운드에서 순서 변경 실행
     if (fromIndex !== null && toIndex !== null && fromIndex !== toIndex) {
-      handleReorder(fromIndex, toIndex);
+      reorderImages(fromIndex, toIndex);
     }
-  }, [touchDragIndex, dragOverIndex, handleReorder]);
+  }, [touchDragIndex, dragOverIndex, reorderImages]);
 
   const handleTouchCancel = useCallback(() => {
     if (longPressTimerRef.current) {
@@ -480,20 +411,18 @@ export default function ProfilePhotoGallery({
       />
 
       <div ref={gridRef} className="grid grid-cols-2 gap-3">
-        {slots.map((imageUrl, index) => (
+        {slots.map((image, index) => (
           <PhotoSlot
-            key={index}
-            imageUrl={imageUrl}
+            key={image?.id || `empty-${index}`}
+            image={image}
             index={index}
-            isFirst={index === 0}
-            isUploading={uploadingState?.index === index}
-            isDeleting={deletingIndex === index}
+            isFirst={index === 0 && !!image}
+            isProcessing={isProcessing}
             isDragging={draggedIndex === index || touchDragIndex === index}
             isDragOver={dragOverIndex === index}
             isLongPressed={longPressIndex === index}
             isTouchDragging={touchDragIndex === index}
             isMobile={isMobile}
-            uploadingState={uploadingState}
             onAddClick={() => handleAddClick(index)}
             onDelete={() => handleDelete(index)}
             onDragStart={(e) => handleDragStart(e, index)}
@@ -505,7 +434,6 @@ export default function ProfilePhotoGallery({
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             onTouchCancel={handleTouchCancel}
-            disabled={!!uploadingState}
           />
         ))}
       </div>
