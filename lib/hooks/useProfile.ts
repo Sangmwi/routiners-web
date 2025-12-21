@@ -187,15 +187,17 @@ export function useUpdateProfile() {
 
     // 성공 시 관련 쿼리 무효화
     onSuccess: (updatedUser) => {
-      // 현재 사용자 캐시 업데이트
+      // 현재 사용자 캐시 즉시 업데이트 (깜빡임 방지)
       queryClient.setQueryData(queryKeys.user.me(), updatedUser);
 
-      // 검색 결과만 무효화 (추천/같은부대 등 다른 쿼리는 유지)
-      // 전체 무효화 대신 검색 쿼리만 타겟팅하여 불필요한 리페치 방지
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.user.search(),
-        exact: false
-      });
+      // 검색 결과 백그라운드 무효화 (refetch 지연)
+      // 페이지 이동 후 처리되므로 UI에 영향 없음
+      setTimeout(() => {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.user.search(),
+          exact: false,
+        });
+      }, 100);
     },
   });
 }

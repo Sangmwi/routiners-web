@@ -215,6 +215,8 @@ export function useProfileEdit(): UseProfileEditReturn {
       // 3. 프로필 업데이트 실행
       updateProfile.mutate(updates, {
         onSuccess: () => {
+          // 저장 완료 후 페이지 이동 (캐시 업데이트 완료 대기)
+          setIsSaving(false);
           router.push('/profile');
         },
         onError: (err: Error) => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Image, { ImageProps } from 'next/image';
 import { ImageOff } from 'lucide-react';
 
@@ -16,27 +16,9 @@ interface ImageWithFallbackProps extends Omit<ImageProps, 'src' | 'alt'> {
 /**
  * 이미지 로드 실패 시 폴백을 표시하는 Image 컴포넌트
  *
- * @example
- * ```tsx
- * // fill 모드 (부모 요소 크기에 맞춤)
- * <div className="relative w-full h-32">
- *   <ImageWithFallback
- *     src={product.image}
- *     alt="상품 이미지"
- *     fill
- *     className="object-cover"
- *   />
- * </div>
- *
- * // 고정 크기 모드
- * <ImageWithFallback
- *   src={user.avatar}
- *   alt="프로필 이미지"
- *   width={80}
- *   height={80}
- *   className="rounded-full"
- * />
- * ```
+ * - Blob URL: native <img> 사용 (즉시 로드, 최적화 불필요)
+ * - Server URL: Next.js Image 사용 (최적화 + 캐싱)
+ * - Supabase URL: unoptimized 모드 (프록시 우회)
  */
 export default function ImageWithFallback({
   src,
@@ -51,14 +33,33 @@ export default function ImageWithFallback({
 }: ImageWithFallbackProps) {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const prevSrcRef = useRef<string | null | undefined>(src);
 
-  // src가 변경되면 에러/로딩 상태 초기화
+  // src가 실제로 변경될 때만 상태 초기화
   useEffect(() => {
-    setError(false);
-    setLoading(true);
+    if (prevSrcRef.current !== src) {
+      prevSrcRef.current = src;
+      setError(false);
+      // Blob URL은 즉시 로드되므로 loading 상태 유지 불필요
+      if (src?.startsWith('blob:')) {
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
+    }
   }, [src]);
 
-  // Supabase Storage URL인 경우 최적화 비활성화 (Next.js 프록시 우회)
+  const handleLoad = useCallback(() => {
+    setLoading(false);
+  }, []);
+
+  const handleError = useCallback(() => {
+    setError(true);
+    setLoading(false);
+  }, []);
+
+  // URL 타입 감지
+  const isBlobUrl = src?.startsWith('blob:');
   const isSupabaseUrl = src?.includes('supabase.co/storage');
 
   // src가 없거나 에러 발생 시
@@ -73,14 +74,13 @@ export default function ImageWithFallback({
           fill={fill}
           sizes={sizes}
           className={className}
-          onError={() => setError(true)}
+          onError={handleError}
         />
       );
     }
 
     // 폴백 UI 표시
     if (fill) {
-      // fill 모드일 때는 absolute positioning 사용
       return (
         <div className={`absolute inset-0 flex items-center justify-center ${fallbackClassName} ${className}`}>
           {showFallbackIcon && (
@@ -90,7 +90,6 @@ export default function ImageWithFallback({
       );
     }
 
-    // 고정 크기 모드
     return (
       <div
         className={`flex items-center justify-center ${fallbackClassName} ${className}`}
@@ -106,6 +105,38 @@ export default function ImageWithFallback({
     );
   }
 
+  // Blob URL: native <img> 사용 (Next.js 최적화 우회)
+  // 웹뷰에서 Next.js Image의 blob URL 처리 문제 해결
+  if (isBlobUrl) {
+    if (fill) {
+      return (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt={alt}
+          className={`absolute inset-0 w-full h-full ${className}`}
+          style={{ objectFit: 'cover' }}
+          onLoad={handleLoad}
+          onError={handleError}
+        />
+      );
+    }
+
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt={alt}
+        width={props.width as number}
+        height={props.height as number}
+        className={className}
+        onLoad={handleLoad}
+        onError={handleError}
+      />
+    );
+  }
+
+  // Server URL: Next.js Image 사용
   return (
     <Image
       {...props}
@@ -115,8 +146,8 @@ export default function ImageWithFallback({
       sizes={sizes}
       unoptimized={isSupabaseUrl}
       className={`${className} ${loading ? 'bg-muted animate-pulse' : ''}`}
-      onLoad={() => setLoading(false)}
-      onError={() => setError(true)}
+      onLoad={handleLoad}
+      onError={handleError}
     />
   );
 }
