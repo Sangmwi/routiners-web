@@ -274,10 +274,17 @@ export default function ProfilePhotoGallery({
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
-      e.target.value = '';
+
+      // 🔥 중요: input 초기화를 파일 읽기 완료 후로 지연
+      // e.target.value = '' 를 먼저 하면 일부 WebView에서
+      // 파일 참조가 무효화되어 FileReader가 실패할 수 있음
+      const inputElement = e.target;
 
       // 비동기 함수 (Data URL 변환)
       const result: AddImageAsyncResult = await addImage(file, uploadIndexRef.current);
+
+      // 파일 읽기 완료 후 input 초기화 (같은 파일 재선택 허용)
+      inputElement.value = '';
 
       if (!result.success && result.error) {
         setErrorMessage(result.error);
