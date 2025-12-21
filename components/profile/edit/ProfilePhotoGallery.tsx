@@ -119,29 +119,6 @@ function ErrorToast({ message, onClose }: { message: string; onClose: () => void
   );
 }
 
-function WarningToast({ message, onClose }: { message: string; onClose: () => void }) {
-  useEffect(() => {
-    const timer = setTimeout(onClose, 4000);
-    return () => clearTimeout(timer);
-  }, [onClose]);
-
-  return (
-    <div className="fixed bottom-20 left-4 right-4 z-50 animate-in slide-in-from-bottom-4 fade-in duration-200">
-      <div className="bg-yellow-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-        <p className="text-sm flex-1">{message}</p>
-        <button
-          type="button"
-          onClick={onClose}
-          className="shrink-0 hover:opacity-80"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-    </div>
-  );
-}
-
 function EmptySlot({ onClick, disabled }: { onClick: () => void; disabled: boolean }) {
   return (
     <button
@@ -235,11 +212,10 @@ export default function ProfilePhotoGallery({
 }: ProfilePhotoGalleryProps) {
   // ========== Draft Hook ==========
   const draft = useProfileImagesDraft(initialImages);
-  const { images, isProcessing, addImage, removeImage, reorderImages } = draft;
+  const { images, addImage, removeImage, reorderImages } = draft;
 
   // ========== Toast State ==========
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [warningMessage, setWarningMessage] = useState<string | null>(null);
 
   // ========== Drag State ==========
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -295,17 +271,16 @@ export default function ProfilePhotoGallery({
   }, []);
 
   const handleInputChange = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
       e.target.value = '';
 
-      const result: AddImageResult = await addImage(file, uploadIndexRef.current);
+      // 동기 함수 (압축 없음)
+      const result: AddImageResult = addImage(file, uploadIndexRef.current);
 
       if (!result.success && result.error) {
         setErrorMessage(result.error);
-      } else if (result.warning) {
-        setWarningMessage(result.warning);
       }
     },
     [addImage]
@@ -474,7 +449,7 @@ export default function ProfilePhotoGallery({
             image={image}
             index={index}
             isFirst={index === 0 && !!image}
-            isProcessing={isProcessing}
+            isProcessing={false}
             isDragging={draggedIndex === index || touchDragIndex === index}
             isDragOver={dragOverIndex === index}
             isLongPressed={longPressIndex === index}
@@ -513,14 +488,6 @@ export default function ProfilePhotoGallery({
         <ErrorToast
           message={errorMessage}
           onClose={() => setErrorMessage(null)}
-        />
-      )}
-
-      {/* Warning Toast */}
-      {warningMessage && (
-        <WarningToast
-          message={warningMessage}
-          onClose={() => setWarningMessage(null)}
         />
       )}
     </FormSection>

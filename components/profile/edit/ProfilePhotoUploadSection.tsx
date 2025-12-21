@@ -1,11 +1,15 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { User } from '@/lib/types';
 import ImageWithFallback from '@/components/ui/ImageWithFallback';
 import FormSection from '@/components/ui/FormSection';
-import { Plus, Loader2 } from 'lucide-react';
-import { compressImage, isImageFile, formatFileSize } from '@/lib/utils/imageCompression';
+import { Plus, X, AlertCircle } from 'lucide-react';
+import { validateImageFile } from '@/lib/utils/imageValidation';
+
+// ============================================================
+// Types
+// ============================================================
 
 interface ProfilePhotoUploadSectionProps {
   user: User;
@@ -13,76 +17,87 @@ interface ProfilePhotoUploadSectionProps {
   onAdditionalPhotosChange?: (index: number, file: File | null) => void;
 }
 
+// ============================================================
+// Sub Components
+// ============================================================
+
+function ErrorToast({ message, onClose }: { message: string; onClose: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 5000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div className="fixed bottom-20 left-4 right-4 z-50 animate-in slide-in-from-bottom-4 fade-in duration-200">
+      <div className="bg-destructive text-destructive-foreground px-4 py-3 rounded-lg shadow-lg flex items-start gap-3">
+        <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+        <p className="text-sm flex-1">{message}</p>
+        <button
+          type="button"
+          onClick={onClose}
+          className="shrink-0 hover:opacity-80"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// Main Component
+// ============================================================
+
 export default function ProfilePhotoUploadSection({
   user,
   onMainPhotoChange,
-  onAdditionalPhotosChange
+  onAdditionalPhotosChange,
 }: ProfilePhotoUploadSectionProps) {
+  // ========== State ==========
   const [mainPhoto, setMainPhoto] = useState(user.profileImages?.[0]);
   const [additionalPhotos, setAdditionalPhotos] = useState<(string | null)[]>([null, null, null]);
-  const [isCompressing, setIsCompressing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // ========== Refs ==========
   const mainPhotoInputRef = useRef<HTMLInputElement>(null);
   const additionalPhotoInputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
-  // Store blob URLs for cleanup
   const blobUrlsRef = useRef<Set<string>>(new Set());
+
+  // ========== Effects ==========
 
   // Cleanup blob URLs on unmount
   useEffect(() => {
     return () => {
-      blobUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+      blobUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
       blobUrlsRef.current.clear();
     };
   }, []);
 
-  const handleMainPhotoUpload = () => {
+  // ========== Handlers ==========
+
+  const handleMainPhotoUpload = useCallback(() => {
     mainPhotoInputRef.current?.click();
-  };
+  }, []);
 
-  const handleAdditionalPhotoUpload = (index: number) => {
+  const handleAdditionalPhotoUpload = useCallback((index: number) => {
     additionalPhotoInputRefs.current[index]?.click();
-  };
+  }, []);
 
-  const handleMainPhotoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleMainPhotoFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      e.target.value = ''; // Reset input
 
-    // Validate file type
-    if (!isImageFile(file)) {
-      alert('이미지 파일만 업로드할 수 있습니다.');
-      return;
-    }
-
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      alert('파일 크기는 10MB 이하여야 합니다.');
-      return;
-    }
-
-    setIsCompressing(true);
-
-    try {
-      const originalSize = formatFileSize(file.size);
-      console.log(`압축 전 크기: ${originalSize}`);
-
-      // Compress image
-      const result = await compressImage(file, {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
-        quality: 0.8,
-      });
-
-      if (!result.success) {
-        alert(result.error || '사진 처리에 실패했습니다.');
+      // 동기 검증 (압축 없음)
+      const validation = validateImageFile(file);
+      if (!validation.valid) {
+        setErrorMessage(validation.error || '이미지 검증에 실패했습니다.');
         return;
       }
 
-      const compressedSize = formatFileSize(result.compressedSize);
-      console.log(`압축 후 크기: ${compressedSize}`);
-
       // Create local preview URL
-      const previewUrl = URL.createObjectURL(result.file);
+      const previewUrl = URL.createObjectURL(file);
 
       // Clean up old blob URL if exists
       if (mainPhoto && mainPhoto.startsWith('blob:')) {
@@ -96,63 +111,27 @@ export default function ProfilePhotoUploadSection({
       // Update UI with preview
       setMainPhoto(previewUrl);
 
-      // Notify parent component with compressed file
-      onMainPhotoChange?.(result.file);
+      // Notify parent component with original file (no compression)
+      onMainPhotoChange?.(file);
+    },
+    [mainPhoto, onMainPhotoChange]
+  );
 
-      // Show warning if any
-      if (result.warning) {
-        console.warn(result.warning);
-      }
-    } catch (error) {
-      console.error('Failed to compress photo:', error);
-      alert('사진 처리에 실패했습니다. 다시 시도해주세요.');
-    } finally {
-      setIsCompressing(false);
-    }
-  };
+  const handleAdditionalPhotoFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      e.target.value = ''; // Reset input
 
-  const handleAdditionalPhotoFileChange = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-    index: number
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!isImageFile(file)) {
-      alert('이미지 파일만 업로드할 수 있습니다.');
-      return;
-    }
-
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      alert('파일 크기는 10MB 이하여야 합니다.');
-      return;
-    }
-
-    setIsCompressing(true);
-
-    try {
-      const originalSize = formatFileSize(file.size);
-      console.log(`압축 전 크기: ${originalSize}`);
-
-      // Compress image
-      const result = await compressImage(file, {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
-        quality: 0.8,
-      });
-
-      if (!result.success) {
-        alert(result.error || '사진 처리에 실패했습니다.');
+      // 동기 검증 (압축 없음)
+      const validation = validateImageFile(file);
+      if (!validation.valid) {
+        setErrorMessage(validation.error || '이미지 검증에 실패했습니다.');
         return;
       }
 
-      const compressedSize = formatFileSize(result.compressedSize);
-      console.log(`압축 후 크기: ${compressedSize}`);
-
       // Create local preview URL
-      const previewUrl = URL.createObjectURL(result.file);
+      const previewUrl = URL.createObjectURL(file);
 
       // Clean up old blob URL if exists
       const oldPhoto = additionalPhotos[index];
@@ -165,24 +144,19 @@ export default function ProfilePhotoUploadSection({
       blobUrlsRef.current.add(previewUrl);
 
       // Update UI with preview
-      const newPhotos = [...additionalPhotos];
-      newPhotos[index] = previewUrl;
-      setAdditionalPhotos(newPhotos);
+      setAdditionalPhotos((prev) => {
+        const newPhotos = [...prev];
+        newPhotos[index] = previewUrl;
+        return newPhotos;
+      });
 
-      // Notify parent component with compressed file
-      onAdditionalPhotosChange?.(index, result.file);
+      // Notify parent component with original file (no compression)
+      onAdditionalPhotosChange?.(index, file);
+    },
+    [additionalPhotos, onAdditionalPhotosChange]
+  );
 
-      // Show warning if any
-      if (result.warning) {
-        console.warn(result.warning);
-      }
-    } catch (error) {
-      console.error('Failed to compress photo:', error);
-      alert('사진 처리에 실패했습니다. 다시 시도해주세요.');
-    } finally {
-      setIsCompressing(false);
-    }
-  };
+  // ========== Render ==========
 
   return (
     <FormSection
@@ -215,8 +189,7 @@ export default function ProfilePhotoUploadSection({
         <button
           type="button"
           onClick={handleMainPhotoUpload}
-          disabled={isCompressing}
-          className="relative flex-[2] aspect-[2/3] rounded-2xl overflow-hidden bg-muted/50 border-2 border-dashed border-border hover:border-primary transition-colors group disabled:opacity-50 disabled:cursor-not-allowed"
+          className="relative flex-[2] aspect-[2/3] rounded-2xl overflow-hidden bg-muted/50 border-2 border-dashed border-border hover:border-primary transition-colors group"
         >
           {mainPhoto ? (
             <ImageWithFallback
@@ -228,11 +201,7 @@ export default function ProfilePhotoUploadSection({
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
-              {isCompressing ? (
-                <Loader2 className="w-8 h-8 text-primary animate-spin" />
-              ) : (
-                <Plus className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors" />
-              )}
+              <Plus className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors" />
             </div>
           )}
         </button>
@@ -244,8 +213,7 @@ export default function ProfilePhotoUploadSection({
               key={index}
               type="button"
               onClick={() => handleAdditionalPhotoUpload(index)}
-              disabled={isCompressing}
-              className="relative w-full flex-1 rounded-xl overflow-hidden bg-muted/50 border-2 border-dashed border-border hover:border-primary transition-colors group disabled:opacity-50 disabled:cursor-not-allowed"
+              className="relative w-full flex-1 rounded-xl overflow-hidden bg-muted/50 border-2 border-dashed border-border hover:border-primary transition-colors group"
             >
               {photo ? (
                 <ImageWithFallback
@@ -257,17 +225,21 @@ export default function ProfilePhotoUploadSection({
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  {isCompressing ? (
-                    <Loader2 className="w-6 h-6 text-primary animate-spin" />
-                  ) : (
-                    <Plus className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
-                  )}
+                  <Plus className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
                 </div>
               )}
             </button>
           ))}
         </div>
       </div>
+
+      {/* Error Toast */}
+      {errorMessage && (
+        <ErrorToast
+          message={errorMessage}
+          onClose={() => setErrorMessage(null)}
+        />
+      )}
     </FormSection>
   );
 }

@@ -1,70 +1,50 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import {
-  compressImage,
-  isImageFile,
-  formatFileSize,
-  type CompressionResult,
-} from '@/lib/utils/imageCompression';
+import { validateImageFile, formatFileSize } from '@/lib/utils/imageValidation';
 
 // ============================================================
 // Types
 // ============================================================
 
 export interface DraftImage {
+  /** 고유 식별자 */
   id: string;
+  /** 화면에 표시할 URL (blob URL 또는 서버 URL) */
   displayUrl: string;
+  /** 원본 서버 URL (기존 이미지인 경우) */
   originalUrl?: string;
+  /** 업로드할 파일 (새 이미지인 경우) */
   file?: File;
+  /** 새로 추가된 이미지 여부 */
   isNew: boolean;
 }
 
 export interface ImageChanges {
+  /** 새로 추가된 이미지들 */
   newImages: { file: File; id: string }[];
+  /** 삭제된 이미지 URL들 */
   deletedUrls: string[];
+  /** 최종 순서 */
   finalOrder: DraftImage[];
+  /** 변경사항 존재 여부 */
   hasChanges: boolean;
 }
 
 export interface AddImageResult {
   success: boolean;
   error?: string;
-  warning?: string;
 }
 
 interface UseProfileImagesDraftOptions {
   maxImages?: number;
-  onImagesChange?: (images: DraftImage[]) => void;
-}
-
-interface UseProfileImagesDraftReturn {
-  images: DraftImage[];
-  isProcessing: boolean;
-  hasChanges: boolean;
-  addImage: (file: File, index: number) => Promise<AddImageResult>;
-  removeImage: (index: number) => void;
-  reorderImages: (fromIndex: number, toIndex: number) => void;
-  reset: () => void;
-  getChanges: () => ImageChanges;
 }
 
 // ============================================================
 // Constants
 // ============================================================
 
-/** 클라이언트 측 파일 크기 제한 (압축 전) */
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-
-/** 기본 최대 이미지 수 */
 const DEFAULT_MAX_IMAGES = 4;
-
-/** 이미지 압축 옵션 */
-const COMPRESSION_OPTIONS = {
-  maxSizeMB: 1,
-  maxWidthOrHeight: 1920,
-  quality: 0.8,
-};
 
 // ============================================================
 // Helpers
@@ -94,16 +74,16 @@ const createDraftFromFile = (file: File, blobUrl: string): DraftImage => ({
  * 프로필 이미지 드래프트 관리 훅
  *
  * 로컬 상태만 관리하며, 저장 시 일괄 처리를 위한 데이터를 제공합니다.
- * API 호출은 하지 않습니다.
+ * 압축 없이 원본 파일을 그대로 사용합니다.
  *
  * @example
  * ```tsx
  * const { images, addImage, removeImage, getChanges } = useProfileImagesDraft(initialUrls);
  *
  * const handleAdd = async (file: File, index: number) => {
- *   const result = await addImage(file, index);
+ *   const result = addImage(file, index);
  *   if (!result.success) {
- *     alert(result.error);
+ *     showError(result.error);
  *   }
  * };
  * ```
@@ -111,18 +91,15 @@ const createDraftFromFile = (file: File, blobUrl: string): DraftImage => ({
 export function useProfileImagesDraft(
   initialImages: string[] = [],
   options: UseProfileImagesDraftOptions = {}
-): UseProfileImagesDraftReturn {
-  const { maxImages = DEFAULT_MAX_IMAGES, onImagesChange } = options;
+) {
+  const { maxImages = DEFAULT_MAX_IMAGES } = options;
 
   // ========== State ==========
 
-  const createInitialState = useCallback(
-    () => initialImages.map(createDraftFromUrl),
-    [initialImages]
+  const [images, setImages] = useState<DraftImage[]>(() =>
+    initialImages.map(createDraftFromUrl)
   );
 
-  const [images, setImages] = useState<DraftImage[]>(createInitialState);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [deletedUrls, setDeletedUrls] = useState<string[]>([]);
 
   // ========== Refs ==========
@@ -178,27 +155,17 @@ export function useProfileImagesDraft(
   // ========== Actions ==========
 
   /**
-   * 이미지 추가
-   * @returns 결과 객체 (성공 여부, 에러/경고 메시지)
+   * 이미지 추가 (동기 - 압축 없음)
    */
   const addImage = useCallback(
-    async (file: File, index: number): Promise<AddImageResult> => {
-      // 1. 기본 검증
-      if (!isImageFile(file)) {
-        return {
-          success: false,
-          error: '이미지 파일만 업로드할 수 있습니다. (JPG, PNG, WebP 등)',
-        };
+    (file: File, index: number): AddImageResult => {
+      // 1. 파일 검증
+      const validation = validateImageFile(file);
+      if (!validation.valid) {
+        return { success: false, error: validation.error };
       }
 
-      if (file.size > MAX_FILE_SIZE) {
-        return {
-          success: false,
-          error: `파일 크기는 ${formatFileSize(MAX_FILE_SIZE)} 이하여야 합니다. 현재: ${formatFileSize(file.size)}`,
-        };
-      }
-
-      // 2. 이미 최대 개수인지 체크
+      // 2. 최대 개수 체크
       if (images.length >= maxImages && index >= images.length) {
         return {
           success: false,
@@ -206,70 +173,39 @@ export function useProfileImagesDraft(
         };
       }
 
-      setIsProcessing(true);
+      // 3. Blob URL 생성 (압축 없이 원본 사용)
+      const blobUrl = URL.createObjectURL(file);
+      blobUrlsRef.current.add(blobUrl);
 
-      try {
-        // 3. 이미지 압축
-        const compressionResult: CompressionResult = await compressImage(
-          file,
-          COMPRESSION_OPTIONS
-        );
+      const newDraft = createDraftFromFile(file, blobUrl);
 
-        // 압축 실패 시 에러 반환
-        if (!compressionResult.success) {
-          return {
-            success: false,
-            error: compressionResult.error,
-          };
-        }
+      // 4. 상태 업데이트
+      setImages((prev) => {
+        const newImages = [...prev];
 
-        // 4. Blob URL 생성
-        const blobUrl = URL.createObjectURL(compressionResult.file);
-        blobUrlsRef.current.add(blobUrl);
+        // 기존 이미지가 있는 슬롯이면 교체
+        if (index < newImages.length && newImages[index]) {
+          const existing = newImages[index];
 
-        const newDraft = createDraftFromFile(compressionResult.file, blobUrl);
-
-        // 5. 상태 업데이트
-        setImages((prev) => {
-          const newImages = [...prev];
-
-          // 기존 이미지가 있는 슬롯이면 교체
-          if (index < newImages.length && newImages[index]) {
-            const existing = newImages[index];
-
-            // 기존 이미지 삭제 처리
-            if (existing.originalUrl) {
-              setDeletedUrls((urls) => [...urls, existing.originalUrl!]);
-            }
-            if (existing.displayUrl.startsWith('blob:')) {
-              URL.revokeObjectURL(existing.displayUrl);
-              blobUrlsRef.current.delete(existing.displayUrl);
-            }
-
-            newImages[index] = newDraft;
-          } else {
-            // 빈 슬롯이면 배열 끝에 추가
-            newImages.push(newDraft);
+          // 기존 이미지 삭제 처리
+          if (existing.originalUrl) {
+            setDeletedUrls((urls) => [...urls, existing.originalUrl!]);
+          }
+          if (existing.displayUrl.startsWith('blob:')) {
+            URL.revokeObjectURL(existing.displayUrl);
+            blobUrlsRef.current.delete(existing.displayUrl);
           }
 
-          return newImages.slice(0, maxImages);
-        });
+          newImages[index] = newDraft;
+        } else {
+          // 빈 슬롯이면 배열 끝에 추가
+          newImages.push(newDraft);
+        }
 
-        // 6. 경고가 있으면 포함하여 반환
-        return {
-          success: true,
-          warning: compressionResult.warning,
-        };
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.';
-        return {
-          success: false,
-          error: `이미지 처리 실패: ${errorMessage}`,
-        };
-      } finally {
-        setIsProcessing(false);
-      }
+        return newImages.slice(0, maxImages);
+      });
+
+      return { success: true };
     },
     [images.length, maxImages]
   );
@@ -361,7 +297,6 @@ export function useProfileImagesDraft(
 
   return {
     images,
-    isProcessing,
     hasChanges: hasChanges(),
     addImage,
     removeImage,
