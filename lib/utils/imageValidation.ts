@@ -235,9 +235,22 @@ export function validateImageFiles(
  */
 export function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
+    // 파일 유효성 먼저 체크
+    if (!file || file.size === 0) {
+      reject(new Error('유효하지 않은 파일입니다.'));
+      return;
+    }
+
     const reader = new FileReader();
 
+    // 타임아웃 설정 (10초) - 웹뷰에서 파일 접근이 지연될 수 있음
+    const timeout = setTimeout(() => {
+      reader.abort();
+      reject(new Error('파일 읽기 시간이 초과되었습니다. 다시 시도해주세요.'));
+    }, 10000);
+
     reader.onload = () => {
+      clearTimeout(timeout);
       if (typeof reader.result === 'string') {
         resolve(reader.result);
       } else {
@@ -246,9 +259,33 @@ export function fileToDataUrl(file: File): Promise<string> {
     };
 
     reader.onerror = () => {
-      reject(new Error('파일 읽기에 실패했습니다.'));
+      clearTimeout(timeout);
+      // 상세 에러 정보 제공
+      const errorCode = reader.error?.name || 'Unknown';
+      const errorMessage = reader.error?.message || '';
+
+      if (errorCode === 'NotReadableError') {
+        reject(new Error('파일에 접근할 수 없습니다. 다른 사진을 선택해주세요.'));
+      } else if (errorCode === 'AbortError') {
+        reject(new Error('파일 읽기가 취소되었습니다.'));
+      } else {
+        reject(new Error(`파일 읽기에 실패했습니다. (${errorCode})`));
+      }
+
+      console.error('[fileToDataUrl] FileReader error:', { errorCode, errorMessage, fileName: file.name, fileSize: file.size });
     };
 
-    reader.readAsDataURL(file);
+    reader.onabort = () => {
+      clearTimeout(timeout);
+      reject(new Error('파일 읽기가 취소되었습니다.'));
+    };
+
+    try {
+      reader.readAsDataURL(file);
+    } catch (e) {
+      clearTimeout(timeout);
+      console.error('[fileToDataUrl] readAsDataURL exception:', e);
+      reject(new Error('파일을 읽을 수 없습니다. 다른 사진을 선택해주세요.'));
+    }
   });
 }

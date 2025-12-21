@@ -97,7 +97,16 @@ export default function ProfileHeroSection({ user }: ProfileHeroSectionProps) {
             </div>
           ))
         ) : (
-          <div className="relative w-full h-full flex-shrink-0 bg-gradient-to-br from-muted via-muted/80 to-muted/60" />
+          // 이미지가 없을 때도 ImageWithFallback 사용하여 fallback 아이콘 표시
+          <div className="relative w-full h-full flex-shrink-0">
+            <ImageWithFallback
+              src={null}
+              alt="프로필 사진 없음"
+              fill
+              className="object-cover"
+              fallbackClassName="bg-gradient-to-br from-muted via-muted/80 to-muted/60"
+            />
+          </div>
         )}
       </div>
 
