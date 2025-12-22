@@ -2,10 +2,12 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useProfileImagesDraft, DraftImage, AddImageAsyncResult } from '@/lib/hooks';
+import { useGridDragDrop } from '@/lib/hooks/useGridDragDrop';
 import { startFileRead, arrayBufferToDataUrl, validateImageFile } from '@/lib/utils/imageValidation';
 import ImageWithFallback from '@/components/ui/ImageWithFallback';
 import FormSection from '@/components/ui/FormSection';
-import { Plus, Loader2, X, GripVertical, Star, Move, AlertCircle } from 'lucide-react';
+import ErrorToast from '@/components/ui/ErrorToast';
+import { Plus, Loader2, X, GripVertical, Star, Move } from 'lucide-react';
 
 // ============================================================
 // Constants
@@ -93,29 +95,6 @@ function TouchDragIndicator() {
   return (
     <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
       <Move className="w-8 h-8 text-primary" />
-    </div>
-  );
-}
-
-function ErrorToast({ message, onClose }: { message: string; onClose: () => void }) {
-  useEffect(() => {
-    const timer = setTimeout(onClose, 5000);
-    return () => clearTimeout(timer);
-  }, [onClose]);
-
-  return (
-    <div className="fixed bottom-20 left-4 right-4 z-50 animate-in slide-in-from-bottom-4 fade-in duration-200">
-      <div className="bg-destructive text-destructive-foreground px-4 py-3 rounded-lg shadow-lg flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-        <p className="text-sm flex-1">{message}</p>
-        <button
-          type="button"
-          onClick={onClose}
-          className="shrink-0 hover:opacity-80"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
     </div>
   );
 }
@@ -215,22 +194,37 @@ export default function ProfilePhotoGallery({
   const draft = useProfileImagesDraft(initialImages);
   const { images, addImage, removeImage, reorderImages } = draft;
 
+  // ========== Drag & Drop Hook ==========
+  const {
+    draggedIndex,
+    dragOverIndex,
+    longPressIndex,
+    touchDragIndex,
+    isMobile,
+    gridRef,
+    handleDragStart,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    handleDragEnd,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+    handleTouchCancel,
+    resetLongPress,
+  } = useGridDragDrop({
+    items: images,
+    onReorder: reorderImages,
+    canDrag: (index) => !!images[index],
+    canDrop: (index) => !!images[index],
+  });
+
   // ========== Toast State ==========
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // ========== Drag State ==========
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-  const [longPressIndex, setLongPressIndex] = useState<number | null>(null);
-  const [touchDragIndex, setTouchDragIndex] = useState<number | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
 
   // ========== Refs ==========
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadIndexRef = useRef<number>(0);
-  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
 
   // ========== Effects ==========
 
@@ -238,31 +232,6 @@ export default function ProfilePhotoGallery({
   useEffect(() => {
     onDraftChange?.(draft);
   }, [draft, onDraftChange]);
-
-  // 모바일 감지
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile('ontouchstart' in window || navigator.maxTouchPoints > 0);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // 터치 드래그 중 스크롤 방지
-  useEffect(() => {
-    const grid = gridRef.current;
-    if (!grid) return;
-
-    const preventScroll = (e: TouchEvent) => {
-      if (touchDragIndex !== null) {
-        e.preventDefault();
-      }
-    };
-
-    grid.addEventListener('touchmove', preventScroll, { passive: false });
-    return () => grid.removeEventListener('touchmove', preventScroll);
-  }, [touchDragIndex]);
 
   // ========== Handlers ==========
 
@@ -279,9 +248,8 @@ export default function ProfilePhotoGallery({
       const inputElement = e.target;
       const targetIndex = uploadIndexRef.current;
 
-      // 🔥 안드로이드 WebView content:// URI 권한 만료 문제 해결
+      // 안드로이드 WebView content:// URI 권한 만료 문제 해결
       // 이벤트 핸들러 내에서 즉시 파일 검증 + 읽기 시작
-      // 1. 파일 검증 (동기)
       const validation = validateImageFile(file);
       if (!validation.valid) {
         inputElement.value = '';
@@ -289,18 +257,12 @@ export default function ProfilePhotoGallery({
         return;
       }
 
-      // 2. 파일 읽기 즉시 시작 (비동기지만 읽기 "시작"은 동기적)
-      // readAsArrayBuffer 호출 시점에 content:// 권한이 유효해야 함
+      // 파일 읽기 즉시 시작 (비동기지만 읽기 "시작"은 동기적)
       const { promise: readPromise } = startFileRead(file);
 
       try {
-        // 3. 읽기 완료 대기
         const arrayBuffer = await readPromise;
-
-        // 4. Data URL 변환 (이미 메모리에 복사된 데이터 사용)
         const dataUrl = await arrayBufferToDataUrl(arrayBuffer, file.type || 'image/jpeg');
-
-        // 5. 훅에 직접 추가 (이미 검증 + 읽기 완료됨)
         const result: AddImageAsyncResult = await addImage(file, targetIndex, dataUrl);
 
         if (!result.success && result.error) {
@@ -309,7 +271,6 @@ export default function ProfilePhotoGallery({
       } catch (err) {
         setErrorMessage(err instanceof Error ? err.message : '파일 처리에 실패했습니다.');
       } finally {
-        // 파일 읽기 완료 후 input 초기화 (같은 파일 재선택 허용)
         inputElement.value = '';
       }
     },
@@ -323,138 +284,6 @@ export default function ProfilePhotoGallery({
     [removeImage]
   );
 
-  // Desktop Drag & Drop
-  const handleDragStart = useCallback((e: React.DragEvent, index: number) => {
-    setDraggedIndex(index);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', index.toString());
-  }, []);
-
-  const handleDragOver = useCallback(
-    (e: React.DragEvent, index: number) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      if (draggedIndex !== null && draggedIndex !== index && images[index]) {
-        setDragOverIndex(index);
-      }
-    },
-    [draggedIndex, images]
-  );
-
-  const handleDragLeave = useCallback(() => {
-    setDragOverIndex(null);
-  }, []);
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent, dropIndex: number) => {
-      e.preventDefault();
-      const fromIndex = draggedIndex;
-      setDraggedIndex(null);
-      setDragOverIndex(null);
-
-      if (fromIndex !== null && fromIndex !== dropIndex && images[dropIndex]) {
-        reorderImages(fromIndex, dropIndex);
-      }
-    },
-    [draggedIndex, images, reorderImages]
-  );
-
-  const handleDragEnd = useCallback(() => {
-    setDraggedIndex(null);
-    setDragOverIndex(null);
-  }, []);
-
-  // Mobile Touch
-  const handleTouchStart = useCallback((e: React.TouchEvent, index: number) => {
-    const touch = e.touches[0];
-    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-
-    longPressTimerRef.current = setTimeout(() => {
-      setLongPressIndex(index);
-      setTouchDragIndex(index);
-      if ('vibrate' in navigator) {
-        navigator.vibrate(50);
-      }
-    }, 500);
-  }, []);
-
-  const handleTouchMove = useCallback(
-    (e: React.TouchEvent) => {
-      if (!touchStartRef.current) return;
-
-      const touch = e.touches[0];
-      const deltaX = Math.abs(touch.clientX - touchStartRef.current.x);
-      const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
-
-      if (deltaX > 10 || deltaY > 10) {
-        if (longPressTimerRef.current) {
-          clearTimeout(longPressTimerRef.current);
-          longPressTimerRef.current = null;
-        }
-      }
-
-      if (touchDragIndex !== null && gridRef.current) {
-        const gridItems = gridRef.current.children;
-        let foundTarget = false;
-
-        for (let i = 0; i < gridItems.length; i++) {
-          const item = gridItems[i] as HTMLElement;
-          const rect = item.getBoundingClientRect();
-
-          if (
-            touch.clientX >= rect.left &&
-            touch.clientX <= rect.right &&
-            touch.clientY >= rect.top &&
-            touch.clientY <= rect.bottom
-          ) {
-            if (i !== touchDragIndex && images[i]) {
-              setDragOverIndex(i);
-            } else {
-              setDragOverIndex(null);
-            }
-            foundTarget = true;
-            break;
-          }
-        }
-
-        if (!foundTarget) {
-          setDragOverIndex(null);
-        }
-      }
-    },
-    [touchDragIndex, images]
-  );
-
-  const handleTouchEnd = useCallback(() => {
-    if (longPressTimerRef.current) {
-      clearTimeout(longPressTimerRef.current);
-      longPressTimerRef.current = null;
-    }
-    touchStartRef.current = null;
-
-    const fromIndex = touchDragIndex;
-    const toIndex = dragOverIndex;
-
-    setTouchDragIndex(null);
-    setDragOverIndex(null);
-    setLongPressIndex(null);
-
-    if (fromIndex !== null && toIndex !== null && fromIndex !== toIndex) {
-      reorderImages(fromIndex, toIndex);
-    }
-  }, [touchDragIndex, dragOverIndex, reorderImages]);
-
-  const handleTouchCancel = useCallback(() => {
-    if (longPressTimerRef.current) {
-      clearTimeout(longPressTimerRef.current);
-      longPressTimerRef.current = null;
-    }
-    touchStartRef.current = null;
-    setTouchDragIndex(null);
-    setDragOverIndex(null);
-    setLongPressIndex(null);
-  }, []);
-
   // ========== Render ==========
 
   const slots = Array.from({ length: MAX_IMAGES }, (_, i) => images[i] || null);
@@ -462,7 +291,7 @@ export default function ProfilePhotoGallery({
   return (
     <FormSection
       title="프로필 사진"
-      description="최대 4장의 사진을 등록할 수 있습니다. 첫 번째 사진이 대표 사진이 됩니다."
+      description="최대 4장의 사진을 등록할 수 있습니다."
     >
       <input
         ref={fileInputRef}
@@ -509,11 +338,10 @@ export default function ProfilePhotoGallery({
       {longPressIndex !== null && (
         <div
           className="fixed inset-0 z-40"
-          onClick={() => setLongPressIndex(null)}
+          onClick={resetLongPress}
         />
       )}
 
-      {/* Error Toast */}
       {errorMessage && (
         <ErrorToast
           message={errorMessage}
