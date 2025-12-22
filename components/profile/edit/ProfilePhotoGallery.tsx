@@ -502,7 +502,7 @@ export default function ProfilePhotoGallery({
 
       <p className="text-xs text-muted-foreground mt-4 text-center">
         {isMobile
-          ? '길게 누른 후 드래그하여 순서를 변경하세요.'
+          ? '꾹 눌러 드래그하여 순서를 변경할 수 있습니다.'
           : '드래그하여 순서를 변경할 수 있습니다.'}
       </p>
 
