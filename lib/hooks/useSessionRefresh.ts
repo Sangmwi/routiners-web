@@ -37,13 +37,33 @@ export function useSessionRefresh() {
       lastRefreshRef.current = now;
 
       try {
+        // 갱신 전 세션 상태 확인
+        const { data: beforeSession } = await supabase.auth.getSession();
+        console.log('[SessionRefresh] Before:', {
+          hasSession: !!beforeSession.session,
+          hasRefreshToken: !!beforeSession.session?.refresh_token,
+          expiresAt: beforeSession.session?.expires_at,
+        });
+
         console.log('[SessionRefresh] Refreshing session...');
         const { data, error } = await supabase.auth.refreshSession();
+
         if (error) {
-          console.error('[SessionRefresh] Failed:', error.message);
+          console.error('[SessionRefresh] Failed:', error.message, error);
         } else {
-          console.log('[SessionRefresh] Success:', data.session ? 'session exists' : 'no session');
+          console.log('[SessionRefresh] Success:', {
+            hasSession: !!data.session,
+            expiresAt: data.session?.expires_at,
+          });
         }
+
+        // 갱신 후 세션 상태 재확인
+        const { data: afterSession } = await supabase.auth.getSession();
+        console.log('[SessionRefresh] After:', {
+          hasSession: !!afterSession.session,
+          hasRefreshToken: !!afterSession.session?.refresh_token,
+          expiresAt: afterSession.session?.expires_at,
+        });
       } catch (e) {
         console.error('[SessionRefresh] Error:', e);
       }
