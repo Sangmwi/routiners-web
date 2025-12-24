@@ -1,5 +1,9 @@
 /**
- * 인증이 필요한 API 호출을 위한 Fetch 래퍼
+ * 인증이 필요한 API 호출을 위한 Fetch 래퍼 (하이브리드 인증 지원)
+ *
+ * 인증 방식:
+ * 1. Expo 앱: 주입된 토큰으로 Authorization 헤더 사용
+ * 2. 웹 브라우저: 쿠키 기반 인증 (기존 방식)
  *
  * 401 에러 발생 시:
  * 1. Supabase 세션 갱신 시도
@@ -8,6 +12,37 @@
  */
 
 import { createClient } from '@/utils/supabase/client';
+
+// ============================================================================
+// 토큰 저장소 (Expo 앱에서 주입된 토큰)
+// ============================================================================
+
+let _accessToken: string | null = null;
+
+/**
+ * Expo 앱에서 주입된 토큰을 설정합니다.
+ * WebViewBridge에서 앱으로부터 토큰을 받으면 호출됩니다.
+ *
+ * @param token - Access token (null이면 토큰 제거)
+ */
+export function setAuthToken(token: string | null): void {
+  _accessToken = token;
+  console.log('[authFetch] Token', token ? 'set' : 'cleared');
+}
+
+/**
+ * 현재 저장된 토큰을 반환합니다.
+ */
+export function getAuthToken(): string | null {
+  return _accessToken;
+}
+
+/**
+ * 토큰이 설정되어 있는지 확인합니다. (앱 환경인지 확인용)
+ */
+export function hasAuthToken(): boolean {
+  return _accessToken !== null;
+}
 
 interface AuthFetchOptions extends RequestInit {
   /** 401 에러 시 세션 갱신 후 재시도 여부 (기본: true) */
@@ -99,10 +134,21 @@ export async function authFetch(
     ...fetchOptions
   } = options;
 
+  // 헤더 병합: 토큰이 있으면 Authorization 헤더 추가
+  const headers: HeadersInit = {
+    ...fetchOptions.headers,
+  };
+
+  // 앱 환경(토큰 있음)이면 Authorization 헤더 추가
+  if (_accessToken) {
+    (headers as Record<string, string>)['Authorization'] = `Bearer ${_accessToken}`;
+  }
+
   // credentials: 'include' 기본 설정 (WebView 쿠키 전달용)
   const mergedOptions: RequestInit = {
     credentials: 'include',
     ...fetchOptions,
+    headers,
   };
 
   let lastResponse: Response | null = null;

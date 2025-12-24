@@ -3,6 +3,7 @@
 import { useEffect, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { isTabRoute } from "@/lib/routes";
+import { setAuthToken } from "@/lib/utils/authFetch";
 
 // ============================================================================
 // Types
@@ -12,7 +13,8 @@ import { isTabRoute } from "@/lib/routes";
 export type AppToWebCommand =
   | { type: "NAVIGATE_HOME" }
   | { type: "NAVIGATE_TO"; path: string }
-  | { type: "GET_ROUTE_INFO" };
+  | { type: "GET_ROUTE_INFO" }
+  | { type: "SET_TOKEN"; token: string | null };
 
 /** 웹 → 앱 메시지 (postMessage로 전송) */
 export type WebToAppMessage =
@@ -82,6 +84,10 @@ export const useWebViewBridge = () => {
           break;
         case "GET_ROUTE_INFO":
           sendRouteInfo();
+          break;
+        case "SET_TOKEN":
+          // 앱에서 전달받은 토큰을 저장 (API 호출 시 Authorization 헤더에 사용)
+          setAuthToken(command.token);
           break;
       }
     };
