@@ -1,8 +1,8 @@
 /**
- * WebView Constants
+ * WebView Constants (공유)
  *
- * ⚠️ SOURCE OF TRUTH
- * 이 파일 수정 시 앱의 lib/webview/types.ts에도 동일하게 반영하세요.
+ * 웹/앱에서 공통으로 사용하는 상수입니다.
+ * 앱의 lib/webview/constants.ts에도 동일한 상수가 있어야 합니다.
  */
 
 import type { RouteInfo } from './types';
