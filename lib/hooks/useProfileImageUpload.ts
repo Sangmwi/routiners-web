@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import type { ImageChanges, DraftImage } from './useProfileImagesDraft';
+import type { ImageChanges } from './useProfileImagesDraft';
 import { authFetch } from '@/lib/utils/authFetch';
 
 // ============================================================
@@ -38,15 +38,42 @@ const DEFAULT_DELETE_ENDPOINT = '/api/user/profile/image';
 // ============================================================
 
 /**
+ * Data URL을 Blob으로 변환
+ * 안드로이드 WebView에서 File 객체 재읽기가 불가능하므로
+ * 미리 저장해둔 dataUrl을 사용하여 업로드
+ */
+function dataUrlToBlob(dataUrl: string): Blob {
+  const [header, base64Data] = dataUrl.split(',');
+  const mimeMatch = header.match(/:(.*?);/);
+  const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+
+  const byteString = atob(base64Data);
+  const arrayBuffer = new ArrayBuffer(byteString.length);
+  const uint8Array = new Uint8Array(arrayBuffer);
+
+  for (let i = 0; i < byteString.length; i++) {
+    uint8Array[i] = byteString.charCodeAt(i);
+  }
+
+  return new Blob([uint8Array], { type: mimeType });
+}
+
+/**
  * 단일 이미지 업로드
  * authFetch 사용하여 401 에러 시 세션 갱신 후 재시도
+ *
+ * @param dataUrl - 이미지의 Data URL (File 대신 사용 - WebView 호환)
+ * @param fileName - 원본 파일명
+ * @param endpoint - 업로드 API 엔드포인트
  */
 async function uploadSingleImage(
-  file: File,
+  dataUrl: string,
+  fileName: string,
   endpoint: string
 ): Promise<string> {
+  const blob = dataUrlToBlob(dataUrl);
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('file', blob, fileName);
 
   const response = await authFetch(endpoint, {
     method: 'POST',
@@ -136,9 +163,9 @@ export function useProfileImageUpload(options: UseProfileImageUploadOptions = {}
       setProgress({ current: 0, total: newImages.length });
 
       try {
-        // 1. 새 이미지들 병렬 업로드
-        const uploadPromises = newImages.map(async ({ file, id }): Promise<UploadedImage> => {
-          const url = await uploadSingleImage(file, uploadEndpoint);
+        // 1. 새 이미지들 병렬 업로드 (dataUrl 사용 - WebView에서 File 재읽기 불가)
+        const uploadPromises = newImages.map(async ({ file, id, dataUrl }): Promise<UploadedImage> => {
+          const url = await uploadSingleImage(dataUrl, file.name, uploadEndpoint);
           setProgress((prev) => ({ ...prev, current: prev.current + 1 }));
           return { id, url };
         });

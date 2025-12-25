@@ -21,8 +21,8 @@ export interface DraftImage {
 }
 
 export interface ImageChanges {
-  /** 새로 추가된 이미지들 */
-  newImages: { file: File; id: string }[];
+  /** 새로 추가된 이미지들 (dataUrl 포함 - 안드로이드 WebView에서 File 재읽기 불가) */
+  newImages: { file: File; id: string; dataUrl: string }[];
   /** 삭제된 이미지 URL들 */
   deletedUrls: string[];
   /** 최종 순서 */
@@ -279,7 +279,7 @@ export function useProfileImagesDraft(
 
     const newImages = currentImages
       .filter((img) => img.isNew && img.file)
-      .map((img) => ({ file: img.file!, id: img.id }));
+      .map((img) => ({ file: img.file!, id: img.id, dataUrl: img.displayUrl }));
 
     // hasChanges 로직 인라인
     const hasAnyChanges = (() => {
