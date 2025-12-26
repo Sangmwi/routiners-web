@@ -4,7 +4,7 @@ import { useModalStore } from '@/lib/stores';
 import ConfirmModal from './ConfirmModal';
 import AlertModal from './AlertModal';
 import ImagePreviewModal from './ImagePreviewModal';
-import type { ModalInstance, ModalType } from '@/lib/stores/modalStore';
+import type { ModalInstance, ModalDataMap } from '@/lib/stores/modalStore';
 
 // ============================================================================
 // Modal Renderer
@@ -25,7 +25,7 @@ function renderModal(modal: ModalInstance, onClose: () => void) {
         <ConfirmModal
           key={modal.id}
           {...commonProps}
-          data={modal.data}
+          data={modal.data as ModalDataMap['confirm']}
         />
       );
 
@@ -34,7 +34,7 @@ function renderModal(modal: ModalInstance, onClose: () => void) {
         <AlertModal
           key={modal.id}
           {...commonProps}
-          data={modal.data}
+          data={modal.data as ModalDataMap['alert']}
         />
       );
 
@@ -43,7 +43,7 @@ function renderModal(modal: ModalInstance, onClose: () => void) {
         <ImagePreviewModal
           key={modal.id}
           {...commonProps}
-          data={modal.data}
+          data={modal.data as ModalDataMap['imagePreview']}
         />
       );
 
