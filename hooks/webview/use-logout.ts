@@ -11,7 +11,8 @@
 
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { useWebViewBridge } from "./use-webview-bridge";
+import { useWebViewCore } from "./use-webview-core";
+import { useWebViewAuth } from "./use-webview-auth";
 
 // ============================================================================
 // Types
@@ -30,7 +31,8 @@ interface UseLogoutResult {
 
 export function useLogout(): UseLogoutResult {
   const supabase = createClient();
-  const { isInWebView, sendLogout } = useWebViewBridge();
+  const { isInWebView } = useWebViewCore();
+  const { sendLogout } = useWebViewAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const logout = async () => {

@@ -124,7 +124,7 @@ export function getPresetImageUrl(
 
   return getOptimizedImageUrl(url, {
     width: presetConfig.width,
-    height: presetConfig.height,
+    height: 'height' in presetConfig ? presetConfig.height : undefined,
     quality: presetConfig.quality,
     format: 'webp',
   });

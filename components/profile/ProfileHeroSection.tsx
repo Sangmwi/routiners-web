@@ -93,6 +93,7 @@ export default function ProfileHeroSection({ user }: ProfileHeroSectionProps) {
                 fill
                 className="object-cover"
                 fallbackClassName="bg-gradient-to-br from-muted via-muted/80 to-muted/60"
+                optimizePreset="detail"
               />
             </div>
           ))

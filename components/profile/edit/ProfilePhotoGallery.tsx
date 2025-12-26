@@ -169,6 +169,7 @@ function PhotoSlot({
             fill
             sizes="(max-width: 768px) 50vw, 200px"
             className="object-cover"
+            optimizePreset="card"
           />
           {isFirst && <MainPhotoBadge />}
           {!isProcessing && <DragHandle />}
