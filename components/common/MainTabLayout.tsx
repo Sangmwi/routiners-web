@@ -40,7 +40,7 @@ export default function MainTabLayout({
   const spacingClass = SPACING_MAP[spacing];
 
   return (
-    <div className={`min-h-screen bg-background p-4 ${className}`.trim()}>
+    <div className={`min-h-screen bg-background p-4 pb-24 ${className}`.trim()}>
       <div className={`flex flex-col ${spacingClass}`}>
         {children}
       </div>

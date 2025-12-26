@@ -4,6 +4,8 @@ import "./globals.css";
 import BottomNav from "@/components/common/BottomNav";
 import WebViewBridge from "@/components/WebViewBridge";
 import QueryProvider from "@/lib/providers/QueryProvider";
+import ErrorBoundary from "@/components/common/ErrorBoundary";
+import { ModalProvider } from "@/components/modals";
 
 const pretendardVariable = localFont({
   src: '../assets/fonts/PretendardVariable.woff2',
@@ -31,13 +33,16 @@ export default function RootLayout({
         className={`${pretendardVariable.variable} antialiased bg-background`}
       >
         <QueryProvider>
-          <WebViewBridge />
-          <div className="mx-auto flex min-h-screen max-w-md flex-col bg-background shadow-2xl">
-            <main className="flex-1">
-              {children}
-            </main>
-            <BottomNav />
-          </div>
+          <ErrorBoundary>
+            <WebViewBridge />
+            <ModalProvider />
+            <div className="mx-auto flex min-h-screen max-w-md flex-col bg-background shadow-2xl">
+              <main className="flex-1">
+                {children}
+              </main>
+              <BottomNav />
+            </div>
+          </ErrorBoundary>
         </QueryProvider>
       </body>
     </html>

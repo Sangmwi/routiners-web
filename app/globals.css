@@ -169,3 +169,112 @@ main {
     }
   }
 }
+
+/* ============================================================================
+   WebView Performance Optimizations
+   ============================================================================ */
+
+/* GPU 가속 레이어 프로모션 */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* 스크롤 성능 최적화 */
+.scroll-container {
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* 터치 반응성 개선 */
+.touch-optimized {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* 이미지 렌더링 최적화 */
+.image-optimized {
+  content-visibility: auto;
+  contain: layout style paint;
+}
+
+/* 리스트 아이템 최적화 */
+.list-item-optimized {
+  contain: layout style;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 80px;
+}
+
+/* 애니메이션 성능 (transform만 사용) */
+.animate-performance {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* 고정 헤더/푸터 최적화 */
+.fixed-optimized {
+  position: fixed;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* 카드 호버/탭 상태 최적화 */
+.card-interactive {
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+  will-change: transform;
+}
+
+.card-interactive:active {
+  transform: scale(0.98);
+}
+
+/* 버튼 탭 피드백 */
+.btn-tap-feedback {
+  transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+}
+
+.btn-tap-feedback:active {
+  transform: scale(0.95);
+  opacity: 0.9;
+}
+
+/* 레이지 로딩 이미지 플레이스홀더 */
+.lazy-image {
+  background: linear-gradient(90deg, var(--muted) 25%, var(--border) 50%, var(--muted) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* 가상화 컨테이너 */
+.virtualized-container {
+  contain: strict;
+  overflow: auto;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .lazy-image {
+    animation: none;
+    background: var(--muted);
+  }
+}
