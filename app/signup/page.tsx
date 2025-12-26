@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
 import StepIndicator from '@/components/ui/StepIndicator';
 import PassVerificationStep from '@/components/signup/PassVerificationStep';
 import MilitaryInfoStep from '@/components/signup/MilitaryInfoStep';
@@ -14,7 +13,6 @@ const STEPS = ['본인인증', '군인정보', '확인'];
 
 export default function SignupPage() {
   const router = useRouter();
-  const supabase = createClient();
   const completeSignupMutation = useCompleteSignup();
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -43,17 +41,9 @@ export default function SignupPage() {
     if (!passData || !militaryData) return;
 
     try {
-      // Get current auth user
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser();
-      if (!authUser) {
-        throw new Error('Not authenticated');
-      }
-
-      const signupData: SignupCompleteData = {
-        providerId: authUser.id,
-        email: authUser.email || '',
+      // 서버 API가 쿠키 세션으로 인증 처리
+      // (WebView에서는 클라이언트 getUser()가 작동하지 않음)
+      const signupData = {
         ...passData,
         ...militaryData,
       };

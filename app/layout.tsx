@@ -33,7 +33,7 @@ export default function RootLayout({
         <QueryProvider>
           <WebViewBridge />
           <div className="mx-auto flex min-h-screen max-w-md flex-col bg-background shadow-2xl">
-            <main className="flex-1 pb-24">
+            <main className="flex-1">
               {children}
             </main>
             <BottomNav />

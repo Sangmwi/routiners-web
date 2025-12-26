@@ -5,9 +5,10 @@ import { createClient } from '@/utils/supabase/server';
  * POST /api/signup/complete
  * Complete signup and create User record
  *
+ * providerId와 email은 서버 세션에서 가져옵니다.
+ * (WebView에서는 클라이언트 Supabase가 세션을 읽지 못하기 때문)
+ *
  * Body: {
- *   providerId: string;
- *   email: string;
  *   realName: string;
  *   phoneNumber: string;
  *   birthDate: string;
@@ -40,10 +41,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('Signup data received:', { ...body, phoneNumber: '***' });
 
-    // Validate required fields
+    // providerId와 email은 서버 세션에서 가져옴
+    const providerId = authUser.id;
+    const email = authUser.email || '';
+
+    // Validate required fields (providerId, email 제외 - 서버에서 처리)
     const requiredFields = [
-      'providerId',
-      'email',
       'realName',
       'phoneNumber',
       'birthDate',
@@ -99,8 +102,8 @@ export async function POST(request: NextRequest) {
     const { data: newUser, error: insertError } = await supabase
       .from('users')
       .insert({
-        provider_id: body.providerId,
-        email: body.email,
+        provider_id: providerId,
+        email: email,
         real_name: body.realName,
         phone_number: body.phoneNumber,
         birth_date: body.birthDate,
