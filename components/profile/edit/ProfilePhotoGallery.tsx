@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useProfileImagesDraft, useGridDragDrop } from '@/hooks';
 import type { DraftImage, AddImageResult } from '@/hooks/profile/useProfileImagesDraft';
 import { validateImageFile } from '@/lib/utils/imageValidation';
-import ImageWithFallback from '@/components/ui/ImageWithFallback';
+import { ImageWithFallback } from '@/components/ui/image';
 import FormSection from '@/components/ui/FormSection';
 import ErrorToast from '@/components/ui/ErrorToast';
 import { Plus, Loader2, X, GripVertical, Star, Move } from 'lucide-react';

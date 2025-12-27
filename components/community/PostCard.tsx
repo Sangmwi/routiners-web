@@ -1,7 +1,7 @@
 'use client';
 
 import { Heart, MessageCircle, Share2 } from 'lucide-react';
-import ImageWithFallback from '@/components/ui/ImageWithFallback';
+import { ImageWithFallback } from '@/components/ui/image';
 
 interface PostCardProps {
   author: string;

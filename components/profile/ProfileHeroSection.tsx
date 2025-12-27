@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { User } from '@/lib/types';
-import ImageWithFallback from '@/components/ui/ImageWithFallback';
+import { ImageWithFallback } from '@/components/ui/image';
 import { CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ProfileHeroSectionProps {

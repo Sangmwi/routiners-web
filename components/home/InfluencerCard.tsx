@@ -1,6 +1,6 @@
 'use client';
 
-import ImageWithFallback from '@/components/ui/ImageWithFallback';
+import { ImageWithFallback } from '@/components/ui/image';
 
 interface InfluencerCardProps {
   author: string;

@@ -215,7 +215,7 @@ export function useProfileEdit(): UseProfileEditReturn {
           // 저장 완료 후 즉시 페이지 이동
           // isSaving을 false로 바꾸지 않음: 캐시 업데이트로 인한 미리보기 깜빡임 방지
           // 페이지를 떠나므로 상태 리셋 불필요
-          router.push('/profile');
+          router.back();
         },
         onError: (err: Error) => {
           console.error('Failed to update profile:', err);

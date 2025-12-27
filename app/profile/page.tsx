@@ -47,6 +47,7 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-background">
       <PageHeader
         title="내 프로필"
+        onBack={() => router.push('/')}
         centered
         action={
           <Link
