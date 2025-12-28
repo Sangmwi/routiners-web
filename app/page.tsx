@@ -7,9 +7,7 @@ import HealthScoreCard from '@/components/home/HealthScoreCard';
 import SectionHeader from '@/components/home/SectionHeader';
 import ProductSlider from '@/components/home/ProductSlider';
 import InfluencerSlider from '@/components/home/InfluencerSlider';
-import HealthScoreCardSkeleton from '@/components/home/HealthScoreCardSkeleton';
-import InfluencerSliderSkeleton from '@/components/home/InfluencerSliderSkeleton';
-import { Skeleton, SkeletonGrid } from '@/components/ui/Skeleton';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 import ErrorState from '@/components/common/ErrorState';
 import { Product, Influencer } from '@/lib/types';
 
@@ -171,30 +169,7 @@ export default function Home() {
   };
 
   if (isLoading) {
-    return (
-      <MainTabLayout>
-        {/* Greeting Skeleton */}
-        <div>
-          <Skeleton height="28px" width="180px" className="mb-2" />
-          <Skeleton height="16px" width="140px" />
-        </div>
-
-        {/* Health Score Skeleton */}
-        <HealthScoreCardSkeleton />
-
-        {/* Products Section Skeleton */}
-        <section>
-          <Skeleton height="24px" width="200px" className="mb-4" />
-          <SkeletonGrid columns={2} items={4} />
-        </section>
-
-        {/* Influencer Section Skeleton */}
-        <section>
-          <Skeleton height="24px" width="140px" className="mb-4" />
-          <InfluencerSliderSkeleton />
-        </section>
-      </MainTabLayout>
-    );
+    return <PageSkeleton />;
   }
 
   if (error) {

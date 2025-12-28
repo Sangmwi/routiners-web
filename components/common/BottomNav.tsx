@@ -1,7 +1,7 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { Home, Bot, Users, User } from "lucide-react";
 import { shouldShowBottomTab } from "@/lib/routes";
 
@@ -14,6 +14,14 @@ const NAV_ITEMS = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  // 프리패치 적용
+  useEffect(() => {
+    NAV_ITEMS.forEach((item) => {
+      router.prefetch(item.href);
+    });
+  }, [router]);
 
   // 특정 페이지에서는 탭 숨김
   if (!shouldShowBottomTab(pathname)) {
@@ -28,10 +36,10 @@ export default function BottomNav() {
           const Icon = item.icon;
 
           return (
-            <Link
+            <button
               key={item.href}
-              href={item.href}
-              prefetch={true}
+              type="button"
+              onClick={() => router.push(item.href)}
               className={`flex flex-col items-center justify-center gap-1 transition-colors ${
                 isActive
                   ? "text-primary"
@@ -40,7 +48,7 @@ export default function BottomNav() {
             >
               <Icon className="h-6 w-6" strokeWidth={isActive ? 2.5 : 2} />
               <span className="text-xs font-medium">{item.label}</span>
-            </Link>
+            </button>
           );
         })}
       </div>

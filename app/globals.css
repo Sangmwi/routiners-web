@@ -263,6 +263,16 @@ main {
   overflow: auto;
 }
 
+/* 토스 스타일 스켈레톤 시간차 애니메이션 */
+.skeleton-delay-1 { animation-delay: 0ms; }
+.skeleton-delay-2 { animation-delay: 50ms; }
+.skeleton-delay-3 { animation-delay: 100ms; }
+.skeleton-delay-4 { animation-delay: 150ms; }
+.skeleton-delay-5 { animation-delay: 200ms; }
+.skeleton-delay-6 { animation-delay: 250ms; }
+.skeleton-delay-7 { animation-delay: 300ms; }
+.skeleton-delay-8 { animation-delay: 350ms; }
+
 /* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
   *,

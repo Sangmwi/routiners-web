@@ -14,7 +14,7 @@ import ProfileInbodySection from '@/components/profile/ProfileInbodySection';
 import ProfileMilitarySection from '@/components/profile/ProfileMilitarySection';
 import ProfileLocationsSection from '@/components/profile/ProfileLocationsSection';
 import FloatingChatButton from '@/components/profile/FloatingChatButton';
-import { Loader2 } from 'lucide-react';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 
 export default function UserProfilePage() {
   const router = useRouter();
@@ -30,11 +30,7 @@ export default function UserProfilePage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   if (error || !user) {

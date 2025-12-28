@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useProfileProgress, useProfileEdit } from '@/hooks';
 import { Loader2 } from 'lucide-react';
+import { PageSkeleton } from '@/components/ui/Skeleton';
 import PageHeader from '@/components/common/PageHeader';
 import ProfilePhotoGallery from '@/components/profile/edit/ProfilePhotoGallery';
 import ProfileNicknameInput from '@/components/profile/edit/ProfileNicknameInput';
@@ -18,11 +19,7 @@ import ProfileInterestsInput from '@/components/profile/edit/ProfileInterestsInp
 // ============================================================
 
 function LoadingState() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-    </div>
-  );
+  return <PageSkeleton />;
 }
 
 function ErrorState() {
