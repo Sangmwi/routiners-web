@@ -147,11 +147,7 @@ export default function ProfileEditPage() {
         />
 
         <ProfileInbodyInput
-          muscleMass={formData.muscleMass}
-          bodyFatPercentage={formData.bodyFatPercentage}
           showInbodyPublic={formData.showInbodyPublic}
-          onMuscleMassChange={(value) => updateFormField('muscleMass', value)}
-          onBodyFatPercentageChange={(value) => updateFormField('bodyFatPercentage', value)}
           onShowInbodyPublicChange={(value) => updateFormField('showInbodyPublic', value)}
         />
 

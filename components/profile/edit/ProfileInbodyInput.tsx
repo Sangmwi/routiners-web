@@ -1,49 +1,95 @@
 'use client';
 
+import { useState } from 'react';
+import { Settings, ChevronRight, Scale, Activity, Percent } from 'lucide-react';
 import FormSection from '@/components/ui/FormSection';
-import FormInput from '@/components/ui/FormInput';
 import FormToggle from '@/components/ui/FormToggle';
+import { InBodyManageModal } from '@/components/inbody';
+import { useInBodySummary } from '@/hooks/inbody';
 
 interface ProfileInbodyInputProps {
-  muscleMass: string;
-  bodyFatPercentage: string;
   showInbodyPublic: boolean;
-  onMuscleMassChange: (value: string) => void;
-  onBodyFatPercentageChange: (value: string) => void;
   onShowInbodyPublicChange: (value: boolean) => void;
 }
 
 export default function ProfileInbodyInput({
-  muscleMass,
-  bodyFatPercentage,
   showInbodyPublic,
-  onMuscleMassChange,
-  onBodyFatPercentageChange,
   onShowInbodyPublicChange,
 }: ProfileInbodyInputProps) {
+  const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const { data: summary } = useInBodySummary();
+
+  const latest = summary?.latest;
+  const totalRecords = summary?.totalRecords ?? 0;
+
   return (
-    <FormSection
-      title="인바디 정보"
-      description="인바디 정보를 입력하면 더 정확한 운동 파트너 매칭을 받을 수 있어요!"
-    >
-      <div className="space-y-3">
-        <FormInput
-          type="number"
-          step="0.1"
-          label="골격근량 (kg)"
-          value={muscleMass}
-          onChange={(e) => onMuscleMassChange(e.target.value)}
-          placeholder="예: 35.2"
-        />
-        <FormInput
-          type="number"
-          step="0.1"
-          label="체지방률 (%)"
-          value={bodyFatPercentage}
-          onChange={(e) => onBodyFatPercentageChange(e.target.value)}
-          placeholder="예: 15.5"
-        />
-        <div className="pt-2">
+    <>
+      <FormSection
+        title="인바디 정보"
+        description="인바디 결과지를 스캔하여 정확한 데이터를 기록하세요"
+        action={
+          <button
+            type="button"
+            onClick={() => setIsManageModalOpen(true)}
+            className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors"
+          >
+            <Settings className="w-4 h-4" />
+            <span>관리</span>
+          </button>
+        }
+      >
+        <div className="space-y-4">
+          {/* 현재 인바디 요약 */}
+          <div
+            className="bg-muted/30 rounded-xl p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => setIsManageModalOpen(true)}
+          >
+            {latest ? (
+              <>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <Scale className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
+                    <p className="text-xs text-muted-foreground">체중</p>
+                    <p className="text-sm font-semibold text-card-foreground">
+                      {latest.weight}kg
+                    </p>
+                  </div>
+                  <div>
+                    <Activity className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
+                    <p className="text-xs text-muted-foreground">골격근량</p>
+                    <p className="text-sm font-semibold text-card-foreground">
+                      {latest.skeletalMuscleMass}kg
+                    </p>
+                  </div>
+                  <div>
+                    <Percent className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
+                    <p className="text-xs text-muted-foreground">체지방률</p>
+                    <p className="text-sm font-semibold text-card-foreground">
+                      {latest.bodyFatPercentage}%
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-center gap-1 mt-3 text-xs text-muted-foreground">
+                  <span>총 {totalRecords}개의 기록</span>
+                  <ChevronRight className="w-3 h-3" />
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-card-foreground">
+                    아직 등록된 기록이 없어요
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    탭하여 인바디 기록을 추가하세요
+                  </p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+              </div>
+            )}
+          </div>
+
+          {/* 공개 설정 토글 */}
           <FormToggle
             label="인바디 정보 공개"
             description="다른 사용자에게 인바디 정보를 공개합니다"
@@ -51,7 +97,13 @@ export default function ProfileInbodyInput({
             onChange={onShowInbodyPublicChange}
           />
         </div>
-      </div>
-    </FormSection>
+      </FormSection>
+
+      {/* 인바디 관리 모달 */}
+      <InBodyManageModal
+        isOpen={isManageModalOpen}
+        onClose={() => setIsManageModalOpen(false)}
+      />
+    </>
   );
 }

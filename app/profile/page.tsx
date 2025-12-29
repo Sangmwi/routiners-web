@@ -83,10 +83,8 @@ export default function ProfilePage() {
 
         {/* Inbody Info */}
         <ProfileInbodySection
-          muscleMass={user.muscleMass}
-          bodyFatPercentage={user.bodyFatPercentage}
-          weight={user.weight}
           showInbodyPublic={user.showInbodyPublic}
+          isOwnProfile={true}
         />
 
         {/* Favorite Locations */}

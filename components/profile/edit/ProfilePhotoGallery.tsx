@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useProfileImagesDraft, useGridDragDrop } from '@/hooks';
+import { useNativeImagePicker } from '@/hooks/webview';
 import type { DraftImage, AddImageResult } from '@/hooks/profile/useProfileImagesDraft';
 import { validateImageFile } from '@/lib/utils/imageValidation';
 import { ImageWithFallback } from '@/components/ui/image';
@@ -225,9 +226,11 @@ export default function ProfilePhotoGallery({
   // ========== Toast State ==========
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // ========== Refs ==========
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const uploadIndexRef = useRef<number>(0);
+  // ========== Native Image Picker ==========
+  const { pickImage, base64ToFile } = useNativeImagePicker();
+
+  // ========== Refs & State ==========
+  const [processingIndex, setProcessingIndex] = useState<number | null>(null);
 
   // ========== Effects ==========
 
@@ -238,35 +241,46 @@ export default function ProfilePhotoGallery({
 
   // ========== Handlers ==========
 
-  const handleAddClick = (index: number) => {
-    uploadIndexRef.current = index;
-    fileInputRef.current?.click();
-  };
+  const handleAddClick = useCallback(async (index: number) => {
+    console.log('[ProfilePhotoGallery] handleAddClick called, index:', index);
+    setProcessingIndex(index);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    console.log('[ProfilePhotoGallery] Calling pickImage...');
+    const result = await pickImage('both');
+    console.log('[ProfilePhotoGallery] pickImage result:', result);
 
-    const inputElement = e.target;
-    const targetIndex = uploadIndexRef.current;
-
-    // 파일 검증 (addImage 내부에서도 하지만 에러 메시지 표시를 위해)
-    const validation = validateImageFile(file);
-    if (!validation.valid) {
-      inputElement.value = '';
-      setErrorMessage(validation.error || '파일 검증에 실패했습니다.');
+    if (result.cancelled) {
+      setProcessingIndex(null);
       return;
     }
 
-    // 동기적으로 이미지 추가 (Blob URL 즉시 생성)
-    const result: AddImageResult = addImage(file, targetIndex);
-
-    if (!result.success && result.error) {
-      setErrorMessage(result.error);
+    if (!result.success) {
+      setErrorMessage(result.error || '이미지 선택에 실패했습니다.');
+      setProcessingIndex(null);
+      return;
     }
 
-    inputElement.value = '';
-  };
+    if (result.base64) {
+      const file = base64ToFile(result.base64, result.fileName || 'profile.jpg');
+
+      // 파일 검증
+      const validation = validateImageFile(file);
+      if (!validation.valid) {
+        setErrorMessage(validation.error || '파일 검증에 실패했습니다.');
+        setProcessingIndex(null);
+        return;
+      }
+
+      // 동기적으로 이미지 추가 (Blob URL 즉시 생성)
+      const addResult: AddImageResult = addImage(file, index);
+
+      if (!addResult.success && addResult.error) {
+        setErrorMessage(addResult.error);
+      }
+    }
+
+    setProcessingIndex(null);
+  }, [pickImage, base64ToFile, addImage]);
 
   const handleDelete = (index: number) => {
     removeImage(index);
@@ -281,14 +295,6 @@ export default function ProfilePhotoGallery({
       title="프로필 사진"
       description="최대 4장의 사진을 등록할 수 있습니다."
     >
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        onChange={handleInputChange}
-        className="hidden"
-      />
-
       <div ref={gridRef} className="grid grid-cols-2 gap-3">
         {slots.map((image, index) => (
           <PhotoSlot
@@ -296,7 +302,7 @@ export default function ProfilePhotoGallery({
             image={image}
             index={index}
             isFirst={index === 0 && !!image}
-            isProcessing={false}
+            isProcessing={processingIndex === index}
             isDragging={draggedIndex === index || touchDragIndex === index}
             isDragOver={dragOverIndex === index}
             isLongPressed={longPressIndex === index}

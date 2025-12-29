@@ -3,11 +3,16 @@
 /**
  * WebView Commands Hook
  *
- * 앱에서 오는 명령(AppToWebMessage)을 처리합니다.
+ * 앱에서 오는 명령(AppToWebMessage)을 중앙 집중식으로 처리합니다.
  * 선언적 핸들러 맵 방식으로 앱의 messageHandlers와 패턴을 통일합니다.
+ *
+ * 확장성:
+ * - 외부 핸들러 등록 가능 (registerHandler)
+ * - 핸들러 해제 가능 (unregisterHandler)
+ * - 모든 app-command 이벤트를 단일 지점에서 관리
  */
 
-import { useEffect } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import type { AppToWebMessage } from "@/lib/webview";
 import { useWebViewAuth } from "./use-webview-auth";
@@ -18,8 +23,51 @@ import { LOG_PREFIX } from "./use-webview-core";
 // Types
 // ============================================================================
 
-type CommandHandler = (command: AppToWebMessage) => void | Promise<void>;
-type CommandHandlerMap = Record<AppToWebMessage["type"], CommandHandler>;
+export type CommandHandler<T extends AppToWebMessage = AppToWebMessage> = (
+  command: T
+) => void | Promise<void>;
+
+type CommandType = AppToWebMessage["type"];
+type HandlerRegistry = Map<CommandType, Set<CommandHandler>>;
+
+// 개별 메시지 타입 추출
+type NavigateToMessage = Extract<AppToWebMessage, { type: "NAVIGATE_TO" }>;
+type SetSessionMessage = Extract<AppToWebMessage, { type: "SET_SESSION" }>;
+type LoginErrorMessage = Extract<AppToWebMessage, { type: "LOGIN_ERROR" }>;
+
+// ============================================================================
+// Global Registry (싱글톤)
+// ============================================================================
+
+const globalHandlerRegistry: HandlerRegistry = new Map();
+
+/**
+ * 외부 핸들러 등록 (컴포넌트 외부에서도 사용 가능)
+ */
+export const registerCommandHandler = <T extends AppToWebMessage>(
+  type: T["type"],
+  handler: CommandHandler<T>
+): (() => void) => {
+  if (!globalHandlerRegistry.has(type)) {
+    globalHandlerRegistry.set(type, new Set());
+  }
+  globalHandlerRegistry.get(type)!.add(handler as CommandHandler);
+
+  // cleanup 함수 반환
+  return () => {
+    globalHandlerRegistry.get(type)?.delete(handler as CommandHandler);
+  };
+};
+
+/**
+ * 핸들러 해제
+ */
+export const unregisterCommandHandler = <T extends AppToWebMessage>(
+  type: T["type"],
+  handler: CommandHandler<T>
+): void => {
+  globalHandlerRegistry.get(type)?.delete(handler as CommandHandler);
+};
 
 // ============================================================================
 // Hook
@@ -28,61 +76,115 @@ type CommandHandlerMap = Record<AppToWebMessage["type"], CommandHandler>;
 export const useWebViewCommands = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const pathnameRef = useRef(pathname);
+  pathnameRef.current = pathname;
+
   const { setSession, clearSession, notifySessionSet } = useWebViewAuth();
   const { sendRouteInfo } = useWebViewNavigation();
 
-  // 선언적 명령 핸들러 맵 (앱의 messageHandlers와 동일한 패턴)
-  // React Compiler가 자동 메모이제이션 처리
-  const commandHandlers: CommandHandlerMap = {
-    NAVIGATE_HOME: () => {
-      router.replace("/");
-    },
+  // ──────────────────────────────────────────────────────────────────────────
+  // 기본 핸들러 등록 (내장)
+  // ──────────────────────────────────────────────────────────────────────────
 
-    NAVIGATE_TO: (cmd) => {
-      if (cmd.type === "NAVIGATE_TO") {
+  useEffect(() => {
+    const cleanups: (() => void)[] = [];
+
+    // NAVIGATE_HOME
+    cleanups.push(
+      registerCommandHandler("NAVIGATE_HOME", () => {
+        router.replace("/");
+      })
+    );
+
+    // NAVIGATE_TO
+    cleanups.push(
+      registerCommandHandler<NavigateToMessage>("NAVIGATE_TO", (cmd) => {
         router.replace(cmd.path);
-      }
-    },
+      })
+    );
 
-    GET_ROUTE_INFO: () => {
-      sendRouteInfo();
-    },
+    // GET_ROUTE_INFO
+    cleanups.push(
+      registerCommandHandler("GET_ROUTE_INFO", () => {
+        sendRouteInfo();
+      })
+    );
 
-    SET_SESSION: async (cmd) => {
-      if (cmd.type === "SET_SESSION") {
+    // SET_SESSION
+    cleanups.push(
+      registerCommandHandler<SetSessionMessage>("SET_SESSION", async (cmd) => {
         const success = await setSession(cmd.access_token, cmd.refresh_token);
         notifySessionSet(success);
 
-        if (success && pathname === "/login") {
+        if (success && pathnameRef.current === "/login") {
           router.replace("/");
         }
-      }
-    },
+      })
+    );
 
-    CLEAR_SESSION: async () => {
-      await clearSession();
-      router.replace("/login");
-    },
+    // CLEAR_SESSION
+    cleanups.push(
+      registerCommandHandler("CLEAR_SESSION", async () => {
+        await clearSession();
+        router.replace("/login");
+      })
+    );
 
-    LOGIN_ERROR: (cmd) => {
-      if (cmd.type === "LOGIN_ERROR") {
+    // LOGIN_ERROR
+    cleanups.push(
+      registerCommandHandler<LoginErrorMessage>("LOGIN_ERROR", (cmd) => {
         console.error(`${LOG_PREFIX} Login error from app:`, cmd.error);
-      }
-    },
-  };
+      })
+    );
 
-  // 앱 명령 이벤트 리스너 등록
+    return () => {
+      cleanups.forEach((cleanup) => cleanup());
+    };
+  }, [router, setSession, clearSession, notifySessionSet, sendRouteInfo]);
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // 중앙 이벤트 리스너
+  // ──────────────────────────────────────────────────────────────────────────
+
   useEffect(() => {
     const handleAppCommand = async (event: CustomEvent<AppToWebMessage>) => {
       const command = event.detail;
-      const handler = commandHandlers[command.type];
+      const handlers = globalHandlerRegistry.get(command.type);
 
-      if (handler) {
-        await handler(command);
+      if (handlers && handlers.size > 0) {
+        // 등록된 모든 핸들러 실행
+        for (const handler of handlers) {
+          try {
+            await handler(command);
+          } catch (error) {
+            console.error(
+              `${LOG_PREFIX} Handler error for ${command.type}:`,
+              error
+            );
+          }
+        }
       }
     };
 
     window.addEventListener("app-command", handleAppCommand);
     return () => window.removeEventListener("app-command", handleAppCommand);
-  });
+  }, []);
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // 외부 사용을 위한 API
+  // ──────────────────────────────────────────────────────────────────────────
+
+  const register = useCallback(
+    <T extends AppToWebMessage>(
+      type: T["type"],
+      handler: CommandHandler<T>
+    ) => {
+      return registerCommandHandler(type, handler);
+    },
+    []
+  );
+
+  return {
+    registerHandler: register,
+  };
 };

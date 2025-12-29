@@ -20,6 +20,35 @@ export type RouteInfo = {
 // WebView Bridge Messages
 // ============================================================================
 
+// ============================================================================
+// Image Picker Types
+// ============================================================================
+
+export type ImagePickerSource = 'camera' | 'gallery' | 'both';
+
+export type ImagePickerResult = {
+  /** 성공 여부 */
+  success: boolean;
+  /** 이미지 base64 데이터 (data:image/jpeg;base64,... 형식) */
+  base64?: string;
+  /** 이미지 URI (네이티브 경로) */
+  uri?: string;
+  /** MIME 타입 */
+  mimeType?: string;
+  /** 파일명 */
+  fileName?: string;
+  /** 파일 크기 (bytes) */
+  fileSize?: number;
+  /** 이미지 너비 */
+  width?: number;
+  /** 이미지 높이 */
+  height?: number;
+  /** 취소 여부 */
+  cancelled?: boolean;
+  /** 에러 메시지 */
+  error?: string;
+};
+
 /** 앱 → 웹 메시지 (CustomEvent로 수신) */
 export type AppToWebMessage =
   | { type: 'NAVIGATE_HOME' }
@@ -27,7 +56,8 @@ export type AppToWebMessage =
   | { type: 'GET_ROUTE_INFO' }
   | { type: 'SET_SESSION'; access_token: string; refresh_token: string }
   | { type: 'CLEAR_SESSION' }
-  | { type: 'LOGIN_ERROR'; error: string };
+  | { type: 'LOGIN_ERROR'; error: string }
+  | { type: 'IMAGE_PICKER_RESULT'; requestId: string; result: ImagePickerResult };
 
 /** 웹 → 앱 메시지 (postMessage로 전송) */
 export type WebToAppMessage =
@@ -37,4 +67,5 @@ export type WebToAppMessage =
   | { type: 'WEB_READY' }
   | { type: 'SESSION_SET'; success: boolean }
   | { type: 'REQUEST_SESSION_REFRESH' }
-  | { type: 'SESSION_EXPIRED' };
+  | { type: 'SESSION_EXPIRED' }
+  | { type: 'REQUEST_IMAGE_PICKER'; requestId: string; source: ImagePickerSource };

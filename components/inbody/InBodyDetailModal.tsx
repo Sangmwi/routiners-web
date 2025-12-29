@@ -1,0 +1,280 @@
+'use client';
+
+import { useState, useCallback } from 'react';
+import { Trash2, Edit2, Loader2, AlertTriangle } from 'lucide-react';
+import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
+import Button from '@/components/ui/Button';
+import { InBodyRecord, InBodyUpdateData } from '@/lib/types/inbody';
+import { useUpdateInBody, useDeleteInBody } from '@/hooks/inbody';
+import InBodyPreview from './InBodyPreview';
+
+interface InBodyDetailModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  record: InBodyRecord;
+}
+
+type ModalState = 'view' | 'edit' | 'deleting' | 'saving' | 'confirmDelete';
+
+export default function InBodyDetailModal({
+  isOpen,
+  onClose,
+  record,
+}: InBodyDetailModalProps) {
+  const [state, setState] = useState<ModalState>('view');
+  const [editData, setEditData] = useState<InBodyUpdateData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const updateInBody = useUpdateInBody();
+  const deleteInBody = useDeleteInBody();
+
+  // 모달 닫기 시 상태 초기화
+  const handleClose = useCallback(() => {
+    setState('view');
+    setEditData(null);
+    setError(null);
+    onClose();
+  }, [onClose]);
+
+  // 수정 모드 진입
+  const handleEdit = useCallback(() => {
+    setEditData({
+      measuredAt: record.measuredAt,
+      weight: record.weight,
+      skeletalMuscleMass: record.skeletalMuscleMass,
+      bodyFatPercentage: record.bodyFatPercentage,
+      bmi: record.bmi,
+      inbodyScore: record.inbodyScore,
+      totalBodyWater: record.totalBodyWater,
+      protein: record.protein,
+      minerals: record.minerals,
+      bodyFatMass: record.bodyFatMass,
+      rightArmMuscle: record.rightArmMuscle,
+      leftArmMuscle: record.leftArmMuscle,
+      trunkMuscle: record.trunkMuscle,
+      rightLegMuscle: record.rightLegMuscle,
+      leftLegMuscle: record.leftLegMuscle,
+      rightArmFat: record.rightArmFat,
+      leftArmFat: record.leftArmFat,
+      trunkFat: record.trunkFat,
+      rightLegFat: record.rightLegFat,
+      leftLegFat: record.leftLegFat,
+    });
+    setState('edit');
+  }, [record]);
+
+  // 수정 저장
+  const handleSave = useCallback(async () => {
+    if (!editData) return;
+
+    setState('saving');
+    setError(null);
+    try {
+      await updateInBody.mutateAsync({ id: record.id, data: editData });
+      handleClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '수정에 실패했습니다.');
+      setState('edit');
+    }
+  }, [record.id, editData, updateInBody, handleClose]);
+
+  // 삭제 확인
+  const handleConfirmDelete = useCallback(() => {
+    setState('confirmDelete');
+  }, []);
+
+  // 삭제 실행
+  const handleDelete = useCallback(async () => {
+    setState('deleting');
+    setError(null);
+    try {
+      await deleteInBody.mutateAsync(record.id);
+      handleClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '삭제에 실패했습니다.');
+      setState('view');
+    }
+  }, [record.id, deleteInBody, handleClose]);
+
+  // 수정 취소
+  const handleCancelEdit = useCallback(() => {
+    setEditData(null);
+    setState('view');
+  }, []);
+
+  // 날짜 포맷
+  const formattedDate = new Date(record.measuredAt).toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={`${formattedDate} 측정 기록`}
+      size="lg"
+      closeOnBackdrop={state === 'view'}
+      headerAction={
+        state === 'view' ? (
+          <button
+            onClick={handleEdit}
+            className="p-1.5 rounded-lg hover:bg-muted/50 transition-colors"
+            aria-label="수정"
+          >
+            <Edit2 className="w-5 h-5 text-muted-foreground" />
+          </button>
+        ) : undefined
+      }
+    >
+      <ModalBody>
+        {/* 삭제 확인 */}
+        {state === 'confirmDelete' && (
+          <div className="flex flex-col items-center justify-center py-8 space-y-4">
+            <AlertTriangle className="w-12 h-12 text-destructive" />
+            <div className="text-center space-y-1">
+              <p className="text-lg font-medium text-card-foreground">
+                정말 삭제하시겠습니까?
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {formattedDate} 측정 기록이 영구적으로 삭제됩니다.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* 삭제 중 */}
+        {state === 'deleting' && (
+          <div className="flex flex-col items-center justify-center py-12 space-y-4">
+            <Loader2 className="w-12 h-12 text-destructive animate-spin" />
+            <p className="text-lg font-medium text-card-foreground">
+              삭제 중...
+            </p>
+          </div>
+        )}
+
+        {/* 저장 중 */}
+        {state === 'saving' && (
+          <div className="flex flex-col items-center justify-center py-12 space-y-4">
+            <Loader2 className="w-12 h-12 text-primary animate-spin" />
+            <p className="text-lg font-medium text-card-foreground">
+              저장 중...
+            </p>
+          </div>
+        )}
+
+        {/* 조회/수정 모드 */}
+        {(state === 'view' || state === 'edit') && (
+          <>
+            <InBodyPreview
+              data={
+                state === 'edit' && editData
+                  ? {
+                      measuredAt: editData.measuredAt || record.measuredAt,
+                      weight: editData.weight || record.weight,
+                      skeletalMuscleMass:
+                        editData.skeletalMuscleMass || record.skeletalMuscleMass,
+                      bodyFatPercentage:
+                        editData.bodyFatPercentage || record.bodyFatPercentage,
+                      bmi: editData.bmi,
+                      inbodyScore: editData.inbodyScore,
+                      totalBodyWater: editData.totalBodyWater,
+                      protein: editData.protein,
+                      minerals: editData.minerals,
+                      bodyFatMass: editData.bodyFatMass,
+                      rightArmMuscle: editData.rightArmMuscle,
+                      leftArmMuscle: editData.leftArmMuscle,
+                      trunkMuscle: editData.trunkMuscle,
+                      rightLegMuscle: editData.rightLegMuscle,
+                      leftLegMuscle: editData.leftLegMuscle,
+                      rightArmFat: editData.rightArmFat,
+                      leftArmFat: editData.leftArmFat,
+                      trunkFat: editData.trunkFat,
+                      rightLegFat: editData.rightLegFat,
+                      leftLegFat: editData.leftLegFat,
+                    }
+                  : {
+                      measuredAt: record.measuredAt,
+                      weight: record.weight,
+                      skeletalMuscleMass: record.skeletalMuscleMass,
+                      bodyFatPercentage: record.bodyFatPercentage,
+                      bmi: record.bmi,
+                      inbodyScore: record.inbodyScore,
+                      totalBodyWater: record.totalBodyWater,
+                      protein: record.protein,
+                      minerals: record.minerals,
+                      bodyFatMass: record.bodyFatMass,
+                      rightArmMuscle: record.rightArmMuscle,
+                      leftArmMuscle: record.leftArmMuscle,
+                      trunkMuscle: record.trunkMuscle,
+                      rightLegMuscle: record.rightLegMuscle,
+                      leftLegMuscle: record.leftLegMuscle,
+                      rightArmFat: record.rightArmFat,
+                      leftArmFat: record.leftArmFat,
+                      trunkFat: record.trunkFat,
+                      rightLegFat: record.rightLegFat,
+                      leftLegFat: record.leftLegFat,
+                    }
+              }
+              onChange={(newData) => setEditData(newData)}
+              readOnly={state === 'view'}
+            />
+
+            {error && (
+              <p className="mt-4 text-sm text-center text-destructive">{error}</p>
+            )}
+          </>
+        )}
+      </ModalBody>
+
+      <ModalFooter>
+        {state === 'view' && (
+          <>
+            <Button
+              variant="outline"
+              onClick={handleConfirmDelete}
+              className="text-destructive hover:bg-destructive/10"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              삭제
+            </Button>
+            <Button variant="outline" onClick={handleClose} className="flex-1">
+              닫기
+            </Button>
+          </>
+        )}
+
+        {state === 'edit' && (
+          <>
+            <Button variant="outline" onClick={handleCancelEdit} className="flex-1">
+              취소
+            </Button>
+            <Button onClick={handleSave} className="flex-1">
+              저장
+            </Button>
+          </>
+        )}
+
+        {state === 'confirmDelete' && (
+          <>
+            <Button
+              variant="outline"
+              onClick={() => setState('view')}
+              className="flex-1"
+            >
+              취소
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleDelete}
+              className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground shadow-destructive/20"
+            >
+              삭제
+            </Button>
+          </>
+        )}
+      </ModalFooter>
+    </Modal>
+  );
+}

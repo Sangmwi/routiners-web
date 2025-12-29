@@ -94,6 +94,27 @@ export const queryKeys = {
     detail: (id: string) =>
       [...queryKeys.influencer.all, 'detail', id] as const,
   },
+
+  /**
+   * InBody 관련 Query Keys
+   */
+  inbody: {
+    /** 모든 inbody 쿼리의 기본 키 */
+    all: ['inbody'] as const,
+
+    /** InBody 기록 목록 */
+    list: (limit?: number, offset?: number) =>
+      [...queryKeys.inbody.all, 'list', limit, offset] as const,
+
+    /** 최신 InBody 기록 */
+    latest: () => [...queryKeys.inbody.all, 'latest'] as const,
+
+    /** InBody 요약 정보 */
+    summary: () => [...queryKeys.inbody.all, 'summary'] as const,
+
+    /** 특정 InBody 기록 상세 */
+    detail: (id: string) => [...queryKeys.inbody.all, 'detail', id] as const,
+  },
 } as const;
 
 /**

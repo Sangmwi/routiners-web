@@ -78,10 +78,9 @@ export default function UserProfilePage() {
 
         {/* Inbody Info */}
         <ProfileInbodySection
-          muscleMass={user.muscleMass}
-          bodyFatPercentage={user.bodyFatPercentage}
-          weight={user.weight}
           showInbodyPublic={user.showInbodyPublic}
+          isOwnProfile={false}
+          userName={user.nickname}
         />
 
         {/* Favorite Locations */}
