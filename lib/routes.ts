@@ -13,7 +13,8 @@ export const ROUTES_WITHOUT_TAB = [
   // 하위 페이지들 (prefix 매칭)
   '/ai/',             // /ai/detail, /ai/chat 등
   '/community/',      // /community/post/123 등
-  '/profile/edit',    // 프로필 편집
+  '/profile/edit',
+  '/profile/inbody',  // 인바디 관리
 ] as const;
 
 // ============================================================================

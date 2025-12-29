@@ -1,115 +1,123 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { withAuth } from '@/utils/supabase/auth';
-import {
-  InBodyExtractedDataSchema,
-  transformExtractedToCreateData,
-} from '@/lib/types/inbody';
+import { InBodyExtractedDataSchema, transformExtractedToCreateData } from '@/lib/types/inbody';
 
 // OpenAI 클라이언트 초기화
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Zod 스키마를 JSON Schema로 변환하는 헬퍼
-function zodToJsonSchema(schema: typeof InBodyExtractedDataSchema) {
-  // 간단한 변환 - 실제로는 zod-to-json-schema 패키지 사용 권장
+// OpenAI Structured Output용 JSON Schema
+// strict: true 모드에서는 모든 properties가 required에 포함되어야 함
+// 선택적 필드는 type: ['number', 'null'] 형태로 nullable 처리
+function getInBodyJsonSchema() {
   return {
     type: 'object',
     properties: {
       measured_at: {
         type: 'string',
-        pattern: '^\\d{4}-\\d{2}-\\d{2}$',
         description: '측정일 (YYYY-MM-DD 형식)',
       },
       weight: {
         type: 'number',
-        minimum: 30,
-        maximum: 200,
         description: '체중 (kg 단위, 숫자만)',
       },
       skeletal_muscle_mass: {
         type: 'number',
-        minimum: 10,
-        maximum: 80,
         description: '골격근량 (kg 단위, 숫자만)',
       },
       body_fat_percentage: {
         type: 'number',
-        minimum: 3,
-        maximum: 60,
         description: '체지방률 (% 단위, 숫자만)',
       },
       bmi: {
-        type: 'number',
-        minimum: 10,
-        maximum: 50,
-        description: 'BMI (체질량지수, 숫자만)',
+        type: ['number', 'null'],
+        description: 'BMI (체질량지수, 숫자만). 없으면 null',
       },
       inbody_score: {
-        type: 'integer',
-        minimum: 0,
-        maximum: 100,
-        description: '인바디 점수 (0-100 정수)',
+        type: ['integer', 'null'],
+        description: '인바디 점수 (0-100 정수). 없으면 null',
       },
       total_body_water: {
-        type: 'number',
-        description: '체수분 (L 단위)',
+        type: ['number', 'null'],
+        description: '체수분 (L 단위). 없으면 null',
       },
       protein: {
-        type: 'number',
-        description: '단백질 (kg 단위)',
+        type: ['number', 'null'],
+        description: '단백질 (kg 단위). 없으면 null',
       },
       minerals: {
-        type: 'number',
-        description: '무기질 (kg 단위)',
+        type: ['number', 'null'],
+        description: '무기질 (kg 단위). 없으면 null',
       },
       body_fat_mass: {
-        type: 'number',
-        description: '체지방량 (kg 단위)',
+        type: ['number', 'null'],
+        description: '체지방량 (kg 단위). 없으면 null',
       },
       right_arm_muscle: {
-        type: 'number',
-        description: '오른팔 근육량 (kg)',
+        type: ['number', 'null'],
+        description: '오른팔 근육량 (kg). 없으면 null',
       },
       left_arm_muscle: {
-        type: 'number',
-        description: '왼팔 근육량 (kg)',
+        type: ['number', 'null'],
+        description: '왼팔 근육량 (kg). 없으면 null',
       },
       trunk_muscle: {
-        type: 'number',
-        description: '몸통 근육량 (kg)',
+        type: ['number', 'null'],
+        description: '몸통 근육량 (kg). 없으면 null',
       },
       right_leg_muscle: {
-        type: 'number',
-        description: '오른다리 근육량 (kg)',
+        type: ['number', 'null'],
+        description: '오른다리 근육량 (kg). 없으면 null',
       },
       left_leg_muscle: {
-        type: 'number',
-        description: '왼다리 근육량 (kg)',
+        type: ['number', 'null'],
+        description: '왼다리 근육량 (kg). 없으면 null',
       },
       right_arm_fat: {
-        type: 'number',
-        description: '오른팔 체지방량 (kg)',
+        type: ['number', 'null'],
+        description: '오른팔 체지방량 (kg). 없으면 null',
       },
       left_arm_fat: {
-        type: 'number',
-        description: '왼팔 체지방량 (kg)',
+        type: ['number', 'null'],
+        description: '왼팔 체지방량 (kg). 없으면 null',
       },
       trunk_fat: {
-        type: 'number',
-        description: '몸통 체지방량 (kg)',
+        type: ['number', 'null'],
+        description: '몸통 체지방량 (kg). 없으면 null',
       },
       right_leg_fat: {
-        type: 'number',
-        description: '오른다리 체지방량 (kg)',
+        type: ['number', 'null'],
+        description: '오른다리 체지방량 (kg). 없으면 null',
       },
       left_leg_fat: {
-        type: 'number',
-        description: '왼다리 체지방량 (kg)',
+        type: ['number', 'null'],
+        description: '왼다리 체지방량 (kg). 없으면 null',
       },
     },
-    required: ['measured_at', 'weight', 'skeletal_muscle_mass', 'body_fat_percentage'],
+    required: [
+      'measured_at',
+      'weight',
+      'skeletal_muscle_mass',
+      'body_fat_percentage',
+      'bmi',
+      'inbody_score',
+      'total_body_water',
+      'protein',
+      'minerals',
+      'body_fat_mass',
+      'right_arm_muscle',
+      'left_arm_muscle',
+      'trunk_muscle',
+      'right_leg_muscle',
+      'left_leg_muscle',
+      'right_arm_fat',
+      'left_arm_fat',
+      'trunk_fat',
+      'right_leg_fat',
+      'left_leg_fat',
+    ],
     additionalProperties: false,
   };
 }
@@ -203,7 +211,7 @@ export const POST = withAuth(async (request: NextRequest) => {
         json_schema: {
           name: 'inbody_data',
           strict: true,
-          schema: zodToJsonSchema(InBodyExtractedDataSchema),
+          schema: getInBodyJsonSchema(),
         },
       },
       max_tokens: 1500,

@@ -81,6 +81,7 @@ export default function UserProfilePage() {
           showInbodyPublic={user.showInbodyPublic}
           isOwnProfile={false}
           userName={user.nickname}
+          userId={userId}
         />
 
         {/* Favorite Locations */}

@@ -78,6 +78,27 @@ export function useInBodySummary(
 }
 
 /**
+ * 특정 사용자의 InBody 요약 정보 조회
+ *
+ * @param userId - 조회할 사용자 ID
+ *
+ * @example
+ * const { data: summary } = useUserInBodySummary('user-123');
+ */
+export function useUserInBodySummary(
+  userId: string | undefined,
+  options?: Omit<UseQueryOptions<InBodySummary>, 'queryKey' | 'queryFn'>
+) {
+  return useQuery({
+    queryKey: queryKeys.inbody.userSummary(userId || ''),
+    queryFn: () => inbodyApi.getUserSummary(userId!),
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
+    ...options,
+  });
+}
+
+/**
  * 특정 InBody 기록 조회
  *
  * @param id - InBody 기록 ID

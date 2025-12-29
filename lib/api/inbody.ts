@@ -83,6 +83,25 @@ export const inbodyApi = {
   },
 
   /**
+   * 특정 사용자의 InBody 요약 정보 조회
+   *
+   * @param userId - 조회할 사용자 ID
+   * @returns 요약 정보 (공개 설정 시에만 데이터 포함)
+   */
+  async getUserSummary(userId: string): Promise<InBodySummary> {
+    const response = await authFetch(`/api/inbody/user/${userId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!response.ok) {
+      throw await ApiError.fromResponse(response);
+    }
+
+    return response.json();
+  },
+
+  /**
    * 특정 InBody 기록 조회
    *
    * @param id - InBody 기록 ID

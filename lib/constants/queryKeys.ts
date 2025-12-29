@@ -114,6 +114,10 @@ export const queryKeys = {
 
     /** 특정 InBody 기록 상세 */
     detail: (id: string) => [...queryKeys.inbody.all, 'detail', id] as const,
+
+    /** 특정 사용자의 InBody 요약 정보 */
+    userSummary: (userId: string) =>
+      [...queryKeys.inbody.all, 'user', userId, 'summary'] as const,
   },
 } as const;
 

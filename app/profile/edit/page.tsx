@@ -9,7 +9,6 @@ import ProfilePhotoGallery from '@/components/profile/edit/ProfilePhotoGallery';
 import ProfileNicknameInput from '@/components/profile/edit/ProfileNicknameInput';
 import ProfileBioInput from '@/components/profile/edit/ProfileBioInput';
 import ProfileHeightWeightInput from '@/components/profile/edit/ProfileHeightWeightInput';
-import ProfileInbodyInput from '@/components/profile/edit/ProfileInbodyInput';
 import ProfileSmokingInput from '@/components/profile/edit/ProfileSmokingInput';
 import ProfileLocationsInput from '@/components/profile/edit/ProfileLocationsInput';
 import ProfileInterestsInput from '@/components/profile/edit/ProfileInterestsInput';
@@ -144,11 +143,6 @@ export default function ProfileEditPage() {
           weight={formData.weight}
           onHeightChange={(value) => updateFormField('height', value)}
           onWeightChange={(value) => updateFormField('weight', value)}
-        />
-
-        <ProfileInbodyInput
-          showInbodyPublic={formData.showInbodyPublic}
-          onShowInbodyPublicChange={(value) => updateFormField('showInbodyPublic', value)}
         />
 
         <ProfileSmokingInput

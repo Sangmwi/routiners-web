@@ -1,12 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Activity, Scale, Percent, ChevronRight, TrendingUp, TrendingDown, Lock } from 'lucide-react';
-import { useInBodySummary } from '@/hooks/inbody';
-import {
-  InBodyListModal,
-  InBodyDetailModal,
-} from '@/components/inbody';
+import { useInBodySummary, useUserInBodySummary } from '@/hooks/inbody';
+import { InBodyDetailModal } from '@/components/inbody';
 import { InBodyRecord } from '@/lib/types';
 
 interface ProfileInbodySectionProps {
@@ -15,22 +13,35 @@ interface ProfileInbodySectionProps {
   isOwnProfile?: boolean;
   /** 프로필 소유자 이름 (타인 프로필에서 사용) */
   userName?: string;
+  /** 프로필 소유자 ID (타인 프로필에서 사용) */
+  userId?: string;
 }
 
 export default function ProfileInbodySection({
   showInbodyPublic = true,
   isOwnProfile = false,
   userName,
+  userId,
 }: ProfileInbodySectionProps) {
-  // 비공개 상태이고 내 프로필이 아니면 데이터 fetch 안함
-  const canViewData = showInbodyPublic || isOwnProfile;
+  const router = useRouter();
 
-  const { data: summary, isLoading } = useInBodySummary({
-    enabled: canViewData,
+  // 내 프로필: useInBodySummary, 타인 프로필: useUserInBodySummary
+  const ownSummaryQuery = useInBodySummary({
+    enabled: isOwnProfile,
   });
 
-  // 모달 상태
-  const [isListModalOpen, setIsListModalOpen] = useState(false);
+  const otherSummaryQuery = useUserInBodySummary(userId, {
+    enabled: !isOwnProfile && !!userId,
+  });
+
+  // 사용할 데이터 선택
+  const { data: summary, isLoading } = isOwnProfile ? ownSummaryQuery : otherSummaryQuery;
+
+  // 비공개 여부 (API 응답에서 확인)
+  const isPrivate = summary?.isPrivate ?? !showInbodyPublic;
+  const canViewData = !isPrivate || isOwnProfile;
+
+  // 모달 상태 (타인 프로필에서만 사용 - 상세보기만)
   const [selectedRecord, setSelectedRecord] = useState<InBodyRecord | null>(null);
 
   const latest = summary?.latest;
@@ -54,10 +65,6 @@ export default function ProfileInbodySection({
     );
   };
 
-  const handleRecordSelect = (record: InBodyRecord) => {
-    setIsListModalOpen(false);
-    setSelectedRecord(record);
-  };
 
   // 비공개 상태 렌더링
   const renderPrivateState = () => {
@@ -74,7 +81,7 @@ export default function ProfileInbodySection({
         </p>
         {isOwnProfile && (
           <p className="text-xs text-muted-foreground/70 mt-1">
-            프로필 편집에서 공개 설정을 변경할 수 있어요
+            탭하여 공개 설정을 변경할 수 있어요
           </p>
         )}
       </div>
@@ -93,7 +100,7 @@ export default function ProfileInbodySection({
       </p>
       {isOwnProfile && (
         <p className="text-xs text-muted-foreground/70 mt-1">
-          프로필 편집에서 인바디를 추가해보세요
+          탭하여 인바디 기록을 추가해보세요
         </p>
       )}
     </div>
@@ -176,7 +183,19 @@ export default function ProfileInbodySection({
   );
 
   // 카드 클릭 가능 여부
-  const isClickable = canViewData && totalRecords > 0;
+  const isClickable = canViewData && (isOwnProfile || totalRecords > 0);
+
+  // 클릭 핸들러 - 내 프로필이면 페이지 이동, 타인이면 상세 모달
+  const handleCardClick = () => {
+    if (!isClickable) return;
+
+    if (isOwnProfile) {
+      router.push('/profile/inbody');
+    } else if (latest) {
+      // 타인 프로필: 최신 기록 상세보기
+      setSelectedRecord(latest);
+    }
+  };
 
   return (
     <>
@@ -187,7 +206,7 @@ export default function ProfileInbodySection({
           className={`rounded-[20px] bg-card p-4 shadow-sm border border-border/50 transition-colors ${
             isClickable ? 'cursor-pointer hover:bg-card/80' : ''
           }`}
-          onClick={() => isClickable && setIsListModalOpen(true)}
+          onClick={handleCardClick}
         >
           {isLoading ? (
             <div className="flex items-center justify-center py-4">
@@ -203,13 +222,7 @@ export default function ProfileInbodySection({
         </div>
       </div>
 
-      {/* Modals */}
-      <InBodyListModal
-        isOpen={isListModalOpen}
-        onClose={() => setIsListModalOpen(false)}
-        onSelect={handleRecordSelect}
-      />
-
+      {/* Detail Modal - 타인 프로필에서 최신 기록 상세보기 */}
       {selectedRecord && (
         <InBodyDetailModal
           isOpen={!!selectedRecord}

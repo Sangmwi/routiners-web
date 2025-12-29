@@ -344,6 +344,8 @@ export interface InBodySummary {
     bodyFatPercentage: number;
     periodDays: number;
   };
+  /** 비공개 상태 여부 (타인 프로필 조회 시) */
+  isPrivate?: boolean;
 }
 
 /**

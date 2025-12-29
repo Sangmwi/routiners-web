@@ -9,9 +9,13 @@ export {
   useInBodyRecords,
   useLatestInBody,
   useInBodySummary,
+  useUserInBodySummary,
   useInBodyRecord,
   // Mutation Hooks
   useCreateInBody,
   useUpdateInBody,
   useDeleteInBody,
 } from './useInBody';
+
+// Page-level State Management
+export { useInBodyManager } from './useInBodyManager';
