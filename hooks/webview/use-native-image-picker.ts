@@ -73,7 +73,6 @@ export const useNativeImagePicker = () => {
     (source: ImagePickerSource): Promise<ImagePickerResult> => {
       return new Promise((resolve, reject) => {
         const requestId = `img_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-        console.log('[useNativeImagePicker] pickImageNative called, requestId:', requestId, 'source:', source);
 
         pendingRequestRef.current = { requestId, resolve, reject };
         setIsPickerOpen(true);
@@ -83,10 +82,8 @@ export const useNativeImagePicker = () => {
           requestId,
           source,
         });
-        console.log('[useNativeImagePicker] Message sent:', sent);
 
         if (!sent) {
-          console.log('[useNativeImagePicker] Failed to send message');
           setIsPickerOpen(false);
           pendingRequestRef.current = null;
           reject(new Error('Failed to send message to native app'));
@@ -177,12 +174,9 @@ export const useNativeImagePicker = () => {
    */
   const pickImage = useCallback(
     async (source: ImagePickerSource = 'both'): Promise<ImagePickerResult> => {
-      console.log('[useNativeImagePicker] pickImage called, isInWebView:', isInWebView);
       if (isInWebView) {
-        console.log('[useNativeImagePicker] Using native picker');
         return pickImageNative(source);
       }
-      console.log('[useNativeImagePicker] Using web picker');
       return pickImageWeb(source);
     },
     [isInWebView, pickImageNative, pickImageWeb]

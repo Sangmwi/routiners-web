@@ -242,12 +242,8 @@ export default function ProfilePhotoGallery({
   // ========== Handlers ==========
 
   const handleAddClick = useCallback(async (index: number) => {
-    console.log('[ProfilePhotoGallery] handleAddClick called, index:', index);
     setProcessingIndex(index);
-
-    console.log('[ProfilePhotoGallery] Calling pickImage...');
     const result = await pickImage('both');
-    console.log('[ProfilePhotoGallery] pickImage result:', result);
 
     if (result.cancelled) {
       setProcessingIndex(null);
