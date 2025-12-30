@@ -14,8 +14,9 @@ import { z } from 'zod';
 /**
  * AI Vision API 응답 검증용 Zod 스키마
  *
- * OpenAI Structured Output에서 사용
- * 모든 필드에 describe() 추가하여 AI가 정확히 추출하도록 유도
+ * OpenAI Structured Output에서 사용 (strict: true)
+ * - AI는 모든 필드를 반환하되, 값이 없으면 null 반환
+ * - 따라서 선택 필드는 .nullable() 사용
  */
 export const InBodyExtractedDataSchema = z.object({
   measured_at: z
@@ -43,76 +44,76 @@ export const InBodyExtractedDataSchema = z.object({
     .number()
     .min(10)
     .max(50)
-    .optional()
+    .nullable()
     .describe('BMI (체질량지수, 숫자만)'),
   inbody_score: z
     .number()
     .int()
     .min(0)
     .max(100)
-    .optional()
+    .nullable()
     .describe('인바디 점수 (0-100 정수)'),
 
   // 체성분 상세 (선택)
   total_body_water: z
     .number()
-    .optional()
+    .nullable()
     .describe('체수분 (L 단위)'),
   protein: z
     .number()
-    .optional()
+    .nullable()
     .describe('단백질 (kg 단위)'),
   minerals: z
     .number()
-    .optional()
+    .nullable()
     .describe('무기질 (kg 단위)'),
   body_fat_mass: z
     .number()
-    .optional()
+    .nullable()
     .describe('체지방량 (kg 단위)'),
 
   // 부위별 근육량 (선택)
   right_arm_muscle: z
     .number()
-    .optional()
+    .nullable()
     .describe('오른팔 근육량 (kg)'),
   left_arm_muscle: z
     .number()
-    .optional()
+    .nullable()
     .describe('왼팔 근육량 (kg)'),
   trunk_muscle: z
     .number()
-    .optional()
+    .nullable()
     .describe('몸통 근육량 (kg)'),
   right_leg_muscle: z
     .number()
-    .optional()
+    .nullable()
     .describe('오른다리 근육량 (kg)'),
   left_leg_muscle: z
     .number()
-    .optional()
+    .nullable()
     .describe('왼다리 근육량 (kg)'),
 
   // 부위별 체지방량 (선택)
   right_arm_fat: z
     .number()
-    .optional()
+    .nullable()
     .describe('오른팔 체지방량 (kg)'),
   left_arm_fat: z
     .number()
-    .optional()
+    .nullable()
     .describe('왼팔 체지방량 (kg)'),
   trunk_fat: z
     .number()
-    .optional()
+    .nullable()
     .describe('몸통 체지방량 (kg)'),
   right_leg_fat: z
     .number()
-    .optional()
+    .nullable()
     .describe('오른다리 체지방량 (kg)'),
   left_leg_fat: z
     .number()
-    .optional()
+    .nullable()
     .describe('왼다리 체지방량 (kg)'),
 });
 

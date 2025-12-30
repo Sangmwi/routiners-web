@@ -23,13 +23,13 @@
   --secondary: #dbf5e2; /* green-100 */
   --secondary-foreground: #17451c; /* green-900 */
   
-  --muted: #e8f4eb;
-  --muted-foreground: #328a4d; /* green-600 */
+  --muted: #e2e8f0; /* slate-200 - 중립 회색 */
+  --muted-foreground: #64748b; /* slate-500 - 중립 회색 텍스트 */
 
   --card: #ffffff;
   --card-foreground: #0a2610;
-  
-  --border: #b9eac8; /* green-200 */
+
+  --border: #cbd5e1; /* slate-300 - 중립 회색 */
   --input: #dbf5e2;
 }
 
@@ -82,8 +82,8 @@
     --card: #1e293b; /* slate-800 */
     --card-foreground: #f1f5f9; /* slate-100 - 밝은 텍스트 */
 
-    /* Muted: 카드보다 약간 어두운 톤 (계층 구분) */
-    --muted: #0f172a; /* slate-900 - 배경과 동일 (카드보다 어두움) */
+    /* Muted: 배경과 카드 사이의 중간 톤 */
+    --muted: #1e293b; /* slate-800 - 카드와 동일 (배경보다 밝음) */
     --muted-foreground: #94a3b8; /* slate-400 - 중간 밝기 */
 
     /* Border: 미묘한 구분선 */

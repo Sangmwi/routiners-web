@@ -30,7 +30,7 @@ export function Skeleton({
   style,
   ...props
 }: SkeletonProps) {
-  const baseStyles = 'bg-card/50';
+  const baseStyles = 'bg-muted';
   const animationStyles = noAnimation ? '' : 'animate-pulse';
   const shapeStyles = circle ? 'rounded-full' : 'rounded-lg';
 
