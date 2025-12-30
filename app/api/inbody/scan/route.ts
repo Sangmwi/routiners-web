@@ -15,21 +15,31 @@ function getInBodyJsonSchema() {
   return {
     type: 'object',
     properties: {
+      // 이미지 유효성 검사 필드
+      is_valid_inbody: {
+        type: 'boolean',
+        description: '이 이미지가 InBody 측정 결과지인지 여부. InBody 결과지가 아니면 false',
+      },
+      rejection_reason: {
+        type: ['string', 'null'],
+        description: 'is_valid_inbody가 false인 경우 거부 사유. 예: "음식 사진입니다", "체중계 사진입니다", "문서를 인식할 수 없습니다"',
+      },
+      // 측정 데이터 필드
       measured_at: {
-        type: 'string',
-        description: '측정일 (YYYY-MM-DD 형식)',
+        type: ['string', 'null'],
+        description: '측정일 (YYYY-MM-DD 형식). is_valid_inbody가 false면 null',
       },
       weight: {
-        type: 'number',
-        description: '체중 (kg 단위, 숫자만)',
+        type: ['number', 'null'],
+        description: '체중 (kg 단위, 숫자만). is_valid_inbody가 false면 null',
       },
       skeletal_muscle_mass: {
-        type: 'number',
-        description: '골격근량 (kg 단위, 숫자만)',
+        type: ['number', 'null'],
+        description: '골격근량 (kg 단위, 숫자만). is_valid_inbody가 false면 null',
       },
       body_fat_percentage: {
-        type: 'number',
-        description: '체지방률 (% 단위, 숫자만)',
+        type: ['number', 'null'],
+        description: '체지방률 (% 단위, 숫자만). is_valid_inbody가 false면 null',
       },
       bmi: {
         type: ['number', 'null'],
@@ -97,6 +107,8 @@ function getInBodyJsonSchema() {
       },
     },
     required: [
+      'is_valid_inbody',
+      'rejection_reason',
       'measured_at',
       'weight',
       'skeletal_muscle_mass',
@@ -155,9 +167,9 @@ export const POST = withAuth(async (request: NextRequest) => {
     }
 
     // 이미지 → base64 변환
-    const bytes = await image.arrayBuffer();
-    const base64 = Buffer.from(bytes).toString('base64');
-    const mimeType = image.type;
+    const bytes = await image.arrayBuffer(); //형태: Uint8Array ex: [104, 101, 108, 108, 111]
+    const base64 = Buffer.from(bytes).toString('base64'); //형태: aGVsbG8=
+    const mimeType = image.type; //형태: image/jpeg
 
     // OpenAI Vision API 호출
     const response = await openai.chat.completions.create({
@@ -166,7 +178,22 @@ export const POST = withAuth(async (request: NextRequest) => {
         {
           role: 'system',
           content: `당신은 InBody 측정 결과지에서 데이터를 추출하는 전문가입니다.
-이미지에서 다음 정보를 정확히 추출하세요:
+
+## 1단계: 이미지 유효성 검사
+먼저 이미지가 InBody 측정 결과지인지 판단하세요.
+
+InBody 결과지의 특징:
+- "InBody", "체성분분석", "Body Composition" 등의 텍스트가 있음
+- 체중, 골격근량, 체지방률 등의 측정값이 표 형태로 정리됨
+- 부위별 근육량/체지방량 분석이 포함될 수 있음
+
+InBody 결과지가 아닌 경우:
+- is_valid_inbody: false
+- rejection_reason: 거부 사유를 간단히 한국어로 작성 (예: "음식 사진입니다", "체중계 사진입니다", "문서를 인식할 수 없습니다", "InBody 결과지가 아닙니다")
+- 나머지 필드는 모두 null
+
+## 2단계: 데이터 추출 (유효한 InBody 결과지인 경우)
+is_valid_inbody: true로 설정하고, rejection_reason: null로 설정한 후 아래 정보를 추출하세요.
 
 필수 항목:
 - measured_at: 측정일 (YYYY-MM-DD 형식으로 변환)
@@ -174,20 +201,20 @@ export const POST = withAuth(async (request: NextRequest) => {
 - skeletal_muscle_mass: 골격근량 (kg)
 - body_fat_percentage: 체지방률 (%)
 
-선택 항목 (있는 경우에만):
-- bmi: BMI
-- inbody_score: 인바디 점수
-- total_body_water: 체수분 (L)
-- protein: 단백질 (kg)
-- minerals: 무기질 (kg)
-- body_fat_mass: 체지방량 (kg)
-- 부위별 근육량: right_arm_muscle, left_arm_muscle, trunk_muscle, right_leg_muscle, left_leg_muscle
-- 부위별 체지방량: right_arm_fat, left_arm_fat, trunk_fat, right_leg_fat, left_leg_fat
+선택 항목 (있는 경우에만, 없으면 null):
+- bmi: BMI (체질량지수)
+- inbody_score: 인바디 점수 (0-100 정수)
+- total_body_water: 체수분 (L 단위)
+- protein: 단백질 (kg 단위)
+- minerals: 무기질 (kg 단위)
+- body_fat_mass: 체지방량 (kg 단위)
+- 부위별 근육량 (kg): right_arm_muscle(오른팔), left_arm_muscle(왼팔), trunk_muscle(몸통), right_leg_muscle(오른다리), left_leg_muscle(왼다리)
+- 부위별 체지방량 (kg): right_arm_fat(오른팔), left_arm_fat(왼팔), trunk_fat(몸통), right_leg_fat(오른다리), left_leg_fat(왼다리)
 
 주의사항:
 - 숫자만 추출하고, 단위(kg, %, L 등)는 제외하세요.
-- 측정일이 없으면 오늘 날짜를 사용하세요.
-- 읽을 수 없거나 불분명한 값은 생략하세요.`,
+- 측정일이 없으면 오늘 날짜(${new Date().toISOString().split('T')[0]})를 사용하세요.
+- 읽을 수 없거나 불분명한 값은 null로 설정하세요.`,
         },
         {
           role: 'user',
@@ -236,8 +263,22 @@ export const POST = withAuth(async (request: NextRequest) => {
       );
     }
 
+    // 1단계: InBody 결과지 유효성 검사
+    if (parsedData.is_valid_inbody === false) {
+      return NextResponse.json(
+        {
+          error: parsedData.rejection_reason || '인바디 결과지를 인식할 수 없습니다.',
+          code: 'INVALID_IMAGE',
+        },
+        { status: 422 }
+      );
+    }
+
+    // is_valid_inbody와 rejection_reason 필드 제거 후 Zod 검증
+    const { is_valid_inbody, rejection_reason, ...extractedData } = parsedData;
+
     // Zod 검증
-    const validationResult = InBodyExtractedDataSchema.safeParse(parsedData);
+    const validationResult = InBodyExtractedDataSchema.safeParse(extractedData);
     if (!validationResult.success) {
       return NextResponse.json(
         {
