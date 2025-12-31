@@ -1,6 +1,7 @@
 'use client';
 
 import { X } from 'lucide-react';
+import SectionHeader from '@/components/ui/SectionHeader';
 
 interface ProfileInterestsInputProps {
   value: string[];
@@ -41,10 +42,10 @@ export default function ProfileInterestsInput({ value, onChange }: ProfileIntere
 
   return (
     <section className="space-y-3">
-      <h2 className="text-xl font-bold text-card-foreground">관심 운동 종목</h2>
-      <p className="text-xs text-muted-foreground">
-        관심있는 운동 종목을 선택하세요! 같은 운동에 관심있는 사람과 매칭됩니다.
-      </p>
+      <SectionHeader
+        title="관심 운동 종목"
+        description="관심있는 운동 종목을 선택하세요!"
+      />
 
       {/* Selected Interests */}
       {value.length > 0 && (

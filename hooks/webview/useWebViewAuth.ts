@@ -9,7 +9,7 @@
  * - 로그아웃 알림
  */
 
-import { useWebViewCore, LOG_PREFIX } from "./use-webview-core";
+import { useWebViewCore, LOG_PREFIX } from "./useWebViewCore";
 
 // ============================================================================
 // Hook

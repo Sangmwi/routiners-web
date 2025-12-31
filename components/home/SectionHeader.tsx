@@ -14,7 +14,7 @@ export default function SectionHeader({ title, showMoreButton = false, onMoreCli
       <h2 className="text-lg font-semibold text-green-800">{title}</h2>
       {showMoreButton && (
         <ViewMoreButton onClick={onMoreClick} className="text-sm">
-          더보기
+          더 보기
         </ViewMoreButton>
       )}
     </div>

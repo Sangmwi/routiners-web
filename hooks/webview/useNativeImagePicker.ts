@@ -19,8 +19,8 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { ImagePickerSource, ImagePickerResult, AppToWebMessage } from '@/lib/webview';
-import { useWebViewCore } from './use-webview-core';
-import { registerCommandHandler } from './use-webview-commands';
+import { useWebViewCore } from './useWebViewCore';
+import { registerCommandHandler } from './useWebViewCommands';
 
 // IMAGE_PICKER_RESULT 타입 추출
 type ImagePickerResultMessage = Extract<AppToWebMessage, { type: 'IMAGE_PICKER_RESULT' }>;

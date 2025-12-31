@@ -15,9 +15,9 @@
 import { useEffect, useCallback, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import type { AppToWebMessage } from "@/lib/webview";
-import { useWebViewAuth } from "./use-webview-auth";
-import { useWebViewNavigation } from "./use-webview-navigation";
-import { LOG_PREFIX } from "./use-webview-core";
+import { useWebViewAuth } from "./useWebViewAuth";
+import { useWebViewNavigation } from "./useWebViewNavigation";
+import { LOG_PREFIX } from "./useWebViewCore";
 
 // ============================================================================
 // Types

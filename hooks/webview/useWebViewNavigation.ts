@@ -11,7 +11,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { isTabRoute } from "@/lib/routes";
-import { useWebViewCore } from "./use-webview-core";
+import { useWebViewCore } from "./useWebViewCore";
 
 // ============================================================================
 // Hook

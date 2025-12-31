@@ -19,11 +19,11 @@
  * 3. SESSION_SET 응답으로 완료 알림
  */
 
-import { useWebViewCore } from "./use-webview-core";
-import { useWebViewAuth } from "./use-webview-auth";
-import { useWebViewNavigation } from "./use-webview-navigation";
-import { useWebViewLifecycle } from "./use-webview-lifecycle";
-import { useWebViewCommands } from "./use-webview-commands";
+import { useWebViewCore } from "./useWebViewCore";
+import { useWebViewAuth } from "./useWebViewAuth";
+import { useWebViewNavigation } from "./useWebViewNavigation";
+import { useWebViewLifecycle } from "./useWebViewLifecycle";
+import { useWebViewCommands } from "./useWebViewCommands";
 
 // Re-export types for convenience
 export type { AppToWebMessage, WebToAppMessage } from "@/lib/webview";

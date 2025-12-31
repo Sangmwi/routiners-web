@@ -9,7 +9,7 @@
  */
 
 import { useEffect } from "react";
-import { useWebViewCore } from "./use-webview-core";
+import { useWebViewCore } from "./useWebViewCore";
 
 // ============================================================================
 // Module State (앱 전체에서 한 번만 WEB_READY 전송)

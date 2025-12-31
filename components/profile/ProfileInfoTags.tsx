@@ -2,6 +2,8 @@
 
 import { User } from '@/lib/types';
 import { Ruler, Weight, Baby, Calendar, Cigarette } from 'lucide-react';
+import SectionHeader from '@/components/ui/SectionHeader';
+import Tag from '@/components/ui/Tag';
 
 interface ProfileInfoTagsProps {
   user: User;
@@ -22,51 +24,35 @@ export default function ProfileInfoTags({ user }: ProfileInfoTagsProps) {
 
   const getSmokeStatus = (isSmoker?: boolean) => {
     if (isSmoker === undefined) return '미입력';
-    return isSmoker ? '흡연' : '전자담배';
+    return isSmoker ? '흡연' : '비흡연';
   };
 
   return (
     <div className="space-y-3">
-      <h2 className="text-xl font-bold text-card-foreground">내 정보</h2>
+      <SectionHeader title="내 정보" />
 
       <div className="flex flex-wrap gap-2">
-        {/* Height */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[14px] bg-card text-xs text-card-foreground border border-border/50">
-          <Ruler className="w-4 h-4 text-muted-foreground" />
-          <span className={!user.height ? 'text-muted-foreground' : ''}>
-            {user.height ? `${user.height}cm` : '미입력'}
-          </span>
-        </div>
+        <Tag icon={Ruler} inactive={!user.height}>
+          {user.height ? `${user.height}cm` : '미입력'}
+        </Tag>
 
-        {/* Smoking Status */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[14px] bg-card text-xs text-card-foreground border border-border/50">
-          <Cigarette className="w-4 h-4 text-muted-foreground" />
-          <span className={user.isSmoker === undefined ? 'text-muted-foreground' : ''}>
-            {getSmokeStatus(user.isSmoker)}
-          </span>
-        </div>
+        <Tag icon={Cigarette} inactive={user.isSmoker === undefined}>
+          {getSmokeStatus(user.isSmoker)}
+        </Tag>
 
-        {/* Discharge Date */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[14px] bg-card text-xs text-muted-foreground border border-border/50">
-          <Calendar className="w-4 h-4" />
-          <span>{getDischargeDate(user.enlistmentMonth)}</span>
-        </div>
+        <Tag icon={Calendar} inactive>
+          {getDischargeDate(user.enlistmentMonth)}
+        </Tag>
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {/* Weight */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[14px] bg-card text-xs text-card-foreground border border-border/50">
-          <Weight className="w-4 h-4 text-muted-foreground" />
-          <span className={!user.weight ? 'text-muted-foreground' : ''}>
-            {user.weight ? `${user.weight}kg` : '미입력'}
-          </span>
-        </div>
+        <Tag icon={Weight} inactive={!user.weight}>
+          {user.weight ? `${user.weight}kg` : '미입력'}
+        </Tag>
 
-        {/* Gender */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[14px] bg-card text-xs text-card-foreground border border-border/50">
-          <Baby className="w-4 h-4 text-muted-foreground" />
-          <span>{user.gender === 'male' ? '남성' : '여성'}</span>
-        </div>
+        <Tag icon={Baby}>
+          {user.gender === 'male' ? '남성' : '여성'}
+        </Tag>
       </div>
     </div>
   );

@@ -11,8 +11,8 @@
 
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { useWebViewCore } from "./use-webview-core";
-import { useWebViewAuth } from "./use-webview-auth";
+import { useWebViewCore } from "./useWebViewCore";
+import { useWebViewAuth } from "./useWebViewAuth";
 
 // ============================================================================
 // Types

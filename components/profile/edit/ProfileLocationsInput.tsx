@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { X, Plus } from 'lucide-react';
+import SectionHeader from '@/components/ui/SectionHeader';
+import Tag from '@/components/ui/Tag';
 
 interface ProfileLocationsInputProps {
   value: string[];
@@ -32,10 +34,10 @@ export default function ProfileLocationsInput({ value, onChange }: ProfileLocati
 
   return (
     <section className="space-y-3">
-      <h2 className="text-xl font-bold text-card-foreground">자주 가는 운동 장소</h2>
-      <p className="text-xs text-muted-foreground">
-        평소에 자주 가는 헬스장, 조깅 코스 등을 태그로 추가해주세요! 같은 장소에서 운동하는 사람을 찾을 수 있어요!
-      </p>
+      <SectionHeader
+        title="자주 가는 운동 장소"
+        description="헬스장, 조깅 코스 등을 추가해주세요!"
+      />
 
       {/* Input Field */}
       <div className="flex gap-2">
@@ -61,19 +63,16 @@ export default function ProfileLocationsInput({ value, onChange }: ProfileLocati
       {value.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {value.map((location, index) => (
-            <div
-              key={index}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[14px] bg-card text-xs text-card-foreground border border-border/50"
-            >
+            <Tag key={index} className="pr-2">
               <span>{location}</span>
               <button
                 type="button"
                 onClick={() => handleRemoveLocation(index)}
-                className="hover:text-destructive transition-colors"
+                className="ml-1.5 hover:text-destructive transition-colors"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
-            </div>
+            </Tag>
           ))}
         </div>
       )}

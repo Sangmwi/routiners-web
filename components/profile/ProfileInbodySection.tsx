@@ -6,6 +6,8 @@ import { Activity, Scale, Percent, ChevronRight, TrendingUp, TrendingDown, Lock 
 import { useInBodySummary, useUserInBodySummary } from '@/hooks/inbody';
 import { InBodyDetailModal } from '@/components/inbody';
 import { InBodyRecord } from '@/lib/types';
+import SectionHeader from '@/components/ui/SectionHeader';
+import EmptyState from '@/components/common/EmptyState';
 
 interface ProfileInbodySectionProps {
   showInbodyPublic?: boolean;
@@ -71,39 +73,30 @@ export default function ProfileInbodySection({
     const displayName = userName || '사용자';
 
     return (
-      <div className="flex flex-col items-center justify-center py-6 text-center">
-        <Lock className="w-8 h-8 text-muted-foreground mb-3" />
-        <p className="text-sm text-muted-foreground">
-          {isOwnProfile
+      <EmptyState
+        icon={Lock}
+        message={
+          isOwnProfile
             ? '인바디 정보가 비공개 상태입니다'
             : `아직 ${displayName}님이 인바디 정보를 공유하지 않았어요`
-          }
-        </p>
-        {isOwnProfile && (
-          <p className="text-xs text-muted-foreground/70 mt-1">
-            탭하여 공개 설정을 변경할 수 있어요
-          </p>
-        )}
-      </div>
+        }
+        hint={isOwnProfile ? '탭하여 공개 설정을 변경할 수 있어요' : undefined}
+        variant="private"
+      />
     );
   };
 
   // 데이터 없음 상태 렌더링
   const renderEmptyState = () => (
-    <div className="flex flex-col items-center justify-center py-6 text-center">
-      <Scale className="w-8 h-8 text-muted-foreground mb-3" />
-      <p className="text-sm text-muted-foreground">
-        {isOwnProfile
+    <EmptyState
+      icon={Scale}
+      message={
+        isOwnProfile
           ? '아직 등록된 인바디 기록이 없어요'
           : '등록된 인바디 기록이 없습니다'
-        }
-      </p>
-      {isOwnProfile && (
-        <p className="text-xs text-muted-foreground/70 mt-1">
-          탭하여 인바디 기록을 추가해보세요
-        </p>
-      )}
-    </div>
+      }
+      hint={isOwnProfile ? '탭하여 인바디 기록을 추가해보세요' : undefined}
+    />
   );
 
   // 데이터 표시 렌더링
@@ -200,7 +193,7 @@ export default function ProfileInbodySection({
   return (
     <>
       <div className="space-y-3">
-        <h2 className="text-xl font-bold text-card-foreground">인바디 정보</h2>
+        <SectionHeader title="인바디 정보" />
 
         <div
           className={`rounded-[20px] bg-card p-4 shadow-sm border border-border/50 transition-colors ${
