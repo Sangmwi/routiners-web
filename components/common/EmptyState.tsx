@@ -107,8 +107,11 @@ export default function EmptyState({
   const renderIcon = () => {
     if (!icon) return null;
 
-    // LucideIcon 타입인지 확인 (함수이고 displayName이 있는 경우)
-    const isLucideIcon = typeof icon === 'function';
+    // LucideIcon은 forwardRef를 사용하므로 $$typeof와 render 속성을 가진 객체
+    // typeof === 'function' 또는 $$typeof 속성 존재 여부로 체크
+    const isLucideIcon =
+      typeof icon === 'function' ||
+      (typeof icon === 'object' && icon !== null && '$$typeof' in icon);
 
     if (showIconBackground) {
       // 배경 있는 스타일 (기존 common/EmptyState 스타일)

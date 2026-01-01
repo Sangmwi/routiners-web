@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Activity, Scale, Percent, ChevronRight, TrendingUp, TrendingDown, Lock } from 'lucide-react';
+import { Activity, Scale, Percent, TrendingUp, TrendingDown, Lock } from 'lucide-react';
 import { useInBodySummary, useUserInBodySummary } from '@/hooks/inbody';
 import { InBodyDetailModal } from '@/components/inbody';
 import { InBodyRecord } from '@/lib/types';
@@ -25,7 +24,6 @@ export default function ProfileInbodySection({
   userName,
   userId,
 }: ProfileInbodySectionProps) {
-  const router = useRouter();
 
   // 내 프로필: useInBodySummary, 타인 프로필: useUserInBodySummary
   const ownSummaryQuery = useInBodySummary({
@@ -80,7 +78,7 @@ export default function ProfileInbodySection({
             ? '인바디 정보가 비공개 상태입니다'
             : `아직 ${displayName}님이 인바디 정보를 공유하지 않았어요`
         }
-        hint={isOwnProfile ? '탭하여 공개 설정을 변경할 수 있어요' : undefined}
+        hint={isOwnProfile ? '상단의 관리 버튼에서 공개 설정을 변경할 수 있어요' : undefined}
         variant="private"
       />
     );
@@ -95,7 +93,7 @@ export default function ProfileInbodySection({
           ? '아직 등록된 인바디 기록이 없어요'
           : '등록된 인바디 기록이 없습니다'
       }
-      hint={isOwnProfile ? '탭하여 인바디 기록을 추가해보세요' : undefined}
+      hint={isOwnProfile ? '상단의 관리 버튼에서 인바디 기록을 추가해보세요' : undefined}
     />
   );
 
@@ -165,41 +163,38 @@ export default function ProfileInbodySection({
         </p>
       )}
 
-      {/* 기록 보기 버튼 */}
+      {/* 기록 개수 표시 */}
       {totalRecords > 0 && (
-        <div className="flex items-center justify-center gap-1 mt-3 text-xs text-muted-foreground">
-          <span>총 {totalRecords}개의 기록</span>
-          <ChevronRight className="w-3 h-3" />
-        </div>
+        <p className="text-center text-xs text-muted-foreground mt-2">
+          총 {totalRecords}개의 기록
+        </p>
       )}
     </>
   );
 
-  // 카드 클릭 가능 여부
-  const isClickable = canViewData && (isOwnProfile || totalRecords > 0);
-
-  // 클릭 핸들러 - 내 프로필이면 페이지 이동, 타인이면 상세 모달
+  // 타인 프로필에서 카드 클릭 시 상세보기
   const handleCardClick = () => {
-    if (!isClickable) return;
-
-    if (isOwnProfile) {
-      router.push('/profile/inbody');
-    } else if (latest) {
-      // 타인 프로필: 최신 기록 상세보기
+    if (!isOwnProfile && canViewData && latest) {
       setSelectedRecord(latest);
     }
   };
 
+  // 타인 프로필에서만 클릭 가능
+  const isClickable = !isOwnProfile && canViewData && !!latest;
+
   return (
     <>
       <div className="space-y-3">
-        <SectionHeader title="인바디 정보" />
+        <SectionHeader
+          title="인바디 정보"
+          action={isOwnProfile ? { label: '관리', href: '/profile/inbody' } : undefined}
+        />
 
         <div
           className={`rounded-[20px] bg-card p-4 shadow-sm border border-border/50 transition-colors ${
             isClickable ? 'cursor-pointer hover:bg-card/80' : ''
           }`}
-          onClick={handleCardClick}
+          onClick={isClickable ? handleCardClick : undefined}
         >
           {isLoading ? (
             <div className="flex items-center justify-center py-4">

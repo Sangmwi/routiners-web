@@ -67,8 +67,13 @@ export default function Tag({
   const renderIcon = () => {
     if (!icon) return null;
 
-    const isLucideIcon = typeof icon === 'function';
     const iconSizeClass = size === 'sm' ? 'w-3 h-3' : 'w-3.5 h-3.5';
+
+    // LucideIcon은 forwardRef를 사용하므로 $$typeof와 render 속성을 가진 객체
+    // typeof === 'function' 또는 $$typeof 속성 존재 여부로 체크
+    const isLucideIcon =
+      typeof icon === 'function' ||
+      (typeof icon === 'object' && icon !== null && '$$typeof' in icon);
 
     if (isLucideIcon) {
       const Icon = icon as LucideIcon;
