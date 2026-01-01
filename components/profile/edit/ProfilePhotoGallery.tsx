@@ -1,14 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { useProfileImagesDraft, useGridDragDrop } from '@/hooks';
-import { useNativeImagePicker } from '@/hooks/webview';
-import type { DraftImage, AddImageResult } from '@/hooks/profile/useProfileImagesDraft';
-import { validateImageFile } from '@/lib/utils/imageValidation';
-import { ImageWithFallback } from '@/components/ui/image';
-import FormSection from '@/components/ui/FormSection';
-import ErrorToast from '@/components/ui/ErrorToast';
-import { Plus, Loader2, X, GripVertical, Star, Move } from 'lucide-react';
+import { useState, useEffect, useCallback } from "react";
+import { useProfileImagesDraft, useGridDragDrop } from "@/hooks";
+import { useNativeImagePicker } from "@/hooks/webview";
+import type {
+  DraftImage,
+  AddImageResult,
+} from "@/hooks/profile/useProfileImagesDraft";
+import { validateImageFile } from "@/lib/utils/imageValidation";
+import { ImageWithFallback } from "@/components/ui/image";
+import FormSection from "@/components/ui/FormSection";
+import ErrorToast from "@/components/ui/ErrorToast";
+import { Plus, Loader2, X, GripVertical, Star, Move } from "lucide-react";
 
 // ============================================================
 // Constants
@@ -101,7 +104,13 @@ function TouchDragIndicator() {
   );
 }
 
-function EmptySlot({ onClick, disabled }: { onClick: () => void; disabled: boolean }) {
+function EmptySlot({
+  onClick,
+  disabled,
+}: {
+  onClick: () => void;
+  disabled: boolean;
+}) {
   return (
     <button
       type="button"
@@ -142,10 +151,10 @@ function PhotoSlot({
   const slotClassName = `
     group relative aspect-[2/3] rounded-2xl overflow-hidden
     transition-[transform,opacity,box-shadow] duration-150 ease-out
-    ${isDragging ? 'opacity-60 scale-[0.97] shadow-lg' : ''}
-    ${isDragOver ? 'ring-2 ring-primary ring-offset-2 scale-[1.02] bg-primary/5' : ''}
-    ${isLongPressed && !isTouchDragging ? 'ring-2 ring-primary/50 ring-offset-2' : ''}
-    ${isTouchDragging ? 'opacity-70 scale-[0.97] shadow-xl z-10' : ''}
+    ${isDragging ? "opacity-60 scale-[0.97] shadow-lg" : ""}
+    ${isDragOver ? "ring-2 ring-primary ring-offset-2 scale-[1.02] bg-primary/5" : ""}
+    ${isLongPressed && !isTouchDragging ? "ring-2 ring-primary/50 ring-offset-2" : ""}
+    ${isTouchDragging ? "opacity-70 scale-[0.97] shadow-xl z-10" : ""}
   `;
 
   return (
@@ -241,42 +250,48 @@ export default function ProfilePhotoGallery({
 
   // ========== Handlers ==========
 
-  const handleAddClick = useCallback(async (index: number) => {
-    setProcessingIndex(index);
-    const result = await pickImage('both');
+  const handleAddClick = useCallback(
+    async (index: number) => {
+      setProcessingIndex(index);
+      const result = await pickImage("both");
 
-    if (result.cancelled) {
-      setProcessingIndex(null);
-      return;
-    }
-
-    if (!result.success) {
-      setErrorMessage(result.error || '이미지 선택에 실패했습니다.');
-      setProcessingIndex(null);
-      return;
-    }
-
-    if (result.base64) {
-      const file = base64ToFile(result.base64, result.fileName || 'profile.jpg');
-
-      // 파일 검증
-      const validation = validateImageFile(file);
-      if (!validation.valid) {
-        setErrorMessage(validation.error || '파일 검증에 실패했습니다.');
+      if (result.cancelled) {
         setProcessingIndex(null);
         return;
       }
 
-      // 동기적으로 이미지 추가 (Blob URL 즉시 생성)
-      const addResult: AddImageResult = addImage(file, index);
-
-      if (!addResult.success && addResult.error) {
-        setErrorMessage(addResult.error);
+      if (!result.success) {
+        setErrorMessage(result.error || "이미지 선택에 실패했습니다.");
+        setProcessingIndex(null);
+        return;
       }
-    }
 
-    setProcessingIndex(null);
-  }, [pickImage, base64ToFile, addImage]);
+      if (result.base64) {
+        const file = base64ToFile(
+          result.base64,
+          result.fileName || "profile.jpg"
+        );
+
+        // 파일 검증
+        const validation = validateImageFile(file);
+        if (!validation.valid) {
+          setErrorMessage(validation.error || "파일 검증에 실패했습니다.");
+          setProcessingIndex(null);
+          return;
+        }
+
+        // 동기적으로 이미지 추가 (Blob URL 즉시 생성)
+        const addResult: AddImageResult = addImage(file, index);
+
+        if (!addResult.success && addResult.error) {
+          setErrorMessage(addResult.error);
+        }
+      }
+
+      setProcessingIndex(null);
+    },
+    [pickImage, base64ToFile, addImage]
+  );
 
   const handleDelete = (index: number) => {
     removeImage(index);
@@ -320,16 +335,11 @@ export default function ProfilePhotoGallery({
       </div>
 
       <p className="text-xs text-muted-foreground mt-4 text-center">
-        {isMobile
-          ? '꾹 눌러 드래그하여 순서를 변경할 수 있습니다.'
-          : '드래그하여 순서를 변경할 수 있습니다.'}
+        드래그하여 순서를 변경할 수 있습니다.
       </p>
 
       {longPressIndex !== null && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={resetLongPress}
-        />
+        <div className="fixed inset-0 z-40" onClick={resetLongPress} />
       )}
 
       {errorMessage && (

@@ -6,23 +6,17 @@ import { useCurrentUserProfile, useUpdateProfile } from './useProfile';
 import { useProfileImagesDraft } from './useProfileImagesDraft';
 import { useProfileImageUpload } from './useProfileImageUpload';
 import { useModalStore } from '@/lib/stores/modalStore';
+import {
+  type ProfileFormData,
+  INITIAL_FORM_DATA,
+  userToFormData,
+  formDataToUpdateData,
+  hasFormChanges,
+} from '@/lib/utils/profileUtils';
 
 // ============================================================
 // Types
 // ============================================================
-
-export interface ProfileFormData {
-  nickname: string;
-  bio: string;
-  height: string;
-  weight: string;
-  muscleMass: string;
-  bodyFatPercentage: string;
-  showInbodyPublic: boolean;
-  isSmoker: boolean | undefined;
-  interestedLocations: string[];
-  interestedExercises: string[];
-}
 
 export interface UseProfileEditReturn {
   // User data
@@ -53,22 +47,8 @@ export interface UseProfileEditReturn {
   hasChanges: boolean;
 }
 
-// ============================================================
-// Constants
-// ============================================================
-
-const INITIAL_FORM_DATA: ProfileFormData = {
-  nickname: '',
-  bio: '',
-  height: '',
-  weight: '',
-  muscleMass: '',
-  bodyFatPercentage: '',
-  showInbodyPublic: true,
-  isSmoker: undefined,
-  interestedLocations: [],
-  interestedExercises: [],
-};
+// Re-export for backward compatibility
+export type { ProfileFormData };
 
 // ============================================================
 // Hook
@@ -110,6 +90,7 @@ export function useProfileEdit(): UseProfileEditReturn {
 
   const [formData, setFormData] = useState<ProfileFormData>(INITIAL_FORM_DATA);
   const [isSaving, setIsSaving] = useState(false);
+  const [isFormInitialized, setIsFormInitialized] = useState(false);
 
   // ========== Image Handling ==========
 
@@ -128,62 +109,17 @@ export function useProfileEdit(): UseProfileEditReturn {
   // User 데이터 로드 시 form 초기화
   useEffect(() => {
     if (user) {
-      setFormData({
-        nickname: user.nickname || '',
-        bio: user.bio || '',
-        height: user.height?.toString() || '',
-        weight: user.weight?.toString() || '',
-        muscleMass: user.muscleMass?.toString() || '',
-        bodyFatPercentage: user.bodyFatPercentage?.toString() || '',
-        showInbodyPublic: user.showInbodyPublic ?? true,
-        isSmoker: user.isSmoker,
-        interestedLocations: user.interestedLocations || [],
-        interestedExercises: user.interestedExercises || [],
-      });
+      setFormData(userToFormData(user));
+      setIsFormInitialized(true);
     }
   }, [user]);
 
-  // ========== Change Detection ==========
+  // ========== Computed ==========
 
-  /**
-   * 배열 비교 헬퍼 (순서 무관)
-   */
-  const arraysEqual = (a: string[], b: string[]) => {
-    if (a.length !== b.length) return false;
-    const sortedA = [...a].sort();
-    const sortedB = [...b].sort();
-    return sortedA.every((val, i) => val === sortedB[i]);
-  };
-
-  /**
-   * 폼 변경 감지
-   */
-  const getHasFormChanges = () => {
-    if (!user) return false;
-
-    return (
-      formData.nickname !== (user.nickname || '') ||
-      formData.bio !== (user.bio || '') ||
-      formData.height !== (user.height?.toString() || '') ||
-      formData.weight !== (user.weight?.toString() || '') ||
-      formData.muscleMass !== (user.muscleMass?.toString() || '') ||
-      formData.bodyFatPercentage !== (user.bodyFatPercentage?.toString() || '') ||
-      formData.showInbodyPublic !== (user.showInbodyPublic ?? true) ||
-      formData.isSmoker !== user.isSmoker ||
-      !arraysEqual(formData.interestedLocations, user.interestedLocations || []) ||
-      !arraysEqual(formData.interestedExercises, user.interestedExercises || [])
-    );
-  };
-
-  /**
-   * 이미지 변경 감지 (ref에서 읽어야 함)
-   */
-  const hasImageChanges = imageDraftRef.current?.hasChanges || imageDraft.hasChanges;
-
-  /**
-   * 전체 변경 감지
-   */
-  const hasChanges = getHasFormChanges() || hasImageChanges;
+  // 폼이 초기화되기 전에는 변경 없음으로 처리 (초기 깜빡임 방지)
+  const formChanged = isFormInitialized && user ? hasFormChanges(formData, user) : false;
+  const imageChanged = imageDraftRef.current?.hasChanges || imageDraft.hasChanges;
+  const hasChanges = formChanged || imageChanged;
 
   // ========== Actions ==========
 
@@ -205,20 +141,30 @@ export function useProfileEdit(): UseProfileEditReturn {
   };
 
   /**
+   * 에러 표시 (커스텀 모달)
+   */
+  const showError = (message: string) => {
+    openModal('alert', {
+      title: '오류',
+      message,
+      buttonText: '확인',
+    });
+  };
+
+  /**
    * 뒤로가기
    */
   const handleBack = () => {
-    const currentHasChanges = getHasFormChanges() || imageDraftRef.current?.hasChanges || imageDraft.hasChanges;
+    const currentFormChanged = user ? hasFormChanges(formData, user) : false;
+    const currentImageChanged = imageDraftRef.current?.hasChanges || imageDraft.hasChanges;
 
-    if (currentHasChanges) {
+    if (currentFormChanged || currentImageChanged) {
       openModal('confirm', {
         title: '변경사항 저장 안 함',
         message: '저장하지 않은 변경사항이 있습니다.\n정말 나가시겠습니까?',
         confirmText: '나가기',
         cancelText: '계속 편집',
-        onConfirm: () => {
-          router.back();
-        },
+        onConfirm: () => router.back(),
       });
     } else {
       router.back();
@@ -249,40 +195,25 @@ export function useProfileEdit(): UseProfileEditReturn {
         finalImageUrls = uploadResult.imageUrls || [];
       }
 
-      // 2. 프로필 업데이트 데이터 구성
-      const updates: Record<string, unknown> = {
-        nickname: formData.nickname.trim() || undefined,
-        bio: formData.bio.trim() || undefined,
-        height: formData.height ? Number(formData.height) : undefined,
-        weight: formData.weight ? Number(formData.weight) : undefined,
-        muscleMass: formData.muscleMass ? Number(formData.muscleMass) : undefined,
-        bodyFatPercentage: formData.bodyFatPercentage
-          ? Number(formData.bodyFatPercentage)
-          : undefined,
-        showInbodyPublic: formData.showInbodyPublic,
-        isSmoker: formData.isSmoker,
-        interestedLocations: formData.interestedLocations,
-        interestedExercises: formData.interestedExercises,
-        profileImages: finalImageUrls,
-      };
+      // 2. 프로필 업데이트 데이터 구성 (타입 안전)
+      const updates = formDataToUpdateData(formData, finalImageUrls);
 
       // 3. 프로필 업데이트 실행
       updateProfile.mutate(updates, {
         onSuccess: () => {
           // 저장 완료 후 즉시 페이지 이동
           // isSaving을 false로 바꾸지 않음: 캐시 업데이트로 인한 미리보기 깜빡임 방지
-          // 페이지를 떠나므로 상태 리셋 불필요
           router.back();
         },
         onError: (err: Error) => {
           console.error('Failed to update profile:', err);
-          alert('프로필 저장에 실패했습니다. 다시 시도해 주세요.');
+          showError('프로필 저장에 실패했습니다. 다시 시도해 주세요.');
           setIsSaving(false);
         },
       });
     } catch (err) {
       console.error('Save failed:', err);
-      alert(err instanceof Error ? err.message : '저장에 실패했습니다.');
+      showError(err instanceof Error ? err.message : '저장에 실패했습니다.');
       setIsSaving(false);
     }
   };

@@ -90,7 +90,7 @@ export default function SectionHeader({
       <ViewMoreButton
         href={action.href}
         onClick={action.onClick}
-        variant="muted"
+        variant="primary"
         hideIcon={action.hideIcon}
       >
         {action.label}
