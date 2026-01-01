@@ -1,6 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
-import { User } from '@/lib/types';
+import { transformDbUsersToPublicUsers, DbUser } from '@/lib/types/user';
+import { handleError } from '@/lib/utils/apiResponse';
+import { z } from 'zod';
+
+// Query parameter validation schema
+const SearchQuerySchema = z.object({
+  ranks: z.string().optional().transform(val => val?.split(',').filter(Boolean)),
+  unitIds: z.string().optional().transform(val => val?.split(',').filter(Boolean)),
+  specialties: z.string().optional().transform(val => val?.split(',').filter(Boolean)),
+  interestedExercises: z.string().optional().transform(val => val?.split(',').filter(Boolean)),
+  interestedLocations: z.string().optional().transform(val => val?.split(',').filter(Boolean)),
+  minHeight: z.coerce.number().min(100).max(250).optional(),
+  maxHeight: z.coerce.number().min(100).max(250).optional(),
+  minWeight: z.coerce.number().min(30).max(200).optional(),
+  maxWeight: z.coerce.number().min(30).max(200).optional(),
+  isSmoker: z.enum(['true', 'false']).optional().transform(val => val === undefined ? undefined : val === 'true'),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  sortBy: z.enum(['recent', 'similarity']).default('recent'),
+});
 
 /**
  * GET /api/user/search
@@ -29,24 +48,24 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const searchParams = request.nextUrl.searchParams;
 
-    // Parse query parameters
-    const ranks = searchParams.get('ranks')?.split(',').filter(Boolean);
-    const unitIds = searchParams.get('unitIds')?.split(',').filter(Boolean);
-    const specialties = searchParams.get('specialties')?.split(',').filter(Boolean);
-    const interestedExercises = searchParams.get('interestedExercises')?.split(',').filter(Boolean);
-    const interestedLocations = searchParams.get('interestedLocations')?.split(',').filter(Boolean);
+    // Parse and validate query parameters
+    const queryObj: Record<string, string | undefined> = {};
+    ['ranks', 'unitIds', 'specialties', 'interestedExercises', 'interestedLocations',
+     'minHeight', 'maxHeight', 'minWeight', 'maxWeight', 'isSmoker', 'page', 'limit', 'sortBy'
+    ].forEach(key => {
+      const val = searchParams.get(key);
+      if (val !== null) queryObj[key] = val;
+    });
 
-    const minHeight = searchParams.get('minHeight') ? Number(searchParams.get('minHeight')) : undefined;
-    const maxHeight = searchParams.get('maxHeight') ? Number(searchParams.get('maxHeight')) : undefined;
-    const minWeight = searchParams.get('minWeight') ? Number(searchParams.get('minWeight')) : undefined;
-    const maxWeight = searchParams.get('maxWeight') ? Number(searchParams.get('maxWeight')) : undefined;
+    const validation = SearchQuerySchema.safeParse(queryObj);
+    if (!validation.success) {
+      return handleError(validation.error, '/api/user/search');
+    }
 
-    const isSmokerParam = searchParams.get('isSmoker');
-    const isSmoker = isSmokerParam !== null ? isSmokerParam === 'true' : undefined;
-
-    const page = Number(searchParams.get('page')) || 1;
-    const limit = Math.min(Number(searchParams.get('limit')) || 20, 100); // Max 100 per page
-    const sortBy = searchParams.get('sortBy') || 'recent';
+    const {
+      ranks, unitIds, specialties, interestedExercises, interestedLocations,
+      minHeight, maxHeight, minWeight, maxWeight, isSmoker, page, limit, sortBy
+    } = validation.data;
 
     // Build query with indexes
     let query = supabase.from('users').select('*', { count: 'exact' });
@@ -110,34 +129,8 @@ export async function GET(request: NextRequest) {
       throw queryError;
     }
 
-    // Map to User type
-    const users: User[] = (usersData || []).map((userData) => ({
-      id: userData.id,
-      providerId: userData.provider_id,
-      email: userData.email,
-      realName: userData.real_name,
-      phoneNumber: userData.phone_number,
-      birthDate: userData.birth_date,
-      gender: userData.gender,
-      nickname: userData.nickname,
-      enlistmentMonth: userData.enlistment_month,
-      rank: userData.rank,
-      unitId: userData.unit_id,
-      unitName: userData.unit_name,
-      specialty: userData.specialty,
-      profileImages: userData.profile_images || [],
-      bio: userData.bio,
-      height: userData.height_cm,
-      weight: userData.weight_kg,
-      muscleMass: userData.show_body_metrics ? userData.skeletal_muscle_mass_kg : undefined,
-      bodyFatPercentage: userData.show_body_metrics ? userData.body_fat_percentage : undefined,
-      interestedLocations: userData.interested_exercise_locations,
-      interestedExercises: userData.interested_exercise_types,
-      isSmoker: userData.is_smoker,
-      showInbodyPublic: userData.show_body_metrics,
-      createdAt: userData.created_at,
-      updatedAt: userData.updated_at,
-    }));
+    // Use centralized transformer with privacy settings
+    const users = transformDbUsersToPublicUsers((usersData || []) as DbUser[]);
 
     return NextResponse.json({
       users,
@@ -147,9 +140,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('[GET /api/user/search]', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return handleError(error, '/api/user/search');
   }
 }

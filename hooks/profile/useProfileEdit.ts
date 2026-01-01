@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCurrentUserProfile, useUpdateProfile } from './useProfile';
 import { useProfileImagesDraft } from './useProfileImagesDraft';
 import { useProfileImageUpload } from './useProfileImageUpload';
+import { useModalStore } from '@/lib/stores/modalStore';
 
 // ============================================================
 // Types
@@ -47,6 +48,9 @@ export interface UseProfileEditReturn {
   // Status
   isSaving: boolean;
   uploadProgress: number;
+
+  // Change detection
+  hasChanges: boolean;
 }
 
 // ============================================================
@@ -115,6 +119,10 @@ export function useProfileEdit(): UseProfileEditReturn {
   // 초기 이미지 드래프트 생성 (user가 로드될 때까지 빈 배열)
   const imageDraft = useProfileImagesDraft(user?.profileImages || []);
 
+  // ========== Modal ==========
+
+  const openModal = useModalStore((state) => state.openModal);
+
   // ========== Effects ==========
 
   // User 데이터 로드 시 form 초기화
@@ -134,6 +142,48 @@ export function useProfileEdit(): UseProfileEditReturn {
       });
     }
   }, [user]);
+
+  // ========== Change Detection ==========
+
+  /**
+   * 배열 비교 헬퍼 (순서 무관)
+   */
+  const arraysEqual = (a: string[], b: string[]) => {
+    if (a.length !== b.length) return false;
+    const sortedA = [...a].sort();
+    const sortedB = [...b].sort();
+    return sortedA.every((val, i) => val === sortedB[i]);
+  };
+
+  /**
+   * 폼 변경 감지
+   */
+  const getHasFormChanges = () => {
+    if (!user) return false;
+
+    return (
+      formData.nickname !== (user.nickname || '') ||
+      formData.bio !== (user.bio || '') ||
+      formData.height !== (user.height?.toString() || '') ||
+      formData.weight !== (user.weight?.toString() || '') ||
+      formData.muscleMass !== (user.muscleMass?.toString() || '') ||
+      formData.bodyFatPercentage !== (user.bodyFatPercentage?.toString() || '') ||
+      formData.showInbodyPublic !== (user.showInbodyPublic ?? true) ||
+      formData.isSmoker !== user.isSmoker ||
+      !arraysEqual(formData.interestedLocations, user.interestedLocations || []) ||
+      !arraysEqual(formData.interestedExercises, user.interestedExercises || [])
+    );
+  };
+
+  /**
+   * 이미지 변경 감지 (ref에서 읽어야 함)
+   */
+  const hasImageChanges = imageDraftRef.current?.hasChanges || imageDraft.hasChanges;
+
+  /**
+   * 전체 변경 감지
+   */
+  const hasChanges = getHasFormChanges() || hasImageChanges;
 
   // ========== Actions ==========
 
@@ -158,11 +208,18 @@ export function useProfileEdit(): UseProfileEditReturn {
    * 뒤로가기
    */
   const handleBack = () => {
-    const hasImageChanges = imageDraftRef.current?.hasChanges;
-    if (hasImageChanges) {
-      if (confirm('저장하지 않은 변경사항이 있습니다. 정말 나가시겠습니까?')) {
-        router.back();
-      }
+    const currentHasChanges = getHasFormChanges() || imageDraftRef.current?.hasChanges || imageDraft.hasChanges;
+
+    if (currentHasChanges) {
+      openModal('confirm', {
+        title: '변경사항 저장 안 함',
+        message: '저장하지 않은 변경사항이 있습니다.\n정말 나가시겠습니까?',
+        confirmText: '나가기',
+        cancelText: '계속 편집',
+        onConfirm: () => {
+          router.back();
+        },
+      });
     } else {
       router.back();
     }
@@ -253,5 +310,8 @@ export function useProfileEdit(): UseProfileEditReturn {
     // Status
     isSaving: isSaving || isUploading || updateProfile.isPending,
     uploadProgress: progressPercent,
+
+    // Change detection
+    hasChanges,
   };
 }

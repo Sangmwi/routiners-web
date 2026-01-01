@@ -4,7 +4,7 @@ import { useCurrentUserProfile } from '@/hooks';
 import MainTabLayout from '@/components/common/MainTabLayout';
 import GreetingSection from '@/components/home/GreetingSection';
 import HealthScoreCard from '@/components/home/HealthScoreCard';
-import SectionHeader from '@/components/home/SectionHeader';
+import SectionHeader from '@/components/ui/SectionHeader';
 import ProductSlider from '@/components/home/ProductSlider';
 import InfluencerSlider from '@/components/home/InfluencerSlider';
 import { PageSkeleton } from '@/components/ui/Skeleton';
@@ -185,8 +185,8 @@ export default function Home() {
       <section>
         <SectionHeader
           title="이주의 PX 핫템 🔥"
-          showMoreButton
-          onMoreClick={handleViewMoreProducts}
+          action={{ label: '더 보기', onClick: handleViewMoreProducts }}
+          className="mb-4"
         />
         <ProductSlider
           products={DUMMY_PRODUCTS}
@@ -197,8 +197,8 @@ export default function Home() {
       <section>
         <SectionHeader
           title="이주의 인플루언서"
-          showMoreButton
-          onMoreClick={handleViewMoreInfluencers}
+          action={{ label: '더 보기', onClick: handleViewMoreInfluencers }}
+          className="mb-4"
         />
         <InfluencerSlider
           influencers={DUMMY_INFLUENCERS}

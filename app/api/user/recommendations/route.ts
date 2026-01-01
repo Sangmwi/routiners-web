@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
-import { User } from '@/lib/types';
+import { transformDbUsersToPublicUsers, DbUser } from '@/lib/types/user';
+import { notFound, handleSupabaseError } from '@/lib/utils/apiResponse';
+import { z } from 'zod';
+
+// Query parameter validation schema
+const RecommendationsQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(50).default(20),
+});
 
 /**
  * GET /api/user/recommendations
@@ -21,7 +28,13 @@ import { User } from '@/lib/types';
  */
 export const GET = withAuth(async (request: NextRequest, { authUser, supabase }) => {
   const searchParams = request.nextUrl.searchParams;
-  const limit = Math.min(Number(searchParams.get('limit')) || 20, 50);
+
+  // Validate query parameters
+  const validation = RecommendationsQuerySchema.safeParse({
+    limit: searchParams.get('limit') ?? 20,
+  });
+
+  const limit = validation.success ? validation.data.limit : 20;
 
   // Get current user's profile
   const { data: currentUser, error: currentUserError } = await supabase
@@ -31,10 +44,7 @@ export const GET = withAuth(async (request: NextRequest, { authUser, supabase })
     .single();
 
   if (currentUserError || !currentUser) {
-    return NextResponse.json(
-      { error: 'Current user profile not found' },
-      { status: 404 }
-    );
+    return notFound('현재 사용자 프로필을 찾을 수 없습니다');
   }
 
   // Use PostgreSQL to calculate similarity scores directly in the database
@@ -61,7 +71,10 @@ export const GET = withAuth(async (request: NextRequest, { authUser, supabase })
       .neq('id', currentUser.id)
       .limit(50); // Reduced from 200 for better performance
 
-    if (fallbackError) throw fallbackError;
+    if (fallbackError) {
+      return handleSupabaseError(fallbackError);
+    }
+
     if (!candidates || candidates.length === 0) {
       return NextResponse.json([]);
     }
@@ -76,36 +89,10 @@ export const GET = withAuth(async (request: NextRequest, { authUser, supabase })
       .sort((a, b) => b.score - a.score)
       .slice(0, limit);
 
-    const topUsers = scoredCandidates;
-
-    // Continue with mapping below...
-    const recommendations: User[] = topUsers.map(({ user: userData }) => ({
-      id: userData.id,
-      providerId: userData.provider_id,
-      email: userData.email,
-      realName: userData.real_name,
-      phoneNumber: userData.phone_number,
-      birthDate: userData.birth_date,
-      gender: userData.gender,
-      nickname: userData.nickname,
-      enlistmentMonth: userData.enlistment_month,
-      rank: userData.rank,
-      unitId: userData.unit_id,
-      unitName: userData.unit_name,
-      specialty: userData.specialty,
-      profileImages: userData.profile_images || [],
-      bio: userData.bio,
-      height: userData.height_cm,
-      weight: userData.weight_kg,
-      muscleMass: userData.show_body_metrics ? userData.skeletal_muscle_mass_kg : undefined,
-      bodyFatPercentage: userData.show_body_metrics ? userData.body_fat_percentage : undefined,
-      interestedLocations: userData.interested_exercise_locations,
-      interestedExercises: userData.interested_exercise_types,
-      isSmoker: userData.is_smoker,
-      showInbodyPublic: userData.show_body_metrics,
-      createdAt: userData.created_at,
-      updatedAt: userData.updated_at,
-    }));
+    // Use centralized transformer with privacy settings
+    const recommendations = transformDbUsersToPublicUsers(
+      scoredCandidates.map(({ user }) => user) as DbUser[]
+    );
     return NextResponse.json(recommendations);
   }
 
@@ -113,36 +100,8 @@ export const GET = withAuth(async (request: NextRequest, { authUser, supabase })
     return NextResponse.json([]);
   }
 
-  const topUsers = scoredUsers;
-
-  // Map to User type (scoredUsers already has the correct structure from RPC)
-  const recommendations: User[] = topUsers.map((userData: any) => ({
-    id: userData.id,
-    providerId: userData.provider_id,
-    email: userData.email,
-    realName: userData.real_name,
-    phoneNumber: userData.phone_number,
-    birthDate: userData.birth_date,
-    gender: userData.gender,
-    nickname: userData.nickname,
-    enlistmentMonth: userData.enlistment_month,
-    rank: userData.rank,
-    unitId: userData.unit_id,
-    unitName: userData.unit_name,
-    specialty: userData.specialty,
-    profileImages: userData.profile_images || [],
-    bio: userData.bio,
-    height: userData.height_cm,
-    weight: userData.weight_kg,
-    muscleMass: userData.show_body_metrics ? userData.skeletal_muscle_mass_kg : undefined,
-    bodyFatPercentage: userData.show_body_metrics ? userData.body_fat_percentage : undefined,
-    interestedLocations: userData.interested_exercise_locations,
-    interestedExercises: userData.interested_exercise_types,
-    isSmoker: userData.is_smoker,
-    showInbodyPublic: userData.show_body_metrics,
-    createdAt: userData.created_at,
-    updatedAt: userData.updated_at,
-  }));
+  // Use centralized transformer with privacy settings
+  const recommendations = transformDbUsersToPublicUsers(scoredUsers as DbUser[]);
 
   return NextResponse.json(recommendations);
 });

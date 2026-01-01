@@ -1,33 +1,91 @@
 'use client';
 
+import { ReactNode } from 'react';
 import { ChevronRight } from 'lucide-react';
+import Link from 'next/link';
+
+// ============================================================
+// Types
+// ============================================================
 
 interface ViewMoreButtonProps {
+  /** 클릭 핸들러 (href가 없을 때 사용) */
   onClick?: () => void;
-  children?: React.ReactNode;
+  /** 링크 URL (onClick 대신 사용) */
+  href?: string;
+  /** 버튼 텍스트 */
+  children?: ReactNode;
+  /** 스타일 변형 */
+  variant?: 'primary' | 'muted';
+  /** 아이콘 숨기기 */
+  hideIcon?: boolean;
+  /** 추가 클래스 */
   className?: string;
 }
 
+// ============================================================
+// Styles
+// ============================================================
+
+const variantStyles = {
+  primary: 'text-primary hover:text-primary/80',
+  muted: 'text-muted-foreground hover:text-foreground',
+};
+
+// ============================================================
+// Component
+// ============================================================
+
 /**
- * "더 알아보기" 버튼 컴포넌트
+ * 액션 버튼 컴포넌트 (더보기, 관리 등)
  *
  * @example
  * ```tsx
+ * // 기본 (primary 스타일)
  * <ViewMoreButton onClick={() => console.log('clicked')} />
- * <ViewMoreButton>자세히 보기</ViewMoreButton>
+ *
+ * // 링크로 사용
+ * <ViewMoreButton href="/profile/inbody">관리</ViewMoreButton>
+ *
+ * // muted 스타일 (SectionHeader 등에서 사용)
+ * <ViewMoreButton href="/locations" variant="muted">
+ *   더보기
+ * </ViewMoreButton>
+ *
+ * // 아이콘 없이
+ * <ViewMoreButton onClick={handleClick} hideIcon>
+ *   수정
+ * </ViewMoreButton>
  * ```
  */
 export default function ViewMoreButton({
   onClick,
-  children = "더 알아보기",
-  className = ""
+  href,
+  children = '더 보기',
+  variant = 'primary',
+  hideIcon = false,
+  className = '',
 }: ViewMoreButtonProps) {
+  const baseClassName = `text-sm transition-colors inline-flex items-center gap-1 ${variantStyles[variant]} ${className}`;
+
+  const content = (
+    <>
+      <span>{children}</span>
+      {!hideIcon && <ChevronRight className="w-4 h-4" />}
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className={baseClassName}>
+        {content}
+      </Link>
+    );
+  }
+
   return (
-    <button
-      onClick={onClick}
-      className={`text-xs text-primary hover:text-primary/80 transition-colors flex items-center gap-1 ${className}`}
-    >
-      {children} <ChevronRight className="w-4 h-4" />
+    <button type="button" onClick={onClick} className={baseClassName}>
+      {content}
     </button>
   );
 }

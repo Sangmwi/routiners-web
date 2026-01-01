@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withOptionalAuth } from '@/utils/supabase/auth';
-import { User } from '@/lib/types';
+import { transformDbUsersToPublicUsers, DbUser } from '@/lib/types/user';
+import { badRequest, handleSupabaseError } from '@/lib/utils/apiResponse';
+import { z } from 'zod';
+
+// Query parameter validation schema
+const SameUnitQuerySchema = z.object({
+  unitId: z.string().min(1, 'unitId는 필수입니다'),
+  limit: z.coerce.number().int().min(1).max(50).default(20),
+});
 
 /**
  * GET /api/user/same-unit
@@ -16,15 +24,18 @@ import { User } from '@/lib/types';
 export const GET = withOptionalAuth(async (request: NextRequest, auth) => {
   const searchParams = request.nextUrl.searchParams;
 
-  const unitId = searchParams.get('unitId');
-  const limit = Math.min(Number(searchParams.get('limit')) || 20, 50);
+  // Validate query parameters
+  const validation = SameUnitQuerySchema.safeParse({
+    unitId: searchParams.get('unitId'),
+    limit: searchParams.get('limit') ?? 20,
+  });
 
-  if (!unitId) {
-    return NextResponse.json(
-      { error: 'unitId parameter is required' },
-      { status: 400 }
-    );
+  if (!validation.success) {
+    const firstError = validation.error.errors[0];
+    return badRequest(firstError?.message || '잘못된 요청 파라미터입니다');
   }
+
+  const { unitId, limit } = validation.data;
 
   // Use the supabase client from auth context if available, or create new one
   const supabase = auth?.supabase;
@@ -41,10 +52,11 @@ export const GET = withOptionalAuth(async (request: NextRequest, auth) => {
       .limit(limit);
 
     if (queryError) {
-      throw queryError;
+      return handleSupabaseError(queryError);
     }
 
-    const users: User[] = (usersData || []).map((userData) => mapUserData(userData));
+    // Use centralized transformer with privacy settings
+    const users = transformDbUsersToPublicUsers((usersData || []) as DbUser[]);
     return NextResponse.json(users);
   }
 
@@ -64,42 +76,11 @@ export const GET = withOptionalAuth(async (request: NextRequest, auth) => {
   const { data: usersData, error: queryError } = await query;
 
   if (queryError) {
-    throw queryError;
+    return handleSupabaseError(queryError);
   }
 
-  // Map to User type
-  const users: User[] = (usersData || []).map((userData) => mapUserData(userData));
+  // Use centralized transformer with privacy settings
+  const users = transformDbUsersToPublicUsers((usersData || []) as DbUser[]);
 
   return NextResponse.json(users);
 });
-
-// Helper function to map DB data to User type
-function mapUserData(userData: any): User {
-  return {
-    id: userData.id,
-    providerId: userData.provider_id,
-    email: userData.email,
-    realName: userData.real_name,
-    phoneNumber: userData.phone_number,
-    birthDate: userData.birth_date,
-    gender: userData.gender,
-    nickname: userData.nickname,
-    enlistmentMonth: userData.enlistment_month,
-    rank: userData.rank,
-    unitId: userData.unit_id,
-    unitName: userData.unit_name,
-    specialty: userData.specialty,
-    profileImages: userData.profile_images || [],
-    bio: userData.bio,
-    height: userData.height_cm,
-    weight: userData.weight_kg,
-    muscleMass: userData.show_body_metrics ? userData.skeletal_muscle_mass_kg : undefined,
-    bodyFatPercentage: userData.show_body_metrics ? userData.body_fat_percentage : undefined,
-    interestedLocations: userData.interested_exercise_locations,
-    interestedExercises: userData.interested_exercise_types,
-    isSmoker: userData.is_smoker,
-    showInbodyPublic: userData.show_body_metrics,
-    createdAt: userData.created_at,
-    updatedAt: userData.updated_at,
-  };
-}

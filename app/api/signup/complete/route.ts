@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { transformDbUserToUser, DbUser } from '@/lib/types/user';
+import { SignupCompleteSchema } from '@/lib/schemas/user.schema';
+import {
+  unauthorized,
+  conflict,
+  validationError,
+  handleError,
+} from '@/lib/utils/apiResponse';
+import { ZodError } from 'zod';
 
 /**
  * POST /api/signup/complete
@@ -8,18 +17,7 @@ import { createClient } from '@/utils/supabase/server';
  * providerId와 email은 서버 세션에서 가져옵니다.
  * (WebView에서는 클라이언트 Supabase가 세션을 읽지 못하기 때문)
  *
- * Body: {
- *   realName: string;
- *   phoneNumber: string;
- *   birthDate: string;
- *   gender: 'male' | 'female';
- *   nickname: string;
- *   enlistmentMonth: string;
- *   rank: string;
- *   unitId: string;
- *   unitName: string;
- *   specialty: string;
- * }
+ * Body: SignupCompleteSchema (see lib/schemas/user.schema.ts)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -33,37 +31,27 @@ export async function POST(request: NextRequest) {
 
     if (authError || !authUser) {
       console.error('Auth error:', authError);
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return unauthorized('로그인이 필요합니다');
     }
 
     console.log('Authenticated user:', authUser.id);
 
-    const body = await request.json();
-    console.log('Signup data received:', { ...body, phoneNumber: '***' });
+    // Parse and validate request body using Zod
+    let body;
+    try {
+      const rawBody = await request.json();
+      console.log('Signup data received:', { ...rawBody, phoneNumber: '***' });
+      body = SignupCompleteSchema.parse(rawBody);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return validationError(error);
+      }
+      throw error;
+    }
 
     // providerId와 email은 서버 세션에서 가져옴
     const providerId = authUser.id;
     const email = authUser.email || '';
-
-    // Validate required fields (providerId, email 제외 - 서버에서 처리)
-    const requiredFields = [
-      'realName',
-      'phoneNumber',
-      'birthDate',
-      'gender',
-      'nickname',
-      'enlistmentMonth',
-      'rank',
-      'unitId',
-      'unitName',
-      'specialty',
-    ];
-
-    for (const field of requiredFields) {
-      if (!body[field]) {
-        return NextResponse.json({ error: `Missing field: ${field}` }, { status: 400 });
-      }
-    }
 
     // Check if user already exists
     const { data: existingUser } = await supabase
@@ -73,7 +61,7 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (existingUser) {
-      return NextResponse.json({ error: 'User already exists' }, { status: 409 });
+      return conflict('이미 가입된 사용자입니다');
     }
 
     // Check nickname availability
@@ -84,13 +72,7 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (nicknameCheck) {
-      return NextResponse.json({ error: 'Nickname already taken' }, { status: 409 });
-    }
-
-    // Validate rank (이병/일병/상병/병장)
-    const validRanks = ['이병', '일병', '상병', '병장'];
-    if (!validRanks.includes(body.rank)) {
-      return NextResponse.json({ error: 'Invalid rank format' }, { status: 400 });
+      return conflict('이미 사용 중인 닉네임입니다');
     }
 
     // Convert enlistment month to full date (YYYY-MM -> YYYY-MM-01)
@@ -125,52 +107,12 @@ export async function POST(request: NextRequest) {
 
     console.log('User created successfully:', newUser.id);
 
-    // Convert enlistment_month back to YYYY-MM format (from YYYY-MM-DD)
-    const enlistmentMonthFormatted = newUser.enlistment_month
-      ? newUser.enlistment_month.substring(0, 7) // "2023-06-01" -> "2023-06"
-      : newUser.enlistment_month;
-
-    // Transform response to camelCase
-    const transformedUser = {
-      id: newUser.id,
-      providerId: newUser.provider_id,
-      email: newUser.email,
-      realName: newUser.real_name,
-      phoneNumber: newUser.phone_number,
-      birthDate: newUser.birth_date,
-      gender: newUser.gender,
-      nickname: newUser.nickname,
-      enlistmentMonth: enlistmentMonthFormatted,
-      rank: newUser.rank,
-      unitId: newUser.unit_id,
-      unitName: newUser.unit_name,
-      specialty: newUser.specialty,
-      createdAt: newUser.created_at,
-      updatedAt: newUser.updated_at,
-    };
+    // Use centralized transformer
+    const transformedUser = transformDbUserToUser(newUser as DbUser);
 
     return NextResponse.json(transformedUser, { status: 201 });
   } catch (error) {
     console.error('Error completing signup:', error);
-    console.error('Error type:', typeof error);
-    console.error('Error stringified:', JSON.stringify(error, null, 2));
-
-    // Return detailed error in development
-    if (process.env.NODE_ENV === 'development') {
-      return NextResponse.json(
-        {
-          error: 'Internal server error',
-          details: error instanceof Error ? error.message : JSON.stringify(error),
-          errorType: typeof error,
-          errorKeys: error ? Object.keys(error) : [],
-          stack: error instanceof Error ? error.stack : undefined
-        },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return handleError(error, '/api/signup/complete');
   }
 }
-
-

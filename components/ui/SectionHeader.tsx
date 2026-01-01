@@ -1,8 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { ChevronRight } from 'lucide-react';
-import Link from 'next/link';
+import ViewMoreButton from './ViewMoreButton';
 
 // ============================================================
 // Types
@@ -15,8 +14,6 @@ interface SectionHeaderAction {
   onClick?: () => void;
   /** 링크 URL (onClick 대신 사용) */
   href?: string;
-  /** 커스텀 아이콘 (기본: ChevronRight) */
-  icon?: ReactNode;
   /** 아이콘 숨기기 */
   hideIcon?: boolean;
 }
@@ -89,36 +86,15 @@ export default function SectionHeader({
   const renderAction = () => {
     if (!action) return null;
 
-    const ActionIcon = action.icon ?? (
-      !action.hideIcon && <ChevronRight className="w-4 h-4" />
-    );
-
-    const buttonContent = (
-      <>
-        <span>{action.label}</span>
-        {ActionIcon}
-      </>
-    );
-
-    const buttonClassName =
-      'inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-card-foreground transition-colors';
-
-    if (action.href) {
-      return (
-        <Link href={action.href} className={buttonClassName}>
-          {buttonContent}
-        </Link>
-      );
-    }
-
     return (
-      <button
-        type="button"
+      <ViewMoreButton
+        href={action.href}
         onClick={action.onClick}
-        className={buttonClassName}
+        variant="muted"
+        hideIcon={action.hideIcon}
       >
-        {buttonContent}
-      </button>
+        {action.label}
+      </ViewMoreButton>
     );
   };
 

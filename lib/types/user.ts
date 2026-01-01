@@ -89,6 +89,9 @@ export interface User {
 
 /**
  * DbUser (snake_case) → User (camelCase) 변환
+ *
+ * @param dbUser - DB에서 조회한 사용자 데이터
+ * @returns 클라이언트용 User 객체
  */
 export function transformDbUserToUser(dbUser: DbUser): User {
   return {
@@ -118,6 +121,36 @@ export function transformDbUserToUser(dbUser: DbUser): User {
     createdAt: dbUser.created_at,
     updatedAt: dbUser.updated_at,
   };
+}
+
+/**
+ * DbUser → User 변환 (공개 프로필용, privacy 설정 적용)
+ *
+ * show_body_metrics가 false인 경우 InBody 데이터 숨김 처리
+ *
+ * @param dbUser - DB에서 조회한 사용자 데이터
+ * @returns privacy 설정이 적용된 User 객체
+ */
+export function transformDbUserToPublicUser(dbUser: DbUser): User {
+  const user = transformDbUserToUser(dbUser);
+
+  // Privacy 설정에 따라 InBody 데이터 숨김
+  if (!dbUser.show_body_metrics) {
+    user.muscleMass = undefined;
+    user.bodyFatPercentage = undefined;
+  }
+
+  return user;
+}
+
+/**
+ * DbUser 배열 → User 배열 변환 (공개 프로필용)
+ *
+ * @param dbUsers - DB에서 조회한 사용자 배열
+ * @returns privacy 설정이 적용된 User 배열
+ */
+export function transformDbUsersToPublicUsers(dbUsers: DbUser[]): User[] {
+  return dbUsers.map(transformDbUserToPublicUser);
 }
 
 // ============================================================================

@@ -101,6 +101,7 @@ export default function ProfileEditPage() {
     handleSave,
     handleBack,
     isSaving,
+    hasChanges,
   } = useProfileEdit();
 
   const progress = useProfileProgress(user);
@@ -163,7 +164,7 @@ export default function ProfileEditPage() {
 
       <SaveButton
         onClick={handleSave}
-        disabled={isSaving}
+        disabled={isSaving || !hasChanges}
         isSaving={isSaving}
       />
     </div>

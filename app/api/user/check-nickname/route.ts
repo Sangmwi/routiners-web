@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { handleError } from '@/lib/utils/apiResponse';
+import { z } from 'zod';
+
+// Validation schema for nickname
+const NicknameQuerySchema = z.object({
+  nickname: z
+    .string()
+    .min(2, '닉네임은 2자 이상이어야 합니다')
+    .max(20, '닉네임은 20자 이하여야 합니다'),
+});
 
 /**
  * GET /api/user/check-nickname?nickname=...
@@ -10,12 +20,14 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const nickname = searchParams.get('nickname');
 
-    if (!nickname) {
-      return NextResponse.json({ error: 'Nickname is required' }, { status: 400 });
-    }
-
-    if (nickname.length < 2) {
-      return NextResponse.json({ available: false, reason: 'Too short' });
+    // Validate input
+    const validation = NicknameQuerySchema.safeParse({ nickname });
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      return NextResponse.json({
+        available: false,
+        reason: firstError?.message || '올바르지 않은 닉네임입니다',
+      });
     }
 
     const supabase = await createClient();
@@ -24,7 +36,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase
       .from('users')
       .select('id')
-      .eq('nickname', nickname)
+      .eq('nickname', validation.data.nickname)
       .maybeSingle();
 
     if (error) {
@@ -35,7 +47,7 @@ export async function GET(request: NextRequest) {
       available: !data,
     });
   } catch (error) {
-    console.error('Error checking nickname:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('[GET /api/user/check-nickname]', error);
+    return handleError(error, '/api/user/check-nickname');
   }
 }

@@ -82,55 +82,6 @@ export const profileApi = {
     return response.json();
   },
 
-  /**
-   * 프로필 이미지 업로드
-   *
-   * @param file - 업로드할 이미지 파일
-   * @param type - 이미지 타입 ('main' | 'additional')
-   * @returns 업로드 결과 (url, index, profileImages)
-   * @throws {ApiError} 업로드 실패 시
-   */
-  async uploadProfileImage(
-    file: File,
-    type: 'main' | 'additional'
-  ): Promise<{ url: string; index: number; profileImages: string[] }> {
-    const formData = new FormData();
-    formData.append('file', file);
-    // type을 index로 변환: main = 0, additional = 현재 이미지 수
-    formData.append('index', type === 'main' ? '0' : '1');
-
-    const response = await authFetch('/api/user/profile/image', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
-  },
-
-  /**
-   * 프로필 이미지 삭제
-   *
-   * @param imageUrl - 삭제할 이미지 URL
-   * @returns 삭제 결과 (success, profileImages)
-   * @throws {ApiError} 삭제 실패 시
-   */
-  async deleteProfileImage(imageUrl: string): Promise<{ success: boolean; profileImages: string[] }> {
-    const response = await authFetch('/api/user/profile/image', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageUrl }),
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
-  },
 };
 
 /**
