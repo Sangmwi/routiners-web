@@ -119,6 +119,49 @@ export const queryKeys = {
     userSummary: (userId: string) =>
       [...queryKeys.inbody.all, 'user', userId, 'summary'] as const,
   },
+
+  /**
+   * AI Session 관련 Query Keys
+   */
+  aiSession: {
+    /** 모든 aiSession 쿼리의 기본 키 */
+    all: ['aiSession'] as const,
+
+    /** 세션 목록 */
+    list: (filters?: AISessionFilters) =>
+      [...queryKeys.aiSession.all, 'list', filters] as const,
+
+    /** 특정 세션 상세 */
+    detail: (id: string) => [...queryKeys.aiSession.all, 'detail', id] as const,
+
+    /** 현재 활성 세션 (purpose별) */
+    active: (purpose: 'workout' | 'meal') =>
+      [...queryKeys.aiSession.all, 'active', purpose] as const,
+  },
+
+  /**
+   * Routine Event 관련 Query Keys
+   */
+  routineEvent: {
+    /** 모든 routineEvent 쿼리의 기본 키 */
+    all: ['routineEvent'] as const,
+
+    /** 이벤트 목록 (날짜 범위) */
+    list: (filters?: RoutineEventFilters) =>
+      [...queryKeys.routineEvent.all, 'list', filters] as const,
+
+    /** 특정 날짜의 이벤트 */
+    byDate: (date: string, type?: 'workout' | 'meal') =>
+      [...queryKeys.routineEvent.all, 'date', date, type] as const,
+
+    /** 특정 이벤트 상세 */
+    detail: (id: string) =>
+      [...queryKeys.routineEvent.all, 'detail', id] as const,
+
+    /** 캘린더 뷰용 월별 요약 */
+    monthSummary: (year: number, month: number) =>
+      [...queryKeys.routineEvent.all, 'month', year, month] as const,
+  },
 } as const;
 
 /**
@@ -155,4 +198,20 @@ export interface ProfileSearchFilters {
   page?: number;
   limit?: number;
   sortBy?: 'recent' | 'similarity';
+}
+
+export interface AISessionFilters {
+  purpose?: 'workout' | 'meal';
+  status?: 'active' | 'completed' | 'abandoned';
+  limit?: number;
+  offset?: number;
+}
+
+export interface RoutineEventFilters {
+  startDate?: string;
+  endDate?: string;
+  type?: 'workout' | 'meal';
+  status?: 'scheduled' | 'completed' | 'skipped';
+  limit?: number;
+  offset?: number;
 }

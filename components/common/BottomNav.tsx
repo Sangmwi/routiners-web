@@ -2,12 +2,12 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Home, Bot, Users, User } from "lucide-react";
+import { Home, CalendarDays, Users, User } from "lucide-react";
 import { shouldShowBottomTab } from "@/lib/routes";
 
 const NAV_ITEMS = [
   { label: "홈", href: "/", icon: Home },
-  { label: "AI", href: "/ai", icon: Bot },
+  { label: "루틴", href: "/routine", icon: CalendarDays },
   { label: "커뮤니티", href: "/community", icon: Users },
   { label: "프로필", href: "/profile", icon: User },
 ] as const;

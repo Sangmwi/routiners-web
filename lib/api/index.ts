@@ -8,3 +8,11 @@
 export { authApi } from './auth';
 export { profileApi, profileSearchApi } from './profile';
 export type { ProfileSearchFilters, ProfileSearchResult } from './profile';
+
+export { inbodyApi, inbodyScanApi } from './inbody';
+
+export { sessionApi, chatApi } from './session';
+export type { SessionListParams, ChatStreamCallbacks } from './session';
+
+export { routineEventApi } from './routineEvent';
+export type { EventListParams } from './routineEvent';

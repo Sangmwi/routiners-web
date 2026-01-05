@@ -193,13 +193,21 @@ export async function requireAuth(request?: NextRequest): Promise<AuthContext> {
 }
 
 /**
+ * withAuth 핸들러에 전달되는 확장된 컨텍스트
+ */
+export interface AuthContextWithParams<P = Record<string, string>> extends AuthContext {
+  /** Next.js 15+ 동적 라우트 params (Promise) */
+  params: Promise<P>;
+}
+
+/**
  * 인증된 API 라우트 핸들러를 생성합니다. (하이브리드 방식)
  *
  * 인증 로직을 자동으로 처리하고, 인증된 사용자 정보를 핸들러에 전달합니다.
  * Authorization 헤더가 있으면 토큰 인증, 없으면 쿠키 인증을 사용합니다.
  *
  * @example
- * // app/api/user/me/route.ts
+ * // 일반 JSON 응답
  * export const GET = withAuth(async (request, { authUser, userId, supabase }) => {
  *   const { data: user } = await supabase
  *     .from('users')
@@ -209,17 +217,33 @@ export async function requireAuth(request?: NextRequest): Promise<AuthContext> {
  *
  *   return NextResponse.json(user);
  * });
+ *
+ * // 동적 라우트 params 사용
+ * export const GET = withAuth(async (request, { userId, supabase, params }) => {
+ *   const { id } = await params;
+ *   // ...
+ * });
+ *
+ * // SSE 스트리밍 응답
+ * export const POST = withAuth(async (request, { userId, supabase }) => {
+ *   const stream = new ReadableStream({ ... });
+ *   return new Response(stream, { headers: { 'Content-Type': 'text/event-stream' } });
+ * });
  */
-export function withAuth(
+export function withAuth<T extends Response = NextResponse, P = Record<string, string>>(
   handler: (
     request: NextRequest,
-    auth: AuthContext
-  ) => Promise<NextResponse>
-): (request: NextRequest) => Promise<NextResponse> {
-  return async (request: NextRequest) => {
+    auth: AuthContextWithParams<P>
+  ) => Promise<T>
+): (request: NextRequest, context: { params: Promise<P> }) => Promise<T | NextResponse> {
+  return async (request: NextRequest, context: { params: Promise<P> }) => {
     try {
       const auth = await requireAuth(request);
-      return await handler(request, auth);
+      const authWithParams: AuthContextWithParams<P> = {
+        ...auth,
+        params: context.params,
+      };
+      return await handler(request, authWithParams);
     } catch (error) {
       if (error instanceof AuthError) {
         return NextResponse.json(

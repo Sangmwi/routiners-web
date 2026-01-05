@@ -47,3 +47,57 @@ export {
 } from './api.schema';
 
 export type { ApiErrorResponseSchemaType } from './api.schema';
+
+// Routine Schemas
+export {
+  // Enums
+  SessionPurposeSchema,
+  SessionStatusSchema,
+  EventTypeSchema,
+  EventStatusSchema,
+  EventSourceSchema,
+  ChatRoleSchema,
+  ExerciseCategorySchema,
+  WorkoutTypeSchema,
+  // Workout Details
+  WorkoutSetSchema,
+  WorkoutExerciseSchema,
+  WorkoutDataSchema,
+  // Chat
+  ChatMessageSchema,
+  // Session
+  AISessionSchema,
+  AISessionCreateSchema,
+  AISessionUpdateSchema,
+  // Event
+  RoutineEventSchema,
+  RoutineEventCreateSchema,
+  RoutineEventUpdateSchema,
+  RoutineBatchCreateSchema,
+  // Request
+  ChatSendMessageSchema,
+  RoutineGenerateRequestSchema,
+  // Query Params
+  EventQueryParamsSchema,
+  SessionQueryParamsSchema,
+} from './routine.schema';
+
+export type {
+  SessionPurposeSchemaType,
+  SessionStatusSchemaType,
+  EventTypeSchemaType,
+  EventStatusSchemaType,
+  WorkoutSetSchemaType,
+  WorkoutExerciseSchemaType,
+  WorkoutDataSchemaType,
+  ChatMessageSchemaType,
+  AISessionSchemaType,
+  AISessionCreateSchemaType,
+  RoutineEventSchemaType,
+  RoutineEventCreateSchemaType,
+  RoutineBatchCreateSchemaType,
+  ChatSendMessageSchemaType,
+  RoutineGenerateRequestSchemaType,
+  EventQueryParamsSchemaType,
+  SessionQueryParamsSchemaType,
+} from './routine.schema';

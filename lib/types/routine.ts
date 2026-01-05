@@ -1,0 +1,395 @@
+/**
+ * Routine Types
+ *
+ * AI 세션 및 루틴 이벤트 관련 타입 정의
+ * DB 타입(snake_case) ↔ 도메인 타입(camelCase) 변환 포함
+ */
+
+// ============================================================================
+// Enums & Constants
+// ============================================================================
+
+export type SessionPurpose = 'workout' | 'meal';
+export type SessionStatus = 'active' | 'completed' | 'abandoned';
+export type EventType = 'workout' | 'meal';
+export type EventStatus = 'scheduled' | 'completed' | 'skipped';
+export type EventSource = 'user' | 'ai';
+
+// ============================================================================
+// Workout Exercise Types (JSONB 내부 구조)
+// ============================================================================
+
+/**
+ * 개별 운동 세트 정보
+ */
+export interface WorkoutSet {
+  /** 세트 번호 (1부터 시작) */
+  setNumber: number;
+  /** 목표 반복 횟수 */
+  targetReps: number;
+  /** 목표 중량 (kg) */
+  targetWeight?: number;
+  /** 세트 간 휴식 시간 (초) - 세트별로 다를 수 있음 */
+  restSeconds?: number;
+  /** 실제 수행 반복 횟수 (완료 시) */
+  actualReps?: number;
+  /** 실제 수행 중량 (완료 시) */
+  actualWeight?: number;
+  /** 세트 완료 여부 */
+  completed?: boolean;
+}
+
+/**
+ * 개별 운동 정보
+ */
+export interface WorkoutExercise {
+  /** 운동 ID (고유 식별자) */
+  id: string;
+  /** 운동명 (예: 벤치프레스, 스쿼트) */
+  name: string;
+  /** 운동 카테고리 */
+  category?: 'strength' | 'cardio' | 'flexibility' | 'compound' | 'isolation';
+  /** 주요 타겟 근육 */
+  targetMuscle?: string;
+  /** 세트 정보 */
+  sets: WorkoutSet[];
+  /** 세트 간 휴식 시간 (초) */
+  restSeconds?: number;
+  /** 템포 (예: "3-1-2" = 3초 하강, 1초 유지, 2초 상승) */
+  tempo?: string;
+  /** RIR (Reps In Reserve, 여유 반복 수) */
+  rir?: number;
+  /** 특별 기법 (드롭셋, 슈퍼셋 등) */
+  technique?: string;
+  /** 메모/주의사항 */
+  notes?: string;
+  /** 운동 완료 여부 */
+  completed?: boolean;
+  /** 건너뛰기 여부 */
+  skipped?: boolean;
+}
+
+/**
+ * 워크아웃 데이터 (routine_events.data JSONB)
+ */
+export interface WorkoutData {
+  /** 운동 목록 */
+  exercises: WorkoutExercise[];
+  /** 총 예상 시간 (분) */
+  estimatedDuration?: number;
+  /** 워크아웃 유형 */
+  workoutType?: 'upper' | 'lower' | 'push' | 'pull' | 'full' | 'cardio' | 'rest';
+  /** 강도 (1-10) */
+  intensity?: number;
+  /** 워밍업 지침 */
+  warmup?: string;
+  /** 쿨다운 지침 */
+  cooldown?: string;
+  /** AI가 생성한 추가 조언 */
+  tips?: string[];
+  /** 전체 메모/설명 */
+  notes?: string;
+}
+
+// ============================================================================
+// Chat Message Types
+// ============================================================================
+
+export type ChatRole = 'user' | 'assistant' | 'system';
+
+/**
+ * 채팅 메시지
+ */
+export interface ChatMessage {
+  /** 메시지 ID */
+  id: string;
+  /** 역할 */
+  role: ChatRole;
+  /** 메시지 내용 */
+  content: string;
+  /** 생성 시간 */
+  createdAt: string;
+}
+
+// ============================================================================
+// Database Types (snake_case - DB 직접 사용용)
+// ============================================================================
+
+/**
+ * DB ai_sessions 테이블 Row 타입
+ */
+export interface DbAISession {
+  id: string;
+  user_id: string;
+  purpose: SessionPurpose;
+  status: SessionStatus;
+  title: string | null;
+  messages: ChatMessage[];
+  result_applied: boolean;
+  result_applied_at: string | null;
+  created_at: string;
+  completed_at: string | null;
+}
+
+/**
+ * DB routine_events 테이블 Row 타입
+ */
+export interface DbRoutineEvent {
+  id: string;
+  user_id: string;
+  type: EventType;
+  date: string; // DATE as string (YYYY-MM-DD)
+  title: string;
+  data: WorkoutData; // JSONB
+  rationale: string | null;
+  status: EventStatus;
+  completed_at: string | null;
+  source: EventSource;
+  ai_session_id: string | null;
+  created_at: string;
+}
+
+// ============================================================================
+// Domain Types (camelCase - 클라이언트 사용용)
+// ============================================================================
+
+/**
+ * 클라이언트용 AI 세션 타입
+ */
+export interface AISession {
+  id: string;
+  userId: string;
+  purpose: SessionPurpose;
+  status: SessionStatus;
+  title?: string;
+  messages: ChatMessage[];
+  resultApplied: boolean;
+  resultAppliedAt?: string;
+  createdAt: string;
+  completedAt?: string;
+}
+
+/**
+ * 클라이언트용 루틴 이벤트 타입
+ */
+export interface RoutineEvent {
+  id: string;
+  userId: string;
+  type: EventType;
+  date: string;
+  title: string;
+  data: WorkoutData;
+  rationale?: string;
+  status: EventStatus;
+  completedAt?: string;
+  source: EventSource;
+  aiSessionId?: string;
+  createdAt: string;
+}
+
+// ============================================================================
+// Create/Update Types
+// ============================================================================
+
+/**
+ * AI 세션 생성용 데이터
+ */
+export interface AISessionCreateData {
+  purpose: SessionPurpose;
+  title?: string;
+}
+
+/**
+ * AI 세션 업데이트용 데이터
+ */
+export interface AISessionUpdateData {
+  status?: SessionStatus;
+  title?: string;
+  messages?: ChatMessage[];
+  resultApplied?: boolean;
+  resultAppliedAt?: string;
+  completedAt?: string;
+}
+
+/**
+ * 루틴 이벤트 생성용 데이터 (AI 생성)
+ */
+export interface RoutineEventCreateData {
+  type: EventType;
+  date: string;
+  title: string;
+  data: WorkoutData;
+  rationale?: string;
+  source: EventSource;
+  aiSessionId?: string;
+}
+
+/**
+ * 루틴 이벤트 업데이트용 데이터
+ */
+export interface RoutineEventUpdateData {
+  title?: string;
+  data?: WorkoutData;
+  status?: EventStatus;
+  completedAt?: string;
+}
+
+/**
+ * 4주치 루틴 일괄 생성용 데이터
+ */
+export interface RoutineBatchCreateData {
+  events: RoutineEventCreateData[];
+  aiSessionId: string;
+}
+
+// ============================================================================
+// Type Transformers
+// ============================================================================
+
+/**
+ * DbAISession (snake_case) → AISession (camelCase) 변환
+ */
+export function transformDbSessionToSession(db: DbAISession): AISession {
+  return {
+    id: db.id,
+    userId: db.user_id,
+    purpose: db.purpose,
+    status: db.status,
+    title: db.title ?? undefined,
+    messages: db.messages,
+    resultApplied: db.result_applied,
+    resultAppliedAt: db.result_applied_at ?? undefined,
+    createdAt: db.created_at,
+    completedAt: db.completed_at ?? undefined,
+  };
+}
+
+/**
+ * DbRoutineEvent (snake_case) → RoutineEvent (camelCase) 변환
+ */
+export function transformDbEventToEvent(db: DbRoutineEvent): RoutineEvent {
+  return {
+    id: db.id,
+    userId: db.user_id,
+    type: db.type,
+    date: db.date,
+    title: db.title,
+    data: db.data,
+    rationale: db.rationale ?? undefined,
+    status: db.status,
+    completedAt: db.completed_at ?? undefined,
+    source: db.source,
+    aiSessionId: db.ai_session_id ?? undefined,
+    createdAt: db.created_at,
+  };
+}
+
+/**
+ * AISessionCreateData → DB Insert 데이터 변환
+ */
+export function transformSessionToDbInsert(
+  data: AISessionCreateData,
+  userId: string
+): Omit<DbAISession, 'id' | 'created_at' | 'completed_at' | 'result_applied_at'> {
+  return {
+    user_id: userId,
+    purpose: data.purpose,
+    status: 'active',
+    title: data.title ?? null,
+    messages: [],
+    result_applied: false,
+  };
+}
+
+/**
+ * RoutineEventCreateData → DB Insert 데이터 변환
+ */
+export function transformEventToDbInsert(
+  data: RoutineEventCreateData,
+  userId: string
+): Omit<DbRoutineEvent, 'id' | 'created_at' | 'completed_at'> {
+  return {
+    user_id: userId,
+    type: data.type,
+    date: data.date,
+    title: data.title,
+    data: data.data,
+    rationale: data.rationale ?? null,
+    status: 'scheduled',
+    source: data.source,
+    ai_session_id: data.aiSessionId ?? null,
+  };
+}
+
+// ============================================================================
+// Calendar View Types
+// ============================================================================
+
+/**
+ * 캘린더 표시용 이벤트 요약
+ */
+export interface CalendarEventSummary {
+  id: string;
+  date: string;
+  title: string;
+  type: EventType;
+  status: EventStatus;
+  /** 운동 개수 (workout 타입인 경우) */
+  exerciseCount?: number;
+  /** 예상 소요 시간 (분) */
+  estimatedDuration?: number;
+}
+
+/**
+ * RoutineEvent → CalendarEventSummary 변환
+ */
+export function transformEventToCalendarSummary(
+  event: RoutineEvent
+): CalendarEventSummary {
+  return {
+    id: event.id,
+    date: event.date,
+    title: event.title,
+    type: event.type,
+    status: event.status,
+    exerciseCount: event.data.exercises?.length,
+    estimatedDuration: event.data.estimatedDuration,
+  };
+}
+
+// ============================================================================
+// Session History Types
+// ============================================================================
+
+/**
+ * 세션 목록 표시용 요약
+ */
+export interface SessionSummary {
+  id: string;
+  purpose: SessionPurpose;
+  status: SessionStatus;
+  title?: string;
+  /** 마지막 메시지 미리보기 */
+  lastMessage?: string;
+  /** 메시지 개수 */
+  messageCount: number;
+  createdAt: string;
+  completedAt?: string;
+}
+
+/**
+ * AISession → SessionSummary 변환
+ */
+export function transformSessionToSummary(session: AISession): SessionSummary {
+  const lastMsg = session.messages[session.messages.length - 1];
+  return {
+    id: session.id,
+    purpose: session.purpose,
+    status: session.status,
+    title: session.title,
+    lastMessage: lastMsg?.content?.substring(0, 100),
+    messageCount: session.messages.length,
+    createdAt: session.createdAt,
+    completedAt: session.completedAt,
+  };
+}
