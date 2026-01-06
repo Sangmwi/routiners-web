@@ -92,13 +92,13 @@ export function userToFormData(user: User): ProfileFormData {
  * 문자열 필드를 숫자로 변환하고, 빈 값은 undefined로 처리
  *
  * @param formData - 폼 데이터
- * @param imageUrls - 최종 이미지 URL 배열
+ * @param imageUrls - 최종 이미지 URL 배열 (undefined면 이미지 필드 업데이트 안 함)
  */
 export function formDataToUpdateData(
   formData: ProfileFormData,
-  imageUrls: string[]
+  imageUrls?: string[]
 ): ProfileUpdateData {
-  return {
+  const result: ProfileUpdateData = {
     nickname: formData.nickname.trim() || undefined,
     bio: formData.bio.trim() || undefined,
     height: formData.height ? Number(formData.height) : undefined,
@@ -111,8 +111,14 @@ export function formDataToUpdateData(
     isSmoker: formData.isSmoker,
     interestedLocations: formData.interestedLocations,
     interestedExercises: formData.interestedExercises,
-    profileImages: imageUrls,
   };
+
+  // 이미지 배열이 명시적으로 제공된 경우에만 포함
+  if (imageUrls !== undefined) {
+    result.profileImages = imageUrls;
+  }
+
+  return result;
 }
 
 // ============================================================================

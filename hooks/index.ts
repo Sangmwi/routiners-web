@@ -7,6 +7,9 @@ export * from './profile';
 // InBody
 export * from './inbody';
 
+// Fitness Profile
+export * from './fitnessProfile';
+
 // AI Chat & Session
 export * from './aiChat';
 

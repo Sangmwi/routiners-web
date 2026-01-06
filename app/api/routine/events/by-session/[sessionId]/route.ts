@@ -12,12 +12,13 @@ interface RouteParams {
 export const DELETE = withAuth(async (request: NextRequest, { userId, supabase }) => {
   const { sessionId } = await (request as unknown as RouteParams).params;
 
-  // 세션 소유권 확인
+  // 대화(conversation) 소유권 확인
   const { data: session, error: sessionError } = await supabase
-    .from('ai_sessions')
+    .from('conversations')
     .select('id')
     .eq('id', sessionId)
-    .eq('user_id', userId)
+    .eq('type', 'ai')
+    .eq('created_by', userId)
     .single();
 
   if (sessionError || !session) {
@@ -42,12 +43,12 @@ export const DELETE = withAuth(async (request: NextRequest, { userId, supabase }
     );
   }
 
-  // AI 세션의 result_applied 플래그 초기화
+  // AI 대화의 ai_result_applied 플래그 초기화
   await supabase
-    .from('ai_sessions')
+    .from('conversations')
     .update({
-      result_applied: false,
-      result_applied_at: null,
+      ai_result_applied: false,
+      ai_result_applied_at: null,
     })
     .eq('id', sessionId);
 

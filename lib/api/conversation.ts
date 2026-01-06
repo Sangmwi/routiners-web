@@ -271,10 +271,20 @@ export const messageApi = {
 // AI Chat API (SSE Streaming) - 새 스키마용
 // ============================================================================
 
+export interface ToolEvent {
+  toolCallId: string;
+  name: string;
+  success?: boolean;
+  data?: unknown;
+  error?: string;
+}
+
 export interface ChatStreamCallbacks {
   onMessage: (chunk: string) => void;
   onComplete: (fullMessage: string) => void;
   onError: (error: Error) => void;
+  onToolStart?: (event: ToolEvent) => void;
+  onToolDone?: (event: ToolEvent) => void;
 }
 
 export const aiChatApi = {
@@ -308,6 +318,8 @@ export const aiChatApi = {
 
         const decoder = new TextDecoder();
         let fullMessage = '';
+        let currentEventType = '';
+        let dataBuffer = '';
 
         while (true) {
           const { done, value } = await reader.read();
@@ -317,26 +329,76 @@ export const aiChatApi = {
           const lines = chunk.split('\n');
 
           for (const line of lines) {
+            // SSE event type
+            if (line.startsWith('event: ')) {
+              currentEventType = line.slice(7).trim();
+              continue;
+            }
+
+            // SSE data
             if (line.startsWith('data: ')) {
-              const data = line.slice(6);
-              if (data === '[DONE]') {
-                callbacks.onComplete(fullMessage);
-                return;
+              dataBuffer = line.slice(6);
+
+              // 기존 포맷 호환 (event 없이 data만 오는 경우)
+              if (!currentEventType) {
+                if (dataBuffer === '[DONE]') {
+                  callbacks.onComplete(fullMessage);
+                  return;
+                }
+
+                try {
+                  const parsed = JSON.parse(dataBuffer);
+                  if (parsed.content) {
+                    fullMessage += parsed.content;
+                    callbacks.onMessage(parsed.content);
+                  }
+                  if (parsed.error) {
+                    throw new Error(parsed.error);
+                  }
+                } catch (e) {
+                  if (e instanceof SyntaxError) continue;
+                  throw e;
+                }
+                continue;
               }
 
+              // 새로운 이벤트 포맷 처리
               try {
-                const parsed = JSON.parse(data);
-                if (parsed.content) {
-                  fullMessage += parsed.content;
-                  callbacks.onMessage(parsed.content);
-                }
-                if (parsed.error) {
-                  throw new Error(parsed.error);
+                const parsed = JSON.parse(dataBuffer);
+
+                switch (currentEventType) {
+                  case 'content':
+                    if (parsed.content) {
+                      fullMessage += parsed.content;
+                      callbacks.onMessage(parsed.content);
+                    }
+                    break;
+                  case 'tool_start':
+                    callbacks.onToolStart?.(parsed);
+                    break;
+                  case 'tool_done':
+                    callbacks.onToolDone?.(parsed);
+                    break;
+                  case 'done':
+                    callbacks.onComplete(fullMessage);
+                    return;
+                  case 'error':
+                    throw new Error(parsed.error || 'Unknown error');
                 }
               } catch (e) {
                 if (e instanceof SyntaxError) continue;
                 throw e;
               }
+
+              // 이벤트 처리 후 초기화
+              currentEventType = '';
+              dataBuffer = '';
+            }
+
+            // 빈 줄은 이벤트 끝을 의미
+            if (line === '') {
+              currentEventType = '';
+              dataBuffer = '';
             }
           }
         }

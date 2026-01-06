@@ -181,10 +181,10 @@ export function useProfileEdit(): UseProfileEditReturn {
 
     try {
       // 1. 이미지 업로드 처리
-      let finalImageUrls: string[] = [];
+      let finalImageUrls: string[] | undefined = undefined;
       const draft = imageDraftRef.current;
 
-      if (draft) {
+      if (draft && draft.hasChanges) {
         const changes = draft.getChanges();
         const uploadResult = await uploadImages(changes);
 
@@ -194,6 +194,7 @@ export function useProfileEdit(): UseProfileEditReturn {
 
         finalImageUrls = uploadResult.imageUrls || [];
       }
+      // draft가 없거나 변경이 없으면 finalImageUrls는 undefined → 이미지 필드 업데이트 안 함
 
       // 2. 프로필 업데이트 데이터 구성 (타입 안전)
       const updates = formDataToUpdateData(formData, finalImageUrls);

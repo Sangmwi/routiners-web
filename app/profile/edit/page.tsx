@@ -8,10 +8,9 @@ import PageHeader from '@/components/common/PageHeader';
 import ProfilePhotoGallery from '@/components/profile/edit/ProfilePhotoGallery';
 import ProfileNicknameInput from '@/components/profile/edit/ProfileNicknameInput';
 import ProfileBioInput from '@/components/profile/edit/ProfileBioInput';
-import ProfileHeightWeightInput from '@/components/profile/edit/ProfileHeightWeightInput';
-import ProfileSmokingInput from '@/components/profile/edit/ProfileSmokingInput';
-import ProfileLocationsInput from '@/components/profile/edit/ProfileLocationsInput';
+import ProfileBodyInfoInput from '@/components/profile/edit/ProfileBodyInfoInput';
 import ProfileInterestsInput from '@/components/profile/edit/ProfileInterestsInput';
+import ProfileLocationsInput from '@/components/profile/edit/ProfileLocationsInput';
 
 // ============================================================
 // Sub Components
@@ -139,26 +138,23 @@ export default function ProfileEditPage() {
           onChange={(value) => updateFormField('bio', value)}
         />
 
-        <ProfileHeightWeightInput
+        <ProfileBodyInfoInput
           height={formData.height}
           weight={formData.weight}
-          onHeightChange={(value) => updateFormField('height', value)}
-          onWeightChange={(value) => updateFormField('weight', value)}
-        />
-
-        <ProfileSmokingInput
-          value={formData.isSmoker}
-          onChange={(value) => updateFormField('isSmoker', value)}
-        />
-
-        <ProfileLocationsInput
-          value={formData.interestedLocations}
-          onChange={(value) => updateFormField('interestedLocations', value)}
+          isSmoker={formData.isSmoker}
+          onHeightChange={(value: string) => updateFormField('height', value)}
+          onWeightChange={(value: string) => updateFormField('weight', value)}
+          onSmokerChange={(value: boolean) => updateFormField('isSmoker', value)}
         />
 
         <ProfileInterestsInput
           value={formData.interestedExercises}
-          onChange={(value) => updateFormField('interestedExercises', value)}
+          onChange={(value: string[]) => updateFormField('interestedExercises', value)}
+        />
+
+        <ProfileLocationsInput
+          value={formData.interestedLocations}
+          onChange={(value: string[]) => updateFormField('interestedLocations', value)}
         />
       </div>
 

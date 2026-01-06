@@ -20,7 +20,7 @@ export default function MainTabLayout({
 }: MainTabLayoutProps) {
   return (
     <div className={`min-h-screen bg-background p-4 pb-24 ${className}`.trim()}>
-      <div className="flex flex-col gap-6">{children}</div>
+      <div className="flex flex-col gap-8">{children}</div>
     </div>
   );
 }

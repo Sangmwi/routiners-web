@@ -140,6 +140,17 @@ export const queryKeys = {
   },
 
   /**
+   * Fitness Profile 관련 Query Keys
+   */
+  fitnessProfile: {
+    /** 모든 fitnessProfile 쿼리의 기본 키 */
+    all: ['fitnessProfile'] as const,
+
+    /** 현재 사용자의 피트니스 프로필 */
+    me: () => [...queryKeys.fitnessProfile.all, 'me'] as const,
+  },
+
+  /**
    * Routine Event 관련 Query Keys
    */
   routineEvent: {

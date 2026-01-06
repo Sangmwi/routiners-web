@@ -3,3 +3,5 @@ export * from './product';
 export * from './influencer';
 export * from './api';
 export * from './inbody';
+export * from './fitness';
+export * from './chat';

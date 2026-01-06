@@ -2,9 +2,10 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { aiChatApi, ChatStreamCallbacks } from '@/lib/api/conversation';
+import { aiChatApi, ChatStreamCallbacks, ToolEvent } from '@/lib/api/conversation';
 import { queryKeys } from '@/lib/constants/queryKeys';
 import { ChatMessage, AISessionCompat } from '@/lib/types/chat';
+import type { AIToolName, AIToolStatus } from '@/lib/types/fitness';
 
 /**
  * AI 채팅 상태 인터페이스
@@ -18,6 +19,8 @@ interface ChatState {
   isSending: boolean;
   /** 에러 메시지 */
   error: string | null;
+  /** 현재 실행 중인 도구 상태 목록 */
+  activeTools: AIToolStatus[];
 }
 
 /**
@@ -32,6 +35,8 @@ export interface UseAIChatReturn {
   isStreaming: boolean;
   /** 에러 메시지 */
   error: string | null;
+  /** 현재 실행 중인 도구 상태 목록 */
+  activeTools: AIToolStatus[];
   /** 메시지 전송 */
   sendMessage: (message: string) => void;
   /** 스트리밍 취소 */
@@ -63,6 +68,7 @@ export function useAIChat(session: AISessionCompat | null | undefined): UseAICha
     streamingContent: '',
     isSending: false,
     error: null,
+    activeTools: [],
   });
 
   // 세션이 변경되면 메시지 동기화
@@ -93,6 +99,7 @@ export function useAIChat(session: AISessionCompat | null | undefined): UseAICha
       }
 
       // 낙관적 업데이트: 사용자 메시지 즉시 로컬 상태에 추가
+      // 이전 도구 상태도 초기화 (새 대화 시작)
       const userMessage: ChatMessage = {
         id: `temp-user-${Date.now()}`,
         conversationId: sessionId,
@@ -109,6 +116,7 @@ export function useAIChat(session: AISessionCompat | null | undefined): UseAICha
         streamingContent: '',
         isSending: true,
         error: null,
+        activeTools: [], // 새 메시지 전송 시 이전 도구 상태 초기화
       }));
 
       const callbacks: ChatStreamCallbacks = {
@@ -116,6 +124,31 @@ export function useAIChat(session: AISessionCompat | null | undefined): UseAICha
           setState((prev) => ({
             ...prev,
             streamingContent: prev.streamingContent + chunk,
+          }));
+        },
+        onToolStart: (event: ToolEvent) => {
+          const toolStatus: AIToolStatus = {
+            toolCallId: event.toolCallId,
+            name: event.name as AIToolName,
+            status: 'running',
+          };
+          setState((prev) => ({
+            ...prev,
+            activeTools: [...prev.activeTools, toolStatus],
+          }));
+        },
+        onToolDone: (event: ToolEvent) => {
+          setState((prev) => ({
+            ...prev,
+            activeTools: prev.activeTools.map((tool) =>
+              tool.toolCallId === event.toolCallId
+                ? {
+                    ...tool,
+                    status: event.success ? 'completed' : 'error',
+                    error: event.error,
+                  }
+                : tool
+            ),
           }));
         },
         onComplete: (fullMessage) => {
@@ -136,7 +169,24 @@ export function useAIChat(session: AISessionCompat | null | undefined): UseAICha
             streamingContent: '',
             isSending: false,
             error: null,
+            // activeTools는 유지 (완료 상태 표시)
           }));
+
+          // 완료된 도구: 2초 후 제거
+          setTimeout(() => {
+            setState((prev) => ({
+              ...prev,
+              activeTools: prev.activeTools.filter((tool) => tool.status !== 'completed'),
+            }));
+          }, 2000);
+
+          // 에러 도구: 5초 후 제거 (사용자가 확인할 시간 제공)
+          setTimeout(() => {
+            setState((prev) => ({
+              ...prev,
+              activeTools: prev.activeTools.filter((tool) => tool.status !== 'error'),
+            }));
+          }, 5000);
 
           // 백그라운드에서 캐시 업데이트 (UI에 영향 없음)
           queryClient.invalidateQueries({
@@ -147,6 +197,7 @@ export function useAIChat(session: AISessionCompat | null | undefined): UseAICha
         },
         onError: (error) => {
           // 에러 시 마지막 사용자 메시지 롤백
+          // activeTools는 유지 (에러 상태 표시용)
           setState((prev) => ({
             ...prev,
             localMessages: prev.localMessages.slice(0, -1),
@@ -195,6 +246,7 @@ export function useAIChat(session: AISessionCompat | null | undefined): UseAICha
     streamingContent: state.streamingContent,
     isStreaming: state.isSending,
     error: state.error,
+    activeTools: state.activeTools,
     sendMessage,
     cancelStream,
     clearError,

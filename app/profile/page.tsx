@@ -10,6 +10,7 @@ import ProfileBioSection from '@/components/profile/ProfileBioSection';
 import ProfileInfoTags from '@/components/profile/ProfileInfoTags';
 import ProfileInterestsTags from '@/components/profile/ProfileInterestsTags';
 import ProfileInbodySection from '@/components/profile/ProfileInbodySection';
+import ProfileFitnessSection from '@/components/profile/ProfileFitnessSection';
 import ProfileMilitarySection from '@/components/profile/ProfileMilitarySection';
 import ProfileLocationsSection from '@/components/profile/ProfileLocationsSection';
 import { LogOut, Loader2 } from 'lucide-react';
@@ -47,14 +48,20 @@ export default function ProfilePage() {
 
       <ProfileInfoTags user={user} />
 
+      {/* 소셜/매칭용: 관심종목, 자주가는 장소 */}
+      <ProfileInterestsTags interests={user.interestedExercises} />
+
+      <ProfileLocationsSection locations={user.interestedLocations} />
+
+      {/* AI 트레이너용: 인바디, 운동 프로필 - 그룹 간 간격 추가 */}
+      <div className="pt-4" />
+
       <ProfileInbodySection
         showInbodyPublic={user.showInbodyPublic}
         isOwnProfile={true}
       />
 
-      <ProfileLocationsSection locations={user.interestedLocations} />
-
-      <ProfileInterestsTags interests={user.interestedExercises} />
+      <ProfileFitnessSection />
 
       {/* Logout Button */}
       <div className="pt-2">

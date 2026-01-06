@@ -37,12 +37,13 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
 
   const { events, aiSessionId } = validation.data;
 
-  // AI 세션 확인
+  // AI 대화(conversation) 확인
   const { data: session, error: sessionError } = await supabase
-    .from('ai_sessions')
-    .select('id, status')
+    .from('conversations')
+    .select('id, ai_status')
     .eq('id', aiSessionId)
-    .eq('user_id', userId)
+    .eq('type', 'ai')
+    .eq('created_by', userId)
     .single();
 
   if (sessionError || !session) {
@@ -95,14 +96,12 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
     );
   }
 
-  // AI 세션 업데이트 (result_applied = true)
+  // AI 대화 업데이트 (ai_result_applied = true)
   await supabase
-    .from('ai_sessions')
+    .from('conversations')
     .update({
-      result_applied: true,
-      result_applied_at: new Date().toISOString(),
-      status: 'completed',
-      completed_at: new Date().toISOString(),
+      ai_result_applied: true,
+      ai_result_applied_at: new Date().toISOString(),
     })
     .eq('id', aiSessionId);
 
