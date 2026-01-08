@@ -47,8 +47,8 @@ export interface WorkoutExercise {
   id: string;
   /** 운동명 (예: 벤치프레스, 스쿼트) */
   name: string;
-  /** 운동 카테고리 */
-  category?: 'strength' | 'cardio' | 'flexibility' | 'compound' | 'isolation';
+  /** 운동 카테고리 (AI가 다양한 값 생성 가능) */
+  category?: string;
   /** 주요 타겟 근육 */
   targetMuscle?: string;
   /** 세트 정보 */
@@ -77,8 +77,8 @@ export interface WorkoutData {
   exercises: WorkoutExercise[];
   /** 총 예상 시간 (분) */
   estimatedDuration?: number;
-  /** 워크아웃 유형 */
-  workoutType?: 'upper' | 'lower' | 'push' | 'pull' | 'full' | 'cardio' | 'rest';
+  /** 워크아웃 유형 (AI가 다양한 값 생성 가능) */
+  workoutType?: string;
   /** 강도 (1-10) */
   intensity?: number;
   /** 워밍업 지침 */

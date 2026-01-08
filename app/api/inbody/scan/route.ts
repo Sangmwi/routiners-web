@@ -216,7 +216,7 @@ export const POST = withAuth(async (request: NextRequest) => {
 
     // OpenAI Responses API 호출 (최신 모델 지원)
     const response = await openai.responses.create({
-      model: 'gpt-4.1-mini', // 최신 모델 사용 가능
+      model: 'gpt-5.1',
       instructions: SYSTEM_INSTRUCTIONS,
       input: [
         {

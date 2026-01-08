@@ -17,7 +17,7 @@ import { z } from 'zod';
 export const AISetSchema = z.object({
   setNumber: z.number().int().positive().optional(),
   targetReps: z.number().int().positive(),
-  targetWeight: z.number().positive().optional(),
+  targetWeight: z.number().nonnegative().optional(), // 0도 허용 (AI가 무게를 지정하지 않는 경우)
   restSeconds: z.number().int().positive().optional(),
 });
 
@@ -25,11 +25,14 @@ export type AISet = z.infer<typeof AISetSchema>;
 
 /**
  * 운동 스키마
+ *
+ * category, targetMuscle 등은 AI가 다양한 값을 생성할 수 있도록 string으로 완화
+ * (enum 사용 시 AI 첫 시도 실패 → 재시도로 시간 2배 소요되는 문제 해결)
  */
 export const AIExerciseSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, '운동 이름은 필수입니다'),
-  category: z.enum(['compound', 'isolation', 'cardio', 'flexibility', 'core']).optional(),
+  category: z.string().optional(), // compound, isolation, cardio, flexibility, core 등
   targetMuscle: z.string().optional(),
   sets: z.array(AISetSchema).optional(),
   restSeconds: z.number().int().positive().optional(),
@@ -43,11 +46,13 @@ export type AIExercise = z.infer<typeof AIExerciseSchema>;
 
 /**
  * 하루 운동 스키마
+ *
+ * workoutType은 AI가 다양한 값을 생성할 수 있도록 string으로 완화
  */
 export const AIRoutineDaySchema = z.object({
   dayOfWeek: z.number().int().min(1).max(7), // 1=월, 7=일
   title: z.string().optional(),
-  workoutType: z.enum(['push', 'pull', 'legs', 'upper', 'lower', 'full', 'cardio', 'rest', 'active_recovery']).optional(),
+  workoutType: z.string().optional(), // push, pull, legs, upper, lower, full, cardio, rest, active_recovery 등
   exercises: z.array(AIExerciseSchema).optional(),
   estimatedDuration: z.number().int().positive().optional(), // 분 단위
   intensity: z.number().int().min(1).max(10).optional(), // 1-10 RPE

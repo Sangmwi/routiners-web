@@ -11,11 +11,12 @@ import {
   useAIChat,
 } from '@/hooks/aiChat';
 import { queryKeys } from '@/lib/constants/queryKeys';
-import { Loader2, CheckCircle, XCircle, RotateCcw } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, RotateCcw, Dumbbell, Utensils } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { conversationApi } from '@/lib/api/conversation';
 import { routineEventApi } from '@/lib/api/routineEvent';
 import { useConfirmDialog } from '@/lib/stores/modalStore';
+import type { SessionPurpose } from '@/lib/types/chat';
 
 /**
  * AI 트레이너 채팅 페이지
@@ -24,14 +25,24 @@ export default function AIChatPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [actionError, setActionError] = useState<string | null>(null);
+  const [selectedPurpose, setSelectedPurpose] = useState<SessionPurpose | null>(null);
   const confirmDialog = useConfirmDialog();
 
-  // 활성 세션 조회
+  // 활성 세션 조회 (workout과 meal 둘 다 확인)
   const {
-    data: activeSession,
-    isLoading: isLoadingSession,
-    error: sessionError,
+    data: workoutSession,
+    isLoading: isLoadingWorkout,
   } = useActiveAISession('workout');
+
+  const {
+    data: mealSession,
+    isLoading: isLoadingMeal,
+  } = useActiveAISession('meal');
+
+  // 활성 세션 (workout 또는 meal 중 하나)
+  const activeSession = workoutSession || mealSession;
+  const isLoadingSession = isLoadingWorkout || isLoadingMeal;
+  const sessionError = null; // 에러는 개별적으로 처리
 
   // 세션 생성
   const createSession = useCreateAISession();
@@ -40,9 +51,16 @@ export default function AIChatPage() {
   const {
     messages,
     sendMessage,
+    submitInput,
     isStreaming,
     streamingContent,
     activeTools,
+    pendingInput,
+    pendingRoutinePreview,
+    appliedRoutine,
+    routineProgress,
+    applyRoutine,
+    requestRevision,
     error: chatError,
   } = useAIChat(activeSession);
 
@@ -51,8 +69,8 @@ export default function AIChatPage() {
   const isAbandoned = activeSession?.status === 'abandoned';
   const isActive = activeSession?.status === 'active';
 
-  // 새 대화 시작 실행
-  const executeStartNewSession = useCallback(async () => {
+  // 새 대화 시작 실행 (purpose 파라미터 받음)
+  const executeStartNewSession = useCallback(async (purpose: SessionPurpose) => {
     // 기존 활성 세션이 있으면 정리
     if (isActive && activeSession) {
       // 기존 루틴이 저장되어 있으면 삭제
@@ -73,13 +91,20 @@ export default function AIChatPage() {
     }
 
     try {
-      await createSession.mutateAsync({ purpose: 'workout' });
+      await createSession.mutateAsync({ purpose });
+      setSelectedPurpose(null); // 선택 초기화
     } catch (err) {
       console.error('Failed to create session:', err);
     }
   }, [createSession, isActive, activeSession]);
 
-  // 새 세션 생성 (기존 활성 세션이 있으면 확인 후 포기)
+  // purpose 선택 후 세션 시작
+  const handleSelectPurpose = useCallback((purpose: SessionPurpose) => {
+    setSelectedPurpose(purpose);
+    executeStartNewSession(purpose);
+  }, [executeStartNewSession]);
+
+  // 새 세션 생성 (기존 활성 세션이 있으면 확인 후 포기하고 purpose 선택 화면으로)
   const handleStartNewSession = useCallback(() => {
     // 활성 대화 중이면 확인 모달 표시
     if (isActive && messages.length > 0) {
@@ -88,14 +113,34 @@ export default function AIChatPage() {
         message: '현재 대화를 종료하고 새 대화를 시작할까요?',
         confirmText: '시작하기',
         cancelText: '취소',
-        onConfirm: executeStartNewSession,
+        onConfirm: async () => {
+          // 기존 세션 정리
+          if (activeSession) {
+            if (activeSession.resultApplied) {
+              try {
+                await routineEventApi.deleteEventsBySession(activeSession.id);
+              } catch (err) {
+                console.error('Failed to delete existing routine:', err);
+              }
+            }
+            try {
+              await conversationApi.abandonAIConversation(activeSession.id);
+            } catch (err) {
+              console.error('Failed to abandon session:', err);
+            }
+          }
+          // 캐시 무효화하여 purpose 선택 화면으로 돌아가기
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.aiSession.active('workout'),
+          });
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.aiSession.active('meal'),
+          });
+        },
       });
       return;
     }
-
-    // 활성 대화가 없으면 바로 시작
-    executeStartNewSession();
-  }, [isActive, messages.length, confirmDialog, executeStartNewSession]);
+  }, [isActive, messages.length, confirmDialog, activeSession, queryClient]);
 
   // 메시지 전송
   const handleSendMessage = useCallback(
@@ -146,36 +191,74 @@ export default function AIChatPage() {
     );
   }
 
-  // 활성 세션이 없는 경우
+  // 활성 세션이 없는 경우 - purpose 선택 화면
   if (!activeSession) {
     return (
       <div className="min-h-screen bg-background">
-        <PageHeader title="AI 트레이너" />
-        <div className="flex flex-col items-center justify-center gap-6 p-8 mt-20">
-          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-4xl">🏋️</span>
-          </div>
+        <PageHeader title="AI 코치" onBack={() => router.push('/routine')} />
+        <div className="flex flex-col items-center justify-center gap-8 p-8 mt-12">
           <div className="text-center space-y-2">
             <h2 className="text-xl font-bold text-foreground">
-              AI 트레이너와 대화하기
+              무엇을 도와드릴까요?
             </h2>
             <p className="text-muted-foreground text-sm">
-              운동 목표, 체력 수준, 가용 시간을 알려주시면
-              <br />
-              맞춤형 4주 운동 루틴을 만들어 드립니다.
+              원하는 목표를 선택해주세요
             </p>
           </div>
-          <Button
-            onClick={handleStartNewSession}
-            isLoading={createSession.isPending}
-            size="lg"
-          >
-            대화 시작하기
-          </Button>
+
+          {/* Purpose 선택 카드 */}
+          <div className="w-full max-w-sm space-y-4">
+            {/* 운동 루틴 */}
+            <button
+              onClick={() => handleSelectPurpose('workout')}
+              disabled={createSession.isPending}
+              className="w-full p-6 rounded-2xl border-2 border-border bg-card hover:border-primary hover:bg-primary/5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-orange-500/10 flex items-center justify-center shrink-0">
+                  <Dumbbell className="w-7 h-7 text-orange-500" />
+                </div>
+                <div className="text-left flex-1">
+                  <h3 className="font-bold text-foreground text-lg">운동 루틴</h3>
+                  <p className="text-muted-foreground text-sm mt-0.5">
+                    맞춤형 4주 운동 프로그램
+                  </p>
+                </div>
+                {createSession.isPending && selectedPurpose === 'workout' && (
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                )}
+              </div>
+            </button>
+
+            {/* 식단 관리 */}
+            <button
+              onClick={() => handleSelectPurpose('meal')}
+              disabled={createSession.isPending}
+              className="w-full p-6 rounded-2xl border-2 border-border bg-card hover:border-primary hover:bg-primary/5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
+                  <Utensils className="w-7 h-7 text-green-500" />
+                </div>
+                <div className="text-left flex-1">
+                  <h3 className="font-bold text-foreground text-lg">식단 관리</h3>
+                  <p className="text-muted-foreground text-sm mt-0.5">
+                    맞춤형 영양 및 식단 계획
+                  </p>
+                </div>
+                {createSession.isPending && selectedPurpose === 'meal' && (
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                )}
+              </div>
+            </button>
+          </div>
         </div>
       </div>
     );
   }
+
+  // 헤더 타이틀 (purpose에 따라)
+  const headerTitle = activeSession?.purpose === 'meal' ? 'AI 영양사' : 'AI 트레이너';
 
   // 헤더 우측 액션 버튼 (세션이 있으면 항상 표시)
   const headerAction = (
@@ -196,7 +279,7 @@ export default function AIChatPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <PageHeader
-        title="AI 트레이너"
+        title={headerTitle}
         onBack={() => router.push('/routine')}
         action={headerAction}
       />
@@ -221,6 +304,13 @@ export default function AIChatPage() {
         isLoading={isStreaming && !streamingContent}
         streamingContent={streamingContent}
         activeTools={activeTools}
+        pendingInput={pendingInput}
+        onSubmitInput={submitInput}
+        pendingRoutinePreview={pendingRoutinePreview}
+        appliedRoutine={appliedRoutine}
+        routineProgress={routineProgress}
+        onApplyRoutine={applyRoutine}
+        onRequestRevision={requestRevision}
       />
 
       {/* 에러 메시지 */}

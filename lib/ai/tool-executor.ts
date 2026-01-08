@@ -6,8 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import type { AIToolName, AIToolResult, DbFitnessProfile, FitnessProfile, FitnessProfileUpdateData } from '@/lib/types';
-import { transformDbFitnessProfile, transformFitnessProfileToDb } from '@/lib/types/fitness';
+import type { AIToolName, AIToolResult, InputRequest, InputRequestOption, InputRequestSliderConfig, InputRequestType, RoutinePreviewData, RoutinePreviewWeek, RoutinePreviewDay, RoutinePreviewExercise, RoutineConflict } from '@/lib/types';
 import { transformDbInBodyToInBody, DbInBodyRecord, InBodyRecord } from '@/lib/types/inbody';
 import type { DbUser } from '@/lib/types/user';
 import type { WorkoutData, WorkoutExercise, EventType } from '@/lib/types/routine';
@@ -31,6 +30,8 @@ export interface UserBasicInfo {
   name: string;
   age: number;
   gender: 'male' | 'female';
+  interestedExercises: string[] | null;
+  isSmoker: boolean | null;
 }
 
 export interface UserMilitaryInfo {
@@ -43,6 +44,8 @@ export interface UserMilitaryInfo {
 export interface UserBodyMetrics {
   height: number | null;
   weight: number | null;
+  muscleMass: number | null;
+  bodyFatPercentage: number | null;
 }
 
 export interface TrainingPreferences {
@@ -54,6 +57,25 @@ export interface TrainingPreferences {
 }
 
 export interface InjuriesRestrictions {
+  injuries: string[];
+  restrictions: string[];
+}
+
+/**
+ * 통합 피트니스 프로필 (4개 쿼리 → 1개 통합)
+ * 성능 최적화: 개별 쿼리 대신 이 타입 사용 권장
+ */
+export interface FitnessProfile {
+  // 운동 목표/경험
+  fitnessGoal: string | null;
+  experienceLevel: string | null;
+  // 운동 선호도
+  preferredDaysPerWeek: number | null;
+  sessionDurationMinutes: number | null;
+  equipmentAccess: string | null;
+  focusAreas: string[];
+  preferences: string[];
+  // 부상/제한 사항
   injuries: string[];
   restrictions: string[];
 }
@@ -162,7 +184,7 @@ function convertAIRoutineToEvents(
       const exercises: WorkoutExercise[] = (day.exercises || []).map((ex, idx) => ({
         id: ex.id || `exercise-${idx}`,
         name: ex.name,
-        category: ex.category as WorkoutExercise['category'],
+        category: ex.category,
         targetMuscle: ex.targetMuscle,
         sets: (ex.sets || []).map((set, setIdx) => ({
           setNumber: set.setNumber || setIdx + 1,
@@ -181,7 +203,7 @@ function convertAIRoutineToEvents(
       const workoutData: WorkoutData = {
         exercises,
         estimatedDuration: day.estimatedDuration,
-        workoutType: day.workoutType as WorkoutData['workoutType'],
+        workoutType: day.workoutType,
         intensity: day.intensity,
         warmup: day.warmup,
         cooldown: day.cooldown,
@@ -218,7 +240,7 @@ export async function executeGetUserBasicInfo(
 ): Promise<AIToolResult<UserBasicInfo>> {
   const { data: user, error } = await ctx.supabase
     .from('users')
-    .select('real_name, birth_date, gender')
+    .select('nickname, real_name, birth_date, gender, interested_exercise_types, is_smoker')
     .eq('id', ctx.userId)
     .single();
 
@@ -229,9 +251,12 @@ export async function executeGetUserBasicInfo(
   return {
     success: true,
     data: {
-      name: user.real_name,
+      // nickname 우선, 없으면 real_name 사용
+      name: user.nickname || user.real_name,
       age: calculateAge(user.birth_date),
       gender: user.gender as 'male' | 'female',
+      interestedExercises: user.interested_exercise_types,
+      isSmoker: user.is_smoker,
     },
   };
 }
@@ -271,7 +296,7 @@ export async function executeGetUserBodyMetrics(
 ): Promise<AIToolResult<UserBodyMetrics>> {
   const { data: user, error } = await ctx.supabase
     .from('users')
-    .select('height_cm, weight_kg')
+    .select('height_cm, weight_kg, skeletal_muscle_mass_kg, body_fat_percentage')
     .eq('id', ctx.userId)
     .single();
 
@@ -284,6 +309,8 @@ export async function executeGetUserBodyMetrics(
     data: {
       height: user.height_cm,
       weight: user.weight_kg,
+      muscleMass: user.skeletal_muscle_mass_kg,
+      bodyFatPercentage: user.body_fat_percentage,
     },
   };
 }
@@ -342,7 +369,70 @@ export async function executeGetInbodyHistory(
 }
 
 /**
- * 6. get_fitness_goal
+ * 6. get_fitness_profile (통합)
+ *
+ * 4개의 개별 쿼리(get_fitness_goal, get_experience_level, get_training_preferences, get_injuries_restrictions)를
+ * 1개의 쿼리로 통합하여 성능 최적화 (쿼리 4회 → 1회)
+ */
+export async function executeGetFitnessProfile(
+  ctx: ToolExecutorContext
+): Promise<AIToolResult<FitnessProfile>> {
+  const { data, error } = await ctx.supabase
+    .from('fitness_profiles')
+    .select(`
+      fitness_goal,
+      experience_level,
+      preferred_days_per_week,
+      session_duration_minutes,
+      equipment_access,
+      focus_areas,
+      preferences,
+      injuries,
+      restrictions
+    `)
+    .eq('user_id', ctx.userId)
+    .single();
+
+  if (error) {
+    // 프로필이 없는 경우 빈 값 반환 (정상 케이스)
+    if (error.code === 'PGRST116') {
+      return {
+        success: true,
+        data: {
+          fitnessGoal: null,
+          experienceLevel: null,
+          preferredDaysPerWeek: null,
+          sessionDurationMinutes: null,
+          equipmentAccess: null,
+          focusAreas: [],
+          preferences: [],
+          injuries: [],
+          restrictions: [],
+        },
+      };
+    }
+    return { success: false, error: '피트니스 프로필을 조회할 수 없습니다.' };
+  }
+
+  return {
+    success: true,
+    data: {
+      fitnessGoal: data.fitness_goal,
+      experienceLevel: data.experience_level,
+      preferredDaysPerWeek: data.preferred_days_per_week,
+      sessionDurationMinutes: data.session_duration_minutes,
+      equipmentAccess: data.equipment_access,
+      focusAreas: data.focus_areas ?? [],
+      preferences: data.preferences ?? [],
+      injuries: data.injuries ?? [],
+      restrictions: data.restrictions ?? [],
+    },
+  };
+}
+
+/**
+ * 6-1. get_fitness_goal (deprecated)
+ * @deprecated get_fitness_profile 사용 권장
  */
 export async function executeGetFitnessGoal(
   ctx: ToolExecutorContext
@@ -367,7 +457,8 @@ export async function executeGetFitnessGoal(
 }
 
 /**
- * 7. get_experience_level
+ * 6-2. get_experience_level (deprecated)
+ * @deprecated get_fitness_profile 사용 권장
  */
 export async function executeGetExperienceLevel(
   ctx: ToolExecutorContext
@@ -392,7 +483,8 @@ export async function executeGetExperienceLevel(
 }
 
 /**
- * 8. get_training_preferences
+ * 6-3. get_training_preferences (deprecated)
+ * @deprecated get_fitness_profile 사용 권장
  */
 export async function executeGetTrainingPreferences(
   ctx: ToolExecutorContext
@@ -432,7 +524,8 @@ export async function executeGetTrainingPreferences(
 }
 
 /**
- * 9. get_injuries_restrictions
+ * 6-4. get_injuries_restrictions (deprecated)
+ * @deprecated get_fitness_profile 사용 권장
  */
 export async function executeGetInjuriesRestrictions(
   ctx: ToolExecutorContext
@@ -510,7 +603,9 @@ export async function executeUpdateFitnessProfile(
     );
 
   if (error) {
-    return { success: false, error: '프로필 업데이트에 실패했습니다.' };
+    console.error('[update_fitness_profile] Error:', error);
+    console.error('[update_fitness_profile] UpdateData:', updateData);
+    return { success: false, error: `프로필 업데이트에 실패했습니다: ${error.message}` };
   }
 
   return { success: true, data: { updated: true } };
@@ -623,6 +718,231 @@ export async function executeSaveRoutineDraft(
   }
 }
 
+/**
+ * 13. request_user_input
+ *
+ * 사용자에게 객관식 선택 UI를 요청
+ * 이 도구는 DB 작업 없이 프론트엔드에 UI 요청만 전달
+ * 실제 UI 렌더링은 API route에서 input_request SSE 이벤트로 처리
+ */
+export function executeRequestUserInput(
+  args: {
+    message?: string;
+    type: InputRequestType;
+    options?: InputRequestOption[];
+    sliderConfig?: InputRequestSliderConfig;
+  },
+  toolCallId: string
+): AIToolResult<InputRequest> {
+  // 유효성 검증
+  if (args.type === 'slider' && !args.sliderConfig) {
+    return { success: false, error: 'slider 타입에는 sliderConfig가 필요합니다.' };
+  }
+
+  if ((args.type === 'radio' || args.type === 'checkbox') && (!args.options || args.options.length === 0)) {
+    return { success: false, error: 'radio/checkbox 타입에는 options가 필요합니다.' };
+  }
+
+  const inputRequest: InputRequest = {
+    id: toolCallId,
+    type: args.type,
+    message: args.message,
+    options: args.options,
+    sliderConfig: args.sliderConfig,
+  };
+
+  return {
+    success: true,
+    data: inputRequest,
+  };
+}
+
+/**
+ * 14. generate_routine_preview
+ *
+ * AI가 생성한 루틴 미리보기 데이터 생성 (DB 저장 없음)
+ * 프론트엔드에서 routine_preview SSE 이벤트로 UI 표시
+ */
+export function executeGenerateRoutinePreview(
+  args: {
+    title: string;
+    description: string;
+    duration_weeks: number;
+    days_per_week: number;
+    weeks: Array<{
+      weekNumber: number;
+      days: Array<{
+        dayOfWeek: number;
+        title: string;
+        exercises: Array<{
+          name: string;
+          sets: number;
+          reps: string;
+          rest: string;
+          notes?: string;
+        }>;
+        estimatedDuration?: number;
+      }>;
+    }>;
+  },
+  toolCallId: string
+): AIToolResult<RoutinePreviewData> {
+  // 미리보기 ID 생성
+  const previewId = `preview-${toolCallId}`;
+
+  // weeks 데이터를 RoutinePreviewWeek[] 형태로 변환
+  const weeks: RoutinePreviewWeek[] = args.weeks.map((week) => ({
+    weekNumber: week.weekNumber,
+    days: week.days.map((day): RoutinePreviewDay => ({
+      dayOfWeek: day.dayOfWeek,
+      title: day.title,
+      exercises: day.exercises.map((ex): RoutinePreviewExercise => ({
+        name: ex.name,
+        sets: ex.sets,
+        reps: ex.reps,
+        rest: ex.rest,
+        notes: ex.notes,
+      })),
+      estimatedDuration: day.estimatedDuration,
+    })),
+  }));
+
+  const previewData: RoutinePreviewData = {
+    id: previewId,
+    title: args.title,
+    description: args.description,
+    durationWeeks: args.duration_weeks,
+    daysPerWeek: args.days_per_week,
+    weeks,
+    // 원본 데이터 저장 (apply_routine에서 사용)
+    rawRoutineData: {
+      title: args.title,
+      description: args.description,
+      duration_weeks: args.duration_weeks,
+      days_per_week: args.days_per_week,
+      routine_data: {
+        weeks: args.weeks.map((week) => ({
+          weekNumber: week.weekNumber,
+          days: week.days.map((day) => ({
+            dayOfWeek: day.dayOfWeek,
+            title: day.title,
+            exercises: day.exercises.map((ex) => ({
+              name: ex.name,
+              category: 'compound',
+              targetMuscle: 'general',
+              sets: Array.from({ length: ex.sets }, (_, i) => ({
+                setNumber: i + 1,
+                targetReps: parseInt(ex.reps.split('-')[0]) || 10,
+                targetWeight: 0,
+              })),
+              restSeconds: parseInt(ex.rest) || 90,
+              notes: ex.notes,
+            })),
+            estimatedDuration: day.estimatedDuration || 60,
+          })),
+        })),
+      },
+    },
+  };
+
+  return {
+    success: true,
+    data: previewData,
+  };
+}
+
+/**
+ * 14-1. 충돌 체크
+ *
+ * 새 루틴이 적용될 날짜들에 기존 루틴이 있는지 확인
+ * generate_routine_preview 호출 후 conflicts 필드에 포함
+ */
+export async function checkDateConflicts(
+  ctx: ToolExecutorContext,
+  previewData: RoutinePreviewData
+): Promise<RoutineConflict[]> {
+  // 루틴이 적용될 날짜들 계산
+  const nextMonday = getNextMonday();
+  const dates: string[] = [];
+
+  for (const week of previewData.weeks) {
+    for (const day of week.days) {
+      // 주차 오프셋 (0부터 시작)
+      const weekOffset = week.weekNumber - 1;
+      // 요일 오프셋 (월요일=1 → 0일 추가, 화요일=2 → 1일 추가, ...)
+      const dayOffset = day.dayOfWeek - 1;
+
+      const targetDate = new Date(nextMonday);
+      targetDate.setDate(targetDate.getDate() + weekOffset * 7 + dayOffset);
+      dates.push(targetDate.toISOString().split('T')[0]);
+    }
+  }
+
+  if (dates.length === 0) {
+    return [];
+  }
+
+  // 기존 루틴 이벤트 조회
+  const { data: existingEvents, error } = await ctx.supabase
+    .from('routine_events')
+    .select('date, title')
+    .eq('user_id', ctx.userId)
+    .eq('type', 'workout')
+    .in('date', dates);
+
+  if (error) {
+    console.error('[checkDateConflicts] Error:', error);
+    return []; // 에러 시 충돌 없음으로 처리 (안전하게)
+  }
+
+  if (!existingEvents || existingEvents.length === 0) {
+    return [];
+  }
+
+  // 충돌 정보 반환
+  return existingEvents.map((event) => ({
+    date: event.date,
+    existingTitle: event.title,
+  }));
+}
+
+/**
+ * 15. apply_routine
+ *
+ * 미리보기 데이터를 실제 DB에 저장
+ * previewData는 API route에서 메시지 metadata에서 가져와서 전달
+ */
+export async function executeApplyRoutine(
+  ctx: ToolExecutorContext,
+  previewData: RoutinePreviewData
+): Promise<AIToolResult<{ saved: boolean; eventsCreated: number; startDate: string }>> {
+  try {
+    if (!previewData.rawRoutineData) {
+      return { success: false, error: '미리보기 데이터를 찾을 수 없습니다.' };
+    }
+
+    const rawData = previewData.rawRoutineData as {
+      title: string;
+      description: string;
+      duration_weeks: number;
+      days_per_week: number;
+      routine_data: Record<string, unknown>;
+    };
+
+    // 기존 executeSaveRoutineDraft 로직 재사용
+    return await executeSaveRoutineDraft(ctx, {
+      title: rawData.title,
+      description: rawData.description,
+      duration_weeks: rawData.duration_weeks,
+      days_per_week: rawData.days_per_week,
+      routine_data: rawData.routine_data,
+    });
+  } catch (err) {
+    console.error('[apply_routine] Unexpected error:', err);
+    return { success: false, error: '루틴 적용 중 오류가 발생했습니다.' };
+  }
+}
+
 // ============================================================================
 // Main Executor
 // ============================================================================
@@ -651,6 +971,11 @@ export async function executeTool(
     case 'get_inbody_history':
       return executeGetInbodyHistory(ctx, args as { limit: number | null });
 
+    // 통합 피트니스 프로필 (권장)
+    case 'get_fitness_profile':
+      return executeGetFitnessProfile(ctx);
+
+    // 개별 피트니스 프로필 (deprecated - 하위 호환성 유지)
     case 'get_fitness_goal':
       return executeGetFitnessGoal(ctx);
 
@@ -671,6 +996,21 @@ export async function executeTool(
 
     case 'save_routine_draft':
       return executeSaveRoutineDraft(ctx, args as Parameters<typeof executeSaveRoutineDraft>[1]);
+
+    case 'request_user_input':
+      // 이 도구는 API route에서 직접 처리 (input_request SSE 이벤트 전송)
+      // executeTool을 통해 호출되면 안됨
+      return { success: false, error: 'request_user_input은 API route에서 직접 처리해야 합니다.' };
+
+    case 'generate_routine_preview':
+      // 이 도구는 API route에서 직접 처리 (routine_preview SSE 이벤트 전송)
+      // executeTool을 통해 호출되면 안됨
+      return { success: false, error: 'generate_routine_preview는 API route에서 직접 처리해야 합니다.' };
+
+    case 'apply_routine':
+      // 이 도구는 API route에서 직접 처리 (preview 데이터 조회 필요)
+      // executeTool을 통해 호출되면 안됨
+      return { success: false, error: 'apply_routine은 API route에서 직접 처리해야 합니다.' };
 
     default:
       return { success: false, error: `알 수 없는 도구: ${toolName}` };

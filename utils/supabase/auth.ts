@@ -47,7 +47,8 @@ function extractBearerToken(request: NextRequest): string | null {
  * Expo 앱에서 토큰을 직접 전달할 때 사용됩니다.
  */
 async function getAuthUserFromToken(accessToken: string): Promise<AuthContext | null> {
-  // 토큰 검증용 Supabase 클라이언트 (서버 키 불필요, anon key로 충분)
+  // 토큰 검증용 Supabase 클라이언트 (anon key + Bearer 토큰)
+  // 이 클라이언트가 RLS 정책에서 auth.uid()를 올바르게 반환함
   const supabaseWithToken = createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -81,13 +82,11 @@ async function getAuthUserFromToken(accessToken: string): Promise<AuthContext | 
     return null;
   }
 
-  // 쿠키 기반 클라이언트도 생성 (DB 쿼리용으로 재사용)
-  const supabase = await createClient();
-
+  // 토큰 인증된 클라이언트를 그대로 반환 (RLS 정책에서 auth.uid() 작동)
   return {
     authUser,
     userId: dbUser.id,
-    supabase,
+    supabase: supabaseWithToken,
   };
 }
 

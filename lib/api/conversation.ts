@@ -7,7 +7,7 @@
  * @throws {ApiError} 모든 API 에러는 ApiError로 통일
  */
 
-import { ApiError } from '@/lib/types';
+import { ApiError, InputRequest, RoutinePreviewData } from '@/lib/types';
 import { authFetch } from '@/lib/utils/authFetch';
 import {
   Conversation,
@@ -279,12 +279,31 @@ export interface ToolEvent {
   error?: string;
 }
 
+export interface RoutineAppliedEvent {
+  previewId: string;
+  eventsCreated: number;
+  startDate: string;
+}
+
+export interface RoutineProgressEvent {
+  progress: number;
+  stage: string;
+}
+
 export interface ChatStreamCallbacks {
   onMessage: (chunk: string) => void;
   onComplete: (fullMessage: string) => void;
   onError: (error: Error) => void;
   onToolStart?: (event: ToolEvent) => void;
   onToolDone?: (event: ToolEvent) => void;
+  /** 객관식 입력 UI 요청 */
+  onInputRequest?: (request: InputRequest) => void;
+  /** 루틴 미리보기 표시 */
+  onRoutinePreview?: (preview: RoutinePreviewData) => void;
+  /** 루틴 적용 완료 */
+  onRoutineApplied?: (event: RoutineAppliedEvent) => void;
+  /** 루틴 생성 진행률 */
+  onRoutineProgress?: (event: RoutineProgressEvent) => void;
 }
 
 export const aiChatApi = {
@@ -378,6 +397,18 @@ export const aiChatApi = {
                     break;
                   case 'tool_done':
                     callbacks.onToolDone?.(parsed);
+                    break;
+                  case 'input_request':
+                    callbacks.onInputRequest?.(parsed as InputRequest);
+                    break;
+                  case 'routine_preview':
+                    callbacks.onRoutinePreview?.(parsed as RoutinePreviewData);
+                    break;
+                  case 'routine_applied':
+                    callbacks.onRoutineApplied?.(parsed as RoutineAppliedEvent);
+                    break;
+                  case 'routine_progress':
+                    callbacks.onRoutineProgress?.(parsed as RoutineProgressEvent);
                     break;
                   case 'done':
                     callbacks.onComplete(fullMessage);

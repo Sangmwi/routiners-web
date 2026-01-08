@@ -2,43 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
 import {
   DbConversation,
-  DbChatMessage,
   transformDbConversation,
-  transformDbMessage,
   toAISessionCompat,
-  ChatMessage,
 } from '@/lib/types/chat';
 import { z } from 'zod';
 
 // ============================================================================
-// AI 초기 메시지 (purpose별)
+// AI 초기 메시지 - 더 이상 사용하지 않음
+// 세션 생성 후 프론트엔드에서 자동으로 __START__ 메시지를 전송하여
+// AI가 직접 첫 질문 UI를 표시합니다.
 // ============================================================================
-
-const INITIAL_MESSAGES: Record<'workout' | 'meal', string> = {
-  workout: `안녕하세요! 저는 AI 트레이너입니다. 💪
-
-맞춤형 4주 운동 루틴을 만들어 드릴게요. 몇 가지 질문에 답해주시면 됩니다.
-
-먼저, **운동 목표**가 무엇인가요?
-- 근력 향상
-- 체중 감량
-- 체력 증진
-- 근육량 증가
-
-원하는 목표를 알려주세요!`,
-
-  meal: `안녕하세요! 저는 AI 영양사입니다. 🥗
-
-맞춤형 식단을 만들어 드릴게요. 몇 가지 질문에 답해주시면 됩니다.
-
-먼저, **식단 목표**가 무엇인가요?
-- 체중 감량
-- 근육량 증가
-- 건강 관리
-- 체중 유지
-
-원하는 목표를 알려주세요!`,
-};
 
 // ============================================================================
 // Validation Schema
@@ -187,31 +160,10 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
     );
   }
 
-  // AI 대화인 경우: 초기 메시지 추가
-  let messages: ChatMessage[] = [];
-  if (type === 'ai' && aiPurpose) {
-    const { data: initialMsg, error: msgError } = await supabase
-      .from('chat_messages')
-      .insert({
-        conversation_id: conv.id,
-        sender_id: null, // AI
-        role: 'assistant',
-        content: INITIAL_MESSAGES[aiPurpose],
-        content_type: 'text',
-      })
-      .select()
-      .single();
-
-    if (msgError) {
-      console.error('[Conversations POST] Message Error:', msgError);
-    } else {
-      messages = [transformDbMessage(initialMsg as DbChatMessage)];
-    }
-  }
-
   // AI 대화인 경우: AISessionCompat 형태로 반환 (기존 코드 호환)
+  // 초기 메시지 없이 빈 세션 반환 - 프론트엔드에서 자동으로 AI 시작 트리거
   if (type === 'ai') {
-    const result = toAISessionCompat(transformDbConversation(conv), messages);
+    const result = toAISessionCompat(transformDbConversation(conv), []);
     return NextResponse.json(result, { status: 201 });
   }
 

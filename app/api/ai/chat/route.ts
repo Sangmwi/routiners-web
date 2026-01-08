@@ -112,7 +112,7 @@ export const POST = withAuth<Response>(async (request: NextRequest, { userId, su
     // 비스트리밍 응답
     try {
       const response = await openai.chat.completions.create({
-        model: 'gpt-4.1-mini',
+        model: 'gpt-5.1',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           ...updatedMessages.map((m) => ({
@@ -157,7 +157,7 @@ export const POST = withAuth<Response>(async (request: NextRequest, { userId, su
     async start(controller) {
       try {
         const response = await openai.chat.completions.create({
-          model: 'gpt-4.1-mini',
+          model: 'gpt-5.1',
           messages: [
             { role: 'system', content: SYSTEM_PROMPT },
             ...updatedMessages.map((m) => ({

@@ -33,13 +33,14 @@ export interface AIToolDefinition {
 
 /**
  * 1. 사용자 기본 정보 조회
- * - 이름, 나이, 성별
+ * - 닉네임(사용자가 설정한 이름), 나이, 성별, 관심 운동, 흡연 여부
+ * - 주의: 이름은 사용자가 직접 설정한 닉네임(nickname)이며, 공식 실명(real_name)과 다를 수 있음
  */
 export const GET_USER_BASIC_INFO: AIToolDefinition = {
   type: 'function',
   name: 'get_user_basic_info',
   description:
-    '사용자의 기본 정보(이름, 나이, 성별)를 조회합니다. 운동 프로그램 설계 시 기본적인 개인화에 사용됩니다.',
+    '사용자의 기본 프로필 정보를 조회합니다. 반환값: name(사용자가 설정한 닉네임), age(나이), gender(성별), interestedExercises(관심 운동 종류 배열), isSmoker(흡연 여부). 사용자를 부를 때는 반드시 name 필드를 사용하세요.',
   parameters: {
     type: 'object',
     properties: {},
@@ -63,13 +64,14 @@ export const GET_USER_MILITARY_INFO: AIToolDefinition = {
 
 /**
  * 3. 사용자 신체 정보 조회
- * - 키, 몸무게 (프로필에 저장된 값)
+ * - 키, 몸무게, 골격근량, 체지방률 (프로필에 저장된 값)
+ * - 인바디 상세 데이터는 get_latest_inbody 사용
  */
 export const GET_USER_BODY_METRICS: AIToolDefinition = {
   type: 'function',
   name: 'get_user_body_metrics',
   description:
-    '사용자의 기본 신체 정보(키, 몸무게)를 조회합니다. 운동 강도 및 칼로리 계산에 사용됩니다.',
+    '사용자의 기본 신체 정보를 조회합니다. 반환값: height(키, cm), weight(몸무게, kg), muscleMass(골격근량, kg), bodyFatPercentage(체지방률, %). 이 값은 사용자가 프로필에 직접 입력한 값입니다. 더 정확한 인바디 측정 데이터가 필요하면 get_latest_inbody를 사용하세요.',
   parameters: {
     type: 'object',
     properties: {},
@@ -112,14 +114,30 @@ export const GET_INBODY_HISTORY: AIToolDefinition = {
 };
 
 /**
- * 6. 운동 목표 조회
- * - fitness_profiles.fitness_goal
+ * 6. 피트니스 프로필 통합 조회 (권장)
+ * - 운동 목표, 경험 수준, 선호도, 부상/제한 사항을 한 번에 조회
+ * - 성능 최적화: 4개 개별 쿼리 → 1개 통합 쿼리
+ */
+export const GET_FITNESS_PROFILE: AIToolDefinition = {
+  type: 'function',
+  name: 'get_fitness_profile',
+  description:
+    '사용자의 피트니스 프로필을 한 번에 조회합니다. 운동 목표(fitnessGoal), 경험 수준(experienceLevel), 선호도(preferredDaysPerWeek, sessionDurationMinutes, equipmentAccess, focusAreas, preferences), 부상/제한 사항(injuries, restrictions)을 모두 반환합니다. 개별 도구(get_fitness_goal, get_experience_level 등) 대신 이 도구를 사용하세요.',
+  parameters: {
+    type: 'object',
+    properties: {},
+  },
+};
+
+/**
+ * 6-1. 운동 목표 조회 (deprecated)
+ * @deprecated get_fitness_profile 사용 권장
  */
 export const GET_FITNESS_GOAL: AIToolDefinition = {
   type: 'function',
   name: 'get_fitness_goal',
   description:
-    '사용자의 운동 목표(근육 증가, 체지방 감소, 지구력 향상 등)를 조회합니다. 목표에 맞는 운동 프로그램 설계에 핵심적입니다.',
+    '[deprecated] get_fitness_profile 사용 권장. 사용자의 운동 목표를 조회합니다.',
   parameters: {
     type: 'object',
     properties: {},
@@ -127,14 +145,14 @@ export const GET_FITNESS_GOAL: AIToolDefinition = {
 };
 
 /**
- * 7. 운동 경험 수준 조회
- * - fitness_profiles.experience_level
+ * 6-2. 운동 경험 수준 조회 (deprecated)
+ * @deprecated get_fitness_profile 사용 권장
  */
 export const GET_EXPERIENCE_LEVEL: AIToolDefinition = {
   type: 'function',
   name: 'get_experience_level',
   description:
-    '사용자의 운동 경험 수준(초보자, 중급자, 상급자)을 조회합니다. 적절한 운동 난이도와 볼륨 설정에 사용됩니다.',
+    '[deprecated] get_fitness_profile 사용 권장. 사용자의 운동 경험 수준을 조회합니다.',
   parameters: {
     type: 'object',
     properties: {},
@@ -142,14 +160,14 @@ export const GET_EXPERIENCE_LEVEL: AIToolDefinition = {
 };
 
 /**
- * 8. 운동 선호도 조회
- * - 주간 운동 일수, 세션 시간, 장비 접근성, 집중 부위
+ * 6-3. 운동 선호도 조회 (deprecated)
+ * @deprecated get_fitness_profile 사용 권장
  */
 export const GET_TRAINING_PREFERENCES: AIToolDefinition = {
   type: 'function',
   name: 'get_training_preferences',
   description:
-    '사용자의 운동 선호도(주간 운동 일수, 세션당 시간, 사용 가능 장비, 집중하고 싶은 부위)를 조회합니다.',
+    '[deprecated] get_fitness_profile 사용 권장. 사용자의 운동 선호도를 조회합니다.',
   parameters: {
     type: 'object',
     properties: {},
@@ -157,14 +175,14 @@ export const GET_TRAINING_PREFERENCES: AIToolDefinition = {
 };
 
 /**
- * 9. 부상/제한 사항 조회
- * - injuries, restrictions 배열
+ * 6-4. 부상/제한 사항 조회 (deprecated)
+ * @deprecated get_fitness_profile 사용 권장
  */
 export const GET_INJURIES_RESTRICTIONS: AIToolDefinition = {
   type: 'function',
   name: 'get_injuries_restrictions',
   description:
-    '사용자의 부상 이력과 운동 제한 사항을 조회합니다. 안전한 운동 프로그램 설계를 위해 반드시 확인해야 합니다.',
+    '[deprecated] get_fitness_profile 사용 권장. 사용자의 부상/제한 사항을 조회합니다.',
   parameters: {
     type: 'object',
     properties: {},
@@ -250,14 +268,14 @@ export const GET_CURRENT_ROUTINE: AIToolDefinition = {
 };
 
 /**
- * 12. 루틴 초안 저장
+ * 12. 루틴 초안 저장 (deprecated - generate_routine_preview 사용 권장)
  * - 대화 중 생성한 루틴을 임시 저장
  */
 export const SAVE_ROUTINE_DRAFT: AIToolDefinition = {
   type: 'function',
   name: 'save_routine_draft',
   description:
-    '생성한 운동 루틴 초안을 대화에 연결하여 저장합니다. 사용자가 "적용하기"를 선택하면 정식 루틴으로 변환됩니다.',
+    '[deprecated] 이 도구 대신 generate_routine_preview를 사용하세요. 미리보기 후 사용자가 확인하면 apply_routine으로 저장합니다.',
   parameters: {
     type: 'object',
     properties: {
@@ -339,23 +357,182 @@ export const SAVE_ROUTINE_DRAFT: AIToolDefinition = {
   },
 };
 
+/**
+ * 13. 사용자 입력 요청
+ * - 객관식 선택, 슬라이더 등 UI를 통한 사용자 입력 요청
+ * - 사용자가 직접 타이핑하지 않고 버튼/슬라이더로 쉽게 답변 가능
+ * - 중요: 텍스트로 옵션을 나열하지 말고 반드시 이 도구를 사용할 것
+ */
+export const REQUEST_USER_INPUT: AIToolDefinition = {
+  type: 'function',
+  name: 'request_user_input',
+  description:
+    '사용자에게 선택형 질문을 할 때 반드시 이 도구를 사용하세요. 절대로 텍스트로 "1. 근육증가 2. 체지방감소" 같이 나열하지 마세요. 이 도구를 호출하면 사용자 화면에 클릭 가능한 버튼이나 슬라이더가 표시됩니다. message 파라미터에 사용자에게 보여줄 질문 메시지를 반드시 포함하세요.',
+  parameters: {
+    type: 'object',
+    properties: {
+      message: {
+        type: 'string',
+        description:
+          '사용자에게 보여줄 질문 메시지. 예: "운동 경험은 어느 정도인가요?", "좋습니다! 주간 운동 일수를 선택해주세요."',
+      },
+      type: {
+        type: 'string',
+        enum: ['radio', 'checkbox', 'slider'],
+        description:
+          'UI 타입. radio: 단일 선택, checkbox: 다중 선택, slider: 숫자 범위 선택',
+      },
+      options: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            value: { type: 'string', description: '선택 시 전송될 값' },
+            label: { type: 'string', description: '화면에 표시될 텍스트' },
+          },
+          required: ['value', 'label'],
+        },
+        description: 'radio, checkbox 타입에서 사용할 선택지 목록',
+      },
+      sliderConfig: {
+        type: 'object',
+        properties: {
+          min: { type: 'number', description: '최소값' },
+          max: { type: 'number', description: '최대값' },
+          step: { type: 'number', description: '증가 단위' },
+          unit: { type: 'string', description: '단위 (예: 일, 분, kg)' },
+          defaultValue: { type: 'number', description: '기본값' },
+        },
+        required: ['min', 'max', 'step', 'unit'],
+        description: 'slider 타입에서 사용할 설정',
+      },
+    },
+    required: ['message', 'type'],
+  },
+};
+
+/**
+ * 14. 루틴 미리보기 생성
+ * - DB에 저장하지 않고 미리보기 UI만 표시
+ * - 사용자가 확인 후 프론트엔드에서 apply API 호출
+ * - 2주 단위 생성 권장 (토큰 50% 절약, 응답 속도 2배 향상)
+ */
+export const GENERATE_ROUTINE_PREVIEW: AIToolDefinition = {
+  type: 'function',
+  name: 'generate_routine_preview',
+  description:
+    '2주 운동 루틴 미리보기를 생성합니다. duration_weeks는 반드시 2로 설정하세요. 이 도구는 루틴을 DB에 저장하지 않고 사용자에게 미리보기 UI만 표시합니다. 사용자가 "적용하기" 버튼을 클릭하면 프론트엔드에서 자동으로 저장 처리됩니다. 수정 요청이 오면 피드백을 반영하여 다시 이 도구를 호출하세요.',
+  parameters: {
+    type: 'object',
+    properties: {
+      title: {
+        type: 'string',
+        description: '루틴 제목 (예: "2주 근력 강화 프로그램")',
+      },
+      description: {
+        type: 'string',
+        description: '루틴에 대한 간단한 설명',
+      },
+      duration_weeks: {
+        type: 'integer',
+        description: '루틴 기간 (항상 2로 설정). 2주 단위로 생성합니다.',
+      },
+      days_per_week: {
+        type: 'integer',
+        description: '주간 운동 일수',
+      },
+      weeks: {
+        type: 'array',
+        description: '주차별 운동 계획',
+        items: {
+          type: 'object',
+          properties: {
+            weekNumber: { type: 'integer', description: '주차 번호 (1부터 시작)' },
+            days: {
+              type: 'array',
+              description: '해당 주의 운동 일정',
+              items: {
+                type: 'object',
+                properties: {
+                  dayOfWeek: { type: 'integer', description: '요일 (1=월요일, 7=일요일)' },
+                  title: { type: 'string', description: '운동 제목 (예: 가슴+삼두)' },
+                  exercises: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        name: { type: 'string', description: '운동 이름' },
+                        sets: { type: 'integer', description: '세트 수' },
+                        reps: { type: 'string', description: '반복 횟수 (예: "8-12", "10")' },
+                        rest: { type: 'string', description: '휴식 시간 (예: "90초", "2분")' },
+                      },
+                      required: ['name', 'sets', 'reps', 'rest'],
+                    },
+                  },
+                  estimatedDuration: { type: 'integer', description: '예상 소요 시간 (분)' },
+                },
+                required: ['dayOfWeek', 'title', 'exercises'],
+              },
+            },
+          },
+          required: ['weekNumber', 'days'],
+        },
+      },
+    },
+    required: ['title', 'description', 'duration_weeks', 'days_per_week', 'weeks'],
+  },
+};
+
+/**
+ * 15. 루틴 적용 (미리보기 확정)
+ * - 미리보기 데이터를 실제 DB에 저장
+ * - 사용자가 "적용하기" 버튼을 클릭하면 호출됨
+ */
+export const APPLY_ROUTINE: AIToolDefinition = {
+  type: 'function',
+  name: 'apply_routine',
+  description:
+    '미리보기 중인 루틴을 실제로 적용합니다. 이 도구는 사용자가 루틴 미리보기에서 "적용하기" 버튼을 클릭했을 때만 호출됩니다. preview_id는 generate_routine_preview에서 생성된 미리보기 ID입니다.',
+  parameters: {
+    type: 'object',
+    properties: {
+      preview_id: {
+        type: 'string',
+        description: '적용할 루틴 미리보기 ID',
+      },
+    },
+    required: ['preview_id'],
+  },
+};
+
 // ============================================================================
 // All Tools Export
 // ============================================================================
 
 export const AI_TRAINER_TOOLS: AIToolDefinition[] = [
+  // 사용자 기본 정보
   GET_USER_BASIC_INFO,
   GET_USER_MILITARY_INFO,
   GET_USER_BODY_METRICS,
   GET_LATEST_INBODY,
   GET_INBODY_HISTORY,
+  // 피트니스 프로필 (통합 - 권장)
+  GET_FITNESS_PROFILE,
+  // 피트니스 프로필 (개별 - deprecated, 하위 호환성 유지)
   GET_FITNESS_GOAL,
   GET_EXPERIENCE_LEVEL,
   GET_TRAINING_PREFERENCES,
   GET_INJURIES_RESTRICTIONS,
+  // 프로필 업데이트
   UPDATE_FITNESS_PROFILE,
+  // 루틴 관련
   GET_CURRENT_ROUTINE,
   SAVE_ROUTINE_DRAFT,
+  // 사용자 입력 요청
+  REQUEST_USER_INPUT,
+  // 루틴 미리보기/적용
+  GENERATE_ROUTINE_PREVIEW,
+  APPLY_ROUTINE,
 ];
 
 /**

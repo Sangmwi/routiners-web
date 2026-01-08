@@ -218,7 +218,9 @@ export const AI_TOOL_NAMES = [
   'get_user_body_metrics',
   'get_latest_inbody',
   'get_inbody_history',
-  // 피트니스 프로필
+  // 피트니스 프로필 (통합)
+  'get_fitness_profile', // 통합 쿼리 (권장)
+  // 피트니스 프로필 (개별 - deprecated)
   'get_fitness_goal',
   'get_experience_level',
   'get_training_preferences',
@@ -228,6 +230,10 @@ export const AI_TOOL_NAMES = [
   // 루틴 관련
   'get_current_routine',
   'save_routine_draft',
+  'generate_routine_preview', // 미리보기 생성 (DB 저장 X)
+  'apply_routine', // 미리보기 적용 (DB 저장)
+  // 사용자 입력 요청
+  'request_user_input',
 ] as const;
 
 export type AIToolName = (typeof AI_TOOL_NAMES)[number];
@@ -241,6 +247,7 @@ export const AI_TOOL_LABELS: Record<AIToolName, string> = {
   get_user_body_metrics: '신체 정보 확인 중',
   get_latest_inbody: '최근 인바디 확인 중',
   get_inbody_history: '인바디 이력 확인 중',
+  get_fitness_profile: '피트니스 프로필 확인 중',
   get_fitness_goal: '운동 목표 확인 중',
   get_experience_level: '운동 경험 확인 중',
   get_training_preferences: '운동 선호도 확인 중',
@@ -248,6 +255,9 @@ export const AI_TOOL_LABELS: Record<AIToolName, string> = {
   update_fitness_profile: '프로필 업데이트 중',
   get_current_routine: '현재 루틴 확인 중',
   save_routine_draft: '루틴 초안 저장 중',
+  generate_routine_preview: '루틴 미리보기 생성 중',
+  apply_routine: '루틴 적용 중',
+  request_user_input: '입력 요청',
 };
 
 /**
@@ -277,4 +287,101 @@ export interface AIToolStatus {
   status: 'running' | 'completed' | 'error';
   result?: unknown;
   error?: string;
+}
+
+// ============================================================================
+// Input Request Types (객관식 UI용)
+// ============================================================================
+
+/**
+ * 입력 요청 UI 타입
+ */
+export type InputRequestType = 'radio' | 'checkbox' | 'slider';
+
+/**
+ * 선택지 옵션
+ */
+export interface InputRequestOption {
+  value: string;
+  label: string;
+}
+
+/**
+ * 슬라이더 설정
+ */
+export interface InputRequestSliderConfig {
+  min: number;
+  max: number;
+  step: number;
+  unit: string;
+  defaultValue?: number;
+}
+
+/**
+ * AI가 요청하는 사용자 입력 정보
+ */
+export interface InputRequest {
+  id: string;
+  type: InputRequestType;
+  /** AI가 질문할 때 표시할 메시지 */
+  message?: string;
+  options?: InputRequestOption[];
+  sliderConfig?: InputRequestSliderConfig;
+}
+
+// ============================================================================
+// Routine Preview Types (루틴 미리보기용)
+// ============================================================================
+
+/**
+ * 미리보기용 운동 항목
+ */
+export interface RoutinePreviewExercise {
+  name: string;
+  sets: number;
+  reps: string;
+  rest: string;
+  notes?: string;
+}
+
+/**
+ * 미리보기용 운동 일자
+ */
+export interface RoutinePreviewDay {
+  dayOfWeek: number; // 1=월, 2=화, ...
+  title: string;
+  exercises: RoutinePreviewExercise[];
+  estimatedDuration?: number;
+}
+
+/**
+ * 미리보기용 주차 데이터
+ */
+export interface RoutinePreviewWeek {
+  weekNumber: number;
+  days: RoutinePreviewDay[];
+}
+
+/**
+ * 루틴 충돌 정보
+ */
+export interface RoutineConflict {
+  date: string; // YYYY-MM-DD
+  existingTitle: string;
+}
+
+/**
+ * AI가 생성한 루틴 미리보기 데이터
+ */
+export interface RoutinePreviewData {
+  id: string;
+  title: string;
+  description: string;
+  durationWeeks: number;
+  daysPerWeek: number;
+  weeks: RoutinePreviewWeek[];
+  /** AI 생성 시 사용된 원본 데이터 (apply_routine에서 사용) */
+  rawRoutineData?: Record<string, unknown>;
+  /** 기존 루틴과의 충돌 정보 (있는 경우) */
+  conflicts?: RoutineConflict[];
 }

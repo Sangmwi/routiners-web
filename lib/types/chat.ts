@@ -13,7 +13,7 @@ export type ConversationType = 'ai' | 'direct' | 'group';
 export type ConversationStatus = 'active' | 'completed' | 'abandoned';
 export type ParticipantRole = 'owner' | 'admin' | 'member';
 export type MessageRole = 'user' | 'assistant' | 'system';
-export type ContentType = 'text' | 'image' | 'file' | 'audio' | 'video' | 'location' | 'call';
+export type ContentType = 'text' | 'image' | 'file' | 'audio' | 'video' | 'location' | 'call' | 'tool_call' | 'tool_result';
 
 // SessionPurpose는 routine.ts에서 가져오기 (호환성)
 export type { SessionPurpose } from './routine';
@@ -37,6 +37,7 @@ export interface DbConversation {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  metadata: Record<string, unknown> | null;
 }
 
 /**
@@ -103,6 +104,8 @@ export interface Conversation {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  /** 대화방 메타데이터 (미리보기 상태 등) */
+  metadata?: Record<string, unknown>;
 
   // 조인 데이터 (optional)
   participants?: ConversationParticipant[];
@@ -226,6 +229,7 @@ export function transformDbConversation(db: DbConversation): Conversation {
     createdBy: db.created_by,
     createdAt: db.created_at,
     updatedAt: db.updated_at,
+    metadata: db.metadata ?? undefined,
   };
 }
 
@@ -286,6 +290,13 @@ export function transformDbReaction(db: DbMessageReaction): MessageReaction {
 // ============================================================================
 
 /**
+ * AI 세션 메타데이터 (미리보기 상태 복구용)
+ */
+export interface AISessionMetadata {
+  pending_preview?: import('./fitness').RoutinePreviewData;
+}
+
+/**
  * AI 세션 호환 타입 (기존 코드와의 호환성을 위해)
  * Conversation을 AISession처럼 사용할 수 있도록 변환
  */
@@ -300,6 +311,8 @@ export interface AISessionCompat {
   resultAppliedAt?: string;
   createdAt: string;
   completedAt?: string;
+  /** 세션 메타데이터 (미리보기 상태 등) */
+  metadata?: AISessionMetadata;
 }
 
 /**
@@ -320,6 +333,7 @@ export function toAISessionCompat(
     resultAppliedAt: conversation.aiResultAppliedAt,
     createdAt: conversation.createdAt,
     completedAt: conversation.aiStatus === 'completed' ? conversation.updatedAt : undefined,
+    metadata: conversation.metadata as AISessionMetadata | undefined,
   };
 }
 
