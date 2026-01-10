@@ -8,6 +8,7 @@
  */
 
 import { ApiError, InputRequest, RoutinePreviewData } from '@/lib/types';
+import { MealPlanPreviewData } from '@/lib/types/meal';
 import { authFetch } from '@/lib/utils/authFetch';
 import {
   Conversation,
@@ -17,6 +18,7 @@ import {
   MessageCreateData,
   AISessionCompat,
   ConversationStatus,
+  ProfileConfirmationRequest,
 } from '@/lib/types/chat';
 import { SessionPurpose } from '@/lib/types/routine';
 
@@ -70,9 +72,26 @@ export const conversationApi = {
 
   /**
    * 활성 AI 대화 조회 (purpose별 1개)
+   * - 활성 세션 없으면 null 반환 (200 + null body)
    */
   async getActiveAIConversation(purpose: SessionPurpose): Promise<AISessionCompat | null> {
     const response = await authFetch(`/api/conversations/ai/active?purpose=${purpose}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!response.ok) {
+      throw await ApiError.fromResponse(response);
+    }
+
+    return response.json(); // null if no active session
+  },
+
+  /**
+   * 특정 대화방 조회
+   */
+  async getConversation(id: string): Promise<Conversation | null> {
+    const response = await authFetch(`/api/conversations/${id}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     });
@@ -86,9 +105,10 @@ export const conversationApi = {
   },
 
   /**
-   * 특정 대화방 조회
+   * AI 대화 상세 조회 (메시지 포함)
+   * - AI 타입 대화인 경우 메시지가 포함된 AISessionCompat 반환
    */
-  async getConversation(id: string): Promise<Conversation | null> {
+  async getAISession(id: string): Promise<AISessionCompat | null> {
     const response = await authFetch(`/api/conversations/${id}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -141,22 +161,6 @@ export const conversationApi = {
    */
   async completeAIConversation(id: string): Promise<Conversation> {
     const response = await authFetch(`/api/conversations/${id}/complete`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
-  },
-
-  /**
-   * AI 대화 포기 처리
-   */
-  async abandonAIConversation(id: string): Promise<Conversation> {
-    const response = await authFetch(`/api/conversations/${id}/abandon`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     });
@@ -290,6 +294,17 @@ export interface RoutineProgressEvent {
   stage: string;
 }
 
+export interface MealPlanAppliedEvent {
+  previewId: string;
+  eventsCreated: number;
+  startDate: string;
+}
+
+export interface MealPlanProgressEvent {
+  progress: number;
+  stage: string;
+}
+
 export interface ChatStreamCallbacks {
   onMessage: (chunk: string) => void;
   onComplete: (fullMessage: string) => void;
@@ -304,6 +319,14 @@ export interface ChatStreamCallbacks {
   onRoutineApplied?: (event: RoutineAppliedEvent) => void;
   /** 루틴 생성 진행률 */
   onRoutineProgress?: (event: RoutineProgressEvent) => void;
+  /** 식단 미리보기 표시 */
+  onMealPlanPreview?: (preview: MealPlanPreviewData) => void;
+  /** 식단 적용 완료 */
+  onMealPlanApplied?: (event: MealPlanAppliedEvent) => void;
+  /** 식단 생성 진행률 */
+  onMealPlanProgress?: (event: MealPlanProgressEvent) => void;
+  /** 프로필 데이터 확인 요청 */
+  onProfileConfirmation?: (request: ProfileConfirmationRequest) => void;
 }
 
 export const aiChatApi = {
@@ -409,6 +432,18 @@ export const aiChatApi = {
                     break;
                   case 'routine_progress':
                     callbacks.onRoutineProgress?.(parsed as RoutineProgressEvent);
+                    break;
+                  case 'meal_plan_preview':
+                    callbacks.onMealPlanPreview?.(parsed as MealPlanPreviewData);
+                    break;
+                  case 'meal_plan_applied':
+                    callbacks.onMealPlanApplied?.(parsed as MealPlanAppliedEvent);
+                    break;
+                  case 'meal_plan_progress':
+                    callbacks.onMealPlanProgress?.(parsed as MealPlanProgressEvent);
+                    break;
+                  case 'profile_confirmation':
+                    callbacks.onProfileConfirmation?.(parsed as ProfileConfirmationRequest);
                     break;
                   case 'done':
                     callbacks.onComplete(fullMessage);

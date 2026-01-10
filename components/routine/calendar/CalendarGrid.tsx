@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { CalendarEventSummary } from '@/lib/types/routine';
+import { CalendarEventSummary, EventType } from '@/lib/types/routine';
 
 interface CalendarGridProps {
   year: number;
@@ -16,13 +16,16 @@ interface DayInfo {
   day: number;
   isCurrentMonth: boolean;
   isToday: boolean;
-  event?: CalendarEventSummary;
+  events: CalendarEventSummary[];
 }
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
 /**
  * 캘린더 그리드 컴포넌트
+ *
+ * - 날짜별 이벤트 인디케이터 표시
+ * - 운동: 🟠 (orange), 식단: 🟢 (green)
  */
 export default function CalendarGrid({
   year,
@@ -50,6 +53,7 @@ export default function CalendarGrid({
         day: date.getDate(),
         isCurrentMonth: false,
         isToday: false,
+        events: [],
       });
     }
 
@@ -57,14 +61,14 @@ export default function CalendarGrid({
     for (let d = 1; d <= lastDay.getDate(); d++) {
       const date = new Date(year, month - 1, d);
       const dateStr = formatDate(date);
-      const event = events.find((e) => e.date === dateStr);
+      const dayEvents = events.filter((e) => e.date === dateStr);
 
       result.push({
         date: dateStr,
         day: d,
         isCurrentMonth: true,
         isToday: dateStr === todayStr,
-        event,
+        events: dayEvents,
       });
     }
 
@@ -77,6 +81,7 @@ export default function CalendarGrid({
         day: d,
         isCurrentMonth: false,
         isToday: false,
+        events: [],
       });
     }
 
@@ -134,10 +139,17 @@ export default function CalendarGrid({
                 {dayInfo.day}
               </span>
 
-              {/* 이벤트 인디케이터 */}
-              {dayInfo.event && (
+              {/* 이벤트 인디케이터 (타입별) */}
+              {dayInfo.events.length > 0 && (
                 <div className="absolute bottom-1 flex gap-0.5">
-                  <EventDot status={dayInfo.event.status} isSelected={isSelected} />
+                  {dayInfo.events.map((event) => (
+                    <EventDot
+                      key={event.id}
+                      type={event.type}
+                      status={event.status}
+                      isSelected={isSelected}
+                    />
+                  ))}
                 </div>
               )}
             </button>
@@ -148,23 +160,33 @@ export default function CalendarGrid({
   );
 }
 
-// 이벤트 상태 표시 점
+// 이벤트 타입/상태 표시 점
 function EventDot({
+  type,
   status,
   isSelected,
 }: {
+  type: EventType;
   status: 'scheduled' | 'completed' | 'skipped';
   isSelected: boolean;
 }) {
-  const colorClass = isSelected
-    ? 'bg-primary-foreground'
-    : status === 'completed'
-      ? 'bg-primary'
-      : status === 'skipped'
-        ? 'bg-muted-foreground'
-        : 'bg-amber-500';
+  // 선택된 셀이면 흰색
+  if (isSelected) {
+    return <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />;
+  }
 
-  return <span className={`w-1.5 h-1.5 rounded-full ${colorClass}`} />;
+  // 건너뛴 이벤트
+  if (status === 'skipped') {
+    return <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground" />;
+  }
+
+  // 타입별 색상
+  const typeColors = {
+    workout: status === 'completed' ? 'bg-teal-500' : 'bg-teal-500/60',
+    meal: status === 'completed' ? 'bg-lime-500' : 'bg-lime-500/60',
+  };
+
+  return <span className={`w-1.5 h-1.5 rounded-full ${typeColors[type]}`} />;
 }
 
 // 날짜 포맷 (YYYY-MM-DD)

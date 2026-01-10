@@ -49,6 +49,53 @@ export function useRoutineEvents(
 }
 
 /**
+ * 과거 + 미래 이벤트 조회 (캐러셀용)
+ *
+ * @param type - 이벤트 타입 ('workout' | 'meal')
+ * @param pastDays - 과거 조회 일수 (기본 7일)
+ * @param futureDays - 미래 조회 일수 (기본 14일)
+ *
+ * @example
+ * const { data: workouts } = useUpcomingEvents('workout', 7, 14);
+ * const { data: meals } = useUpcomingEvents('meal', 7, 14);
+ */
+export function useUpcomingEvents(
+  type: EventType,
+  pastDays: number = 7,
+  futureDays: number = 14,
+  options?: Omit<UseQueryOptions<RoutineEvent[]>, 'queryKey' | 'queryFn'>
+) {
+  const startDate = formatDate(addDays(new Date(), -pastDays));
+  const endDate = formatDate(addDays(new Date(), futureDays));
+
+  return useRoutineEvents(
+    {
+      type,
+      startDate,
+      endDate,
+    },
+    options
+  );
+}
+
+// ============================================================================
+// Date Helpers
+// ============================================================================
+
+function formatDate(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function addDays(date: Date, days: number): Date {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+/**
  * 특정 날짜의 이벤트 조회
  *
  * @param date - 날짜 (YYYY-MM-DD)

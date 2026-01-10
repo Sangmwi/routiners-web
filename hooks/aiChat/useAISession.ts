@@ -54,12 +54,16 @@ export function useActiveAISession(
     queryKey: queryKeys.aiSession.active(purpose),
     queryFn: () => conversationApi.getActiveAIConversation(purpose),
     staleTime: 30 * 1000, // 30초 (활성 세션은 자주 변경될 수 있음)
+    // ⚠️ refetchOnMount: 'always' 제거
+    // - 세션 생성 시 setQueryData로 캐시 설정되므로 불필요한 refetch 방지
+    // - 'always'는 컴포넌트 마운트마다 refetch → 타이밍 이슈로 404 반환 가능
+    // - staleTime 30초 이후에만 자동 refetch (React Query 기본 동작)
     ...options,
   });
 }
 
 /**
- * 특정 세션 상세 조회
+ * 특정 세션 상세 조회 (메타데이터만)
  *
  * @param id - 세션 ID
  *
@@ -73,6 +77,27 @@ export function useAISession(
   return useQuery({
     queryKey: queryKeys.aiSession.detail(id || ''),
     queryFn: () => conversationApi.getConversation(id!),
+    enabled: !!id,
+    staleTime: 30 * 1000,
+    ...options,
+  });
+}
+
+/**
+ * 특정 AI 세션 상세 조회 (메시지 포함)
+ *
+ * @param id - 세션 ID
+ *
+ * @example
+ * const { data: session } = useAISessionWithMessages('session-id');
+ */
+export function useAISessionWithMessages(
+  id: string | undefined,
+  options?: Omit<UseQueryOptions<AISessionCompat | null>, 'queryKey' | 'queryFn'>
+) {
+  return useQuery({
+    queryKey: queryKeys.aiSession.detail(id || ''),
+    queryFn: () => conversationApi.getAISession(id!),
     enabled: !!id,
     staleTime: 30 * 1000,
     ...options,
@@ -124,9 +149,10 @@ export function useCreateAISession() {
         newSession
       );
 
-      // 목록 캐시 무효화
+      // 목록 캐시만 무효화 (active 쿼리는 setQueryData로 이미 설정됨)
+      // all을 무효화하면 active도 refetch되어 setQueryData를 덮어쓰므로 list만 무효화
       queryClient.invalidateQueries({
-        queryKey: queryKeys.aiSession.all,
+        queryKey: queryKeys.aiSession.list({}),
       });
     },
   });
@@ -144,42 +170,6 @@ export function useCompleteAISession() {
 
   return useMutation({
     mutationFn: conversationApi.completeAIConversation,
-
-    onSuccess: (updatedConversation) => {
-      // 상세 캐시 업데이트
-      queryClient.setQueryData(
-        queryKeys.aiSession.detail(updatedConversation.id),
-        updatedConversation
-      );
-
-      // 활성 세션 캐시 제거
-      if (updatedConversation.aiPurpose) {
-        queryClient.setQueryData(
-          queryKeys.aiSession.active(updatedConversation.aiPurpose),
-          null
-        );
-      }
-
-      // 목록 캐시 무효화
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.aiSession.all,
-      });
-    },
-  });
-}
-
-/**
- * AI 세션 포기 Mutation
- *
- * @example
- * const abandonSession = useAbandonAISession();
- * abandonSession.mutate('session-id');
- */
-export function useAbandonAISession() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: conversationApi.abandonAIConversation,
 
     onSuccess: (updatedConversation) => {
       // 상세 캐시 업데이트

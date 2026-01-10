@@ -2,6 +2,7 @@
 
 import { ChatMessage as ChatMessageType } from '@/lib/types/routine';
 import { Bot, User } from 'lucide-react';
+import { Markdown } from '@/components/common/Markdown';
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -40,9 +41,13 @@ export default function ChatMessage({ message }: ChatMessageProps) {
             : 'bg-primary text-primary-foreground rounded-tr-md'
         }`}
       >
-        <p className="text-sm whitespace-pre-wrap leading-relaxed">
-          {message.content}
-        </p>
+        {isAssistant ? (
+          <Markdown content={message.content} />
+        ) : (
+          <p className="text-sm whitespace-pre-wrap leading-relaxed">
+            {message.content}
+          </p>
+        )}
       </div>
     </div>
   );

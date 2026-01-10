@@ -234,6 +234,15 @@ export const AI_TOOL_NAMES = [
   'apply_routine', // 미리보기 적용 (DB 저장)
   // 사용자 입력 요청
   'request_user_input',
+  // 프로필 확인 요청
+  'confirm_profile_data',
+  // 식단 프로필 관련
+  'get_dietary_profile',
+  'update_dietary_profile',
+  'calculate_daily_needs',
+  // 식단 관련
+  'generate_meal_plan_preview', // 식단 미리보기 생성 (DB 저장 X)
+  'apply_meal_plan', // 식단 적용 (DB 저장)
 ] as const;
 
 export type AIToolName = (typeof AI_TOOL_NAMES)[number];
@@ -258,6 +267,13 @@ export const AI_TOOL_LABELS: Record<AIToolName, string> = {
   generate_routine_preview: '루틴 미리보기 생성 중',
   apply_routine: '루틴 적용 중',
   request_user_input: '입력 요청',
+  confirm_profile_data: '프로필 확인 중',
+  // 식단 도구 레이블
+  get_dietary_profile: '식단 프로필 확인 중',
+  update_dietary_profile: '식단 프로필 업데이트 중',
+  calculate_daily_needs: '일일 영양 필요량 계산 중',
+  generate_meal_plan_preview: '식단 미리보기 생성 중',
+  apply_meal_plan: '식단 적용 중',
 };
 
 /**

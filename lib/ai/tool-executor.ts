@@ -1002,6 +1002,11 @@ export async function executeTool(
       // executeTool을 통해 호출되면 안됨
       return { success: false, error: 'request_user_input은 API route에서 직접 처리해야 합니다.' };
 
+    case 'confirm_profile_data':
+      // 이 도구는 API route에서 직접 처리 (profile_confirmation SSE 이벤트 전송)
+      // executeTool을 통해 호출되면 안됨
+      return { success: false, error: 'confirm_profile_data는 API route에서 직접 처리해야 합니다.' };
+
     case 'generate_routine_preview':
       // 이 도구는 API route에서 직접 처리 (routine_preview SSE 이벤트 전송)
       // executeTool을 통해 호출되면 안됨

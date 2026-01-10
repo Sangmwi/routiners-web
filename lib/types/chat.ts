@@ -10,7 +10,7 @@
 // ============================================================================
 
 export type ConversationType = 'ai' | 'direct' | 'group';
-export type ConversationStatus = 'active' | 'completed' | 'abandoned';
+export type ConversationStatus = 'active' | 'completed';
 export type ParticipantRole = 'owner' | 'admin' | 'member';
 export type MessageRole = 'user' | 'assistant' | 'system';
 export type ContentType = 'text' | 'image' | 'file' | 'audio' | 'video' | 'location' | 'call' | 'tool_call' | 'tool_result';
@@ -290,10 +290,37 @@ export function transformDbReaction(db: DbMessageReaction): MessageReaction {
 // ============================================================================
 
 /**
+ * 적용된 루틴 메타데이터
+ */
+export interface AppliedRoutineMetadata {
+  previewId: string;
+  eventsCreated: number;
+  startDate: string;
+  appliedAt: string;
+}
+
+/**
+ * 적용된 식단 메타데이터
+ */
+export interface AppliedMealPlanMetadata {
+  previewId: string;
+  eventsCreated: number;
+  startDate: string;
+  appliedAt: string;
+}
+
+/**
  * AI 세션 메타데이터 (미리보기 상태 복구용)
  */
 export interface AISessionMetadata {
+  // 운동 관련
   pending_preview?: import('./fitness').RoutinePreviewData;
+  applied_routine?: AppliedRoutineMetadata;
+  // 식단 관련
+  pending_meal_preview?: import('./meal').MealPlanPreviewData;
+  applied_meal_plan?: AppliedMealPlanMetadata;
+  // 프로필 확인 (운동/식단 공통)
+  pending_profile_confirmation?: ProfileConfirmationRequest;
 }
 
 /**
@@ -372,4 +399,42 @@ export interface ConversationListItem {
   conversation: Conversation;
   lastMessage?: ChatMessage;
   unreadCount: number;
+}
+
+// ============================================================================
+// Profile Confirmation Types (프로필 확인 UI)
+// ============================================================================
+
+/**
+ * 프로필 확인 요청 필드
+ */
+export interface ProfileConfirmationField {
+  /** 필드 키 (예: "fitnessGoal", "experienceLevel") */
+  key: string;
+  /** 표시 라벨 (예: "운동 목표", "운동 경험") */
+  label: string;
+  /** 저장된 값 (예: "muscle_gain", "beginner") */
+  value: string;
+  /** 표시용 값 - 한국어 (예: "근육 증가", "초보자") */
+  displayValue: string;
+}
+
+/**
+ * 프로필 확인 요청 데이터
+ *
+ * AI가 기존 프로필 데이터를 확인받을 때 사용
+ */
+export interface ProfileConfirmationRequest {
+  /** 고유 ID */
+  id: string;
+  /** 확인 카드 제목 (예: "현재 설정된 운동 프로필") */
+  title: string;
+  /** 확인 안내 메시지 (예: "아래 정보가 맞는지 확인해주세요") */
+  description?: string;
+  /** 확인할 필드 목록 */
+  fields: ProfileConfirmationField[];
+  /** 확인 버튼 텍스트 (기본값: "확인") */
+  confirmText?: string;
+  /** 수정 버튼 텍스트 (기본값: "수정하기") */
+  editText?: string;
 }

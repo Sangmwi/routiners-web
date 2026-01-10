@@ -2,64 +2,30 @@
 
 import { useMemo } from 'react';
 import MainTabLayout from '@/components/common/MainTabLayout';
-import {
-  TodayEventSection,
-  WeeklyCalendar,
-  FloatingAIButton,
-} from '@/components/routine';
-import {
-  useCalendarEvents,
-  useRoutineEventByDate,
-  useCompleteRoutineEvent,
-  useSkipRoutineEvent,
-} from '@/hooks/routine';
+import { RoutineSection, FloatingAIButton } from '@/components/routine';
+import { useUpcomingEvents } from '@/hooks/routine';
 import { useActiveAISession } from '@/hooks/aiChat';
 
 /**
- * 루틴 탭 메인 페이지 (오늘 + 주간 뷰)
+ * 루틴 탭 메인 페이지 (섹션 기반 v2)
+ *
+ * - 운동 섹션: 과거 7일 + 오늘 + 미래 14일 캐러셀
+ * - 식단 섹션: 과거 7일 + 오늘 + 미래 14일 캐러셀
+ * - 초기 로드 시 "오늘" 카드로 자동 스크롤
+ * - 전체보기 → 캘린더 (타입 필터 프리셋)
  */
 export default function RoutinePage() {
   const today = useMemo(() => new Date(), []);
-  const todayStr = formatDate(today);
 
-  // 이번 달 이벤트 조회 (주간 캘린더용)
-  const year = today.getFullYear();
-  const month = today.getMonth() + 1;
-
-  const { data: weekEvents = [] } = useCalendarEvents(year, month);
-
-  // 오늘의 이벤트 조회
-  const { data: todayEvent, isLoading: isLoadingToday } = useRoutineEventByDate(
-    todayStr,
-    'workout'
-  );
+  // 과거 7일 + 오늘 + 미래 14일 이벤트 조회
+  const { data: workoutEvents = [], isLoading: isLoadingWorkout } =
+    useUpcomingEvents('workout', 7, 14);
+  const { data: mealEvents = [], isLoading: isLoadingMeal } =
+    useUpcomingEvents('meal', 7, 14);
 
   // 활성 AI 세션 확인
-  const { data: activeSession } = useActiveAISession('workout');
-
-  // 완료/건너뛰기 뮤테이션
-  const completeEvent = useCompleteRoutineEvent();
-  const skipEvent = useSkipRoutineEvent();
-
-  // 오늘 운동 완료
-  const handleComplete = async () => {
-    if (!todayEvent) return;
-    try {
-      await completeEvent.mutateAsync(todayEvent.id);
-    } catch (err) {
-      console.error('Failed to complete event:', err);
-    }
-  };
-
-  // 오늘 운동 건너뛰기
-  const handleSkip = async () => {
-    if (!todayEvent) return;
-    try {
-      await skipEvent.mutateAsync(todayEvent.id);
-    } catch (err) {
-      console.error('Failed to skip event:', err);
-    }
-  };
+  const { data: workoutSession } = useActiveAISession('workout');
+  const { data: mealSession } = useActiveAISession('meal');
 
   return (
     <MainTabLayout>
@@ -71,29 +37,27 @@ export default function RoutinePage() {
         </p>
       </div>
 
-      {/* 오늘의 운동 */}
-      <TodayEventSection
-        event={todayEvent ?? null}
-        isLoading={isLoadingToday}
-        onComplete={handleComplete}
-        onSkip={handleSkip}
-        isActionLoading={completeEvent.isPending || skipEvent.isPending}
+      {/* 운동 섹션 */}
+      <RoutineSection
+        type="workout"
+        events={workoutEvents}
+        isLoading={isLoadingWorkout}
       />
 
-      {/* 이번 주 캘린더 */}
-      <WeeklyCalendar events={weekEvents} selectedDate={todayStr} />
+      {/* 식단 섹션 */}
+      <RoutineSection
+        type="meal"
+        events={mealEvents}
+        isLoading={isLoadingMeal}
+      />
 
-      {/* AI 트레이너 플로팅 버튼 */}
-      <FloatingAIButton hasActiveSession={!!activeSession} />
+      {/* AI 코치 플로팅 버튼 */}
+      <FloatingAIButton
+        hasWorkoutSession={!!workoutSession}
+        hasMealSession={!!mealSession}
+      />
     </MainTabLayout>
   );
-}
-
-function formatDate(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
 }
 
 function formatDisplayDate(date: Date): string {

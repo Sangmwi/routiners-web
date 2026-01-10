@@ -2,7 +2,15 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { aiChatApi, ChatStreamCallbacks, ToolEvent, RoutineAppliedEvent, RoutineProgressEvent } from '@/lib/api/conversation';
+import {
+  aiChatApi,
+  ChatStreamCallbacks,
+  ToolEvent,
+  RoutineAppliedEvent,
+  RoutineProgressEvent,
+  MealPlanAppliedEvent,
+  MealPlanProgressEvent,
+} from '@/lib/api/conversation';
 import { queryKeys } from '@/lib/constants/queryKeys';
 import {
   AI_CHAT_TIMING,
@@ -10,8 +18,9 @@ import {
   isSystemMessage,
   createInitialGreetingMessage,
 } from '@/lib/constants/aiChat';
-import { ChatMessage, AISessionCompat } from '@/lib/types/chat';
+import { ChatMessage, AISessionCompat, ProfileConfirmationRequest } from '@/lib/types/chat';
 import type { AIToolName, AIToolStatus, InputRequest, RoutinePreviewData } from '@/lib/types/fitness';
+import type { MealPlanPreviewData } from '@/lib/types/meal';
 
 // =============================================================================
 // Types
@@ -30,6 +39,14 @@ interface ChatState {
   appliedRoutine: RoutineAppliedEvent | null;
   /** 루틴 생성 진행률 */
   routineProgress: RoutineProgressEvent | null;
+  /** 대기 중인 식단 미리보기 (사용자 확인 대기) */
+  pendingMealPreview: MealPlanPreviewData | null;
+  /** 식단 적용 완료 정보 */
+  appliedMealPlan: MealPlanAppliedEvent | null;
+  /** 식단 생성 진행률 */
+  mealProgress: MealPlanProgressEvent | null;
+  /** 대기 중인 프로필 확인 요청 */
+  pendingProfileConfirmation: ProfileConfirmationRequest | null;
 }
 
 export interface UseAIChatReturn {
@@ -45,12 +62,28 @@ export interface UseAIChatReturn {
   appliedRoutine: RoutineAppliedEvent | null;
   /** 루틴 생성 진행률 */
   routineProgress: RoutineProgressEvent | null;
+  /** 대기 중인 식단 미리보기 */
+  pendingMealPreview: MealPlanPreviewData | null;
+  /** 식단 적용 완료 정보 */
+  appliedMealPlan: MealPlanAppliedEvent | null;
+  /** 식단 생성 진행률 */
+  mealProgress: MealPlanProgressEvent | null;
+  /** 대기 중인 프로필 확인 요청 */
+  pendingProfileConfirmation: ProfileConfirmationRequest | null;
   sendMessage: (message: string) => void;
   submitInput: (value: string | string[]) => void;
   /** 루틴 미리보기 적용 (forceOverwrite: 충돌 시 덮어쓰기) */
   applyRoutine: (forceOverwrite?: boolean) => void;
   /** 루틴 수정 요청 */
   requestRevision: (feedback: string) => void;
+  /** 식단 미리보기 적용 (forceOverwrite: 충돌 시 덮어쓰기) */
+  applyMealPlan: (forceOverwrite?: boolean) => void;
+  /** 식단 수정 요청 */
+  requestMealRevision: (feedback: string) => void;
+  /** 프로필 데이터 확인 */
+  confirmProfile: () => void;
+  /** 프로필 수정 요청 */
+  requestProfileEdit: () => void;
   cancelStream: () => void;
   clearError: () => void;
 }
@@ -69,6 +102,10 @@ const INITIAL_STATE: ChatState = {
   pendingRoutinePreview: null,
   appliedRoutine: null,
   routineProgress: null,
+  pendingMealPreview: null,
+  appliedMealPlan: null,
+  mealProgress: null,
+  pendingProfileConfirmation: null,
 };
 
 /** 메시지 생성 헬퍼 */
@@ -120,6 +157,7 @@ export function useAIChat(
 
   const sessionId = session?.id;
   const purpose = session?.purpose ?? 'workout';
+  const hasInitializedRef = useRef(false); // 초기 로드 완료 여부 (새로고침 감지용)
 
   // ---------------------------------------------------------------------------
   // 도구 상태 정리 스케줄러
@@ -227,7 +265,44 @@ export function useAIChat(
         }));
       },
 
+      onMealPlanPreview: (preview: MealPlanPreviewData) => {
+        setState((prev) => ({
+          ...prev,
+          pendingMealPreview: preview,
+          mealProgress: null, // 진행률 초기화
+          isSending: false,
+        }));
+      },
+
+      onMealPlanApplied: (event: MealPlanAppliedEvent) => {
+        setState((prev) => ({
+          ...prev,
+          appliedMealPlan: event,
+          pendingMealPreview: null, // 미리보기 상태 해제
+        }));
+      },
+
+      onMealPlanProgress: (event: MealPlanProgressEvent) => {
+        setState((prev) => ({
+          ...prev,
+          mealProgress: event,
+        }));
+      },
+
+      onProfileConfirmation: (request: ProfileConfirmationRequest) => {
+        setState((prev) => ({
+          ...prev,
+          pendingProfileConfirmation: request,
+          isSending: false,
+        }));
+      },
+
       onComplete: (fullMessage) => {
+        // ⚠️ 중요: abortControllerRef를 먼저 null로 설정해야 함
+        // invalidateQueries가 캐시 업데이트 → useEffect cleanup 트리거할 수 있음
+        // cleanup에서 abort() 호출 방지를 위해 먼저 null 처리
+        abortControllerRef.current = null;
+
         setState((prev) => ({
           ...prev,
           messages: fullMessage.trim()
@@ -237,21 +312,30 @@ export function useAIChat(
           isSending: false,
           error: null,
           routineProgress: null, // 진행률 초기화
+          mealProgress: null, // 식단 진행률 초기화
         }));
 
         // 도구 상태 정리
         scheduleToolCleanup('completed', AI_CHAT_TIMING.TOOL_COMPLETED_DISPLAY_MS);
         scheduleToolCleanup('error', AI_CHAT_TIMING.TOOL_ERROR_DISPLAY_MS);
 
-        // 캐시 갱신
+        // 캐시 갱신 (detail만 무효화)
+        // ⚠️ active 쿼리는 무효화하지 않음: 세션 자체는 변경되지 않음 (메시지만 추가됨)
+        // active 무효화 시 refetch가 빠르게 완료되면 404 반환 가능성 있어 currentSession이 null이 됨
         queryClient.invalidateQueries({
-          queryKey: queryKeys.aiSession.active(purpose),
+          queryKey: queryKeys.aiSession.detail(sessionId),
         });
-
-        abortControllerRef.current = null;
+        // NOTE: active 쿼리 무효화 제거 - 페이지 로딩 스피너 이슈 방지
+        // 세션 상태(status, resultApplied 등)가 변경되는 경우에만 개별적으로 처리
       },
 
       onError: (error) => {
+        // AbortError는 정상적인 취소이므로 무시 (세션 전환 등)
+        if (error.name === 'AbortError') {
+          abortControllerRef.current = null;
+          return;
+        }
+
         setState((prev) => ({
           ...prev,
           // 에러 시 마지막 사용자 메시지 롤백 (시스템 메시지 제외)
@@ -279,41 +363,85 @@ export function useAIChat(
     if (!session?.id) return;
 
     const isNewSession = session.id !== sessionIdRef.current;
-    if (!isNewSession) return;
 
-    sessionIdRef.current = session.id;
+    // 세션이 변경되면 이전 스트림 정리
+    if (isNewSession && abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
 
     // DB 메시지 동기화 (tool_call, tool_result 제외)
     const displayMessages = filterDisplayableMessages(session.messages ?? []);
     const hasMessages = displayMessages.length > 0;
 
-    if (hasMessages) {
-      // 기존 세션 복귀: DB 메시지 + 미리보기 상태 복구
-      const pendingPreview = session.metadata?.pending_preview ?? null;
-      setState({
-        ...INITIAL_STATE,
-        messages: displayMessages,
-        pendingRoutinePreview: pendingPreview,
+    // 메타데이터에서 상태 추출
+    const pendingPreview = session.metadata?.pending_preview ?? null;
+    const appliedRoutineFromDb = session.metadata?.applied_routine ?? null;
+    const pendingMealPreviewFromDb = (session.metadata as Record<string, unknown>)?.pending_meal_preview as MealPlanPreviewData | null ?? null;
+    const appliedMealFromDb = (session.metadata as Record<string, unknown>)?.applied_meal_plan as MealPlanAppliedEvent | null ?? null;
+    const pendingProfileConfirmationFromDb = (session.metadata as Record<string, unknown>)?.pending_profile_confirmation as ProfileConfirmationRequest | null ?? null;
+
+    if (isNewSession) {
+      // 새 세션 또는 다른 세션으로 전환
+      sessionIdRef.current = session.id;
+      hasInitializedRef.current = true;
+
+      if (hasMessages) {
+        // 기존 세션 복귀: DB 메시지 + 모든 상태 복구
+        setState({
+          ...INITIAL_STATE,
+          messages: displayMessages,
+          pendingRoutinePreview: pendingPreview,
+          appliedRoutine: appliedRoutineFromDb,
+          pendingMealPreview: pendingMealPreviewFromDb,
+          appliedMealPlan: appliedMealFromDb,
+          pendingProfileConfirmation: pendingProfileConfirmationFromDb,
+        });
+      } else {
+        // 새 세션: 초기 인사말 + __START__ 전송
+        const greetingMessage = createInitialGreetingMessage(session.id, purpose);
+
+        setState({
+          ...INITIAL_STATE,
+          messages: [greetingMessage],
+        });
+
+        // __START__ 메시지 전송 (AI 대화 시작 트리거)
+        const timer = setTimeout(() => {
+          sendMessageCore(AI_SYSTEM_MESSAGE.START, { skipGuards: true });
+        }, AI_CHAT_TIMING.AUTO_START_DELAY_MS);
+
+        return () => {
+          clearTimeout(timer);
+          if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+            abortControllerRef.current = null;
+          }
+        };
+      }
+    } else if (hasInitializedRef.current) {
+      // 동일 세션이지만 데이터 업데이트 (React Query refetch 등)
+      // DB 메타데이터가 source of truth이므로 DB 값으로 동기화
+      // (단, 현재 스트리밍 중이면 로컬 상태 유지)
+      setState((prev) => {
+        // 스트리밍 중이면 로컬 상태 유지 (SSE 이벤트가 실시간 업데이트 중)
+        if (prev.isSending) return prev;
+
+        return {
+          ...prev,
+          // 메시지는 로컬 상태가 더 최신일 수 있으므로 유지
+          messages: prev.messages.length > 0 ? prev.messages : displayMessages,
+          // 메타데이터는 DB가 source of truth (새로고침/복귀 시 복원 보장)
+          pendingRoutinePreview: pendingPreview,
+          appliedRoutine: appliedRoutineFromDb,
+          pendingMealPreview: pendingMealPreviewFromDb,
+          appliedMealPlan: appliedMealFromDb,
+          pendingProfileConfirmation: pendingProfileConfirmationFromDb,
+        };
       });
-    } else {
-      // 새 세션: 초기 인사말만 표시 + __START__ 전송
-      // pendingInput은 AI가 request_user_input으로 직접 설정 (이미 데이터가 있으면 스킵)
-      const greetingMessage = createInitialGreetingMessage(session.id, purpose);
-
-      setState({
-        ...INITIAL_STATE,
-        messages: [greetingMessage],
-        // pendingInput은 AI 응답에서 설정됨 (하드코딩 제거)
-      });
-
-      // __START__ 메시지 전송 (AI 대화 시작 트리거)
-      const timer = setTimeout(() => {
-        sendMessageCore(AI_SYSTEM_MESSAGE.START, { skipGuards: true });
-      }, AI_CHAT_TIMING.AUTO_START_DELAY_MS);
-
-      return () => clearTimeout(timer);
     }
-  }, [session?.id, session?.messages, session?.metadata?.pending_preview, purpose]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- purpose는 session?.purpose에서 파생되므로 session?.id 변경 시 자동 반영됨
+  }, [session?.id, session?.messages, session?.metadata]);
 
   // ---------------------------------------------------------------------------
   // 대기 중인 사용자 메시지 전송 (isSending이 false가 되면)
@@ -412,9 +540,12 @@ export function useAIChat(
         pendingRoutinePreview: null,
       }));
 
-      // 캐시 갱신
+      // 캐시 갱신: 활성 세션 + 세션 목록 (히스토리용)
       queryClient.invalidateQueries({
         queryKey: queryKeys.aiSession.active(purpose),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.aiSession.all,
       });
     } catch (error) {
       console.error('[applyRoutine] Error:', error);
@@ -437,6 +568,142 @@ export function useAIChat(
 
     // 수정 요청 메시지 전송 (AI가 피드백 반영 후 다시 generate_routine_preview 호출)
     sendMessageCore(feedback, {});
+  };
+
+  // ---------------------------------------------------------------------------
+  // 식단 미리보기 적용 / 수정 요청
+  // ---------------------------------------------------------------------------
+
+  const applyMealPlan = async (forceOverwrite?: boolean) => {
+    if (!sessionId || !state.pendingMealPreview) return;
+
+    const previewId = state.pendingMealPreview.id;
+
+    // 로딩 상태로 전환
+    setState((prev) => ({
+      ...prev,
+      isSending: true,
+      error: null,
+    }));
+
+    try {
+      // 직접 API 호출 (AI 의존성 제거)
+      const response = await fetch('/api/routine/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conversationId: sessionId,
+          previewId,
+          forceOverwrite: forceOverwrite || false,
+          type: 'meal', // 식단 타입 명시
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        setState((prev) => ({
+          ...prev,
+          isSending: false,
+          error: result.error || '식단 적용에 실패했습니다.',
+        }));
+        return;
+      }
+
+      // 성공: appliedMealPlan 상태 업데이트, pendingMealPreview 제거
+      setState((prev) => ({
+        ...prev,
+        isSending: false,
+        appliedMealPlan: {
+          previewId: result.data.previewId,
+          eventsCreated: result.data.eventsCreated,
+          startDate: result.data.startDate,
+        },
+        pendingMealPreview: null,
+      }));
+
+      // 캐시 갱신: 활성 세션 + 세션 목록 (히스토리용)
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.aiSession.active(purpose),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.aiSession.all,
+      });
+    } catch (error) {
+      console.error('[applyMealPlan] Error:', error);
+      setState((prev) => ({
+        ...prev,
+        isSending: false,
+        error: '식단 적용 중 오류가 발생했습니다.',
+      }));
+    }
+  };
+
+  const requestMealRevision = (feedback: string) => {
+    if (!sessionId || !state.pendingMealPreview) return;
+
+    // 미리보기 상태 해제 후 피드백 메시지 전송
+    setState((prev) => ({
+      ...prev,
+      pendingMealPreview: null,
+    }));
+
+    // 수정 요청 메시지 전송 (AI가 피드백 반영 후 다시 generate_meal_plan_preview 호출)
+    sendMessageCore(feedback, {});
+  };
+
+  // ---------------------------------------------------------------------------
+  // 프로필 확인 / 수정 요청
+  // ---------------------------------------------------------------------------
+
+  const confirmProfile = async () => {
+    if (!sessionId || !state.pendingProfileConfirmation) return;
+
+    // 로컬 상태 즉시 초기화 (UI 반응성)
+    setState((prev) => ({
+      ...prev,
+      pendingProfileConfirmation: null,
+    }));
+
+    // DB 메타데이터 즉시 클리어 (페이지 이탈 후 복귀 시 복원 방지)
+    // API 메시지 처리보다 먼저 실행하여 race condition 방지
+    try {
+      await fetch(`/api/conversations/${sessionId}/metadata`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clearProfileConfirmation: true }),
+      });
+    } catch (e) {
+      console.error('[confirmProfile] Failed to clear metadata:', e);
+    }
+
+    // 확인 메시지 전송 (AI가 다음 단계 진행)
+    // ⚠️ skipMessageAdd 제거 - 로컬/DB 상태 일치 필요 (새로고침 시 동기화)
+    sendMessageCore('확인했습니다. 계속 진행해주세요.', {});
+  };
+
+  const requestProfileEdit = async () => {
+    if (!sessionId || !state.pendingProfileConfirmation) return;
+
+    // 로컬 상태 즉시 초기화 (UI 반응성)
+    setState((prev) => ({
+      ...prev,
+      pendingProfileConfirmation: null,
+    }));
+
+    // DB 메타데이터 즉시 클리어 (페이지 이탈 후 복귀 시 복원 방지)
+    try {
+      await fetch(`/api/conversations/${sessionId}/metadata`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clearProfileConfirmation: true }),
+      });
+    } catch (e) {
+      console.error('[requestProfileEdit] Failed to clear metadata:', e);
+    }
+
+    // 수정 의사 전달
+    sendMessageCore('수정하고 싶은 내용이 있어요.', {});
   };
 
   // ---------------------------------------------------------------------------
@@ -472,10 +739,18 @@ export function useAIChat(
     pendingRoutinePreview: state.pendingRoutinePreview,
     appliedRoutine: state.appliedRoutine,
     routineProgress: state.routineProgress,
+    pendingMealPreview: state.pendingMealPreview,
+    appliedMealPlan: state.appliedMealPlan,
+    mealProgress: state.mealProgress,
+    pendingProfileConfirmation: state.pendingProfileConfirmation,
     sendMessage,
     submitInput,
     applyRoutine,
     requestRevision,
+    applyMealPlan,
+    requestMealRevision,
+    confirmProfile,
+    requestProfileEdit,
     cancelStream,
     clearError,
   };

@@ -7,6 +7,7 @@
 export {
   // Query Hooks
   useRoutineEvents,
+  useUpcomingEvents,
   useRoutineEventByDate,
   useRoutineEvent,
   useCalendarEvents,

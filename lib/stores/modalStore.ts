@@ -27,7 +27,8 @@ export type ModalType =
   | 'unitSearch'        // 부대 검색
   | 'tagSelect'         // 태그 선택 (관심 운동/장소)
   | 'rankSelect'        // 계급 선택
-  | 'specialtySelect';  // 병과 선택
+  | 'specialtySelect'   // 병과 선택
+  | 'aiSelection';      // AI 코치 선택 (운동/식단)
 
 /**
  * 모달별 데이터 타입 매핑
@@ -72,6 +73,11 @@ export interface ModalDataMap {
   specialtySelect: {
     currentSpecialty?: string;
     onSelect: (specialty: string) => void;
+  };
+  aiSelection: {
+    workoutSessionActive?: boolean;
+    mealSessionActive?: boolean;
+    onSelectPurpose: (purpose: 'workout' | 'meal') => void;
   };
 }
 

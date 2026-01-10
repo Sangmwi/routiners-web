@@ -24,6 +24,8 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
   }
 
   // 활성 대화 조회
+  console.log('[Conversations Active GET] Query params:', { userId, purpose });
+
   const { data: conversation, error: convError } = await supabase
     .from('conversations')
     .select('*')
@@ -36,7 +38,19 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
 
   if (convError) {
     if (convError.code === 'PGRST116') {
-      return NextResponse.json(null, { status: 404 });
+      // 활성 세션 없음 - 디버깅을 위해 모든 세션 조회
+      const { data: allSessions } = await supabase
+        .from('conversations')
+        .select('id, ai_purpose, ai_status, deleted_at, created_at')
+        .eq('created_by', userId)
+        .eq('type', 'ai')
+        .eq('ai_purpose', purpose)
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      console.log('[Conversations Active GET] No active session found. Recent sessions:', allSessions);
+
+      return NextResponse.json(null, { status: 200 });
     }
     console.error('[Conversations Active GET] Error:', convError);
     return NextResponse.json(
@@ -44,6 +58,8 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
       { status: 500 }
     );
   }
+
+  console.log('[Conversations Active GET] Found session:', conversation.id, 'status:', conversation.ai_status);
 
   const conv = conversation as DbConversation;
 

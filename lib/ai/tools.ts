@@ -412,7 +412,47 @@ export const REQUEST_USER_INPUT: AIToolDefinition = {
 };
 
 /**
- * 14. 루틴 미리보기 생성
+ * 14. 프로필 데이터 확인 요청
+ * - 기존 저장된 프로필 데이터를 사용자에게 확인받음
+ * - 자동 스킵 대신 확인 UI 표시
+ */
+export const CONFIRM_PROFILE_DATA: AIToolDefinition = {
+  type: 'function',
+  name: 'confirm_profile_data',
+  description:
+    '기존 저장된 프로필 데이터를 사용자에게 확인받습니다. 프로필 정보(운동 목표, 경험 수준 등)가 이미 있을 때, 자동으로 넘어가지 않고 이 도구를 사용해 사용자에게 현재 값을 보여주고 "확인" 또는 "수정" 선택권을 줍니다. 사용자가 확인하면 다음 단계로, 수정을 원하면 해당 정보를 다시 질문합니다.',
+  parameters: {
+    type: 'object',
+    properties: {
+      title: {
+        type: 'string',
+        description: '확인 카드 제목 (예: "현재 설정된 운동 프로필")',
+      },
+      description: {
+        type: 'string',
+        description: '확인 안내 메시지 (예: "아래 정보가 맞는지 확인해주세요")',
+      },
+      fields: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            key: { type: 'string', description: '필드 키 (예: fitnessGoal)' },
+            label: { type: 'string', description: '표시 라벨 (예: 운동 목표)' },
+            value: { type: 'string', description: '저장된 값 (예: muscle_gain)' },
+            displayValue: { type: 'string', description: '표시용 값 - 한국어 (예: 근육 증가)' },
+          },
+          required: ['key', 'label', 'value', 'displayValue'],
+        },
+        description: '확인할 필드 목록',
+      },
+    },
+    required: ['title', 'fields'],
+  },
+};
+
+/**
+ * 15. 루틴 미리보기 생성
  * - DB에 저장하지 않고 미리보기 UI만 표시
  * - 사용자가 확인 후 프론트엔드에서 apply API 호출
  * - 2주 단위 생성 권장 (토큰 50% 절약, 응답 속도 2배 향상)
@@ -530,6 +570,8 @@ export const AI_TRAINER_TOOLS: AIToolDefinition[] = [
   SAVE_ROUTINE_DRAFT,
   // 사용자 입력 요청
   REQUEST_USER_INPUT,
+  // 프로필 확인 요청
+  CONFIRM_PROFILE_DATA,
   // 루틴 미리보기/적용
   GENERATE_ROUTINE_PREVIEW,
   APPLY_ROUTINE,

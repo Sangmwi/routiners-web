@@ -14,6 +14,32 @@
   --color-green-900: #17451c;
   --color-green-950: #0a2610;
 
+  /* Teal Palette (운동 - 청록색, 푸른계열) */
+  --color-teal-50: #f0fdfa;
+  --color-teal-100: #ccfbf1;
+  --color-teal-200: #99f6e4;
+  --color-teal-300: #5eead4;
+  --color-teal-400: #2dd4bf;
+  --color-teal-500: #14b8a6; /* 운동 메인 컬러 */
+  --color-teal-600: #0d9488;
+  --color-teal-700: #0f766e;
+  --color-teal-800: #115e59;
+  --color-teal-900: #134e4a;
+  --color-teal-950: #042f2e;
+
+  /* Lime Palette (식단 - 연두색, 노란계열) */
+  --color-lime-50: #f7fee7;
+  --color-lime-100: #ecfccb;
+  --color-lime-200: #d9f99d;
+  --color-lime-300: #bef264;
+  --color-lime-400: #a3e635;
+  --color-lime-500: #84cc16; /* 식단 메인 컬러 */
+  --color-lime-600: #65a30d;
+  --color-lime-700: #4d7c0f;
+  --color-lime-800: #3f6212;
+  --color-lime-900: #365314;
+  --color-lime-950: #1a2e05;
+
   --background: #f8faf8;
   --foreground: #0a2610; /* green-950 */
   
@@ -60,6 +86,32 @@
   --color-green-900: var(--color-green-900);
   --color-green-950: var(--color-green-950);
 
+  /* Teal Scale (운동) - Tailwind에서 teal-500 등으로 사용 가능 */
+  --color-teal-50: var(--color-teal-50);
+  --color-teal-100: var(--color-teal-100);
+  --color-teal-200: var(--color-teal-200);
+  --color-teal-300: var(--color-teal-300);
+  --color-teal-400: var(--color-teal-400);
+  --color-teal-500: var(--color-teal-500);
+  --color-teal-600: var(--color-teal-600);
+  --color-teal-700: var(--color-teal-700);
+  --color-teal-800: var(--color-teal-800);
+  --color-teal-900: var(--color-teal-900);
+  --color-teal-950: var(--color-teal-950);
+
+  /* Lime Scale (식단) - Tailwind에서 lime-500 등으로 사용 가능 */
+  --color-lime-50: var(--color-lime-50);
+  --color-lime-100: var(--color-lime-100);
+  --color-lime-200: var(--color-lime-200);
+  --color-lime-300: var(--color-lime-300);
+  --color-lime-400: var(--color-lime-400);
+  --color-lime-500: var(--color-lime-500);
+  --color-lime-600: var(--color-lime-600);
+  --color-lime-700: var(--color-lime-700);
+  --color-lime-800: var(--color-lime-800);
+  --color-lime-900: var(--color-lime-900);
+  --color-lime-950: var(--color-lime-950);
+
   --font-sans: var(--font-pretendard-variable);
   --font-mono: var(--font-geist-mono);
 }
@@ -104,6 +156,32 @@
     --color-green-800: #b9eac8;  /* 200 반전 */
     --color-green-900: #dbf5e2;  /* 100 반전 */
     --color-green-950: #f0faf3;  /* 50 반전 */
+
+    /* Teal 스케일 반전 (운동) */
+    --color-teal-50: #042f2e;
+    --color-teal-100: #134e4a;
+    --color-teal-200: #115e59;
+    --color-teal-300: #0f766e;
+    --color-teal-400: #0d9488;
+    --color-teal-500: #14b8a6;
+    --color-teal-600: #2dd4bf;
+    --color-teal-700: #5eead4;
+    --color-teal-800: #99f6e4;
+    --color-teal-900: #ccfbf1;
+    --color-teal-950: #f0fdfa;
+
+    /* Lime 스케일 반전 (식단) */
+    --color-lime-50: #1a2e05;
+    --color-lime-100: #365314;
+    --color-lime-200: #3f6212;
+    --color-lime-300: #4d7c0f;
+    --color-lime-400: #65a30d;
+    --color-lime-500: #84cc16;
+    --color-lime-600: #a3e635;
+    --color-lime-700: #bef264;
+    --color-lime-800: #d9f99d;
+    --color-lime-900: #ecfccb;
+    --color-lime-950: #f7fee7;
   }
 }
 

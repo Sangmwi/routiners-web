@@ -9,9 +9,9 @@ export {
   useAISessions,
   useActiveAISession,
   useAISession,
+  useAISessionWithMessages,
   useCreateAISession,
   useCompleteAISession,
-  useAbandonAISession,
   useDeleteAISession,
 } from './useAISession';
 

@@ -2,9 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { withAuth } from '@/utils/supabase/auth';
 import { DbConversation, DbChatMessage } from '@/lib/types/chat';
-import { AI_TRAINER_TOOLS } from '@/lib/ai/tools';
+import { AI_TRAINER_TOOLS, type AIToolDefinition } from '@/lib/ai/tools';
+import { AI_MEAL_TOOLS } from '@/lib/ai/meal-tools';
 import { executeTool, executeRequestUserInput, executeGenerateRoutinePreview, executeApplyRoutine, checkDateConflicts, ToolExecutorContext } from '@/lib/ai/tool-executor';
+import {
+  executeMealTool,
+  executeGenerateMealPlanPreview,
+  executeApplyMealPlan,
+  checkMealDateConflicts,
+  type MealToolExecutorContext,
+} from '@/lib/ai/meal-tool-executor';
 import type { RoutinePreviewData } from '@/lib/types/fitness';
+import type { MealPlanPreviewData } from '@/lib/types/meal';
 import {
   AI_CHAT_LIMITS,
   isSystemMessage,
@@ -26,7 +35,7 @@ const SYSTEM_PROMPTS: Record<'workout' | 'meal', string> = {
 
 1. **한 번에 하나씩만** - 한 응답에 질문 하나만 하세요.
 2. **짧고 친근하게** - 설명은 1-2문장으로.
-3. **이미 있는 정보는 건너뛰기** - 조회해서 값이 있으면 그 질문은 생략.
+3. **기존 정보는 확인받기** - 조회해서 값이 있으면 confirm_profile_data로 사용자에게 확인받고 건너뛰기.
 4. **선택형 질문은 request_user_input** - 텍스트로 옵션 나열 금지.
 5. **2주 단위 루틴** - 루틴은 항상 2주 단위로 생성. 더 긴 기간 요청 시에도 2주씩 생성 후 연장.
 
@@ -37,8 +46,9 @@ const SYSTEM_PROMPTS: Record<'workout' | 'meal', string> = {
 2. get_fitness_profile → 목표, 경험, 선호도, 부상/제한 모두 조회
 
 **조회 결과 분석 후:**
-- 누락된 첫 번째 정보에 대해서만 질문
-- 모든 정보가 있으면 → 바로 루틴 생성 제안
+- 프로필 정보가 이미 있으면 → confirm_profile_data로 확인 UI 표시 (사용자가 확인/수정 선택)
+- 누락된 정보가 있으면 → 첫 번째 누락된 정보에 대해서만 질문
+- 모든 정보가 있고 사용자가 확인하면 → 바로 루틴 생성 제안
 
 ## 질문 순서 (누락된 항목만, 순서대로)
 
@@ -87,12 +97,29 @@ const SYSTEM_PROMPTS: Record<'workout' | 'meal', string> = {
 
 ## 사용자 응답 처리
 
+- 프로필 확인 UI에서 "확인" 클릭 → 다음 단계로 진행
+- 프로필 확인 UI에서 "수정" 클릭 → 해당 정보 다시 질문
 - 사용자가 선택 → update_fitness_profile로 저장
 - 저장 완료 → 짧은 확인 + 다음 질문
 - 모든 정보 수집 완료 → "추가로 원하시는 게 있나요?" 질문
 - 추가 요청사항 확인 후 → generate_routine_preview로 2주 미리보기 생성
 - 수정 요청 시 → 피드백 반영하여 다시 generate_routine_preview
 - 적용 완료 후 사용자가 추가 요청 → 새로운 2주 루틴 생성 가능
+
+## confirm_profile_data 사용법
+
+기존 프로필 데이터가 있을 때 사용자에게 확인받기:
+\`\`\`
+confirm_profile_data({
+  title: "현재 설정된 운동 프로필",
+  description: "아래 정보가 맞는지 확인해주세요",
+  fields: [
+    { key: "fitnessGoal", label: "운동 목표", value: "muscle_gain", displayValue: "근육 증가" },
+    { key: "experienceLevel", label: "운동 경험", value: "beginner", displayValue: "초보자" },
+    { key: "weeklyFrequency", label: "주간 운동 횟수", value: "3", displayValue: "3일" }
+  ]
+})
+\`\`\`
 
 ## 예시 대화
 
@@ -104,42 +131,81 @@ AI: "알겠어요! 일주일에 며칠 운동하실 수 있나요?" + request_us
 
 한국어로 자연스럽게 대화하세요. 친구처럼 편하게!`,
 
-  meal: `당신은 "루티너스" 앱의 AI 영양사입니다. 한국 군인을 위한 맞춤형 식단을 제안합니다.
+  meal: `당신은 "루티너스" 앱의 AI 영양사입니다. 한국 군인을 위한 맞춤형 2주 식단을 만듭니다.
 
 ## 핵심 규칙
 
 1. **한 번에 하나씩만** - 한 응답에 질문 하나만 하세요.
 2. **짧고 친근하게** - 설명은 1-2문장으로.
-3. **이미 있는 정보는 건너뛰기** - 조회해서 값이 있으면 그 질문은 생략.
+3. **기존 정보는 확인받기** - 조회해서 값이 있으면 confirm_profile_data로 사용자에게 확인받고 건너뛰기.
 4. **선택형 질문은 request_user_input** - 텍스트로 옵션 나열 금지.
+5. **2주 단위 식단** - 식단은 항상 2주 단위로 생성. 더 긴 기간 요청 시에도 2주씩 생성 후 연장.
 
 ## 대화 시작 (__START__ 수신 시)
 
-**모든 정보를 한번에 조회 (3개 호출만):**
+**모든 정보를 한번에 조회 (4개 호출만):**
 1. get_user_basic_info → 이름 확인
-2. get_user_body_metrics → 신체 정보
-3. get_fitness_profile → 목표, 선호도 등
+2. get_user_body_metrics → 신체 정보 (TDEE 계산용)
+3. get_fitness_profile → 운동 목표 (식단 연계)
+4. get_dietary_profile → 식단 프로필 조회
 
 **조회 결과 분석 후:**
-- 누락된 첫 번째 정보에 대해서만 질문
-- 모든 정보가 있으면 → 바로 식단 제안
+- 프로필 정보가 이미 있으면 → confirm_profile_data로 확인 UI 표시 (사용자가 확인/수정 선택)
+- 누락된 정보가 있으면 → 첫 번째 누락된 정보에 대해서만 질문
+- 모든 정보가 있고 사용자가 확인하면 → 바로 식단 생성 제안
 
-## 질문 순서 (누락된 항목만)
+## 질문 순서 (누락된 항목만, 순서대로)
 
 1. 식단 목표 (없을 때만) → request_user_input (type: radio)
-   options: 체중 감량(weight_loss), 근육 증가(muscle_gain), 건강 유지(health), 체중 유지(maintenance)
+   - fitnessProfile.fitnessGoal이 있으면 연동 (muscle_gain→벌크업, fat_loss→커팅)
+   options: 근육 증가(muscle_gain), 체지방 감소(fat_loss), 체중 유지(maintenance), 건강 유지(health), 운동 퍼포먼스(performance)
 
-2. 식습관 (없을 때만) → request_user_input (type: checkbox)
-   options: 규칙적 식사, 야식 자주, 외식 많음, 간식 많음
+2. 활동 수준 → request_user_input (type: radio)
+   → 답변 후 바로 calculate_daily_needs 호출하여 TDEE/매크로 계산
+   options: 거의 운동 안함(sedentary), 가벼운 활동(light), 보통 활동(moderate), 활발한 활동(active), 매우 활발(very_active)
 
-3. 알레르기/제한 (없을 때만) → request_user_input (type: checkbox)
-   options: 없음, 유제품, 해산물, 견과류, 글루텐
+3. 음식 제한사항 (없을 때만) → request_user_input (type: checkbox)
+   options: 없음(none), 유제품(dairy), 해산물(seafood), 견과류(nuts), 글루텐(gluten), 계란(egg), 돼지고기(pork), 소고기(beef), 매운음식(spicy)
+
+4. 음식 출처 (없을 때만) → request_user_input (type: checkbox)
+   options: 부대 식당(canteen), PX(px), 외출/외박 외식(outside), 배달(delivery)
+
+5. 하루 식사 횟수 (없을 때만) → request_user_input (type: slider)
+   sliderConfig: { min: 2, max: 6, step: 1, unit: "끼", defaultValue: 3 }
+
+6. 월 식비 예산 (없을 때만) → request_user_input (type: slider)
+   sliderConfig: { min: 30000, max: 500000, step: 10000, unit: "원", defaultValue: 150000 }
+
+7. 추가 요청사항 확인 → 텍스트로 간단히 질문
 
 ## 사용자 응답 후
 
-1. 저장
-2. 짧은 확인 + 다음 누락 정보 질문
-3. 모든 정보 완료 → 식단 제안
+1. update_dietary_profile로 저장
+2. 짧은 확인 ("좋아요!", "알겠어요")
+3. **다음 누락된 정보** 질문 (이미 있는 건 건너뛰기)
+4. 모든 정보 수집 완료 → "추가로 원하시는 게 있나요?" 텍스트로 질문
+5. 사용자 답변 후 → generate_meal_plan_preview (2주 미리보기 생성, duration_weeks: 2)
+6. 사용자가 수정 요청 → 피드백 반영하여 다시 generate_meal_plan_preview
+7. 사용자가 "적용" 버튼 클릭 → 프론트엔드에서 처리 (apply_meal_plan 호출 불필요)
+
+## PX 추천 음식 (고단백 간식)
+- **단백질**: 닭가슴살, 삶은 계란, 두부, 프로틴 바, 그릭 요거트
+- **탄수화물**: 귀리, 고구마, 바나나, 통밀빵
+- **간식**: 아몬드, 프로틴 음료, 무가당 우유
+
+## 식단 생성 규칙
+- 각 식사에 **탄단지 균형** 맞추기
+- 부대 식당 기반 + PX 간식 보충 패턴
+- 예산 범위 내에서 구성
+- 단백질 섭취량은 calculate_daily_needs 결과 기반
+
+## 예시 대화
+
+사용자: (목표 선택)
+AI: "좋아요! 평소 활동량은 어느 정도인가요?" + request_user_input
+
+사용자: (활동 수준 선택)
+AI: (calculate_daily_needs 호출 후) "하루 약 2,400kcal, 단백질 120g 정도가 적당해요! 못 먹는 음식이 있나요?" + request_user_input
 
 한국어로 자연스럽게 대화하세요. 친구처럼 편하게!`,
 };
@@ -151,9 +217,42 @@ const MessageSchema = z.object({
     .max(AI_CHAT_LIMITS.MAX_MESSAGE_LENGTH, `메시지는 ${AI_CHAT_LIMITS.MAX_MESSAGE_LENGTH}자 이내여야 합니다.`),
 });
 
+/**
+ * 공유 도구 목록 (운동/식단 AI 공통)
+ * - 사용자 정보 조회 도구들
+ * - 사용자 입력 요청 도구
+ */
+const SHARED_TOOL_NAMES = [
+  'get_user_basic_info',
+  'get_user_military_info',
+  'get_user_body_metrics',
+  'get_latest_inbody',
+  'get_inbody_history',
+  'get_fitness_profile',
+  'request_user_input',
+  'confirm_profile_data', // 프로필 확인 UI (운동/식단 AI 공통)
+] as const;
+
+/**
+ * purpose에 따라 적절한 도구 목록 반환
+ */
+function getToolsForPurpose(purpose: 'workout' | 'meal'): AIToolDefinition[] {
+  if (purpose === 'meal') {
+    // 식단 AI: 공유 도구 + 식단 전용 도구
+    const sharedTools = AI_TRAINER_TOOLS.filter(
+      (tool) => SHARED_TOOL_NAMES.includes(tool.name as typeof SHARED_TOOL_NAMES[number])
+    );
+    return [...sharedTools, ...AI_MEAL_TOOLS];
+  } else {
+    // 운동 AI: 기존 운동 도구 전체
+    return AI_TRAINER_TOOLS;
+  }
+}
+
 // Responses API용 도구 포맷 변환
-function formatToolsForResponsesAPI(): OpenAI.Responses.Tool[] {
-  return AI_TRAINER_TOOLS.map((tool) => ({
+function formatToolsForResponsesAPI(purpose: 'workout' | 'meal'): OpenAI.Responses.Tool[] {
+  const tools = getToolsForPurpose(purpose);
+  return tools.map((tool) => ({
     type: 'function' as const,
     name: tool.name,
     description: tool.description,
@@ -296,12 +395,11 @@ export const POST = withAuth<Response>(
     const purpose = conv.ai_purpose as 'workout' | 'meal';
     const isSystem = isSystemMessage(message);
     let userMsgId: string | null = null;
-    let greetingMsgId: string | null = null;
 
     // __START__ 메시지인 경우: 인사말을 DB에 저장 (세션 복귀 시에도 유지)
     if (isSystem) {
       const greeting = INITIAL_GREETINGS[purpose];
-      const { data: greetingMsg } = await supabase
+      await supabase
         .from('chat_messages')
         .insert({
           conversation_id: conversationId,
@@ -309,10 +407,7 @@ export const POST = withAuth<Response>(
           role: 'assistant',
           content: greeting,
           content_type: 'text',
-        })
-        .select()
-        .single();
-      greetingMsgId = greetingMsg?.id ?? null;
+        });
     } else {
       // 일반 사용자 메시지 저장
       const { data: userMsg, error: userMsgError } = await supabase
@@ -335,6 +430,23 @@ export const POST = withAuth<Response>(
         );
       }
       userMsgId = userMsg.id;
+
+      // 사용자가 응답하면 pending_profile_confirmation 정리 (확인/수정 버튼 클릭 후)
+      // metadata에서 pending_profile_confirmation만 제거
+      const { data: convForClear } = await supabase
+        .from('conversations')
+        .select('metadata')
+        .eq('id', conversationId)
+        .single();
+
+      if (convForClear?.metadata && (convForClear.metadata as Record<string, unknown>).pending_profile_confirmation) {
+        const updatedMetadata = { ...(convForClear.metadata as Record<string, unknown>) };
+        delete updatedMetadata.pending_profile_confirmation;
+        await supabase
+          .from('conversations')
+          .update({ metadata: updatedMetadata })
+          .eq('id', conversationId);
+      }
     }
 
     // Tool executor 컨텍스트
@@ -357,8 +469,8 @@ export const POST = withAuth<Response>(
 
         try {
           // Responses API용 input 구성
-          let input = buildConversationInput(dbMessages, message);
-          const tools = formatToolsForResponsesAPI();
+          const input = buildConversationInput(dbMessages, message);
+          const tools = formatToolsForResponsesAPI(purpose);
 
           // 디버그 로그
           console.log('[AI Chat] Tools count:', tools.length);
@@ -534,6 +646,68 @@ export const POST = withAuth<Response>(
                   // ✅ request_user_input 후에는 루프 종료
                   // 사용자가 버튼 클릭하면 새 API 요청으로 다음 질문 진행
                   continueLoop = false;
+                } else if (toolName === 'confirm_profile_data') {
+                  // confirm_profile_data 특별 처리 (프로필 확인 UI)
+                  const { title, description, fields } = args as {
+                    title: string;
+                    description?: string;
+                    fields: Array<{
+                      key: string;
+                      label: string;
+                      value: string;
+                      displayValue: string;
+                    }>;
+                  };
+
+                  const confirmationRequest = {
+                    id: fc.id,
+                    title,
+                    description,
+                    fields,
+                  };
+
+                  // profile_confirmation SSE 이벤트 전송
+                  sendEvent('profile_confirmation', confirmationRequest);
+
+                  // 프로필 확인 데이터를 conversation.metadata에 저장 (페이지 이탈 후 복귀 시 복원용)
+                  // 기존 metadata를 읽어서 병합
+                  const { data: existingConv } = await supabase
+                    .from('conversations')
+                    .select('metadata')
+                    .eq('id', conversationId)
+                    .single();
+
+                  const existingMetadata = (existingConv?.metadata as Record<string, unknown>) ?? {};
+                  const { error: updateError } = await supabase
+                    .from('conversations')
+                    .update({
+                      metadata: {
+                        ...existingMetadata,
+                        pending_profile_confirmation: confirmationRequest,
+                      },
+                    })
+                    .eq('id', conversationId);
+
+                  if (updateError) {
+                    console.error('[confirm_profile_data] Failed to save confirmation:', updateError);
+                  }
+
+                  sendEvent('tool_done', {
+                    toolCallId: fc.id,
+                    name: toolName,
+                    success: true,
+                    data: confirmationRequest,
+                  });
+
+                  toolResult = JSON.stringify({
+                    success: true,
+                    waiting_for_confirmation: true,
+                    message: '프로필 확인 UI가 표시되었습니다. 사용자가 "확인" 또는 "수정" 버튼을 클릭할 때까지 기다리세요.',
+                  });
+
+                  // ✅ confirm_profile_data 후에는 루프 종료
+                  // 사용자가 버튼 클릭하면 새 API 요청으로 다음 단계 진행
+                  continueLoop = false;
                 } else if (toolName === 'generate_routine_preview') {
                   // generate_routine_preview 특별 처리
                   const previewResult = executeGenerateRoutinePreview(
@@ -551,11 +725,19 @@ export const POST = withAuth<Response>(
                     // routine_preview SSE 이벤트 전송
                     sendEvent('routine_preview', previewResult.data);
 
-                    // 미리보기 데이터를 conversation.metadata에 저장 (더 신뢰할 수 있음)
+                    // 미리보기 데이터를 conversation.metadata에 저장 (기존 metadata 병합)
+                    const { data: existingConvForRoutine } = await supabase
+                      .from('conversations')
+                      .select('metadata')
+                      .eq('id', conversationId)
+                      .single();
+
+                    const existingMetadataForRoutine = (existingConvForRoutine?.metadata as Record<string, unknown>) ?? {};
                     const { error: updateError } = await supabase
                       .from('conversations')
                       .update({
                         metadata: {
+                          ...existingMetadataForRoutine,
                           pending_preview: previewResult.data,
                         },
                       })
@@ -622,10 +804,20 @@ export const POST = withAuth<Response>(
                         startDate: applyResult.data?.startDate,
                       });
 
-                      // 적용 완료 후 pending_preview 제거 (중복 적용 방지)
+                      // 적용 완료 후 pending_preview 제거하고 applied_routine 저장 (기존 metadata 유지)
+                      const { pending_preview: _removed, ...restRoutineMetadata } = convMetadata as Record<string, unknown>;
                       await supabase
                         .from('conversations')
-                        .update({ metadata: {} })
+                        .update({
+                          metadata: {
+                            ...restRoutineMetadata,
+                            applied_routine: {
+                              previewId,
+                              eventsCreated: applyResult.data?.eventsCreated,
+                              startDate: applyResult.data?.startDate,
+                            },
+                          },
+                        })
                         .eq('id', conversationId);
                     }
 
@@ -634,8 +826,154 @@ export const POST = withAuth<Response>(
 
                   // ✅ apply_routine 후에는 루프 종료 (성공/실패 모두)
                   continueLoop = false;
+                } else if (toolName === 'generate_meal_plan_preview') {
+                  // generate_meal_plan_preview 특별 처리 (식단)
+                  const previewResult = executeGenerateMealPlanPreview(
+                    args as Parameters<typeof executeGenerateMealPlanPreview>[0],
+                    fc.id
+                  );
+
+                  if (previewResult.success && previewResult.data) {
+                    // 충돌 체크 수행
+                    const mealCtx: MealToolExecutorContext = {
+                      userId,
+                      supabase,
+                      conversationId,
+                    };
+                    const conflicts = await checkMealDateConflicts(mealCtx, previewResult.data);
+                    if (conflicts.length > 0) {
+                      previewResult.data.conflicts = conflicts;
+                    }
+
+                    // meal_plan_preview SSE 이벤트 전송
+                    sendEvent('meal_plan_preview', previewResult.data);
+
+                    // 미리보기 데이터를 conversation.metadata에 저장 (기존 metadata 병합)
+                    const { data: existingConvForMeal } = await supabase
+                      .from('conversations')
+                      .select('metadata')
+                      .eq('id', conversationId)
+                      .single();
+
+                    const existingMetadataForMeal = (existingConvForMeal?.metadata as Record<string, unknown>) ?? {};
+                    const { error: updateError } = await supabase
+                      .from('conversations')
+                      .update({
+                        metadata: {
+                          ...existingMetadataForMeal,
+                          pending_meal_preview: previewResult.data,
+                        },
+                      })
+                      .eq('id', conversationId);
+
+                    if (updateError) {
+                      console.error('[generate_meal_plan_preview] Failed to save preview_data:', updateError);
+                    }
+                  }
+
+                  sendEvent('tool_done', {
+                    toolCallId: fc.id,
+                    name: toolName,
+                    success: previewResult.success,
+                    data: { previewId: previewResult.data?.id },
+                    error: previewResult.error,
+                  });
+
+                  toolResult = JSON.stringify({
+                    success: true,
+                    waiting_for_confirmation: true,
+                    message: '식단 미리보기가 표시되었습니다. 사용자가 "적용하기" 또는 수정 요청을 할 때까지 기다리세요.',
+                    preview_id: previewResult.data?.id,
+                  });
+
+                  // 미리보기 표시 후 루프 종료 (사용자 확인 대기)
+                  continueLoop = false;
+                } else if (toolName === 'apply_meal_plan') {
+                  // apply_meal_plan 특별 처리 (식단)
+                  const previewId = args.preview_id as string;
+
+                  // conversation.metadata에서 pending_meal_preview 가져오기
+                  const { data: conversationData } = await supabase
+                    .from('conversations')
+                    .select('metadata')
+                    .eq('id', conversationId)
+                    .single();
+
+                  const convMetadata = conversationData?.metadata as { pending_meal_preview?: MealPlanPreviewData } | null;
+                  const mealPreviewData = convMetadata?.pending_meal_preview ?? null;
+
+                  // previewId가 일치하는지 확인 (보안 검증)
+                  if (!mealPreviewData || mealPreviewData.id !== previewId) {
+                    toolResult = JSON.stringify({
+                      success: false,
+                      error: '미리보기 데이터를 찾을 수 없습니다. 다시 식단을 생성해주세요.',
+                    });
+                  } else {
+                    const mealCtx: MealToolExecutorContext = {
+                      userId,
+                      supabase,
+                      conversationId,
+                    };
+                    const applyResult = await executeApplyMealPlan(mealCtx, mealPreviewData);
+
+                    sendEvent('tool_done', {
+                      toolCallId: fc.id,
+                      name: toolName,
+                      success: applyResult.success,
+                      data: applyResult.data,
+                      error: applyResult.error,
+                    });
+
+                    if (applyResult.success) {
+                      // 식단 적용 성공 이벤트
+                      sendEvent('meal_plan_applied', {
+                        previewId,
+                        eventsCreated: applyResult.data?.eventsCreated,
+                        startDate: applyResult.data?.startDate,
+                      });
+
+                      // 적용 완료 후 pending_meal_preview 제거하고 applied_meal_plan 저장 (기존 metadata 유지)
+                      const { pending_meal_preview: _removed, ...restMealMetadata } = convMetadata as Record<string, unknown>;
+                      await supabase
+                        .from('conversations')
+                        .update({
+                          metadata: {
+                            ...restMealMetadata,
+                            applied_meal_plan: {
+                              previewId,
+                              eventsCreated: applyResult.data?.eventsCreated,
+                              startDate: applyResult.data?.startDate,
+                            },
+                          },
+                        })
+                        .eq('id', conversationId);
+                    }
+
+                    toolResult = JSON.stringify(applyResult);
+                  }
+
+                  // ✅ apply_meal_plan 후에는 루프 종료 (성공/실패 모두)
+                  continueLoop = false;
+                } else if (['get_dietary_profile', 'update_dietary_profile', 'calculate_daily_needs'].includes(toolName)) {
+                  // 식단 전용 도구 실행
+                  const mealCtx: MealToolExecutorContext = {
+                    userId,
+                    supabase,
+                    conversationId,
+                  };
+                  const result = await executeMealTool(toolName, args, mealCtx);
+
+                  sendEvent('tool_done', {
+                    toolCallId: fc.id,
+                    name: toolName,
+                    success: result.success,
+                    data: result.data,
+                    error: result.error,
+                  });
+
+                  toolResult = JSON.stringify(result);
                 } else {
-                  // 일반 도구 실행
+                  // 일반 도구 실행 (운동 AI 도구)
                   const result = await executeTool(toolName, args, toolCtx);
 
                   sendEvent('tool_done', {

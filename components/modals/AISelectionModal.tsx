@@ -1,0 +1,104 @@
+'use client';
+
+import { Dumbbell, Utensils } from 'lucide-react';
+import Modal, { ModalBody } from '@/components/ui/Modal';
+import type { ModalDataMap } from '@/lib/stores/modalStore';
+
+interface AISelectionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  data: ModalDataMap['aiSelection'];
+}
+
+/**
+ * AI 코치 선택 모달 (바텀시트)
+ *
+ * 운동/식단 AI 중 선택하여 채팅 시작
+ * - 활성 세션 있으면 "진행중" 뱃지 표시
+ * - 선택 시 해당 purpose로 채팅 페이지 이동
+ */
+export default function AISelectionModal({
+  isOpen,
+  onClose,
+  data,
+}: AISelectionModalProps) {
+  const handleSelect = (purpose: 'workout' | 'meal') => {
+    data.onSelectPurpose(purpose);
+    onClose();
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      position="bottom"
+      showCloseButton={false}
+      size="lg"
+    >
+      <ModalBody className="pb-8">
+        {/* 타이틀 */}
+        <div className="text-center mb-6">
+          <h2 className="text-lg font-bold text-foreground">
+            AI 코치와 대화하기
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            원하는 목표를 선택해주세요
+          </p>
+        </div>
+
+        {/* 선택 옵션 */}
+        <div className="space-y-3">
+          {/* 운동 루틴 */}
+          <button
+            onClick={() => handleSelect('workout')}
+            className="w-full p-4 rounded-xl border-2 border-border bg-card hover:border-teal-500/50 hover:bg-teal-500/5 transition-all text-left active:scale-[0.99]"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-teal-500/10 flex items-center justify-center shrink-0">
+                <Dumbbell className="w-6 h-6 text-teal-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-foreground">운동 루틴</h3>
+                  {data.workoutSessionActive && (
+                    <span className="px-2 py-0.5 text-xs rounded-full bg-teal-500/10 text-teal-500 font-medium">
+                      진행중
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  맞춤형 4주 운동 프로그램 생성
+                </p>
+              </div>
+            </div>
+          </button>
+
+          {/* 식단 관리 */}
+          <button
+            onClick={() => handleSelect('meal')}
+            className="w-full p-4 rounded-xl border-2 border-border bg-card hover:border-lime-500/50 hover:bg-lime-500/5 transition-all text-left active:scale-[0.99]"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-lime-500/10 flex items-center justify-center shrink-0">
+                <Utensils className="w-6 h-6 text-lime-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-foreground">식단 관리</h3>
+                  {data.mealSessionActive && (
+                    <span className="px-2 py-0.5 text-xs rounded-full bg-lime-500/10 text-lime-500 font-medium">
+                      진행중
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  맞춤형 영양 및 식단 계획 생성
+                </p>
+              </div>
+            </div>
+          </button>
+        </div>
+      </ModalBody>
+    </Modal>
+  );
+}
