@@ -321,6 +321,8 @@ export interface AISessionMetadata {
   applied_meal_plan?: AppliedMealPlanMetadata;
   // 프로필 확인 (운동/식단 공통)
   pending_profile_confirmation?: ProfileConfirmationRequest;
+  // 선택형 입력 요청 (운동/식단 공통)
+  pending_input?: import('./fitness').InputRequest;
 }
 
 /**

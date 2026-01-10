@@ -23,10 +23,9 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
     );
   }
 
-  // 활성 대화 조회
-  console.log('[Conversations Active GET] Query params:', { userId, purpose });
-
-  const { data: conversation, error: convError } = await supabase
+  // 활성 대화 조회 (가장 최근 1개만)
+  // ⚠️ .single() 대신 .limit(1) 사용 - 여러 개의 활성 세션이 있을 수 있음
+  const { data: conversations, error: convError } = await supabase
     .from('conversations')
     .select('*')
     .eq('created_by', userId)
@@ -34,24 +33,10 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
     .eq('ai_purpose', purpose)
     .eq('ai_status', 'active')
     .is('deleted_at', null)
-    .single();
+    .order('created_at', { ascending: false })
+    .limit(1);
 
   if (convError) {
-    if (convError.code === 'PGRST116') {
-      // 활성 세션 없음 - 디버깅을 위해 모든 세션 조회
-      const { data: allSessions } = await supabase
-        .from('conversations')
-        .select('id, ai_purpose, ai_status, deleted_at, created_at')
-        .eq('created_by', userId)
-        .eq('type', 'ai')
-        .eq('ai_purpose', purpose)
-        .order('created_at', { ascending: false })
-        .limit(3);
-
-      console.log('[Conversations Active GET] No active session found. Recent sessions:', allSessions);
-
-      return NextResponse.json(null, { status: 200 });
-    }
     console.error('[Conversations Active GET] Error:', convError);
     return NextResponse.json(
       { error: '대화를 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
@@ -59,7 +44,12 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
     );
   }
 
-  console.log('[Conversations Active GET] Found session:', conversation.id, 'status:', conversation.ai_status);
+  // 활성 세션이 없으면 null 반환
+  if (!conversations || conversations.length === 0) {
+    return NextResponse.json(null, { status: 200 });
+  }
+
+  const conversation = conversations[0];
 
   const conv = conversation as DbConversation;
 

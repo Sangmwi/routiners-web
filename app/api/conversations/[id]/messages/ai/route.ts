@@ -431,17 +431,19 @@ export const POST = withAuth<Response>(
       }
       userMsgId = userMsg.id;
 
-      // 사용자가 응답하면 pending_profile_confirmation 정리 (확인/수정 버튼 클릭 후)
-      // metadata에서 pending_profile_confirmation만 제거
+      // 사용자가 응답하면 pending_profile_confirmation, pending_input 정리
+      // (확인/수정 버튼 클릭 후 또는 선택 버튼 클릭 후)
       const { data: convForClear } = await supabase
         .from('conversations')
         .select('metadata')
         .eq('id', conversationId)
         .single();
 
-      if (convForClear?.metadata && (convForClear.metadata as Record<string, unknown>).pending_profile_confirmation) {
-        const updatedMetadata = { ...(convForClear.metadata as Record<string, unknown>) };
+      const existingMeta = convForClear?.metadata as Record<string, unknown> | null;
+      if (existingMeta && (existingMeta.pending_profile_confirmation || existingMeta.pending_input)) {
+        const updatedMetadata = { ...existingMeta };
         delete updatedMetadata.pending_profile_confirmation;
+        delete updatedMetadata.pending_input;
         await supabase
           .from('conversations')
           .update({ metadata: updatedMetadata })
@@ -472,15 +474,10 @@ export const POST = withAuth<Response>(
           const input = buildConversationInput(dbMessages, message);
           const tools = formatToolsForResponsesAPI(purpose);
 
-          // 디버그 로그
-          console.log('[AI Chat] Tools count:', tools.length);
-          console.log('[AI Chat] Tool names:', tools.map(t => (t as { name?: string }).name || 'unknown').join(', '));
-          console.log('[AI Chat] Input messages:', input.length);
-          console.log('[AI Chat] System prompt length:', SYSTEM_PROMPTS[purpose].length);
-
           let continueLoop = true;
           let fullContent = '';
           let totalToolCalls = 0;
+          let savedTextLength = 0; // tool과 함께 이미 저장된 텍스트 길이 추적
 
           while (continueLoop && totalToolCalls < AI_CHAT_LIMITS.MAX_TOOL_CALLS_PER_RESPONSE) {
             // Responses API 호출 (스트리밍)
@@ -578,6 +575,19 @@ export const POST = withAuth<Response>(
             if (hasToolCalls && functionCalls.size > 0) {
               totalToolCalls += functionCalls.size;
 
+              // ✅ 텍스트 응답이 있으면 먼저 text 메시지로 별도 저장
+              // (tool_call에 저장하면 클라이언트에서 필터링되어 표시 안됨)
+              if (contentBuffer.trim()) {
+                await supabase.from('chat_messages').insert({
+                  conversation_id: conversationId,
+                  sender_id: null,
+                  role: 'assistant',
+                  content: contentBuffer,
+                  content_type: 'text',
+                });
+                savedTextLength += contentBuffer.length; // 저장된 길이 추적
+              }
+
               // Tool calls를 DB에 저장
               const formattedToolCalls: Array<{
                 id: string;
@@ -591,12 +601,12 @@ export const POST = withAuth<Response>(
                 arguments: fc.arguments,
               }));
 
-              // tool_call 메시지 삽입
+              // tool_call 메시지 삽입 (텍스트는 위에서 별도 저장했으므로 비움)
               await supabase.from('chat_messages').insert({
                 conversation_id: conversationId,
                 sender_id: null,
                 role: 'assistant',
-                content: contentBuffer || '',
+                content: '',
                 content_type: 'tool_call',
                 metadata: { tool_calls: formattedToolCalls },
               });
@@ -616,17 +626,48 @@ export const POST = withAuth<Response>(
 
                 // request_user_input 특별 처리
                 if (toolName === 'request_user_input') {
-                  const inputResult = executeRequestUserInput(
-                    args as {
-                      type: InputRequestType;
-                      options?: InputRequestOption[];
-                      sliderConfig?: InputRequestSliderConfig;
-                    },
-                    fc.id
-                  );
+                  const inputArgs = args as {
+                    message?: string;
+                    type: InputRequestType;
+                    options?: InputRequestOption[];
+                    sliderConfig?: InputRequestSliderConfig;
+                  };
+
+                  const inputResult = executeRequestUserInput(inputArgs, fc.id);
 
                   if (inputResult.success && inputResult.data) {
                     sendEvent('input_request', inputResult.data);
+                  }
+
+                  // ✅ message가 있으면 별도 text 메시지로 저장 (새로고침 후에도 표시되도록)
+                  if (inputArgs.message?.trim()) {
+                    await supabase.from('chat_messages').insert({
+                      conversation_id: conversationId,
+                      sender_id: null,
+                      role: 'assistant',
+                      content: inputArgs.message,
+                      content_type: 'text',
+                    });
+                  }
+
+                  // ✅ pending_input을 metadata에 저장 (새로고침 후에도 버튼 UI 표시)
+                  if (inputResult.success && inputResult.data) {
+                    const { data: existingConvForInput } = await supabase
+                      .from('conversations')
+                      .select('metadata')
+                      .eq('id', conversationId)
+                      .single();
+
+                    const existingMetadataForInput = (existingConvForInput?.metadata as Record<string, unknown>) ?? {};
+                    await supabase
+                      .from('conversations')
+                      .update({
+                        metadata: {
+                          ...existingMetadataForInput,
+                          pending_input: inputResult.data,
+                        },
+                      })
+                      .eq('id', conversationId);
                   }
 
                   sendEvent('tool_done', {
@@ -1025,29 +1066,17 @@ export const POST = withAuth<Response>(
             }
           }
 
-          // 최종 텍스트 응답 저장 (tool_call이 아닌 순수 텍스트만)
-          if (fullContent.trim()) {
-            // 이미 tool_call과 함께 저장된 텍스트는 제외하고,
-            // 마지막 순수 텍스트 응답만 저장
-            const lastToolCallMsg = await supabase
-              .from('chat_messages')
-              .select('content')
-              .eq('conversation_id', conversationId)
-              .eq('content_type', 'tool_call')
-              .order('created_at', { ascending: false })
-              .limit(1)
-              .single();
-
-            // 마지막 tool_call의 content와 다른 경우에만 저장
-            if (!lastToolCallMsg.data || lastToolCallMsg.data.content !== fullContent) {
-              await supabase.from('chat_messages').insert({
-                conversation_id: conversationId,
-                sender_id: null,
-                role: 'assistant',
-                content: fullContent,
-                content_type: 'text',
-              });
-            }
+          // 최종 텍스트 응답 저장 (tool_call과 함께 이미 저장된 부분 제외)
+          // savedTextLength: tool 호출 시 이미 저장된 텍스트 길이
+          const unsavedContent = fullContent.slice(savedTextLength);
+          if (unsavedContent.trim()) {
+            await supabase.from('chat_messages').insert({
+              conversation_id: conversationId,
+              sender_id: null,
+              role: 'assistant',
+              content: unsavedContent,
+              content_type: 'text',
+            });
           }
 
           // 대화 업데이트 시간 갱신

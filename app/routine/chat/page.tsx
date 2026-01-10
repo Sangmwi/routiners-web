@@ -49,12 +49,23 @@ export default function AIChatPage() {
   const {
     data: workoutSession,
     isLoading: isLoadingWorkout,
+    refetch: refetchWorkout,
   } = useActiveAISession('workout');
 
   const {
     data: mealSession,
     isLoading: isLoadingMeal,
+    refetch: refetchMeal,
   } = useActiveAISession('meal');
+
+  // 페이지 진입 시 최신 세션 데이터 fetch
+  // - 홈에서 돌아올 때 캐시된 오래된 데이터 대신 최신 데이터 로드
+  // - ⚠️ 항상 refetch: 캐시 동기화가 완벽하지 않을 수 있으므로 안전을 위해
+  useEffect(() => {
+    refetchWorkout();
+    refetchMeal();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- 마운트 시 1회만 실행, refetch 함수는 stable
+  }, []);
 
   // URL 파라미터로 지정된 히스토리 세션 조회
   const {
@@ -111,23 +122,13 @@ export default function AIChatPage() {
     // 해당 purpose에 활성 세션이 있는지 확인
     const existingSession = purposeParam === 'workout' ? workoutSession : mealSession;
 
-    console.log('[Chat Page] Purpose handling:', {
-      purposeParam,
-      existingSession: existingSession?.id,
-      existingStatus: existingSession?.status,
-      workoutSession: workoutSession?.id,
-      mealSession: mealSession?.id,
-    });
-
     if (existingSession?.status === 'active') {
       // 활성 세션이 있으면 해당 purpose를 기억
       // ⚠️ URL 정리하지 않음 - 새로고침 시 purpose 유지를 위해
-      console.log('[Chat Page] Using existing session:', existingSession.id);
       setViewPurpose(purposeParam);
       setPurposeHandled(true);
     } else {
       // 활성 세션이 없으면 새 세션 생성
-      console.log('[Chat Page] Creating new session for purpose:', purposeParam);
       setPurposeHandled(true);
       setSelectedPurpose(purposeParam);
       setViewPurpose(purposeParam); // URL 변경 후에도 올바른 세션이 표시되도록
