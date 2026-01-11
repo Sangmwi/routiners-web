@@ -4,22 +4,18 @@ import { withAuth } from '@/utils/supabase/auth';
 import { DbConversation, DbChatMessage } from '@/lib/types/chat';
 import { AI_TRAINER_TOOLS, type AIToolDefinition } from '@/lib/ai/tools';
 import { AI_MEAL_TOOLS } from '@/lib/ai/meal-tools';
-import { executeTool, executeRequestUserInput, executeGenerateRoutinePreview, executeApplyRoutine, checkDateConflicts, ToolExecutorContext } from '@/lib/ai/tool-executor';
 import {
-  executeMealTool,
-  executeGenerateMealPlanPreview,
-  executeApplyMealPlan,
-  checkMealDateConflicts,
-  type MealToolExecutorContext,
-} from '@/lib/ai/meal-tool-executor';
-import type { RoutinePreviewData } from '@/lib/types/fitness';
-import type { MealPlanPreviewData } from '@/lib/types/meal';
+  handleToolCall,
+  clearMetadataKeys,
+  type ToolHandlerContext,
+  type FunctionCallInfo,
+} from '@/lib/ai/chat-handlers';
 import {
   AI_CHAT_LIMITS,
   isSystemMessage,
   INITIAL_GREETINGS,
 } from '@/lib/constants/aiChat';
-import type { AIToolName, InputRequestType, InputRequestOption, InputRequestSliderConfig } from '@/lib/types/fitness';
+import type { AIToolName } from '@/lib/types/fitness';
 import { z } from 'zod';
 
 // OpenAI 클라이언트 초기화
@@ -121,6 +117,22 @@ confirm_profile_data({
 })
 \`\`\`
 
+## 프로필 확인 응답 처리
+
+사용자가 프로필 확인 UI에서 버튼을 클릭하면 특별한 형식의 메시지를 보냅니다:
+
+1. **"[프로필 확인 완료]"로 시작하는 메시지**:
+   - 사용자가 기존 프로필 정보를 확인함
+   - 확인된 항목들을 절대 다시 묻지 않음
+   - 바로 다음 단계로 진행 (추가 요청 확인 또는 루틴 생성)
+
+2. **"[프로필 수정 요청]"으로 시작하는 메시지**:
+   - 사용자가 일부 정보 수정을 원함
+   - "어떤 항목을 수정하시겠어요?" 질문
+   - 해당 항목만 request_user_input으로 다시 질문
+
+**⚠️ 중요**: confirm_profile_data로 확인받은 정보는 같은 세션에서 다시 질문하지 마세요!
+
 ## 예시 대화
 
 사용자: (목표 선택)
@@ -198,6 +210,22 @@ AI: "알겠어요! 일주일에 며칠 운동하실 수 있나요?" + request_us
 - 부대 식당 기반 + PX 간식 보충 패턴
 - 예산 범위 내에서 구성
 - 단백질 섭취량은 calculate_daily_needs 결과 기반
+
+## 프로필 확인 응답 처리
+
+사용자가 프로필 확인 UI에서 버튼을 클릭하면 특별한 형식의 메시지를 보냅니다:
+
+1. **"[프로필 확인 완료]"로 시작하는 메시지**:
+   - 사용자가 기존 프로필 정보를 확인함
+   - 확인된 항목들을 절대 다시 묻지 않음
+   - 바로 다음 단계로 진행 (추가 요청 확인 또는 식단 생성)
+
+2. **"[프로필 수정 요청]"으로 시작하는 메시지**:
+   - 사용자가 일부 정보 수정을 원함
+   - "어떤 항목을 수정하시겠어요?" 질문
+   - 해당 항목만 request_user_input으로 다시 질문
+
+**⚠️ 중요**: confirm_profile_data로 확인받은 정보는 같은 세션에서 다시 질문하지 마세요!
 
 ## 예시 대화
 
@@ -432,41 +460,36 @@ export const POST = withAuth<Response>(
       userMsgId = userMsg.id;
 
       // 사용자가 응답하면 pending_profile_confirmation, pending_input 정리
-      // (확인/수정 버튼 클릭 후 또는 선택 버튼 클릭 후)
-      const { data: convForClear } = await supabase
-        .from('conversations')
-        .select('metadata')
-        .eq('id', conversationId)
-        .single();
-
-      const existingMeta = convForClear?.metadata as Record<string, unknown> | null;
-      if (existingMeta && (existingMeta.pending_profile_confirmation || existingMeta.pending_input)) {
-        const updatedMetadata = { ...existingMeta };
-        delete updatedMetadata.pending_profile_confirmation;
-        delete updatedMetadata.pending_input;
-        await supabase
-          .from('conversations')
-          .update({ metadata: updatedMetadata })
-          .eq('id', conversationId);
-      }
+      await clearMetadataKeys(supabase, conversationId, [
+        'pending_profile_confirmation',
+        'pending_input',
+      ]);
     }
-
-    // Tool executor 컨텍스트
-    const toolCtx: ToolExecutorContext = {
-      userId,
-      supabase,
-      conversationId,
-    };
 
     // SSE 스트리밍 응답
     const encoder = new TextEncoder();
 
     const stream = new ReadableStream({
       async start(controller) {
+        let controllerClosed = false;
+
+        // ✅ sendEvent에 에러 핸들링 추가 - 컨트롤러 닫힘 상태 대응
         const sendEvent = (event: string, data: unknown) => {
-          controller.enqueue(
-            encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
-          );
+          if (controllerClosed) return; // 이미 닫힌 경우 무시
+
+          try {
+            controller.enqueue(
+              encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
+            );
+          } catch (error) {
+            // Controller가 닫힌 경우 (클라이언트 연결 종료 등)
+            if ((error as Error)?.message?.includes('Controller is already closed')) {
+              controllerClosed = true;
+              console.warn('[SSE] Controller closed, skipping event:', event);
+            } else {
+              throw error; // 다른 에러는 re-throw
+            }
+          }
         };
 
         try {
@@ -589,6 +612,7 @@ export const POST = withAuth<Response>(
               }
 
               // Tool calls를 DB에 저장
+              // ✅ call_id 일관성 보장: call_id가 없으면 id를 fallback으로 사용
               const formattedToolCalls: Array<{
                 id: string;
                 call_id: string;
@@ -596,7 +620,7 @@ export const POST = withAuth<Response>(
                 arguments: string;
               }> = Array.from(functionCalls.values()).map((fc) => ({
                 id: fc.id,
-                call_id: fc.callId,
+                call_id: fc.callId || fc.id,
                 name: fc.name,
                 arguments: fc.arguments,
               }));
@@ -611,6 +635,14 @@ export const POST = withAuth<Response>(
                 metadata: { tool_calls: formattedToolCalls },
               });
 
+              // Tool Handler Context 생성
+              const toolHandlerCtx: ToolHandlerContext = {
+                userId,
+                supabase,
+                conversationId,
+                sendEvent,
+              };
+
               // 각 function call 실행
               for (const fc of functionCalls.values()) {
                 const toolName = fc.name as AIToolName;
@@ -622,434 +654,54 @@ export const POST = withAuth<Response>(
                   args = {};
                 }
 
-                let toolResult: string;
+                // ✅ call_id 일관성 보장: call_id가 없으면 id를 fallback으로 사용
+              // (buildConversationInput에서 tool_call 읽을 때도 동일한 로직 사용)
+              const effectiveCallId = fc.callId || fc.id;
 
-                // request_user_input 특별 처리
-                if (toolName === 'request_user_input') {
-                  const inputArgs = args as {
-                    message?: string;
-                    type: InputRequestType;
-                    options?: InputRequestOption[];
-                    sliderConfig?: InputRequestSliderConfig;
-                  };
+              // FunctionCallInfo 생성
+              const fcInfo: FunctionCallInfo = {
+                id: fc.id,
+                callId: effectiveCallId,
+                name: fc.name,
+                arguments: fc.arguments,
+              };
 
-                  const inputResult = executeRequestUserInput(inputArgs, fc.id);
+              // Handler 호출
+              const { toolResult, continueLoop: shouldContinue } = await handleToolCall(
+                fcInfo,
+                toolName,
+                args,
+                toolHandlerCtx
+              );
 
-                  if (inputResult.success && inputResult.data) {
-                    sendEvent('input_request', inputResult.data);
-                  }
+              // continueLoop 업데이트
+              if (!shouldContinue) {
+                continueLoop = false;
+              }
 
-                  // ✅ message가 있으면 별도 text 메시지로 저장 (새로고침 후에도 표시되도록)
-                  if (inputArgs.message?.trim()) {
-                    await supabase.from('chat_messages').insert({
-                      conversation_id: conversationId,
-                      sender_id: null,
-                      role: 'assistant',
-                      content: inputArgs.message,
-                      content_type: 'text',
-                    });
-                  }
-
-                  // ✅ pending_input을 metadata에 저장 (새로고침 후에도 버튼 UI 표시)
-                  if (inputResult.success && inputResult.data) {
-                    const { data: existingConvForInput } = await supabase
-                      .from('conversations')
-                      .select('metadata')
-                      .eq('id', conversationId)
-                      .single();
-
-                    const existingMetadataForInput = (existingConvForInput?.metadata as Record<string, unknown>) ?? {};
-                    await supabase
-                      .from('conversations')
-                      .update({
-                        metadata: {
-                          ...existingMetadataForInput,
-                          pending_input: inputResult.data,
-                        },
-                      })
-                      .eq('id', conversationId);
-                  }
-
-                  sendEvent('tool_done', {
-                    toolCallId: fc.id,
-                    name: toolName,
-                    success: inputResult.success,
-                    data: inputResult.data,
-                    error: inputResult.error,
-                  });
-
-                  toolResult = JSON.stringify({
-                    success: true,
-                    waiting_for_user: true,
-                    message: '사용자 입력 대기 중',
-                  });
-
-                  // ✅ request_user_input 후에는 루프 종료
-                  // 사용자가 버튼 클릭하면 새 API 요청으로 다음 질문 진행
-                  continueLoop = false;
-                } else if (toolName === 'confirm_profile_data') {
-                  // confirm_profile_data 특별 처리 (프로필 확인 UI)
-                  const { title, description, fields } = args as {
-                    title: string;
-                    description?: string;
-                    fields: Array<{
-                      key: string;
-                      label: string;
-                      value: string;
-                      displayValue: string;
-                    }>;
-                  };
-
-                  const confirmationRequest = {
-                    id: fc.id,
-                    title,
-                    description,
-                    fields,
-                  };
-
-                  // profile_confirmation SSE 이벤트 전송
-                  sendEvent('profile_confirmation', confirmationRequest);
-
-                  // 프로필 확인 데이터를 conversation.metadata에 저장 (페이지 이탈 후 복귀 시 복원용)
-                  // 기존 metadata를 읽어서 병합
-                  const { data: existingConv } = await supabase
-                    .from('conversations')
-                    .select('metadata')
-                    .eq('id', conversationId)
-                    .single();
-
-                  const existingMetadata = (existingConv?.metadata as Record<string, unknown>) ?? {};
-                  const { error: updateError } = await supabase
-                    .from('conversations')
-                    .update({
-                      metadata: {
-                        ...existingMetadata,
-                        pending_profile_confirmation: confirmationRequest,
-                      },
-                    })
-                    .eq('id', conversationId);
-
-                  if (updateError) {
-                    console.error('[confirm_profile_data] Failed to save confirmation:', updateError);
-                  }
-
-                  sendEvent('tool_done', {
-                    toolCallId: fc.id,
-                    name: toolName,
-                    success: true,
-                    data: confirmationRequest,
-                  });
-
-                  toolResult = JSON.stringify({
-                    success: true,
-                    waiting_for_confirmation: true,
-                    message: '프로필 확인 UI가 표시되었습니다. 사용자가 "확인" 또는 "수정" 버튼을 클릭할 때까지 기다리세요.',
-                  });
-
-                  // ✅ confirm_profile_data 후에는 루프 종료
-                  // 사용자가 버튼 클릭하면 새 API 요청으로 다음 단계 진행
-                  continueLoop = false;
-                } else if (toolName === 'generate_routine_preview') {
-                  // generate_routine_preview 특별 처리
-                  const previewResult = executeGenerateRoutinePreview(
-                    args as Parameters<typeof executeGenerateRoutinePreview>[0],
-                    fc.id
-                  );
-
-                  if (previewResult.success && previewResult.data) {
-                    // 충돌 체크 수행
-                    const conflicts = await checkDateConflicts(toolCtx, previewResult.data);
-                    if (conflicts.length > 0) {
-                      previewResult.data.conflicts = conflicts;
-                    }
-
-                    // routine_preview SSE 이벤트 전송
-                    sendEvent('routine_preview', previewResult.data);
-
-                    // 미리보기 데이터를 conversation.metadata에 저장 (기존 metadata 병합)
-                    const { data: existingConvForRoutine } = await supabase
-                      .from('conversations')
-                      .select('metadata')
-                      .eq('id', conversationId)
-                      .single();
-
-                    const existingMetadataForRoutine = (existingConvForRoutine?.metadata as Record<string, unknown>) ?? {};
-                    const { error: updateError } = await supabase
-                      .from('conversations')
-                      .update({
-                        metadata: {
-                          ...existingMetadataForRoutine,
-                          pending_preview: previewResult.data,
-                        },
-                      })
-                      .eq('id', conversationId);
-
-                    if (updateError) {
-                      console.error('[generate_routine_preview] Failed to save preview_data:', updateError);
-                    }
-                  }
-
-                  sendEvent('tool_done', {
-                    toolCallId: fc.id,
-                    name: toolName,
-                    success: previewResult.success,
-                    data: { previewId: previewResult.data?.id },
-                    error: previewResult.error,
-                  });
-
-                  toolResult = JSON.stringify({
-                    success: true,
-                    waiting_for_confirmation: true,
-                    message: '루틴 미리보기가 표시되었습니다. 사용자가 "적용하기" 또는 수정 요청을 할 때까지 기다리세요.',
-                    preview_id: previewResult.data?.id,
-                  });
-
-                  // 미리보기 표시 후 루프 종료 (사용자 확인 대기)
-                  continueLoop = false;
-                } else if (toolName === 'apply_routine') {
-                  // apply_routine 특별 처리
-                  const previewId = args.preview_id as string;
-
-                  // conversation.metadata에서 pending_preview 가져오기
-                  const { data: conversation } = await supabase
-                    .from('conversations')
-                    .select('metadata')
-                    .eq('id', conversationId)
-                    .single();
-
-                  const convMetadata = conversation?.metadata as { pending_preview?: RoutinePreviewData } | null;
-                  const previewData = convMetadata?.pending_preview ?? null;
-
-                  // previewId가 일치하는지 확인 (보안 검증)
-                  if (!previewData || previewData.id !== previewId) {
-                    toolResult = JSON.stringify({
-                      success: false,
-                      error: '미리보기 데이터를 찾을 수 없습니다. 다시 루틴을 생성해주세요.',
-                    });
-                  } else {
-                    const applyResult = await executeApplyRoutine(toolCtx, previewData);
-
-                    sendEvent('tool_done', {
-                      toolCallId: fc.id,
-                      name: toolName,
-                      success: applyResult.success,
-                      data: applyResult.data,
-                      error: applyResult.error,
-                    });
-
-                    if (applyResult.success) {
-                      // 루틴 적용 성공 이벤트
-                      sendEvent('routine_applied', {
-                        previewId,
-                        eventsCreated: applyResult.data?.eventsCreated,
-                        startDate: applyResult.data?.startDate,
-                      });
-
-                      // 적용 완료 후 pending_preview 제거하고 applied_routine 저장 (기존 metadata 유지)
-                      const { pending_preview: _removed, ...restRoutineMetadata } = convMetadata as Record<string, unknown>;
-                      await supabase
-                        .from('conversations')
-                        .update({
-                          metadata: {
-                            ...restRoutineMetadata,
-                            applied_routine: {
-                              previewId,
-                              eventsCreated: applyResult.data?.eventsCreated,
-                              startDate: applyResult.data?.startDate,
-                            },
-                          },
-                        })
-                        .eq('id', conversationId);
-                    }
-
-                    toolResult = JSON.stringify(applyResult);
-                  }
-
-                  // ✅ apply_routine 후에는 루프 종료 (성공/실패 모두)
-                  continueLoop = false;
-                } else if (toolName === 'generate_meal_plan_preview') {
-                  // generate_meal_plan_preview 특별 처리 (식단)
-                  const previewResult = executeGenerateMealPlanPreview(
-                    args as Parameters<typeof executeGenerateMealPlanPreview>[0],
-                    fc.id
-                  );
-
-                  if (previewResult.success && previewResult.data) {
-                    // 충돌 체크 수행
-                    const mealCtx: MealToolExecutorContext = {
-                      userId,
-                      supabase,
-                      conversationId,
-                    };
-                    const conflicts = await checkMealDateConflicts(mealCtx, previewResult.data);
-                    if (conflicts.length > 0) {
-                      previewResult.data.conflicts = conflicts;
-                    }
-
-                    // meal_plan_preview SSE 이벤트 전송
-                    sendEvent('meal_plan_preview', previewResult.data);
-
-                    // 미리보기 데이터를 conversation.metadata에 저장 (기존 metadata 병합)
-                    const { data: existingConvForMeal } = await supabase
-                      .from('conversations')
-                      .select('metadata')
-                      .eq('id', conversationId)
-                      .single();
-
-                    const existingMetadataForMeal = (existingConvForMeal?.metadata as Record<string, unknown>) ?? {};
-                    const { error: updateError } = await supabase
-                      .from('conversations')
-                      .update({
-                        metadata: {
-                          ...existingMetadataForMeal,
-                          pending_meal_preview: previewResult.data,
-                        },
-                      })
-                      .eq('id', conversationId);
-
-                    if (updateError) {
-                      console.error('[generate_meal_plan_preview] Failed to save preview_data:', updateError);
-                    }
-                  }
-
-                  sendEvent('tool_done', {
-                    toolCallId: fc.id,
-                    name: toolName,
-                    success: previewResult.success,
-                    data: { previewId: previewResult.data?.id },
-                    error: previewResult.error,
-                  });
-
-                  toolResult = JSON.stringify({
-                    success: true,
-                    waiting_for_confirmation: true,
-                    message: '식단 미리보기가 표시되었습니다. 사용자가 "적용하기" 또는 수정 요청을 할 때까지 기다리세요.',
-                    preview_id: previewResult.data?.id,
-                  });
-
-                  // 미리보기 표시 후 루프 종료 (사용자 확인 대기)
-                  continueLoop = false;
-                } else if (toolName === 'apply_meal_plan') {
-                  // apply_meal_plan 특별 처리 (식단)
-                  const previewId = args.preview_id as string;
-
-                  // conversation.metadata에서 pending_meal_preview 가져오기
-                  const { data: conversationData } = await supabase
-                    .from('conversations')
-                    .select('metadata')
-                    .eq('id', conversationId)
-                    .single();
-
-                  const convMetadata = conversationData?.metadata as { pending_meal_preview?: MealPlanPreviewData } | null;
-                  const mealPreviewData = convMetadata?.pending_meal_preview ?? null;
-
-                  // previewId가 일치하는지 확인 (보안 검증)
-                  if (!mealPreviewData || mealPreviewData.id !== previewId) {
-                    toolResult = JSON.stringify({
-                      success: false,
-                      error: '미리보기 데이터를 찾을 수 없습니다. 다시 식단을 생성해주세요.',
-                    });
-                  } else {
-                    const mealCtx: MealToolExecutorContext = {
-                      userId,
-                      supabase,
-                      conversationId,
-                    };
-                    const applyResult = await executeApplyMealPlan(mealCtx, mealPreviewData);
-
-                    sendEvent('tool_done', {
-                      toolCallId: fc.id,
-                      name: toolName,
-                      success: applyResult.success,
-                      data: applyResult.data,
-                      error: applyResult.error,
-                    });
-
-                    if (applyResult.success) {
-                      // 식단 적용 성공 이벤트
-                      sendEvent('meal_plan_applied', {
-                        previewId,
-                        eventsCreated: applyResult.data?.eventsCreated,
-                        startDate: applyResult.data?.startDate,
-                      });
-
-                      // 적용 완료 후 pending_meal_preview 제거하고 applied_meal_plan 저장 (기존 metadata 유지)
-                      const { pending_meal_preview: _removed, ...restMealMetadata } = convMetadata as Record<string, unknown>;
-                      await supabase
-                        .from('conversations')
-                        .update({
-                          metadata: {
-                            ...restMealMetadata,
-                            applied_meal_plan: {
-                              previewId,
-                              eventsCreated: applyResult.data?.eventsCreated,
-                              startDate: applyResult.data?.startDate,
-                            },
-                          },
-                        })
-                        .eq('id', conversationId);
-                    }
-
-                    toolResult = JSON.stringify(applyResult);
-                  }
-
-                  // ✅ apply_meal_plan 후에는 루프 종료 (성공/실패 모두)
-                  continueLoop = false;
-                } else if (['get_dietary_profile', 'update_dietary_profile', 'calculate_daily_needs'].includes(toolName)) {
-                  // 식단 전용 도구 실행
-                  const mealCtx: MealToolExecutorContext = {
-                    userId,
-                    supabase,
-                    conversationId,
-                  };
-                  const result = await executeMealTool(toolName, args, mealCtx);
-
-                  sendEvent('tool_done', {
-                    toolCallId: fc.id,
-                    name: toolName,
-                    success: result.success,
-                    data: result.data,
-                    error: result.error,
-                  });
-
-                  toolResult = JSON.stringify(result);
-                } else {
-                  // 일반 도구 실행 (운동 AI 도구)
-                  const result = await executeTool(toolName, args, toolCtx);
-
-                  sendEvent('tool_done', {
-                    toolCallId: fc.id,
-                    name: toolName,
-                    success: result.success,
-                    data: result.data,
-                    error: result.error,
-                  });
-
-                  toolResult = JSON.stringify(result);
-                }
-
-                // Tool result DB 저장
-                await supabase.from('chat_messages').insert({
-                  conversation_id: conversationId,
-                  sender_id: null,
-                  role: 'assistant',
-                  content: toolResult,
-                  content_type: 'tool_result',
-                  metadata: { tool_call_id: fc.callId, tool_name: toolName },
-                });
+              // Tool result DB 저장
+              await supabase.from('chat_messages').insert({
+                conversation_id: conversationId,
+                sender_id: null,
+                role: 'assistant',
+                content: toolResult,
+                content_type: 'tool_result',
+                metadata: { tool_call_id: effectiveCallId, tool_name: toolName },
+              });
 
                 // 다음 루프를 위해 input에 function_call과 output 추가
+                // ✅ effectiveCallId 사용으로 일관성 보장
                 input.push({
                   type: 'function_call',
                   id: fc.id,
-                  call_id: fc.callId,
+                  call_id: effectiveCallId,
                   name: fc.name,
                   arguments: fc.arguments,
                 });
 
                 input.push({
                   type: 'function_call_output',
-                  call_id: fc.callId,
+                  call_id: effectiveCallId,
                   output: toolResult,
                 });
               }
@@ -1086,6 +738,7 @@ export const POST = withAuth<Response>(
             .eq('id', conversationId);
 
           sendEvent('done', { messageId: userMsgId });
+          controllerClosed = true;
           controller.close();
         } catch (error) {
           console.error('[AI Chat Stream] Error:', error);
@@ -1093,6 +746,7 @@ export const POST = withAuth<Response>(
           sendEvent('error', {
             error: 'AI 응답 생성 중 오류가 발생했습니다.',
           });
+          controllerClosed = true;
           controller.close();
         }
       },

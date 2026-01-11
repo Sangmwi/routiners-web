@@ -127,9 +127,12 @@ export const queryKeys = {
     /** 모든 aiSession 쿼리의 기본 키 */
     all: ['aiSession'] as const,
 
+    /** 세션 목록 쿼리들의 기본 키 (invalidateQueries용) */
+    lists: () => [...queryKeys.aiSession.all, 'list'] as const,
+
     /** 세션 목록 */
     list: (filters?: AISessionFilters) =>
-      [...queryKeys.aiSession.all, 'list', filters] as const,
+      [...queryKeys.aiSession.lists(), filters] as const,
 
     /** 특정 세션 상세 */
     detail: (id: string) => [...queryKeys.aiSession.all, 'detail', id] as const,

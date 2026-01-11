@@ -97,23 +97,23 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
 
   const { type, aiPurpose, title } = validation.data;
 
-  // AI 대화인 경우: 이미 활성 세션이 있는지 확인
+  // AI 대화인 경우: 기존 활성 세션이 있으면 자동 완료 처리
   if (type === 'ai' && aiPurpose) {
-    const { data: existingConv } = await supabase
+    const { error: completeError } = await supabase
       .from('conversations')
-      .select('id')
+      .update({
+        ai_status: 'completed',
+        updated_at: new Date().toISOString(),
+      })
       .eq('created_by', userId)
       .eq('type', 'ai')
       .eq('ai_purpose', aiPurpose)
       .eq('ai_status', 'active')
-      .is('deleted_at', null)
-      .single();
+      .is('deleted_at', null);
 
-    if (existingConv) {
-      return NextResponse.json(
-        { error: '이미 진행 중인 세션이 있습니다.', code: 'ALREADY_EXISTS' },
-        { status: 409 }
-      );
+    if (completeError) {
+      console.error('[Conversations POST] Complete existing error:', completeError);
+      // 에러가 나도 새 세션 생성은 계속 진행
     }
   }
 

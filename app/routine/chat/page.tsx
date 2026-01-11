@@ -17,7 +17,7 @@ import {
   useAIChat,
 } from '@/hooks/aiChat';
 import { queryKeys } from '@/lib/constants/queryKeys';
-import { Loader2, CheckCircle, Plus, Home } from 'lucide-react';
+import { Loader2, CheckCircle, Plus, Trash2 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { conversationApi } from '@/lib/api/conversation';
 import { routineEventApi } from '@/lib/api/routineEvent';
@@ -178,6 +178,8 @@ export default function AIChatPage() {
     pendingProfileConfirmation,
     confirmProfile,
     requestProfileEdit,
+    pendingStart,
+    startConversation,
     error: chatError,
   } = useAIChat(currentSession);
 
@@ -378,24 +380,17 @@ export default function AIChatPage() {
   // 헤더 타이틀 (purpose에 따라)
   const headerTitle = currentSession?.purpose === 'meal' ? 'AI 영양사' : 'AI 트레이너';
 
-  // 헤더 우측 액션 버튼 (히스토리 드롭다운 + 컨텍스트별 버튼)
+  // 헤더 우측 액션 버튼 (대화 목록 드롭다운 + 컨텍스트별 버튼)
+  // 진행중: [대화목록] [새 대화]
+  // 완료/히스토리: [대화목록] [삭제]
   const headerAction = (
     <div className="flex items-center gap-1">
       <ChatHistoryDropdown
         currentSessionId={currentSession?.id}
         onSelectSession={handleSelectHistorySession}
       />
-      {isHistoryMode ? (
-        // 히스토리 모드: 홈(목록)으로 이동
-        <button
-          onClick={() => router.replace('/routine/chat')}
-          className="p-2 hover:bg-muted/50 rounded-lg transition-colors text-primary"
-          aria-label="목록으로"
-        >
-          <Home className="w-5 h-5" />
-        </button>
-      ) : isActive ? (
-        // 활성 세션: 새 대화 시작
+      {isActive && !isHistoryMode && !pendingStart ? (
+        // 활성 세션 (대화 시작 후): 새 대화 버튼
         <button
           onClick={handleStartNewSession}
           disabled={createSession.isPending || isStreaming}
@@ -407,6 +402,15 @@ export default function AIChatPage() {
           ) : (
             <Plus className="w-5 h-5" />
           )}
+        </button>
+      ) : (isCompleted || isHistoryMode) ? (
+        // 완료 상태 또는 히스토리 모드: 삭제 버튼만
+        <button
+          onClick={handleDeleteChat}
+          className="p-2 hover:bg-muted/50 rounded-lg transition-colors text-destructive"
+          aria-label="대화 삭제"
+        >
+          <Trash2 className="w-5 h-5" />
         </button>
       ) : null}
     </div>
@@ -455,6 +459,9 @@ export default function AIChatPage() {
         pendingProfileConfirmation={pendingProfileConfirmation}
         onConfirmProfile={confirmProfile}
         onRequestProfileEdit={requestProfileEdit}
+        pendingStart={pendingStart}
+        onStartConversation={startConversation}
+        sessionPurpose={currentSession?.purpose}
       />
 
       {/* 에러 메시지 */}
@@ -464,8 +471,8 @@ export default function AIChatPage() {
         </div>
       )}
 
-      {/* 활성 대화 - 입력 영역 (히스토리 모드에서는 숨김) */}
-      {isActive && !isHistoryMode && (
+      {/* 활성 대화 - 입력 영역 (히스토리 모드 또는 시작 대기 상태에서는 숨김) */}
+      {isActive && !isHistoryMode && !pendingStart && (
         <ChatInput
           onSend={handleSendMessage}
           disabled={isStreaming}
@@ -484,7 +491,6 @@ export default function AIChatPage() {
           appliedRoutine={appliedRoutine}
           appliedMealPlan={appliedMealPlan}
           onNavigateToCalendar={handleNavigateToCalendar}
-          onDeleteChat={handleDeleteChat}
         />
       )}
     </div>

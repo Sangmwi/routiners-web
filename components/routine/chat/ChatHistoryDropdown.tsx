@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { ChevronDown, CheckCircle, MessageCircle, Dumbbell, Utensils } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { ChevronDown, CheckCircle, MessageCircle, Dumbbell, Utensils, Loader2 } from 'lucide-react';
 import { useAISessions } from '@/hooks/aiChat';
 import type { Conversation, ConversationStatus } from '@/lib/types/chat';
-import type { SessionPurpose } from '@/lib/types/routine';
 
 interface ChatHistoryDropdownProps {
   /** 현재 선택된 세션 ID */
@@ -14,9 +13,9 @@ interface ChatHistoryDropdownProps {
 }
 
 /**
- * 채팅 히스토리 드롭다운
+ * 대화 목록 드롭다운
  *
- * - 이전 AI 채팅 세션 목록 표시
+ * - 모든 AI 채팅 세션 목록 표시 (활성 + 완료)
  * - 세션 선택 시 해당 대화 로드
  */
 export default function ChatHistoryDropdown({
@@ -26,9 +25,9 @@ export default function ChatHistoryDropdown({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // 완료된 AI 세션만 조회 (최근 10개)
+  // 모든 AI 세션 조회 (활성 + 완료, 최근 15개)
   const { data: sessions, isLoading } = useAISessions(
-    { limit: 10, aiStatus: 'completed' },
+    { limit: 15 },
     { enabled: isOpen }
   );
 
@@ -67,16 +66,16 @@ export default function ChatHistoryDropdown({
   }, [isOpen]);
 
   // 세션 선택 핸들러
-  const handleSelect = useCallback(
-    (sessionId: string) => {
-      onSelectSession(sessionId);
-      setIsOpen(false);
-    },
-    [onSelectSession]
-  );
+  const handleSelect = (sessionId: string) => {
+    onSelectSession(sessionId);
+    setIsOpen(false);
+  };
 
-  // 세션이 없으면 렌더링하지 않음
-  const filteredSessions = sessions?.filter((s) => s.id !== currentSessionId) || [];
+  // 현재 세션 찾기 + 활성/완료 분리 (현재 세션 포함)
+  const currentSession = sessions?.find((s) => s.id === currentSessionId);
+  const otherActiveSessions = sessions?.filter((s) => s.id !== currentSessionId && s.aiStatus === 'active') || [];
+  const completedSessions = sessions?.filter((s) => s.aiStatus === 'completed') || [];
+  const hasAnySessions = currentSession || otherActiveSessions.length > 0 || completedSessions.length > 0;
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -88,7 +87,7 @@ export default function ChatHistoryDropdown({
         aria-haspopup="listbox"
       >
         <MessageCircle className="w-4 h-4" />
-        <span className="hidden sm:inline">이전 대화</span>
+        <span className="hidden sm:inline">대화 목록</span>
         <ChevronDown
           className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
         />
@@ -99,29 +98,70 @@ export default function ChatHistoryDropdown({
         <div className="absolute right-0 top-full mt-1 w-72 bg-card border border-border rounded-xl shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
           {/* 헤더 */}
           <div className="px-3 py-2 border-b border-border bg-muted/30">
-            <span className="text-xs font-medium text-muted-foreground">이전 대화 목록</span>
+            <span className="text-xs font-medium text-muted-foreground">대화 목록</span>
           </div>
 
           {/* 세션 목록 */}
-          <div className="max-h-64 overflow-y-auto">
+          <div className="max-h-72 overflow-y-auto">
             {isLoading ? (
-              <div className="p-4 text-center text-sm text-muted-foreground">
+              <div className="p-4 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
                 불러오는 중...
               </div>
-            ) : filteredSessions.length === 0 ? (
+            ) : !hasAnySessions ? (
               <div className="p-4 text-center text-sm text-muted-foreground">
-                이전 대화가 없습니다
+                대화 내역이 없습니다
               </div>
             ) : (
               <ul role="listbox">
-                {filteredSessions.map((session) => (
-                  <SessionItem
-                    key={session.id}
-                    session={session}
-                    isSelected={session.id === currentSessionId}
-                    onSelect={() => handleSelect(session.id)}
-                  />
-                ))}
+                {/* 현재 대화 섹션 (현재 세션 하이라이트) */}
+                {currentSession && (
+                  <>
+                    <li className="px-3 py-1.5 text-xs font-medium text-primary bg-primary/5">
+                      현재 대화
+                    </li>
+                    <SessionItem
+                      key={currentSession.id}
+                      session={currentSession}
+                      isSelected={true}
+                      onSelect={() => handleSelect(currentSession.id)}
+                    />
+                  </>
+                )}
+
+                {/* 다른 진행 중인 대화 (현재 세션 제외) */}
+                {otherActiveSessions.length > 0 && (
+                  <>
+                    <li className="px-3 py-1.5 text-xs font-medium text-primary bg-primary/5">
+                      진행 중인 대화
+                    </li>
+                    {otherActiveSessions.map((session) => (
+                      <SessionItem
+                        key={session.id}
+                        session={session}
+                        isSelected={false}
+                        onSelect={() => handleSelect(session.id)}
+                      />
+                    ))}
+                  </>
+                )}
+
+                {/* 완료된 세션 섹션 */}
+                {completedSessions.length > 0 && (
+                  <>
+                    <li className="px-3 py-1.5 text-xs font-medium text-muted-foreground bg-muted/30">
+                      이전 대화
+                    </li>
+                    {completedSessions.map((session) => (
+                      <SessionItem
+                        key={session.id}
+                        session={session}
+                        isSelected={session.id === currentSessionId}
+                        onSelect={() => handleSelect(session.id)}
+                      />
+                    ))}
+                  </>
+                )}
               </ul>
             )}
           </div>
@@ -218,6 +258,12 @@ function getStatusInfo(status?: ConversationStatus): {
   color: string;
 } | null {
   switch (status) {
+    case 'active':
+      return {
+        icon: <Loader2 className="w-3 h-3 animate-spin" />,
+        label: '진행 중',
+        color: 'text-primary',
+      };
     case 'completed':
       return {
         icon: <CheckCircle className="w-3 h-3" />,

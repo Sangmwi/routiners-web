@@ -204,14 +204,11 @@ export const inbodyScanApi = {
       // Content-Type은 FormData에서 자동 설정됨 (boundary 포함)
     });
 
-    console.log('[InBody Scan] API Response:', response);
-
     if (!response.ok) {
       throw await ApiError.fromResponse(response);
     }
 
     const result = await response.json();
-    console.log('[InBody Scan] API Success:', result);
     return result.data;
   },
 };

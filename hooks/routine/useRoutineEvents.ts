@@ -17,6 +17,15 @@ import {
 } from '@/lib/types/routine';
 import { routineEventApi, EventListParams } from '@/lib/api/routineEvent';
 import { queryKeys } from '@/lib/constants/queryKeys';
+import { formatDate, addDays } from '@/lib/utils/dateHelpers';
+import {
+  updateEventCacheAndInvalidate,
+  updateBatchEventCacheWithAI,
+  removeEventCache,
+  updateEventCache,
+  invalidateEventLists,
+  invalidateAISessions,
+} from '@/lib/utils/routineEventCacheHelper';
 
 /**
  * Routine Event Query Hooks
@@ -76,23 +85,6 @@ export function useUpcomingEvents(
     },
     options
   );
-}
-
-// ============================================================================
-// Date Helpers
-// ============================================================================
-
-function formatDate(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
-function addDays(date: Date, days: number): Date {
-  const result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
 }
 
 /**
@@ -180,22 +172,11 @@ export function useCreateRoutineEvent() {
       routineEventApi.createEvent(data),
 
     onSuccess: (newEvent) => {
-      // 상세 캐시 설정
-      queryClient.setQueryData(
-        queryKeys.routineEvent.detail(newEvent.id),
-        newEvent
-      );
+      updateEventCacheAndInvalidate(queryClient, newEvent);
+    },
 
-      // 날짜별 캐시 설정
-      queryClient.setQueryData(
-        queryKeys.routineEvent.byDate(newEvent.date, newEvent.type),
-        newEvent
-      );
-
-      // 목록 캐시 무효화
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.routineEvent.all,
-      });
+    onError: (error) => {
+      console.error('[RoutineEvent] Create failed:', error);
     },
   });
 }
@@ -215,27 +196,11 @@ export function useCreateRoutineEventsBatch() {
       routineEventApi.createEventsBatch(data),
 
     onSuccess: (newEvents) => {
-      // 각 이벤트의 상세 및 날짜별 캐시 설정
-      newEvents.forEach((event) => {
-        queryClient.setQueryData(
-          queryKeys.routineEvent.detail(event.id),
-          event
-        );
-        queryClient.setQueryData(
-          queryKeys.routineEvent.byDate(event.date, event.type),
-          event
-        );
-      });
+      updateBatchEventCacheWithAI(queryClient, newEvents);
+    },
 
-      // 목록 및 캘린더 캐시 무효화
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.routineEvent.all,
-      });
-
-      // AI 세션 캐시 무효화 (result_applied 변경됨)
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.aiSession.all,
-      });
+    onError: (error) => {
+      console.error('[RoutineEvent] Batch create failed:', error);
     },
   });
 }
@@ -255,22 +220,11 @@ export function useUpdateRoutineEvent() {
       routineEventApi.updateEvent(id, data),
 
     onSuccess: (updatedEvent) => {
-      // 상세 캐시 업데이트
-      queryClient.setQueryData(
-        queryKeys.routineEvent.detail(updatedEvent.id),
-        updatedEvent
-      );
+      updateEventCacheAndInvalidate(queryClient, updatedEvent);
+    },
 
-      // 날짜별 캐시 업데이트
-      queryClient.setQueryData(
-        queryKeys.routineEvent.byDate(updatedEvent.date, updatedEvent.type),
-        updatedEvent
-      );
-
-      // 목록 캐시 무효화
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.routineEvent.all,
-      });
+    onError: (error) => {
+      console.error('[RoutineEvent] Update failed:', error);
     },
   });
 }
@@ -289,22 +243,11 @@ export function useCompleteRoutineEvent() {
     mutationFn: routineEventApi.completeEvent,
 
     onSuccess: (updatedEvent) => {
-      // 상세 캐시 업데이트
-      queryClient.setQueryData(
-        queryKeys.routineEvent.detail(updatedEvent.id),
-        updatedEvent
-      );
+      updateEventCacheAndInvalidate(queryClient, updatedEvent);
+    },
 
-      // 날짜별 캐시 업데이트
-      queryClient.setQueryData(
-        queryKeys.routineEvent.byDate(updatedEvent.date, updatedEvent.type),
-        updatedEvent
-      );
-
-      // 목록 및 캘린더 캐시 무효화
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.routineEvent.all,
-      });
+    onError: (error) => {
+      console.error('[RoutineEvent] Complete failed:', error);
     },
   });
 }
@@ -323,22 +266,11 @@ export function useSkipRoutineEvent() {
     mutationFn: routineEventApi.skipEvent,
 
     onSuccess: (updatedEvent) => {
-      // 상세 캐시 업데이트
-      queryClient.setQueryData(
-        queryKeys.routineEvent.detail(updatedEvent.id),
-        updatedEvent
-      );
+      updateEventCacheAndInvalidate(queryClient, updatedEvent);
+    },
 
-      // 날짜별 캐시 업데이트
-      queryClient.setQueryData(
-        queryKeys.routineEvent.byDate(updatedEvent.date, updatedEvent.type),
-        updatedEvent
-      );
-
-      // 목록 및 캘린더 캐시 무효화
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.routineEvent.all,
-      });
+    onError: (error) => {
+      console.error('[RoutineEvent] Skip failed:', error);
     },
   });
 }
@@ -358,17 +290,12 @@ export function useUpdateWorkoutData() {
       routineEventApi.updateWorkoutData(id, data),
 
     onSuccess: (updatedEvent) => {
-      // 상세 캐시 업데이트
-      queryClient.setQueryData(
-        queryKeys.routineEvent.detail(updatedEvent.id),
-        updatedEvent
-      );
+      // 상세 + 날짜별 캐시 업데이트 (목록 무효화는 불필요 - workout_data만 변경)
+      updateEventCache(queryClient, updatedEvent);
+    },
 
-      // 날짜별 캐시 업데이트
-      queryClient.setQueryData(
-        queryKeys.routineEvent.byDate(updatedEvent.date, updatedEvent.type),
-        updatedEvent
-      );
+    onError: (error) => {
+      console.error('[RoutineEvent] Workout data update failed:', error);
     },
   });
 }
@@ -387,15 +314,11 @@ export function useDeleteRoutineEvent() {
     mutationFn: routineEventApi.deleteEvent,
 
     onSuccess: (_, eventId) => {
-      // 상세 캐시 제거
-      queryClient.removeQueries({
-        queryKey: queryKeys.routineEvent.detail(eventId),
-      });
+      removeEventCache(queryClient, eventId);
+    },
 
-      // 목록 및 캘린더 캐시 무효화
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.routineEvent.all,
-      });
+    onError: (error) => {
+      console.error('[RoutineEvent] Delete failed:', error);
     },
   });
 }
@@ -414,15 +337,12 @@ export function useDeleteRoutineEventsBySession() {
     mutationFn: routineEventApi.deleteEventsBySession,
 
     onSuccess: () => {
-      // 목록 및 캘린더 캐시 무효화
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.routineEvent.all,
-      });
+      invalidateEventLists(queryClient);
+      invalidateAISessions(queryClient);
+    },
 
-      // AI 세션 캐시 무효화
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.aiSession.all,
-      });
+    onError: (error) => {
+      console.error('[RoutineEvent] Delete by session failed:', error);
     },
   });
 }

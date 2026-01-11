@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle, Trash2, Utensils } from 'lucide-react';
+import { CheckCircle, Utensils } from 'lucide-react';
 import ViewMoreButton from '@/components/ui/ViewMoreButton';
 import type { AppliedRoutineMetadata, SessionPurpose } from '@/lib/types/chat';
 import type { RoutineAppliedEvent, MealPlanAppliedEvent } from '@/lib/api/conversation';
@@ -14,24 +14,20 @@ interface ChatCompletedBannerProps {
   appliedMealPlan?: MealPlanAppliedEvent | null;
   /** 캘린더로 이동 콜백 */
   onNavigateToCalendar: () => void;
-  /** 대화 삭제 콜백 */
-  onDeleteChat: () => void;
 }
 
 /**
  * 완료된 채팅방 하단 배너
  *
- * - 루틴 생성 완료 안내 메시지
- * - 적용된 루틴 정보 표시
- * - 내 캘린더로 이동 버튼 (primary)
- * - 대화 삭제 버튼 (secondary)
+ * - 루틴/식단 적용 완료 안내 메시지
+ * - 적용된 정보 표시
+ * - 캘린더에서 확인하기 버튼 (primary, full width)
  */
 export default function ChatCompletedBanner({
   purpose = 'workout',
   appliedRoutine,
   appliedMealPlan,
   onNavigateToCalendar,
-  onDeleteChat,
 }: ChatCompletedBannerProps) {
   const isMeal = purpose === 'meal';
   const appliedData = isMeal ? appliedMealPlan : appliedRoutine;
@@ -62,18 +58,13 @@ export default function ChatCompletedBanner({
           )}
         </div>
       </div>
-      <div className="flex gap-2">
-        <button
-          onClick={onDeleteChat}
-          className="flex items-center justify-center gap-1.5 flex-1 py-2.5 px-4 text-sm font-medium text-muted-foreground border border-border rounded-xl hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors"
-        >
-          <Trash2 className="w-4 h-4" />
-          대화 삭제
-        </button>
-        <ViewMoreButton onClick={onNavigateToCalendar} variant="primary" className="flex-1 justify-center">
-          내 캘린더로
-        </ViewMoreButton>
-      </div>
+      <ViewMoreButton
+        onClick={onNavigateToCalendar}
+        variant="primary"
+        className="w-full justify-center"
+      >
+        캘린더에서 확인하기
+      </ViewMoreButton>
     </div>
   );
 }

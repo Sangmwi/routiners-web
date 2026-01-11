@@ -16,7 +16,8 @@ import ChatInputRequest from './ChatInputRequest';
 import ChatRoutinePreview from './ChatRoutinePreview';
 import ChatMealPreview from './ChatMealPreview';
 import { ChatProfileConfirmation } from './ChatProfileConfirmation';
-import { Loader2, CheckCircle, Utensils } from 'lucide-react';
+import { Loader2, CheckCircle, Utensils, Play } from 'lucide-react';
+import { SessionPurpose } from '@/lib/types/routine';
 
 interface ChatMessageListProps {
   messages: ChatMessageType[];
@@ -54,6 +55,12 @@ interface ChatMessageListProps {
   onConfirmProfile?: () => void;
   /** 프로필 수정 요청 핸들러 */
   onRequestProfileEdit?: () => void;
+  /** 대화 시작 대기 상태 */
+  pendingStart?: boolean;
+  /** 대화 시작 핸들러 */
+  onStartConversation?: () => void;
+  /** 세션 목적 (workout | meal) */
+  sessionPurpose?: SessionPurpose;
 }
 
 /**
@@ -82,6 +89,9 @@ export default function ChatMessageList({
   pendingProfileConfirmation,
   onConfirmProfile,
   onRequestProfileEdit,
+  pendingStart,
+  onStartConversation,
+  sessionPurpose,
 }: ChatMessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -294,6 +304,30 @@ export default function ChatMessageList({
               <p className="text-xs text-lime-600 dark:text-lime-400 mt-1">
                 {appliedMealPlan.eventsCreated}일 분의 식단이 {appliedMealPlan.startDate}부터 시작됩니다.
               </p>
+            </div>
+          </div>
+        )}
+
+        {/* 대화 시작 버튼 (인라인) */}
+        {pendingStart && onStartConversation && (
+          <div className="flex gap-3 items-start my-4">
+            <div className="shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
+              <Play className="w-4 h-4" />
+            </div>
+            <div className="bg-card border border-border rounded-2xl rounded-tl-md px-4 py-3 max-w-[85%]">
+              <p className="text-sm text-muted-foreground mb-3">
+                {sessionPurpose === 'meal'
+                  ? '맞춤 식단을 만들 준비가 되셨나요?'
+                  : '맞춤 운동 루틴을 만들 준비가 되셨나요?'}
+              </p>
+              <button
+                type="button"
+                onClick={onStartConversation}
+                className="w-full px-4 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+              >
+                <Play className="w-4 h-4" />
+                시작하기
+              </button>
             </div>
           </div>
         )}
