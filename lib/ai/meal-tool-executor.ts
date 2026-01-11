@@ -38,6 +38,8 @@ import {
   type DietaryProfileUpdate,
   type CalculateDailyNeedsInput,
 } from './meal-schemas';
+import { getNextMonday, formatDate, checkEventDateConflicts, calculateAge } from './tool-utils';
+import { insertEventsWithConflictCheck, updateConversationApplied, type EventInsertData } from './event-factory';
 
 // ============================================================================
 // Executor Context (tool-executor.ts와 동일)
@@ -85,28 +87,7 @@ export interface MealPlanApplyResult {
 // Helper Functions
 // ============================================================================
 
-/**
- * 다음 월요일 날짜 계산
- */
-function getNextMonday(): Date {
-  const today = new Date();
-  const dayOfWeek = today.getDay(); // 0=일, 1=월, ..., 6=토
-  const daysUntilMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek);
-  const nextMonday = new Date(today);
-  nextMonday.setDate(today.getDate() + daysUntilMonday);
-  nextMonday.setHours(0, 0, 0, 0);
-  return nextMonday;
-}
-
-/**
- * 날짜를 YYYY-MM-DD 형식으로 포맷
- */
-function formatDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
+// getNextMonday, formatDate → tool-utils.ts로 이동
 
 /**
  * Harris-Benedict 공식으로 BMR 계산
@@ -124,20 +105,6 @@ function calculateBMR(
     // 여성: BMR = 447.593 + (9.247 × 체중kg) + (3.098 × 키cm) − (4.330 × 나이)
     return 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
   }
-}
-
-/**
- * 생년월일로 나이 계산
- */
-function calculateAge(birthDate: string): number {
-  const today = new Date();
-  const birth = new Date(birthDate);
-  let age = today.getFullYear() - birth.getFullYear();
-  const monthDiff = today.getMonth() - birth.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-    age--;
-  }
-  return age;
 }
 
 // ============================================================================
@@ -468,44 +435,7 @@ export async function checkMealDateConflicts(
   ctx: MealToolExecutorContext,
   previewData: MealPlanPreviewData
 ): Promise<MealPlanConflict[]> {
-  const nextMonday = getNextMonday();
-  const dates: string[] = [];
-
-  for (const week of previewData.weeks) {
-    for (const day of week.days) {
-      const weekOffset = week.weekNumber - 1;
-      const dayOffset = day.dayOfWeek - 1;
-
-      const targetDate = new Date(nextMonday);
-      targetDate.setDate(targetDate.getDate() + weekOffset * 7 + dayOffset);
-      dates.push(formatDate(targetDate));
-    }
-  }
-
-  if (dates.length === 0) {
-    return [];
-  }
-
-  const { data: existingEvents, error } = await ctx.supabase
-    .from('routine_events')
-    .select('date, title')
-    .eq('user_id', ctx.userId)
-    .eq('type', 'meal')
-    .in('date', dates);
-
-  if (error) {
-    console.error('[checkMealDateConflicts] Error:', error);
-    return [];
-  }
-
-  if (!existingEvents || existingEvents.length === 0) {
-    return [];
-  }
-
-  return existingEvents.map((event) => ({
-    date: event.date,
-    existingTitle: event.title,
-  }));
+  return checkEventDateConflicts(ctx, previewData, 'meal');
 }
 
 /**
@@ -610,66 +540,27 @@ export async function executeApplyMealPlan(
       }
     }
 
-    if (events.length === 0) {
-      return { success: false, error: '식단 데이터가 비어있습니다.' };
+    // 팩토리로 충돌 체크 + 삽입 (meal은 기존 식단 덮어쓰기)
+    const insertResult = await insertEventsWithConflictCheck(
+      ctx,
+      events as EventInsertData[],
+      'meal',
+      'overwrite'
+    );
+
+    if (!insertResult.success) {
+      return { success: false, error: insertResult.error };
     }
 
-    // 기존 이벤트와 충돌 확인
-    const dates = events.map((e) => e.date);
-    const { data: existingEvents } = await ctx.supabase
-      .from('routine_events')
-      .select('date, type')
-      .eq('user_id', ctx.userId)
-      .in('date', dates)
-      .eq('type', 'meal');
-
-    if (existingEvents && existingEvents.length > 0) {
-      // 기존 식단 삭제 (덮어쓰기)
-      const { error: deleteError } = await ctx.supabase
-        .from('routine_events')
-        .delete()
-        .eq('user_id', ctx.userId)
-        .in('date', dates)
-        .eq('type', 'meal');
-
-      if (deleteError) {
-        console.error('[apply_meal_plan] Delete error:', deleteError);
-        return { success: false, error: '기존 식단 삭제에 실패했습니다.' };
-      }
-    }
-
-    // routine_events 일괄 삽입
-    const { error: insertError } = await ctx.supabase
-      .from('routine_events')
-      .insert(events);
-
-    if (insertError) {
-      console.error('[apply_meal_plan] Insert error:', insertError);
-      return { success: false, error: '식단 저장에 실패했습니다.' };
-    }
-
-    // conversations.ai_result_applied = true 업데이트
-    const { error: updateError } = await ctx.supabase
-      .from('conversations')
-      .update({
-        ai_result_applied: true,
-        ai_result_applied_at: new Date().toISOString(),
-      })
-      .eq('id', ctx.conversationId);
-
-    if (updateError) {
-      console.error('[apply_meal_plan] Update conversation error:', updateError);
-      // 식단은 저장됐으므로 성공으로 처리
-    }
-
-    const firstEventDate = events.length > 0 ? events[0].date : '';
+    // 대화 상태 업데이트
+    await updateConversationApplied(ctx.supabase, ctx.conversationId);
 
     return {
       success: true,
       data: {
         saved: true,
-        eventsCreated: events.length,
-        startDate: firstEventDate,
+        eventsCreated: insertResult.eventsCreated!,
+        startDate: insertResult.startDate!,
       },
     };
   } catch (err) {

@@ -130,66 +130,6 @@ export const GET_FITNESS_PROFILE: AIToolDefinition = {
 };
 
 /**
- * 6-1. 운동 목표 조회 (deprecated)
- * @deprecated get_fitness_profile 사용 권장
- */
-export const GET_FITNESS_GOAL: AIToolDefinition = {
-  type: 'function',
-  name: 'get_fitness_goal',
-  description:
-    '[deprecated] get_fitness_profile 사용 권장. 사용자의 운동 목표를 조회합니다.',
-  parameters: {
-    type: 'object',
-    properties: {},
-  },
-};
-
-/**
- * 6-2. 운동 경험 수준 조회 (deprecated)
- * @deprecated get_fitness_profile 사용 권장
- */
-export const GET_EXPERIENCE_LEVEL: AIToolDefinition = {
-  type: 'function',
-  name: 'get_experience_level',
-  description:
-    '[deprecated] get_fitness_profile 사용 권장. 사용자의 운동 경험 수준을 조회합니다.',
-  parameters: {
-    type: 'object',
-    properties: {},
-  },
-};
-
-/**
- * 6-3. 운동 선호도 조회 (deprecated)
- * @deprecated get_fitness_profile 사용 권장
- */
-export const GET_TRAINING_PREFERENCES: AIToolDefinition = {
-  type: 'function',
-  name: 'get_training_preferences',
-  description:
-    '[deprecated] get_fitness_profile 사용 권장. 사용자의 운동 선호도를 조회합니다.',
-  parameters: {
-    type: 'object',
-    properties: {},
-  },
-};
-
-/**
- * 6-4. 부상/제한 사항 조회 (deprecated)
- * @deprecated get_fitness_profile 사용 권장
- */
-export const GET_INJURIES_RESTRICTIONS: AIToolDefinition = {
-  type: 'function',
-  name: 'get_injuries_restrictions',
-  description:
-    '[deprecated] get_fitness_profile 사용 권장. 사용자의 부상/제한 사항을 조회합니다.',
-  parameters: {
-    type: 'object',
-    properties: {},
-  },
-};
-
-/**
  * 10. 피트니스 프로필 업데이트
  * - 대화 중 수집한 정보를 저장
  */
@@ -556,14 +496,8 @@ export const AI_TRAINER_TOOLS: AIToolDefinition[] = [
   GET_USER_BODY_METRICS,
   GET_LATEST_INBODY,
   GET_INBODY_HISTORY,
-  // 피트니스 프로필 (통합 - 권장)
+  // 피트니스 프로필
   GET_FITNESS_PROFILE,
-  // 피트니스 프로필 (개별 - deprecated, 하위 호환성 유지)
-  GET_FITNESS_GOAL,
-  GET_EXPERIENCE_LEVEL,
-  GET_TRAINING_PREFERENCES,
-  GET_INJURIES_RESTRICTIONS,
-  // 프로필 업데이트
   UPDATE_FITNESS_PROFILE,
   // 루틴 관련
   GET_CURRENT_ROUTINE,

@@ -5,7 +5,7 @@
  * 사용자에게 선택형 입력 UI를 표시
  */
 
-import { executeRequestUserInput } from '@/lib/ai/tool-executor';
+import { executeRequestUserInput } from '@/lib/ai/executors';
 import { updateMetadata } from './metadata-manager';
 import type { ToolHandlerContext, ToolHandlerResult, FunctionCallInfo } from './types';
 import type { InputRequestType, InputRequestOption, InputRequestSliderConfig } from '@/lib/types/fitness';

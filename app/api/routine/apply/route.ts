@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
-import { executeApplyRoutine, ToolExecutorContext } from '@/lib/ai/tool-executor';
+import { executeApplyRoutine, type ToolExecutorContext } from '@/lib/ai/executors';
 import type { RoutinePreviewData } from '@/lib/types/fitness';
 
 /**

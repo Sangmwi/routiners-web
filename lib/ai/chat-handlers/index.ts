@@ -4,7 +4,7 @@
  * Tool handler 라우터 및 통합 export
  */
 
-import { executeTool, ToolExecutorContext } from '@/lib/ai/tool-executor';
+import { executeTool, type ToolExecutorContext } from '@/lib/ai/executors';
 import { executeMealTool, type MealToolExecutorContext } from '@/lib/ai/meal-tool-executor';
 import { handleRequestUserInput } from './request-user-input';
 import { handleConfirmProfile } from './confirm-profile';
@@ -13,6 +13,11 @@ import { handleApplyRoutine } from './apply-routine';
 import { handleGenerateMealPlanPreview } from './generate-meal-plan-preview';
 import { handleApplyMealPlan } from './apply-meal-plan';
 import type { ToolHandlerContext, ToolHandlerResult, FunctionCallInfo } from './types';
+import {
+  RequestUserInputArgsSchema,
+  ConfirmProfileArgsSchema,
+  ApplyPreviewArgsSchema,
+} from './types';
 import type { AIToolName } from '@/lib/types/fitness';
 
 // Re-export types
@@ -27,9 +32,23 @@ const MEAL_ONLY_TOOLS = [
 ] as const;
 
 /**
+ * 검증 실패 결과 생성
+ */
+function createValidationError(toolName: string, error: string): ToolHandlerResult {
+  return {
+    toolResult: JSON.stringify({
+      success: false,
+      error: `[${toolName}] 인자 검증 실패: ${error}`,
+    }),
+    continueLoop: true,
+  };
+}
+
+/**
  * Tool Handler 라우터
  *
  * 도구 이름에 따라 적절한 handler로 라우팅
+ * Zod 스키마로 인자를 검증하여 타입 안전성 확보
  */
 export async function handleToolCall(
   fc: FunctionCallInfo,
@@ -37,25 +56,47 @@ export async function handleToolCall(
   args: Record<string, unknown>,
   ctx: ToolHandlerContext
 ): Promise<ToolHandlerResult> {
-  // 특별 처리 도구들
+  // 특별 처리 도구들 (Zod 검증 적용)
   switch (toolName) {
-    case 'request_user_input':
-      return handleRequestUserInput(fc, args as unknown as Parameters<typeof handleRequestUserInput>[1], ctx);
+    case 'request_user_input': {
+      const parsed = RequestUserInputArgsSchema.safeParse(args);
+      if (!parsed.success) {
+        return createValidationError(toolName, parsed.error.message);
+      }
+      return handleRequestUserInput(fc, parsed.data, ctx);
+    }
 
-    case 'confirm_profile_data':
-      return handleConfirmProfile(fc, args as unknown as Parameters<typeof handleConfirmProfile>[1], ctx);
+    case 'confirm_profile_data': {
+      const parsed = ConfirmProfileArgsSchema.safeParse(args);
+      if (!parsed.success) {
+        return createValidationError(toolName, parsed.error.message);
+      }
+      return handleConfirmProfile(fc, parsed.data, ctx);
+    }
 
     case 'generate_routine_preview':
-      return handleGenerateRoutinePreview(fc, args as unknown as Parameters<typeof handleGenerateRoutinePreview>[1], ctx);
+      // generate_routine_preview는 executor 내부에서 검증 (복잡한 nested 구조)
+      return handleGenerateRoutinePreview(fc, args as Parameters<typeof handleGenerateRoutinePreview>[1], ctx);
 
-    case 'apply_routine':
-      return handleApplyRoutine(fc, args as unknown as Parameters<typeof handleApplyRoutine>[1], ctx);
+    case 'apply_routine': {
+      const parsed = ApplyPreviewArgsSchema.safeParse(args);
+      if (!parsed.success) {
+        return createValidationError(toolName, parsed.error.message);
+      }
+      return handleApplyRoutine(fc, parsed.data, ctx);
+    }
 
     case 'generate_meal_plan_preview':
-      return handleGenerateMealPlanPreview(fc, args as unknown as Parameters<typeof handleGenerateMealPlanPreview>[1], ctx);
+      // generate_meal_plan_preview는 executor 내부에서 검증 (복잡한 nested 구조)
+      return handleGenerateMealPlanPreview(fc, args as Parameters<typeof handleGenerateMealPlanPreview>[1], ctx);
 
-    case 'apply_meal_plan':
-      return handleApplyMealPlan(fc, args as unknown as Parameters<typeof handleApplyMealPlan>[1], ctx);
+    case 'apply_meal_plan': {
+      const parsed = ApplyPreviewArgsSchema.safeParse(args);
+      if (!parsed.success) {
+        return createValidationError(toolName, parsed.error.message);
+      }
+      return handleApplyMealPlan(fc, parsed.data, ctx);
+    }
 
     default:
       // 일반 도구 처리

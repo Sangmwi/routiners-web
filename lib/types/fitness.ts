@@ -218,14 +218,8 @@ export const AI_TOOL_NAMES = [
   'get_user_body_metrics',
   'get_latest_inbody',
   'get_inbody_history',
-  // 피트니스 프로필 (통합)
-  'get_fitness_profile', // 통합 쿼리 (권장)
-  // 피트니스 프로필 (개별 - deprecated)
-  'get_fitness_goal',
-  'get_experience_level',
-  'get_training_preferences',
-  'get_injuries_restrictions',
-  // 프로필 업데이트
+  // 피트니스 프로필
+  'get_fitness_profile',
   'update_fitness_profile',
   // 루틴 관련
   'get_current_routine',
@@ -257,10 +251,6 @@ export const AI_TOOL_LABELS: Record<AIToolName, string> = {
   get_latest_inbody: '최근 인바디 확인 중',
   get_inbody_history: '인바디 이력 확인 중',
   get_fitness_profile: '피트니스 프로필 확인 중',
-  get_fitness_goal: '운동 목표 확인 중',
-  get_experience_level: '운동 경험 확인 중',
-  get_training_preferences: '운동 선호도 확인 중',
-  get_injuries_restrictions: '부상/제한 사항 확인 중',
   update_fitness_profile: '프로필 업데이트 중',
   get_current_routine: '현재 루틴 확인 중',
   save_routine_draft: '루틴 초안 저장 중',

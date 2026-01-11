@@ -5,7 +5,7 @@
  * 미리보기 루틴을 실제 일정에 적용
  */
 
-import { executeApplyRoutine, ToolExecutorContext } from '@/lib/ai/tool-executor';
+import { executeApplyRoutine, type ToolExecutorContext } from '@/lib/ai/executors';
 import { getMetadata, transitionToApplied } from './metadata-manager';
 import type { ToolHandlerContext, ToolHandlerResult, FunctionCallInfo } from './types';
 import type { RoutinePreviewData } from '@/lib/types/fitness';

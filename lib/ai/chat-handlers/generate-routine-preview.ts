@@ -5,7 +5,7 @@
  * 2주 운동 루틴 미리보기 생성
  */
 
-import { executeGenerateRoutinePreview, checkDateConflicts, ToolExecutorContext } from '@/lib/ai/tool-executor';
+import { executeGenerateRoutinePreview, checkDateConflicts, type ToolExecutorContext } from '@/lib/ai/executors';
 import { updateMetadata } from './metadata-manager';
 import type { ToolHandlerContext, ToolHandlerResult, FunctionCallInfo } from './types';
 

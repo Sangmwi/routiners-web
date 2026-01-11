@@ -8,7 +8,7 @@
  */
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { queryKeys } from '@/lib/constants/queryKeys';
 import type { ChatMessage, AISessionCompat, ProfileConfirmationRequest } from '@/lib/types/chat';
 import type { InputRequest, RoutinePreviewData } from '@/lib/types/fitness';
@@ -39,180 +39,90 @@ interface AISessionMetadataUpdate {
 export function useChatCacheSync(purpose: SessionPurpose) {
   const queryClient = useQueryClient();
 
-  /**
-   * Active 세션 캐시의 메시지 업데이트
-   */
-  const syncMessages = useCallback(
-    (messages: ChatMessage[]) => {
-      queryClient.setQueryData(
-        queryKeys.aiSession.active(purpose),
-        (oldData: AISessionCompat | null | undefined) => {
-          if (!oldData) return oldData;
-          return { ...oldData, messages };
-        }
-      );
-    },
-    [queryClient, purpose]
-  );
+  return useMemo(() => {
+    const queryKey = queryKeys.aiSession.active(purpose);
 
-  /**
-   * Active 세션 캐시의 메타데이터 업데이트 (병합)
-   */
-  const syncMetadata = useCallback(
-    (updates: AISessionMetadataUpdate) => {
-      queryClient.setQueryData(
-        queryKeys.aiSession.active(purpose),
-        (oldData: AISessionCompat | null | undefined) => {
-          if (!oldData) return oldData;
-          return {
-            ...oldData,
-            metadata: { ...oldData.metadata, ...updates },
-          };
-        }
-      );
-    },
-    [queryClient, purpose]
-  );
+    // ==========================================================================
+    // Core Sync Methods
+    // ==========================================================================
 
-  /**
-   * 메시지 + 메타데이터 동시 업데이트
-   */
-  const syncMessagesAndMetadata = useCallback(
-    (messages: ChatMessage[], metadataUpdates: AISessionMetadataUpdate) => {
-      queryClient.setQueryData(
-        queryKeys.aiSession.active(purpose),
-        (oldData: AISessionCompat | null | undefined) => {
-          if (!oldData) return oldData;
-          return {
-            ...oldData,
-            messages,
-            metadata: { ...oldData.metadata, ...metadataUpdates },
-          };
-        }
-      );
-    },
-    [queryClient, purpose]
-  );
+    /** Active 세션 캐시의 메시지 업데이트 */
+    const syncMessages = (messages: ChatMessage[]) => {
+      queryClient.setQueryData(queryKey, (oldData: AISessionCompat | null | undefined) => {
+        if (!oldData) return oldData;
+        return { ...oldData, messages };
+      });
+    };
 
-  /**
-   * Pending input 캐시 동기화
-   */
-  const syncPendingInput = useCallback(
-    (request: InputRequest | null) => {
+    /** Active 세션 캐시의 메타데이터 업데이트 (병합) */
+    const syncMetadata = (updates: AISessionMetadataUpdate) => {
+      queryClient.setQueryData(queryKey, (oldData: AISessionCompat | null | undefined) => {
+        if (!oldData) return oldData;
+        return { ...oldData, metadata: { ...oldData.metadata, ...updates } };
+      });
+    };
+
+    /** 메시지 + 메타데이터 동시 업데이트 */
+    const syncMessagesAndMetadata = (messages: ChatMessage[], metadataUpdates: AISessionMetadataUpdate) => {
+      queryClient.setQueryData(queryKey, (oldData: AISessionCompat | null | undefined) => {
+        if (!oldData) return oldData;
+        return { ...oldData, messages, metadata: { ...oldData.metadata, ...metadataUpdates } };
+      });
+    };
+
+    // ==========================================================================
+    // Specific Sync Helpers (with auto-clear logic)
+    // ==========================================================================
+
+    /** Pending input 캐시 동기화 */
+    const syncPendingInput = (request: InputRequest | null) =>
       syncMetadata({ pending_input: request ?? undefined });
-    },
-    [syncMetadata]
-  );
 
-  /**
-   * Routine preview 캐시 동기화 (pending_input 정리 포함)
-   */
-  const syncRoutinePreview = useCallback(
-    (preview: RoutinePreviewData | null) => {
-      syncMetadata({
-        pending_preview: preview ?? undefined,
-        pending_input: undefined,  // ✅ 이전 입력 요청 정리
-      });
-    },
-    [syncMetadata]
-  );
+    /** Routine preview 캐시 동기화 (pending_input 자동 정리) */
+    const syncRoutinePreview = (preview: RoutinePreviewData | null) =>
+      syncMetadata({ pending_preview: preview ?? undefined, pending_input: undefined });
 
-  /**
-   * Applied routine 캐시 동기화 (pending_preview 제거 포함)
-   */
-  const syncRoutineApplied = useCallback(
-    (event: RoutineAppliedEvent) => {
-      syncMetadata({
-        pending_preview: null,
-        applied_routine: event,
-      });
-    },
-    [syncMetadata]
-  );
+    /** Applied routine 캐시 동기화 (pending_preview 자동 정리) */
+    const syncRoutineApplied = (event: RoutineAppliedEvent) =>
+      syncMetadata({ pending_preview: null, applied_routine: event });
 
-  /**
-   * Meal plan preview 캐시 동기화 (pending_input 정리 포함)
-   */
-  const syncMealPlanPreview = useCallback(
-    (preview: MealPlanPreviewData | null) => {
-      syncMetadata({
-        pending_meal_preview: preview ?? undefined,
-        pending_input: undefined,  // ✅ 이전 입력 요청 정리
-      });
-    },
-    [syncMetadata]
-  );
+    /** Meal plan preview 캐시 동기화 (pending_input 자동 정리) */
+    const syncMealPlanPreview = (preview: MealPlanPreviewData | null) =>
+      syncMetadata({ pending_meal_preview: preview ?? undefined, pending_input: undefined });
 
-  /**
-   * Applied meal plan 캐시 동기화 (pending_meal_preview 제거 포함)
-   */
-  const syncMealPlanApplied = useCallback(
-    (event: MealPlanAppliedEvent) => {
-      syncMetadata({
-        pending_meal_preview: null,
-        applied_meal_plan: event,
-      });
-    },
-    [syncMetadata]
-  );
+    /** Applied meal plan 캐시 동기화 (pending_meal_preview 자동 정리) */
+    const syncMealPlanApplied = (event: MealPlanAppliedEvent) =>
+      syncMetadata({ pending_meal_preview: null, applied_meal_plan: event });
 
-  /**
-   * Profile confirmation 캐시 동기화
-   */
-  const syncProfileConfirmation = useCallback(
-    (request: ProfileConfirmationRequest | null) => {
+    /** Profile confirmation 캐시 동기화 */
+    const syncProfileConfirmation = (request: ProfileConfirmationRequest | null) =>
       syncMetadata({ pending_profile_confirmation: request ?? undefined });
-    },
-    [syncMetadata]
-  );
 
-  /**
-   * 사용자 응답 시 pending states 클리어
-   */
-  const clearPendingStates = useCallback(() => {
-    syncMetadata({
-      pending_input: undefined,
-      pending_profile_confirmation: undefined,
-    });
-  }, [syncMetadata]);
+    /** 사용자 응답 시 pending states 클리어 */
+    const clearPendingStates = () =>
+      syncMetadata({ pending_input: undefined, pending_profile_confirmation: undefined });
 
-  /**
-   * Detail 캐시 무효화 (active는 유지)
-   */
-  const invalidateDetail = useCallback(
-    (sessionId: string) => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.aiSession.detail(sessionId),
-      });
-    },
-    [queryClient]
-  );
+    // ==========================================================================
+    // Invalidation Methods
+    // ==========================================================================
 
-  /**
-   * Active 세션 캐시 무효화
-   */
-  const invalidateActive = useCallback(() => {
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.aiSession.active(purpose),
-    });
-  }, [queryClient, purpose]);
+    /** Detail 캐시 무효화 (active는 유지) */
+    const invalidateDetail = (sessionId: string) =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.aiSession.detail(sessionId) });
 
-  /**
-   * 모든 세션 캐시 무효화
-   */
-  const invalidateAll = useCallback(() => {
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.aiSession.all,
-    });
-  }, [queryClient]);
+    /** Active 세션 캐시 무효화 */
+    const invalidateActive = () =>
+      queryClient.invalidateQueries({ queryKey });
 
-  return useMemo(
-    () => ({
+    /** 모든 세션 캐시 무효화 */
+    const invalidateAll = () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.aiSession.all });
+
+    return {
       // Core sync methods
       syncMessages,
       syncMetadata,
       syncMessagesAndMetadata,
-
       // Specific sync helpers
       syncPendingInput,
       syncRoutinePreview,
@@ -221,26 +131,10 @@ export function useChatCacheSync(purpose: SessionPurpose) {
       syncMealPlanApplied,
       syncProfileConfirmation,
       clearPendingStates,
-
       // Invalidation methods
       invalidateDetail,
       invalidateActive,
       invalidateAll,
-    }),
-    [
-      syncMessages,
-      syncMetadata,
-      syncMessagesAndMetadata,
-      syncPendingInput,
-      syncRoutinePreview,
-      syncRoutineApplied,
-      syncMealPlanPreview,
-      syncMealPlanApplied,
-      syncProfileConfirmation,
-      clearPendingStates,
-      invalidateDetail,
-      invalidateActive,
-      invalidateAll,
-    ]
-  );
+    };
+  }, [queryClient, purpose]);
 }

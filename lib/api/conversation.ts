@@ -187,6 +187,22 @@ export const conversationApi = {
 
     return response.json();
   },
+
+  /**
+   * 프로필 확인 메타데이터 클리어
+   * - 프로필 확인/수정 UI 응답 후 pending 상태 정리
+   */
+  async clearProfileConfirmation(id: string): Promise<void> {
+    const response = await authFetch(`/api/conversations/${id}/metadata`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clearProfileConfirmation: true }),
+    });
+
+    if (!response.ok) {
+      throw await ApiError.fromResponse(response);
+    }
+  },
 };
 
 // ============================================================================
