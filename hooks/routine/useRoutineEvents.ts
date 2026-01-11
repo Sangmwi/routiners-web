@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  UseQueryOptions,
-} from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   RoutineEvent,
   RoutineEventCreateData,
@@ -26,6 +21,7 @@ import {
   invalidateEventLists,
   invalidateAISessions,
 } from '@/lib/utils/routineEventCacheHelper';
+import { useBaseQuery, useConditionalQuery } from '@/hooks/common/useBaseQuery';
 
 /**
  * Routine Event Query Hooks
@@ -35,122 +31,58 @@ import {
 
 /**
  * 루틴 이벤트 목록 조회
- *
- * @param params - 필터 파라미터
- *
- * @example
- * const { data: events } = useRoutineEvents({
- *   startDate: '2025-01-01',
- *   endDate: '2025-01-31',
- *   type: 'workout',
- * });
  */
-export function useRoutineEvents(
-  params: EventListParams = {},
-  options?: Omit<UseQueryOptions<RoutineEvent[]>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: queryKeys.routineEvent.list(params),
-    queryFn: () => routineEventApi.getEvents(params),
-    staleTime: 5 * 60 * 1000,
-    ...options,
-  });
-}
-
-/**
- * 과거 + 미래 이벤트 조회 (캐러셀용)
- *
- * @param type - 이벤트 타입 ('workout' | 'meal')
- * @param pastDays - 과거 조회 일수 (기본 7일)
- * @param futureDays - 미래 조회 일수 (기본 14일)
- *
- * @example
- * const { data: workouts } = useUpcomingEvents('workout', 7, 14);
- * const { data: meals } = useUpcomingEvents('meal', 7, 14);
- */
-export function useUpcomingEvents(
-  type: EventType,
-  pastDays: number = 7,
-  futureDays: number = 14,
-  options?: Omit<UseQueryOptions<RoutineEvent[]>, 'queryKey' | 'queryFn'>
-) {
-  const startDate = formatDate(addDays(new Date(), -pastDays));
-  const endDate = formatDate(addDays(new Date(), futureDays));
-
-  return useRoutineEvents(
-    {
-      type,
-      startDate,
-      endDate,
-    },
-    options
+export function useRoutineEvents(params: EventListParams = {}) {
+  return useBaseQuery(
+    queryKeys.routineEvent.list(params),
+    () => routineEventApi.getEvents(params)
   );
 }
 
 /**
- * 특정 날짜의 이벤트 조회
- *
- * @param date - 날짜 (YYYY-MM-DD)
- * @param type - 이벤트 타입 (optional)
- *
- * @example
- * const { data: event } = useRoutineEventByDate('2025-01-15', 'workout');
+ * 과거 + 미래 이벤트 조회 (캐러셀용)
  */
-export function useRoutineEventByDate(
-  date: string | undefined,
-  type?: EventType,
-  options?: Omit<UseQueryOptions<RoutineEvent | null>, 'queryKey' | 'queryFn'>
+export function useUpcomingEvents(
+  type: EventType,
+  pastDays: number = 7,
+  futureDays: number = 14
 ) {
-  return useQuery({
-    queryKey: queryKeys.routineEvent.byDate(date || '', type),
-    queryFn: () => routineEventApi.getEventByDate(date!, type),
-    enabled: !!date,
-    staleTime: 5 * 60 * 1000,
-    ...options,
-  });
+  const startDate = formatDate(addDays(new Date(), -pastDays));
+  const endDate = formatDate(addDays(new Date(), futureDays));
+
+  return useRoutineEvents({ type, startDate, endDate });
+}
+
+/**
+ * 특정 날짜의 이벤트 조회
+ */
+export function useRoutineEventByDate(date: string | undefined, type?: EventType) {
+  return useConditionalQuery(
+    queryKeys.routineEvent.byDate(date || '', type),
+    () => routineEventApi.getEventByDate(date!, type),
+    date
+  );
 }
 
 /**
  * 특정 이벤트 상세 조회
- *
- * @param id - 이벤트 ID
- *
- * @example
- * const { data: event } = useRoutineEvent('event-id');
  */
-export function useRoutineEvent(
-  id: string | undefined,
-  options?: Omit<UseQueryOptions<RoutineEvent | null>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: queryKeys.routineEvent.detail(id || ''),
-    queryFn: () => routineEventApi.getEvent(id!),
-    enabled: !!id,
-    staleTime: 5 * 60 * 1000,
-    ...options,
-  });
+export function useRoutineEvent(id: string | undefined) {
+  return useConditionalQuery(
+    queryKeys.routineEvent.detail(id || ''),
+    () => routineEventApi.getEvent(id!),
+    id
+  );
 }
 
 /**
  * 월별 캘린더 요약 조회
- *
- * @param year - 연도
- * @param month - 월 (1-12)
- *
- * @example
- * const { data: events } = useCalendarEvents(2025, 1);
  */
-export function useCalendarEvents(
-  year: number,
-  month: number,
-  options?: Omit<UseQueryOptions<CalendarEventSummary[]>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: queryKeys.routineEvent.monthSummary(year, month),
-    queryFn: () => routineEventApi.getMonthSummary(year, month),
-    staleTime: 5 * 60 * 1000,
-    ...options,
-  });
+export function useCalendarEvents(year: number, month: number) {
+  return useBaseQuery(
+    queryKeys.routineEvent.monthSummary(year, month),
+    () => routineEventApi.getMonthSummary(year, month)
+  );
 }
 
 /**

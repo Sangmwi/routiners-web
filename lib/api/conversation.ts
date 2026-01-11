@@ -21,6 +21,7 @@ import {
   ProfileConfirmationRequest,
 } from '@/lib/types/chat';
 import { SessionPurpose } from '@/lib/types/routine';
+import { api } from './client';
 
 // ============================================================================
 // Query Parameters Types
@@ -39,6 +40,8 @@ export interface MessageListParams {
   cursor?: string; // 페이지네이션 커서 (created_at)
 }
 
+const BASE_URL = '/api/conversations';
+
 // ============================================================================
 // Conversation API
 // ============================================================================
@@ -56,18 +59,9 @@ export const conversationApi = {
     if (params.offset) searchParams.set('offset', String(params.offset));
 
     const query = searchParams.toString();
-    const url = `/api/conversations${query ? `?${query}` : ''}`;
+    const url = `${BASE_URL}${query ? `?${query}` : ''}`;
 
-    const response = await authFetch(url, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.getOrThrow<Conversation[]>(url);
   },
 
   /**
@@ -75,33 +69,14 @@ export const conversationApi = {
    * - 활성 세션 없으면 null 반환 (200 + null body)
    */
   async getActiveAIConversation(purpose: SessionPurpose): Promise<AISessionCompat | null> {
-    const response = await authFetch(`/api/conversations/ai/active?purpose=${purpose}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json(); // null if no active session
+    return api.getOrThrow<AISessionCompat | null>(`${BASE_URL}/ai/active?purpose=${purpose}`);
   },
 
   /**
    * 특정 대화방 조회
    */
   async getConversation(id: string): Promise<Conversation | null> {
-    const response = await authFetch(`/api/conversations/${id}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (response.status === 404) return null;
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.get<Conversation>(`${BASE_URL}/${id}`);
   },
 
   /**
@@ -109,83 +84,35 @@ export const conversationApi = {
    * - AI 타입 대화인 경우 메시지가 포함된 AISessionCompat 반환
    */
   async getAISession(id: string): Promise<AISessionCompat | null> {
-    const response = await authFetch(`/api/conversations/${id}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (response.status === 404) return null;
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.get<AISessionCompat>(`${BASE_URL}/${id}`);
   },
 
   /**
    * 새 대화방 생성
    */
   async createConversation(data: ConversationCreateData): Promise<AISessionCompat> {
-    const response = await authFetch('/api/conversations', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.post<AISessionCompat>(BASE_URL, data);
   },
 
   /**
    * 대화방 업데이트
    */
   async updateConversation(id: string, data: ConversationUpdateData): Promise<Conversation> {
-    const response = await authFetch(`/api/conversations/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.patch<Conversation>(`${BASE_URL}/${id}`, data);
   },
 
   /**
    * AI 대화 완료 처리
    */
   async completeAIConversation(id: string): Promise<Conversation> {
-    const response = await authFetch(`/api/conversations/${id}/complete`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.post<Conversation>(`${BASE_URL}/${id}/complete`);
   },
 
   /**
    * 대화방 삭제 (소프트 삭제)
    */
   async deleteConversation(id: string): Promise<{ success: boolean }> {
-    const response = await authFetch(`/api/conversations/${id}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.delete<{ success: boolean }>(`${BASE_URL}/${id}`) as Promise<{ success: boolean }>;
   },
 
   /**
@@ -193,15 +120,7 @@ export const conversationApi = {
    * - 프로필 확인/수정 UI 응답 후 pending 상태 정리
    */
   async clearProfileConfirmation(id: string): Promise<void> {
-    const response = await authFetch(`/api/conversations/${id}/metadata`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clearProfileConfirmation: true }),
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
+    await api.patch(`${BASE_URL}/${id}/metadata`, { clearProfileConfirmation: true });
   },
 };
 
@@ -222,68 +141,30 @@ export const messageApi = {
     if (params.cursor) searchParams.set('cursor', params.cursor);
 
     const query = searchParams.toString();
-    const url = `/api/conversations/${conversationId}/messages${query ? `?${query}` : ''}`;
+    const url = `${BASE_URL}/${conversationId}/messages${query ? `?${query}` : ''}`;
 
-    const response = await authFetch(url, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.getOrThrow<{ messages: ChatMessage[]; hasMore: boolean; nextCursor?: string }>(url);
   },
 
   /**
    * 메시지 전송 (일반)
    */
   async sendMessage(conversationId: string, data: MessageCreateData): Promise<ChatMessage> {
-    const response = await authFetch(`/api/conversations/${conversationId}/messages`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.post<ChatMessage>(`${BASE_URL}/${conversationId}/messages`, data);
   },
 
   /**
    * 메시지 수정
    */
   async updateMessage(messageId: string, content: string): Promise<ChatMessage> {
-    const response = await authFetch(`/api/messages/${messageId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content }),
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.patch<ChatMessage>(`/api/messages/${messageId}`, { content });
   },
 
   /**
    * 메시지 삭제 (소프트 삭제)
    */
   async deleteMessage(messageId: string): Promise<{ success: boolean }> {
-    const response = await authFetch(`/api/messages/${messageId}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.delete<{ success: boolean }>(`/api/messages/${messageId}`) as Promise<{ success: boolean }>;
   },
 };
 
@@ -356,9 +237,10 @@ export const aiChatApi = {
   ): AbortController {
     const controller = new AbortController();
 
+    // SSE 스트리밍은 특수 처리 필요 - authFetch 직접 사용
     (async () => {
       try {
-        const response = await authFetch(`/api/conversations/${conversationId}/messages/ai`, {
+        const response = await authFetch(`${BASE_URL}/${conversationId}/messages/ai`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message }),
@@ -501,20 +383,11 @@ export const aiChatApi = {
    * AI 채팅 메시지 전송 (Non-streaming)
    */
   async sendMessageSync(conversationId: string, message: string): Promise<string> {
-    const response = await authFetch(`/api/conversations/${conversationId}/messages/ai`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-No-Stream': 'true',
-      },
-      body: JSON.stringify({ message }),
+    const data = await api.post<{ content: string }>(`${BASE_URL}/${conversationId}/messages/ai`, {
+      message,
+    }, {
+      headers: { 'X-No-Stream': 'true' },
     });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    const data = await response.json();
     return data.content;
   },
 };
@@ -528,13 +401,6 @@ export const readStatusApi = {
    * 읽음 표시 업데이트
    */
   async markAsRead(conversationId: string): Promise<void> {
-    const response = await authFetch(`/api/conversations/${conversationId}/read`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
+    await api.post(`${BASE_URL}/${conversationId}/read`);
   },
 };

@@ -5,6 +5,7 @@ import {
   DbInBodyRecord,
   InBodySummary,
 } from '@/lib/types/inbody';
+import { handleSupabaseError } from '@/lib/utils/apiResponse';
 
 /**
  * GET /api/inbody/summary
@@ -21,10 +22,7 @@ export const GET = withAuth(async (_request, { userId, supabase }) => {
 
   if (error) {
     console.error('[InBody Summary] Error:', error);
-    return NextResponse.json(
-      { error: '기록을 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
-      { status: 500 }
-    );
+    return handleSupabaseError(error);
   }
 
   const records = (data as DbInBodyRecord[]).map(transformDbInBodyToInBody);

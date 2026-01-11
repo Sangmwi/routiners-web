@@ -8,8 +8,9 @@
  */
 
 import { FitnessProfile, FitnessProfileUpdateData } from '@/lib/types/fitness';
-import { ApiError } from '@/lib/types';
-import { authFetch } from '@/lib/utils/authFetch';
+import { api } from './client';
+
+const ENDPOINT = '/api/fitness-profile';
 
 /**
  * Fitness Profile 관련 API
@@ -22,16 +23,7 @@ export const fitnessProfileApi = {
    * @throws {ApiError} 네트워크 오류 또는 서버 오류 발생 시
    */
   async getFitnessProfile(): Promise<FitnessProfile> {
-    const response = await authFetch('/api/fitness-profile', {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.getOrThrow<FitnessProfile>(ENDPOINT);
   },
 
   /**
@@ -42,17 +34,7 @@ export const fitnessProfileApi = {
    * @throws {ApiError} 업데이트 실패 시
    */
   async updateFitnessProfile(data: FitnessProfileUpdateData): Promise<FitnessProfile> {
-    const response = await authFetch('/api/fitness-profile', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.patch<FitnessProfile>(ENDPOINT, data);
   },
 
   /**
@@ -63,17 +45,7 @@ export const fitnessProfileApi = {
    * @throws {ApiError} 저장 실패 시
    */
   async replaceFitnessProfile(data: FitnessProfileUpdateData): Promise<FitnessProfile> {
-    const response = await authFetch('/api/fitness-profile', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.put<FitnessProfile>(ENDPOINT, data);
   },
 
   /**
@@ -82,13 +54,6 @@ export const fitnessProfileApi = {
    * @throws {ApiError} 삭제 실패 시
    */
   async deleteFitnessProfile(): Promise<void> {
-    const response = await authFetch('/api/fitness-profile', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
+    await api.delete(ENDPOINT);
   },
 };

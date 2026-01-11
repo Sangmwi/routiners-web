@@ -1,15 +1,10 @@
 'use client';
 
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  UseQueryOptions,
-} from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { SessionPurpose } from '@/lib/types/routine';
-import { AISessionCompat, Conversation } from '@/lib/types/chat';
 import { conversationApi, ConversationListParams } from '@/lib/api/conversation';
 import { queryKeys } from '@/lib/constants/queryKeys';
+import { useBaseQuery, useConditionalQuery } from '@/hooks/common/useBaseQuery';
 
 /**
  * AI Session Query Hooks (새 스키마 버전)
@@ -20,88 +15,53 @@ import { queryKeys } from '@/lib/constants/queryKeys';
 
 /**
  * AI 대화 목록 조회
- *
- * @param params - 필터 파라미터
- *
- * @example
- * const { data: sessions } = useAISessions({ aiPurpose: 'workout' });
  */
 export function useAISessions(
   params: ConversationListParams = {},
-  options?: Omit<UseQueryOptions<Conversation[]>, 'queryKey' | 'queryFn'>
+  options?: { enabled?: boolean }
 ) {
-  return useQuery({
-    queryKey: queryKeys.aiSession.list(params),
-    queryFn: () => conversationApi.getConversations({ type: 'ai', ...params }),
-    staleTime: 5 * 60 * 1000,
-    ...options,
-  });
+  return useBaseQuery(
+    queryKeys.aiSession.list(params),
+    () => conversationApi.getConversations({ type: 'ai', ...params }),
+    options
+  );
 }
 
 /**
  * 현재 활성 세션 조회
  *
- * @param purpose - 세션 목적 ('workout' | 'meal')
- *
- * @example
- * const { data: activeSession } = useActiveAISession('workout');
+ * staleTime 30초: 활성 세션은 자주 변경될 수 있음
  */
-export function useActiveAISession(
-  purpose: SessionPurpose,
-  options?: Omit<UseQueryOptions<AISessionCompat | null>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: queryKeys.aiSession.active(purpose),
-    queryFn: () => conversationApi.getActiveAIConversation(purpose),
-    staleTime: 30 * 1000, // 30초 (활성 세션은 자주 변경될 수 있음)
-    // ⚠️ refetchOnMount: 'always' 제거
-    // - 세션 생성 시 setQueryData로 캐시 설정되므로 불필요한 refetch 방지
-    // - 'always'는 컴포넌트 마운트마다 refetch → 타이밍 이슈로 404 반환 가능
-    // - staleTime 30초 이후에만 자동 refetch (React Query 기본 동작)
-    ...options,
-  });
+export function useActiveAISession(purpose: SessionPurpose) {
+  return useBaseQuery(
+    queryKeys.aiSession.active(purpose),
+    () => conversationApi.getActiveAIConversation(purpose),
+    { staleTime: 'active' }
+  );
 }
 
 /**
  * 특정 세션 상세 조회 (메타데이터만)
- *
- * @param id - 세션 ID
- *
- * @example
- * const { data: session } = useAISession('session-id');
  */
-export function useAISession(
-  id: string | undefined,
-  options?: Omit<UseQueryOptions<Conversation | null>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: queryKeys.aiSession.detail(id || ''),
-    queryFn: () => conversationApi.getConversation(id!),
-    enabled: !!id,
-    staleTime: 30 * 1000,
-    ...options,
-  });
+export function useAISession(id: string | undefined, options?: { enabled?: boolean }) {
+  return useConditionalQuery(
+    queryKeys.aiSession.detail(id || ''),
+    () => conversationApi.getConversation(id!),
+    options?.enabled === false ? false : id,
+    { staleTime: 'active' }
+  );
 }
 
 /**
  * 특정 AI 세션 상세 조회 (메시지 포함)
- *
- * @param id - 세션 ID
- *
- * @example
- * const { data: session } = useAISessionWithMessages('session-id');
  */
-export function useAISessionWithMessages(
-  id: string | undefined,
-  options?: Omit<UseQueryOptions<AISessionCompat | null>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: queryKeys.aiSession.detail(id || ''),
-    queryFn: () => conversationApi.getAISession(id!),
-    enabled: !!id,
-    staleTime: 30 * 1000,
-    ...options,
-  });
+export function useAISessionWithMessages(id: string | undefined, options?: { enabled?: boolean }) {
+  return useConditionalQuery(
+    queryKeys.aiSession.detail(id || ''),
+    () => conversationApi.getAISession(id!),
+    options?.enabled === false ? false : id,
+    { staleTime: 'active' }
+  );
 }
 
 /**

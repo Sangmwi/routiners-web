@@ -1,14 +1,10 @@
 'use client';
 
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  UseQueryOptions,
-} from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { User, ProfileUpdateData } from '@/lib/types';
-import { profileApi, profileSearchApi, ProfileSearchFilters } from '@/lib/api/profile';
+import { profileApi, profileSearchApi, ProfileSearchFilters, ProfileSearchResult } from '@/lib/api/profile';
 import { queryKeys } from '@/lib/constants/queryKeys';
+import { useBaseQuery, useConditionalQuery } from '@/hooks/common/useBaseQuery';
 
 /**
  * Profile Query Hooks
@@ -18,112 +14,57 @@ import { queryKeys } from '@/lib/constants/queryKeys';
 
 /**
  * 현재 사용자 프로필 조회
- *
- * @example
- * const { data: user, isLoading } = useCurrentUserProfile();
  */
-export function useCurrentUserProfile(
-  options?: Omit<UseQueryOptions<User | null>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: queryKeys.user.me(),
-    queryFn: profileApi.getCurrentUserProfile,
-    staleTime: 5 * 60 * 1000, // 5분간 fresh
-    ...options,
-  });
+export function useCurrentUserProfile() {
+  return useBaseQuery(
+    queryKeys.user.me(),
+    profileApi.getCurrentUserProfile
+  );
 }
 
 /**
  * 특정 사용자 프로필 조회
- *
- * @param userId - 조회할 사용자 ID
- * @param options - React Query 옵션
- *
- * @example
- * const { data: user } = useUserProfile('user-123');
  */
-export function useUserProfile(
-  userId: string | undefined,
-  options?: Omit<UseQueryOptions<User | null>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: queryKeys.user.detail(userId || ''),
-    queryFn: () => profileApi.getUserProfile(userId!),
-    enabled: !!userId,
-    staleTime: 2 * 60 * 1000, // 2분간 fresh
-    ...options,
-  });
+export function useUserProfile(userId: string | undefined) {
+  return useConditionalQuery(
+    queryKeys.user.detail(userId || ''),
+    () => profileApi.getUserProfile(userId!),
+    userId,
+    { staleTime: 'short' }
+  );
 }
 
 /**
  * 프로필 검색
- *
- * @param filters - 검색 필터
- * @param options - React Query 옵션
- *
- * @example
- * const { data: searchResult } = useSearchProfiles({
- *   interestedExercises: ['헬스(웨이트리프팅)'],
- *   unitIds: ['unit-123'],
- * });
  */
-export function useSearchProfiles(
-  filters?: ProfileSearchFilters,
-  options?: Omit<UseQueryOptions<any>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: queryKeys.user.search(filters),
-    queryFn: () => profileSearchApi.searchProfiles(filters || {}),
-    staleTime: 1 * 60 * 1000, // 1분간 fresh
-    ...options,
-  });
+export function useSearchProfiles(filters?: ProfileSearchFilters) {
+  return useBaseQuery<ProfileSearchResult>(
+    queryKeys.user.search(filters),
+    () => profileSearchApi.searchProfiles(filters || {}),
+    { staleTime: 'search' }
+  );
 }
 
 /**
  * 추천 프로필 조회
- *
- * 현재 사용자와 유사한 프로필을 추천
- *
- * @param limit - 반환할 프로필 수 (기본 20)
- * @param options - React Query 옵션
- *
- * @example
- * const { data: recommendations } = useRecommendedProfiles(10);
  */
-export function useRecommendedProfiles(
-  limit: number = 20,
-  options?: Omit<UseQueryOptions<User[]>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: queryKeys.user.recommendations(limit),
-    queryFn: () => profileSearchApi.getRecommendedProfiles(limit),
-    staleTime: 5 * 60 * 1000, // 5분간 fresh (자주 변하지 않음)
-    ...options,
-  });
+export function useRecommendedProfiles(limit: number = 20) {
+  return useBaseQuery(
+    queryKeys.user.recommendations(limit),
+    () => profileSearchApi.getRecommendedProfiles(limit)
+  );
 }
 
 /**
  * 같은 부대 사용자 조회
- *
- * @param unitId - 부대 ID
- * @param limit - 반환할 사용자 수 (기본 20)
- * @param options - React Query 옵션
- *
- * @example
- * const { data: sameUnitUsers } = useSameUnitUsers('unit-123');
  */
-export function useSameUnitUsers(
-  unitId: string | undefined,
-  limit: number = 20,
-  options?: Omit<UseQueryOptions<User[]>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: queryKeys.user.sameUnit(unitId || '', limit),
-    queryFn: () => profileSearchApi.getSameUnitUsers(unitId!, limit),
-    enabled: !!unitId,
-    staleTime: 3 * 60 * 1000, // 3분간 fresh
-    ...options,
-  });
+export function useSameUnitUsers(unitId: string | undefined, limit: number = 20) {
+  return useConditionalQuery(
+    queryKeys.user.sameUnit(unitId || '', limit),
+    () => profileSearchApi.getSameUnitUsers(unitId!, limit),
+    unitId,
+    { staleTime: 'medium' }
+  );
 }
 
 /**

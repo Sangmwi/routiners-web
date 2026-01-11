@@ -2,6 +2,7 @@
 
 import { Cigarette, CigaretteOff } from 'lucide-react';
 import FormSection from '@/components/ui/FormSection';
+import FormSlider from '@/components/ui/FormSlider';
 
 interface ProfileBodyInfoInputProps {
   height: string;
@@ -24,60 +25,31 @@ export default function ProfileBodyInfoInput({
   onWeightChange,
   onSmokerChange,
 }: ProfileBodyInfoInputProps) {
-  const heightValue = height ? Number(height) : HEIGHT_CONFIG.default;
-  const weightValue = weight ? Number(weight) : WEIGHT_CONFIG.default;
-
   return (
     <FormSection
       title="신체 정보"
       description="슬라이더를 움직여 입력하세요."
     >
       <div className="space-y-6">
-        {/* 신장 슬라이더 */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">신장</span>
-            <span className="text-sm font-medium text-foreground">
-              {height || '-'} cm
-            </span>
-          </div>
-          <input
-            type="range"
-            min={HEIGHT_CONFIG.min}
-            max={HEIGHT_CONFIG.max}
-            step={1}
-            value={heightValue}
-            onChange={(e) => onHeightChange(e.target.value)}
-            className="w-full h-2 bg-muted rounded-full appearance-none cursor-pointer accent-primary"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{HEIGHT_CONFIG.min}cm</span>
-            <span>{HEIGHT_CONFIG.max}cm</span>
-          </div>
-        </div>
+        <FormSlider
+          label="신장"
+          value={height}
+          onChange={onHeightChange}
+          min={HEIGHT_CONFIG.min}
+          max={HEIGHT_CONFIG.max}
+          unit="cm"
+          defaultValue={HEIGHT_CONFIG.default}
+        />
 
-        {/* 체중 슬라이더 */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">체중</span>
-            <span className="text-sm font-medium text-foreground">
-              {weight || '-'} kg
-            </span>
-          </div>
-          <input
-            type="range"
-            min={WEIGHT_CONFIG.min}
-            max={WEIGHT_CONFIG.max}
-            step={1}
-            value={weightValue}
-            onChange={(e) => onWeightChange(e.target.value)}
-            className="w-full h-2 bg-muted rounded-full appearance-none cursor-pointer accent-primary"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{WEIGHT_CONFIG.min}kg</span>
-            <span>{WEIGHT_CONFIG.max}kg</span>
-          </div>
-        </div>
+        <FormSlider
+          label="체중"
+          value={weight}
+          onChange={onWeightChange}
+          min={WEIGHT_CONFIG.min}
+          max={WEIGHT_CONFIG.max}
+          unit="kg"
+          defaultValue={WEIGHT_CONFIG.default}
+        />
 
         {/* 흡연 여부 - 미니멀 토글 */}
         <div className="flex items-center justify-between py-2">

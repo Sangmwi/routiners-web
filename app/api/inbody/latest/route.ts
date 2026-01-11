@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
 import { transformDbInBodyToInBody, DbInBodyRecord } from '@/lib/types/inbody';
+import { handleSupabaseError } from '@/lib/utils/apiResponse';
 
 /**
  * GET /api/inbody/latest
@@ -16,14 +17,12 @@ export const GET = withAuth(async (_request, { userId, supabase }) => {
     .single();
 
   if (error) {
+    // PGRST116: 기록이 없는 경우 null 반환 (정상)
     if (error.code === 'PGRST116') {
-      return NextResponse.json(null, { status: 404 });
+      return NextResponse.json(null);
     }
     console.error('[InBody Latest] Error:', error);
-    return NextResponse.json(
-      { error: '기록을 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
-      { status: 500 }
-    );
+    return handleSupabaseError(error);
   }
 
   const record = transformDbInBodyToInBody(data as DbInBodyRecord);

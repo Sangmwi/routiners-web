@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
 import {
   DbFitnessProfile,
-  FitnessProfileUpdateData,
   FitnessProfileUpdateSchema,
   transformDbFitnessProfile,
   transformFitnessProfileToDb,
 } from '@/lib/types/fitness';
+import { validateRequest, handleSupabaseError, badRequest } from '@/lib/utils/apiResponse';
 
 /**
  * GET /api/fitness-profile
@@ -54,30 +54,10 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
  * 피트니스 프로필 생성 또는 업데이트 (Upsert)
  */
 export const PUT = withAuth(async (request: NextRequest, { userId, supabase }) => {
-  let body;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { error: '잘못된 요청 형식입니다.', code: 'BAD_REQUEST' },
-      { status: 400 }
-    );
-  }
+  const result = await validateRequest(request, FitnessProfileUpdateSchema);
+  if (!result.success) return result.response;
 
-  // 유효성 검사
-  const validation = FitnessProfileUpdateSchema.safeParse(body);
-  if (!validation.success) {
-    return NextResponse.json(
-      {
-        error: '입력값이 유효하지 않습니다.',
-        code: 'VALIDATION_ERROR',
-        details: validation.error.flatten(),
-      },
-      { status: 400 }
-    );
-  }
-
-  const updateData = transformFitnessProfileToDb(validation.data);
+  const updateData = transformFitnessProfileToDb(result.data);
 
   // Upsert
   const { data, error } = await supabase
@@ -94,10 +74,7 @@ export const PUT = withAuth(async (request: NextRequest, { userId, supabase }) =
 
   if (error) {
     console.error('[Fitness Profile PUT] Error:', error);
-    return NextResponse.json(
-      { error: '피트니스 프로필 저장에 실패했습니다.', code: 'DATABASE_ERROR' },
-      { status: 500 }
-    );
+    return handleSupabaseError(error);
   }
 
   return NextResponse.json(transformDbFitnessProfile(data as DbFitnessProfile));
@@ -108,36 +85,13 @@ export const PUT = withAuth(async (request: NextRequest, { userId, supabase }) =
  * 피트니스 프로필 부분 업데이트
  */
 export const PATCH = withAuth(async (request: NextRequest, { userId, supabase }) => {
-  let body;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { error: '잘못된 요청 형식입니다.', code: 'BAD_REQUEST' },
-      { status: 400 }
-    );
-  }
+  const result = await validateRequest(request, FitnessProfileUpdateSchema);
+  if (!result.success) return result.response;
 
-  // 유효성 검사
-  const validation = FitnessProfileUpdateSchema.safeParse(body);
-  if (!validation.success) {
-    return NextResponse.json(
-      {
-        error: '입력값이 유효하지 않습니다.',
-        code: 'VALIDATION_ERROR',
-        details: validation.error.flatten(),
-      },
-      { status: 400 }
-    );
-  }
-
-  const updateData = transformFitnessProfileToDb(validation.data);
+  const updateData = transformFitnessProfileToDb(result.data);
 
   if (Object.keys(updateData).length === 0) {
-    return NextResponse.json(
-      { error: '업데이트할 내용이 없습니다.', code: 'BAD_REQUEST' },
-      { status: 400 }
-    );
+    return badRequest('업데이트할 내용이 없습니다');
   }
 
   // 기존 프로필 확인
@@ -160,10 +114,7 @@ export const PATCH = withAuth(async (request: NextRequest, { userId, supabase })
 
     if (error) {
       console.error('[Fitness Profile PATCH] Insert Error:', error);
-      return NextResponse.json(
-        { error: '피트니스 프로필 생성에 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 }
-      );
+      return handleSupabaseError(error);
     }
 
     return NextResponse.json(transformDbFitnessProfile(data as DbFitnessProfile), { status: 201 });
@@ -179,10 +130,7 @@ export const PATCH = withAuth(async (request: NextRequest, { userId, supabase })
 
   if (error) {
     console.error('[Fitness Profile PATCH] Update Error:', error);
-    return NextResponse.json(
-      { error: '피트니스 프로필 업데이트에 실패했습니다.', code: 'DATABASE_ERROR' },
-      { status: 500 }
-    );
+    return handleSupabaseError(error);
   }
 
   return NextResponse.json(transformDbFitnessProfile(data as DbFitnessProfile));
@@ -200,10 +148,7 @@ export const DELETE = withAuth(async (request: NextRequest, { userId, supabase }
 
   if (error) {
     console.error('[Fitness Profile DELETE] Error:', error);
-    return NextResponse.json(
-      { error: '피트니스 프로필 삭제에 실패했습니다.', code: 'DATABASE_ERROR' },
-      { status: 500 }
-    );
+    return handleSupabaseError(error);
   }
 
   return NextResponse.json({ success: true });

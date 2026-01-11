@@ -10,6 +10,7 @@
 import { User, SignupCompleteData, ApiError } from '@/lib/types';
 import { authFetch } from '@/lib/utils/authFetch';
 import { createClient } from '@/utils/supabase/client';
+import { api } from './client';
 
 export const authApi = {
   /**
@@ -20,15 +21,9 @@ export const authApi = {
    * @throws {ApiError} 확인 실패 시
    */
   async checkNickname(nickname: string): Promise<{ available: boolean }> {
-    const response = await authFetch(
+    return api.getOrThrow<{ available: boolean }>(
       `/api/user/check-nickname?nickname=${encodeURIComponent(nickname)}`
     );
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
   },
 
   /**
@@ -39,6 +34,7 @@ export const authApi = {
    * @throws {ApiError} 가입 실패 시
    */
   async completeSignup(data: Omit<SignupCompleteData, 'providerId' | 'email'>): Promise<User> {
+    // 특수 에러 처리가 필요하여 authFetch 직접 사용
     const response = await authFetch('/api/signup/complete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Settings, ChevronRight, Scale, Activity, Percent } from 'lucide-react';
+import { Settings, ChevronRight } from 'lucide-react';
 import FormSection from '@/components/ui/FormSection';
 import FormToggle from '@/components/ui/FormToggle';
-import { InBodyManageModal } from '@/components/inbody';
+import { InBodyManageModal, MetricsGrid } from '@/components/inbody';
 import { useInBodySummary } from '@/hooks/inbody';
 
 interface ProfileInbodyInputProps {
@@ -46,29 +46,7 @@ export default function ProfileInbodyInput({
           >
             {latest ? (
               <>
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <Scale className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
-                    <p className="text-xs text-muted-foreground">체중</p>
-                    <p className="text-sm font-semibold text-card-foreground">
-                      {latest.weight}kg
-                    </p>
-                  </div>
-                  <div>
-                    <Activity className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
-                    <p className="text-xs text-muted-foreground">골격근량</p>
-                    <p className="text-sm font-semibold text-card-foreground">
-                      {latest.skeletalMuscleMass}kg
-                    </p>
-                  </div>
-                  <div>
-                    <Percent className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
-                    <p className="text-xs text-muted-foreground">체지방률</p>
-                    <p className="text-sm font-semibold text-card-foreground">
-                      {latest.bodyFatPercentage}%
-                    </p>
-                  </div>
-                </div>
+                <MetricsGrid data={latest} />
                 <div className="flex items-center justify-center gap-1 mt-3 text-xs text-muted-foreground">
                   <span>총 {totalRecords}개의 기록</span>
                   <ChevronRight className="w-3 h-3" />

@@ -16,7 +16,9 @@ import ChatInputRequest from './ChatInputRequest';
 import ChatRoutinePreview from './ChatRoutinePreview';
 import ChatMealPreview from './ChatMealPreview';
 import { ChatProfileConfirmation } from './ChatProfileConfirmation';
-import { Loader2, CheckCircle, Utensils, Play } from 'lucide-react';
+import { ChatProgressIndicator } from './ChatProgressIndicator';
+import { ChatAppliedBanner } from './ChatAppliedBanner';
+import { Loader2, Play } from 'lucide-react';
 import { SessionPurpose } from '@/lib/types/routine';
 
 interface ChatMessageListProps {
@@ -210,25 +212,11 @@ export default function ChatMessageList({
 
         {/* 루틴 생성 진행률 */}
         {routineProgress && !pendingRoutinePreview && (
-          <div className="flex gap-3 items-start my-4">
-            <div className="shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-              <Loader2 className="w-4 h-4 animate-spin" />
-            </div>
-            <div className="flex-1 bg-card border border-border rounded-2xl rounded-tl-md px-4 py-3">
-              <p className="text-sm font-medium text-foreground mb-2">
-                루틴 생성 중... {routineProgress.progress}%
-              </p>
-              <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                <div
-                  className="bg-primary h-full rounded-full transition-all duration-300 ease-out"
-                  style={{ width: `${routineProgress.progress}%` }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {routineProgress.stage}
-              </p>
-            </div>
-          </div>
+          <ChatProgressIndicator
+            progress={routineProgress.progress}
+            stage={routineProgress.stage}
+            variant="workout"
+          />
         )}
 
         {/* 루틴 미리보기 */}
@@ -243,42 +231,20 @@ export default function ChatMessageList({
 
         {/* 루틴 적용 완료 메시지 */}
         {appliedRoutine && (
-          <div className="flex gap-3 items-start my-4">
-            <div className="shrink-0 w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center">
-              <CheckCircle className="w-4 h-4" />
-            </div>
-            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl rounded-tl-md px-4 py-3">
-              <p className="text-sm text-green-800 dark:text-green-200 font-medium">
-                루틴이 적용되었습니다!
-              </p>
-              <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                {appliedRoutine.eventsCreated}개의 운동이 {appliedRoutine.startDate}부터 시작됩니다.
-              </p>
-            </div>
-          </div>
+          <ChatAppliedBanner
+            type="workout"
+            eventsCreated={appliedRoutine.eventsCreated}
+            startDate={appliedRoutine.startDate}
+          />
         )}
 
         {/* 식단 생성 진행률 */}
         {mealProgress && !pendingMealPreview && (
-          <div className="flex gap-3 items-start my-4">
-            <div className="shrink-0 w-8 h-8 rounded-full bg-lime-500 text-white flex items-center justify-center">
-              <Loader2 className="w-4 h-4 animate-spin" />
-            </div>
-            <div className="flex-1 bg-card border border-border rounded-2xl rounded-tl-md px-4 py-3">
-              <p className="text-sm font-medium text-foreground mb-2">
-                식단 생성 중... {mealProgress.progress}%
-              </p>
-              <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                <div
-                  className="bg-lime-500 h-full rounded-full transition-all duration-300 ease-out"
-                  style={{ width: `${mealProgress.progress}%` }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {mealProgress.stage}
-              </p>
-            </div>
-          </div>
+          <ChatProgressIndicator
+            progress={mealProgress.progress}
+            stage={mealProgress.stage}
+            variant="meal"
+          />
         )}
 
         {/* 식단 미리보기 */}
@@ -293,19 +259,11 @@ export default function ChatMessageList({
 
         {/* 식단 적용 완료 메시지 */}
         {appliedMealPlan && (
-          <div className="flex gap-3 items-start my-4">
-            <div className="shrink-0 w-8 h-8 rounded-full bg-lime-500 text-white flex items-center justify-center">
-              <Utensils className="w-4 h-4" />
-            </div>
-            <div className="bg-lime-50 dark:bg-lime-900/20 border border-lime-200 dark:border-lime-800 rounded-2xl rounded-tl-md px-4 py-3">
-              <p className="text-sm text-lime-800 dark:text-lime-200 font-medium">
-                식단이 적용되었습니다!
-              </p>
-              <p className="text-xs text-lime-600 dark:text-lime-400 mt-1">
-                {appliedMealPlan.eventsCreated}일 분의 식단이 {appliedMealPlan.startDate}부터 시작됩니다.
-              </p>
-            </div>
-          </div>
+          <ChatAppliedBanner
+            type="meal"
+            eventsCreated={appliedMealPlan.eventsCreated}
+            startDate={appliedMealPlan.startDate}
+          />
         )}
 
         {/* 대화 시작 버튼 (인라인) */}

@@ -7,8 +7,6 @@
  * @throws {ApiError} 모든 API 에러는 ApiError로 통일
  */
 
-import { ApiError } from '@/lib/types';
-import { authFetch } from '@/lib/utils/authFetch';
 import {
   RoutineEvent,
   RoutineEventCreateData,
@@ -19,6 +17,7 @@ import {
   CalendarEventSummary,
   WorkoutData,
 } from '@/lib/types/routine';
+import { api } from './client';
 
 // ============================================================================
 // Query Parameters Types
@@ -32,6 +31,8 @@ export interface EventListParams {
   limit?: number;
   offset?: number;
 }
+
+const BASE_URL = '/api/routine/events';
 
 // ============================================================================
 // Routine Event API
@@ -54,18 +55,9 @@ export const routineEventApi = {
     if (params.offset) searchParams.set('offset', String(params.offset));
 
     const query = searchParams.toString();
-    const url = `/api/routine/events${query ? `?${query}` : ''}`;
+    const url = `${BASE_URL}${query ? `?${query}` : ''}`;
 
-    const response = await authFetch(url, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.getOrThrow<RoutineEvent[]>(url);
   },
 
   /**
@@ -75,24 +67,11 @@ export const routineEventApi = {
    * @param type - 이벤트 타입 (optional)
    * @returns 해당 날짜의 이벤트 또는 null
    */
-  async getEventByDate(
-    date: string,
-    type?: EventType
-  ): Promise<RoutineEvent | null> {
+  async getEventByDate(date: string, type?: EventType): Promise<RoutineEvent | null> {
     const params = new URLSearchParams({ date });
     if (type) params.set('type', type);
 
-    const response = await authFetch(`/api/routine/events/by-date?${params}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (response.status === 404) return null;
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.get<RoutineEvent>(`${BASE_URL}/by-date?${params}`);
   },
 
   /**
@@ -102,17 +81,7 @@ export const routineEventApi = {
    * @returns 이벤트 상세 정보 또는 null
    */
   async getEvent(id: string): Promise<RoutineEvent | null> {
-    const response = await authFetch(`/api/routine/events/${id}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (response.status === 404) return null;
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.get<RoutineEvent>(`${BASE_URL}/${id}`);
   },
 
   /**
@@ -122,23 +91,10 @@ export const routineEventApi = {
    * @param month - 월 (1-12)
    * @returns 캘린더 이벤트 요약 목록
    */
-  async getMonthSummary(
-    year: number,
-    month: number
-  ): Promise<CalendarEventSummary[]> {
-    const response = await authFetch(
-      `/api/routine/events/calendar?year=${year}&month=${month}`,
-      {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      }
+  async getMonthSummary(year: number, month: number): Promise<CalendarEventSummary[]> {
+    return api.getOrThrow<CalendarEventSummary[]>(
+      `${BASE_URL}/calendar?year=${year}&month=${month}`
     );
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
   },
 
   /**
@@ -148,17 +104,7 @@ export const routineEventApi = {
    * @returns 생성된 이벤트
    */
   async createEvent(data: RoutineEventCreateData): Promise<RoutineEvent> {
-    const response = await authFetch('/api/routine/events', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.post<RoutineEvent>(BASE_URL, data);
   },
 
   /**
@@ -168,17 +114,7 @@ export const routineEventApi = {
    * @returns 생성된 이벤트 목록
    */
   async createEventsBatch(data: RoutineBatchCreateData): Promise<RoutineEvent[]> {
-    const response = await authFetch('/api/routine/events/batch', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.post<RoutineEvent[]>(`${BASE_URL}/batch`, data);
   },
 
   /**
@@ -189,17 +125,7 @@ export const routineEventApi = {
    * @returns 수정된 이벤트
    */
   async updateEvent(id: string, data: RoutineEventUpdateData): Promise<RoutineEvent> {
-    const response = await authFetch(`/api/routine/events/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.patch<RoutineEvent>(`${BASE_URL}/${id}`, data);
   },
 
   /**
@@ -209,16 +135,7 @@ export const routineEventApi = {
    * @returns 업데이트된 이벤트
    */
   async completeEvent(id: string): Promise<RoutineEvent> {
-    const response = await authFetch(`/api/routine/events/${id}/complete`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.post<RoutineEvent>(`${BASE_URL}/${id}/complete`);
   },
 
   /**
@@ -228,16 +145,7 @@ export const routineEventApi = {
    * @returns 업데이트된 이벤트
    */
   async skipEvent(id: string): Promise<RoutineEvent> {
-    const response = await authFetch(`/api/routine/events/${id}/skip`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.post<RoutineEvent>(`${BASE_URL}/${id}/skip`);
   },
 
   /**
@@ -248,17 +156,7 @@ export const routineEventApi = {
    * @returns 업데이트된 이벤트
    */
   async updateWorkoutData(id: string, workoutData: WorkoutData): Promise<RoutineEvent> {
-    const response = await authFetch(`/api/routine/events/${id}/workout`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data: workoutData }),
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.patch<RoutineEvent>(`${BASE_URL}/${id}/workout`, { data: workoutData });
   },
 
   /**
@@ -268,16 +166,7 @@ export const routineEventApi = {
    * @returns 성공 여부
    */
   async deleteEvent(id: string): Promise<{ success: boolean }> {
-    const response = await authFetch(`/api/routine/events/${id}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.delete<{ success: boolean }>(`${BASE_URL}/${id}`) as Promise<{ success: boolean }>;
   },
 
   /**
@@ -287,18 +176,6 @@ export const routineEventApi = {
    * @returns 삭제된 이벤트 수
    */
   async deleteEventsBySession(aiSessionId: string): Promise<{ count: number }> {
-    const response = await authFetch(
-      `/api/routine/events/by-session/${aiSessionId}`,
-      {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.delete<{ count: number }>(`${BASE_URL}/by-session/${aiSessionId}`) as Promise<{ count: number }>;
   },
 };

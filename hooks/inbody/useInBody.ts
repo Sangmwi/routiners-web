@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  UseQueryOptions,
-} from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   InBodyRecord,
   InBodyCreateData,
@@ -14,6 +9,7 @@ import {
 } from '@/lib/types';
 import { inbodyApi } from '@/lib/api/inbody';
 import { queryKeys } from '@/lib/constants/queryKeys';
+import { useBaseQuery, useConditionalQuery } from '@/hooks/common/useBaseQuery';
 
 /**
  * InBody Query Hooks
@@ -23,100 +19,60 @@ import { queryKeys } from '@/lib/constants/queryKeys';
 
 /**
  * InBody 기록 목록 조회
- *
- * @param limit - 조회할 기록 수 (기본 20)
- * @param offset - 오프셋 (페이지네이션)
- *
- * @example
- * const { data: records, isLoading } = useInBodyRecords();
  */
 export function useInBodyRecords(
   limit = 20,
   offset = 0,
-  options?: Omit<UseQueryOptions<InBodyRecord[]>, 'queryKey' | 'queryFn'>
+  options?: { enabled?: boolean }
 ) {
-  return useQuery({
-    queryKey: queryKeys.inbody.list(limit, offset),
-    queryFn: () => inbodyApi.getRecords(limit, offset),
-    staleTime: 5 * 60 * 1000, // 5분간 fresh
-    ...options,
-  });
+  return useBaseQuery(
+    queryKeys.inbody.list(limit, offset),
+    () => inbodyApi.getRecords(limit, offset),
+    options
+  );
 }
 
 /**
  * 최신 InBody 기록 조회
- *
- * @example
- * const { data: latest } = useLatestInBody();
  */
-export function useLatestInBody(
-  options?: Omit<UseQueryOptions<InBodyRecord | null>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: queryKeys.inbody.latest(),
-    queryFn: inbodyApi.getLatest,
-    staleTime: 5 * 60 * 1000,
-    ...options,
-  });
+export function useLatestInBody() {
+  return useBaseQuery(
+    queryKeys.inbody.latest(),
+    inbodyApi.getLatest
+  );
 }
 
 /**
  * InBody 요약 정보 조회 (프로필 표시용)
- *
- * @example
- * const { data: summary } = useInBodySummary();
  */
-export function useInBodySummary(
-  options?: Omit<UseQueryOptions<InBodySummary>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: queryKeys.inbody.summary(),
-    queryFn: inbodyApi.getSummary,
-    staleTime: 5 * 60 * 1000,
-    ...options,
-  });
+export function useInBodySummary(options?: { enabled?: boolean }) {
+  return useBaseQuery(
+    queryKeys.inbody.summary(),
+    inbodyApi.getSummary,
+    options
+  );
 }
 
 /**
  * 특정 사용자의 InBody 요약 정보 조회
- *
- * @param userId - 조회할 사용자 ID
- *
- * @example
- * const { data: summary } = useUserInBodySummary('user-123');
  */
-export function useUserInBodySummary(
-  userId: string | undefined,
-  options?: Omit<UseQueryOptions<InBodySummary>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: queryKeys.inbody.userSummary(userId || ''),
-    queryFn: () => inbodyApi.getUserSummary(userId!),
-    enabled: !!userId,
-    staleTime: 5 * 60 * 1000,
-    ...options,
-  });
+export function useUserInBodySummary(userId: string | undefined, options?: { enabled?: boolean }) {
+  return useConditionalQuery(
+    queryKeys.inbody.userSummary(userId || ''),
+    () => inbodyApi.getUserSummary(userId!),
+    options?.enabled === false ? false : userId
+  );
 }
 
 /**
  * 특정 InBody 기록 조회
- *
- * @param id - InBody 기록 ID
- *
- * @example
- * const { data: record } = useInBodyRecord('record-id');
  */
-export function useInBodyRecord(
-  id: string | undefined,
-  options?: Omit<UseQueryOptions<InBodyRecord | null>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: queryKeys.inbody.detail(id || ''),
-    queryFn: () => inbodyApi.getRecord(id!),
-    enabled: !!id,
-    staleTime: 5 * 60 * 1000,
-    ...options,
-  });
+export function useInBodyRecord(id: string | undefined) {
+  return useConditionalQuery(
+    queryKeys.inbody.detail(id || ''),
+    () => inbodyApi.getRecord(id!),
+    id
+  );
 }
 
 /**

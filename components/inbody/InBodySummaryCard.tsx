@@ -1,6 +1,7 @@
 'use client';
 
-import { Scale, Activity, Percent, ChevronRight, TrendingUp, TrendingDown } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
+import { MetricsGrid, InBodyChanges } from './MetricsGrid';
 
 // ============================================================
 // Types
@@ -20,65 +21,16 @@ interface InBodySummaryCardProps {
   /** 총 기록 수 */
   totalRecords?: number;
   /** 이전 측정 대비 변화량 (선택) */
-  changes?: {
-    weight?: number;
-    skeletalMuscleMass?: number;
-    bodyFatPercentage?: number;
-  };
+  changes?: InBodyChanges;
   /** 클릭 핸들러 */
   onClick?: () => void;
   /** 간소화 모드 (프로필 페이지용) */
   compact?: boolean;
 }
 
-interface MetricItemProps {
-  icon: React.ElementType;
-  label: string;
-  value: string;
-  change?: number;
-  positiveIsGood?: boolean;
-}
-
 // ============================================================
 // Sub Components
 // ============================================================
-
-function MetricItem({
-  icon: Icon,
-  label,
-  value,
-  change,
-  positiveIsGood = true,
-}: MetricItemProps) {
-  const showChange = change !== undefined && change !== 0;
-  const isPositive = change !== undefined && change > 0;
-  const isGood = positiveIsGood ? isPositive : !isPositive;
-
-  return (
-    <div className="text-center">
-      <Icon className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="text-sm font-semibold text-card-foreground">{value}</p>
-      {showChange && (
-        <div
-          className={`flex items-center justify-center gap-0.5 text-xs mt-0.5 ${
-            isGood ? 'text-green-600' : 'text-red-500'
-          }`}
-        >
-          {isPositive ? (
-            <TrendingUp className="w-3 h-3" />
-          ) : (
-            <TrendingDown className="w-3 h-3" />
-          )}
-          <span>
-            {isPositive ? '+' : ''}
-            {change.toFixed(1)}
-          </span>
-        </div>
-      )}
-    </div>
-  );
-}
 
 function EmptyState({ onClick }: { onClick?: () => void }) {
   return (
@@ -149,29 +101,7 @@ export default function InBodySummaryCard({
       onClick={onClick}
     >
       {/* 메트릭 그리드 */}
-      <div className="grid grid-cols-3 gap-4">
-        <MetricItem
-          icon={Scale}
-          label="체중"
-          value={`${latest.weight}kg`}
-          change={changes?.weight}
-          positiveIsGood={false}
-        />
-        <MetricItem
-          icon={Activity}
-          label="골격근량"
-          value={`${latest.skeletalMuscleMass}kg`}
-          change={changes?.skeletalMuscleMass}
-          positiveIsGood={true}
-        />
-        <MetricItem
-          icon={Percent}
-          label="체지방률"
-          value={`${latest.bodyFatPercentage}%`}
-          change={changes?.bodyFatPercentage}
-          positiveIsGood={false}
-        />
-      </div>
+      <MetricsGrid data={latest} changes={changes} />
 
       {/* 점수 뱃지 (있는 경우) */}
       {latest.inbodyScore && !compact && (

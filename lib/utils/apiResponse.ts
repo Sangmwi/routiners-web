@@ -5,8 +5,8 @@
  * 모든 API 라우트에서 일관된 응답 형식 보장
  */
 
-import { NextResponse } from 'next/server';
-import { ZodError } from 'zod';
+import { NextRequest, NextResponse } from 'next/server';
+import { ZodError, ZodSchema } from 'zod';
 
 // ============================================================================
 // Types
@@ -237,4 +237,82 @@ export function handleError(
   // Log unexpected errors
   console.error(`[API Error]${context ? ` ${context}` : ''}`, error);
   return internalError();
+}
+
+// ============================================================================
+// Request Validation Helpers
+// ============================================================================
+
+/**
+ * 요청 본문 검증 결과
+ */
+export type ValidateRequestResult<T> =
+  | { success: true; data: T }
+  | { success: false; response: NextResponse<ApiErrorResponse> };
+
+/**
+ * 요청 본문 파싱 및 Zod 검증 통합 함수
+ *
+ * JSON 파싱 실패, Zod 검증 실패를 모두 처리하여
+ * 성공 시 검증된 데이터, 실패 시 에러 응답을 반환
+ *
+ * @example
+ * ```ts
+ * const result = await validateRequest(request, MySchema);
+ * if (!result.success) return result.response;
+ * const data = result.data; // 타입 안전
+ * ```
+ */
+export async function validateRequest<T>(
+  request: NextRequest | Request,
+  schema: ZodSchema<T>
+): Promise<ValidateRequestResult<T>> {
+  // JSON 파싱
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return {
+      success: false,
+      response: badRequest('잘못된 요청 형식입니다'),
+    };
+  }
+
+  // Zod 검증
+  const validation = schema.safeParse(body);
+  if (!validation.success) {
+    return {
+      success: false,
+      response: validationError(validation.error),
+    };
+  }
+
+  return {
+    success: true,
+    data: validation.data,
+  };
+}
+
+/**
+ * 요청 본문 파싱만 수행 (검증 없이)
+ *
+ * @example
+ * ```ts
+ * const result = await parseRequestBody<MyType>(request);
+ * if (!result.success) return result.response;
+ * const data = result.data;
+ * ```
+ */
+export async function parseRequestBody<T = unknown>(
+  request: NextRequest | Request
+): Promise<ValidateRequestResult<T>> {
+  try {
+    const body = await request.json();
+    return { success: true, data: body as T };
+  } catch {
+    return {
+      success: false,
+      response: badRequest('잘못된 요청 형식입니다'),
+    };
+  }
 }

@@ -5,10 +5,7 @@ import {
   InBodyUpdateData,
   DbInBodyRecord,
 } from '@/lib/types/inbody';
-
-interface RouteContext {
-  params: Promise<{ id: string }>;
-}
+import { badRequest, parseRequestBody, handleSupabaseError } from '@/lib/utils/apiResponse';
 
 /**
  * GET /api/inbody/[id]
@@ -20,10 +17,7 @@ export const GET = withAuth(
     const id = url.pathname.split('/').pop();
 
     if (!id) {
-      return NextResponse.json(
-        { error: '기록 ID가 필요합니다.', code: 'BAD_REQUEST' },
-        { status: 400 }
-      );
+      return badRequest('기록 ID가 필요합니다');
     }
 
     const { data, error } = await supabase
@@ -34,17 +28,8 @@ export const GET = withAuth(
       .single();
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        return NextResponse.json(
-          { error: '기록을 찾을 수 없습니다.', code: 'NOT_FOUND' },
-          { status: 404 }
-        );
-      }
       console.error('[InBody GET/:id] Error:', error);
-      return NextResponse.json(
-        { error: '기록을 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 }
-      );
+      return handleSupabaseError(error);
     }
 
     const record = transformDbInBodyToInBody(data as DbInBodyRecord);
@@ -62,21 +47,12 @@ export const PATCH = withAuth(
     const id = url.pathname.split('/').pop();
 
     if (!id) {
-      return NextResponse.json(
-        { error: '기록 ID가 필요합니다.', code: 'BAD_REQUEST' },
-        { status: 400 }
-      );
+      return badRequest('기록 ID가 필요합니다');
     }
 
-    let body: InBodyUpdateData;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        { error: '잘못된 요청 형식입니다.', code: 'BAD_REQUEST' },
-        { status: 400 }
-      );
-    }
+    const result = await parseRequestBody<InBodyUpdateData>(request);
+    if (!result.success) return result.response;
+    const body = result.data;
 
     // camelCase → snake_case 변환
     const updateData: Record<string, unknown> = {};
@@ -102,10 +78,7 @@ export const PATCH = withAuth(
     if (body.leftLegFat !== undefined) updateData.left_leg_fat = body.leftLegFat;
 
     if (Object.keys(updateData).length === 0) {
-      return NextResponse.json(
-        { error: '수정할 데이터가 없습니다.', code: 'BAD_REQUEST' },
-        { status: 400 }
-      );
+      return badRequest('수정할 데이터가 없습니다');
     }
 
     const { data, error } = await supabase
@@ -117,24 +90,8 @@ export const PATCH = withAuth(
       .single();
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        return NextResponse.json(
-          { error: '기록을 찾을 수 없습니다.', code: 'NOT_FOUND' },
-          { status: 404 }
-        );
-      }
-      // 중복 날짜 체크
-      if (error.code === '23505') {
-        return NextResponse.json(
-          { error: '해당 날짜에 이미 기록이 존재합니다.', code: 'ALREADY_EXISTS' },
-          { status: 409 }
-        );
-      }
       console.error('[InBody PATCH/:id] Error:', error);
-      return NextResponse.json(
-        { error: '기록 수정에 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 }
-      );
+      return handleSupabaseError(error);
     }
 
     const record = transformDbInBodyToInBody(data as DbInBodyRecord);
@@ -152,10 +109,7 @@ export const DELETE = withAuth(
     const id = url.pathname.split('/').pop();
 
     if (!id) {
-      return NextResponse.json(
-        { error: '기록 ID가 필요합니다.', code: 'BAD_REQUEST' },
-        { status: 400 }
-      );
+      return badRequest('기록 ID가 필요합니다');
     }
 
     const { error } = await supabase
@@ -166,10 +120,7 @@ export const DELETE = withAuth(
 
     if (error) {
       console.error('[InBody DELETE/:id] Error:', error);
-      return NextResponse.json(
-        { error: '기록 삭제에 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 }
-      );
+      return handleSupabaseError(error);
     }
 
     return NextResponse.json({ success: true });

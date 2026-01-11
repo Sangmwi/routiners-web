@@ -4,10 +4,9 @@ import { transformDbUserToUser, DbUser } from '@/lib/types/user';
 import { ProfileUpdateSchema } from '@/lib/schemas/user.schema';
 import {
   conflict,
-  validationError,
+  validateRequest,
   handleSupabaseError,
 } from '@/lib/utils/apiResponse';
-import { ZodError } from 'zod';
 
 /**
  * PATCH /api/user/profile
@@ -16,17 +15,9 @@ import { ZodError } from 'zod';
  * Body: ProfileUpdateSchema (see lib/schemas/user.schema.ts)
  */
 export const PATCH = withAuth(async (request, { authUser, supabase }) => {
-  // Parse and validate request body
-  let body;
-  try {
-    const rawBody = await request.json();
-    body = ProfileUpdateSchema.parse(rawBody);
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return validationError(error);
-    }
-    throw error;
-  }
+  const result = await validateRequest(request, ProfileUpdateSchema);
+  if (!result.success) return result.response;
+  const body = result.data;
 
   // If nickname is being updated, check availability
   if (body.nickname) {

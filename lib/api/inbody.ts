@@ -13,9 +13,10 @@ import {
   InBodyUpdateData,
   InBodyExtractedData,
   InBodySummary,
-  ApiError,
 } from '@/lib/types';
-import { authFetch } from '@/lib/utils/authFetch';
+import { api } from './client';
+
+const BASE_URL = '/api/inbody';
 
 // ============================================================================
 // InBody Records API
@@ -30,19 +31,7 @@ export const inbodyApi = {
    * @returns InBody 기록 목록 (최신순)
    */
   async getRecords(limit = 20, offset = 0): Promise<InBodyRecord[]> {
-    const response = await authFetch(
-      `/api/inbody?limit=${limit}&offset=${offset}`,
-      {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.getOrThrow<InBodyRecord[]>(`${BASE_URL}?limit=${limit}&offset=${offset}`);
   },
 
   /**
@@ -51,17 +40,7 @@ export const inbodyApi = {
    * @returns 가장 최근 InBody 기록 또는 null
    */
   async getLatest(): Promise<InBodyRecord | null> {
-    const response = await authFetch('/api/inbody/latest', {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (response.status === 404) return null;
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.get<InBodyRecord>(`${BASE_URL}/latest`);
   },
 
   /**
@@ -70,16 +49,7 @@ export const inbodyApi = {
    * @returns 요약 정보 (최신 기록 + 변화량)
    */
   async getSummary(): Promise<InBodySummary> {
-    const response = await authFetch('/api/inbody/summary', {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.getOrThrow<InBodySummary>(`${BASE_URL}/summary`);
   },
 
   /**
@@ -89,16 +59,7 @@ export const inbodyApi = {
    * @returns 요약 정보 (공개 설정 시에만 데이터 포함)
    */
   async getUserSummary(userId: string): Promise<InBodySummary> {
-    const response = await authFetch(`/api/inbody/user/${userId}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.getOrThrow<InBodySummary>(`${BASE_URL}/user/${userId}`);
   },
 
   /**
@@ -108,17 +69,7 @@ export const inbodyApi = {
    * @returns InBody 기록 또는 null
    */
   async getRecord(id: string): Promise<InBodyRecord | null> {
-    const response = await authFetch(`/api/inbody/${id}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (response.status === 404) return null;
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.get<InBodyRecord>(`${BASE_URL}/${id}`);
   },
 
   /**
@@ -128,17 +79,7 @@ export const inbodyApi = {
    * @returns 생성된 InBody 기록
    */
   async createRecord(data: InBodyCreateData): Promise<InBodyRecord> {
-    const response = await authFetch('/api/inbody', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.post<InBodyRecord>(BASE_URL, data);
   },
 
   /**
@@ -149,17 +90,7 @@ export const inbodyApi = {
    * @returns 수정된 InBody 기록
    */
   async updateRecord(id: string, data: InBodyUpdateData): Promise<InBodyRecord> {
-    const response = await authFetch(`/api/inbody/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.patch<InBodyRecord>(`${BASE_URL}/${id}`, data);
   },
 
   /**
@@ -169,16 +100,7 @@ export const inbodyApi = {
    * @returns 성공 여부
    */
   async deleteRecord(id: string): Promise<{ success: boolean }> {
-    const response = await authFetch(`/api/inbody/${id}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.delete<{ success: boolean }>(`${BASE_URL}/${id}`) as Promise<{ success: boolean }>;
   },
 };
 
@@ -198,17 +120,7 @@ export const inbodyScanApi = {
     const formData = new FormData();
     formData.append('image', imageFile);
 
-    const response = await authFetch('/api/inbody/scan', {
-      method: 'POST',
-      body: formData,
-      // Content-Type은 FormData에서 자동 설정됨 (boundary 포함)
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    const result = await response.json();
+    const result = await api.post<{ data: InBodyExtractedData }>(`${BASE_URL}/scan`, formData);
     return result.data;
   },
 };

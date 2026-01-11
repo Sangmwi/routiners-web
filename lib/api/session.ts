@@ -16,6 +16,7 @@ import {
   SessionStatus,
   SessionSummary,
 } from '@/lib/types/routine';
+import { api } from './client';
 
 // ============================================================================
 // Query Parameters Types
@@ -49,16 +50,7 @@ export const sessionApi = {
     const query = searchParams.toString();
     const url = `/api/ai/sessions${query ? `?${query}` : ''}`;
 
-    const response = await authFetch(url, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.getOrThrow<SessionSummary[]>(url);
   },
 
   /**
@@ -68,17 +60,7 @@ export const sessionApi = {
    * @returns 활성 세션 또는 null
    */
   async getActiveSession(purpose: SessionPurpose): Promise<AISession | null> {
-    const response = await authFetch(`/api/ai/sessions/active?purpose=${purpose}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (response.status === 404) return null;
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.get<AISession>(`/api/ai/sessions/active?purpose=${purpose}`);
   },
 
   /**
@@ -88,17 +70,7 @@ export const sessionApi = {
    * @returns 세션 상세 정보 또는 null
    */
   async getSession(id: string): Promise<AISession | null> {
-    const response = await authFetch(`/api/ai/sessions/${id}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (response.status === 404) return null;
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.get<AISession>(`/api/ai/sessions/${id}`);
   },
 
   /**
@@ -108,17 +80,7 @@ export const sessionApi = {
    * @returns 생성된 세션
    */
   async createSession(data: AISessionCreateData): Promise<AISession> {
-    const response = await authFetch('/api/ai/sessions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.post<AISession>('/api/ai/sessions', data);
   },
 
   /**
@@ -128,16 +90,7 @@ export const sessionApi = {
    * @returns 업데이트된 세션
    */
   async completeSession(id: string): Promise<AISession> {
-    const response = await authFetch(`/api/ai/sessions/${id}/complete`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.post<AISession>(`/api/ai/sessions/${id}/complete`);
   },
 
   /**
@@ -147,16 +100,7 @@ export const sessionApi = {
    * @returns 업데이트된 세션
    */
   async abandonSession(id: string): Promise<AISession> {
-    const response = await authFetch(`/api/ai/sessions/${id}/abandon`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.post<AISession>(`/api/ai/sessions/${id}/abandon`);
   },
 
   /**
@@ -166,16 +110,7 @@ export const sessionApi = {
    * @returns 성공 여부
    */
   async deleteSession(id: string): Promise<{ success: boolean }> {
-    const response = await authFetch(`/api/ai/sessions/${id}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.delete<{ success: boolean }>(`/api/ai/sessions/${id}`) as Promise<{ success: boolean }>;
   },
 };
 
@@ -205,6 +140,7 @@ export const chatApi = {
   ): AbortController {
     const controller = new AbortController();
 
+    // SSE 스트리밍은 특수 처리 필요 - authFetch 직접 사용
     (async () => {
       try {
         const response = await authFetch('/api/ai/chat', {
@@ -279,20 +215,12 @@ export const chatApi = {
    * @returns AI 응답 메시지
    */
   async sendMessageSync(sessionId: string, message: string): Promise<string> {
-    const response = await authFetch('/api/ai/chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-No-Stream': 'true',
-      },
-      body: JSON.stringify({ sessionId, message }),
+    const data = await api.post<{ content: string }>('/api/ai/chat', {
+      sessionId,
+      message,
+    }, {
+      headers: { 'X-No-Stream': 'true' },
     });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    const data = await response.json();
     return data.content;
   },
 };

@@ -4,13 +4,11 @@
  * Supabase와 통신하는 순수 API 함수들
  * React Query에 의존하지 않음 - 재사용성과 테스트 용이성 향상
  *
- * 모든 API 호출은 authFetch를 사용하여 401 에러 시 자동 세션 갱신
- *
  * @throws {ApiError} 모든 API 에러는 ApiError로 통일
  */
 
-import { User, ProfileUpdateData, ApiError } from '@/lib/types';
-import { authFetch } from '@/lib/utils/authFetch';
+import { User, ProfileUpdateData } from '@/lib/types';
+import { api } from './client';
 
 /**
  * Profile 조회/수정 관련 API
@@ -23,17 +21,7 @@ export const profileApi = {
    * @throws {ApiError} 네트워크 오류 또는 서버 오류 발생 시
    */
   async getCurrentUserProfile(): Promise<User | null> {
-    const response = await authFetch('/api/user/me', {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (response.status === 404) return null;
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.get<User>('/api/user/me');
   },
 
   /**
@@ -46,17 +34,7 @@ export const profileApi = {
    * @throws {ApiError} 네트워크 오류 또는 서버 오류 발생 시
    */
   async getUserProfile(userId: string): Promise<User | null> {
-    const response = await authFetch(`/api/user/${userId}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (response.status === 404) return null;
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.get<User>(`/api/user/${userId}`);
   },
 
   /**
@@ -69,19 +47,8 @@ export const profileApi = {
    * @throws {ApiError} 업데이트 실패 시
    */
   async updateProfile(data: ProfileUpdateData): Promise<User> {
-    const response = await authFetch('/api/user/profile', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.patch<User>('/api/user/profile', data);
   },
-
 };
 
 /**
@@ -134,9 +101,7 @@ export const profileSearchApi = {
    * @returns 검색 결과
    * @throws {ApiError} 검색 실패 시
    */
-  async searchProfiles(
-    filters: ProfileSearchFilters
-  ): Promise<ProfileSearchResult> {
+  async searchProfiles(filters: ProfileSearchFilters): Promise<ProfileSearchResult> {
     const queryParams = new URLSearchParams();
 
     if (filters.ranks?.length) {
@@ -175,16 +140,7 @@ export const profileSearchApi = {
       queryParams.append('sortBy', filters.sortBy);
     }
 
-    const response = await authFetch(`/api/user/search?${queryParams}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.getOrThrow<ProfileSearchResult>(`/api/user/search?${queryParams}`);
   },
 
   /**
@@ -204,19 +160,7 @@ export const profileSearchApi = {
    * @throws {ApiError} 조회 실패 시
    */
   async getRecommendedProfiles(limit: number = 20): Promise<User[]> {
-    const response = await authFetch(
-      `/api/user/recommendations?limit=${limit}`,
-      {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.getOrThrow<User[]>(`/api/user/recommendations?limit=${limit}`);
   },
 
   /**
@@ -230,18 +174,6 @@ export const profileSearchApi = {
    * @throws {ApiError} 조회 실패 시
    */
   async getSameUnitUsers(unitId: string, limit: number = 20): Promise<User[]> {
-    const response = await authFetch(
-      `/api/user/same-unit?unitId=${unitId}&limit=${limit}`,
-      {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
-
-    if (!response.ok) {
-      throw await ApiError.fromResponse(response);
-    }
-
-    return response.json();
+    return api.getOrThrow<User[]>(`/api/user/same-unit?unitId=${unitId}&limit=${limit}`);
   },
 };

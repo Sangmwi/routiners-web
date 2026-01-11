@@ -6,6 +6,7 @@ import {
   InBodyCreateData,
   DbInBodyRecord,
 } from '@/lib/types/inbody';
+import { parseRequestBody, handleSupabaseError, badRequest } from '@/lib/utils/apiResponse';
 
 /**
  * GET /api/inbody
@@ -25,10 +26,7 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
 
   if (error) {
     console.error('[InBody GET] Error:', error);
-    return NextResponse.json(
-      { error: '기록을 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
-      { status: 500 }
-    );
+    return handleSupabaseError(error);
   }
 
   const records = (data as DbInBodyRecord[]).map(transformDbInBodyToInBody);
@@ -40,22 +38,13 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
  * 새 InBody 기록 생성
  */
 export const POST = withAuth(async (request: NextRequest, { userId, supabase }) => {
-  let body: InBodyCreateData;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { error: '잘못된 요청 형식입니다.', code: 'BAD_REQUEST' },
-      { status: 400 }
-    );
-  }
+  const result = await parseRequestBody<InBodyCreateData>(request);
+  if (!result.success) return result.response;
+  const body = result.data;
 
   // 필수 필드 검증
   if (!body.measuredAt || !body.weight || !body.skeletalMuscleMass || body.bodyFatPercentage === undefined) {
-    return NextResponse.json(
-      { error: '필수 항목(측정일, 체중, 골격근량, 체지방률)을 입력해주세요.', code: 'MISSING_FIELD' },
-      { status: 400 }
-    );
+    return badRequest('필수 항목(측정일, 체중, 골격근량, 체지방률)을 입력해주세요');
   }
 
   // DB 형식으로 변환
@@ -69,19 +58,7 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
 
   if (error) {
     console.error('[InBody POST] Error:', error);
-
-    // 중복 날짜 체크
-    if (error.code === '23505') {
-      return NextResponse.json(
-        { error: '해당 날짜에 이미 기록이 존재합니다.', code: 'ALREADY_EXISTS' },
-        { status: 409 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: '기록 저장에 실패했습니다.', code: 'DATABASE_ERROR' },
-      { status: 500 }
-    );
+    return handleSupabaseError(error);
   }
 
   const record = transformDbInBodyToInBody(data as DbInBodyRecord);

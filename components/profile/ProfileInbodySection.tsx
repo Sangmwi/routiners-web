@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Activity, Scale, Percent, TrendingUp, TrendingDown, Lock } from 'lucide-react';
+import { Scale, Lock } from 'lucide-react';
 import { useInBodySummary, useUserInBodySummary } from '@/hooks/inbody';
-import { InBodyDetailModal } from '@/components/inbody';
+import { InBodyDetailModal, MetricsGrid } from '@/components/inbody';
 import { InBodyRecord } from '@/lib/types';
 import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/common/EmptyState';
@@ -48,24 +48,6 @@ export default function ProfileInbodySection({
   const changes = summary?.changes;
   const totalRecords = summary?.totalRecords ?? 0;
 
-  // 변화량 표시 헬퍼
-  const renderChange = (value: number | undefined, unit: string, inverse = false) => {
-    if (value === undefined || value === 0) return null;
-
-    const isPositive = inverse ? value < 0 : value > 0;
-    const Icon = isPositive ? TrendingUp : TrendingDown;
-    const colorClass = isPositive ? 'text-green-500' : 'text-red-500';
-    const displayValue = Math.abs(value);
-
-    return (
-      <span className={`inline-flex items-center gap-0.5 text-xs ${colorClass}`}>
-        <Icon className="w-3 h-3" />
-        {displayValue}{unit}
-      </span>
-    );
-  };
-
-
   // 비공개 상태 렌더링
   const renderPrivateState = () => {
     const displayName = userName || '사용자';
@@ -100,61 +82,7 @@ export default function ProfileInbodySection({
   // 데이터 표시 렌더링
   const renderDataState = () => (
     <>
-      <div className="grid grid-cols-3 gap-4">
-        {/* Weight */}
-        <div className="flex flex-col items-center gap-2">
-          <Scale className="w-5 h-5 text-muted-foreground" />
-          <div className="text-center">
-            <p className="text-xs text-muted-foreground mb-1">체중</p>
-            <p
-              className={`text-sm font-semibold ${
-                !latest?.weight ? 'text-muted-foreground' : 'text-card-foreground'
-              }`}
-            >
-              {latest?.weight ? `${latest.weight}kg` : '-'}
-            </p>
-            {renderChange(changes?.weight, 'kg', true)}
-          </div>
-        </div>
-
-        {/* Muscle Mass */}
-        <div className="flex flex-col items-center gap-2">
-          <Activity className="w-5 h-5 text-muted-foreground" />
-          <div className="text-center">
-            <p className="text-xs text-muted-foreground mb-1">골격근량</p>
-            <p
-              className={`text-sm font-semibold ${
-                !latest?.skeletalMuscleMass
-                  ? 'text-muted-foreground'
-                  : 'text-card-foreground'
-              }`}
-            >
-              {latest?.skeletalMuscleMass
-                ? `${latest.skeletalMuscleMass}kg`
-                : '-'}
-            </p>
-            {renderChange(changes?.skeletalMuscleMass, 'kg')}
-          </div>
-        </div>
-
-        {/* Body Fat Percentage */}
-        <div className="flex flex-col items-center gap-2">
-          <Percent className="w-5 h-5 text-muted-foreground" />
-          <div className="text-center">
-            <p className="text-xs text-muted-foreground mb-1">체지방률</p>
-            <p
-              className={`text-sm font-semibold ${
-                !latest?.bodyFatPercentage
-                  ? 'text-muted-foreground'
-                  : 'text-card-foreground'
-              }`}
-            >
-              {latest?.bodyFatPercentage ? `${latest.bodyFatPercentage}%` : '-'}
-            </p>
-            {renderChange(changes?.bodyFatPercentage, '%', true)}
-          </div>
-        </div>
-      </div>
+      <MetricsGrid data={latest} changes={changes} />
 
       {/* 변화 기간 표시 */}
       {changes?.periodDays && (
