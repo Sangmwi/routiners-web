@@ -128,6 +128,7 @@ export default function InBodyScanModal({
       size="lg"
       closeOnBackdrop={state === 'idle' || state === 'error'}
       position={modalPosition}
+      enableSwipe={state === 'idle'}
     >
       <ModalBody className="min-h-[300px]">
         {/* 초기 상태: 이미지 선택 */}

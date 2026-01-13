@@ -1,7 +1,7 @@
 'use client';
 
 import { Info } from 'lucide-react';
-import ModalBase from './ModalBase';
+import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import type { ModalDataMap } from '@/lib/stores/modalStore';
 
@@ -37,34 +37,36 @@ export default function AlertModal({
   };
 
   return (
-    <ModalBase
+    <Modal
       isOpen={isOpen}
       onClose={handleClose}
       showCloseButton={false}
       size="sm"
     >
-      <div className="text-center">
-        {/* 아이콘 */}
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-          <Info className="h-6 w-6 text-primary" />
+      <ModalBody>
+        <div className="text-center">
+          {/* 아이콘 */}
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+            <Info className="h-6 w-6 text-primary" />
+          </div>
+
+          {/* 제목 */}
+          <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+
+          {/* 메시지 */}
+          <p className="mt-2 text-sm text-muted-foreground">{message}</p>
+
+          {/* 버튼 */}
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={handleClose}
+            className="mt-6 w-full"
+          >
+            {buttonText}
+          </Button>
         </div>
-
-        {/* 제목 */}
-        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
-
-        {/* 메시지 */}
-        <p className="mt-2 text-sm text-muted-foreground">{message}</p>
-
-        {/* 버튼 */}
-        <Button
-          variant="primary"
-          size="lg"
-          onClick={handleClose}
-          className="mt-6 w-full"
-        >
-          {buttonText}
-        </Button>
-      </div>
-    </ModalBase>
+      </ModalBody>
+    </Modal>
   );
 }

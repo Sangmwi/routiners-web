@@ -34,6 +34,7 @@ export default function AISelectionModal({
       isOpen={isOpen}
       onClose={onClose}
       position="bottom"
+      enableSwipe
       showCloseButton={false}
       size="lg"
     >

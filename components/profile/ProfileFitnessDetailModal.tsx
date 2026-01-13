@@ -69,6 +69,7 @@ export default function ProfileFitnessDetailModal({
       title="운동 프로필 상세"
       size="lg"
       position="bottom"
+      enableSwipe
     >
       <ModalBody className="space-y-1">
         {/* 기본 정보 */}

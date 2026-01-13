@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Building2, Search, Check } from 'lucide-react';
 import Button from '@/components/ui/Button';
-import { BottomSheet } from '@/components/ui/BottomSheet';
+import Modal, { ModalBody } from '@/components/ui/Modal';
 import { UNITS } from '@/lib/constants/units';
 
 interface UnitStepProps {
@@ -126,67 +126,72 @@ export function UnitStep({
         </Button>
       </div>
 
-      {/* Bottom Sheet */}
-      <BottomSheet
+      {/* Bottom Sheet Modal */}
+      <Modal
         isOpen={isSheetOpen}
         onClose={() => {
           setIsSheetOpen(false);
           setSearchQuery('');
         }}
         title="소속 부대 검색"
+        position="bottom"
+        enableSwipe
         height="full"
+        size="lg"
       >
-        {/* Search input */}
-        <div className="sticky top-0 bg-card pb-4 -mx-6 px-6 -mt-4 pt-4 border-b border-border">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="부대명 또는 지역으로 검색"
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              autoFocus
-            />
-          </div>
-        </div>
-
-        {/* Unit list */}
-        <div className="space-y-2 pt-4">
-          {filteredUnits.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              검색 결과가 없습니다
+        <ModalBody className="p-0">
+          {/* Search input */}
+          <div className="sticky top-0 bg-card px-4 pb-4 pt-2 border-b border-border">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="부대명 또는 지역으로 검색"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                autoFocus
+              />
             </div>
-          ) : (
-            filteredUnits.slice(0, 50).map((unit) => (
-              <button
-                key={unit.id}
-                type="button"
-                onClick={() => handleSelect(unit.id, unit.name)}
-                className={`
-                  w-full px-4 py-3 rounded-xl text-left transition-all
-                  ${
-                    unit.id === unitId
-                      ? 'bg-primary/10 border-2 border-primary'
-                      : 'bg-muted/30 border-2 border-transparent hover:bg-muted/50'
-                  }
-                `}
-              >
-                <p className="font-medium text-foreground">{unit.name}</p>
-                {unit.region && (
-                  <p className="text-sm text-muted-foreground">{unit.region}</p>
-                )}
-              </button>
-            ))
-          )}
+          </div>
 
-          {filteredUnits.length > 50 && (
-            <p className="text-center text-xs text-muted-foreground py-2">
-              검색어를 더 입력해 주세요 ({filteredUnits.length - 50}개 더 있음)
-            </p>
-          )}
-        </div>
-      </BottomSheet>
+          {/* Unit list */}
+          <div className="space-y-2 p-4">
+            {filteredUnits.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                검색 결과가 없습니다
+              </div>
+            ) : (
+              filteredUnits.slice(0, 50).map((unit) => (
+                <button
+                  key={unit.id}
+                  type="button"
+                  onClick={() => handleSelect(unit.id, unit.name)}
+                  className={`
+                    w-full px-4 py-3 rounded-xl text-left transition-all
+                    ${
+                      unit.id === unitId
+                        ? 'bg-primary/10 border-2 border-primary'
+                        : 'bg-muted/30 border-2 border-transparent hover:bg-muted/50'
+                    }
+                  `}
+                >
+                  <p className="font-medium text-foreground">{unit.name}</p>
+                  {unit.region && (
+                    <p className="text-sm text-muted-foreground">{unit.region}</p>
+                  )}
+                </button>
+              ))
+            )}
+
+            {filteredUnits.length > 50 && (
+              <p className="text-center text-xs text-muted-foreground py-2">
+                검색어를 더 입력해 주세요 ({filteredUnits.length - 50}개 더 있음)
+              </p>
+            )}
+          </div>
+        </ModalBody>
+      </Modal>
     </div>
   );
 }

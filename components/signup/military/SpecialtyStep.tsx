@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Briefcase, Search, Check } from 'lucide-react';
 import Button from '@/components/ui/Button';
-import { BottomSheet } from '@/components/ui/BottomSheet';
+import Modal, { ModalBody } from '@/components/ui/Modal';
 import type { Specialty } from '@/lib/types/user';
 
 interface SpecialtyStepProps {
@@ -142,61 +142,66 @@ export function SpecialtyStep({
         </Button>
       </div>
 
-      {/* Bottom Sheet */}
-      <BottomSheet
+      {/* Bottom Sheet Modal */}
+      <Modal
         isOpen={isSheetOpen}
         onClose={() => {
           setIsSheetOpen(false);
           setSearchQuery('');
         }}
         title="병과 선택"
+        position="bottom"
+        enableSwipe
         height="half"
+        size="lg"
       >
-        {/* Search input */}
-        <div className="sticky top-0 bg-card pb-4 -mx-6 px-6 -mt-4 pt-4 border-b border-border">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="병과명으로 검색"
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              autoFocus
-            />
-          </div>
-        </div>
-
-        {/* Specialty list */}
-        <div className="space-y-2 pt-4">
-          {filteredSpecialties.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              검색 결과가 없습니다
+        <ModalBody className="p-0">
+          {/* Search input */}
+          <div className="sticky top-0 bg-card px-4 pb-4 pt-2 border-b border-border">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="병과명으로 검색"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                autoFocus
+              />
             </div>
-          ) : (
-            filteredSpecialties.map((item) => (
-              <button
-                key={item.value}
-                type="button"
-                onClick={() => handleSelect(item.value)}
-                className={`
-                  w-full px-4 py-3 rounded-xl text-left transition-all
-                  ${
-                    item.value === specialty
-                      ? 'bg-primary/10 border-2 border-primary'
-                      : 'bg-muted/30 border-2 border-transparent hover:bg-muted/50'
-                  }
-                `}
-              >
-                <p className="font-medium text-foreground">{item.label}</p>
-                <p className="text-sm text-muted-foreground">
-                  {item.description}
-                </p>
-              </button>
-            ))
-          )}
-        </div>
-      </BottomSheet>
+          </div>
+
+          {/* Specialty list */}
+          <div className="space-y-2 p-4">
+            {filteredSpecialties.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                검색 결과가 없습니다
+              </div>
+            ) : (
+              filteredSpecialties.map((item) => (
+                <button
+                  key={item.value}
+                  type="button"
+                  onClick={() => handleSelect(item.value)}
+                  className={`
+                    w-full px-4 py-3 rounded-xl text-left transition-all
+                    ${
+                      item.value === specialty
+                        ? 'bg-primary/10 border-2 border-primary'
+                        : 'bg-muted/30 border-2 border-transparent hover:bg-muted/50'
+                    }
+                  `}
+                >
+                  <p className="font-medium text-foreground">{item.label}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {item.description}
+                  </p>
+                </button>
+              ))
+            )}
+          </div>
+        </ModalBody>
+      </Modal>
     </div>
   );
 }

@@ -5,7 +5,6 @@
  */
 
 export { default as ModalProvider } from './ModalProvider';
-export { default as ModalBase } from './ModalBase';
 export { default as ConfirmModal } from './ConfirmModal';
 export { default as AlertModal } from './AlertModal';
 export { default as ImagePreviewModal } from './ImagePreviewModal';

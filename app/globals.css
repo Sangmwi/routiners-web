@@ -228,6 +228,129 @@ body {
   }
 }
 
+/* ============================================================================
+   Modal/Drawer Animations (tailwindcss-animate 대체)
+   ============================================================================ */
+
+/* animate-in 기본 클래스 */
+.animate-in {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: both;
+}
+
+/* fade-in: 페이드 인 */
+.fade-in {
+  animation-name: fadeInAnimation;
+}
+
+@keyframes fadeInAnimation {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* slide-in-from-bottom: 아래에서 위로 슬라이드 */
+.slide-in-from-bottom {
+  animation-name: slideInFromBottom;
+}
+
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* zoom-in-95: 살짝 확대되면서 나타남 */
+.zoom-in-95 {
+  animation-name: zoomIn95;
+}
+
+@keyframes zoomIn95 {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ============================================================================
+   닫기 애니메이션 (animate-out)
+   ============================================================================ */
+
+/* animate-out 기본 클래스 */
+.animate-out {
+  animation-duration: 200ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: both;
+}
+
+/* fade-out: 페이드 아웃 */
+.fade-out {
+  animation-name: fadeOutAnimation;
+}
+
+@keyframes fadeOutAnimation {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* slide-out-to-bottom: 아래로 슬라이드 아웃 */
+.slide-out-to-bottom {
+  animation-name: slideOutToBottom;
+}
+
+@keyframes slideOutToBottom {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+/* zoom-out-95: 살짝 축소되면서 사라짐 */
+.zoom-out-95 {
+  animation-name: zoomOut95;
+}
+
+@keyframes zoomOut95 {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+/* duration 오버라이드 */
+.duration-200 {
+  animation-duration: 200ms;
+}
+
+.duration-300 {
+  animation-duration: 300ms;
+}
+
 /* Apply smooth transitions to main content */
 main {
   animation: fadeIn 0.2s ease-in-out;
