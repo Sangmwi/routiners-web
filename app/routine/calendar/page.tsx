@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import PageHeader from '@/components/common/PageHeader';
 import {
@@ -43,10 +43,10 @@ export default function RoutineCalendarPage() {
     useCalendarEvents(year, month);
 
   // 필터링된 캘린더 이벤트
-  const filteredEvents = useMemo(() => {
-    if (filterType === 'all') return calendarEvents;
-    return calendarEvents.filter((event) => event.type === filterType);
-  }, [calendarEvents, filterType]);
+  const filteredEvents =
+    filterType === 'all'
+      ? calendarEvents
+      : calendarEvents.filter((event) => event.type === filterType);
 
   // 선택된 날짜의 운동 이벤트
   const { data: workoutEvent, isLoading: isLoadingWorkout } =
@@ -57,12 +57,12 @@ export default function RoutineCalendarPage() {
     useRoutineEventByDate(selectedDate, 'meal');
 
   // 필터에 맞는 이벤트 선택
-  const selectedEvent = useMemo(() => {
-    if (filterType === 'workout') return workoutEvent ?? null;
-    if (filterType === 'meal') return mealEvent ?? null;
-    // 'all'일 때는 운동 우선, 없으면 식단
-    return workoutEvent ?? mealEvent ?? null;
-  }, [filterType, workoutEvent, mealEvent]);
+  const selectedEvent =
+    filterType === 'workout'
+      ? (workoutEvent ?? null)
+      : filterType === 'meal'
+        ? (mealEvent ?? null)
+        : (workoutEvent ?? mealEvent ?? null);
 
   const isLoadingEvent = isLoadingWorkout || isLoadingMeal;
 

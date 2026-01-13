@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
 import { CalendarEventSummary, EventType } from '@/lib/types/routine';
 
 interface CalendarGridProps {
@@ -35,58 +34,7 @@ export default function CalendarGrid({
   onSelectDate,
 }: CalendarGridProps) {
   // 캘린더 날짜 데이터 생성
-  const days = useMemo(() => {
-    const result: DayInfo[] = [];
-    const today = new Date();
-    const todayStr = formatDate(today);
-
-    // 이번 달 첫째날, 마지막날
-    const firstDay = new Date(year, month - 1, 1);
-    const lastDay = new Date(year, month, 0);
-
-    // 이전 달 날짜들 (일요일 시작)
-    const startDayOfWeek = firstDay.getDay();
-    for (let i = startDayOfWeek - 1; i >= 0; i--) {
-      const date = new Date(year, month - 1, -i);
-      result.push({
-        date: formatDate(date),
-        day: date.getDate(),
-        isCurrentMonth: false,
-        isToday: false,
-        events: [],
-      });
-    }
-
-    // 이번 달 날짜들
-    for (let d = 1; d <= lastDay.getDate(); d++) {
-      const date = new Date(year, month - 1, d);
-      const dateStr = formatDate(date);
-      const dayEvents = events.filter((e) => e.date === dateStr);
-
-      result.push({
-        date: dateStr,
-        day: d,
-        isCurrentMonth: true,
-        isToday: dateStr === todayStr,
-        events: dayEvents,
-      });
-    }
-
-    // 다음 달 날짜들 (6주 맞추기)
-    const remainingDays = 42 - result.length;
-    for (let d = 1; d <= remainingDays; d++) {
-      const date = new Date(year, month, d);
-      result.push({
-        date: formatDate(date),
-        day: d,
-        isCurrentMonth: false,
-        isToday: false,
-        events: [],
-      });
-    }
-
-    return result;
-  }, [year, month, events]);
+  const days = generateCalendarDays(year, month, events);
 
   return (
     <div>
@@ -187,6 +135,64 @@ function EventDot({
   };
 
   return <span className={`w-1.5 h-1.5 rounded-full ${typeColors[type]}`} />;
+}
+
+// 캘린더 날짜 데이터 생성
+function generateCalendarDays(
+  year: number,
+  month: number,
+  events: CalendarEventSummary[]
+): DayInfo[] {
+  const result: DayInfo[] = [];
+  const today = new Date();
+  const todayStr = formatDate(today);
+
+  // 이번 달 첫째날, 마지막날
+  const firstDay = new Date(year, month - 1, 1);
+  const lastDay = new Date(year, month, 0);
+
+  // 이전 달 날짜들 (일요일 시작)
+  const startDayOfWeek = firstDay.getDay();
+  for (let i = startDayOfWeek - 1; i >= 0; i--) {
+    const date = new Date(year, month - 1, -i);
+    result.push({
+      date: formatDate(date),
+      day: date.getDate(),
+      isCurrentMonth: false,
+      isToday: false,
+      events: [],
+    });
+  }
+
+  // 이번 달 날짜들
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const date = new Date(year, month - 1, d);
+    const dateStr = formatDate(date);
+    const dayEvents = events.filter((e) => e.date === dateStr);
+
+    result.push({
+      date: dateStr,
+      day: d,
+      isCurrentMonth: true,
+      isToday: dateStr === todayStr,
+      events: dayEvents,
+    });
+  }
+
+  // 다음 달 날짜들 (6주 맞추기)
+  const remainingDays = 42 - result.length;
+  for (let d = 1; d <= remainingDays; d++) {
+    const date = new Date(year, month, d);
+    result.push({
+      date: formatDate(date),
+      day: d,
+      isCurrentMonth: false,
+      isToday: false,
+      events: [],
+    });
+  }
+
+  return result;
 }
 
 // 날짜 포맷 (YYYY-MM-DD)

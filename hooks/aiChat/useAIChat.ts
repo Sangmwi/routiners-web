@@ -340,6 +340,9 @@ export function useAIChat(
       return { ...prev, messages: messagesWithUser, pendingInput: null };
     });
 
+    // React Query 캐시 즉시 동기화 (race condition 방지)
+    cacheSync.syncPendingInput(null);
+
     // isSendingRef를 사용하여 최신 값 확인 (closure 문제 방지)
     if (isSendingRef.current) {
       pendingUserMessageRef.current = messageText;
@@ -396,7 +399,9 @@ export function useAIChat(
         pendingRoutinePreview: null,
       }));
 
-      cacheSync.invalidateAll();
+      // 세션을 완료 상태로 마킹 (캐시 유지하면서 status만 업데이트)
+      // invalidateAll() 대신 사용하여 세션 데이터 유지 → 완료 UI 표시
+      cacheSync.markSessionCompleted();
     } catch (error) {
       console.error('[applyRoutine] Error:', error);
       setState((prev) => ({
@@ -450,7 +455,9 @@ export function useAIChat(
         pendingMealPreview: null,
       }));
 
-      cacheSync.invalidateAll();
+      // 세션을 완료 상태로 마킹 (캐시 유지하면서 status만 업데이트)
+      // invalidateAll() 대신 사용하여 세션 데이터 유지 → 완료 UI 표시
+      cacheSync.markSessionCompleted();
     } catch (error) {
       console.error('[applyMealPlan] Error:', error);
       setState((prev) => ({
@@ -504,6 +511,8 @@ export function useAIChat(
     // DB 메타데이터 즉시 클리어 (페이지 이탈 후 복귀 시 복원 방지)
     try {
       await conversationApi.clearProfileConfirmation(sessionId);
+      // React Query 캐시도 즉시 동기화 (race condition 방지)
+      cacheSync.syncProfileConfirmation(null);
     } catch (e) {
       console.error('[handleProfileResponse] Failed to clear metadata:', e);
     }

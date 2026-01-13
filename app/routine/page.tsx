@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
 import MainTabLayout from '@/components/common/MainTabLayout';
 import { RoutineSection, FloatingAIButton } from '@/components/routine';
 import { useUpcomingEvents } from '@/hooks/routine';
@@ -15,7 +14,7 @@ import { useActiveAISession } from '@/hooks/aiChat';
  * - 전체보기 → 캘린더 (타입 필터 프리셋)
  */
 export default function RoutinePage() {
-  const today = useMemo(() => new Date(), []);
+  const today = new Date();
 
   // 과거 7일 + 오늘 + 미래 14일 이벤트 조회
   const { data: workoutEvents = [], isLoading: isLoadingWorkout } =

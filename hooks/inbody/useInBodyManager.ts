@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState } from 'react';
 import { InBodyRecord, InBodyCreateData } from '@/lib/types/inbody';
 import { useInBodyRecords, useInBodySummary, useDeleteInBody, useCreateInBody } from './useInBody';
 import { useNativeImagePicker } from '@/hooks/webview';
@@ -118,7 +118,7 @@ export function useInBodyManager(
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // ========== Scan Actions (직접 픽커 호출) ==========
-  const startScan = useCallback(async () => {
+  const startScan = async () => {
     // 1. 이미지 픽커 호출
     const result = await pickImage('both');
 
@@ -160,21 +160,21 @@ export function useInBodyManager(
       setScanError(err instanceof Error ? err.message : '스캔 중 오류가 발생했습니다.');
       setScanState('error');
     }
-  }, [pickImage, base64ToFile]);
+  };
 
-  const resetScan = useCallback(() => {
+  const resetScan = () => {
     setScanState('idle');
     setScanError(null);
     setScanData(null);
     setScanImagePreview(null);
     setIsPreviewModalOpen(false);
-  }, []);
+  };
 
-  const updateScanData = useCallback((data: InBodyCreateData) => {
+  const updateScanData = (data: InBodyCreateData) => {
     setScanData(data);
-  }, []);
+  };
 
-  const saveScanData = useCallback(async () => {
+  const saveScanData = async () => {
     if (!scanData) return;
 
     setScanState('saving');
@@ -185,30 +185,30 @@ export function useInBodyManager(
       setScanError(err instanceof Error ? err.message : '저장에 실패했습니다.');
       setScanState('error');
     }
-  }, [scanData, createInBody, resetScan]);
+  };
 
-  const closePreviewModal = useCallback(() => {
+  const closePreviewModal = () => {
     resetScan();
-  }, [resetScan]);
+  };
 
   // ========== Detail Modal Actions ==========
-  const openDetailModal = useCallback((record: InBodyRecord) => {
+  const openDetailModal = (record: InBodyRecord) => {
     setSelectedRecord(record);
     setIsDetailModalOpen(true);
-  }, []);
+  };
 
-  const closeDetailModal = useCallback(() => {
+  const closeDetailModal = () => {
     setIsDetailModalOpen(false);
     setSelectedRecord(null);
-  }, []);
+  };
 
   // ========== Delete Actions ==========
-  const requestDelete = useCallback((record: InBodyRecord) => {
+  const requestDelete = (record: InBodyRecord) => {
     setRecordToDelete(record);
     setCurrentView('confirm-delete');
-  }, []);
+  };
 
-  const confirmDelete = useCallback(async () => {
+  const confirmDelete = async () => {
     if (!recordToDelete) return;
 
     try {
@@ -219,18 +219,15 @@ export function useInBodyManager(
       console.error('Failed to delete InBody record:', error);
       throw error;
     }
-  }, [recordToDelete, deleteInBody]);
+  };
 
-  const cancelDelete = useCallback(() => {
+  const cancelDelete = () => {
     setCurrentView('list');
     setRecordToDelete(null);
-  }, []);
+  };
 
   // ========== Computed State ==========
-  const isLoading = useMemo(
-    () => isRecordsLoading || isSummaryLoading,
-    [isRecordsLoading, isSummaryLoading]
-  );
+  const isLoading = isRecordsLoading || isSummaryLoading;
 
   // ========== Return ==========
   return {

@@ -113,7 +113,10 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
 
     if (completeError) {
       console.error('[Conversations POST] Complete existing error:', completeError);
-      // 에러가 나도 새 세션 생성은 계속 진행
+      return NextResponse.json(
+        { error: '기존 세션 종료에 실패했습니다. 다시 시도해주세요.', code: 'SESSION_CLEANUP_FAILED' },
+        { status: 500 }
+      );
     }
   }
 

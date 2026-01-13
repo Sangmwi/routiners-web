@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import EventCarouselCard from './EventCarouselCard';
 import type { RoutineEvent, EventType } from '@/lib/types/routine';
@@ -38,47 +38,7 @@ export default function RoutineEventCarousel({
   const scrollTargetRef = useRef<HTMLDivElement>(null);
 
   // 과거 + 오늘 + 미래 날짜 배열 생성
-  const dateRange = useMemo(() => {
-    const today = new Date();
-    const todayStr = formatDate(today);
-    const yesterdayStr = formatDate(addDays(today, -1));
-    const tomorrowStr = formatDate(addDays(today, 1));
-    const dates: DateSlot[] = [];
-
-    // 과거 날짜들 (pastDays일 전부터)
-    for (let i = pastDays; i > 0; i--) {
-      const date = new Date(today);
-      date.setDate(today.getDate() - i);
-      const dateStr = formatDate(date);
-
-      dates.push({
-        date: dateStr,
-        isToday: false,
-        isYesterday: dateStr === yesterdayStr,
-        isTomorrow: false,
-        isScrollTarget: dateStr === yesterdayStr,
-        event: events.find((e) => e.date === dateStr) ?? null,
-      });
-    }
-
-    // 오늘 + 미래 날짜들
-    for (let i = 0; i < futureDays; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      const dateStr = formatDate(date);
-
-      dates.push({
-        date: dateStr,
-        isToday: dateStr === todayStr,
-        isYesterday: false,
-        isTomorrow: dateStr === tomorrowStr,
-        isScrollTarget: false,
-        event: events.find((e) => e.date === dateStr) ?? null,
-      });
-    }
-
-    return dates;
-  }, [events, pastDays, futureDays]);
+  const dateRange = generateDateRange(events, pastDays, futureDays);
 
   // 어제 카드로 스크롤 → 오늘이 보이면서 왼쪽에 과거 힌트
   useEffect(() => {
@@ -158,6 +118,53 @@ interface DateSlot {
   isTomorrow: boolean;
   isScrollTarget: boolean;
   event: RoutineEvent | null;
+}
+
+// 과거 + 오늘 + 미래 날짜 배열 생성
+function generateDateRange(
+  events: RoutineEvent[],
+  pastDays: number,
+  futureDays: number
+): DateSlot[] {
+  const today = new Date();
+  const todayStr = formatDate(today);
+  const yesterdayStr = formatDate(addDays(today, -1));
+  const tomorrowStr = formatDate(addDays(today, 1));
+  const dates: DateSlot[] = [];
+
+  // 과거 날짜들 (pastDays일 전부터)
+  for (let i = pastDays; i > 0; i--) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - i);
+    const dateStr = formatDate(date);
+
+    dates.push({
+      date: dateStr,
+      isToday: false,
+      isYesterday: dateStr === yesterdayStr,
+      isTomorrow: false,
+      isScrollTarget: dateStr === yesterdayStr,
+      event: events.find((e) => e.date === dateStr) ?? null,
+    });
+  }
+
+  // 오늘 + 미래 날짜들
+  for (let i = 0; i < futureDays; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    const dateStr = formatDate(date);
+
+    dates.push({
+      date: dateStr,
+      isToday: dateStr === todayStr,
+      isYesterday: false,
+      isTomorrow: dateStr === tomorrowStr,
+      isScrollTarget: false,
+      event: events.find((e) => e.date === dateStr) ?? null,
+    });
+  }
+
+  return dates;
 }
 
 function formatDate(date: Date): string {

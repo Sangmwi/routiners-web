@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Camera, ImagePlus, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
@@ -32,16 +32,16 @@ export default function InBodyScanModal({
   const { pickImage, base64ToFile, isPickerOpen } = useNativeImagePicker();
 
   // 모달 닫기 시 상태 초기화
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     setState('idle');
     setError(null);
     setCreateData(null);
     setImagePreview(null);
     onClose();
-  }, [onClose]);
+  };
 
   // 이미지 스캔 처리 (File 객체로)
-  const handleScanImage = useCallback(async (file: File, previewUrl: string) => {
+  const handleScanImage = async (file: File, previewUrl: string) => {
     setImagePreview(previewUrl);
     setState('scanning');
     setError(null);
@@ -67,10 +67,10 @@ export default function InBodyScanModal({
       setError(err instanceof Error ? err.message : '스캔 중 오류가 발생했습니다.');
       setState('error');
     }
-  }, []);
+  };
 
   // 이미지 선택 버튼 클릭
-  const handlePickImage = useCallback(async () => {
+  const handlePickImage = async () => {
     const result = await pickImage('both');
 
     if (result.cancelled) {
@@ -87,10 +87,10 @@ export default function InBodyScanModal({
       const file = base64ToFile(result.base64, result.fileName || 'inbody.jpg');
       await handleScanImage(file, result.base64);
     }
-  }, [pickImage, base64ToFile, handleScanImage]);
+  };
 
   // 저장 처리
-  const handleSave = useCallback(async () => {
+  const handleSave = async () => {
     if (!createData) return;
 
     setState('saving');
@@ -102,20 +102,20 @@ export default function InBodyScanModal({
       setError(err instanceof Error ? err.message : '저장에 실패했습니다.');
       setState('error');
     }
-  }, [createData, createInBody, onSuccess, handleClose]);
+  };
 
   // 데이터 수정 처리
-  const handleDataChange = useCallback((newData: InBodyCreateData) => {
+  const handleDataChange = (newData: InBodyCreateData) => {
     setCreateData(newData);
-  }, []);
+  };
 
   // 다시 스캔
-  const handleRetry = useCallback(() => {
+  const handleRetry = () => {
     setState('idle');
     setError(null);
     setCreateData(null);
     setImagePreview(null);
-  }, []);
+  };
 
   // idle 상태는 하단 시트, 나머지는 중앙 모달
   const modalPosition = state === 'idle' ? 'bottom' : 'center';

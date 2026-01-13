@@ -97,7 +97,7 @@ export function useCreateAISession() {
       }),
 
     onSuccess: (newSession) => {
-      // 활성 세션 캐시 업데이트
+      // 활성 세션 캐시 업데이트 (AISessionCompat.purpose 사용)
       queryClient.setQueryData(
         queryKeys.aiSession.active(newSession.purpose),
         newSession
@@ -111,7 +111,6 @@ export function useCreateAISession() {
 
       // 목록 캐시만 무효화 (active 쿼리는 setQueryData로 이미 설정됨)
       // all을 무효화하면 active도 refetch되어 setQueryData를 덮어쓰므로 list만 무효화
-      // 모든 list 쿼리 무효화 (파라미터 상관없이)
       queryClient.invalidateQueries({
         queryKey: queryKeys.aiSession.lists(),
       });

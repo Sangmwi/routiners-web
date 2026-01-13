@@ -17,7 +17,7 @@
  * };
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { ImagePickerSource, ImagePickerResult, AppToWebMessage } from '@/lib/webview';
 import { useWebViewCore } from './useWebViewCore';
 import { registerCommandHandler } from './useWebViewCommands';
@@ -69,136 +69,124 @@ export const useNativeImagePicker = () => {
   /**
    * 네이티브 이미지 피커 호출
    */
-  const pickImageNative = useCallback(
-    (source: ImagePickerSource): Promise<ImagePickerResult> => {
-      return new Promise((resolve, reject) => {
-        const requestId = `img_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  const pickImageNative = (source: ImagePickerSource): Promise<ImagePickerResult> => {
+    return new Promise((resolve, reject) => {
+      const requestId = `img_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 
-        pendingRequestRef.current = { requestId, resolve, reject };
-        setIsPickerOpen(true);
+      pendingRequestRef.current = { requestId, resolve, reject };
+      setIsPickerOpen(true);
 
-        const sent = sendMessage({
-          type: 'REQUEST_IMAGE_PICKER',
-          requestId,
-          source,
-        });
+      const sent = sendMessage({
+        type: 'REQUEST_IMAGE_PICKER',
+        requestId,
+        source,
+      });
 
-        if (!sent) {
+      if (!sent) {
+        setIsPickerOpen(false);
+        pendingRequestRef.current = null;
+        reject(new Error('Failed to send message to native app'));
+      }
+
+      // 타임아웃 (60초)
+      setTimeout(() => {
+        if (pendingRequestRef.current?.requestId === requestId) {
           setIsPickerOpen(false);
           pendingRequestRef.current = null;
-          reject(new Error('Failed to send message to native app'));
+          resolve({ success: false, cancelled: true });
         }
-
-        // 타임아웃 (60초)
-        setTimeout(() => {
-          if (pendingRequestRef.current?.requestId === requestId) {
-            setIsPickerOpen(false);
-            pendingRequestRef.current = null;
-            resolve({ success: false, cancelled: true });
-          }
-        }, 60000);
-      });
-    },
-    [sendMessage]
-  );
+      }, 60000);
+    });
+  };
 
   /**
    * 브라우저 환경에서 file input 사용
    */
-  const pickImageWeb = useCallback(
-    (source: ImagePickerSource): Promise<ImagePickerResult> => {
-      return new Promise((resolve) => {
-        // 기존 input 제거
-        if (fileInputRef.current) {
-          document.body.removeChild(fileInputRef.current);
-        }
+  const pickImageWeb = (source: ImagePickerSource): Promise<ImagePickerResult> => {
+    return new Promise((resolve) => {
+      // 기존 input 제거
+      if (fileInputRef.current) {
+        document.body.removeChild(fileInputRef.current);
+      }
 
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.style.display = 'none';
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.style.display = 'none';
 
-        // 카메라 전용인 경우 capture 속성 추가
-        if (source === 'camera') {
-          input.capture = 'environment';
-        }
+      // 카메라 전용인 경우 capture 속성 추가
+      if (source === 'camera') {
+        input.capture = 'environment';
+      }
 
-        input.onchange = async (e) => {
-          const file = (e.target as HTMLInputElement).files?.[0];
-          if (!file) {
-            resolve({ success: false, cancelled: true });
-            return;
-          }
-
-          try {
-            // File을 base64로 변환
-            const base64 = await fileToBase64(file);
-            const dimensions = await getImageDimensions(base64);
-
-            resolve({
-              success: true,
-              base64,
-              mimeType: file.type,
-              fileName: file.name,
-              fileSize: file.size,
-              width: dimensions.width,
-              height: dimensions.height,
-            });
-          } catch (error) {
-            resolve({
-              success: false,
-              error: error instanceof Error ? error.message : 'Failed to process image',
-            });
-          } finally {
-            document.body.removeChild(input);
-            fileInputRef.current = null;
-          }
-        };
-
-        input.oncancel = () => {
+      input.onchange = async (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (!file) {
           resolve({ success: false, cancelled: true });
+          return;
+        }
+
+        try {
+          // File을 base64로 변환
+          const base64 = await fileToBase64(file);
+          const dimensions = await getImageDimensions(base64);
+
+          resolve({
+            success: true,
+            base64,
+            mimeType: file.type,
+            fileName: file.name,
+            fileSize: file.size,
+            width: dimensions.width,
+            height: dimensions.height,
+          });
+        } catch (error) {
+          resolve({
+            success: false,
+            error: error instanceof Error ? error.message : 'Failed to process image',
+          });
+        } finally {
           document.body.removeChild(input);
           fileInputRef.current = null;
-        };
+        }
+      };
 
-        document.body.appendChild(input);
-        fileInputRef.current = input;
-        input.click();
-      });
-    },
-    []
-  );
+      input.oncancel = () => {
+        resolve({ success: false, cancelled: true });
+        document.body.removeChild(input);
+        fileInputRef.current = null;
+      };
+
+      document.body.appendChild(input);
+      fileInputRef.current = input;
+      input.click();
+    });
+  };
 
   /**
    * 이미지 선택 (환경에 따라 자동 선택)
    */
-  const pickImage = useCallback(
-    async (source: ImagePickerSource = 'both'): Promise<ImagePickerResult> => {
-      if (isInWebView) {
-        return pickImageNative(source);
-      }
-      return pickImageWeb(source);
-    },
-    [isInWebView, pickImageNative, pickImageWeb]
-  );
+  const pickImage = async (source: ImagePickerSource = 'both'): Promise<ImagePickerResult> => {
+    if (isInWebView) {
+      return pickImageNative(source);
+    }
+    return pickImageWeb(source);
+  };
 
   /**
    * base64를 File 객체로 변환
    */
-  const base64ToFile = useCallback(
-    (base64: string, fileName: string = 'image.jpg'): File => {
-      const arr = base64.split(',');
-      const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
-      const bstr = atob(arr[1]);
-      let n = bstr.length;
-      const u8arr = new Uint8Array(n);
-      while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-      }
-      return new File([u8arr], fileName, { type: mime });
-    },
-    []
-  );
+  const base64ToFile = (base64: string, fileName: string = 'image.jpg'): File => {
+    const arr = base64.split(',');
+    const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], fileName, { type: mime });
+  };
 
   return {
     pickImage,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useProfileImagesDraft, useGridDragDrop } from "@/hooks";
 import { useNativeImagePicker } from "@/hooks/webview";
 import type {
@@ -250,48 +250,45 @@ export default function ProfilePhotoGallery({
 
   // ========== Handlers ==========
 
-  const handleAddClick = useCallback(
-    async (index: number) => {
-      setProcessingIndex(index);
-      const result = await pickImage("both");
+  const handleAddClick = async (index: number) => {
+    setProcessingIndex(index);
+    const result = await pickImage("both");
 
-      if (result.cancelled) {
-        setProcessingIndex(null);
-        return;
-      }
-
-      if (!result.success) {
-        setErrorMessage(result.error || "이미지 선택에 실패했습니다.");
-        setProcessingIndex(null);
-        return;
-      }
-
-      if (result.base64) {
-        const file = base64ToFile(
-          result.base64,
-          result.fileName || "profile.jpg"
-        );
-
-        // 파일 검증
-        const validation = validateImageFile(file);
-        if (!validation.valid) {
-          setErrorMessage(validation.error || "파일 검증에 실패했습니다.");
-          setProcessingIndex(null);
-          return;
-        }
-
-        // 동기적으로 이미지 추가 (Blob URL 즉시 생성)
-        const addResult: AddImageResult = addImage(file, index);
-
-        if (!addResult.success && addResult.error) {
-          setErrorMessage(addResult.error);
-        }
-      }
-
+    if (result.cancelled) {
       setProcessingIndex(null);
-    },
-    [pickImage, base64ToFile, addImage]
-  );
+      return;
+    }
+
+    if (!result.success) {
+      setErrorMessage(result.error || "이미지 선택에 실패했습니다.");
+      setProcessingIndex(null);
+      return;
+    }
+
+    if (result.base64) {
+      const file = base64ToFile(
+        result.base64,
+        result.fileName || "profile.jpg"
+      );
+
+      // 파일 검증
+      const validation = validateImageFile(file);
+      if (!validation.valid) {
+        setErrorMessage(validation.error || "파일 검증에 실패했습니다.");
+        setProcessingIndex(null);
+        return;
+      }
+
+      // 동기적으로 이미지 추가 (Blob URL 즉시 생성)
+      const addResult: AddImageResult = addImage(file, index);
+
+      if (!addResult.success && addResult.error) {
+        setErrorMessage(addResult.error);
+      }
+    }
+
+    setProcessingIndex(null);
+  };
 
   const handleDelete = (index: number) => {
     removeImage(index);

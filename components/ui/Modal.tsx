@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, ReactNode } from 'react';
+import { useEffect, ReactNode } from 'react';
 import { X } from 'lucide-react';
 
 interface ModalProps {
@@ -49,24 +49,18 @@ export default function Modal({
   const isCenter = position === 'center';
 
   // ESC 키 핸들러
-  const handleEsc = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && closeOnEsc) {
-        onClose();
-      }
-    },
-    [closeOnEsc, onClose]
-  );
+  const handleEsc = (e: KeyboardEvent) => {
+    if (e.key === 'Escape' && closeOnEsc) {
+      onClose();
+    }
+  };
 
   // 배경 클릭 핸들러
-  const handleBackdropClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (e.target === e.currentTarget && closeOnBackdrop) {
-        onClose();
-      }
-    },
-    [closeOnBackdrop, onClose]
-  );
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget && closeOnBackdrop) {
+      onClose();
+    }
+  };
 
   // ESC 키 이벤트 등록
   useEffect(() => {

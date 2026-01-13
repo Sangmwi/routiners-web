@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { CalendarEventSummary } from '@/lib/types/routine';
 import { Check, SkipForward, ChevronRight } from 'lucide-react';
@@ -34,35 +33,7 @@ export default function WeeklyCalendar({
   const router = useRouter();
 
   // 이번 주 날짜들 생성
-  const weekDays = useMemo(() => {
-    const today = new Date();
-    const todayStr = formatDate(today);
-
-    // 이번 주 월요일 찾기
-    const currentDay = today.getDay();
-    const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
-    const monday = new Date(today);
-    monday.setDate(today.getDate() + mondayOffset);
-
-    const days: DayInfo[] = [];
-
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(monday);
-      date.setDate(monday.getDate() + i);
-      const dateStr = formatDate(date);
-
-      days.push({
-        date: dateStr,
-        dayOfWeek: WEEKDAYS[(i + 1) % 7], // 월요일부터 시작
-        dayNumber: date.getDate(),
-        isToday: dateStr === todayStr,
-        isPast: date < today && dateStr !== todayStr,
-        event: events.find((e) => e.date === dateStr),
-      });
-    }
-
-    return days;
-  }, [events]);
+  const weekDays = generateWeekDays(events);
 
   const handleDayClick = (date: string) => {
     if (onSelectDate) {
@@ -175,6 +146,37 @@ function EventIndicator({
       className={`w-2 h-2 rounded-full ${isSelected ? 'bg-primary-foreground' : 'bg-amber-500'}`}
     />
   );
+}
+
+// 이번 주 날짜들 생성
+function generateWeekDays(events: CalendarEventSummary[]): DayInfo[] {
+  const today = new Date();
+  const todayStr = formatDate(today);
+
+  // 이번 주 월요일 찾기
+  const currentDay = today.getDay();
+  const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+  const monday = new Date(today);
+  monday.setDate(today.getDate() + mondayOffset);
+
+  const days: DayInfo[] = [];
+
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + i);
+    const dateStr = formatDate(date);
+
+    days.push({
+      date: dateStr,
+      dayOfWeek: WEEKDAYS[(i + 1) % 7], // 월요일부터 시작
+      dayNumber: date.getDate(),
+      isToday: dateStr === todayStr,
+      isPast: date < today && dateStr !== todayStr,
+      event: events.find((e) => e.date === dateStr),
+    });
+  }
+
+  return days;
 }
 
 function formatDate(date: Date): string {

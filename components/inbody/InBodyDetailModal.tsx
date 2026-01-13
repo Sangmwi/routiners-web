@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Trash2, Edit2, Loader2, AlertTriangle } from 'lucide-react';
 import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
@@ -29,15 +29,15 @@ export default function InBodyDetailModal({
   const deleteInBody = useDeleteInBody();
 
   // 모달 닫기 시 상태 초기화
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     setState('view');
     setEditData(null);
     setError(null);
     onClose();
-  }, [onClose]);
+  };
 
   // 수정 모드 진입
-  const handleEdit = useCallback(() => {
+  const handleEdit = () => {
     setEditData({
       measuredAt: record.measuredAt,
       weight: record.weight,
@@ -61,10 +61,10 @@ export default function InBodyDetailModal({
       leftLegFat: record.leftLegFat,
     });
     setState('edit');
-  }, [record]);
+  };
 
   // 수정 저장
-  const handleSave = useCallback(async () => {
+  const handleSave = async () => {
     if (!editData) return;
 
     setState('saving');
@@ -76,15 +76,15 @@ export default function InBodyDetailModal({
       setError(err instanceof Error ? err.message : '수정에 실패했습니다.');
       setState('edit');
     }
-  }, [record.id, editData, updateInBody, handleClose]);
+  };
 
   // 삭제 확인
-  const handleConfirmDelete = useCallback(() => {
+  const handleConfirmDelete = () => {
     setState('confirmDelete');
-  }, []);
+  };
 
   // 삭제 실행
-  const handleDelete = useCallback(async () => {
+  const handleDelete = async () => {
     setState('deleting');
     setError(null);
     try {
@@ -94,13 +94,13 @@ export default function InBodyDetailModal({
       setError(err instanceof Error ? err.message : '삭제에 실패했습니다.');
       setState('view');
     }
-  }, [record.id, deleteInBody, handleClose]);
+  };
 
   // 수정 취소
-  const handleCancelEdit = useCallback(() => {
+  const handleCancelEdit = () => {
     setEditData(null);
     setState('view');
-  }, []);
+  };
 
   // 날짜 포맷
   const formattedDate = new Date(record.measuredAt).toLocaleDateString('ko-KR', {

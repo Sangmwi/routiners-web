@@ -12,7 +12,7 @@
  * - 모든 app-command 이벤트를 단일 지점에서 관리
  */
 
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import type { AppToWebMessage } from "@/lib/webview";
 import { useWebViewAuth } from "./useWebViewAuth";
@@ -174,15 +174,12 @@ export const useWebViewCommands = () => {
   // 외부 사용을 위한 API
   // ──────────────────────────────────────────────────────────────────────────
 
-  const register = useCallback(
-    <T extends AppToWebMessage>(
-      type: T["type"],
-      handler: CommandHandler<T>
-    ) => {
-      return registerCommandHandler(type, handler);
-    },
-    []
-  );
+  const register = <T extends AppToWebMessage>(
+    type: T["type"],
+    handler: CommandHandler<T>
+  ) => {
+    return registerCommandHandler(type, handler);
+  };
 
   return {
     registerHandler: register,

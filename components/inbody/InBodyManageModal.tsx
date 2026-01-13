@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Plus, ChevronRight, Calendar, Loader2, Trash2, AlertCircle } from 'lucide-react';
 import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
@@ -33,12 +33,12 @@ export default function InBodyManageModal({
   const deleteInBody = useDeleteInBody();
 
   // 모달 닫기 시 상태 초기화
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     setState('list');
     setSelectedRecord(null);
     setRecordToDelete(null);
     onClose();
-  }, [onClose]);
+  };
 
   // 기록 클릭 → 상세 보기
   const handleRecordClick = (record: InBodyRecord) => {

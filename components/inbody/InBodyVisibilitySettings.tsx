@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import FormToggle from '@/components/ui/FormToggle';
 import { useCurrentUserProfile, useUpdateProfile } from '@/hooks/profile/useProfile';
@@ -57,27 +57,24 @@ export default function InBodyVisibilitySettings({
     }
   }, [user?.showInbodyPublic]);
 
-  const handleToggle = useCallback(
-    async (newValue: boolean) => {
-      // Optimistic update
-      setIsPublic(newValue);
-      setIsSaving(true);
+  const handleToggle = async (newValue: boolean) => {
+    // Optimistic update
+    setIsPublic(newValue);
+    setIsSaving(true);
 
-      try {
-        await updateProfile.mutateAsync({
-          showInbodyPublic: newValue,
-        });
-        onSaveSuccess?.();
-      } catch (error) {
-        // Rollback on error
-        setIsPublic(!newValue);
-        onSaveError?.(error instanceof Error ? error : new Error('저장에 실패했습니다'));
-      } finally {
-        setIsSaving(false);
-      }
-    },
-    [updateProfile, onSaveSuccess, onSaveError]
-  );
+    try {
+      await updateProfile.mutateAsync({
+        showInbodyPublic: newValue,
+      });
+      onSaveSuccess?.();
+    } catch (error) {
+      // Rollback on error
+      setIsPublic(!newValue);
+      onSaveError?.(error instanceof Error ? error : new Error('저장에 실패했습니다'));
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (isUserLoading) {
     return (

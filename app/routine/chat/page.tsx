@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import PageHeader from '@/components/common/PageHeader';
@@ -22,7 +22,7 @@ import Button from '@/components/ui/Button';
 import { conversationApi } from '@/lib/api/conversation';
 import { routineEventApi } from '@/lib/api/routineEvent';
 import { useConfirmDialog } from '@/lib/stores/modalStore';
-import type { SessionPurpose } from '@/lib/types/chat';
+import type { SessionPurpose, AISessionCompat } from '@/lib/types/chat';
 
 /**
  * AI 트레이너 채팅 페이지
@@ -36,10 +36,16 @@ export default function AIChatPage() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const [selectedPurpose, setSelectedPurpose] = useState<SessionPurpose | null>(null);
-  const [purposeHandled, setPurposeHandled] = useState(false);
+  // ⚠️ useRef 사용: useState는 비동기라 StrictMode 이중 호출 시 중복 세션 생성됨
+  const purposeHandledRef = useRef(false);
   // 사용자가 의도한 세션 목적 (URL 파라미터 또는 버튼 클릭으로 설정)
   const [viewPurpose, setViewPurpose] = useState<SessionPurpose | null>(null);
   const confirmDialog = useConfirmDialog();
+  // 루틴/식단 적용 완료 상태 추적 (적용 후 리다이렉트 방지)
+  const hasAppliedRef = useRef(false);
+  // ⚠️ 방금 생성된 세션 추적 - React Query 캐시 동기화 문제 우회
+  // createSession.data가 업데이트되어도 re-render가 트리거되지 않는 문제 해결
+  const [justCreatedSession, setJustCreatedSession] = useState<AISessionCompat | null>(null);
 
   // URL에서 파라미터 확인
   const sessionIdParam = searchParams.get('session');
@@ -60,12 +66,13 @@ export default function AIChatPage() {
 
   // 페이지 진입 시 최신 세션 데이터 fetch
   // - 홈에서 돌아올 때 캐시된 오래된 데이터 대신 최신 데이터 로드
-  // - ⚠️ 항상 refetch: 캐시 동기화가 완벽하지 않을 수 있으므로 안전을 위해
+  // - ⚠️ purposeParam 있으면 스킵: 새 세션 생성 시 refetch가 mutation 결과를 덮어쓸 수 있음
   useEffect(() => {
+    if (purposeParam) return; // 새 세션 생성 흐름이므로 refetch 불필요
     refetchWorkout();
     refetchMeal();
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- 마운트 시 1회만 실행, refetch 함수는 stable
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- 마운트 시 1회만 실행
+  }, [purposeParam]);
 
   // URL 파라미터로 지정된 히스토리 세션 조회
   const {
@@ -75,13 +82,24 @@ export default function AIChatPage() {
     enabled: !!sessionIdParam,
   });
 
+  // 세션 생성 (currentSession 계산 전에 선언 - createSession.data fallback용)
+  const createSession = useCreateAISession();
+
   // 현재 표시할 세션 결정 (URL 파라미터 우선, viewPurpose 반영)
   // purposeParam이 있으면 그것을 우선 사용 (URL 정리 전), 없으면 viewPurpose 사용
   const effectivePurpose = purposeParam || viewPurpose;
+  // purpose 명시 시 해당 세션 사용, 없으면 상태 기반 선택 (active 우선, 둘 다 없으면 아무거나)
   const activeSessionFromQuery = effectivePurpose === 'meal' ? mealSession :
                                   effectivePurpose === 'workout' ? workoutSession :
-                                  workoutSession || mealSession; // 기본: 둘 다 있으면 workout 우선
-  const currentSession = sessionIdParam ? historySession : activeSessionFromQuery;
+                                  // purpose 미지정 시: active 세션 우선, 없으면 completed 세션
+                                  (workoutSession?.status === 'active' ? workoutSession :
+                                   mealSession?.status === 'active' ? mealSession :
+                                   workoutSession || mealSession);
+  // createSession.data fallback: 캐시 동기화 전에도 생성된 세션 즉시 표시
+  // justCreatedSession: 로컬 state로 확실하게 re-render 트리거
+  const currentSession = sessionIdParam
+    ? historySession
+    : activeSessionFromQuery || justCreatedSession || createSession.data;
   // 로딩 상태: 현재 purpose에 해당하는 쿼리만 체크 (다른 purpose 로딩에 영향 받지 않도록)
   const isLoadingSession = sessionIdParam
     ? isLoadingHistory
@@ -97,25 +115,23 @@ export default function AIChatPage() {
     historySession.status !== 'active'
   );
 
-  // 세션 생성
-  const createSession = useCreateAISession();
-
   // purpose 파라미터 처리 (모달에서 선택 시)
   useEffect(() => {
     // 이미 처리했거나, 로딩 중이거나, purpose가 없으면 스킵
-    if (purposeHandled || isLoadingWorkout || isLoadingMeal || !purposeParam) {
+    // ⚠️ ref는 동기적으로 업데이트되어 StrictMode 이중 호출 방지
+    if (purposeHandledRef.current || isLoadingWorkout || isLoadingMeal || !purposeParam || createSession.isPending) {
       return;
     }
 
     // session 파라미터가 있으면 히스토리 모드이므로 purpose 무시
     if (sessionIdParam) {
-      setPurposeHandled(true);
+      purposeHandledRef.current = true;
       return;
     }
 
     // 유효한 purpose인지 확인
     if (purposeParam !== 'workout' && purposeParam !== 'meal') {
-      setPurposeHandled(true);
+      purposeHandledRef.current = true;
       return;
     }
 
@@ -126,32 +142,55 @@ export default function AIChatPage() {
       // 활성 세션이 있으면 해당 purpose를 기억
       // ⚠️ URL 정리하지 않음 - 새로고침 시 purpose 유지를 위해
       setViewPurpose(purposeParam);
-      setPurposeHandled(true);
+      purposeHandledRef.current = true;
     } else {
       // 활성 세션이 없으면 새 세션 생성
-      setPurposeHandled(true);
+      purposeHandledRef.current = true;
       setSelectedPurpose(purposeParam);
       setViewPurpose(purposeParam); // URL 변경 후에도 올바른 세션이 표시되도록
-      createSession.mutate({ purpose: purposeParam });
+      createSession.mutate(
+        { purpose: purposeParam },
+        {
+          // ⚠️ 로컬 state로 세션 저장 - React Query 캐시 동기화 문제 우회
+          // createSession.data 업데이트가 re-render를 트리거하지 않는 문제 해결
+          onSuccess: (session) => {
+            setJustCreatedSession(session);
+          },
+        }
+      );
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- purposeHandledRef는 ref라 dependency 불필요
   }, [
     purposeParam,
-    purposeHandled,
     sessionIdParam,
     isLoadingWorkout,
     isLoadingMeal,
     workoutSession,
     mealSession,
-    router,
     createSession,
   ]);
+
+  // viewPurpose 자동 동기화
+  // - purposeParam이 없고 viewPurpose도 없을 때, 활성 세션의 purpose로 자동 설정
+  // - 세션 완료 시 캐시 업데이트와 UI 상태 동기화 보장
+  useEffect(() => {
+    if (!viewPurpose && !purposeParam && !isLoadingWorkout && !isLoadingMeal) {
+      // 활성 세션의 purpose 감지
+      const activeSession = workoutSession?.status === 'active' ? workoutSession :
+                            mealSession?.status === 'active' ? mealSession : null;
+      if (activeSession) {
+        setViewPurpose(activeSession.purpose);
+      }
+    }
+  }, [workoutSession, mealSession, viewPurpose, purposeParam, isLoadingWorkout, isLoadingMeal]);
 
   // 활성 세션이 없고 히스토리도 없는 경우 - /routine으로 리다이렉트
   // (purpose 선택은 AISelectionModal에서 처리)
   // ⚠️ 세션 생성 중에는 리다이렉트하지 않음 (race condition 방지)
+  // ⚠️ 루틴/식단 적용 직후에는 리다이렉트하지 않음 (완료 UI 표시)
   useEffect(() => {
     const isCreating = createSession.isPending;
-    if (!isLoadingSession && !currentSession && !sessionIdParam && !purposeParam && !isCreating) {
+    if (!isLoadingSession && !currentSession && !sessionIdParam && !purposeParam && !isCreating && !hasAppliedRef.current) {
       router.replace('/routine');
     }
   }, [isLoadingSession, currentSession, sessionIdParam, purposeParam, createSession.isPending, router]);
@@ -183,12 +222,19 @@ export default function AIChatPage() {
     error: chatError,
   } = useAIChat(currentSession);
 
+  // 루틴/식단 적용 성공 시 ref 설정 (리다이렉트 방지)
+  useEffect(() => {
+    if (appliedRoutine || appliedMealPlan) {
+      hasAppliedRef.current = true;
+    }
+  }, [appliedRoutine, appliedMealPlan]);
+
   // 대화 상태 확인
   const isCompleted = currentSession?.status === 'completed';
   const isActive = currentSession?.status === 'active';
 
   // 새 대화 시작 실행 (purpose 파라미터 받음)
-  const executeStartNewSession = useCallback(async (purpose: SessionPurpose) => {
+  const executeStartNewSession = async (purpose: SessionPurpose) => {
     // 기존 활성 세션이 있으면 정리
     if (activeSessionFromQuery?.status === 'active') {
       // 기존 루틴이 저장되어 있으면 삭제
@@ -214,15 +260,16 @@ export default function AIChatPage() {
     }
 
     try {
-      await createSession.mutateAsync({ purpose });
+      const newSession = await createSession.mutateAsync({ purpose });
+      setJustCreatedSession(newSession);
       setSelectedPurpose(null); // 선택 초기화
     } catch (err) {
       console.error('Failed to create session:', err);
     }
-  }, [createSession, activeSessionFromQuery, sessionIdParam, router]);
+  };
 
   // purpose 선택 후 세션 시작 또는 기존 세션으로 이동
-  const handleSelectPurpose = useCallback((purpose: SessionPurpose) => {
+  const handleSelectPurpose = (purpose: SessionPurpose) => {
     // 해당 purpose에 활성 세션이 있으면 그 세션으로 이동
     const existingSession = purpose === 'workout' ? workoutSession : mealSession;
     if (existingSession?.status === 'active') {
@@ -239,15 +286,15 @@ export default function AIChatPage() {
     setSelectedPurpose(purpose);
     setViewPurpose(purpose);
     executeStartNewSession(purpose);
-  }, [executeStartNewSession, workoutSession, mealSession, queryClient]);
+  };
 
   // 히스토리 세션 선택 핸들러
-  const handleSelectHistorySession = useCallback((sessionId: string) => {
+  const handleSelectHistorySession = (sessionId: string) => {
     router.push(`/routine/chat?session=${sessionId}`);
-  }, [router]);
+  };
 
   // 새 세션 생성 (기존 활성 세션이 있으면 확인 후 포기하고 purpose 선택 화면으로)
-  const handleStartNewSession = useCallback(() => {
+  const handleStartNewSession = () => {
     // 히스토리 모드에서는 바로 purpose 선택 화면으로
     if (isHistoryMode) {
       router.replace('/routine/chat');
@@ -287,7 +334,8 @@ export default function AIChatPage() {
           // 같은 purpose로 새 세션 바로 생성 (/routine 리다이렉트 대신)
           try {
             setViewPurpose(currentPurpose);
-            await createSession.mutateAsync({ purpose: currentPurpose });
+            const newSession = await createSession.mutateAsync({ purpose: currentPurpose });
+            setJustCreatedSession(newSession);
           } catch (err) {
             console.error('Failed to create new session:', err);
             // 실패 시 /routine으로 리다이렉트
@@ -297,26 +345,23 @@ export default function AIChatPage() {
       });
       return;
     }
-  }, [isActive, isHistoryMode, messages.length, confirmDialog, activeSessionFromQuery, queryClient, createSession, router]);
+  };
 
   // 메시지 전송
-  const handleSendMessage = useCallback(
-    (message: string) => {
-      if (currentSession?.id && isActive && !isHistoryMode) {
-        sendMessage(message);
-      }
-    },
-    [currentSession?.id, sendMessage, isActive, isHistoryMode]
-  );
+  const handleSendMessage = (message: string) => {
+    if (currentSession?.id && isActive && !isHistoryMode) {
+      sendMessage(message);
+    }
+  };
 
 
   // 캘린더로 이동
-  const handleNavigateToCalendar = useCallback(() => {
+  const handleNavigateToCalendar = () => {
     router.push('/routine');
-  }, [router]);
+  };
 
   // 완료된 대화 삭제 (확인 후 삭제)
-  const handleDeleteChat = useCallback(() => {
+  const handleDeleteChat = () => {
     if (!currentSession?.id) return;
 
     confirmDialog({
@@ -338,12 +383,15 @@ export default function AIChatPage() {
         }
       },
     });
-  }, [currentSession?.id, confirmDialog, queryClient, router]);
+  };
 
-  // 로딩 상태 (purpose 파라미터 처리 중 또는 세션 생성 중 포함)
-  const isPurposeProcessing = purposeParam && !purposeHandled;
+  // 로딩 상태 (세션 로딩 중 또는 세션 생성 중)
+  // ⚠️ Race Condition 방지: 세션이 이미 있으면 쿼리 로딩과 무관하게 UI 표시
+  // justCreatedSession이 설정되어도 useActiveAISession 쿼리가 아직 로딩 중일 수 있음
   const isCreatingSession = createSession.isPending;
-  if (isLoadingSession || isPurposeProcessing || isCreatingSession) {
+  const hasSession = currentSession || justCreatedSession;
+
+  if (!hasSession && (isLoadingSession || isCreatingSession)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
