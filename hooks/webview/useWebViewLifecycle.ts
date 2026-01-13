@@ -17,6 +17,14 @@ import { useWebViewCore } from "./useWebViewCore";
 
 let isWebReadySent = false;
 
+/**
+ * WEB_READY 상태를 리셋합니다.
+ * 로그아웃 시 호출하여 재로그인 시 WEB_READY를 다시 전송할 수 있게 합니다.
+ */
+export const resetWebReadyState = () => {
+  isWebReadySent = false;
+};
+
 // ============================================================================
 // Hook
 // ============================================================================

@@ -12,7 +12,7 @@ import {
 } from '@/lib/types/fitness';
 import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/common/EmptyState';
-import ProfileFitnessDetailModal from './ProfileFitnessDetailModal';
+import { FitnessDetailDrawer } from '@/components/drawers';
 
 /**
  * 프로필 피트니스 섹션
@@ -150,9 +150,9 @@ export default function ProfileFitnessSection() {
         </div>
       </div>
 
-      {/* 상세 모달 */}
+      {/* 상세 드로어 */}
       {profile && hasData && (
-        <ProfileFitnessDetailModal
+        <FitnessDetailDrawer
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           profile={profile}

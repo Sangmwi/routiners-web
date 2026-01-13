@@ -17,6 +17,7 @@ import { useRouter, usePathname } from "next/navigation";
 import type { AppToWebMessage } from "@/lib/webview";
 import { useWebViewAuth } from "./useWebViewAuth";
 import { useWebViewNavigation } from "./useWebViewNavigation";
+import { resetWebReadyState } from "./useWebViewLifecycle";
 import { LOG_PREFIX } from "./useWebViewCore";
 
 // ============================================================================
@@ -126,6 +127,8 @@ export const useWebViewCommands = () => {
     cleanups.push(
       registerCommandHandler("CLEAR_SESSION", async () => {
         await clearSession();
+        // WEB_READY 상태 리셋하여 재로그인 시 다시 전송되도록 함
+        resetWebReadyState();
         router.replace("/login");
       })
     );

@@ -4,7 +4,7 @@ import { useModalStore } from '@/lib/stores';
 import ConfirmModal from './ConfirmModal';
 import AlertModal from './AlertModal';
 import ImagePreviewModal from './ImagePreviewModal';
-import AISelectionModal from './AISelectionModal';
+import { AISelectionDrawer } from '@/components/drawers';
 import type { ModalInstance, ModalDataMap } from '@/lib/stores/modalStore';
 
 // ============================================================================
@@ -50,7 +50,7 @@ function renderModal(modal: ModalInstance, onClose: () => void) {
 
     case 'aiSelection':
       return (
-        <AISelectionModal
+        <AISelectionDrawer
           key={modal.id}
           {...commonProps}
           data={modal.data as ModalDataMap['aiSelection']}

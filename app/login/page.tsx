@@ -24,6 +24,29 @@ function LoginContent() {
     }
   }, [searchParams]);
 
+  // WebView 환경: 앱에서 SET_SESSION 또는 LOGIN_ERROR 수신 시 로딩 해제
+  useEffect(() => {
+    if (!isInWebView) return;
+
+    const handleAppCommand = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const { type, error: loginError } = customEvent.detail || {};
+
+      if (type === "SET_SESSION") {
+        // 세션 설정 성공 - 홈으로 이동되므로 로딩 해제 불필요하지만 안전장치
+        setIsLoading(false);
+      } else if (type === "LOGIN_ERROR") {
+        setIsLoading(false);
+        if (loginError) {
+          setError(loginError);
+        }
+      }
+    };
+
+    window.addEventListener("app-command", handleAppCommand);
+    return () => window.removeEventListener("app-command", handleAppCommand);
+  }, [isInWebView]);
+
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     setError(null);

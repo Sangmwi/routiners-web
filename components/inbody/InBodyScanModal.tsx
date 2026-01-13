@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Camera, ImagePlus, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import { ImageSourceDrawer } from '@/components/drawers';
 import { InBodyCreateData } from '@/lib/types/inbody';
 import { useCreateInBody } from '@/hooks/inbody';
 import { useNativeImagePicker } from '@/hooks/webview';
+import type { ImagePickerSource } from '@/lib/webview';
 import InBodyPreview from './InBodyPreview';
 
 interface InBodyScanModalProps {
@@ -27,6 +29,7 @@ export default function InBodyScanModal({
   const [error, setError] = useState<string | null>(null);
   const [createData, setCreateData] = useState<InBodyCreateData | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isImageSourceOpen, setIsImageSourceOpen] = useState(false);
 
   const createInBody = useCreateInBody();
   const { pickImage, base64ToFile, isPickerOpen } = useNativeImagePicker();
@@ -37,6 +40,7 @@ export default function InBodyScanModal({
     setError(null);
     setCreateData(null);
     setImagePreview(null);
+    setIsImageSourceOpen(false);
     onClose();
   };
 
@@ -69,9 +73,11 @@ export default function InBodyScanModal({
     }
   };
 
-  // 이미지 선택 버튼 클릭
-  const handlePickImage = async () => {
-    const result = await pickImage('both');
+  // 이미지 선택 처리
+  const handleSelectSource = async (source: ImagePickerSource) => {
+    setIsImageSourceOpen(false);
+
+    const result = await pickImage(source);
 
     if (result.cancelled) {
       return;
@@ -121,6 +127,7 @@ export default function InBodyScanModal({
   const modalPosition = state === 'idle' ? 'bottom' : 'center';
 
   return (
+  <>
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
@@ -144,21 +151,15 @@ export default function InBodyScanModal({
             </div>
 
             {/* 사진 선택 버튼 */}
-            <button
-              type="button"
-              onClick={handlePickImage}
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => setIsImageSourceOpen(true)}
               disabled={isPickerOpen}
-              className="flex flex-col items-center gap-3 p-8 rounded-2xl border-2 border-dashed border-border hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-8"
             >
-              <div className="flex items-center gap-3">
-                <Camera className="w-8 h-8 text-muted-foreground" />
-                <span className="text-muted-foreground">/</span>
-                <ImagePlus className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <span className="text-sm font-medium text-card-foreground">
-                {isPickerOpen ? '선택 중...' : '사진 촬영 또는 앨범에서 선택'}
-              </span>
-            </button>
+              {isPickerOpen ? '선택 중...' : '사진 선택하기'}
+            </Button>
 
             <p className="text-xs text-muted-foreground text-center max-w-xs">
               InBody 결과지가 잘 보이도록 촬영해주세요.
@@ -228,12 +229,6 @@ export default function InBodyScanModal({
       </ModalBody>
 
       <ModalFooter>
-        {state === 'idle' && (
-          <Button variant="outline" onClick={handleClose} className="flex-1">
-            취소
-          </Button>
-        )}
-
         {state === 'preview' && (
           <>
             <Button variant="outline" onClick={handleRetry} className="flex-1">
@@ -258,5 +253,15 @@ export default function InBodyScanModal({
         )}
       </ModalFooter>
     </Modal>
+
+    {/* 이미지 소스 선택 드로어 */}
+    <ImageSourceDrawer
+      isOpen={isImageSourceOpen}
+      onClose={() => setIsImageSourceOpen(false)}
+      onSelectCamera={() => handleSelectSource('camera')}
+      onSelectGallery={() => handleSelectSource('gallery')}
+      isLoading={isPickerOpen}
+    />
+  </>
   );
 }

@@ -4,24 +4,24 @@ import { Dumbbell, Utensils, Loader2 } from 'lucide-react';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import type { ModalDataMap } from '@/lib/stores/modalStore';
 
-interface AISelectionModalProps {
+interface AISelectionDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   data: ModalDataMap['aiSelection'];
 }
 
 /**
- * AI 코치 선택 모달 (바텀시트)
+ * AI 코치 선택 드로어 (바텀시트)
  *
  * 운동/식단 AI 중 선택하여 채팅 시작
  * - 활성 세션 있으면 "진행중" 뱃지 표시
  * - 선택 시 세션 생성/조회 후 채팅 페이지로 이동
  */
-export default function AISelectionModal({
+export default function AISelectionDrawer({
   isOpen,
   onClose,
   data,
-}: AISelectionModalProps) {
+}: AISelectionDrawerProps) {
   const handleSelect = (purpose: 'workout' | 'meal') => {
     // 로딩 중이면 무시
     if (data.isLoading) return;

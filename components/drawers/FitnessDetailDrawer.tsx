@@ -10,22 +10,22 @@ import {
   FOCUS_AREA_LABELS,
 } from '@/lib/types/fitness';
 
-interface ProfileFitnessDetailModalProps {
+interface FitnessDetailDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   profile: FitnessProfile;
 }
 
 /**
- * 피트니스 프로필 상세 모달
+ * 피트니스 프로필 상세 드로어
  *
  * 모든 피트니스 프로필 정보를 상세하게 표시
  */
-export default function ProfileFitnessDetailModal({
+export default function FitnessDetailDrawer({
   isOpen,
   onClose,
   profile,
-}: ProfileFitnessDetailModalProps) {
+}: FitnessDetailDrawerProps) {
   // 정보 항목 렌더링 헬퍼
   const renderInfoItem = (label: string, value: string | undefined | null) => {
     if (!value) return null;

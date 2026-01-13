@@ -7,8 +7,10 @@ import type {
   DraftImage,
   AddImageResult,
 } from "@/hooks/profile/useProfileImagesDraft";
+import type { ImagePickerSource } from "@/lib/webview";
 import { validateImageFile } from "@/lib/utils/imageValidation";
 import { ImageWithFallback } from "@/components/ui/image";
+import { ImageSourceDrawer } from "@/components/drawers";
 import FormSection from "@/components/ui/FormSection";
 import ErrorToast from "@/components/ui/ErrorToast";
 import { Plus, Loader2, X, GripVertical, Star, Move } from "lucide-react";
@@ -240,6 +242,8 @@ export default function ProfilePhotoGallery({
 
   // ========== Refs & State ==========
   const [processingIndex, setProcessingIndex] = useState<number | null>(null);
+  const [isImageSourceOpen, setIsImageSourceOpen] = useState(false);
+  const [pendingSlotIndex, setPendingSlotIndex] = useState<number | null>(null);
 
   // ========== Effects ==========
 
@@ -250,18 +254,31 @@ export default function ProfilePhotoGallery({
 
   // ========== Handlers ==========
 
-  const handleAddClick = async (index: number) => {
-    setProcessingIndex(index);
-    const result = await pickImage("both");
+  // 빈 슬롯 클릭 - 이미지 소스 선택 드로어 열기
+  const handleAddClick = (index: number) => {
+    setPendingSlotIndex(index);
+    setIsImageSourceOpen(true);
+  };
+
+  // 이미지 소스 선택 후 처리
+  const handleSelectSource = async (source: ImagePickerSource) => {
+    if (pendingSlotIndex === null) return;
+
+    setIsImageSourceOpen(false);
+    setProcessingIndex(pendingSlotIndex);
+
+    const result = await pickImage(source);
 
     if (result.cancelled) {
       setProcessingIndex(null);
+      setPendingSlotIndex(null);
       return;
     }
 
     if (!result.success) {
       setErrorMessage(result.error || "이미지 선택에 실패했습니다.");
       setProcessingIndex(null);
+      setPendingSlotIndex(null);
       return;
     }
 
@@ -276,11 +293,12 @@ export default function ProfilePhotoGallery({
       if (!validation.valid) {
         setErrorMessage(validation.error || "파일 검증에 실패했습니다.");
         setProcessingIndex(null);
+        setPendingSlotIndex(null);
         return;
       }
 
       // 동기적으로 이미지 추가 (Blob URL 즉시 생성)
-      const addResult: AddImageResult = addImage(file, index);
+      const addResult: AddImageResult = addImage(file, pendingSlotIndex);
 
       if (!addResult.success && addResult.error) {
         setErrorMessage(addResult.error);
@@ -288,6 +306,7 @@ export default function ProfilePhotoGallery({
     }
 
     setProcessingIndex(null);
+    setPendingSlotIndex(null);
   };
 
   const handleDelete = (index: number) => {
@@ -345,6 +364,18 @@ export default function ProfilePhotoGallery({
           onClose={() => setErrorMessage(null)}
         />
       )}
+
+      {/* 이미지 소스 선택 드로어 */}
+      <ImageSourceDrawer
+        isOpen={isImageSourceOpen}
+        onClose={() => {
+          setIsImageSourceOpen(false);
+          setPendingSlotIndex(null);
+        }}
+        onSelectCamera={() => handleSelectSource("camera")}
+        onSelectGallery={() => handleSelectSource("gallery")}
+        isLoading={processingIndex !== null}
+      />
     </FormSection>
   );
 }
