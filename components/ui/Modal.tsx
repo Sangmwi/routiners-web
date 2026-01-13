@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback, ReactNode } from 'react';
+import { useEffect, useRef, useState, ReactNode } from 'react';
 import { X } from 'lucide-react';
 
 interface ModalProps {
@@ -79,7 +79,7 @@ export default function Modal({
   const [isSwipeClosing, setIsSwipeClosing] = useState(false); // 스와이프로 닫기 중
 
   // 닫기 핸들러 (버튼/배경 클릭 시 - 애니메이션 후 실제 닫기)
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     if (isClosing || isSwipeClosing) return; // 이미 닫는 중이면 무시
     setIsClosing(true);
     setTimeout(() => {
@@ -87,14 +87,7 @@ export default function Modal({
       setIsVisible(false);
       onClose();
     }, ANIMATION_DURATION);
-  }, [isClosing, isSwipeClosing, onClose]);
-
-  // ESC 키 핸들러
-  const handleEsc = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape' && closeOnEsc) {
-      handleClose();
-    }
-  }, [closeOnEsc, handleClose]);
+  };
 
   // 배경 클릭 핸들러
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -104,14 +97,14 @@ export default function Modal({
   };
 
   // 터치 시작
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+  const handleTouchStart = (e: React.TouchEvent) => {
     if (!enableSwipe || !isBottom) return;
     setTouchStart(e.touches[0].clientY);
     setIsDragging(true);
-  }, [enableSwipe, isBottom]);
+  };
 
   // 터치 이동
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+  const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging || touchStart === null) return;
     const currentY = e.touches[0].clientY;
     const delta = currentY - touchStart;
@@ -119,10 +112,10 @@ export default function Modal({
     if (delta > 0) {
       setTouchDelta(delta);
     }
-  }, [isDragging, touchStart]);
+  };
 
   // 터치 종료
-  const handleTouchEnd = useCallback(() => {
+  const handleTouchEnd = () => {
     if (!isDragging) return;
 
     if (touchDelta > swipeThreshold) {
@@ -145,7 +138,7 @@ export default function Modal({
       setTouchDelta(0);
       setIsDragging(false);
     }
-  }, [isDragging, touchDelta, swipeThreshold, onClose]);
+  };
 
   // isOpen 변경 시 visible 상태 관리
   useEffect(() => {
@@ -163,6 +156,12 @@ export default function Modal({
 
   // ESC 키 이벤트 등록
   useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && closeOnEsc) {
+        handleClose();
+      }
+    };
+
     if (isVisible) {
       document.addEventListener('keydown', handleEsc);
       // 모달 오픈 시 스크롤 방지
@@ -172,7 +171,7 @@ export default function Modal({
       document.removeEventListener('keydown', handleEsc);
       document.body.style.overflow = 'unset';
     };
-  }, [isVisible, handleEsc]);
+  });
 
   // 스와이프 상태 초기화 (모달 닫힐 때)
   useEffect(() => {
