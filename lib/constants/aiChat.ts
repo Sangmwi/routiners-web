@@ -2,9 +2,89 @@
  * AI 채팅 관련 상수
  *
  * 모든 AI 채팅 관련 매직 넘버와 상수를 한 곳에서 관리
+ * - SSE 이벤트 타입
+ * - 진행률 단계
+ * - 타이밍/제한 상수
  */
 
 import type { ChatMessage } from '@/lib/types/chat';
+
+// =============================================================================
+// SSE 이벤트 타입
+// =============================================================================
+
+/**
+ * 서버에서 클라이언트로 전송되는 SSE 이벤트 타입
+ */
+export const SSE_EVENT_TYPES = {
+  // 스트리밍
+  CONTENT: 'content',
+  DONE: 'done',
+  ERROR: 'error',
+
+  // 도구 실행
+  TOOL_START: 'tool_start',
+  TOOL_DONE: 'tool_done',
+
+  // 사용자 입력 요청
+  INPUT_REQUEST: 'input_request',
+  PROFILE_CONFIRMATION: 'profile_confirmation',
+
+  // 루틴 관련
+  ROUTINE_PROGRESS: 'routine_progress',
+  ROUTINE_PREVIEW: 'routine_preview',
+  ROUTINE_APPLIED: 'routine_applied',
+
+  // 식단 관련
+  MEAL_PLAN_PROGRESS: 'meal_plan_progress',
+  MEAL_PLAN_PREVIEW: 'meal_plan_preview',
+  MEAL_PLAN_APPLIED: 'meal_plan_applied',
+} as const;
+
+export type SSEEventType = (typeof SSE_EVENT_TYPES)[keyof typeof SSE_EVENT_TYPES];
+
+// =============================================================================
+// 진행률 표시 단계
+// =============================================================================
+
+/**
+ * 진행률 단계 타입
+ */
+export interface ProgressStage {
+  stage: string;
+  progress: number;
+  message: string;
+}
+
+/**
+ * 루틴 생성 진행률 단계
+ */
+export const ROUTINE_PROGRESS_STAGES: ProgressStage[] = [
+  { stage: 'analyzing', progress: 20, message: '운동 목표 분석 중...' },
+  { stage: 'selecting', progress: 40, message: '운동 선택 중...' },
+  { stage: 'structuring', progress: 60, message: '루틴 구성 중...' },
+  { stage: 'optimizing', progress: 80, message: '최적화 중...' },
+  { stage: 'finalizing', progress: 95, message: '마무리 중...' },
+];
+
+/**
+ * 식단 생성 진행률 단계
+ */
+export const MEAL_PLAN_PROGRESS_STAGES: ProgressStage[] = [
+  { stage: 'analyzing', progress: 20, message: '식단 요구사항 분석 중...' },
+  { stage: 'calculating', progress: 40, message: '영양소 계산 중...' },
+  { stage: 'generating', progress: 60, message: '식단 생성 중...' },
+  { stage: 'optimizing', progress: 80, message: '최적화 중...' },
+  { stage: 'finalizing', progress: 95, message: '마무리 중...' },
+];
+
+/**
+ * 세션 목적별 진행률 단계
+ */
+export const PROGRESS_STAGES = {
+  workout: ROUTINE_PROGRESS_STAGES,
+  meal: MEAL_PLAN_PROGRESS_STAGES,
+} as const;
 
 // =============================================================================
 // 시스템 메시지

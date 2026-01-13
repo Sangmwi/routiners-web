@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import StepIndicator from '@/components/ui/StepIndicator';
 import PassVerificationStep from '@/components/signup/PassVerificationStep';
-import MilitaryInfoStep from '@/components/signup/MilitaryInfoStep';
+import MilitaryFlowContainer from '@/components/signup/military/MilitaryFlowContainer';
 import ConfirmationStep from '@/components/signup/ConfirmationStep';
 import { useCompleteSignup } from '@/hooks';
 import { PassVerificationData, MilitaryInfoData, SignupCompleteData } from '@/lib/types';
@@ -73,11 +73,18 @@ export default function SignupPage() {
         </div>
 
         {/* Step Content */}
-        <div className="rounded-3xl bg-card border border-border p-8 shadow-lg">
+        <div
+          className={`rounded-3xl bg-card border border-border shadow-lg overflow-hidden ${
+            currentStep === 2 ? 'p-0 min-h-[600px]' : 'p-8'
+          }`}
+        >
           {currentStep === 1 && <PassVerificationStep onVerified={handlePassVerified} />}
 
-          {currentStep === 2 && militaryData === null && (
-            <MilitaryInfoStep onComplete={handleMilitaryInfoComplete} onBack={handleBackFromMilitary} />
+          {currentStep === 2 && (
+            <MilitaryFlowContainer
+              onComplete={handleMilitaryInfoComplete}
+              onBack={handleBackFromMilitary}
+            />
           )}
 
           {currentStep === 3 && passData && militaryData && (

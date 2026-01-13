@@ -77,7 +77,8 @@ export interface ModalDataMap {
   aiSelection: {
     workoutSessionActive?: boolean;
     mealSessionActive?: boolean;
-    onSelectPurpose: (purpose: 'workout' | 'meal') => void;
+    isLoading?: boolean;
+    onSelectPurpose: (purpose: 'workout' | 'meal') => void | Promise<void>;
   };
 }
 

@@ -2,10 +2,10 @@
  * Chat Callbacks Builder
  *
  * sendMessageCore에서 사용하는 SSE 콜백 객체를 생성
- * Phase L: 170줄 콜백 블록을 별도 모듈로 분리하여 테스트 가능성 향상
+ * P3: useReducer 기반 dispatch 사용으로 상태 업데이트 명확화
  */
 
-import type { Dispatch, SetStateAction, MutableRefObject } from 'react';
+import type { Dispatch, MutableRefObject } from 'react';
 import type {
   ChatStreamCallbacks,
   ToolEvent,
@@ -15,36 +15,16 @@ import type {
   MealPlanProgressEvent,
 } from '@/lib/api/conversation';
 import type { ChatMessage, ProfileConfirmationRequest } from '@/lib/types/chat';
-import type { AIToolName, AIToolStatus, InputRequest, RoutinePreviewData } from '@/lib/types/fitness';
+import type { InputRequest, RoutinePreviewData } from '@/lib/types/fitness';
 import type { MealPlanPreviewData } from '@/lib/types/meal';
 import { AI_CHAT_TIMING } from '@/lib/constants/aiChat';
 import type { useChatCacheSync } from '../useChatCacheSync';
+import type { ChatAction } from './chatReducer';
 
 // =============================================================================
 // Types
 // =============================================================================
 
-/**
- * 콜백 빌더의 ChatState (useAIChat의 ChatState와 동일)
- */
-interface ChatState {
-  messages: ChatMessage[];
-  streamingContent: string;
-  isSending: boolean;
-  error: string | null;
-  activeTools: AIToolStatus[];
-  pendingInput: InputRequest | null;
-  pendingRoutinePreview: RoutinePreviewData | null;
-  appliedRoutine: RoutineAppliedEvent | null;
-  routineProgress: RoutineProgressEvent | null;
-  pendingMealPreview: MealPlanPreviewData | null;
-  appliedMealPlan: MealPlanAppliedEvent | null;
-  mealProgress: MealPlanProgressEvent | null;
-  pendingProfileConfirmation: ProfileConfirmationRequest | null;
-  pendingStart: boolean;
-}
-
-type SetState = Dispatch<SetStateAction<ChatState>>;
 type CacheSync = ReturnType<typeof useChatCacheSync>;
 
 /**
@@ -53,8 +33,8 @@ type CacheSync = ReturnType<typeof useChatCacheSync>;
 export interface CallbackBuilderContext {
   /** 세션 ID */
   sessionId: string;
-  /** 상태 업데이터 */
-  setState: SetState;
+  /** 상태 업데이터 (dispatch) */
+  dispatch: Dispatch<ChatAction>;
   /** 캐시 동기화 유틸리티 */
   cacheSync: CacheSync;
   /** AbortController 참조 */
@@ -63,6 +43,8 @@ export interface CallbackBuilderContext {
   isSystemMessage: boolean;
   /** 메시지 생성 함수 */
   createMessage: (sessionId: string, role: 'user' | 'assistant', content: string) => ChatMessage;
+  /** 현재 메시지 목록 getter (onComplete에서 캐시 동기화용) */
+  getMessages: () => ChatMessage[];
 }
 
 // =============================================================================
@@ -72,13 +54,10 @@ export interface CallbackBuilderContext {
 /**
  * 도구 상태 정리 스케줄러
  */
-function createToolCleanupScheduler(setState: SetState) {
-  return (status: AIToolStatus['status'], delayMs: number) => {
+function createToolCleanupScheduler(dispatch: Dispatch<ChatAction>) {
+  return (status: 'completed' | 'error', delayMs: number) => {
     setTimeout(() => {
-      setState((prev) => ({
-        ...prev,
-        activeTools: prev.activeTools.filter((t) => t.status !== status),
-      }));
+      dispatch({ type: 'CLEANUP_TOOLS', status });
     }, delayMs);
   };
 }
@@ -97,11 +76,12 @@ function createToolCleanupScheduler(setState: SetState) {
  * ```ts
  * const callbacks = createChatCallbacks({
  *   sessionId,
- *   setState,
+ *   dispatch,
  *   cacheSync,
  *   abortControllerRef,
  *   isSystemMessage: isSystem,
  *   createMessage,
+ *   getMessages: () => stateRef.current.messages,
  * });
  * abortControllerRef.current = aiChatApi.sendMessage(sessionId, message, callbacks);
  * ```
@@ -109,117 +89,64 @@ function createToolCleanupScheduler(setState: SetState) {
 export function createChatCallbacks(ctx: CallbackBuilderContext): ChatStreamCallbacks {
   const {
     sessionId,
-    setState,
+    dispatch,
     cacheSync,
     abortControllerRef,
     isSystemMessage,
     createMessage,
+    getMessages,
   } = ctx;
 
-  const scheduleToolCleanup = createToolCleanupScheduler(setState);
+  const scheduleToolCleanup = createToolCleanupScheduler(dispatch);
 
   return {
     onMessage: (chunk) => {
-      setState((prev) => ({
-        ...prev,
-        streamingContent: prev.streamingContent + chunk,
-      }));
+      dispatch({ type: 'APPEND_STREAMING', chunk });
     },
 
     onToolStart: (event: ToolEvent) => {
-      setState((prev) => ({
-        ...prev,
-        activeTools: [
-          ...prev.activeTools,
-          {
-            toolCallId: event.toolCallId,
-            name: event.name as AIToolName,
-            status: 'running',
-          },
-        ],
-      }));
+      dispatch({ type: 'TOOL_START', event });
     },
 
     onToolDone: (event: ToolEvent) => {
-      setState((prev) => ({
-        ...prev,
-        activeTools: prev.activeTools.map((tool) =>
-          tool.toolCallId === event.toolCallId
-            ? { ...tool, status: event.success ? 'completed' : 'error', error: event.error }
-            : tool
-        ),
-      }));
+      dispatch({ type: 'TOOL_DONE', event });
     },
 
     onInputRequest: (request: InputRequest) => {
-      setState((prev) => ({
-        ...prev,
-        pendingInput: request,
-        isSending: false,
-      }));
+      dispatch({ type: 'SET_PENDING_INPUT', input: request });
       cacheSync.syncPendingInput(request);
     },
 
     onRoutinePreview: (preview: RoutinePreviewData) => {
-      setState((prev) => ({
-        ...prev,
-        pendingRoutinePreview: preview,
-        pendingInput: null,
-        routineProgress: null,
-        isSending: false,
-      }));
+      dispatch({ type: 'SET_ROUTINE_PREVIEW', preview });
       cacheSync.syncRoutinePreview(preview);
     },
 
     onRoutineApplied: (event: RoutineAppliedEvent) => {
-      setState((prev) => ({
-        ...prev,
-        appliedRoutine: event,
-        pendingRoutinePreview: null,
-      }));
+      dispatch({ type: 'SET_APPLIED_ROUTINE', event });
       cacheSync.syncRoutineApplied(event);
     },
 
     onRoutineProgress: (event: RoutineProgressEvent) => {
-      setState((prev) => ({
-        ...prev,
-        routineProgress: event,
-      }));
+      dispatch({ type: 'SET_ROUTINE_PROGRESS', progress: event });
     },
 
     onMealPlanPreview: (preview: MealPlanPreviewData) => {
-      setState((prev) => ({
-        ...prev,
-        pendingMealPreview: preview,
-        pendingInput: null,
-        mealProgress: null,
-        isSending: false,
-      }));
+      dispatch({ type: 'SET_MEAL_PREVIEW', preview });
       cacheSync.syncMealPlanPreview(preview);
     },
 
     onMealPlanApplied: (event: MealPlanAppliedEvent) => {
-      setState((prev) => ({
-        ...prev,
-        appliedMealPlan: event,
-        pendingMealPreview: null,
-      }));
+      dispatch({ type: 'SET_APPLIED_MEAL', event });
       cacheSync.syncMealPlanApplied(event);
     },
 
     onMealPlanProgress: (event: MealPlanProgressEvent) => {
-      setState((prev) => ({
-        ...prev,
-        mealProgress: event,
-      }));
+      dispatch({ type: 'SET_MEAL_PROGRESS', progress: event });
     },
 
     onProfileConfirmation: (request: ProfileConfirmationRequest) => {
-      setState((prev) => ({
-        ...prev,
-        pendingProfileConfirmation: request,
-        isSending: false,
-      }));
+      dispatch({ type: 'SET_PROFILE_CONFIRMATION', confirmation: request });
       cacheSync.syncProfileConfirmation(request);
     },
 
@@ -232,24 +159,13 @@ export function createChatCallbacks(ctx: CallbackBuilderContext): ChatStreamCall
         ? createMessage(sessionId, 'assistant', fullMessage)
         : null;
 
-      setState((prev) => {
-        const updatedMessages = newMessage
-          ? [...prev.messages, newMessage]
-          : prev.messages;
+      dispatch({ type: 'COMPLETE_SENDING', message: newMessage });
 
-        // React Query active 캐시 동기화
-        cacheSync.syncMessages(updatedMessages);
-
-        return {
-          ...prev,
-          messages: updatedMessages,
-          streamingContent: '',
-          isSending: false,
-          error: null,
-          routineProgress: null,
-          mealProgress: null,
-        };
-      });
+      // React Query active 캐시 동기화
+      const updatedMessages = newMessage
+        ? [...getMessages(), newMessage]
+        : getMessages();
+      cacheSync.syncMessages(updatedMessages);
 
       // 도구 상태 정리
       scheduleToolCleanup('completed', AI_CHAT_TIMING.TOOL_COMPLETED_DISPLAY_MS);
@@ -266,14 +182,11 @@ export function createChatCallbacks(ctx: CallbackBuilderContext): ChatStreamCall
         return;
       }
 
-      setState((prev) => ({
-        ...prev,
-        // 에러 시 마지막 사용자 메시지 롤백 (시스템 메시지 제외)
-        messages: isSystemMessage ? prev.messages : prev.messages.slice(0, -1),
-        streamingContent: '',
-        isSending: false,
+      dispatch({
+        type: 'SET_ERROR',
         error: error.message || '메시지 전송에 실패했습니다.',
-      }));
+        rollbackLastMessage: !isSystemMessage,
+      });
 
       abortControllerRef.current = null;
     },

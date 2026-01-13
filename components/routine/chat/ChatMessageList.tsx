@@ -19,6 +19,7 @@ import { ChatProfileConfirmation } from './ChatProfileConfirmation';
 import { ChatProgressIndicator } from './ChatProgressIndicator';
 import { ChatAppliedBanner } from './ChatAppliedBanner';
 import { Loader2, Play } from 'lucide-react';
+import { AI_TOOL_LABELS } from '@/lib/types/fitness';
 import { SessionPurpose } from '@/lib/types/routine';
 
 interface ChatMessageListProps {
@@ -165,8 +166,29 @@ export default function ChatMessageList({
           />
         )}
 
-        {/* 로딩 인디케이터 */}
-        {isLoading && !streamingContent && !pendingInput && !pendingProfileConfirmation && (
+        {/* 도구 실행 중 피드백 (프로필 조회중 등) */}
+        {(() => {
+          const runningTool = activeTools.find((t) => t.status === 'running');
+          if (!runningTool || streamingContent || pendingInput || pendingProfileConfirmation) return null;
+          // 미리보기 생성 도구는 진행률 표시로 대체되므로 제외
+          if (runningTool.name === 'generate_routine_preview' || runningTool.name === 'generate_meal_plan_preview') return null;
+
+          const toolLabel = AI_TOOL_LABELS[runningTool.name] || '처리 중';
+          return (
+            <div className="flex gap-3 items-center">
+              <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                <Loader2 className="w-4 h-4 animate-spin" />
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {toolLabel}...
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* 로딩 인디케이터 (도구 실행 중이 아닐 때만 표시) */}
+        {isLoading && !streamingContent && !pendingInput && !pendingProfileConfirmation &&
+         !activeTools.some((t) => t.status === 'running') && (
           <div className="flex gap-3">
             <div className="shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
               <Loader2 className="w-4 h-4 animate-spin" />

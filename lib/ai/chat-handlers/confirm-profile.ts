@@ -24,10 +24,21 @@ export async function handleConfirmProfile(
   args: ConfirmProfileArgs,
   ctx: ToolHandlerContext
 ): Promise<ToolHandlerResult> {
+  // description이 있으면 별도 텍스트 메시지로 저장 (카드와 분리)
+  if (args.description?.trim()) {
+    await ctx.supabase.from('chat_messages').insert({
+      conversation_id: ctx.conversationId,
+      sender_id: null,
+      role: 'assistant',
+      content: args.description,
+      content_type: 'text',
+    });
+  }
+
+  // confirmationRequest에는 description 제외 (이미 별도 메시지로 저장됨)
   const confirmationRequest = {
     id: fc.id,
     title: args.title,
-    description: args.description,
     fields: args.fields,
   };
 

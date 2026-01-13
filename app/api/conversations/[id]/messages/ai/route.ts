@@ -367,6 +367,29 @@ export const POST = withAuth<Response>(
                       });
                     }
                   }
+
+                  // generate_meal_plan_preview 진행률 전송
+                  if (fc.name === 'generate_meal_plan_preview') {
+                    // 예상 토큰: ~2000 (2주 × 7일 × 3끼)
+                    // 글자 수 기준 진행률 계산 (대략 4글자 = 1토큰)
+                    const estimatedChars = 8000; // ~2000 tokens × 4 chars
+                    const progress = Math.min(95, Math.round((fc.arguments.length / estimatedChars) * 100));
+
+                    // 5% 단위로만 이벤트 전송 (너무 자주 보내지 않도록)
+                    const progressStep = Math.floor(progress / 5) * 5;
+                    const lastProgress = (fc as unknown as { lastProgress?: number }).lastProgress ?? 0;
+
+                    if (progressStep > lastProgress) {
+                      (fc as unknown as { lastProgress: number }).lastProgress = progressStep;
+                      sendEvent('meal_plan_progress', {
+                        progress: progressStep,
+                        stage: progress < 30 ? '식단 요구사항 분석 중...' :
+                               progress < 50 ? '영양소 계산 중...' :
+                               progress < 70 ? '식단 구성 중...' :
+                               progress < 90 ? '최적화 중...' : '거의 완료!',
+                      });
+                    }
+                  }
                 }
               }
 

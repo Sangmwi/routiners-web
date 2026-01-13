@@ -52,8 +52,8 @@ export default function RoutinePage() {
 
       {/* AI 코치 플로팅 버튼 */}
       <FloatingAIButton
-        hasWorkoutSession={!!workoutSession}
-        hasMealSession={!!mealSession}
+        workoutSession={workoutSession}
+        mealSession={mealSession}
       />
     </MainTabLayout>
   );

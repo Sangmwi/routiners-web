@@ -97,6 +97,12 @@ export function useCreateAISession() {
       }),
 
     onSuccess: (newSession) => {
+      // 진행 중인 쿼리 취소 → race condition 방지
+      // 쿼리가 완료되면 서버 응답으로 캐시를 덮어쓰는데, 이를 방지
+      queryClient.cancelQueries({
+        queryKey: queryKeys.aiSession.active(newSession.purpose),
+      });
+
       // 활성 세션 캐시 업데이트 (AISessionCompat.purpose 사용)
       queryClient.setQueryData(
         queryKeys.aiSession.active(newSession.purpose),
