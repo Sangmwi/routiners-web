@@ -117,12 +117,19 @@ export const useWebViewCommands = () => {
         const success = await setSession(cmd.access_token, cmd.refresh_token);
         notifySessionSet(success);
 
-        // /login 또는 /app-init에서 세션 설정 시 홈으로 이동
+        // /login 또는 /app-init에서 세션 설정 시 항상 네비게이션 수행
         const currentPath = pathnameRef.current;
-        if (success && (currentPath === "/login" || currentPath === "/app-init")) {
+        if (currentPath === "/login" || currentPath === "/app-init") {
           // 상태 안정화 후 이동 (race condition 방지)
           await new Promise((resolve) => setTimeout(resolve, 50));
-          router.replace("/");
+
+          if (success) {
+            // 세션 설정 성공 → 홈으로
+            router.replace("/");
+          } else {
+            // 세션 설정 실패 → 로그인 페이지로 (스플래시 해제를 위해)
+            router.replace("/login");
+          }
         }
       })
     );
