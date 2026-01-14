@@ -118,6 +118,8 @@ export const useWebViewCommands = () => {
         notifySessionSet(success);
 
         if (success && pathnameRef.current === "/login") {
+          // 상태 안정화 후 이동 (race condition 방지)
+          await new Promise((resolve) => setTimeout(resolve, 50));
           router.replace("/");
         }
       })
@@ -129,6 +131,8 @@ export const useWebViewCommands = () => {
         await clearSession();
         // WEB_READY 상태 리셋하여 재로그인 시 다시 전송되도록 함
         resetWebReadyState();
+        // 상태 안정화 후 이동 (race condition 방지)
+        await new Promise((resolve) => setTimeout(resolve, 50));
         router.replace("/login");
       })
     );
