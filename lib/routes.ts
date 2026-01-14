@@ -10,6 +10,7 @@ export const ROUTES_WITHOUT_TAB = [
   '/login',           // 로그인 페이지
   '/signup',          // 회원가입 페이지
   '/onboarding',      // 온보딩 페이지
+  '/app-init',        // 앱 초기화 페이지 (WebView 세션 동기화)
   // 하위 페이지들 (prefix 매칭)
   '/routine/',        // /routine/chat, /routine/2025-01-01 등
   '/community/',      // /community/post/123 등

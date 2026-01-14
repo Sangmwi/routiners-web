@@ -1,8 +1,11 @@
 /**
- * 세션 관리 API
+ * 세션 관리 API (레거시)
  *
- * 앱에서 네이티브 OAuth로 받은 토큰을 웹 쿠키 세션으로 변환합니다.
- * 이를 통해 WebView에서도 쿠키 기반 인증을 사용할 수 있습니다.
+ * ⚠️ WebView에서는 사용하지 않음!
+ * WebView는 클라이언트 사이드 supabase.auth.setSession()을 사용합니다.
+ * (hooks/webview/useWebViewAuth.ts 참조)
+ *
+ * 이 API는 웹 브라우저에서 직접 OAuth 로그인할 때만 사용됩니다.
  *
  * POST: 토큰으로 쿠키 세션 설정
  * DELETE: 세션 삭제 (로그아웃)

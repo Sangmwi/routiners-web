@@ -117,7 +117,9 @@ export const useWebViewCommands = () => {
         const success = await setSession(cmd.access_token, cmd.refresh_token);
         notifySessionSet(success);
 
-        if (success && pathnameRef.current === "/login") {
+        // /login 또는 /app-init에서 세션 설정 시 홈으로 이동
+        const currentPath = pathnameRef.current;
+        if (success && (currentPath === "/login" || currentPath === "/app-init")) {
           // 상태 안정화 후 이동 (race condition 방지)
           await new Promise((resolve) => setTimeout(resolve, 50));
           router.replace("/");
@@ -131,9 +133,8 @@ export const useWebViewCommands = () => {
         await clearSession();
         // WEB_READY 상태 리셋하여 재로그인 시 다시 전송되도록 함
         resetWebReadyState();
-        // 상태 안정화 후 이동 (race condition 방지)
-        await new Promise((resolve) => setTimeout(resolve, 50));
-        router.replace("/login");
+        // window.location.replace로 히스토리 완전 교체 (뒤로가기 방지)
+        window.location.replace("/login");
       })
     );
 

@@ -4,12 +4,13 @@
  * WebView Auth Hook
  *
  * WebView 환경에서의 인증 관련 기능을 담당합니다.
- * - 세션 설정/삭제
+ * - 세션 설정/삭제 (클라이언트 사이드 Supabase 직접 호출)
  * - 로그인 요청
  * - 로그아웃 알림
  */
 
 import { useWebViewCore, LOG_PREFIX } from "./useWebViewCore";
+import { createClient } from "@/utils/supabase/client";
 
 // ============================================================================
 // Hook
@@ -19,26 +20,23 @@ export const useWebViewAuth = () => {
   const { sendMessage } = useWebViewCore();
 
   /**
-   * 앱에서 받은 토큰으로 쿠키 세션을 설정합니다.
+   * 앱에서 받은 토큰으로 세션을 설정합니다.
+   * 클라이언트 사이드에서 직접 Supabase setSession 호출 (서버 API 불필요)
+   * @supabase/ssr이 document.cookie를 자동으로 관리합니다.
    */
   const setSession = async (
     accessToken: string,
     refreshToken: string
   ): Promise<boolean> => {
     try {
-      const response = await fetch("/api/auth/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        }),
-        credentials: "include",
+      const supabase = createClient();
+      const { error } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
       });
 
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        console.error(`${LOG_PREFIX} Session set failed:`, error);
+      if (error) {
+        console.error(`${LOG_PREFIX} Session set failed:`, error.message);
         return false;
       }
 
@@ -51,13 +49,12 @@ export const useWebViewAuth = () => {
 
   /**
    * 세션을 삭제합니다.
+   * 클라이언트 사이드에서 직접 Supabase signOut 호출
    */
   const clearSession = async (): Promise<boolean> => {
     try {
-      await fetch("/api/auth/session", {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const supabase = createClient();
+      await supabase.auth.signOut({ scope: "local" });
       return true;
     } catch (e) {
       console.error(`${LOG_PREFIX} Session clear error:`, e);

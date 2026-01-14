@@ -6,7 +6,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 // ============================================================================
 
 /** 인증 불필요 경로 (exact match) */
-const PUBLIC_ROUTES = new Set(['/login'])
+const PUBLIC_ROUTES = new Set(['/login', '/app-init'])
 
 /** 인증 불필요 경로 (prefix match) */
 const PUBLIC_PREFIXES = ['/auth/']
