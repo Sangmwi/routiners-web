@@ -162,13 +162,9 @@ export function useChatPageHandlers({
           purpose: session.purpose,
         });
 
+        // 새 세션 URL로 히스토리 대체 (캐시 유지, 깜빡임 방지)
         const newUrl = `/routine/chat?session=${newSession.id}`;
-        if (isInWebView) {
-          window.location.replace(newUrl);
-        } else {
-          // 새 세션 URL로 히스토리 대체 (뒤로가기 시 이전 세션으로 가지 않음)
-          router.replace(newUrl);
-        }
+        router.replace(newUrl);
       },
     });
   };
