@@ -16,6 +16,7 @@ export const ROUTES_WITHOUT_TAB = [
   '/community/',      // /community/post/123 등
   '/profile/edit',
   '/profile/inbody',  // 인바디 관리
+  '/profile/fitness', // 피트니스 관리
 ] as const;
 
 // ============================================================================
