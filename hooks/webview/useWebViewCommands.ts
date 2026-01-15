@@ -112,13 +112,23 @@ export const useWebViewCommands = () => {
     );
 
     // SET_SESSION
-    // 네비게이션은 앱에서 처리 (SESSION_SET 응답 수신 후 NAVIGATE_HOME 전송)
-    // 이렇게 하면 Preview 환경에서 메시지 전달 race condition 방지
+    // window.location.replace 사용 (router.replace보다 확실함)
     cleanups.push(
       registerCommandHandler<SetSessionMessage>("SET_SESSION", async (cmd) => {
         const success = await setSession(cmd.access_token, cmd.refresh_token);
         notifySessionSet(success);
-        // 네비게이션 없음 - 앱이 SESSION_SET 수신 후 NAVIGATE_HOME/NAVIGATE_TO 전송
+
+        // 브라우저 네이티브 네비게이션 (SESSION_SET 전달 시간 확보 후)
+        const currentPath = pathnameRef.current;
+        if (currentPath === "/login" || currentPath === "/app-init") {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+
+          if (success) {
+            window.location.replace("/");
+          } else {
+            window.location.replace("/login");
+          }
+        }
       })
     );
 
