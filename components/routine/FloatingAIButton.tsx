@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bot, Sparkles, Loader2 } from 'lucide-react';
 import { useModalStore } from '@/lib/stores/modalStore';
+import { useShowError } from '@/lib/stores/errorStore';
 import { useCreateAISession } from '@/hooks/aiChat';
 import type { AISessionCompat } from '@/lib/types/chat';
 import type { SessionPurpose } from '@/lib/types/routine';
@@ -30,6 +31,7 @@ export default function FloatingAIButton({
   const openModal = useModalStore((state) => state.openModal);
   const closeCurrentModal = useModalStore((state) => state.closeCurrentModal);
   const createSession = useCreateAISession();
+  const showError = useShowError();
   const [isNavigating, setIsNavigating] = useState(false);
 
   const hasAnySession = !!workoutSession || !!mealSession;
@@ -53,6 +55,7 @@ export default function FloatingAIButton({
         router.push(`/routine/chat?session=${newSession.id}`);
       } catch (error) {
         console.error('[FloatingAIButton] Session creation failed:', error);
+        showError('AI 코치 연결에 실패했습니다');
         setIsNavigating(false);
       }
     }

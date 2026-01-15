@@ -45,7 +45,7 @@ export default function UnitSearch({ units, selectedUnit, onSelect, error }: Uni
   return (
     <div className="w-full">
       <label className="mb-2 block text-sm font-medium text-foreground">
-        소속 부대 <span className="ml-1 text-red-500">*</span>
+        소속 부대 <span className="ml-1 text-destructive">*</span>
       </label>
 
       {selectedUnit ? (
@@ -77,7 +77,7 @@ export default function UnitSearch({ units, selectedUnit, onSelect, error }: Uni
               placeholder="부대명 또는 지역으로 검색"
               className={`w-full rounded-xl border py-3 pl-10 pr-4 text-sm transition-all duration-200 focus:outline-none focus:ring-2 bg-background text-foreground ${
                 error
-                  ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
+                  ? 'border-destructive/50 focus:border-destructive focus:ring-destructive/20'
                   : 'border-border focus:border-primary focus:ring-primary/20'
               }`}
             />
@@ -104,7 +104,7 @@ export default function UnitSearch({ units, selectedUnit, onSelect, error }: Uni
         </div>
       )}
 
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+      {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
     </div>
   );
 }

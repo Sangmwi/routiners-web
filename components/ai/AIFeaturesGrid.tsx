@@ -14,19 +14,19 @@ const FEATURES: Feature[] = [
     icon: Activity,
     title: '자세 분석',
     description: '실시간으로 운동 자세를 분석하고 교정합니다',
-    color: 'text-blue-500',
+    color: 'text-primary',
   },
   {
     icon: BarChart3,
     title: '운동 기록',
     description: '세트, 반복수, 무게를 자동으로 기록합니다',
-    color: 'text-green-500',
+    color: 'text-success',
   },
   {
     icon: Target,
     title: '맞춤 추천',
     description: '당신의 목표에 맞는 운동을 추천합니다',
-    color: 'text-teal-500',
+    color: 'text-workout',
   },
   {
     icon: Trophy,

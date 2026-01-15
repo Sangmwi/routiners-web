@@ -21,7 +21,7 @@ export default function AICameraView() {
 
         {/* 상태 인디케이터 */}
         <div className="absolute top-3 left-3 flex items-center gap-2 rounded-full bg-card/90 backdrop-blur-sm px-3 py-1.5 shadow-sm border border-border/50">
-          <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+          <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
           <span className="text-xs font-medium text-foreground">대기 중</span>
         </div>
       </div>

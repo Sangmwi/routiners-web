@@ -13,6 +13,9 @@ export * from "./useWebViewLifecycle";
 // Commands - 앱 명령 처리 (맵 기반 핸들러)
 export * from "./useWebViewCommands";
 
+// Domain Commands - 도메인별 명령 핸들러
+export * from "./useLoginCommands";
+
 // Bridge - 통합 훅 (모든 기능 포함)
 export * from "./useWebViewBridge";
 

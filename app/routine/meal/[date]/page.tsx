@@ -35,8 +35,8 @@ export default function MealDetailPage({ params }: MealDetailPageProps) {
       <div className="flex flex-col items-center justify-center gap-6 p-8 mt-12">
         {/* 아이콘 */}
         <div className="relative">
-          <div className="w-24 h-24 rounded-full bg-lime-500/10 flex items-center justify-center">
-            <Utensils className="w-12 h-12 text-lime-500" />
+          <div className="w-24 h-24 rounded-full bg-meal/10 flex items-center justify-center">
+            <Utensils className="w-12 h-12 text-meal" />
           </div>
           <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-white" />
@@ -60,19 +60,19 @@ export default function MealDetailPage({ params }: MealDetailPageProps) {
           <h3 className="text-sm font-semibold text-foreground">출시 예정 기능</h3>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-lime-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-meal" />
               맞춤형 칼로리 및 영양소 계획
             </li>
             <li className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-lime-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-meal" />
               식사별 메뉴 추천
             </li>
             <li className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-lime-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-meal" />
               영양 섭취 트래킹
             </li>
             <li className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-lime-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-meal" />
               운동 목표 연동 식단 최적화
             </li>
           </ul>

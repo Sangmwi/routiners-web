@@ -13,7 +13,7 @@ import { ImageWithFallback } from "@/components/ui/image";
 import { ImageSourceDrawer } from "@/components/drawers";
 import FormSection from "@/components/ui/FormSection";
 import ErrorToast from "@/components/ui/ErrorToast";
-import { Plus, Loader2, X, GripVertical, Star, Move } from "lucide-react";
+import { Plus, Loader2, X, Star, Move } from "lucide-react";
 
 // ============================================================
 // Constants
@@ -40,9 +40,11 @@ interface PhotoSlotProps {
   isDragOver: boolean;
   isLongPressed: boolean;
   isTouchDragging: boolean;
+  isSelected: boolean;
   isMobile: boolean;
   onAddClick: () => void;
   onDelete: () => void;
+  onSelect: () => void;
   onDragStart: (e: React.DragEvent) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDragLeave: () => void;
@@ -67,26 +69,34 @@ function MainPhotoBadge() {
   );
 }
 
-function DragHandle() {
+function DeleteOverlay({
+  isVisible,
+  onDelete,
+}: {
+  isVisible: boolean;
+  onDelete: () => void;
+}) {
   return (
-    <div className="absolute top-2 right-2 p-1.5 bg-black/50 rounded-lg cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block">
-      <GripVertical className="w-4 h-4 text-white" />
-    </div>
-  );
-}
-
-function DeleteButton({ onClick }: { onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick();
-      }}
-      className="absolute bottom-2 right-2 p-1.5 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+    <div
+      className={`absolute inset-0 bg-black/60 transition-opacity pointer-events-none ${
+        isVisible ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+      }`}
     >
-      <X className="w-4 h-4" />
-    </button>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete();
+        }}
+        className={`absolute top-2 right-2 p-1 ${
+          isVisible
+            ? "pointer-events-auto"
+            : "pointer-events-none group-hover:pointer-events-auto"
+        }`}
+      >
+        <X className="w-5 h-5 text-white/80" />
+      </button>
+    </div>
   );
 }
 
@@ -135,9 +145,11 @@ function PhotoSlot({
   isDragOver,
   isLongPressed,
   isTouchDragging,
+  isSelected,
   isMobile,
   onAddClick,
   onDelete,
+  onSelect,
   onDragStart,
   onDragOver,
   onDragLeave,
@@ -159,10 +171,17 @@ function PhotoSlot({
     ${isTouchDragging ? "opacity-70 scale-[0.97] shadow-xl z-10" : ""}
   `;
 
+  const handleClick = () => {
+    if (hasImage && !isProcessing && !isTouchDragging) {
+      onSelect();
+    }
+  };
+
   return (
     <div
       className={slotClassName}
       draggable={hasImage && !isProcessing && !isMobile}
+      onClick={handleClick}
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
@@ -184,8 +203,9 @@ function PhotoSlot({
             optimizePreset="card"
           />
           {isFirst && <MainPhotoBadge />}
-          {!isProcessing && <DragHandle />}
-          {!isProcessing && <DeleteButton onClick={onDelete} />}
+          {!isProcessing && (
+            <DeleteOverlay isVisible={isSelected} onDelete={onDelete} />
+          )}
           {isProcessing && <ProcessingOverlay />}
           {isTouchDragging && <TouchDragIndicator />}
         </>
@@ -244,6 +264,7 @@ export default function ProfilePhotoGallery({
   const [processingIndex, setProcessingIndex] = useState<number | null>(null);
   const [isImageSourceOpen, setIsImageSourceOpen] = useState(false);
   const [pendingSlotIndex, setPendingSlotIndex] = useState<number | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   // ========== Effects ==========
 
@@ -264,29 +285,21 @@ export default function ProfilePhotoGallery({
   const handleSelectSource = async (source: ImagePickerSource) => {
     if (pendingSlotIndex === null) return;
 
-    // 슬롯 인덱스를 로컬 변수에 저장
-    const slotIndex = pendingSlotIndex;
-
-    // 1. 드로어 닫기
     setIsImageSourceOpen(false);
-    setPendingSlotIndex(null);
-
-    // 2. 드로어 닫힘 애니메이션 완료 대기 (Modal의 ANIMATION_DURATION = 200ms)
-    await new Promise((resolve) => setTimeout(resolve, 250));
-
-    // 3. 처리 시작
-    setProcessingIndex(slotIndex);
+    setProcessingIndex(pendingSlotIndex);
 
     const result = await pickImage(source);
 
     if (result.cancelled) {
       setProcessingIndex(null);
+      setPendingSlotIndex(null);
       return;
     }
 
     if (!result.success) {
       setErrorMessage(result.error || "이미지 선택에 실패했습니다.");
       setProcessingIndex(null);
+      setPendingSlotIndex(null);
       return;
     }
 
@@ -301,11 +314,12 @@ export default function ProfilePhotoGallery({
       if (!validation.valid) {
         setErrorMessage(validation.error || "파일 검증에 실패했습니다.");
         setProcessingIndex(null);
+        setPendingSlotIndex(null);
         return;
       }
 
       // 동기적으로 이미지 추가 (Blob URL 즉시 생성)
-      const addResult: AddImageResult = addImage(file, slotIndex);
+      const addResult: AddImageResult = addImage(file, pendingSlotIndex);
 
       if (!addResult.success && addResult.error) {
         setErrorMessage(addResult.error);
@@ -313,10 +327,20 @@ export default function ProfilePhotoGallery({
     }
 
     setProcessingIndex(null);
+    setPendingSlotIndex(null);
   };
 
   const handleDelete = (index: number) => {
     removeImage(index);
+    setSelectedIndex(null);
+  };
+
+  const handleSelect = (index: number) => {
+    setSelectedIndex((prev) => (prev === index ? null : index));
+  };
+
+  const clearSelection = () => {
+    setSelectedIndex(null);
   };
 
   // ========== Render ==========
@@ -340,9 +364,11 @@ export default function ProfilePhotoGallery({
             isDragOver={dragOverIndex === index}
             isLongPressed={longPressIndex === index}
             isTouchDragging={touchDragIndex === index}
+            isSelected={selectedIndex === index}
             isMobile={isMobile}
             onAddClick={() => handleAddClick(index)}
             onDelete={() => handleDelete(index)}
+            onSelect={() => handleSelect(index)}
             onDragStart={(e) => handleDragStart(e, index)}
             onDragOver={(e) => handleDragOver(e, index)}
             onDragLeave={handleDragLeave}
@@ -362,6 +388,10 @@ export default function ProfilePhotoGallery({
 
       {longPressIndex !== null && (
         <div className="fixed inset-0 z-40" onClick={resetLongPress} />
+      )}
+
+      {selectedIndex !== null && (
+        <div className="fixed inset-0 z-40" onClick={clearSelection} />
       )}
 
       {errorMessage && (

@@ -6,6 +6,7 @@ import WebViewBridge from "@/components/WebViewBridge";
 import QueryProvider from "@/lib/providers/QueryProvider";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import { ModalProvider } from "@/components/modals";
+import GlobalErrorToast from "@/components/ui/GlobalErrorToast";
 
 const pretendardVariable = localFont({
   src: '../assets/fonts/PretendardVariable.woff2',
@@ -36,6 +37,7 @@ export default function RootLayout({
           <ErrorBoundary>
             <WebViewBridge />
             <ModalProvider />
+            <GlobalErrorToast />
             <div className="mx-auto flex min-h-screen max-w-md flex-col bg-background shadow-2xl">
               <main className="flex-1">
                 {children}

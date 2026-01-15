@@ -17,6 +17,7 @@ import { Loader2, CheckCircle, Trash2 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { conversationApi } from '@/lib/api/conversation';
 import { useConfirmDialog } from '@/lib/stores/modalStore';
+import { useShowError } from '@/lib/stores/errorStore';
 
 /**
  * AI 트레이너 채팅 페이지
@@ -35,6 +36,7 @@ export default function AIChatPage() {
   const { isInWebView } = useWebViewCore();
   // 루틴/식단 적용 완료 상태 추적 (적용 후 리다이렉트 방지)
   const hasAppliedRef = useRef(false);
+  const showError = useShowError();
 
   // URL에서 session 파라미터 확인 (필수)
   const sessionId = searchParams.get('session');
@@ -140,6 +142,7 @@ export default function AIChatPage() {
           }
         } catch (err) {
           console.error('Failed to delete chat:', err);
+          showError('채팅 삭제에 실패했습니다');
         }
       },
     });
@@ -208,7 +211,7 @@ export default function AIChatPage() {
   );
 
   return (
-    <div className="h-screen bg-background flex flex-col overflow-hidden">
+    <div className="h-dvh bg-background flex flex-col overflow-hidden">
       <PageHeader
         title={headerTitle}
         onBack={() => router.push('/routine')}
@@ -219,8 +222,8 @@ export default function AIChatPage() {
       {isCompleted && (
         <div className={`px-4 py-3 border-b flex items-center gap-2 ${
           session.purpose === 'meal'
-            ? 'bg-lime-500/10 border-lime-500/20 text-lime-600'
-            : 'bg-green-500/10 border-green-500/20 text-green-600'
+            ? 'bg-meal/10 border-meal/20 text-meal'
+            : 'bg-workout/10 border-workout/20 text-workout'
         }`}>
           <CheckCircle className="w-5 h-5" />
           <span className="text-sm font-medium">

@@ -36,12 +36,12 @@ export default function ChatCompletedBanner({
     <div className="p-4 border-t border-border bg-card">
       <div className="flex items-center gap-3 mb-3">
         <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-          isMeal ? 'bg-lime-500/10' : 'bg-green-500/10'
+          isMeal ? 'bg-meal/10' : 'bg-workout/10'
         }`}>
           {isMeal ? (
-            <Utensils className="w-4 h-4 text-lime-600" />
+            <Utensils className="w-4 h-4 text-meal" />
           ) : (
-            <CheckCircle className="w-4 h-4 text-green-600" />
+            <CheckCircle className="w-4 h-4 text-workout" />
           )}
         </div>
         <div className="flex-1 min-w-0">

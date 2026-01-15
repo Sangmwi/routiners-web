@@ -194,7 +194,7 @@ function SessionItem({ session, isSelected, onSelect }: SessionItemProps) {
   // 목적 아이콘
   const PurposeIcon = purpose === 'meal' ? Utensils : Dumbbell;
   const purposeLabel = purpose === 'meal' ? '식단 관리' : '운동 루틴';
-  const purposeColor = purpose === 'meal' ? 'text-lime-500' : 'text-teal-500';
+  const purposeColor = purpose === 'meal' ? 'text-meal' : 'text-workout';
 
   return (
     <li>
@@ -210,7 +210,7 @@ function SessionItem({ session, isSelected, onSelect }: SessionItemProps) {
         {/* 목적 아이콘 */}
         <div
           className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-            purpose === 'meal' ? 'bg-lime-500/10' : 'bg-teal-500/10'
+            purpose === 'meal' ? 'bg-meal/10' : 'bg-workout/10'
           }`}
         >
           <PurposeIcon className={`w-4 h-4 ${purposeColor}`} />
@@ -268,7 +268,7 @@ function getStatusInfo(status?: ConversationStatus): {
       return {
         icon: <CheckCircle className="w-3 h-3" />,
         label: '완료',
-        color: 'text-green-600',
+        color: 'text-success',
       };
     default:
       return null;

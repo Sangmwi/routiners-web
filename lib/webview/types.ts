@@ -57,6 +57,7 @@ export type AppToWebMessage =
   | { type: 'SET_SESSION'; access_token: string; refresh_token: string }
   | { type: 'CLEAR_SESSION' }
   | { type: 'LOGIN_ERROR'; error: string }
+  | { type: 'LOGIN_CANCELLED' }
   | { type: 'IMAGE_PICKER_RESULT'; requestId: string; result: ImagePickerResult };
 
 /** 웹 → 앱 메시지 (postMessage로 전송) */

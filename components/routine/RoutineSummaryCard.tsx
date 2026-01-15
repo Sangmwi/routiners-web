@@ -32,18 +32,18 @@ interface RoutineSummaryCardProps {
 
 const typeStyles = {
   workout: {
-    iconBg: 'bg-teal-500/10',
-    iconColor: 'text-teal-500',
-    progressBg: 'bg-teal-500',
-    progressTrack: 'bg-teal-500/20',
-    activeBorder: 'border-teal-500/30',
+    iconBg: 'bg-workout/10',
+    iconColor: 'text-workout',
+    progressBg: 'bg-workout',
+    progressTrack: 'bg-workout/20',
+    activeBorder: 'border-workout/30',
   },
   meal: {
-    iconBg: 'bg-lime-500/10',
-    iconColor: 'text-lime-500',
-    progressBg: 'bg-lime-500',
-    progressTrack: 'bg-lime-500/20',
-    activeBorder: 'border-lime-500/30',
+    iconBg: 'bg-meal/10',
+    iconColor: 'text-meal',
+    progressBg: 'bg-meal',
+    progressTrack: 'bg-meal/20',
+    activeBorder: 'border-meal/30',
   },
 };
 

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Plus, ChevronRight, Calendar, Loader2, Trash2, AlertCircle } from 'lucide-react';
 import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import { useShowError } from '@/lib/stores/errorStore';
 import { InBodyRecord } from '@/lib/types/inbody';
 import { useInBodyRecords, useDeleteInBody } from '@/hooks/inbody';
 import InBodyScanModal from './InBodyScanModal';
@@ -25,6 +26,7 @@ export default function InBodyManageModal({
   const [recordToDelete, setRecordToDelete] = useState<InBodyRecord | null>(null);
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const showError = useShowError();
 
   const { data: records = [], isLoading } = useInBodyRecords(50, 0, {
     enabled: isOpen,
@@ -63,6 +65,7 @@ export default function InBodyManageModal({
       setRecordToDelete(null);
     } catch (error) {
       console.error('Failed to delete InBody record:', error);
+      showError('기록 삭제에 실패했습니다');
     }
   };
 

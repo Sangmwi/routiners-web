@@ -34,7 +34,6 @@ type HandlerRegistry = Map<CommandType, Set<CommandHandler>>;
 // 개별 메시지 타입 추출
 type NavigateToMessage = Extract<AppToWebMessage, { type: "NAVIGATE_TO" }>;
 type SetSessionMessage = Extract<AppToWebMessage, { type: "SET_SESSION" }>;
-type LoginErrorMessage = Extract<AppToWebMessage, { type: "LOGIN_ERROR" }>;
 
 // ============================================================================
 // Global Registry (싱글톤)
@@ -84,7 +83,10 @@ export const useWebViewCommands = () => {
   const { sendRouteInfo } = useWebViewNavigation();
 
   // ──────────────────────────────────────────────────────────────────────────
-  // 기본 핸들러 등록 (내장)
+  // 글로벌 핸들러 (앱 전역에서 필요한 이벤트)
+  //
+  // 페이지 전용 이벤트는 도메인별 훅에서 처리:
+  // - LOGIN_CANCELLED, LOGIN_ERROR → useLoginCommands.ts
   // ──────────────────────────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -142,13 +144,6 @@ export const useWebViewCommands = () => {
         resetWebReadyState();
         // window.location.replace로 히스토리 완전 교체 (뒤로가기 방지)
         window.location.replace("/login");
-      })
-    );
-
-    // LOGIN_ERROR
-    cleanups.push(
-      registerCommandHandler<LoginErrorMessage>("LOGIN_ERROR", (cmd) => {
-        console.error(`${LOG_PREFIX} Login error from app:`, cmd.error);
       })
     );
 

@@ -57,6 +57,18 @@
 
   --border: #cbd5e1; /* slate-300 - 중립 회색 */
   --input: #dbf5e2;
+
+  /* Semantic Colors */
+  --destructive: #ef4444; /* red-500 */
+  --destructive-foreground: #ffffff;
+  --success: #22c55e; /* green-500 (Tailwind default) */
+  --success-foreground: #ffffff;
+
+  /* Domain Colors - 운동/식단 구분 */
+  --workout: #14b8a6; /* teal-500 - 운동 관련 UI */
+  --workout-foreground: #ffffff;
+  --meal: #84cc16; /* lime-500 - 식단 관련 UI */
+  --meal-foreground: #ffffff;
 }
 
 @theme inline {
@@ -72,7 +84,15 @@
   --color-card-foreground: var(--card-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
-  
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-workout: var(--workout);
+  --color-workout-foreground: var(--workout-foreground);
+  --color-meal: var(--meal);
+  --color-meal-foreground: var(--meal-foreground);
+
   /* Green Brand Scale - Tailwind에서 green-500 등으로 사용 가능 */
   --color-green-50: var(--color-green-50);
   --color-green-100: var(--color-green-100);
@@ -143,6 +163,18 @@
 
     /* Input: 카드와 동일한 어두운 배경 */
     --input: #1e293b; /* slate-800 */
+
+    /* Semantic Colors (Dark) */
+    --destructive: #f87171; /* red-400 - 어두운 배경에서 더 밝게 */
+    --destructive-foreground: #0f172a;
+    --success: #4ade80; /* green-400 - 어두운 배경에서 더 밝게 */
+    --success-foreground: #0f172a;
+
+    /* Domain Colors (Dark) */
+    --workout: #2dd4bf; /* teal-400 - 어두운 배경에서 더 밝게 */
+    --workout-foreground: #042f2e;
+    --meal: #a3e635; /* lime-400 - 어두운 배경에서 더 밝게 */
+    --meal-foreground: #1a2e05;
 
     /* Green 브랜드 컬러 스케일 반전 */
     --color-green-50: #0a2610;   /* 950 반전 */

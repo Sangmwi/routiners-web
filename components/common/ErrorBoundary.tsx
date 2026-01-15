@@ -145,8 +145,8 @@ function ErrorFallback({
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6">
       <div className="w-full max-w-sm text-center">
         {/* 에러 아이콘 */}
-        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
-          <AlertTriangle className="h-10 w-10 text-red-500" />
+        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-destructive/10">
+          <AlertTriangle className="h-10 w-10 text-destructive" />
         </div>
 
         {/* 제목 */}
@@ -165,7 +165,7 @@ function ErrorFallback({
             <summary className="cursor-pointer text-xs font-medium text-muted-foreground">
               개발자 정보 (Dev Only)
             </summary>
-            <pre className="mt-2 overflow-auto text-xs text-red-600">
+            <pre className="mt-2 overflow-auto text-xs text-destructive">
               {error.name}: {error.message}
               {'\n\n'}
               {error.stack}

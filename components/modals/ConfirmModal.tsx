@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import { useShowError } from '@/lib/stores/errorStore';
 import type { ModalDataMap } from '@/lib/stores/modalStore';
 
 // ============================================================================
@@ -32,6 +33,7 @@ export default function ConfirmModal({
   data,
 }: ConfirmModalProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const showError = useShowError();
 
   const {
     title,
@@ -50,6 +52,7 @@ export default function ConfirmModal({
       onClose();
     } catch (error) {
       console.error('Confirm action failed:', error);
+      showError('작업 처리에 실패했습니다');
     } finally {
       setIsLoading(false);
     }
@@ -73,8 +76,8 @@ export default function ConfirmModal({
         <div className="text-center">
           {/* 아이콘 (위험 작업일 때만) */}
           {variant === 'danger' && (
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+              <AlertTriangle className="h-6 w-6 text-destructive" />
             </div>
           )}
 
@@ -96,11 +99,11 @@ export default function ConfirmModal({
               {cancelText}
             </Button>
             <Button
-              variant={variant === 'danger' ? 'primary' : 'primary'}
+              variant={variant === 'danger' ? 'destructive' : 'primary'}
               size="lg"
               onClick={handleConfirm}
               disabled={isLoading}
-              className={`flex-1 ${variant === 'danger' ? 'bg-red-600 hover:bg-red-700' : ''}`}
+              className="flex-1"
             >
               {isLoading ? '처리 중...' : confirmText}
             </Button>

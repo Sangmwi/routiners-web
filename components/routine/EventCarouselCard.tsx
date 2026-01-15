@@ -23,16 +23,16 @@ interface EventCarouselCardProps {
 // 타입별 스타일
 const typeStyles = {
   workout: {
-    border: 'border-teal-500/30',
-    bg: 'bg-teal-500/5',
-    iconBg: 'bg-teal-500/10',
-    iconColor: 'text-teal-500',
+    border: 'border-workout/30',
+    bg: 'bg-workout/5',
+    iconBg: 'bg-workout/10',
+    iconColor: 'text-workout',
   },
   meal: {
-    border: 'border-lime-500/30',
-    bg: 'bg-lime-500/5',
-    iconBg: 'bg-lime-500/10',
-    iconColor: 'text-lime-500',
+    border: 'border-meal/30',
+    bg: 'bg-meal/5',
+    iconBg: 'bg-meal/10',
+    iconColor: 'text-meal',
   },
 };
 

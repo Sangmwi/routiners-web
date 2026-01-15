@@ -3,6 +3,7 @@
 import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import PageHeader from '@/components/common/PageHeader';
+import { useShowError } from '@/lib/stores/errorStore';
 import {
   ExerciseCard,
   EventStatusBadge,
@@ -27,20 +28,19 @@ interface WorkoutDetailPageProps {
  * 완료/건너뛰기 기능 제공
  */
 export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
+  // 파라미터 조회
   const { date } = use(params);
+
+  // 라우터 사용
   const router = useRouter();
+  const showError = useShowError();
 
   // 운동 이벤트 조회
-  const {
-    data: event,
-    isLoading,
-    error,
-  } = useRoutineEventByDate(date, 'workout');
+  const { data: event, isLoading, error } = useRoutineEventByDate(date, 'workout');
 
   // 완료/건너뛰기 뮤테이션
   const completeEvent = useCompleteRoutineEvent();
   const skipEvent = useSkipRoutineEvent();
-
   // 날짜 포맷
   const formattedDate = new Date(date).toLocaleDateString('ko-KR', {
     year: 'numeric',
@@ -56,6 +56,7 @@ export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
       await completeEvent.mutateAsync(event.id);
     } catch (err) {
       console.error('Failed to complete event:', err);
+      showError('운동 완료에 실패했습니다');
     }
   };
 
@@ -66,6 +67,7 @@ export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
       await skipEvent.mutateAsync(event.id);
     } catch (err) {
       console.error('Failed to skip event:', err);
+      showError('운동 스킵에 실패했습니다');
     }
   };
 
@@ -129,8 +131,8 @@ export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="w-12 h-12 rounded-xl bg-teal-500/10 flex items-center justify-center flex-shrink-0">
-              <Dumbbell className="w-6 h-6 text-teal-500" />
+            <div className="w-12 h-12 rounded-xl bg-workout/10 flex items-center justify-center flex-shrink-0">
+              <Dumbbell className="w-6 h-6 text-workout" />
             </div>
             <div className="flex-1">
               <h1 className="text-xl font-bold text-foreground">

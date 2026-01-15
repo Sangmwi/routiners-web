@@ -79,8 +79,8 @@ export default function MilitaryInfoStep({ onComplete, onBack }: MilitaryInfoSte
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2 text-center">
-        <h2 className="text-2xl font-bold text-gray-900">군인 정보 입력</h2>
-        <p className="text-sm text-gray-600">
+        <h2 className="text-2xl font-bold text-foreground">군인 정보 입력</h2>
+        <p className="text-sm text-muted-foreground">
           루티너스는 현역 군인을 위한 서비스예요.
           <br />몇 가지만 확인하면 바로 사용할 수 있어요.
         </p>
@@ -89,8 +89,8 @@ export default function MilitaryInfoStep({ onComplete, onBack }: MilitaryInfoSte
       <div className="space-y-4">
         {/* Enlistment Date */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">
-            입대 시기 <span className="ml-1 text-red-500">*</span>
+          <label className="mb-2 block text-sm font-medium text-foreground">
+            입대 시기 <span className="ml-1 text-destructive">*</span>
           </label>
           <div className="grid grid-cols-2 gap-3">
             <Select

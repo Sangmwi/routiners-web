@@ -33,3 +33,12 @@ export type {
   ModalDataMap,
   ModalInstance,
 } from './modalStore';
+
+// Error Store - 에러 토스트 관리
+export {
+  useErrorStore,
+  selectErrorMessage,
+  selectHasError,
+  useShowError,
+  useError,
+} from './errorStore';

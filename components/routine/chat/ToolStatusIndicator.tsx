@@ -61,7 +61,7 @@ export default function ToolStatusIndicator({ tools }: ToolStatusIndicatorProps)
             <Loader2 className="w-3 h-3 animate-spin" />
           )}
           {tool.status === 'completed' && (
-            <Check className="w-3 h-3 text-green-500/70" />
+            <Check className="w-3 h-3 text-success/70" />
           )}
           {tool.status === 'error' && (
             <X className="w-3 h-3 text-amber-500/70" />

@@ -6,13 +6,15 @@ import PassVerificationStep from '@/components/signup/PassVerificationStep';
 import MilitaryFlowContainer from '@/components/signup/military/MilitaryFlowContainer';
 import ConfirmationStep from '@/components/signup/ConfirmationStep';
 import { useCompleteSignup, useWebViewCore } from '@/hooks';
-import { PassVerificationData, MilitaryInfoData } from '@/lib/types';
+import { useShowError } from '@/lib/stores/errorStore';
+import { PassVerificationData, MilitaryInfoData, isApiError, getErrorMessageByCode } from '@/lib/types';
 
 export default function SignupPage() {
   const router = useRouter();
   const { isInWebView } = useWebViewCore();
   const completeSignupMutation = useCompleteSignup();
 
+  const showError = useShowError();
   const [currentStep, setCurrentStep] = useState(1);
   const [passData, setPassData] = useState<PassVerificationData | null>(null);
   const [militaryData, setMilitaryData] = useState<MilitaryInfoData | null>(null);
@@ -58,7 +60,11 @@ export default function SignupPage() {
       }
     } catch (error) {
       console.error('Signup failed:', error);
-      alert('가입에 실패했습니다. 다시 시도해 주세요.');
+      if (isApiError(error)) {
+        showError(getErrorMessageByCode(error.code));
+      } else {
+        showError('가입에 실패했습니다. 다시 시도해 주세요.');
+      }
     }
   };
 

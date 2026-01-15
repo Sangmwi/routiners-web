@@ -130,8 +130,8 @@ function EventDot({
 
   // 타입별 색상
   const typeColors = {
-    workout: status === 'completed' ? 'bg-teal-500' : 'bg-teal-500/60',
-    meal: status === 'completed' ? 'bg-lime-500' : 'bg-lime-500/60',
+    workout: status === 'completed' ? 'bg-workout' : 'bg-workout/60',
+    meal: status === 'completed' ? 'bg-meal' : 'bg-meal/60',
   };
 
   return <span className={`w-1.5 h-1.5 rounded-full ${typeColors[type]}`} />;

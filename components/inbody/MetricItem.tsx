@@ -70,7 +70,7 @@ export function MetricItem({
       {showChange && (
         <div
           className={`flex items-center justify-center gap-0.5 text-xs mt-0.5 ${
-            isGood ? 'text-green-600' : 'text-red-500'
+            isGood ? 'text-success' : 'text-destructive'
           }`}
         >
           {isPositive ? (

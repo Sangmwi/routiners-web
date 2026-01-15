@@ -13,13 +13,13 @@ interface ChatProgressIndicatorProps {
 
 const VARIANT_STYLES = {
   workout: {
-    iconBg: 'bg-primary text-primary-foreground',
-    progressBar: 'bg-primary',
+    iconBg: 'bg-workout text-workout-foreground',
+    progressBar: 'bg-workout',
     text: '루틴',
   },
   meal: {
-    iconBg: 'bg-lime-500 text-white',
-    progressBar: 'bg-lime-500',
+    iconBg: 'bg-meal text-meal-foreground',
+    progressBar: 'bg-meal',
     text: '식단',
   },
 } as const;

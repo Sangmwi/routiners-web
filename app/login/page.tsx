@@ -7,15 +7,23 @@ import Image from "next/image";
 import { Loader2 } from "lucide-react";
 import GoogleLogo from "@/assets/logos/google.svg";
 import logoImage from "@/assets/images/splash-image-md.png";
-import { useWebViewCore, useWebViewAuth } from "@/hooks";
+import { useWebViewAuth, useLoginCommands } from "@/hooks";
 
 function LoginContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const supabase = createClient();
-  const { isInWebView } = useWebViewCore();
   const { requestLogin } = useWebViewAuth();
+
+  // WebView 환경: 로그인 관련 명령 처리
+  useLoginCommands({
+    onCancelled: () => setIsLoading(false),
+    onError: (err) => {
+      setIsLoading(false);
+      setError(err);
+    },
+  });
 
   useEffect(() => {
     const errorParam = searchParams.get("error");
@@ -24,22 +32,18 @@ function LoginContent() {
     }
   }, [searchParams]);
 
-  // WebView 환경: SET_SESSION/LOGIN_ERROR는 useWebViewCommands에서 처리
-  // router.replace("/")로 페이지가 바뀌면 isLoading 상태 무의미
-
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     setError(null);
 
     // WebView 환경에서는 앱에 로그인 요청 전송 (네이티브 OAuth)
-    if (isInWebView) {
-      const sent = requestLogin();
-      if (sent) {
-        console.log("[Login] Requested native OAuth from app");
-        // 앱에서 OAuth 처리 후 토큰 전달받음
-        // 로딩 상태 유지 (앱에서 처리 완료 후 페이지 이동됨)
-        return;
-      }
+    // requestLogin()은 WebView가 아니면 false 반환
+    const sentToApp = requestLogin();
+    if (sentToApp) {
+      console.log("[Login] Requested native OAuth from app");
+      // 앱에서 OAuth 처리 후 토큰 전달받음
+      // 로딩 상태 유지 (앱에서 처리 완료 후 페이지 이동됨)
+      return;
     }
 
     // 웹 브라우저 환경에서는 기존 쿠키 기반 OAuth
