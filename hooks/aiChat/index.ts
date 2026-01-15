@@ -18,3 +18,11 @@ export {
 
 // Chat Hook
 export { useAIChat } from './useAIChat';
+
+// Page Hooks
+export { useChatPage } from './useChatPage';
+export { useChatPageHandlers } from './useChatPageHandlers';
+
+// Types
+export type { ChatPageState, UseChatPageReturn } from './useChatPage';
+export type { UseChatPageHandlersReturn } from './useChatPageHandlers';

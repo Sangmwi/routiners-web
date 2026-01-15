@@ -321,7 +321,7 @@ export default function ChatMessageList({
 
         {/* 대화 시작 버튼 (인라인) */}
         {pendingStart && onStartConversation && (
-          <div className="flex gap-3 items-start my-4">
+          <div className="flex gap-3 items-start">
             <div className="shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
               <Play className="w-4 h-4" />
             </div>

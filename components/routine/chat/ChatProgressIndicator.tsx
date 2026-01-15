@@ -37,7 +37,7 @@ export function ChatProgressIndicator({
   const styles = VARIANT_STYLES[variant];
 
   return (
-    <div className="flex gap-3 items-start my-4">
+    <div className="flex gap-3 items-start">
       <div
         className={`shrink-0 w-8 h-8 rounded-full ${styles.iconBg} flex items-center justify-center`}
       >

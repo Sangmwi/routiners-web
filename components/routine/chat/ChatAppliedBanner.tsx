@@ -60,7 +60,7 @@ export function ChatAppliedBanner({
   const Icon = config.icon;
 
   return (
-    <div className="flex gap-3 items-start my-4">
+    <div className="flex gap-3 items-start">
       <div
         className={`shrink-0 w-8 h-8 rounded-full ${config.iconBg} flex items-center justify-center`}
       >
