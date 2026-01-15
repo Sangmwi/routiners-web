@@ -1,7 +1,6 @@
 'use client';
 
-import { CheckCircle, Utensils } from 'lucide-react';
-import ViewMoreButton from '@/components/ui/ViewMoreButton';
+import { Check, Utensils } from 'lucide-react';
 import type { AppliedRoutineMetadata, SessionPurpose } from '@/lib/types/chat';
 import type { RoutineAppliedEvent, MealPlanAppliedEvent } from '@/lib/api/conversation';
 
@@ -17,11 +16,7 @@ interface ChatCompletedBannerProps {
 }
 
 /**
- * 완료된 채팅방 하단 배너
- *
- * - 루틴/식단 적용 완료 안내 메시지
- * - 적용된 정보 표시
- * - 캘린더에서 확인하기 버튼 (primary, full width)
+ * 완료된 채팅방 하단 배너 - 중앙 정렬 + 블러 효과
  */
 export default function ChatCompletedBanner({
   purpose = 'workout',
@@ -32,39 +27,42 @@ export default function ChatCompletedBanner({
   const isMeal = purpose === 'meal';
   const appliedData = isMeal ? appliedMealPlan : appliedRoutine;
 
+  const Icon = isMeal ? Utensils : Check;
+
   return (
-    <div className="p-4 border-t border-border bg-card">
-      <div className="flex items-center gap-3 mb-3">
-        <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-          isMeal ? 'bg-meal/10' : 'bg-workout/10'
+    <div className="p-4 border-t border-border/50 bg-card/80 backdrop-blur-md">
+      <div className="flex flex-col items-center text-center">
+        {/* 아이콘 */}
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+          isMeal ? 'bg-meal/10' : 'bg-primary/10'
         }`}>
-          {isMeal ? (
-            <Utensils className="w-4 h-4 text-meal" />
-          ) : (
-            <CheckCircle className="w-4 h-4 text-workout" />
-          )}
+          <Icon className={`w-5 h-5 ${isMeal ? 'text-meal' : 'text-primary'}`} />
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-foreground">
-            {isMeal ? '식단이 적용되었습니다!' : '루틴이 적용되었습니다!'}
+
+        {/* 타이틀 */}
+        <p className="text-sm font-semibold text-foreground">
+          {isMeal ? '식단 적용 완료' : '루틴 적용 완료'}
+        </p>
+
+        {/* 상세 정보 */}
+        {appliedData && (
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {appliedData.eventsCreated}개 · {appliedData.startDate} 시작
           </p>
-          {appliedData && (
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {isMeal
-                ? `${appliedData.eventsCreated}일 분의 식단이 ${appliedData.startDate}부터 시작됩니다.`
-                : `${appliedData.eventsCreated}개의 운동이 ${appliedData.startDate}부터 시작됩니다.`
-              }
-            </p>
-          )}
-        </div>
+        )}
+
+        {/* CTA 버튼 */}
+        <button
+          onClick={onNavigateToCalendar}
+          className={`mt-3 w-full py-2.5 rounded-xl text-sm font-medium transition-all active:scale-[0.98] ${
+            isMeal
+              ? 'bg-meal text-meal-foreground hover:bg-meal/90'
+              : 'bg-primary text-primary-foreground hover:bg-primary/90'
+          }`}
+        >
+          캘린더에서 확인
+        </button>
       </div>
-      <ViewMoreButton
-        onClick={onNavigateToCalendar}
-        variant="primary"
-        className="w-full justify-center"
-      >
-        캘린더에서 확인하기
-      </ViewMoreButton>
     </div>
   );
 }

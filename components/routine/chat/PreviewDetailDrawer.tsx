@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Dumbbell, Utensils, Clock, Flame, Loader2 } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
-import type { RoutinePreviewData, RoutinePreviewDay } from '@/lib/types/fitness';
+import type { RoutinePreviewData, RoutinePreviewDay, RoutinePreviewExercise } from '@/lib/types/fitness';
 import type { MealPlanPreviewData, MealPreviewDay, MealPreviewMeal } from '@/lib/types/meal';
 import { MEAL_TYPE_LABELS } from '@/lib/types/meal';
 
@@ -14,15 +14,17 @@ interface PreviewDetailDrawerProps {
   onClose: () => void;
   type: 'routine' | 'meal';
   preview: RoutinePreviewData | MealPlanPreviewData;
-  onApply: () => void;
+  onApply: (forceOverwrite?: boolean) => void;
   isApplying?: boolean;
 }
 
 /**
  * 루틴/식단 상세 보기 드로어
  *
- * 요약 카드에서 "상세 보기" 클릭 시 열리는 하단 드로어
- * 주차별 탭 + 일별 상세 내용 표시
+ * 미니멀하고 구조적인 디자인
+ * - 카드 기반 레이아웃
+ * - 하단 버튼 고정
+ * - 명확한 시각적 계층
  */
 export default function PreviewDetailDrawer({
   isOpen,
@@ -38,7 +40,7 @@ export default function PreviewDetailDrawer({
   const currentWeek = weeks.find(w => w.weekNumber === selectedWeek);
 
   const isRoutine = type === 'routine';
-  const accentColor = isRoutine ? 'primary' : 'meal';
+  const hasConflicts = (preview.conflicts?.length ?? 0) > 0;
 
   return (
     <Modal
@@ -49,31 +51,41 @@ export default function PreviewDetailDrawer({
       height="full"
       showCloseButton={false}
     >
-      {/* 커스텀 헤더 */}
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center gap-2">
-          {isRoutine ? (
-            <Dumbbell className="w-5 h-5 text-primary" />
-          ) : (
-            <Utensils className="w-5 h-5 text-meal" />
-          )}
-          <h2 className="font-semibold text-foreground">{preview.title}</h2>
+      {/* 헤더 */}
+      <div className="px-5 pt-2 pb-4">
+        <div className="flex items-start gap-3">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+            isRoutine ? 'bg-primary/10' : 'bg-meal/10'
+          }`}>
+            {isRoutine ? (
+              <Dumbbell className="w-5 h-5 text-primary" />
+            ) : (
+              <Utensils className="w-5 h-5 text-meal" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h2 className="font-semibold text-foreground text-lg leading-tight">
+              {preview.title}
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+              {preview.description}
+            </p>
+          </div>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">{preview.description}</p>
       </div>
 
       {/* 주차 탭 */}
-      <div className="flex border-b border-border overflow-x-auto scrollbar-hide">
+      <div className="flex px-5 gap-2 pb-3 overflow-x-auto scrollbar-hide">
         {weeks.map((week) => (
           <button
             key={week.weekNumber}
             onClick={() => setSelectedWeek(week.weekNumber)}
-            className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors shrink-0 ${
+            className={`px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-all shrink-0 ${
               selectedWeek === week.weekNumber
                 ? isRoutine
-                  ? 'text-primary border-b-2 border-primary'
-                  : 'text-meal border-b-2 border-meal'
-                : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-meal text-meal-foreground'
+                : 'bg-muted/50 text-muted-foreground hover:bg-muted'
             }`}
           >
             {week.weekNumber}주차
@@ -82,28 +94,29 @@ export default function PreviewDetailDrawer({
       </div>
 
       {/* 일별 상세 (스크롤 영역) */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="space-y-4">
+      <div className="flex-1 overflow-y-auto">
+        <div className="px-4 pb-6 space-y-3">
           {currentWeek?.days.map((day, idx) => (
             <DayDetailCard
               key={idx}
               day={day}
               type={type}
-              isLast={idx === currentWeek.days.length - 1}
             />
           ))}
         </div>
       </div>
 
-      {/* 하단 적용 버튼 */}
-      <div className="p-4 border-t border-border bg-background">
+      {/* 하단 고정 버튼 */}
+      <div className="sticky bottom-0 p-4 bg-card/95 backdrop-blur-sm border-t border-border/50 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
         <button
-          onClick={onApply}
+          onClick={() => onApply(hasConflicts)}
           disabled={isApplying}
-          className={`w-full py-3 rounded-lg font-medium transition-colors disabled:opacity-50 ${
-            isRoutine
-              ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-              : 'bg-meal text-meal-foreground hover:opacity-90'
+          className={`w-full py-3.5 rounded-xl font-medium transition-all disabled:opacity-50 active:scale-[0.98] ${
+            hasConflicts
+              ? 'bg-amber-500 text-white hover:bg-amber-600'
+              : isRoutine
+                ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                : 'bg-meal text-meal-foreground hover:opacity-90'
           }`}
         >
           {isApplying ? (
@@ -120,61 +133,82 @@ export default function PreviewDetailDrawer({
   );
 }
 
-/**
- * 일별 상세 카드
- */
+// =============================================================================
+// Day Cards
+// =============================================================================
+
 function DayDetailCard({
   day,
   type,
-  isLast,
 }: {
   day: RoutinePreviewDay | MealPreviewDay;
   type: 'routine' | 'meal';
-  isLast: boolean;
 }) {
   if (type === 'routine') {
-    return <RoutineDayCard day={day as RoutinePreviewDay} isLast={isLast} />;
+    return <RoutineDayCard day={day as RoutinePreviewDay} />;
   }
-  return <MealDayCard day={day as MealPreviewDay} isLast={isLast} />;
+  return <MealDayCard day={day as MealPreviewDay} />;
 }
 
 /**
- * 루틴 일별 카드
+ * 루틴 일별 카드 - 미니멀 디자인
  */
-function RoutineDayCard({
-  day,
+function RoutineDayCard({ day }: { day: RoutinePreviewDay }) {
+  return (
+    <div className="bg-card rounded-2xl border border-border/60 overflow-hidden">
+      {/* 카드 헤더 */}
+      <div className="flex items-center justify-between gap-3 px-4 py-3 bg-primary/5 border-b border-border/40">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <span className="w-9 h-9 rounded-lg bg-primary text-primary-foreground text-sm font-semibold flex items-center justify-center shrink-0">
+            {DAY_NAMES[day.dayOfWeek]}
+          </span>
+          <span className="font-medium text-foreground truncate">{day.title}</span>
+        </div>
+        {day.estimatedDuration && (
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground shrink-0">
+            <Clock className="w-4 h-4" />
+            <span>{day.estimatedDuration}분</span>
+          </div>
+        )}
+      </div>
+
+      {/* 운동 목록 */}
+      <div className="px-4 py-3">
+        <div className="space-y-0">
+          {day.exercises.map((exercise, idx) => (
+            <ExerciseItem
+              key={idx}
+              exercise={exercise}
+              isLast={idx === day.exercises.length - 1}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * 운동 항목 - 인라인 텍스트로 밀림 방지
+ */
+function ExerciseItem({
+  exercise,
   isLast,
 }: {
-  day: RoutinePreviewDay;
+  exercise: RoutinePreviewExercise;
   isLast: boolean;
 }) {
   return (
-    <div className={`pb-4 ${!isLast ? 'border-b border-border' : ''}`}>
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <span className="w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-medium flex items-center justify-center">
-            {DAY_NAMES[day.dayOfWeek]}
-          </span>
-          <span className="font-medium text-foreground">{day.title}</span>
-        </div>
-        {day.estimatedDuration && (
-          <span className="text-sm text-muted-foreground flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5" />
-            {day.estimatedDuration}분
-          </span>
+    <div className={`py-3 ${!isLast ? 'border-b border-border/30' : ''}`}>
+      <p className="text-sm text-foreground leading-relaxed">
+        {exercise.name}
+      </p>
+      <p className="text-xs text-muted-foreground mt-1">
+        {exercise.sets}세트 · {exercise.reps}회
+        {exercise.rest && (
+          <span className="text-primary"> · 휴식 {exercise.rest}</span>
         )}
-      </div>
-      <div className="space-y-2 ml-10">
-        {day.exercises.map((ex, idx) => (
-          <div key={idx} className="flex items-center justify-between text-sm">
-            <span className="text-foreground">{ex.name}</span>
-            <span className="text-muted-foreground">
-              {ex.sets}x{ex.reps}
-              {ex.rest && <span className="ml-1 text-xs">({ex.rest})</span>}
-            </span>
-          </div>
-        ))}
-      </div>
+      </p>
     </div>
   );
 }
@@ -182,32 +216,29 @@ function RoutineDayCard({
 /**
  * 식단 일별 카드
  */
-function MealDayCard({
-  day,
-  isLast,
-}: {
-  day: MealPreviewDay;
-  isLast: boolean;
-}) {
+function MealDayCard({ day }: { day: MealPreviewDay }) {
   return (
-    <div className={`pb-4 ${!isLast ? 'border-b border-border' : ''}`}>
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <span className="w-8 h-8 rounded-full bg-meal/10 text-meal text-sm font-medium flex items-center justify-center">
+    <div className="bg-card rounded-2xl border border-border/60 overflow-hidden">
+      {/* 카드 헤더 */}
+      <div className="flex items-center justify-between gap-3 px-4 py-3 bg-meal/5 border-b border-border/40">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <span className="w-9 h-9 rounded-lg bg-meal text-meal-foreground text-sm font-semibold flex items-center justify-center shrink-0">
             {DAY_NAMES[day.dayOfWeek]}
           </span>
-          <span className="font-medium text-foreground">
+          <span className="font-medium text-foreground truncate">
             {DAY_NAMES[day.dayOfWeek]}요일
           </span>
         </div>
         {day.totalCalories && (
-          <span className="text-sm text-muted-foreground flex items-center gap-1">
-            <Flame className="w-3.5 h-3.5" />
-            {day.totalCalories}kcal
-          </span>
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground shrink-0">
+            <Flame className="w-4 h-4" />
+            <span>{day.totalCalories}kcal</span>
+          </div>
         )}
       </div>
-      <div className="space-y-3 ml-10">
+
+      {/* 식사 목록 */}
+      <div className="p-3 space-y-2">
         {day.meals.map((meal, idx) => (
           <MealCard key={idx} meal={meal} />
         ))}
@@ -221,7 +252,7 @@ function MealDayCard({
  */
 function MealCard({ meal }: { meal: MealPreviewMeal }) {
   return (
-    <div className="bg-meal/5 rounded-lg p-3">
+    <div className="bg-meal/5 rounded-xl p-3">
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium text-meal">
           {MEAL_TYPE_LABELS[meal.type]}

@@ -18,15 +18,12 @@ interface ChatPreviewSummaryProps {
   hasConflicts?: boolean;
   onViewDetails: () => void;
   onRevision: (feedback: string) => void;
-  onApply: () => void;
+  onApply: (forceOverwrite?: boolean) => void;
   isApplying?: boolean;
 }
 
 /**
- * 미리보기 요약 카드
- *
- * 채팅 내에서 루틴/식단 미리보기를 컴팩트하게 표시
- * 상세 보기는 별도 드로어에서 처리
+ * 미리보기 요약 카드 - 모던 디자인
  */
 export default function ChatPreviewSummary({
   type,
@@ -55,141 +52,148 @@ export default function ChatPreviewSummary({
   };
 
   return (
-    <div className={`my-4 mx-1 rounded-xl border bg-card overflow-hidden ${
-      isRoutine ? 'border-primary/30' : 'border-meal/30'
-    }`}>
-      {/* 헤더 */}
-      <div className={`p-4 border-b border-border ${
-        isRoutine ? 'bg-primary/5' : 'bg-meal/5'
+    <div className="my-4 mx-1">
+      <div className={`rounded-2xl border overflow-hidden ${
+        isRoutine ? 'border-primary/20 bg-linear-to-b from-primary/5 to-transparent' : 'border-meal/20 bg-linear-to-b from-meal/5 to-transparent'
       }`}>
-        <div className="flex items-center gap-2 mb-1">
-          <Icon className={`w-5 h-5 ${isRoutine ? 'text-primary' : 'text-meal'}`} />
-          <h3 className="font-semibold text-foreground">{title}</h3>
+        {/* 헤더 */}
+        <div className="p-4 pb-3">
+          <div className="flex items-start gap-3">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+              isRoutine 
+                ? 'bg-linear-to-br from-primary to-primary/70' 
+                : 'bg-linear-to-br from-meal to-meal/70'
+            }`}>
+              <Icon className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-foreground leading-tight">{title}</h3>
+              <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{description}</p>
+            </div>
+          </div>
+
+          {/* 통계 - 인라인 텍스트 */}
+          <p className="text-xs text-muted-foreground mt-3">
+            {stats.duration} · {stats.frequency}
+            {stats.perSession && (
+              <span className={isRoutine ? 'text-primary' : 'text-meal'}> · {stats.perSession}</span>
+            )}
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground line-clamp-2">{description}</p>
-        <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-          <span>{stats.duration}</span>
-          <span>·</span>
-          <span>{stats.frequency}</span>
-          {stats.perSession && (
-            <>
-              <span>·</span>
-              <span>{stats.perSession}</span>
-            </>
+
+        {/* 주차별 요약 */}
+        <div className="px-4 pb-3 space-y-1.5">
+          {weekSummaries.slice(0, 2).map((summary, idx) => (
+            <div key={idx} className="flex items-start gap-2 text-sm">
+              <span className={`shrink-0 font-semibold ${
+                isRoutine ? 'text-primary' : 'text-meal'
+              }`}>
+                {idx + 1}주차:
+              </span>
+              <span className="text-muted-foreground line-clamp-1">{summary}</span>
+            </div>
+          ))}
+          {weekSummaries.length > 2 && (
+            <p className="text-xs text-muted-foreground/60">
+              +{weekSummaries.length - 2}주 더...
+            </p>
           )}
         </div>
-      </div>
 
-      {/* 주차별 요약 (최대 2줄) */}
-      <div className="p-4 space-y-1.5">
-        {weekSummaries.slice(0, 2).map((summary, idx) => (
-          <div key={idx} className="flex items-start gap-2 text-sm">
-            <span className="text-muted-foreground shrink-0 min-w-[45px]">{idx + 1}주차:</span>
-            <span className="text-foreground line-clamp-1">{summary}</span>
-          </div>
-        ))}
-        {weekSummaries.length > 2 && (
-          <p className="text-xs text-muted-foreground">
-            +{weekSummaries.length - 2}주 더...
-          </p>
-        )}
-      </div>
-
-      {/* 충돌 경고 */}
-      {hasConflicts && (
-        <div className="px-4 pb-3">
-          <div className="flex items-center gap-2 text-xs text-amber-600">
-            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-            <span>기존 일정과 겹치는 날이 있습니다</span>
-          </div>
-        </div>
-      )}
-
-      {/* 액션 버튼 */}
-      <div className={`p-4 border-t border-border ${
-        isRoutine ? 'bg-primary/5' : 'bg-meal/5'
-      }`}>
-        {!showRevisionInput ? (
-          <div className="flex gap-2">
-            {/* 상세 보기 */}
-            <button
-              onClick={onViewDetails}
-              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-sm border border-border bg-background hover:bg-muted transition-colors"
-            >
-              <List className="w-4 h-4" />
-              상세 보기
-            </button>
-
-            {/* 수정 요청 */}
-            <button
-              onClick={() => setShowRevisionInput(true)}
-              disabled={isApplying}
-              className="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm border border-border bg-background hover:bg-muted transition-colors disabled:opacity-50"
-              aria-label="수정 요청"
-            >
-              <Edit2 className="w-4 h-4" />
-            </button>
-
-            {/* 적용 */}
-            <button
-              onClick={onApply}
-              disabled={isApplying}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
-                hasConflicts
-                  ? 'bg-amber-500 text-white hover:bg-amber-600'
-                  : isRoutine
-                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                    : 'bg-meal text-meal-foreground hover:opacity-90'
-              }`}
-            >
-              {isApplying ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <>
-                  <Check className="w-4 h-4" />
-                  적용
-                </>
-              )}
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <textarea
-              value={revisionText}
-              onChange={(e) => setRevisionText(e.target.value)}
-              placeholder={isRoutine
-                ? "수정하고 싶은 내용을 알려주세요... (예: 하체 운동을 더 추가해줘)"
-                : "수정하고 싶은 내용을 알려주세요... (예: 단백질을 더 추가해줘)"
-              }
-              rows={2}
-              className={`w-full px-3 py-2 text-sm border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 ${
-                isRoutine ? 'focus:ring-primary/50' : 'focus:ring-meal/50'
-              }`}
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  setShowRevisionInput(false);
-                  setRevisionText('');
-                }}
-                className="flex-1 px-4 py-2 rounded-lg text-sm font-medium border border-border bg-background text-foreground hover:bg-muted transition-colors"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleRevisionSubmit}
-                disabled={!revisionText.trim()}
-                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
-                  isRoutine
-                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                    : 'bg-meal text-meal-foreground hover:opacity-90'
-                }`}
-              >
-                수정 요청
-              </button>
+        {/* 충돌 경고 */}
+        {hasConflicts && (
+          <div className="px-4 pb-3">
+            <div className="flex items-center gap-2 text-amber-500">
+              <AlertTriangle className="w-4 h-4 shrink-0" />
+              <span className="text-sm font-medium">기존 일정과 겹치는 날이 있습니다</span>
             </div>
           </div>
         )}
+
+        {/* 액션 버튼 */}
+        <div className={`p-3 ${isRoutine ? 'bg-primary/5' : 'bg-meal/5'}`}>
+          {!showRevisionInput ? (
+            <div className="flex gap-2">
+              {/* 상세 보기 */}
+              <button
+                onClick={onViewDetails}
+                className="flex-1 flex items-center justify-center gap-1.5 h-11 rounded-xl text-sm font-medium border border-border bg-card hover:bg-muted/50 transition-colors"
+              >
+                <List className="w-4 h-4" />
+                상세 보기
+              </button>
+
+              {/* 수정 요청 */}
+              <button
+                onClick={() => setShowRevisionInput(true)}
+                disabled={isApplying}
+                className="flex items-center justify-center w-11 h-11 rounded-xl border border-border bg-card hover:bg-muted/50 transition-colors disabled:opacity-50"
+                aria-label="수정 요청"
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+
+              {/* 적용 */}
+              <button
+                onClick={() => onApply(hasConflicts)}
+                disabled={isApplying}
+                className={`flex-1 flex items-center justify-center gap-1.5 h-11 rounded-xl text-sm font-medium transition-all active:scale-[0.98] disabled:opacity-50 ${
+                  hasConflicts
+                    ? 'bg-amber-500 text-white hover:bg-amber-600'
+                    : isRoutine
+                      ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                      : 'bg-meal text-meal-foreground hover:opacity-90'
+                }`}
+              >
+                {isApplying ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" />
+                    적용
+                  </>
+                )}
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <textarea
+                value={revisionText}
+                onChange={(e) => setRevisionText(e.target.value)}
+                placeholder={isRoutine
+                  ? "수정하고 싶은 내용을 알려주세요... (예: 하체 운동을 더 추가해줘)"
+                  : "수정하고 싶은 내용을 알려주세요... (예: 단백질을 더 추가해줘)"
+                }
+                rows={2}
+                className={`w-full px-3 py-2.5 text-sm border border-border rounded-xl bg-card text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 ${
+                  isRoutine ? 'focus:ring-primary/50' : 'focus:ring-meal/50'
+                }`}
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setShowRevisionInput(false);
+                    setRevisionText('');
+                  }}
+                  className="flex-1 h-11 rounded-xl text-sm font-medium border border-border bg-card text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleRevisionSubmit}
+                  disabled={!revisionText.trim()}
+                  className={`flex-1 h-11 rounded-xl text-sm font-medium transition-all active:scale-[0.98] disabled:opacity-50 ${
+                    isRoutine
+                      ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                      : 'bg-meal text-meal-foreground hover:opacity-90'
+                  }`}
+                >
+                  수정 요청
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

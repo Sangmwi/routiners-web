@@ -37,8 +37,8 @@ interface ChatMessageListProps {
   appliedRoutine?: RoutineAppliedEvent | null;
   /** 루틴 생성 진행률 */
   routineProgress?: RoutineProgressEvent | null;
-  /** 루틴 적용 핸들러 */
-  onApplyRoutine?: () => void;
+  /** 루틴 적용 핸들러 (forceOverwrite: 충돌 시 덮어쓰기) */
+  onApplyRoutine?: (forceOverwrite?: boolean) => void;
   /** 루틴 수정 요청 핸들러 */
   onRequestRevision?: (feedback: string) => void;
   /** 루틴 상세 보기 핸들러 */
@@ -341,6 +341,11 @@ export default function ChatMessageList({
               </button>
             </div>
           </div>
+        )}
+
+        {/* 완료 배너를 위한 하단 여백 */}
+        {(appliedRoutine || appliedMealPlan) && (
+          <div className="h-40" aria-hidden="true" />
         )}
 
         <div ref={bottomRef} />

@@ -11,7 +11,7 @@ import {
   PreviewDetailDrawer,
 } from '@/components/routine/chat';
 import { useChatPage } from '@/hooks/aiChat';
-import { Loader2, CheckCircle, Menu, AlertCircle } from 'lucide-react';
+import { Loader2, Menu, AlertCircle } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
 /**
@@ -115,47 +115,48 @@ export default function AIChatPage() {
         action={headerAction}
       />
 
-      {/* 완료 상태 배너 */}
-      {pageState.isCompleted && (
-        <div className={`px-4 py-3 border-b flex items-center gap-2 ${
-          session.purpose === 'meal'
-            ? 'bg-meal/10 border-meal/20 text-meal'
-            : 'bg-workout/10 border-workout/20 text-workout'
-        }`}>
-          <CheckCircle className="w-5 h-5" />
-          <span className="text-sm font-medium">
-            {session.purpose === 'meal' ? '식단이 적용되었습니다' : '루틴이 적용되었습니다'}
-          </span>
-        </div>
-      )}
+      {/* 메인 콘텐츠 영역 */}
+      <div className="relative flex-1 flex flex-col min-h-0">
+        {/* 채팅 메시지 목록 */}
+        <ChatMessageList
+          messages={chat.messages}
+          isLoading={chat.isStreaming && !chat.streamingContent}
+          streamingContent={chat.streamingContent}
+          activeTools={chat.activeTools}
+          pendingInput={chat.pendingInput}
+          onSubmitInput={chat.submitInput}
+          pendingRoutinePreview={chat.pendingRoutinePreview}
+          appliedRoutine={chat.appliedRoutine}
+          routineProgress={chat.routineProgress}
+          onApplyRoutine={chat.applyRoutine}
+          onRequestRevision={chat.requestRevision}
+          onViewRoutineDetails={handlers.handleViewRoutineDetails}
+          pendingMealPreview={chat.pendingMealPreview}
+          appliedMealPlan={chat.appliedMealPlan}
+          mealProgress={chat.mealProgress}
+          onApplyMealPlan={chat.applyMealPlan}
+          onRequestMealRevision={chat.requestMealRevision}
+          onViewMealDetails={handlers.handleViewMealDetails}
+          pendingProfileConfirmation={chat.pendingProfileConfirmation}
+          onConfirmProfile={chat.confirmProfile}
+          onRequestProfileEdit={chat.requestProfileEdit}
+          pendingStart={chat.pendingStart}
+          onStartConversation={chat.startConversation}
+          sessionPurpose={session.purpose}
+        />
 
-      {/* 채팅 메시지 목록 */}
-      <ChatMessageList
-        messages={chat.messages}
-        isLoading={chat.isStreaming && !chat.streamingContent}
-        streamingContent={chat.streamingContent}
-        activeTools={chat.activeTools}
-        pendingInput={chat.pendingInput}
-        onSubmitInput={chat.submitInput}
-        pendingRoutinePreview={chat.pendingRoutinePreview}
-        appliedRoutine={chat.appliedRoutine}
-        routineProgress={chat.routineProgress}
-        onApplyRoutine={chat.applyRoutine}
-        onRequestRevision={chat.requestRevision}
-        onViewRoutineDetails={handlers.handleViewRoutineDetails}
-        pendingMealPreview={chat.pendingMealPreview}
-        appliedMealPlan={chat.appliedMealPlan}
-        mealProgress={chat.mealProgress}
-        onApplyMealPlan={chat.applyMealPlan}
-        onRequestMealRevision={chat.requestMealRevision}
-        onViewMealDetails={handlers.handleViewMealDetails}
-        pendingProfileConfirmation={chat.pendingProfileConfirmation}
-        onConfirmProfile={chat.confirmProfile}
-        onRequestProfileEdit={chat.requestProfileEdit}
-        pendingStart={chat.pendingStart}
-        onStartConversation={chat.startConversation}
-        sessionPurpose={session.purpose}
-      />
+        {/* 완료된 대화 - 완료 배너 (오버레이) */}
+        {pageState.isCompleted && (
+          <div className="absolute bottom-0 left-0 right-0">
+            <ChatCompletedBanner
+              purpose={session.purpose}
+              appliedRoutine={chat.appliedRoutine}
+              appliedMealPlan={chat.appliedMealPlan}
+              onNavigateToCalendar={handlers.handleNavigateToCalendar}
+            />
+          </div>
+        )}
+      </div>
 
       {/* 에러 배너 */}
       {chat.error && (
@@ -197,16 +198,6 @@ export default function AIChatPage() {
         />
       )}
 
-      {/* 완료된 대화 - 완료 배너 */}
-      {pageState.isCompleted && (
-        <ChatCompletedBanner
-          purpose={session.purpose}
-          appliedRoutine={chat.appliedRoutine}
-          appliedMealPlan={chat.appliedMealPlan}
-          onNavigateToCalendar={handlers.handleNavigateToCalendar}
-        />
-      )}
-
       {/* 채팅 메뉴 드로어 */}
       <ChatMenuDrawer
         isOpen={isMenuOpen}
@@ -227,12 +218,12 @@ export default function AIChatPage() {
           onClose={() => setPreviewDrawerOpen(false)}
           type={previewDrawerType}
           preview={previewDrawerType === 'routine' ? chat.pendingRoutinePreview! : chat.pendingMealPreview!}
-          onApply={() => {
+          onApply={(forceOverwrite) => {
             setPreviewDrawerOpen(false);
             if (previewDrawerType === 'routine') {
-              chat.applyRoutine();
+              chat.applyRoutine(forceOverwrite);
             } else {
-              chat.applyMealPlan((chat.pendingMealPreview?.conflicts?.length ?? 0) > 0);
+              chat.applyMealPlan(forceOverwrite);
             }
           }}
           isApplying={chat.isStreaming}

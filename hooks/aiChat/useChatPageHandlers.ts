@@ -89,7 +89,8 @@ export function useChatPageHandlers({
   };
 
   const handleNavigateToCalendar = () => {
-    router.push('/routine');
+    const type = session?.purpose === 'meal' ? 'meal' : 'workout';
+    router.push(`/routine/calendar?type=${type}`);
   };
 
   // ---------------------------------------------------------------------------
