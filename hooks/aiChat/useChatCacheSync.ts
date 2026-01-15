@@ -165,3 +165,6 @@ export function useChatCacheSync(purpose: SessionPurpose) {
     markSessionCompleted,
   };
 }
+
+/** useChatCacheSync 반환 타입 */
+export type UseChatCacheSync = ReturnType<typeof useChatCacheSync>;

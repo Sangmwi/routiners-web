@@ -160,24 +160,46 @@ export function useCompleteAISession() {
   });
 }
 
+interface DeleteAISessionOptions {
+  /**
+   * 캐시 무효화 스킵 여부
+   * true로 설정하면 삭제 후 refetch를 하지 않음
+   * 삭제 후 바로 페이지 이동하는 경우 깜빡임 방지에 유용
+   */
+  skipInvalidation?: boolean;
+}
+
 /**
  * AI 세션 삭제 Mutation
  *
  * @example
+ * // 기본 사용 (캐시 무효화 포함)
  * const deleteSession = useDeleteAISession();
  * deleteSession.mutate('session-id');
+ *
+ * // 페이지 이동 시 (캐시 무효화 스킵)
+ * const deleteSession = useDeleteAISession({ skipInvalidation: true });
+ * deleteSession.mutate('session-id', {
+ *   onSuccess: () => router.replace('/routine'),
+ * });
  */
-export function useDeleteAISession() {
+export function useDeleteAISession(options?: DeleteAISessionOptions) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: conversationApi.deleteConversation,
 
     onSuccess: (_, sessionId) => {
-      // 상세 캐시 제거
+      // 상세 캐시는 항상 제거 (삭제된 세션이므로)
       queryClient.removeQueries({
         queryKey: queryKeys.aiSession.detail(sessionId),
       });
+
+      // skipInvalidation 옵션이 있으면 무효화 스킵
+      // 삭제 후 바로 페이지 이동하는 경우 현재 페이지에서 refetch 방지
+      if (options?.skipInvalidation) {
+        return;
+      }
 
       // 목록 캐시 무효화
       queryClient.invalidateQueries({
@@ -188,6 +210,61 @@ export function useDeleteAISession() {
       queryClient.invalidateQueries({
         predicate: (query) =>
           query.queryKey[0] === 'aiSession' && query.queryKey[1] === 'active',
+      });
+    },
+  });
+}
+
+interface ResetAISessionData {
+  /** 삭제할 세션 ID */
+  sessionId: string;
+  /** 새로 생성할 세션의 purpose */
+  purpose: SessionPurpose;
+}
+
+/**
+ * AI 세션 초기화 Mutation (삭제 후 새 세션 생성)
+ *
+ * @example
+ * const resetSession = useResetAISession();
+ * resetSession.mutate(
+ *   { sessionId: 'current-id', purpose: 'workout' },
+ *   { onSuccess: (newSession) => router.replace(`/chat?session=${newSession.id}`) }
+ * );
+ */
+export function useResetAISession() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ sessionId, purpose }: ResetAISessionData) => {
+      // 1. 현재 세션 삭제
+      await conversationApi.deleteConversation(sessionId);
+
+      // 2. 새 세션 생성
+      const newSession = await conversationApi.createConversation({
+        type: 'ai',
+        aiPurpose: purpose,
+      });
+
+      return newSession;
+    },
+
+    onSuccess: (newSession) => {
+      // 새 세션을 캐시에 설정 (깜빡임 방지)
+      queryClient.setQueryData(
+        queryKeys.aiSession.detail(newSession.id),
+        newSession
+      );
+
+      // 활성 세션 캐시 업데이트
+      queryClient.setQueryData(
+        queryKeys.aiSession.active(newSession.purpose),
+        newSession
+      );
+
+      // 목록 캐시 무효화 (백그라운드에서 갱신)
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.aiSession.lists(),
       });
     },
   });

@@ -50,25 +50,19 @@ export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
   });
 
   // 완료 처리
-  const handleComplete = async () => {
+  const handleComplete = () => {
     if (!event) return;
-    try {
-      await completeEvent.mutateAsync(event.id);
-    } catch (err) {
-      console.error('Failed to complete event:', err);
-      showError('운동 완료에 실패했습니다');
-    }
+    completeEvent.mutate(event.id, {
+      onError: () => showError('운동 완료에 실패했습니다'),
+    });
   };
 
   // 건너뛰기 처리
-  const handleSkip = async () => {
+  const handleSkip = () => {
     if (!event) return;
-    try {
-      await skipEvent.mutateAsync(event.id);
-    } catch (err) {
-      console.error('Failed to skip event:', err);
-      showError('운동 스킵에 실패했습니다');
-    }
+    skipEvent.mutate(event.id, {
+      onError: () => showError('운동 스킵에 실패했습니다'),
+    });
   };
 
   // 로딩 상태

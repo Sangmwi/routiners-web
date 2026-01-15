@@ -13,6 +13,7 @@ export {
   useCreateAISession,
   useCompleteAISession,
   useDeleteAISession,
+  useResetAISession,
 } from './useAISession';
 
 // Chat Hook

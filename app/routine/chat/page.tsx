@@ -2,20 +2,18 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
 import PageHeader from '@/components/common/PageHeader';
 import {
   ChatMessageList,
   ChatInput,
   ChatCompletedBanner,
   ChatMenuDrawer,
+  PreviewDetailDrawer,
 } from '@/components/routine/chat';
-import { useAISessionWithMessages, useAIChat } from '@/hooks/aiChat';
+import { useAISessionWithMessages, useAIChat, useDeleteAISession, useResetAISession } from '@/hooks/aiChat';
 import { useWebViewCore } from '@/hooks';
-import { queryKeys } from '@/lib/constants/queryKeys';
-import { Loader2, CheckCircle, Menu } from 'lucide-react';
+import { Loader2, CheckCircle, Menu, AlertCircle } from 'lucide-react';
 import Button from '@/components/ui/Button';
-import { conversationApi } from '@/lib/api/conversation';
 import { useConfirmDialog } from '@/lib/stores/modalStore';
 import { useShowError } from '@/lib/stores/errorStore';
 
@@ -31,7 +29,6 @@ import { useShowError } from '@/lib/stores/errorStore';
 export default function AIChatPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const queryClient = useQueryClient();
   const confirmDialog = useConfirmDialog();
   const { isInWebView } = useWebViewCore();
   // 루틴/식단 적용 완료 상태 추적 (적용 후 리다이렉트 방지)
@@ -40,8 +37,9 @@ export default function AIChatPage() {
 
   // 메뉴 드로어 상태
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  // 초기화 중 로딩 상태
-  const [isResetting, setIsResetting] = useState(false);
+  // 미리보기 상세 드로어 상태
+  const [previewDrawerOpen, setPreviewDrawerOpen] = useState(false);
+  const [previewDrawerType, setPreviewDrawerType] = useState<'routine' | 'meal'>('routine');
 
   // URL에서 session 파라미터 확인 (필수)
   const sessionId = searchParams.get('session');
@@ -54,6 +52,12 @@ export default function AIChatPage() {
   } = useAISessionWithMessages(sessionId ?? undefined, {
     enabled: !!sessionId,
   });
+
+  // 세션 삭제 mutation (캐시 무효화 스킵 - 페이지 이동 시 깜빡임 방지)
+  const deleteSession = useDeleteAISession({ skipInvalidation: true });
+
+  // 세션 초기화 mutation (삭제 후 새 세션 생성)
+  const resetSession = useResetAISession();
 
   // session 파라미터가 없으면 /routine으로 리다이렉트
   useEffect(() => {
@@ -92,6 +96,8 @@ export default function AIChatPage() {
     pendingStart,
     startConversation,
     error: chatError,
+    clearError,
+    retryLastMessage,
   } = useAIChat(session);
 
   // 루틴/식단 적용 성공 시 ref 설정 (리다이렉트 방지)
@@ -122,6 +128,17 @@ export default function AIChatPage() {
     router.push('/routine');
   };
 
+  // 미리보기 상세 보기 핸들러
+  const handleViewRoutineDetails = () => {
+    setPreviewDrawerType('routine');
+    setPreviewDrawerOpen(true);
+  };
+
+  const handleViewMealDetails = () => {
+    setPreviewDrawerType('meal');
+    setPreviewDrawerOpen(true);
+  };
+
   // 대화 삭제 (확인 후 삭제)
   const handleDeleteChat = () => {
     if (!session?.id) return;
@@ -132,23 +149,21 @@ export default function AIChatPage() {
       confirmText: '삭제',
       cancelText: '취소',
       variant: 'danger',
-      onConfirm: async () => {
-        try {
-          await conversationApi.deleteConversation(session.id);
-          // 캐시 무효화 후 루틴 홈으로 이동
-          queryClient.invalidateQueries({
-            queryKey: queryKeys.aiSession.all,
-          });
-          // WebView에서는 window.location.replace가 더 확실함
-          if (isInWebView) {
-            window.location.replace('/routine');
-          } else {
-            router.replace('/routine');
-          }
-        } catch (err) {
-          console.error('Failed to delete chat:', err);
-          showError('채팅 삭제에 실패했습니다');
-        }
+      onConfirm: () => {
+        // mutation 호출 - isPending으로 로딩 UI 자동 표시
+        deleteSession.mutate(session.id, {
+          onSuccess: () => {
+            if (isInWebView) {
+              window.location.replace('/routine');
+            } else {
+              router.replace('/routine');
+            }
+          },
+          onError: (err) => {
+            console.error('Failed to delete chat:', err);
+            showError('채팅 삭제에 실패했습니다');
+          },
+        });
       },
     });
   };
@@ -157,50 +172,35 @@ export default function AIChatPage() {
   const handleResetChat = () => {
     if (!session?.id || !isActive) return;
 
-    const purpose = session.purpose; // 현재 세션의 purpose 저장
-
     confirmDialog({
       title: '대화 초기화',
       message: '현재 대화를 종료하고 처음부터 다시 시작할까요?',
       confirmText: '초기화',
       cancelText: '취소',
       variant: 'danger',
+      loadingMessage: '대화를 초기화하는 중...',
       onConfirm: async () => {
-        try {
-          setIsResetting(true); // 로딩 시작
+        // mutateAsync로 모달 로딩 상태 유지
+        const newSession = await resetSession.mutateAsync({
+          sessionId: session.id,
+          purpose: session.purpose,
+        });
 
-          // 1. 현재 세션 삭제
-          await conversationApi.deleteConversation(session.id);
-
-          // 2. 캐시 무효화
-          queryClient.invalidateQueries({
-            queryKey: queryKeys.aiSession.all,
-          });
-
-          // 3. 새 세션 생성
-          const newSession = await conversationApi.createConversation({
-            type: 'ai',
-            aiPurpose: purpose,
-          });
-
-          // 4. 새 세션으로 이동 (이동 후 컴포넌트 언마운트)
-          const newUrl = `/routine/chat?session=${newSession.id}`;
-          if (isInWebView) {
-            window.location.replace(newUrl);
-          } else {
-            router.replace(newUrl);
-          }
-        } catch (err) {
-          setIsResetting(false); // 에러 시 로딩 해제
-          console.error('Failed to reset chat:', err);
-          showError('대화 초기화에 실패했습니다');
+        // 새 세션으로 이동
+        const newUrl = `/routine/chat?session=${newSession.id}`;
+        if (isInWebView) {
+          window.location.replace(newUrl);
+        } else {
+          router.replace(newUrl);
+          // URL 변경이 완료될 때까지 대기 (모달이 닫힌 후 바로 새 세션 표시)
+          await new Promise(resolve => setTimeout(resolve, 50));
         }
       },
     });
   };
 
-  // 로딩 상태 (초기화 중 포함)
-  if (!sessionId || isLoadingSession || isResetting) {
+  // 로딩 상태 (삭제/초기화 중 포함)
+  if (!sessionId || isLoadingSession || deleteSession.isPending || resetSession.isPending) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -287,11 +287,13 @@ export default function AIChatPage() {
         routineProgress={routineProgress}
         onApplyRoutine={applyRoutine}
         onRequestRevision={requestRevision}
+        onViewRoutineDetails={handleViewRoutineDetails}
         pendingMealPreview={pendingMealPreview}
         appliedMealPlan={appliedMealPlan}
         mealProgress={mealProgress}
         onApplyMealPlan={applyMealPlan}
         onRequestMealRevision={requestMealRevision}
+        onViewMealDetails={handleViewMealDetails}
         pendingProfileConfirmation={pendingProfileConfirmation}
         onConfirmProfile={confirmProfile}
         onRequestProfileEdit={requestProfileEdit}
@@ -300,10 +302,29 @@ export default function AIChatPage() {
         sessionPurpose={session.purpose}
       />
 
-      {/* 에러 메시지 */}
+      {/* 에러 배너 */}
       {chatError && (
-        <div className="px-4 py-2 bg-destructive/10 text-destructive text-sm text-center">
-          {chatError}
+        <div className="mx-4 mb-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm text-destructive">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>메시지 전송에 실패했습니다</span>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={clearError}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                닫기
+              </button>
+              <button
+                onClick={retryLastMessage}
+                className="text-xs text-destructive font-medium hover:underline"
+              >
+                재시도
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -312,6 +333,7 @@ export default function AIChatPage() {
         <ChatInput
           onSend={handleSendMessage}
           disabled={isStreaming}
+          isLoading={isStreaming}
           placeholder={
             session.purpose === 'meal'
               ? '식단 목표를 알려주세요...'
@@ -342,6 +364,25 @@ export default function AIChatPage() {
         onDeleteChat={handleDeleteChat}
         isStreaming={isStreaming}
       />
+
+      {/* 미리보기 상세 드로어 */}
+      {(pendingRoutinePreview || pendingMealPreview) && (
+        <PreviewDetailDrawer
+          isOpen={previewDrawerOpen}
+          onClose={() => setPreviewDrawerOpen(false)}
+          type={previewDrawerType}
+          preview={previewDrawerType === 'routine' ? pendingRoutinePreview! : pendingMealPreview!}
+          onApply={() => {
+            setPreviewDrawerOpen(false);
+            if (previewDrawerType === 'routine') {
+              applyRoutine();
+            } else {
+              applyMealPlan((pendingMealPreview?.conflicts?.length ?? 0) > 0);
+            }
+          }}
+          isApplying={isStreaming}
+        />
+      )}
     </div>
   );
 }

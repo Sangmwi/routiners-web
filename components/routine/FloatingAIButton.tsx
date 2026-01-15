@@ -36,7 +36,7 @@ export default function FloatingAIButton({
 
   const hasAnySession = !!workoutSession || !!mealSession;
 
-  const handleSelectPurpose = async (purpose: SessionPurpose) => {
+  const handleSelectPurpose = (purpose: SessionPurpose) => {
     // 이미 처리 중이면 무시
     if (isNavigating || createSession.isPending) return;
 
@@ -49,15 +49,19 @@ export default function FloatingAIButton({
     } else {
       // 활성 세션이 없으면 생성 후 이동
       setIsNavigating(true);
-      try {
-        const newSession = await createSession.mutateAsync({ purpose });
-        closeCurrentModal();
-        router.push(`/routine/chat?session=${newSession.id}`);
-      } catch (error) {
-        console.error('[FloatingAIButton] Session creation failed:', error);
-        showError('AI 코치 연결에 실패했습니다');
-        setIsNavigating(false);
-      }
+      createSession.mutate(
+        { purpose },
+        {
+          onSuccess: (newSession) => {
+            closeCurrentModal();
+            router.push(`/routine/chat?session=${newSession.id}`);
+          },
+          onError: () => {
+            showError('AI 코치 연결에 실패했습니다');
+            setIsNavigating(false);
+          },
+        }
+      );
     }
   };
 

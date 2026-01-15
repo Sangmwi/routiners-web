@@ -44,12 +44,12 @@ interface UseInBodyManagerReturn {
   startScan: () => Promise<void>;
   resetScan: () => void;
   updateScanData: (data: InBodyCreateData) => void;
-  saveScanData: () => Promise<void>;
+  saveScanData: () => void;
   closePreviewModal: () => void;
   openDetailModal: (record: InBodyRecord) => void;
   closeDetailModal: () => void;
   requestDelete: (record: InBodyRecord) => void;
-  confirmDelete: () => Promise<void>;
+  confirmDelete: () => void;
   cancelDelete: () => void;
 
   // Delete State
@@ -174,17 +174,17 @@ export function useInBodyManager(
     setScanData(data);
   };
 
-  const saveScanData = async () => {
+  const saveScanData = () => {
     if (!scanData) return;
 
     setScanState('saving');
-    try {
-      await createInBody.mutateAsync(scanData);
-      resetScan();
-    } catch (err) {
-      setScanError(err instanceof Error ? err.message : '저장에 실패했습니다.');
-      setScanState('error');
-    }
+    createInBody.mutate(scanData, {
+      onSuccess: () => resetScan(),
+      onError: (err) => {
+        setScanError(err instanceof Error ? err.message : '저장에 실패했습니다.');
+        setScanState('error');
+      },
+    });
   };
 
   const closePreviewModal = () => {
@@ -208,17 +208,16 @@ export function useInBodyManager(
     setCurrentView('confirm-delete');
   };
 
-  const confirmDelete = async () => {
+  const confirmDelete = () => {
     if (!recordToDelete) return;
 
-    try {
-      await deleteInBody.mutateAsync(recordToDelete.id);
-      setCurrentView('list');
-      setRecordToDelete(null);
-    } catch (error) {
-      console.error('Failed to delete InBody record:', error);
-      throw error;
-    }
+    deleteInBody.mutate(recordToDelete.id, {
+      onSuccess: () => {
+        setCurrentView('list');
+        setRecordToDelete(null);
+      },
+      // onError는 호출측에서 처리
+    });
   };
 
   const cancelDelete = () => {

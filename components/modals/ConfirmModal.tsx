@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { useShowError } from '@/lib/stores/errorStore';
@@ -43,6 +43,7 @@ export default function ConfirmModal({
     onConfirm,
     onCancel,
     variant = 'default',
+    loadingMessage,
   } = data;
 
   const handleConfirm = async () => {
@@ -63,6 +64,9 @@ export default function ConfirmModal({
     onClose();
   };
 
+  // 로딩 메시지가 있고 로딩 중일 때 전체 UI를 로딩 상태로 변경
+  const showLoadingUI = isLoading && loadingMessage;
+
   return (
     <Modal
       isOpen={isOpen}
@@ -73,42 +77,53 @@ export default function ConfirmModal({
       size="sm"
     >
       <ModalBody>
-        <div className="text-center">
-          {/* 아이콘 (위험 작업일 때만) */}
-          {variant === 'danger' && (
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
-              <AlertTriangle className="h-6 w-6 text-destructive" />
+        {showLoadingUI ? (
+          // 로딩 UI
+          <div className="text-center py-4">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-          )}
-
-          {/* 제목 */}
-          <h3 className="text-lg font-semibold text-foreground">{title}</h3>
-
-          {/* 메시지 */}
-          <p className="mt-2 text-sm text-muted-foreground">{message}</p>
-
-          {/* 버튼 */}
-          <div className="mt-6 flex gap-3">
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={handleCancel}
-              disabled={isLoading}
-              className="flex-1"
-            >
-              {cancelText}
-            </Button>
-            <Button
-              variant={variant === 'danger' ? 'destructive' : 'primary'}
-              size="lg"
-              onClick={handleConfirm}
-              disabled={isLoading}
-              className="flex-1"
-            >
-              {isLoading ? '처리 중...' : confirmText}
-            </Button>
+            <p className="text-sm text-muted-foreground">{loadingMessage}</p>
           </div>
-        </div>
+        ) : (
+          // 기본 확인 UI
+          <div className="text-center">
+            {/* 아이콘 (위험 작업일 때만) */}
+            {variant === 'danger' && (
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+                <AlertTriangle className="h-6 w-6 text-destructive" />
+              </div>
+            )}
+
+            {/* 제목 */}
+            <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+
+            {/* 메시지 */}
+            <p className="mt-2 text-sm text-muted-foreground">{message}</p>
+
+            {/* 버튼 */}
+            <div className="mt-6 flex gap-3">
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={handleCancel}
+                disabled={isLoading}
+                className="flex-1"
+              >
+                {cancelText}
+              </Button>
+              <Button
+                variant={variant === 'danger' ? 'destructive' : 'primary'}
+                size="lg"
+                onClick={handleConfirm}
+                disabled={isLoading}
+                className="flex-1"
+              >
+                {isLoading ? '처리 중...' : confirmText}
+              </Button>
+            </div>
+          </div>
+        )}
       </ModalBody>
     </Modal>
   );

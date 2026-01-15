@@ -229,15 +229,18 @@ export function isApiError(error: unknown): error is ApiError {
 
 /**
  * 에러 메시지를 사용자 친화적으로 변환
+ *
+ * ApiError인 경우 에러 코드 기반 메시지 반환
+ * 그 외에는 fallback 메시지 반환
  */
-export function getErrorMessage(error: unknown): string {
+export function getErrorMessage(
+  error: unknown,
+  fallback = '요청에 실패했습니다'
+): string {
   if (isApiError(error)) {
-    return error.message;
+    return getErrorMessageByCode(error.code);
   }
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return '알 수 없는 오류가 발생했습니다.';
+  return fallback;
 }
 
 /**

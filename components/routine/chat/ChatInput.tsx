@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
-import { Send } from 'lucide-react';
+import { Send, Loader2 } from 'lucide-react';
 
 interface ChatInputProps {
   onSend: (message: string) => void;
   disabled?: boolean;
   placeholder?: string;
+  /** AI 응답 대기 중 */
+  isLoading?: boolean;
 }
 
 /**
@@ -16,6 +18,7 @@ export default function ChatInput({
   onSend,
   disabled = false,
   placeholder = '메시지를 입력하세요...',
+  isLoading = false,
 }: ChatInputProps) {
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -49,7 +52,8 @@ export default function ChatInput({
     }
   };
 
-  const canSend = message.trim().length > 0 && !disabled;
+  const canSend = message.trim().length > 0 && !disabled && !isLoading;
+  const displayPlaceholder = isLoading ? '응답을 기다리는 중...' : placeholder;
 
   return (
     <div className="flex items-end gap-2 p-4 border-t border-border bg-background">
@@ -58,8 +62,8 @@ export default function ChatInput({
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        disabled={disabled}
+        placeholder={displayPlaceholder}
+        disabled={disabled || isLoading}
         rows={1}
         className="flex-1 resize-none rounded-xl border border-border bg-card px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
       />
@@ -73,7 +77,11 @@ export default function ChatInput({
         }`}
         aria-label="메시지 전송"
       >
-        <Send className="w-5 h-5" />
+        {isLoading ? (
+          <Loader2 className="w-5 h-5 animate-spin" />
+        ) : (
+          <Send className="w-5 h-5" />
+        )}
       </button>
     </div>
   );

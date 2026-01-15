@@ -13,8 +13,7 @@ import {
 import ChatMessage from './ChatMessage';
 import ToolStatusIndicator from './ToolStatusIndicator';
 import ChatInputRequest from './ChatInputRequest';
-import ChatRoutinePreview from './ChatRoutinePreview';
-import ChatMealPreview from './ChatMealPreview';
+import ChatPreviewSummary from './ChatPreviewSummary';
 import { ChatProfileConfirmation } from './ChatProfileConfirmation';
 import { ChatProgressIndicator } from './ChatProgressIndicator';
 import { ChatAppliedBanner } from './ChatAppliedBanner';
@@ -42,6 +41,8 @@ interface ChatMessageListProps {
   onApplyRoutine?: () => void;
   /** 루틴 수정 요청 핸들러 */
   onRequestRevision?: (feedback: string) => void;
+  /** 루틴 상세 보기 핸들러 */
+  onViewRoutineDetails?: () => void;
   /** 대기 중인 식단 미리보기 */
   pendingMealPreview?: MealPlanPreviewData | null;
   /** 식단 적용 완료 정보 */
@@ -52,6 +53,8 @@ interface ChatMessageListProps {
   onApplyMealPlan?: (forceOverwrite?: boolean) => void;
   /** 식단 수정 요청 핸들러 */
   onRequestMealRevision?: (feedback: string) => void;
+  /** 식단 상세 보기 핸들러 */
+  onViewMealDetails?: () => void;
   /** 대기 중인 프로필 확인 요청 */
   pendingProfileConfirmation?: ProfileConfirmationRequest | null;
   /** 프로필 확인 핸들러 */
@@ -84,11 +87,13 @@ export default function ChatMessageList({
   routineProgress,
   onApplyRoutine,
   onRequestRevision,
+  onViewRoutineDetails,
   pendingMealPreview,
   appliedMealPlan,
   mealProgress,
   onApplyMealPlan,
   onRequestMealRevision,
+  onViewMealDetails,
   pendingProfileConfirmation,
   onConfirmProfile,
   onRequestProfileEdit,
@@ -241,12 +246,26 @@ export default function ChatMessageList({
           />
         )}
 
-        {/* 루틴 미리보기 */}
-        {pendingRoutinePreview && onApplyRoutine && onRequestRevision && (
-          <ChatRoutinePreview
-            preview={pendingRoutinePreview}
+        {/* 루틴 미리보기 - 요약 카드 */}
+        {pendingRoutinePreview && onApplyRoutine && onRequestRevision && onViewRoutineDetails && (
+          <ChatPreviewSummary
+            type="routine"
+            title={pendingRoutinePreview.title}
+            description={pendingRoutinePreview.description}
+            stats={{
+              duration: `${pendingRoutinePreview.durationWeeks}주`,
+              frequency: `주 ${pendingRoutinePreview.daysPerWeek}회`,
+              perSession: pendingRoutinePreview.weeks[0]?.days[0]?.estimatedDuration
+                ? `약 ${pendingRoutinePreview.weeks[0].days[0].estimatedDuration}분`
+                : undefined,
+            }}
+            weekSummaries={pendingRoutinePreview.weeks.map(w =>
+              w.days.map(d => d.title).join(', ')
+            )}
+            hasConflicts={(pendingRoutinePreview.conflicts?.length ?? 0) > 0}
+            onViewDetails={onViewRoutineDetails}
+            onRevision={onRequestRevision}
             onApply={onApplyRoutine}
-            onRequestRevision={onRequestRevision}
             isApplying={isLoading}
           />
         )}
@@ -269,12 +288,24 @@ export default function ChatMessageList({
           />
         )}
 
-        {/* 식단 미리보기 */}
-        {pendingMealPreview && onApplyMealPlan && onRequestMealRevision && (
-          <ChatMealPreview
-            preview={pendingMealPreview}
-            onApply={onApplyMealPlan}
-            onRequestRevision={onRequestMealRevision}
+        {/* 식단 미리보기 - 요약 카드 */}
+        {pendingMealPreview && onApplyMealPlan && onRequestMealRevision && onViewMealDetails && (
+          <ChatPreviewSummary
+            type="meal"
+            title={pendingMealPreview.title}
+            description={pendingMealPreview.description}
+            stats={{
+              duration: `${pendingMealPreview.durationWeeks}주`,
+              frequency: `하루 ${pendingMealPreview.weeks[0]?.days[0]?.meals?.length ?? 3}끼`,
+              perSession: `일 ${pendingMealPreview.targetCalories}kcal`,
+            }}
+            weekSummaries={pendingMealPreview.weeks.map(w =>
+              w.days.map(d => `${d.totalCalories ?? '-'}kcal`).join(', ')
+            )}
+            hasConflicts={(pendingMealPreview.conflicts?.length ?? 0) > 0}
+            onViewDetails={onViewMealDetails}
+            onRevision={onRequestMealRevision}
+            onApply={() => onApplyMealPlan((pendingMealPreview.conflicts?.length ?? 0) > 0)}
             isApplying={isLoading}
           />
         )}

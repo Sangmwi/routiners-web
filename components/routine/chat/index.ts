@@ -7,3 +7,5 @@ export { default as ChatMessageList } from './ChatMessageList';
 export { default as ToolStatusIndicator } from './ToolStatusIndicator';
 export { default as ChatCompletedBanner } from './ChatCompletedBanner';
 export { default as ChatMenuDrawer } from './ChatMenuDrawer';
+export { default as ChatPreviewSummary } from './ChatPreviewSummary';
+export { default as PreviewDetailDrawer } from './PreviewDetailDrawer';

@@ -7,7 +7,7 @@ import MilitaryFlowContainer from '@/components/signup/military/MilitaryFlowCont
 import ConfirmationStep from '@/components/signup/ConfirmationStep';
 import { useCompleteSignup, useWebViewCore } from '@/hooks';
 import { useShowError } from '@/lib/stores/errorStore';
-import { PassVerificationData, MilitaryInfoData, isApiError, getErrorMessageByCode } from '@/lib/types';
+import { PassVerificationData, MilitaryInfoData, getErrorMessage } from '@/lib/types';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -37,35 +37,29 @@ export default function SignupPage() {
     setCurrentStep(2);
   };
 
-  const handleConfirm = async () => {
+  const handleConfirm = () => {
     if (!passData || !militaryData) return;
 
-    try {
-      // 서버 API가 쿠키 세션으로 인증 처리
-      // (WebView에서는 클라이언트 getUser()가 작동하지 않음)
-      const signupData = {
-        ...passData,
-        ...militaryData,
-      };
+    const signupData = {
+      ...passData,
+      ...militaryData,
+    };
 
-      await completeSignupMutation.mutateAsync(signupData);
-
-      // Redirect to home on success
-      // replace 사용 (회원가입 완료 후 뒤로가기 방지)
-      // WebView에서는 window.location.replace가 더 확실함
-      if (isInWebView) {
-        window.location.replace('/');
-      } else {
-        router.replace('/');
-      }
-    } catch (error) {
-      console.error('Signup failed:', error);
-      if (isApiError(error)) {
-        showError(getErrorMessageByCode(error.code));
-      } else {
-        showError('가입에 실패했습니다. 다시 시도해 주세요.');
-      }
-    }
+    completeSignupMutation.mutate(signupData, {
+      onSuccess: () => {
+        // Redirect to home on success
+        // replace 사용 (회원가입 완료 후 뒤로가기 방지)
+        // WebView에서는 window.location.replace가 더 확실함
+        if (isInWebView) {
+          window.location.replace('/');
+        } else {
+          router.replace('/');
+        }
+      },
+      onError: (error) => {
+        showError(getErrorMessage(error, '가입에 실패했습니다'));
+      },
+    });
   };
 
   return (

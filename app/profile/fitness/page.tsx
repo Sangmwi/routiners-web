@@ -175,7 +175,6 @@ export default function FitnessProfilePage() {
     restrictions: [],
   });
 
-  const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
 
@@ -219,18 +218,13 @@ export default function FitnessProfilePage() {
     router.back();
   };
 
-  const handleSave = async () => {
-    setIsSaving(true);
+  const handleSave = () => {
     setSaveError(null);
 
-    try {
-      await updateProfile.mutateAsync(formData);
-      router.back();
-    } catch (err) {
-      setSaveError(err instanceof Error ? err.message : '저장에 실패했습니다.');
-    } finally {
-      setIsSaving(false);
-    }
+    updateProfile.mutate(formData, {
+      onSuccess: () => router.back(),
+      onError: () => setSaveError('저장에 실패했습니다.'),
+    });
   };
 
   const toggleFocusArea = (area: FocusArea) => {
@@ -441,9 +435,9 @@ export default function FitnessProfilePage() {
         <Button
           onClick={handleSave}
           className="w-full"
-          disabled={isSaving || !hasChanges}
+          disabled={updateProfile.isPending || !hasChanges}
         >
-          {isSaving ? (
+          {updateProfile.isPending ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               저장 중...

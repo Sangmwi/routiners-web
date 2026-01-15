@@ -96,18 +96,20 @@ export default function InBodyScanModal({
   };
 
   // 저장 처리
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!createData) return;
 
     setState('saving');
-    try {
-      await createInBody.mutateAsync(createData);
-      onSuccess?.();
-      handleClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '저장에 실패했습니다.');
-      setState('error');
-    }
+    createInBody.mutate(createData, {
+      onSuccess: () => {
+        onSuccess?.();
+        handleClose();
+      },
+      onError: (err) => {
+        setError(err instanceof Error ? err.message : '저장에 실패했습니다.');
+        setState('error');
+      },
+    });
   };
 
   // 데이터 수정 처리

@@ -48,7 +48,6 @@ export default function InBodyVisibilitySettings({
 
   // Local state for immediate UI feedback
   const [isPublic, setIsPublic] = useState<boolean>(true);
-  const [isSaving, setIsSaving] = useState(false);
 
   // Sync with server state
   useEffect(() => {
@@ -57,24 +56,24 @@ export default function InBodyVisibilitySettings({
     }
   }, [user?.showInbodyPublic]);
 
-  const handleToggle = async (newValue: boolean) => {
+  const handleToggle = (newValue: boolean) => {
     // Optimistic update
     setIsPublic(newValue);
-    setIsSaving(true);
 
-    try {
-      await updateProfile.mutateAsync({
-        showInbodyPublic: newValue,
-      });
-      onSaveSuccess?.();
-    } catch (error) {
-      // Rollback on error
-      setIsPublic(!newValue);
-      onSaveError?.(error instanceof Error ? error : new Error('저장에 실패했습니다'));
-    } finally {
-      setIsSaving(false);
-    }
+    updateProfile.mutate(
+      { showInbodyPublic: newValue },
+      {
+        onSuccess: () => onSaveSuccess?.(),
+        onError: (error) => {
+          // Rollback on error
+          setIsPublic(!newValue);
+          onSaveError?.(error instanceof Error ? error : new Error('저장에 실패했습니다'));
+        },
+      }
+    );
   };
+
+  const isSaving = updateProfile.isPending;
 
   if (isUserLoading) {
     return (

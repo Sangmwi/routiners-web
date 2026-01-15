@@ -64,18 +64,21 @@ export default function InBodyDetailModal({
   };
 
   // 수정 저장
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!editData) return;
 
     setState('saving');
     setError(null);
-    try {
-      await updateInBody.mutateAsync({ id: record.id, data: editData });
-      handleClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '수정에 실패했습니다.');
-      setState('edit');
-    }
+    updateInBody.mutate(
+      { id: record.id, data: editData },
+      {
+        onSuccess: () => handleClose(),
+        onError: (err) => {
+          setError(err instanceof Error ? err.message : '수정에 실패했습니다.');
+          setState('edit');
+        },
+      }
+    );
   };
 
   // 삭제 확인
@@ -84,16 +87,16 @@ export default function InBodyDetailModal({
   };
 
   // 삭제 실행
-  const handleDelete = async () => {
+  const handleDelete = () => {
     setState('deleting');
     setError(null);
-    try {
-      await deleteInBody.mutateAsync(record.id);
-      handleClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '삭제에 실패했습니다.');
-      setState('view');
-    }
+    deleteInBody.mutate(record.id, {
+      onSuccess: () => handleClose(),
+      onError: (err) => {
+        setError(err instanceof Error ? err.message : '삭제에 실패했습니다.');
+        setState('view');
+      },
+    });
   };
 
   // 수정 취소

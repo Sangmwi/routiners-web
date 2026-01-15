@@ -56,17 +56,18 @@ export default function InBodyManageModal({
   };
 
   // 삭제 확인
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = () => {
     if (!recordToDelete) return;
 
-    try {
-      await deleteInBody.mutateAsync(recordToDelete.id);
-      setState('list');
-      setRecordToDelete(null);
-    } catch (error) {
-      console.error('Failed to delete InBody record:', error);
-      showError('기록 삭제에 실패했습니다');
-    }
+    deleteInBody.mutate(recordToDelete.id, {
+      onSuccess: () => {
+        setState('list');
+        setRecordToDelete(null);
+      },
+      onError: () => {
+        showError('기록 삭제에 실패했습니다');
+      },
+    });
   };
 
   // 삭제 취소

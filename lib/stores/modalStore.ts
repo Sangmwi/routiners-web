@@ -42,6 +42,8 @@ export interface ModalDataMap {
     onConfirm: () => void | Promise<void>;
     onCancel?: () => void;
     variant?: 'default' | 'danger';
+    /** 로딩 중 표시할 메시지 (설정 시 전체 UI가 로딩 상태로 변경) */
+    loadingMessage?: string;
   };
   alert: {
     title: string;
