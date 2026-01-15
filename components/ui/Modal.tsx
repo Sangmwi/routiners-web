@@ -93,7 +93,8 @@ function getSwipeTransform(
   isSwipeClosing: boolean,
   isDragging: boolean,
   deltaY: number
-): React.CSSProperties {
+): React.CSSProperties | undefined {
+  // 스와이프로 닫히는 중
   if (isSwipeClosing) {
     return {
       transform: 'translateY(100%)',
@@ -101,6 +102,7 @@ function getSwipeTransform(
     };
   }
 
+  // 드래그 중
   if (isDragging && deltaY > 0) {
     return {
       transform: `translateY(${deltaY}px)`,
@@ -108,10 +110,8 @@ function getSwipeTransform(
     };
   }
 
-  return {
-    transform: 'translateY(0)',
-    transition: 'transform 300ms ease-out',
-  };
+  // 그 외: CSS 애니메이션이 제어하도록 undefined 반환
+  return undefined;
 }
 
 // ============================================================================
@@ -211,14 +211,14 @@ export default function Modal({
         className={`relative w-full bg-card shadow-xl ${heightClass} flex flex-col ${modalAnimationClass} ${SIZE_CLASSES[size]} ${className}`}
         style={swipeStyle}
         onClick={(e) => e.stopPropagation()}
-        {...(isBottom && enableSwipe ? swipe.handlers : {})}
       >
-        {/* Drag Handle (Bottom Sheet) */}
+        {/* Drag Handle (Bottom Sheet) - 스와이프 핸들러는 여기에만 적용 */}
         {isBottom && (
           <div
             className={`flex justify-center pt-3 pb-2 ${
               enableSwipe ? 'cursor-grab active:cursor-grabbing' : ''
             }`}
+            {...(enableSwipe ? swipe.handlers : {})}
           >
             <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
           </div>
