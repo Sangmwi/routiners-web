@@ -128,8 +128,15 @@ export function useAIChat(
   // 메시지 전송 (내부 + 외부 공용)
   // ---------------------------------------------------------------------------
 
-  const sendMessageCore = (message: string, options: { skipGuards?: boolean; skipMessageAdd?: boolean } = {}) => {
-    const { skipGuards = false, skipMessageAdd = false } = options;
+  const sendMessageCore = (
+    message: string,
+    options: {
+      skipGuards?: boolean;
+      skipMessageAdd?: boolean;
+      messages?: ChatMessage[];  // 명시적 메시지 배열 (비동기 상태 업데이트 문제 해결용)
+    } = {}
+  ) => {
+    const { skipGuards = false, skipMessageAdd = false, messages: providedMessages } = options;
 
     if (!sessionId) return;
     if (!skipGuards && (state.isSending || !message.trim())) return;
@@ -144,9 +151,11 @@ export function useAIChat(
       ? createMessage(sessionId, 'user', message)
       : null;
 
+    // providedMessages가 있으면 사용 (submitInput에서 이미 메시지 추가됨)
+    const baseMessages = providedMessages ?? state.messages;
     const updatedMessages = userMessage
-      ? [...state.messages, userMessage]
-      : state.messages;
+      ? [...baseMessages, userMessage]
+      : baseMessages;
 
     // 캐시 동기화 (사용자 메시지 추가 시)
     if (userMessage) {
@@ -253,7 +262,8 @@ export function useAIChat(
     if (isSendingRef.current) {
       pendingUserMessageRef.current = messageText;
     } else {
-      sendMessageCore(messageText, { skipMessageAdd: true });
+      // messages 전달: React 비동기 상태 업데이트로 인해 state.messages가 아직 이전 값일 수 있음
+      sendMessageCore(messageText, { skipMessageAdd: true, messages: messagesWithUser });
     }
   };
 

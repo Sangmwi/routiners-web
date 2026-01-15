@@ -6,4 +6,4 @@ export { default as ChatInput } from './ChatInput';
 export { default as ChatMessageList } from './ChatMessageList';
 export { default as ToolStatusIndicator } from './ToolStatusIndicator';
 export { default as ChatCompletedBanner } from './ChatCompletedBanner';
-export { default as ChatHistoryDropdown } from './ChatHistoryDropdown';
+export { default as ChatMenuDrawer } from './ChatMenuDrawer';

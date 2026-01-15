@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import PageHeader from '@/components/common/PageHeader';
@@ -8,12 +8,12 @@ import {
   ChatMessageList,
   ChatInput,
   ChatCompletedBanner,
-  ChatHistoryDropdown,
+  ChatMenuDrawer,
 } from '@/components/routine/chat';
 import { useAISessionWithMessages, useAIChat } from '@/hooks/aiChat';
 import { useWebViewCore } from '@/hooks';
 import { queryKeys } from '@/lib/constants/queryKeys';
-import { Loader2, CheckCircle, Trash2 } from 'lucide-react';
+import { Loader2, CheckCircle, Menu } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { conversationApi } from '@/lib/api/conversation';
 import { useConfirmDialog } from '@/lib/stores/modalStore';
@@ -37,6 +37,11 @@ export default function AIChatPage() {
   // 루틴/식단 적용 완료 상태 추적 (적용 후 리다이렉트 방지)
   const hasAppliedRef = useRef(false);
   const showError = useShowError();
+
+  // 메뉴 드로어 상태
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // 초기화 중 로딩 상태
+  const [isResetting, setIsResetting] = useState(false);
 
   // URL에서 session 파라미터 확인 (필수)
   const sessionId = searchParams.get('session');
@@ -148,8 +153,54 @@ export default function AIChatPage() {
     });
   };
 
-  // 로딩 상태
-  if (!sessionId || isLoadingSession) {
+  // 대화 초기화 (진행 중인 세션 삭제 후 같은 purpose로 새 세션 생성)
+  const handleResetChat = () => {
+    if (!session?.id || !isActive) return;
+
+    const purpose = session.purpose; // 현재 세션의 purpose 저장
+
+    confirmDialog({
+      title: '대화 초기화',
+      message: '현재 대화를 종료하고 처음부터 다시 시작할까요?',
+      confirmText: '초기화',
+      cancelText: '취소',
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          setIsResetting(true); // 로딩 시작
+
+          // 1. 현재 세션 삭제
+          await conversationApi.deleteConversation(session.id);
+
+          // 2. 캐시 무효화
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.aiSession.all,
+          });
+
+          // 3. 새 세션 생성
+          const newSession = await conversationApi.createConversation({
+            type: 'ai',
+            aiPurpose: purpose,
+          });
+
+          // 4. 새 세션으로 이동 (이동 후 컴포넌트 언마운트)
+          const newUrl = `/routine/chat?session=${newSession.id}`;
+          if (isInWebView) {
+            window.location.replace(newUrl);
+          } else {
+            router.replace(newUrl);
+          }
+        } catch (err) {
+          setIsResetting(false); // 에러 시 로딩 해제
+          console.error('Failed to reset chat:', err);
+          showError('대화 초기화에 실패했습니다');
+        }
+      },
+    });
+  };
+
+  // 로딩 상태 (초기화 중 포함)
+  if (!sessionId || isLoadingSession || isResetting) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -190,24 +241,15 @@ export default function AIChatPage() {
   // 헤더 타이틀 (purpose에 따라)
   const headerTitle = session.purpose === 'meal' ? 'AI 영양사' : 'AI 트레이너';
 
-  // 헤더 우측 액션 버튼 (대화 목록 드롭다운 + 삭제 버튼)
+  // 헤더 우측 액션 버튼 (햄버거 메뉴)
   const headerAction = (
-    <div className="flex items-center gap-1">
-      <ChatHistoryDropdown
-        currentSessionId={session.id}
-        onSelectSession={handleSelectHistorySession}
-      />
-      {/* 완료 상태에서만 삭제 버튼 표시 */}
-      {isCompleted && (
-        <button
-          onClick={handleDeleteChat}
-          className="p-2 hover:bg-muted/50 rounded-lg transition-colors text-destructive"
-          aria-label="대화 삭제"
-        >
-          <Trash2 className="w-5 h-5" />
-        </button>
-      )}
-    </div>
+    <button
+      onClick={() => setIsMenuOpen(true)}
+      className="p-2 hover:bg-muted/50 rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+      aria-label="메뉴 열기"
+    >
+      <Menu className="w-5 h-5" />
+    </button>
   );
 
   return (
@@ -287,6 +329,19 @@ export default function AIChatPage() {
           onNavigateToCalendar={handleNavigateToCalendar}
         />
       )}
+
+      {/* 채팅 메뉴 드로어 */}
+      <ChatMenuDrawer
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        currentSessionId={session.id}
+        sessionStatus={session.status}
+        sessionPurpose={session.purpose}
+        onSelectSession={handleSelectHistorySession}
+        onResetChat={handleResetChat}
+        onDeleteChat={handleDeleteChat}
+        isStreaming={isStreaming}
+      />
     </div>
   );
 }

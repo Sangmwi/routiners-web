@@ -117,19 +117,32 @@ export function useChatCacheSync(purpose: SessionPurpose) {
     queryClient.invalidateQueries({ queryKey: queryKeys.routineEvent.all });
   };
 
-  /** 세션을 완료 상태로 마킹 (캐시 유지하면서 상태만 업데이트) */
-  const markSessionCompleted = () => {
+  /** 세션을 완료 상태로 마킹 (active + detail 캐시 모두 업데이트) */
+  const markSessionCompleted = (sessionId: string) => {
+    const completedData = {
+      status: 'completed' as const,
+      resultApplied: true,
+      resultAppliedAt: new Date().toISOString(),
+    };
+
+    // 1. Active 캐시 업데이트
     queryClient.setQueryData(queryKey, (oldData: AISessionCompat | null | undefined) => {
       if (!oldData) return oldData;
-      return {
-        ...oldData,
-        status: 'completed' as const,
-        resultApplied: true,
-        resultAppliedAt: new Date().toISOString(),
-      };
+      return { ...oldData, ...completedData };
     });
-    // 이벤트 캐시만 무효화 (새로 생성된 루틴/식단 이벤트 반영)
+
+    // 2. Detail 캐시 업데이트 (동일한 세션이 캐시되어 있는 경우)
+    const detailKey = queryKeys.aiSession.detail(sessionId);
+    queryClient.setQueryData(detailKey, (oldData: AISessionCompat | null | undefined) => {
+      if (!oldData) return oldData;
+      return { ...oldData, ...completedData };
+    });
+
+    // 3. 이벤트 캐시 무효화 (새로 생성된 루틴/식단 이벤트 반영)
     queryClient.invalidateQueries({ queryKey: queryKeys.routineEvent.all });
+
+    // 4. 세션 리스트 캐시 무효화 (히스토리 목록 업데이트)
+    queryClient.invalidateQueries({ queryKey: queryKeys.aiSession.lists() });
   };
 
   return {

@@ -104,8 +104,8 @@ export async function applyPreview(
       dispatch({ type: 'APPLY_MEAL_SUCCESS', event: appliedEvent });
     }
 
-    // 세션 완료 처리
-    cacheSync.markSessionCompleted();
+    // 세션 완료 처리 (active + detail 캐시 모두 업데이트)
+    cacheSync.markSessionCompleted(sessionId);
   } catch (error) {
     console.error(`[applyPreview:${type}] Error:`, error);
     dispatch({ type: 'APPLY_ERROR', error: config.errorMessageGeneric });
