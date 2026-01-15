@@ -91,6 +91,7 @@ export function useProfileEdit(): UseProfileEditReturn {
   const [formData, setFormData] = useState<ProfileFormData>(INITIAL_FORM_DATA);
   const [isSaving, setIsSaving] = useState(false);
   const [isFormInitialized, setIsFormInitialized] = useState(false);
+  const [imageHasChanges, setImageHasChanges] = useState(false);
 
   // ========== Image Handling ==========
 
@@ -118,8 +119,7 @@ export function useProfileEdit(): UseProfileEditReturn {
 
   // 폼이 초기화되기 전에는 변경 없음으로 처리 (초기 깜빡임 방지)
   const formChanged = isFormInitialized && user ? hasFormChanges(formData, user) : false;
-  const imageChanged = imageDraftRef.current?.hasChanges || imageDraft.hasChanges;
-  const hasChanges = formChanged || imageChanged;
+  const hasChanges = formChanged || imageHasChanges;
 
   // ========== Actions ==========
 
@@ -138,6 +138,8 @@ export function useProfileEdit(): UseProfileEditReturn {
    */
   const handleDraftChange = (draft: ReturnType<typeof useProfileImagesDraft>) => {
     imageDraftRef.current = draft;
+    // 상태 업데이트로 리렌더링 트리거 (저장 버튼 활성화 반영)
+    setImageHasChanges(draft.hasChanges);
   };
 
   /**
@@ -156,7 +158,7 @@ export function useProfileEdit(): UseProfileEditReturn {
    */
   const handleBack = () => {
     const currentFormChanged = user ? hasFormChanges(formData, user) : false;
-    const currentImageChanged = imageDraftRef.current?.hasChanges || imageDraft.hasChanges;
+    const currentImageChanged = imageDraftRef.current?.hasChanges || imageHasChanges;
 
     if (currentFormChanged || currentImageChanged) {
       openModal('confirm', {

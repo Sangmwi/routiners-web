@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useProfileProgress, useProfileEdit } from '@/hooks';
+import { useKeyboardHeight } from '@/hooks/ui';
 import { Loader2 } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import PageHeader from '@/components/common/PageHeader';
@@ -71,8 +72,13 @@ interface SaveButtonProps {
 }
 
 function SaveButton({ onClick, disabled, isSaving }: SaveButtonProps) {
+  const keyboardHeight = useKeyboardHeight();
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border/50">
+    <div
+      className="fixed left-0 right-0 p-4 bg-background border-t border-border/50 transition-[bottom] duration-200"
+      style={{ bottom: keyboardHeight }}
+    >
       <button
         onClick={onClick}
         disabled={disabled}

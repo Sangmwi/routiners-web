@@ -19,5 +19,8 @@ export * from "./useWebViewBridge";
 // Logout - 로그아웃 전용 훅
 export * from "./useLogout";
 
+// Withdrawal - 회원탈퇴 전용 훅
+export * from "./useWithdrawal";
+
 // Image Picker - 네이티브 이미지 피커
 export * from "./useNativeImagePicker";

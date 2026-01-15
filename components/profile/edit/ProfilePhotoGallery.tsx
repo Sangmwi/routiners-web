@@ -264,21 +264,29 @@ export default function ProfilePhotoGallery({
   const handleSelectSource = async (source: ImagePickerSource) => {
     if (pendingSlotIndex === null) return;
 
+    // 슬롯 인덱스를 로컬 변수에 저장
+    const slotIndex = pendingSlotIndex;
+
+    // 1. 드로어 닫기
     setIsImageSourceOpen(false);
-    setProcessingIndex(pendingSlotIndex);
+    setPendingSlotIndex(null);
+
+    // 2. 드로어 닫힘 애니메이션 완료 대기 (Modal의 ANIMATION_DURATION = 200ms)
+    await new Promise((resolve) => setTimeout(resolve, 250));
+
+    // 3. 처리 시작
+    setProcessingIndex(slotIndex);
 
     const result = await pickImage(source);
 
     if (result.cancelled) {
       setProcessingIndex(null);
-      setPendingSlotIndex(null);
       return;
     }
 
     if (!result.success) {
       setErrorMessage(result.error || "이미지 선택에 실패했습니다.");
       setProcessingIndex(null);
-      setPendingSlotIndex(null);
       return;
     }
 
@@ -293,12 +301,11 @@ export default function ProfilePhotoGallery({
       if (!validation.valid) {
         setErrorMessage(validation.error || "파일 검증에 실패했습니다.");
         setProcessingIndex(null);
-        setPendingSlotIndex(null);
         return;
       }
 
       // 동기적으로 이미지 추가 (Blob URL 즉시 생성)
-      const addResult: AddImageResult = addImage(file, pendingSlotIndex);
+      const addResult: AddImageResult = addImage(file, slotIndex);
 
       if (!addResult.success && addResult.error) {
         setErrorMessage(addResult.error);
@@ -306,7 +313,6 @@ export default function ProfilePhotoGallery({
     }
 
     setProcessingIndex(null);
-    setPendingSlotIndex(null);
   };
 
   const handleDelete = (index: number) => {

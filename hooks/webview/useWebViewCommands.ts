@@ -91,16 +91,18 @@ export const useWebViewCommands = () => {
     const cleanups: (() => void)[] = [];
 
     // NAVIGATE_HOME
+    // window.location.replace 사용 (router.replace보다 확실함)
     cleanups.push(
       registerCommandHandler("NAVIGATE_HOME", () => {
-        router.replace("/");
+        window.location.replace("/");
       })
     );
 
     // NAVIGATE_TO
+    // window.location.replace 사용 (router.replace보다 확실함)
     cleanups.push(
       registerCommandHandler<NavigateToMessage>("NAVIGATE_TO", (cmd) => {
-        router.replace(cmd.path);
+        window.location.replace(cmd.path);
       })
     );
 

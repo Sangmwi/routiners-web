@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * Logout Hook
@@ -9,18 +9,19 @@
  * - Web: Supabase signOut → 로그인 페이지 리다이렉트
  */
 
-import { useState } from "react";
-import { createClient } from "@/utils/supabase/client";
-import { useWebViewCore } from "./useWebViewCore";
-import { useWebViewAuth } from "./useWebViewAuth";
+import { useState } from 'react';
+import { createClient } from '@/utils/supabase/client';
+import { useModalStore } from '@/lib/stores/modalStore';
+import { useWebViewCore } from './useWebViewCore';
+import { useWebViewAuth } from './useWebViewAuth';
 
 // ============================================================================
 // Types
 // ============================================================================
 
 interface UseLogoutResult {
-  /** 로그아웃 실행 함수 */
-  logout: () => Promise<void>;
+  /** 로그아웃 실행 함수 (확인 모달 표시) */
+  logout: () => void;
   /** 로그아웃 진행 중 여부 */
   isLoggingOut: boolean;
 }
@@ -33,9 +34,10 @@ export function useLogout(): UseLogoutResult {
   const supabase = createClient();
   const { isInWebView } = useWebViewCore();
   const { sendLogout } = useWebViewAuth();
+  const openModal = useModalStore((state) => state.openModal);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const logout = async () => {
+  const executeLogout = async () => {
     setIsLoggingOut(true);
 
     try {
@@ -44,17 +46,27 @@ export function useLogout(): UseLogoutResult {
         return;
       }
 
-      const { error } = await supabase.auth.signOut({ scope: "local" });
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
 
       if (error) {
-        console.error("[useLogout] SignOut error:", error);
+        console.error('[useLogout] SignOut error:', error);
       }
 
-      window.location.replace("/login");
+      window.location.replace('/login');
     } catch (error) {
-      console.error("[useLogout] Logout failed:", error);
-      window.location.replace("/login");
+      console.error('[useLogout] Logout failed:', error);
+      window.location.replace('/login');
     }
+  };
+
+  const logout = () => {
+    openModal('confirm', {
+      title: '로그아웃',
+      message: '정말 로그아웃 하시겠습니까?',
+      confirmText: '로그아웃',
+      cancelText: '취소',
+      onConfirm: executeLogout,
+    });
   };
 
   return {

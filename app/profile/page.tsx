@@ -1,6 +1,6 @@
 'use client';
 
-import { useCurrentUserProfile, useLogout } from '@/hooks';
+import { useCurrentUserProfile, useLogout, useWithdrawal } from '@/hooks';
 import MainTabLayout from '@/components/common/MainTabLayout';
 import ErrorState from '@/components/common/ErrorState';
 import ProfileHeader from '@/components/profile/ProfileHeader';
@@ -13,12 +13,13 @@ import ProfileInbodySection from '@/components/profile/ProfileInbodySection';
 import ProfileFitnessSection from '@/components/profile/ProfileFitnessSection';
 import ProfileMilitarySection from '@/components/profile/ProfileMilitarySection';
 import ProfileLocationsSection from '@/components/profile/ProfileLocationsSection';
-import { LogOut, Loader2 } from 'lucide-react';
+import { LogOut, UserX, Loader2 } from 'lucide-react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 
 export default function ProfilePage() {
   const { data: user, isLoading, error, refetch } = useCurrentUserProfile();
   const { logout, isLoggingOut } = useLogout();
+  const { withdraw, isWithdrawing } = useWithdrawal();
 
   if (isLoading) {
     return <PageSkeleton />;
@@ -63,11 +64,11 @@ export default function ProfilePage() {
 
       <ProfileFitnessSection />
 
-      {/* Logout Button */}
-      <div className="pt-2">
+      {/* Logout & Withdrawal Buttons */}
+      <div className="pt-2 space-y-2">
         <button
           onClick={logout}
-          disabled={isLoggingOut}
+          disabled={isLoggingOut || isWithdrawing}
           className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoggingOut ? (
@@ -79,6 +80,24 @@ export default function ProfilePage() {
             <>
               <LogOut className="w-4 h-4" />
               <span>로그아웃</span>
+            </>
+          )}
+        </button>
+
+        <button
+          onClick={withdraw}
+          disabled={isWithdrawing || isLoggingOut}
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isWithdrawing ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>탈퇴 처리 중...</span>
+            </>
+          ) : (
+            <>
+              <UserX className="w-4 h-4" />
+              <span>회원 탈퇴</span>
             </>
           )}
         </button>

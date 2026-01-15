@@ -103,7 +103,7 @@ export default function MilitaryFlowContainer({
   };
 
   return (
-    <div className="flex flex-col min-h-[550px]">
+    <div className="flex flex-col h-full">
       {/* Header with progress */}
       <div className="relative flex items-center justify-between px-4 py-3 border-b border-border">
         <button

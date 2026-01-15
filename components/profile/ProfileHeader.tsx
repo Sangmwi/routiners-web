@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Settings } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 
 /**
  * 프로필 페이지 전용 헤더
@@ -17,7 +17,7 @@ export default function ProfileHeader() {
         className="p-1.5 hover:bg-muted/50 rounded-lg transition-colors"
         aria-label="프로필 편집"
       >
-        <Settings className="w-5 h-5 text-muted-foreground" />
+        <Pencil className="w-5 h-5 text-muted-foreground" />
       </Link>
     </div>
   );

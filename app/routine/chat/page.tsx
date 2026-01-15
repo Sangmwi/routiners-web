@@ -11,6 +11,7 @@ import {
   ChatHistoryDropdown,
 } from '@/components/routine/chat';
 import { useAISessionWithMessages, useAIChat } from '@/hooks/aiChat';
+import { useWebViewCore } from '@/hooks';
 import { queryKeys } from '@/lib/constants/queryKeys';
 import { Loader2, CheckCircle, Trash2 } from 'lucide-react';
 import Button from '@/components/ui/Button';
@@ -31,6 +32,7 @@ export default function AIChatPage() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const confirmDialog = useConfirmDialog();
+  const { isInWebView } = useWebViewCore();
   // 루틴/식단 적용 완료 상태 추적 (적용 후 리다이렉트 방지)
   const hasAppliedRef = useRef(false);
 
@@ -49,9 +51,14 @@ export default function AIChatPage() {
   // session 파라미터가 없으면 /routine으로 리다이렉트
   useEffect(() => {
     if (!sessionId) {
-      router.replace('/routine');
+      // WebView에서는 window.location.replace가 더 확실함
+      if (isInWebView) {
+        window.location.replace('/routine');
+      } else {
+        router.replace('/routine');
+      }
     }
-  }, [sessionId, router]);
+  }, [sessionId, router, isInWebView]);
 
   // 채팅 훅
   const {
@@ -125,7 +132,12 @@ export default function AIChatPage() {
           queryClient.invalidateQueries({
             queryKey: queryKeys.aiSession.all,
           });
-          router.replace('/routine');
+          // WebView에서는 window.location.replace가 더 확실함
+          if (isInWebView) {
+            window.location.replace('/routine');
+          } else {
+            router.replace('/routine');
+          }
         } catch (err) {
           console.error('Failed to delete chat:', err);
         }
