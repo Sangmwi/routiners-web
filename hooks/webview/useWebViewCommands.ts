@@ -112,25 +112,13 @@ export const useWebViewCommands = () => {
     );
 
     // SET_SESSION
+    // 네비게이션은 앱에서 처리 (SESSION_SET 응답 수신 후 NAVIGATE_HOME 전송)
+    // 이렇게 하면 Preview 환경에서 메시지 전달 race condition 방지
     cleanups.push(
       registerCommandHandler<SetSessionMessage>("SET_SESSION", async (cmd) => {
         const success = await setSession(cmd.access_token, cmd.refresh_token);
         notifySessionSet(success);
-
-        // /login 또는 /app-init에서 세션 설정 시 항상 네비게이션 수행
-        const currentPath = pathnameRef.current;
-        if (currentPath === "/login" || currentPath === "/app-init") {
-          // 상태 안정화 후 이동 (race condition 방지)
-          await new Promise((resolve) => setTimeout(resolve, 50));
-
-          if (success) {
-            // 세션 설정 성공 → 홈으로
-            router.replace("/");
-          } else {
-            // 세션 설정 실패 → 로그인 페이지로 (스플래시 해제를 위해)
-            router.replace("/login");
-          }
-        }
+        // 네비게이션 없음 - 앱이 SESSION_SET 수신 후 NAVIGATE_HOME/NAVIGATE_TO 전송
       })
     );
 
