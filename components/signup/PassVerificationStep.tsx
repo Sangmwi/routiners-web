@@ -28,7 +28,7 @@ export default function PassVerificationStep({ onVerified }: PassVerificationSte
   };
 
   return (
-    <div className="flex flex-col items-center space-y-6 text-center">
+    <div className="flex flex-col items-center space-y-6 text-center p-8">
       <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/10">
         <Shield className="h-12 w-12 text-primary" />
       </div>

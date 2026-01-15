@@ -80,11 +80,7 @@ export default function SignupPage() {
         </div>
 
         {/* Step Content */}
-        <div
-          className={`rounded-3xl bg-card border border-border shadow-lg overflow-hidden flex-1 flex flex-col ${
-            currentStep === 2 ? 'p-0' : 'p-8'
-          }`}
-        >
+        <div className="rounded-3xl bg-card border border-border shadow-lg overflow-hidden flex-1 flex flex-col">
           {currentStep === 1 && <PassVerificationStep onVerified={handlePassVerified} />}
 
           {currentStep === 2 && (

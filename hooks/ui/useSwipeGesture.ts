@@ -75,11 +75,10 @@ export function useSwipeGesture(
       if (!prev.isDragging) return prev;
 
       if (prev.deltaY > threshold) {
+        // 스와이프 닫기: isSwipeClosing=true 유지한 채 onSwipeClose 호출
+        // isSwipeClosing은 모달 닫힌 후 reset()에서 리셋됨
         setIsSwipeClosing(true);
-        setTimeout(() => {
-          setIsSwipeClosing(false);
-          onSwipeClose();
-        }, ANIMATION_DURATION);
+        onSwipeClose();
       }
 
       return { startY: null, deltaY: 0, isDragging: false };

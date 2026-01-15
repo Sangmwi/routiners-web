@@ -25,7 +25,7 @@ export default function ConfirmationStep({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-8">
       <div className="space-y-2 text-center">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
           <CheckCircle className="h-8 w-8 text-primary" />
