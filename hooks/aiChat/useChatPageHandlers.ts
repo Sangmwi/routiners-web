@@ -162,9 +162,13 @@ export function useChatPageHandlers({
           purpose: session.purpose,
         });
 
-        // 히스토리 스택에서 현재 항목을 대체하여 뒤로가기 시 이전 세션으로 가지 않도록 함
         const newUrl = `/routine/chat?session=${newSession.id}`;
-        window.location.replace(newUrl);
+        if (isInWebView) {
+          window.location.replace(newUrl);
+        } else {
+          // 새 세션 URL로 히스토리 대체 (뒤로가기 시 이전 세션으로 가지 않음)
+          router.replace(newUrl);
+        }
       },
     });
   };
