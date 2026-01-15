@@ -103,9 +103,9 @@ export default function MilitaryFlowContainer({
   };
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header with progress */}
-      <div className="relative flex items-center justify-between px-4 py-3 border-b border-border">
+    <div className="flex flex-col h-full w-full max-w-md mx-auto px-6 py-8">
+      {/* Header with back button */}
+      <div className="flex items-center justify-between mb-6 shrink-0">
         <button
           onClick={goBack}
           className="p-2 -ml-2 rounded-full hover:bg-muted active:bg-muted/80 transition-colors"
@@ -114,26 +114,23 @@ export default function MilitaryFlowContainer({
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
 
-        {/* Progress indicator */}
-        <div className="flex items-center gap-1">
-          <span className="text-sm font-medium text-foreground">{currentIndex + 1}</span>
-          <span className="text-sm text-muted-foreground">/ {totalSteps}</span>
-        </div>
-
-        {/* Spacer for layout balance */}
-        <div className="w-9" />
-
-        {/* Progress bar */}
-        <div className="absolute left-0 bottom-0 w-full h-0.5 bg-muted">
+        {/* Progress bar inline */}
+        <div className="flex-1 mx-4 h-1 bg-muted rounded-full overflow-hidden">
           <div
-            className="h-full bg-primary transition-all duration-300 ease-out"
+            className="h-full bg-primary transition-all duration-300 ease-out rounded-full"
             style={{ width: `${((currentIndex + 1) / totalSteps) * 100}%` }}
           />
         </div>
+
+        {/* Progress indicator */}
+        <div className="flex items-center gap-0.5 text-sm">
+          <span className="font-medium text-foreground">{currentIndex + 1}</span>
+          <span className="text-muted-foreground">/{totalSteps}</span>
+        </div>
       </div>
 
-      {/* Content area - conditional rendering */}
-      <div className="flex-1 p-6 overflow-y-auto">
+      {/* Content area - each step handles its own scroll */}
+      <div className="flex-1 w-full min-h-0">
         {currentSubStep === 'enlistment' && (
           <EnlistmentStep
             initialYear={formData.enlistmentYear}

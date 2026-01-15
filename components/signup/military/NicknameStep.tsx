@@ -78,101 +78,106 @@ export function NicknameStep({ initialNickname, onNext }: NicknameStepProps) {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Question */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <User className="w-6 h-6 text-primary" />
-          </div>
-        </div>
-        <h2 className="text-2xl font-bold text-foreground">
-          어떻게 불러드릴까요?
-        </h2>
-        <p className="text-muted-foreground">
-          앱에서 사용할 닉네임을 입력해 주세요
-        </p>
-      </div>
-
-      {/* Input */}
-      <div>
-        <div className="space-y-2">
-          <div className="relative">
-            <input
-              ref={inputRef}
-              type="text"
-              value={nickname}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              onKeyDown={handleKeyDown}
-              placeholder="닉네임 입력"
-              className={`
-                w-full px-4 py-4 text-lg
-                rounded-xl border-2 transition-all duration-200
-                bg-card text-foreground
-                focus:outline-none focus:ring-2 focus:ring-primary/20
-                ${
-                  errorMessage
-                    ? 'border-destructive focus:border-destructive'
-                    : nickname && isValid
-                      ? 'border-primary focus:border-primary'
-                      : 'border-border focus:border-primary'
-                }
-              `}
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="off"
-              spellCheck="false"
-            />
+    <div className="flex flex-col h-full w-full">
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="space-y-6">
+          {/* Question */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <User className="w-6 h-6 text-primary" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-foreground">
+              어떻게 불러드릴까요?
+            </h2>
+            <p className="text-muted-foreground">
+              앱에서 사용할 닉네임을 입력해 주세요
+            </p>
           </div>
 
-          {/* Character count & error */}
-          <div className="flex items-center justify-between px-1">
-            {errorMessage ? (
-              <div className="flex items-center gap-1 text-destructive text-sm">
-                <AlertCircle className="w-4 h-4" />
-                <span>{errorMessage}</span>
+          {/* Input */}
+          <div>
+            <div className="space-y-2">
+              <div className="relative">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={nickname}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  onKeyDown={handleKeyDown}
+                  placeholder="닉네임 입력"
+                  className={`
+                    w-full px-4 py-4 text-lg
+                    rounded-xl border-2 transition-all duration-200
+                    bg-card text-foreground
+                    focus:outline-none focus:ring-2 focus:ring-primary/20
+                    ${
+                      errorMessage
+                        ? 'border-destructive focus:border-destructive'
+                        : nickname && isValid
+                          ? 'border-primary focus:border-primary'
+                          : 'border-border focus:border-primary'
+                    }
+                  `}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                />
               </div>
-            ) : (
-              <div className="text-sm text-muted-foreground">
-                한글, 영문, 숫자, 밑줄(_) 사용 가능
+
+              {/* Character count & error */}
+              <div className="flex items-center justify-between px-1">
+                {errorMessage ? (
+                  <div className="flex items-center gap-1 text-destructive text-sm">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>{errorMessage}</span>
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    한글, 영문, 숫자, 밑줄(_) 사용 가능
+                  </div>
+                )}
+                <div
+                  className={`text-sm ${
+                    trimmed.length > MAX_LENGTH
+                      ? 'text-destructive'
+                      : 'text-muted-foreground'
+                  }`}
+                >
+                  {trimmed.length}/{MAX_LENGTH}
+                </div>
               </div>
-            )}
-            <div
-              className={`text-sm ${
-                trimmed.length > MAX_LENGTH
-                  ? 'text-destructive'
-                  : 'text-muted-foreground'
-              }`}
-            >
-              {trimmed.length}/{MAX_LENGTH}
+            </div>
+
+            {/* Example nicknames */}
+            <div className="mt-6">
+              <p className="text-sm text-muted-foreground mb-3">추천 닉네임</p>
+              <div className="flex flex-wrap gap-2">
+                {['운동하는병사', '헬스왕', '근육맨', '피지컬킹'].map((example) => (
+                  <button
+                    key={example}
+                    type="button"
+                    onClick={() => {
+                      setNickname(example);
+                      setIsTouched(true);
+                    }}
+                    className="px-3 py-1.5 rounded-full bg-muted/50 text-sm text-foreground hover:bg-muted transition-colors"
+                  >
+                    {example}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-
-        {/* Example nicknames */}
-        <div className="mt-6">
-          <p className="text-sm text-muted-foreground mb-3">추천 닉네임</p>
-          <div className="flex flex-wrap gap-2">
-            {['운동하는병사', '헬스왕', '근육맨', '피지컬킹'].map((example) => (
-              <button
-                key={example}
-                type="button"
-                onClick={() => {
-                  setNickname(example);
-                  setIsTouched(true);
-                }}
-                className="px-3 py-1.5 rounded-full bg-muted/50 text-sm text-foreground hover:bg-muted transition-colors"
-              >
-                {example}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
 
-      {/* Next button */}
-      <div className="pt-4">
+      {/* Fixed Footer */}
+      <div className="shrink-0 pt-6 pb-safe">
         <Button
           variant="primary"
           size="lg"

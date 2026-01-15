@@ -59,54 +59,59 @@ export function RankStep({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Question */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <Medal className="w-6 h-6 text-primary" />
+    <div className="flex flex-col h-full w-full">
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="space-y-6">
+          {/* Question */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Medal className="w-6 h-6 text-primary" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-foreground">
+              현재 계급이 무엇인가요?
+            </h2>
+            <p className="text-muted-foreground">
+              현재 본인의 계급을 선택해 주세요
+            </p>
+          </div>
+
+          {/* Selection Cards */}
+          <div>
+            <SelectionCardGroup gap="md">
+              {RANK_OPTIONS.map((option) => (
+                <SelectionCard
+                  key={option.value}
+                  label={option.label}
+                  description={option.monthRange}
+                  selected={rank === option.value}
+                  onClick={() => setRank(option.value)}
+                  icon={
+                    recommendedRank === option.value ? (
+                      <span className="text-xs font-bold">추천</span>
+                    ) : (
+                      <Medal className="w-5 h-5" />
+                    )
+                  }
+                />
+              ))}
+            </SelectionCardGroup>
+
+            {/* Recommendation hint */}
+            {recommendedRank && (
+              <p className="mt-4 text-xs text-muted-foreground text-center">
+                입대일 기준 예상 계급:{' '}
+                <span className="font-semibold text-primary">{recommendedRank}</span>
+              </p>
+            )}
           </div>
         </div>
-        <h2 className="text-2xl font-bold text-foreground">
-          현재 계급이 무엇인가요?
-        </h2>
-        <p className="text-muted-foreground">
-          현재 본인의 계급을 선택해 주세요
-        </p>
       </div>
 
-      {/* Selection Cards */}
-      <div>
-        <SelectionCardGroup gap="md">
-          {RANK_OPTIONS.map((option) => (
-            <SelectionCard
-              key={option.value}
-              label={option.label}
-              description={option.monthRange}
-              selected={rank === option.value}
-              onClick={() => setRank(option.value)}
-              icon={
-                recommendedRank === option.value ? (
-                  <span className="text-xs font-bold">추천</span>
-                ) : (
-                  <Medal className="w-5 h-5" />
-                )
-              }
-            />
-          ))}
-        </SelectionCardGroup>
-
-        {/* Recommendation hint */}
-        {recommendedRank && (
-          <p className="mt-4 text-xs text-muted-foreground text-center">
-            입대일 기준 예상 계급:{' '}
-            <span className="font-semibold text-primary">{recommendedRank}</span>
-          </p>
-        )}
-      </div>
-
-      {/* Next button */}
-      <div className="pt-4">
+      {/* Fixed Footer */}
+      <div className="shrink-0 pt-6 pb-safe">
         <Button
           variant="primary"
           size="lg"

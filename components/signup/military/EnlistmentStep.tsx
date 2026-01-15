@@ -38,44 +38,49 @@ export function EnlistmentStep({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Question */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <Calendar className="w-6 h-6 text-primary" />
+    <div className="flex flex-col h-full w-full">
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="space-y-6">
+          {/* Question */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-primary" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-foreground">
+              언제 입대하셨나요?
+            </h2>
+            <p className="text-muted-foreground">
+              입대 연월을 선택해 주세요
+            </p>
+          </div>
+
+          {/* Year/Month Picker */}
+          <div className="py-4">
+            <div className="bg-muted/30 rounded-2xl border border-border p-6">
+              <YearMonthPicker
+                year={year}
+                month={month}
+                onYearChange={setYear}
+                onMonthChange={setMonth}
+                yearRange={{ start: currentYear - 3, end: currentYear + 1 }}
+              />
+            </div>
+
+            {/* Selected display */}
+            <div className="mt-4 text-center">
+              <span className="text-lg font-semibold text-primary">
+                {year}년 {parseInt(month)}월
+              </span>
+            </div>
           </div>
         </div>
-        <h2 className="text-2xl font-bold text-foreground">
-          언제 입대하셨나요?
-        </h2>
-        <p className="text-muted-foreground">
-          입대 연월을 선택해 주세요
-        </p>
       </div>
 
-      {/* Year/Month Picker */}
-      <div className="py-4">
-        <div className="bg-card rounded-2xl border border-border p-6 shadow-sm">
-          <YearMonthPicker
-            year={year}
-            month={month}
-            onYearChange={setYear}
-            onMonthChange={setMonth}
-            yearRange={{ start: currentYear - 3, end: currentYear + 1 }}
-          />
-        </div>
-
-        {/* Selected display */}
-        <div className="mt-4 text-center">
-          <span className="text-lg font-semibold text-primary">
-            {year}년 {parseInt(month)}월
-          </span>
-        </div>
-      </div>
-
-      {/* Next button */}
-      <div className="pt-4">
+      {/* Fixed Footer */}
+      <div className="shrink-0 pt-6 pb-safe">
         <Button
           variant="primary"
           size="lg"

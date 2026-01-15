@@ -57,64 +57,69 @@ export function UnitStep({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Question */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <Building2 className="w-6 h-6 text-primary" />
+    <div className="flex flex-col h-full w-full">
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="space-y-6">
+          {/* Question */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Building2 className="w-6 h-6 text-primary" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-foreground">
+              소속 부대가 어디인가요?
+            </h2>
+            <p className="text-muted-foreground">
+              현재 복무 중인 부대를 선택해 주세요
+            </p>
+          </div>
+
+          {/* Selection trigger */}
+          <div>
+            <button
+              type="button"
+              onClick={() => setIsSheetOpen(true)}
+              className={`
+                w-full min-h-[72px] px-4 py-4
+                flex items-center gap-4
+                rounded-xl border-2 transition-all duration-200
+                ${
+                  unitName
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border bg-card hover:border-primary/50'
+                }
+              `}
+            >
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                <Search className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <div className="flex-1 text-left">
+                {unitName ? (
+                  <>
+                    <span className="text-base font-medium text-foreground">
+                      {unitName}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-base text-muted-foreground">
+                    부대를 검색해 주세요
+                  </span>
+                )}
+              </div>
+              {unitName && (
+                <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                  <Check className="w-4 h-4 text-primary-foreground" />
+                </div>
+              )}
+            </button>
           </div>
         </div>
-        <h2 className="text-2xl font-bold text-foreground">
-          소속 부대가 어디인가요?
-        </h2>
-        <p className="text-muted-foreground">
-          현재 복무 중인 부대를 선택해 주세요
-        </p>
       </div>
 
-      {/* Selection trigger */}
-      <div>
-        <button
-          type="button"
-          onClick={() => setIsSheetOpen(true)}
-          className={`
-            w-full min-h-[72px] px-4 py-4
-            flex items-center gap-4
-            rounded-xl border-2 transition-all duration-200
-            ${
-              unitName
-                ? 'border-primary bg-primary/10'
-                : 'border-border bg-card hover:border-primary/50'
-            }
-          `}
-        >
-          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-            <Search className="w-5 h-5 text-muted-foreground" />
-          </div>
-          <div className="flex-1 text-left">
-            {unitName ? (
-              <>
-                <span className="text-base font-medium text-foreground">
-                  {unitName}
-                </span>
-              </>
-            ) : (
-              <span className="text-base text-muted-foreground">
-                부대를 검색해 주세요
-              </span>
-            )}
-          </div>
-          {unitName && (
-            <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-              <Check className="w-4 h-4 text-primary-foreground" />
-            </div>
-          )}
-        </button>
-      </div>
-
-      {/* Next button */}
-      <div className="pt-4">
+      {/* Fixed Footer */}
+      <div className="shrink-0 pt-6 pb-safe">
         <Button
           variant="primary"
           size="lg"
