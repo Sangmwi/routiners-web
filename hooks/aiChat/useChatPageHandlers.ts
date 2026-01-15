@@ -157,14 +157,19 @@ export function useChatPageHandlers({
       variant: 'danger',
       loadingMessage: '대화를 초기화하는 중...',
       onConfirm: async () => {
-        const newSession = await resetSession.mutateAsync({
-          sessionId: session.id,
-          purpose: session.purpose,
-        });
+        try {
+          const newSession = await resetSession.mutateAsync({
+            sessionId: session.id,
+            purpose: session.purpose,
+          });
 
-        // 새 세션 URL로 히스토리 대체 (캐시 유지, 깜빡임 방지)
-        const newUrl = `/routine/chat?session=${newSession.id}`;
-        router.replace(newUrl);
+          // 새 세션 URL로 히스토리 대체 (캐시 유지, 깜빡임 방지)
+          const newUrl = `/routine/chat?session=${newSession.id}`;
+          router.replace(newUrl);
+        } catch (err) {
+          console.error('Failed to reset chat:', err);
+          showError('대화 초기화에 실패했습니다');
+        }
       },
     });
   };
