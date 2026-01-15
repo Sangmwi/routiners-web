@@ -169,6 +169,8 @@ export default function MilitaryFlowContainer({
         {currentSubStep === 'nickname' && (
           <NicknameStep
             initialNickname={formData.nickname}
+            rank={formData.rank || '이병'}
+            specialty={formData.specialty || '기타'}
             onNext={handleNicknameComplete}
           />
         )}

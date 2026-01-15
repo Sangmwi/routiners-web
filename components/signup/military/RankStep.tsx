@@ -13,10 +13,10 @@ interface RankStepProps {
 }
 
 const RANK_OPTIONS: { value: Rank; label: string; monthRange: string }[] = [
-  { value: '이병', label: '이병', monthRange: '0~6개월' },
-  { value: '일병', label: '일병', monthRange: '6~12개월' },
-  { value: '상병', label: '상병', monthRange: '12~18개월' },
-  { value: '병장', label: '병장', monthRange: '18개월 이상' },
+  { value: '이병', label: '이병', monthRange: '0~2개월' },
+  { value: '일병', label: '일병', monthRange: '2~8개월' },
+  { value: '상병', label: '상병', monthRange: '8~14개월' },
+  { value: '병장', label: '병장', monthRange: '14개월 이상' },
 ];
 
 /**
@@ -43,9 +43,9 @@ export function RankStep({
     const monthsDiff = (now.getFullYear() - enlistment.getFullYear()) * 12 +
       (now.getMonth() - enlistment.getMonth());
 
-    if (monthsDiff >= 18) return '병장';
-    if (monthsDiff >= 12) return '상병';
-    if (monthsDiff >= 6) return '일병';
+    if (monthsDiff >= 14) return '병장';
+    if (monthsDiff >= 8) return '상병';
+    if (monthsDiff >= 2) return '일병';
     return '이병';
   };
 
