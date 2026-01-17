@@ -1,6 +1,6 @@
 'use client';
 
-import { MapPin } from 'lucide-react';
+import { MapPinIcon } from '@phosphor-icons/react';
 import SectionHeader from '@/components/ui/SectionHeader';
 import Tag from '@/components/ui/Tag';
 import EmptyState from '@/components/common/EmptyState';
@@ -17,7 +17,7 @@ export default function ProfileLocationsSection({ locations }: ProfileLocationsS
       {locations && locations.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           {locations.map((location, index) => (
-            <Tag key={index} icon={MapPin}>
+            <Tag key={index} icon={MapPinIcon}>
               {location}
             </Tag>
           ))}

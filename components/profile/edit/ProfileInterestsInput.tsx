@@ -1,6 +1,6 @@
 'use client';
 
-import { X } from 'lucide-react';
+import { XIcon } from '@phosphor-icons/react';
 import SectionHeader from '@/components/ui/SectionHeader';
 
 interface ProfileInterestsInputProps {
@@ -79,7 +79,7 @@ export default function ProfileInterestsInput({ value, onChange }: ProfileIntere
                 onClick={() => handleToggleInterest(interest)}
                 className="hover:opacity-80 transition-opacity"
               >
-                <X className="w-3.5 h-3.5" />
+                <XIcon size={14} />
               </button>
             </div>
           ))}

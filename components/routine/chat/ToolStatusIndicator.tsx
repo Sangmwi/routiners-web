@@ -2,7 +2,8 @@
 
 import { AIToolStatus, AIToolName } from '@/lib/types/fitness';
 import { AI_TOOL_LABELS } from '@/lib/types/fitness';
-import { Loader2, Check, X } from 'lucide-react';
+import { CheckIcon, XIcon } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 
 interface ToolStatusIndicatorProps {
   /** 도구 상태 목록 */
@@ -58,13 +59,13 @@ export default function ToolStatusIndicator({ tools }: ToolStatusIndicatorProps)
         <span key={tool.toolCallId} className="inline-flex items-center gap-1">
           {/* 상태 아이콘 */}
           {tool.status === 'running' && (
-            <Loader2 className="w-3 h-3 animate-spin" />
+            <LoadingSpinner size="xs" variant="current" />
           )}
           {tool.status === 'completed' && (
-            <Check className="w-3 h-3 text-success/70" />
+            <CheckIcon size={12} className="text-success/70" />
           )}
           {tool.status === 'error' && (
-            <X className="w-3 h-3 text-amber-500/70" />
+            <XIcon size={12} className="text-amber-500/70" />
           )}
 
           {/* 도구명 + 결과 */}

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { User } from '@/lib/types';
 import { ImageWithFallback } from '@/components/ui/image';
-import { CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CheckCircleIcon, CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 
 interface ProfileHeroSectionProps {
   user: User;
@@ -122,14 +122,14 @@ export default function ProfileHeroSection({ user }: ProfileHeroSectionProps) {
             className="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-black/30 hover:bg-black/50 rounded-full transition-colors hidden sm:block"
             aria-label="이전 사진"
           >
-            <ChevronLeft className="w-6 h-6 text-white" />
+            <CaretLeftIcon size={24} className="text-white" weight="bold" />
           </button>
           <button
             onClick={goToNext}
             className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-black/30 hover:bg-black/50 rounded-full transition-colors hidden sm:block"
             aria-label="다음 사진"
           >
-            <ChevronRight className="w-6 h-6 text-white" />
+            <CaretRightIcon size={24} className="text-white" weight="bold" />
           </button>
         </>
       )}
@@ -158,7 +158,7 @@ export default function ProfileHeroSection({ user }: ProfileHeroSectionProps) {
           <h1 className="text-2xl font-bold text-white">
             {user.rank} {user.nickname}, {getAge(user.birthDate)}
           </h1>
-          <CheckCircle2 className="w-6 h-6 text-white" fill="currentColor" />
+          <CheckCircleIcon size={24} className="text-white" weight="fill" />
         </div>
 
         {/* Interest Tag */}

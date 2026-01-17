@@ -13,7 +13,7 @@ import ProfileInbodySection from '@/components/profile/ProfileInbodySection';
 import ProfileFitnessSection from '@/components/profile/ProfileFitnessSection';
 import ProfileMilitarySection from '@/components/profile/ProfileMilitarySection';
 import ProfileLocationsSection from '@/components/profile/ProfileLocationsSection';
-import { LogOut, UserX, Loader2 } from 'lucide-react';
+import { SignOutIcon, UserMinusIcon, SpinnerGapIcon } from '@phosphor-icons/react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 
 export default function ProfilePage() {
@@ -73,12 +73,12 @@ export default function ProfilePage() {
         >
           {isLoggingOut ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <SpinnerGapIcon size={16} className="animate-spin" />
               <span>로그아웃 중...</span>
             </>
           ) : (
             <>
-              <LogOut className="w-4 h-4" />
+              <SignOutIcon size={16} />
               <span>로그아웃</span>
             </>
           )}
@@ -91,12 +91,12 @@ export default function ProfilePage() {
         >
           {isWithdrawing ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <SpinnerGapIcon size={16} className="animate-spin" />
               <span>탈퇴 처리 중...</span>
             </>
           ) : (
             <>
-              <UserX className="w-4 h-4" />
+              <UserMinusIcon size={16} />
               <span>회원 탈퇴</span>
             </>
           )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { Bot, Sparkles } from 'lucide-react';
+import { RobotIcon, SparkleIcon } from '@phosphor-icons/react';
 
 /**
  * AI 페이지 히어로 섹션
@@ -16,14 +16,14 @@ export default function AIHeroSection() {
       <div className="relative flex flex-col items-center gap-4 text-center">
         {/* 아이콘 */}
         <div className="flex items-center justify-center rounded-full bg-primary/10 p-4 border-2 border-primary/30">
-          <Bot className="h-12 w-12 text-primary" />
+          <RobotIcon size={48} className="text-primary" weight="fill" />
         </div>
 
         {/* 타이틀 */}
         <div>
           <div className="flex items-center justify-center gap-2 mb-2">
             <h1 className="text-3xl font-bold text-foreground">AI 트레이너</h1>
-            <Sparkles className="h-6 w-6 text-primary animate-pulse" />
+            <SparkleIcon size={24} className="text-primary animate-pulse" weight="fill" />
           </div>
           <p className="text-muted-foreground">
             AI가 당신의 운동을 실시간으로 분석하고 코칭해줍니다

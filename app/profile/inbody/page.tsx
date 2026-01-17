@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Plus, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { PlusIcon, SpinnerGapIcon, WarningCircleIcon, CheckCircleIcon } from '@phosphor-icons/react';
 import PageHeader from '@/components/common/PageHeader';
 import Button from '@/components/ui/Button';
 import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
@@ -23,7 +23,7 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center p-6 bg-background">
       <div className="text-center">
-        <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
+        <WarningCircleIcon size={48} className="text-destructive mx-auto mb-4" />
         <p className="mb-4 text-sm text-muted-foreground">
           인바디 기록을 불러올 수 없습니다
         </p>
@@ -53,7 +53,7 @@ function DeleteConfirmView({
 }: DeleteConfirmViewProps) {
   return (
     <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-      <AlertCircle className="w-12 h-12 text-destructive mb-4" />
+      <WarningCircleIcon size={48} className="text-destructive mb-4" />
       <p className="text-lg font-medium text-card-foreground">
         이 기록을 삭제할까요?
       </p>
@@ -79,7 +79,7 @@ function DeleteConfirmView({
         >
           {isDeleting ? (
             <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              <SpinnerGapIcon size={16} className="mr-2 animate-spin" />
               삭제 중...
             </>
           ) : (
@@ -220,12 +220,12 @@ export default function InBodyManagePage() {
           >
             {scanState === 'scanning' ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <SpinnerGapIcon size={16} className="mr-2 animate-spin" />
                 분석 중...
               </>
             ) : (
               <>
-                <Plus className="w-4 h-4 mr-2" />
+                <PlusIcon size={16} className="mr-2" />
                 새 기록 추가
               </>
             )}
@@ -252,7 +252,7 @@ export default function InBodyManagePage() {
 
           {scanState === 'saving' && (
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
-              <Loader2 className="w-12 h-12 text-primary animate-spin" />
+              <SpinnerGapIcon size={48} className="text-primary animate-spin" />
               <p className="text-lg font-medium text-card-foreground">
                 저장 중...
               </p>
@@ -261,7 +261,7 @@ export default function InBodyManagePage() {
 
           {scanState === 'error' && (
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
-              <AlertCircle className="w-12 h-12 text-destructive" />
+              <WarningCircleIcon size={48} className="text-destructive" />
               <div className="text-center space-y-1">
                 <p className="text-lg font-medium text-card-foreground">
                   오류가 발생했습니다
@@ -279,7 +279,7 @@ export default function InBodyManagePage() {
                 다시 스캔
               </Button>
               <Button onClick={saveScanData} className="flex-1">
-                <CheckCircle2 className="w-4 h-4 mr-2" />
+                <CheckCircleIcon size={16} className="mr-2" />
                 저장하기
               </Button>
             </>

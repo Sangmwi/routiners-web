@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, ChevronRight, Calendar, Loader2, Trash2, AlertCircle } from 'lucide-react';
+import { CalendarIcon } from '@phosphor-icons/react';
+import { AddIcon, NextIcon, LoadingSpinner, DeleteIcon, ErrorIcon } from '@/components/ui/icons';
 import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { useShowError } from '@/lib/stores/errorStore';
@@ -104,11 +105,11 @@ export default function InBodyManageModal({
             <>
               {isLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                  <LoadingSpinner size="xl" />
                 </div>
               ) : records.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center px-4">
-                  <Calendar className="w-12 h-12 text-muted-foreground mb-4" />
+                  <CalendarIcon size={48} className="text-muted-foreground mb-4" />
                   <p className="text-lg font-medium text-card-foreground">
                     아직 인바디 기록이 없어요
                   </p>
@@ -151,9 +152,9 @@ export default function InBodyManageModal({
                           className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                           aria-label="삭제"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <DeleteIcon size="sm" />
                         </button>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                        <NextIcon size="md" className="text-muted-foreground shrink-0" />
                       </div>
                     </div>
                   ))}
@@ -164,7 +165,7 @@ export default function InBodyManageModal({
 
           {state === 'confirm-delete' && recordToDelete && (
             <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-              <AlertCircle className="w-12 h-12 text-destructive mb-4" />
+              <ErrorIcon size="2xl" className="text-destructive mb-4" />
               <p className="text-lg font-medium text-card-foreground">
                 이 기록을 삭제할까요?
               </p>
@@ -188,7 +189,7 @@ export default function InBodyManageModal({
                 onClick={() => setIsScanModalOpen(true)}
                 className="flex-1"
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <AddIcon size="sm" className="mr-2" />
                 새 기록 추가
               </Button>
             </>
@@ -212,7 +213,7 @@ export default function InBodyManageModal({
               >
                 {deleteInBody.isPending ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <LoadingSpinner size="sm" variant="current" className="mr-2" />
                     삭제 중...
                   </>
                 ) : (

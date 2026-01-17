@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Medal } from 'lucide-react';
+import { MedalIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
 import { SelectionCard, SelectionCardGroup } from '@/components/ui/SelectionCard';
 import type { Rank } from '@/lib/types/user';
@@ -67,7 +67,7 @@ export function RankStep({
           <div className="space-y-2">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Medal className="w-6 h-6 text-primary" />
+                <MedalIcon size={24} className="text-primary" />
               </div>
             </div>
             <h2 className="text-2xl font-bold text-foreground">
@@ -92,7 +92,7 @@ export function RankStep({
                     recommendedRank === option.value ? (
                       <span className="text-xs font-bold">추천</span>
                     ) : (
-                      <Medal className="w-5 h-5" />
+                      <MedalIcon size={20} />
                     )
                   }
                 />

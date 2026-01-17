@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Settings, ChevronRight } from 'lucide-react';
+import { GearIcon, CaretRightIcon } from '@phosphor-icons/react';
 import FormSection from '@/components/ui/FormSection';
 import FormToggle from '@/components/ui/FormToggle';
 import { InBodyManageModal, MetricsGrid } from '@/components/inbody';
@@ -33,7 +33,7 @@ export default function ProfileInbodyInput({
             onClick={() => setIsManageModalOpen(true)}
             className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors"
           >
-            <Settings className="w-4 h-4" />
+            <GearIcon size={16} />
             <span>관리</span>
           </button>
         }
@@ -49,7 +49,7 @@ export default function ProfileInbodyInput({
                 <MetricsGrid data={latest} />
                 <div className="flex items-center justify-center gap-1 mt-3 text-xs text-muted-foreground">
                   <span>총 {totalRecords}개의 기록</span>
-                  <ChevronRight className="w-3 h-3" />
+                  <CaretRightIcon size={12} />
                 </div>
               </>
             ) : (
@@ -62,7 +62,7 @@ export default function ProfileInbodyInput({
                     탭하여 인바디 기록을 추가하세요
                   </p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                <CaretRightIcon size={20} className="text-muted-foreground" />
               </div>
             )}
           </div>

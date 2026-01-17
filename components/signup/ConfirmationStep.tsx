@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle } from 'lucide-react';
+import { CheckCircleIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
 import { PassVerificationData, MilitaryInfoData } from '@/lib/types';
 
@@ -32,7 +32,7 @@ export default function ConfirmationStep({
           {/* Icon + Title */}
           <div className="space-y-4">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-primary" />
+              <CheckCircleIcon size={24} className="text-primary" />
             </div>
             <div className="space-y-2">
               <h1 className="text-2xl font-bold text-foreground">입력하신 정보를 확인해 주세요</h1>

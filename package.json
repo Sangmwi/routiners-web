@@ -11,6 +11,7 @@
     "db:types:local": "npx supabase gen types typescript --local > lib/database.types.ts"
   },
   "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.88.0",
     "@tanstack/react-query": "^5.90.12",

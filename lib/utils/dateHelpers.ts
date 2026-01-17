@@ -83,3 +83,47 @@ export function parseDate(dateStr: string): Date {
 export function getToday(): string {
   return formatDate(new Date());
 }
+
+/**
+ * 주간 범위 반환 (월요일 ~ 일요일)
+ *
+ * @param date - 기준 Date 객체 (기본값: 오늘)
+ * @returns { startDate, endDate, weekLabel } 주간 범위 정보
+ *
+ * @example
+ * getWeekRange() // { startDate: '2025-01-13', endDate: '2025-01-19', weekLabel: '1월 13일 ~ 1월 19일' }
+ */
+export function getWeekRange(date: Date = new Date()): {
+  startDate: string;
+  endDate: string;
+  weekLabel: string;
+} {
+  const day = date.getDay();
+  // 월요일을 주의 시작으로 (0=일요일이면 -6, 1=월요일이면 0, ...)
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  const monday = addDays(date, diffToMonday);
+  const sunday = addDays(monday, 6);
+
+  const startMonth = monday.getMonth() + 1;
+  const startDay = monday.getDate();
+  const endMonth = sunday.getMonth() + 1;
+  const endDay = sunday.getDate();
+
+  return {
+    startDate: formatDate(monday),
+    endDate: formatDate(sunday),
+    weekLabel: `${startMonth}월 ${startDay}일 ~ ${endMonth}월 ${endDay}일`,
+  };
+}
+
+/**
+ * 요일 레이블 반환
+ *
+ * @param date - Date 객체 또는 YYYY-MM-DD 문자열
+ * @returns 요일 레이블 (월, 화, 수, 목, 금, 토, 일)
+ */
+export function getDayOfWeek(date: Date | string): string {
+  const d = typeof date === 'string' ? parseDate(date) : date;
+  const days = ['일', '월', '화', '수', '목', '금', '토'];
+  return days[d.getDay()];
+}

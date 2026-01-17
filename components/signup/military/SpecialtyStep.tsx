@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Briefcase, Search, Check } from 'lucide-react';
+import { BriefcaseIcon, MagnifyingGlassIcon, CheckIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import type { Specialty } from '@/lib/types/user';
@@ -78,7 +78,7 @@ export function SpecialtyStep({
           <div className="space-y-2">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Briefcase className="w-6 h-6 text-primary" />
+                <BriefcaseIcon size={24} className="text-primary" />
               </div>
             </div>
             <h2 className="text-2xl font-bold text-foreground">
@@ -106,7 +106,7 @@ export function SpecialtyStep({
               `}
             >
               <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                <Search className="w-5 h-5 text-muted-foreground" />
+                <MagnifyingGlassIcon size={20} className="text-muted-foreground" />
               </div>
               <div className="flex-1 text-left">
                 {selectedInfo ? (
@@ -126,7 +126,7 @@ export function SpecialtyStep({
               </div>
               {selectedInfo && (
                 <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                  <Check className="w-4 h-4 text-primary-foreground" />
+                  <CheckIcon size={16} className="text-primary-foreground" />
                 </div>
               )}
             </button>
@@ -164,7 +164,7 @@ export function SpecialtyStep({
           {/* Search input */}
           <div className="sticky top-0 bg-card px-4 pb-4 pt-2 border-b border-border">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <input
                 type="text"
                 value={searchQuery}

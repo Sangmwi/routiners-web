@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { List, Edit2, Check, AlertTriangle, Loader2 } from 'lucide-react';
+import { ListIcon, PencilSimpleIcon, CheckIcon, WarningIcon, SpinnerGapIcon } from '@phosphor-icons/react';
 import { getEventIcon } from '@/lib/config/eventTheme';
 
 interface PreviewStats {
@@ -102,7 +102,7 @@ export default function ChatPreviewSummary({
         {hasConflicts && (
           <div className="px-4 pb-3">
             <div className="flex items-center gap-2 text-amber-500">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
+              <WarningIcon size={16} className="shrink-0" />
               <span className="text-sm font-medium">기존 일정과 겹치는 날이 있습니다</span>
             </div>
           </div>
@@ -117,7 +117,7 @@ export default function ChatPreviewSummary({
                 onClick={onViewDetails}
                 className="flex-1 flex items-center justify-center gap-1.5 h-11 rounded-xl text-sm font-medium bg-muted/40 hover:bg-muted/60 transition-colors"
               >
-                <List className="w-4 h-4" />
+                <ListIcon size={16} />
                 상세 보기
               </button>
 
@@ -128,7 +128,7 @@ export default function ChatPreviewSummary({
                 className="flex items-center justify-center w-11 h-11 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors disabled:opacity-50"
                 aria-label="수정 요청"
               >
-                <Edit2 className="w-4 h-4" />
+                <PencilSimpleIcon size={16} />
               </button>
 
               {/* 적용 */}
@@ -142,10 +142,10 @@ export default function ChatPreviewSummary({
                 }`}
               >
                 {isApplying ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <SpinnerGapIcon size={16} className="animate-spin" />
                 ) : (
                   <>
-                    <Check className="w-4 h-4" />
+                    <CheckIcon size={16} />
                     적용
                   </>
                 )}

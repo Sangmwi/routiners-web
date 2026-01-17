@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, AlertCircle, Check } from 'lucide-react';
+import { SpinnerGapIcon, WarningCircleIcon, CheckIcon } from '@phosphor-icons/react';
 import PageHeader from '@/components/common/PageHeader';
 import Button from '@/components/ui/Button';
 import { PageSkeleton } from '@/components/ui/Skeleton';
@@ -71,7 +71,7 @@ function ChipOption({ label, selected, onClick }: ChipOptionProps) {
           : 'bg-muted text-muted-foreground hover:bg-muted/80'
       }`}
     >
-      {selected && <Check className="w-3 h-3" />}
+      {selected && <CheckIcon size={12} />}
       {label}
     </button>
   );
@@ -246,7 +246,7 @@ export default function FitnessProfilePage() {
     return (
       <div className="flex min-h-screen items-center justify-center p-6 bg-background">
         <div className="text-center">
-          <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
+          <WarningCircleIcon size={48} className="text-destructive mx-auto mb-4" />
           <p className="mb-4 text-sm text-muted-foreground">
             운동 프로필을 불러올 수 없습니다
           </p>
@@ -439,7 +439,7 @@ export default function FitnessProfilePage() {
         >
           {updateProfile.isPending ? (
             <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              <SpinnerGapIcon size={16} className="mr-2 animate-spin" />
               저장 중...
             </>
           ) : (

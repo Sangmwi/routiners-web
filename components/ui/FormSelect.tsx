@@ -1,7 +1,7 @@
 'use client';
 
 import { SelectHTMLAttributes } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ExpandIcon } from '@/components/ui/icons';
 
 interface FormSelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'className'> {
   label?: string;
@@ -32,7 +32,7 @@ export default function FormSelect({ label, error, options, ...props }: FormSele
             </option>
           ))}
         </select>
-        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+        <ExpandIcon size="sm" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
       </div>
       {error && (
         <p className="text-xs text-destructive">{error}</p>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Calendar, Clock, Check, Edit2, AlertTriangle } from 'lucide-react';
+import { CaretDownIcon, CaretRightIcon, CalendarIcon, ClockIcon, CheckIcon, PencilSimpleIcon, WarningIcon } from '@phosphor-icons/react';
 import type { RoutinePreviewData, RoutinePreviewWeek, RoutinePreviewDay } from '@/lib/types/fitness';
 import { getEventIcon } from '@/lib/config/eventTheme';
 
@@ -31,7 +31,7 @@ function DayCard({ day }: { day: RoutinePreviewDay }) {
         <span className="text-sm text-muted-foreground">- {day.title}</span>
         {day.estimatedDuration && (
           <span className="text-xs text-muted-foreground flex items-center gap-1">
-            <Clock className="w-3 h-3" />
+            <ClockIcon size={12} />
             {day.estimatedDuration}분
           </span>
         )}
@@ -74,9 +74,9 @@ function WeekCard({ week, defaultOpen = false }: { week: RoutinePreviewWeek; def
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span>{week.days.length}일</span>
           {isOpen ? (
-            <ChevronDown className="w-4 h-4" />
+            <CaretDownIcon size={16} />
           ) : (
-            <ChevronRight className="w-4 h-4" />
+            <CaretRightIcon size={16} />
           )}
         </div>
       </button>
@@ -130,7 +130,7 @@ export default function ChatRoutinePreview({
         <p className="text-sm text-muted-foreground">{preview.description}</p>
         <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
+            <CalendarIcon size={12} />
             {preview.durationWeeks}주
           </span>
           <span>주 {preview.daysPerWeek}회</span>
@@ -139,11 +139,11 @@ export default function ChatRoutinePreview({
 
       {/* 충돌 경고 */}
       {hasConflicts && (
-        <div className="p-3 bg-amber-500/10 border-b border-amber-500/20">
+        <div className="p-3 bg-scheduled/10 border-b border-scheduled/20">
           <div className="flex items-start gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+            <WarningIcon size={16} className="text-scheduled mt-0.5 shrink-0" />
             <div className="text-sm">
-              <p className="font-medium text-amber-600 dark:text-amber-400">
+              <p className="font-medium text-warning">
                 기존 루틴 {preview.conflicts!.length}개와 겹칩니다
               </p>
               <p className="text-muted-foreground text-xs mt-1">
@@ -170,7 +170,7 @@ export default function ChatRoutinePreview({
               disabled={isApplying}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium border border-border bg-background text-foreground hover:bg-muted transition-colors disabled:opacity-50"
             >
-              <Edit2 className="w-4 h-4" />
+              <PencilSimpleIcon size={16} />
               수정 요청
             </button>
             <button
@@ -178,7 +178,7 @@ export default function ChatRoutinePreview({
               disabled={isApplying}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
                 hasConflicts
-                  ? 'bg-amber-500 text-white hover:bg-amber-600'
+                  ? 'bg-scheduled text-scheduled-foreground hover:opacity-90'
                   : 'bg-primary text-primary-foreground hover:bg-primary/90'
               }`}
             >
@@ -189,12 +189,12 @@ export default function ChatRoutinePreview({
                 </>
               ) : hasConflicts ? (
                 <>
-                  <AlertTriangle className="w-4 h-4" />
+                  <WarningIcon size={16} />
                   덮어쓰고 적용
                 </>
               ) : (
                 <>
-                  <Check className="w-4 h-4" />
+                  <CheckIcon size={16} />
                   이 루틴 적용
                 </>
               )}

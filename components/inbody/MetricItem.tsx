@@ -1,6 +1,6 @@
 'use client';
 
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendUpIcon, TrendDownIcon } from '@phosphor-icons/react';
 
 export interface MetricItemProps {
   /** 아이콘 컴포넌트 */
@@ -74,9 +74,9 @@ export function MetricItem({
           }`}
         >
           {isPositive ? (
-            <TrendingUp className="w-3 h-3" />
+            <TrendUpIcon size={12} weight="bold" />
           ) : (
-            <TrendingDown className="w-3 h-3" />
+            <TrendDownIcon size={12} weight="bold" />
           )}
           <span>
             {isPositive ? '+' : ''}

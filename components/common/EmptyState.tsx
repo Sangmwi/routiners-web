@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { LucideIcon } from 'lucide-react';
+import type { Icon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
 
 // ============================================================
@@ -16,8 +16,8 @@ interface EmptyStateAction {
 }
 
 interface EmptyStateProps {
-  /** 아이콘 - LucideIcon 또는 ReactNode */
-  icon?: LucideIcon | ReactNode;
+  /** 아이콘 - PhosphorIcon 또는 ReactNode */
+  icon?: Icon | ReactNode;
   /** 메인 메시지/제목 */
   message: string;
   /** 안내/힌트 문구 (부가 설명) */
@@ -42,9 +42,9 @@ interface EmptyStateProps {
  * 빈 상태 공통 컴포넌트
  *
  * @example
- * // 기본 사용 (LucideIcon)
+ * // 기본 사용 (PhosphorIcon)
  * <EmptyState
- *   icon={Scale}
+ *   icon={Scales}
  *   message="아직 등록된 인바디 기록이 없어요"
  *   hint="탭하여 인바디 기록을 추가해보세요"
  * />
@@ -58,14 +58,14 @@ interface EmptyStateProps {
  *
  * // 액션 버튼 포함
  * <EmptyState
- *   icon={<Plus className="w-full h-full" />}
+ *   icon={<Plus size={32} />}
  *   message="등록된 기록이 없습니다"
  *   action={{ label: "기록 추가", onClick: handleAdd }}
  * />
  *
  * // 아이콘 배경 포함 (기존 스타일)
  * <EmptyState
- *   icon={Inbox}
+ *   icon={Tray}
  *   message="게시글이 없습니다"
  *   hint="첫 게시글을 작성해보세요"
  *   showIconBackground
@@ -107,9 +107,9 @@ export default function EmptyState({
   const renderIcon = () => {
     if (!icon) return null;
 
-    // LucideIcon은 forwardRef를 사용하므로 $$typeof와 render 속성을 가진 객체
+    // PhosphorIcon은 forwardRef를 사용하므로 $$typeof와 render 속성을 가진 객체
     // typeof === 'function' 또는 $$typeof 속성 존재 여부로 체크
-    const isLucideIcon =
+    const isPhosphorIcon =
       typeof icon === 'function' ||
       (typeof icon === 'object' && icon !== null && '$$typeof' in icon);
 
@@ -117,11 +117,11 @@ export default function EmptyState({
       // 배경 있는 스타일 (기존 common/EmptyState 스타일)
       return (
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-          {isLucideIcon ? (
-            // LucideIcon 컴포넌트
+          {isPhosphorIcon ? (
+            // PhosphorIcon 컴포넌트
             (() => {
-              const Icon = icon as LucideIcon;
-              return <Icon className={`h-8 w-8 ${iconColorStyles[variant]}`} />;
+              const IconComponent = icon as Icon;
+              return <IconComponent size={32} className={iconColorStyles[variant]} />;
             })()
           ) : (
             // ReactNode
@@ -136,10 +136,10 @@ export default function EmptyState({
     // 배경 없는 스타일
     return (
       <div className={`w-8 h-8 mb-3 ${iconColorStyles[variant]} [&>svg]:w-full [&>svg]:h-full`}>
-        {isLucideIcon ? (
+        {isPhosphorIcon ? (
           (() => {
-            const Icon = icon as LucideIcon;
-            return <Icon className="w-full h-full" />;
+            const IconComponent = icon as Icon;
+            return <IconComponent size={32} />;
           })()
         ) : (
           icon

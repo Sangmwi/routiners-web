@@ -11,7 +11,7 @@ import {
 } from '@/components/routine';
 import { useCalendarEvents, useRoutineEventByDate } from '@/hooks/routine';
 import type { EventType } from '@/lib/types/routine';
-import { Loader2 } from 'lucide-react';
+import { SpinnerGapIcon } from '@phosphor-icons/react';
 
 type FilterType = EventType | 'all';
 
@@ -128,7 +128,7 @@ export default function RoutineCalendarPage() {
 
           {isLoadingCalendar ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              <SpinnerGapIcon size={24} className="animate-spin text-primary" />
             </div>
           ) : (
             <CalendarGrid
@@ -148,7 +148,7 @@ export default function RoutineCalendarPage() {
           </h2>
           {isLoadingEvent ? (
             <div className="bg-card border border-border rounded-xl p-4 flex items-center justify-center">
-              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+              <SpinnerGapIcon size={20} className="animate-spin text-primary" />
             </div>
           ) : (
             <DayEventCard event={selectedEvent} date={selectedDate} />

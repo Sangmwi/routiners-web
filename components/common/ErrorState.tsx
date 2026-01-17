@@ -1,4 +1,4 @@
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { ErrorIcon, RefreshIcon } from '@/components/ui/icons';
 import Button from '@/components/ui/Button';
 
 interface ErrorStateProps {
@@ -50,7 +50,7 @@ export default function ErrorState({
     >
       {/* 에러 아이콘 */}
       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
-        <AlertCircle className="h-8 w-8 text-destructive" />
+        <ErrorIcon size="xl" className="text-destructive" />
       </div>
 
       {/* 제목 */}
@@ -62,7 +62,7 @@ export default function ErrorState({
       {/* 재시도 버튼 */}
       {showRetry && onRetry && (
         <Button variant="outline" size="md" onClick={onRetry} className="mt-6">
-          <RefreshCw className="h-4 w-4" />
+          <RefreshIcon size="sm" />
           다시 시도
         </Button>
       )}

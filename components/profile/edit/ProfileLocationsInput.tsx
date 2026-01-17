@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Plus } from 'lucide-react';
+import { XIcon, PlusIcon } from '@phosphor-icons/react';
 import SectionHeader from '@/components/ui/SectionHeader';
 import Tag from '@/components/ui/Tag';
 
@@ -54,7 +54,7 @@ export default function ProfileLocationsInput({ value, onChange }: ProfileLocati
           onClick={handleAddLocation}
           className="px-4 py-3 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center gap-1"
         >
-          <Plus className="w-4 h-4" />
+          <PlusIcon size={16} />
           <span className="text-sm">추가</span>
         </button>
       </div>
@@ -70,7 +70,7 @@ export default function ProfileLocationsInput({ value, onChange }: ProfileLocati
                 onClick={() => handleRemoveLocation(index)}
                 className="ml-1.5 hover:text-destructive transition-colors"
               >
-                <X className="w-3.5 h-3.5" />
+                <XIcon size={14} />
               </button>
             </Tag>
           ))}

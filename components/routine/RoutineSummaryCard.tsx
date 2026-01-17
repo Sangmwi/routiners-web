@@ -1,7 +1,8 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { ChevronRight, Check, Clock } from 'lucide-react';
+import { CheckIcon, ClockIcon } from '@phosphor-icons/react';
+import { NextIcon } from '@/components/ui/icons';
 import type { EventStatus, EventType } from '@/lib/types/routine';
 
 interface RoutineSummaryCardProps {
@@ -120,7 +121,7 @@ export default function RoutineSummaryCard({
           className={`w-12 h-12 rounded-xl ${styles.iconBg} flex items-center justify-center shrink-0`}
         >
           {isCompleted ? (
-            <Check className={`w-6 h-6 ${styles.iconColor}`} />
+            <CheckIcon size={24} weight="bold" className={styles.iconColor} />
           ) : (
             <div className={styles.iconColor}>{icon}</div>
           )}
@@ -131,7 +132,7 @@ export default function RoutineSummaryCard({
           <div className="flex items-center gap-2">
             <h3 className="font-semibold text-foreground truncate">{title}</h3>
             {status === 'scheduled' && (
-              <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
+              <ClockIcon size={16} weight="bold" className="text-muted-foreground shrink-0" />
             )}
           </div>
 
@@ -155,7 +156,7 @@ export default function RoutineSummaryCard({
           )}
         </div>
 
-        <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
+        <NextIcon size="md" weight="emphasis" className="text-muted-foreground shrink-0" />
       </div>
     </button>
   );

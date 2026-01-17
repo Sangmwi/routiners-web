@@ -69,6 +69,18 @@
   --workout-foreground: #ffffff;
   --meal: #84cc16; /* lime-500 - 식단 관련 UI */
   --meal-foreground: #ffffff;
+
+  /* Warning/Alert Colors - 경고, 예정 상태 */
+  --warning: #d97706; /* amber-600 */
+  --warning-foreground: #ffffff;
+  --warning-muted: #fef3c7; /* amber-100 - 배경용 */
+
+  /* Scheduled Status - 예정 상태 */
+  --scheduled: #f59e0b; /* amber-500 */
+  --scheduled-foreground: #ffffff;
+
+  /* Primary Muted - 다크모드에서 살짝 투명한 primary */
+  --primary-muted: var(--primary);
 }
 
 @theme inline {
@@ -76,6 +88,7 @@
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-muted: var(--primary-muted);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -92,6 +105,11 @@
   --color-workout-foreground: var(--workout-foreground);
   --color-meal: var(--meal);
   --color-meal-foreground: var(--meal-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-muted: var(--warning-muted);
+  --color-scheduled: var(--scheduled);
+  --color-scheduled-foreground: var(--scheduled-foreground);
 
   /* Green Brand Scale - Tailwind에서 green-500 등으로 사용 가능 */
   --color-green-50: var(--color-green-50);
@@ -175,6 +193,18 @@
     --workout-foreground: #042f2e;
     --meal: #a3e635; /* lime-400 - 어두운 배경에서 더 밝게 */
     --meal-foreground: #1a2e05;
+
+    /* Warning/Alert Colors (Dark) */
+    --warning: #fbbf24; /* amber-400 - 다크모드에서 더 밝게 */
+    --warning-foreground: #1e1e1e;
+    --warning-muted: #78350f; /* amber-900 - 어두운 배경 */
+
+    /* Scheduled Status (Dark) */
+    --scheduled: #fbbf24; /* amber-400 */
+    --scheduled-foreground: #1e1e1e;
+
+    /* Primary Muted (Dark) - 50% 투명도 */
+    --primary-muted: rgba(80, 167, 108, 0.5); /* primary at 50% opacity */
 
     /* Green 브랜드 컬러 스케일 반전 */
     --color-green-50: #0a2610;   /* 950 반전 */

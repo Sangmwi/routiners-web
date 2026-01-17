@@ -55,15 +55,15 @@ export default function RoutineEventCarousel({
     return () => clearTimeout(timer);
   }, [dateRange.length]);
 
-  // 로딩 스켈레톤
+  // 로딩 스켈레톤 (실제 EventCarouselCard 크기: 140x180)
   if (isLoading) {
     return (
       <div className="-mx-4 px-4">
-        <div className="flex gap-3 overflow-hidden py-1">
+        <div className="flex gap-3 overflow-hidden py-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="w-[120px] h-[140px] bg-muted rounded-xl animate-pulse shrink-0"
+              className="w-[140px] h-[180px] bg-muted rounded-xl animate-pulse shrink-0"
             />
           ))}
         </div>

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Trash2, Edit2, Loader2, AlertTriangle } from 'lucide-react';
+import { PencilSimpleIcon } from '@phosphor-icons/react';
+import { DeleteIcon, LoadingSpinner, ErrorIcon } from '@/components/ui/icons';
 import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { InBodyRecord, InBodyUpdateData } from '@/lib/types/inbody';
@@ -126,7 +127,7 @@ export default function InBodyDetailModal({
             className="p-1.5 rounded-lg hover:bg-muted/50 transition-colors"
             aria-label="수정"
           >
-            <Edit2 className="w-5 h-5 text-muted-foreground" />
+            <PencilSimpleIcon size={20} className="text-muted-foreground" />
           </button>
         ) : undefined
       }
@@ -135,7 +136,7 @@ export default function InBodyDetailModal({
         {/* 삭제 확인 */}
         {state === 'confirmDelete' && (
           <div className="flex flex-col items-center justify-center py-8 space-y-4">
-            <AlertTriangle className="w-12 h-12 text-destructive" />
+            <ErrorIcon size="2xl" className="text-destructive" />
             <div className="text-center space-y-1">
               <p className="text-lg font-medium text-card-foreground">
                 정말 삭제하시겠습니까?
@@ -150,7 +151,7 @@ export default function InBodyDetailModal({
         {/* 삭제 중 */}
         {state === 'deleting' && (
           <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <Loader2 className="w-12 h-12 text-destructive animate-spin" />
+            <LoadingSpinner size="2xl" variant="destructive" />
             <p className="text-lg font-medium text-card-foreground">
               삭제 중...
             </p>
@@ -160,7 +161,7 @@ export default function InBodyDetailModal({
         {/* 저장 중 */}
         {state === 'saving' && (
           <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <Loader2 className="w-12 h-12 text-primary animate-spin" />
+            <LoadingSpinner size="2xl" />
             <p className="text-lg font-medium text-card-foreground">
               저장 중...
             </p>
@@ -239,7 +240,7 @@ export default function InBodyDetailModal({
               onClick={handleConfirmDelete}
               className="text-destructive hover:bg-destructive/10"
             >
-              <Trash2 className="w-4 h-4 mr-2" />
+              <DeleteIcon size="sm" className="mr-2" />
               삭제
             </Button>
             <Button variant="outline" onClick={handleClose} className="flex-1">

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { BackIcon, NextIcon, CloseIcon } from '@/components/ui/icons';
 import type { ModalDataMap } from '@/lib/stores/modalStore';
 
 // ============================================================================
@@ -63,7 +63,7 @@ export default function ImagePreviewModal({
         className="absolute top-4 right-4 z-10 rounded-full bg-black/50 p-2 text-white hover:bg-black/70 transition-colors"
         aria-label="닫기"
       >
-        <X className="h-6 w-6" />
+        <CloseIcon size="lg" />
       </button>
 
       {/* 이미지 카운터 */}
@@ -81,7 +81,7 @@ export default function ImagePreviewModal({
           className="absolute left-4 z-10 rounded-full bg-black/50 p-2 text-white hover:bg-black/70 transition-colors"
           aria-label="이전 이미지"
         >
-          <ChevronLeft className="h-6 w-6" />
+          <BackIcon size="lg" />
         </button>
       )}
 
@@ -101,7 +101,7 @@ export default function ImagePreviewModal({
           className="absolute right-4 z-10 rounded-full bg-black/50 p-2 text-white hover:bg-black/70 transition-colors"
           aria-label="다음 이미지"
         >
-          <ChevronRight className="h-6 w-6" />
+          <NextIcon size="lg" />
         </button>
       )}
 

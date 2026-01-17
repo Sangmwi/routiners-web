@@ -1,6 +1,6 @@
 'use client';
 
-import { Check } from 'lucide-react';
+import { CheckIcon } from '@phosphor-icons/react';
 
 interface SelectionCardProps {
   /** 선택지 라벨 */
@@ -88,7 +88,7 @@ export function SelectionCard({
         ${selected ? 'bg-primary text-primary-foreground' : 'bg-transparent'}
       `}
       >
-        {selected && <Check className="w-4 h-4" strokeWidth={3} />}
+        {selected && <CheckIcon size={16} weight="bold" />}
       </div>
     </button>
   );

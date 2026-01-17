@@ -1,6 +1,6 @@
 'use client';
 
-import { Camera, Video } from 'lucide-react';
+import { CameraIcon, VideoCameraIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
 
 /**
@@ -15,7 +15,7 @@ export default function AICameraView() {
       {/* 카메라 플레이스홀더 */}
       <div className="relative aspect-video rounded-xl bg-muted overflow-hidden mb-4">
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-          <Video className="h-16 w-16 text-muted-foreground" />
+          <VideoCameraIcon size={64} className="text-muted-foreground" />
           <p className="text-sm text-muted-foreground">카메라 뷰 (준비 중)</p>
         </div>
 
@@ -29,11 +29,11 @@ export default function AICameraView() {
       {/* 액션 버튼 */}
       <div className="flex gap-2">
         <Button variant="primary" fullWidth>
-          <Camera className="h-4 w-4" />
+          <CameraIcon size={16} />
           운동 시작
         </Button>
         <Button variant="outline">
-          <Video className="h-4 w-4" />
+          <VideoCameraIcon size={16} />
           영상 업로드
         </Button>
       </div>

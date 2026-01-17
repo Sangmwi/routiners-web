@@ -13,7 +13,7 @@ import { ImageWithFallback } from "@/components/ui/image";
 import { ImageSourceDrawer } from "@/components/drawers";
 import FormSection from "@/components/ui/FormSection";
 import ErrorToast from "@/components/ui/ErrorToast";
-import { Plus, Loader2, X, Star, Move } from "lucide-react";
+import { Plus, SpinnerGap, X, Star, ArrowsOutCardinal } from "@phosphor-icons/react";
 
 // ============================================================
 // Constants
@@ -63,7 +63,7 @@ interface PhotoSlotProps {
 function MainPhotoBadge() {
   return (
     <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-2 py-0.5 rounded-full text-xs font-medium flex items-center gap-1">
-      <Star className="w-3 h-3" />
+      <Star size={12} weight="fill" />
       대표
     </div>
   );
@@ -94,7 +94,7 @@ function DeleteOverlay({
             : "pointer-events-none group-hover:pointer-events-auto"
         }`}
       >
-        <X className="w-5 h-5 text-white/80" />
+        <X size={20} className="text-white/80" />
       </button>
     </div>
   );
@@ -103,7 +103,7 @@ function DeleteOverlay({
 function ProcessingOverlay() {
   return (
     <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-      <Loader2 className="w-8 h-8 text-white animate-spin" />
+      <SpinnerGap size={32} className="text-white animate-spin" />
     </div>
   );
 }
@@ -111,7 +111,7 @@ function ProcessingOverlay() {
 function TouchDragIndicator() {
   return (
     <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-      <Move className="w-8 h-8 text-primary" />
+      <ArrowsOutCardinal size={32} className="text-primary" />
     </div>
   );
 }
@@ -130,7 +130,7 @@ function EmptySlot({
       disabled={disabled}
       className="w-full h-full bg-muted/50 border-2 border-dashed border-border rounded-2xl hover:border-primary hover:bg-muted/80 transition-colors flex flex-col items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
     >
-      <Plus className="w-8 h-8 text-muted-foreground" />
+      <Plus size={32} className="text-muted-foreground" />
       <span className="text-sm text-muted-foreground">사진 추가</span>
     </button>
   );

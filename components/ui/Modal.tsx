@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, ReactNode } from 'react';
-import { X } from 'lucide-react';
+import { CloseIcon } from '@/components/ui/icons';
 import {
   useModalState,
   useSwipeGesture,
@@ -243,7 +243,7 @@ export default function Modal({
                   className="p-2 -mr-2 rounded-full hover:bg-muted/50 active:bg-muted/80 transition-colors"
                   aria-label="닫기"
                 >
-                  <X className="w-5 h-5 text-muted-foreground" />
+                  <CloseIcon size="md" className="text-muted-foreground" />
                 </button>
               )}
             </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import MainTabLayout from '@/components/common/MainTabLayout';
-import { RoutineSection, FloatingAIButton } from '@/components/routine';
+import { RoutineSection, FloatingAIButton, WeeklyProgressCard } from '@/components/routine';
 import { useUpcomingEvents } from '@/hooks/routine';
 import { useActiveAISession } from '@/hooks/aiChat';
 
@@ -35,6 +35,9 @@ export default function RoutinePage() {
           {formatDisplayDate(today)}
         </p>
       </div>
+
+      {/* 주간 통계 카드 */}
+      <WeeklyProgressCard />
 
       {/* 운동 섹션 */}
       <RoutineSection

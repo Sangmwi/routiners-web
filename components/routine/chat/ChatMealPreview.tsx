@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Utensils, Calendar, Clock, Check, Edit2, AlertTriangle, Flame, Beef } from 'lucide-react';
+import { CalendarIcon, ClockIcon, CheckIcon, PencilSimpleIcon, WarningIcon, FireIcon, CookingPotIcon } from '@phosphor-icons/react';
+import { ExpandIcon, CollapseIcon } from '@/components/ui/icons';
+import { EventIcons } from '@/lib/config/theme';
 import type {
   MealPlanPreviewData,
   MealPreviewWeek,
@@ -35,13 +37,13 @@ function MealCard({ meal }: { meal: MealPreviewMeal }) {
         </span>
         {meal.time && (
           <span className="text-xs text-muted-foreground flex items-center gap-0.5">
-            <Clock className="w-3 h-3" />
+            <ClockIcon size={12} />
             {meal.time}
           </span>
         )}
         {meal.totalCalories && (
           <span className="text-xs text-muted-foreground flex items-center gap-0.5 ml-auto">
-            <Flame className="w-3 h-3" />
+            <FireIcon size={12} />
             {meal.totalCalories}kcal
           </span>
         )}
@@ -76,7 +78,7 @@ function DayCard({ day }: { day: MealPreviewDay }) {
         </span>
         {day.totalCalories && (
           <span className="text-xs text-muted-foreground flex items-center gap-1">
-            <Flame className="w-3 h-3" />
+            <FireIcon size={12} />
             {day.totalCalories}kcal
           </span>
         )}
@@ -111,9 +113,9 @@ function WeekCard({ week, defaultOpen = false }: { week: MealPreviewWeek; defaul
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span>{week.days.length}일</span>
           {isOpen ? (
-            <ChevronDown className="w-4 h-4" />
+            <CollapseIcon size="sm" />
           ) : (
-            <ChevronRight className="w-4 h-4" />
+            <ExpandIcon size="sm" />
           )}
         </div>
       </button>
@@ -158,21 +160,21 @@ export default function ChatMealPreview({
       {/* 헤더 */}
       <div className="p-4 border-b border-border bg-primary/5">
         <div className="flex items-center gap-2 mb-1">
-          <Utensils className="w-5 h-5 text-primary" />
+          <EventIcons.Meal size={20} className="text-primary" />
           <h3 className="font-semibold text-foreground">{preview.title}</h3>
         </div>
         <p className="text-sm text-muted-foreground">{preview.description}</p>
         <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
+            <CalendarIcon size={12} />
             {preview.durationWeeks}주
           </span>
           <span className="flex items-center gap-1">
-            <Flame className="w-3 h-3" />
+            <FireIcon size={12} />
             일 {preview.targetCalories}kcal
           </span>
           <span className="flex items-center gap-1">
-            <Beef className="w-3 h-3" />
+            <CookingPotIcon size={12} />
             단백질 {preview.targetProtein}g
           </span>
         </div>
@@ -180,11 +182,11 @@ export default function ChatMealPreview({
 
       {/* 충돌 경고 */}
       {hasConflicts && (
-        <div className="p-3 bg-amber-500/10 border-b border-amber-500/20">
+        <div className="p-3 bg-scheduled/10 border-b border-scheduled/20">
           <div className="flex items-start gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+            <WarningIcon size={16} className="text-scheduled mt-0.5 shrink-0" />
             <div className="text-sm">
-              <p className="font-medium text-amber-600 dark:text-amber-400">
+              <p className="font-medium text-warning">
                 기존 식단 {preview.conflicts!.length}개와 겹칩니다
               </p>
               <p className="text-muted-foreground text-xs mt-1">
@@ -211,7 +213,7 @@ export default function ChatMealPreview({
               disabled={isApplying}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium border border-border bg-background text-foreground hover:bg-muted transition-colors disabled:opacity-50"
             >
-              <Edit2 className="w-4 h-4" />
+              <PencilSimpleIcon size={16} />
               수정 요청
             </button>
             <button
@@ -219,7 +221,7 @@ export default function ChatMealPreview({
               disabled={isApplying}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
                 hasConflicts
-                  ? 'bg-amber-500 text-white hover:bg-amber-600'
+                  ? 'bg-scheduled text-scheduled-foreground hover:opacity-90'
                   : 'bg-primary text-primary-foreground hover:opacity-90'
               }`}
             >
@@ -230,12 +232,12 @@ export default function ChatMealPreview({
                 </>
               ) : hasConflicts ? (
                 <>
-                  <AlertTriangle className="w-4 h-4" />
+                  <WarningIcon size={16} />
                   덮어쓰고 적용
                 </>
               ) : (
                 <>
-                  <Check className="w-4 h-4" />
+                  <CheckIcon size={16} />
                   이 식단 적용
                 </>
               )}

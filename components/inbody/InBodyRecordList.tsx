@@ -1,7 +1,8 @@
 'use client';
 
 import { memo } from 'react';
-import { ChevronRight, Calendar, Loader2, Trash2 } from 'lucide-react';
+import { CalendarIcon } from '@phosphor-icons/react';
+import { NextIcon, LoadingSpinner, DeleteIcon } from '@/components/ui/icons';
 import { InBodyRecord } from '@/lib/types/inbody';
 
 // ============================================================
@@ -32,7 +33,7 @@ interface RecordItemProps {
 function LoadingState() {
   return (
     <div className="flex items-center justify-center py-12">
-      <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      <LoadingSpinner size="xl" />
     </div>
   );
 }
@@ -45,7 +46,7 @@ interface EmptyStateProps {
 function EmptyState({ message, description }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center px-4">
-      <Calendar className="w-12 h-12 text-muted-foreground mb-4" />
+      <CalendarIcon size={48} className="text-muted-foreground mb-4" />
       <p className="text-lg font-medium text-card-foreground">{message}</p>
       <p className="text-sm text-muted-foreground mt-1">{description}</p>
     </div>
@@ -104,10 +105,10 @@ const RecordItem = memo(function RecordItem({
             className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
             aria-label="삭제"
           >
-            <Trash2 className="w-4 h-4" />
+            <DeleteIcon size="sm" />
           </button>
         )}
-        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+        <NextIcon size="md" className="text-muted-foreground" />
       </div>
     </div>
   );

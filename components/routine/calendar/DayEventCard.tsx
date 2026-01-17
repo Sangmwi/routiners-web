@@ -1,9 +1,34 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { RoutineEvent, WorkoutExercise } from '@/lib/types/routine';
-import { ChevronRight } from 'lucide-react';
+import { RoutineEvent, WorkoutExercise, WorkoutData } from '@/lib/types/routine';
+import { CaretRightIcon } from '@phosphor-icons/react';
 import { getEventIcon, getStatusConfig } from '@/lib/config/eventTheme';
+import type { MealData } from '@/lib/types/meal';
+
+/**
+ * 타입 가드: WorkoutData인지 확인
+ */
+function isWorkoutData(data: unknown): data is WorkoutData {
+  return (
+    data !== null &&
+    typeof data === 'object' &&
+    'exercises' in data &&
+    Array.isArray((data as WorkoutData).exercises)
+  );
+}
+
+/**
+ * 타입 가드: MealData인지 확인
+ */
+function isMealData(data: unknown): data is MealData {
+  return (
+    data !== null &&
+    typeof data === 'object' &&
+    'meals' in data &&
+    Array.isArray((data as MealData).meals)
+  );
+}
 
 interface DayEventCardProps {
   event: RoutineEvent | null;
@@ -38,7 +63,7 @@ export default function DayEventCard({ event, date }: DayEventCardProps) {
 
   return (
     <button
-      onClick={() => router.push(`/routine/${date}`)}
+      onClick={() => router.push(`/routine/${event.type}/${date}`)}
       className="w-full bg-card rounded-xl p-5 text-left hover:bg-muted/50 transition-colors"
     >
       {/* 상단: 날짜 + 상태 */}
@@ -72,16 +97,24 @@ export default function DayEventCard({ event, date }: DayEventCardProps) {
             </p>
           )}
         </div>
-        <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+        <CaretRightIcon size={20} weight="bold" className="text-muted-foreground flex-shrink-0" />
       </div>
 
-      {/* 운동 정보 요약 */}
-      {event.data && event.data.exercises.length > 0 && (
+      {/* 이벤트 정보 요약 */}
+      {event.data && (
         <div className="mt-4">
-          <p className="text-sm text-muted-foreground">
-            {event.data.exercises.length}개 운동 •{' '}
-            {getTotalSets(event.data.exercises)}세트
-          </p>
+          {isWorkoutData(event.data) && event.data.exercises.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {event.data.exercises.length}개 운동 •{' '}
+              {getTotalSets(event.data.exercises)}세트
+            </p>
+          )}
+          {isMealData(event.data) && event.data.meals.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {event.data.meals.length}끼 •{' '}
+              {event.data.estimatedTotalCalories || event.data.targetCalories || 0}kcal
+            </p>
+          )}
         </div>
       )}
     </button>

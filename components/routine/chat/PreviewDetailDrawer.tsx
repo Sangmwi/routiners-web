@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Clock, Flame, Loader2 } from 'lucide-react';
+import { ClockIcon, FireIcon, SpinnerGapIcon } from '@phosphor-icons/react';
 import { getEventIcon } from '@/lib/config/eventTheme';
 import Modal from '@/components/ui/Modal';
 import type { RoutinePreviewData, RoutinePreviewDay, RoutinePreviewExercise } from '@/lib/types/fitness';
@@ -117,7 +117,7 @@ export default function PreviewDetailDrawer({
         >
           {isApplying ? (
             <span className="flex items-center justify-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <SpinnerGapIcon size={16} className="animate-spin" />
               적용 중...
             </span>
           ) : (
@@ -162,7 +162,7 @@ function RoutineDayCard({ day }: { day: RoutinePreviewDay }) {
         </div>
         {day.estimatedDuration && (
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground shrink-0">
-            <Clock className="w-4 h-4" />
+            <ClockIcon size={16} />
             <span>{day.estimatedDuration}분</span>
           </div>
         )}
@@ -223,7 +223,7 @@ function MealDayCard({ day }: { day: MealPreviewDay }) {
         </div>
         {day.totalCalories && (
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground shrink-0">
-            <Flame className="w-4 h-4" />
+            <FireIcon size={16} />
             <span>{day.totalCalories}kcal</span>
           </div>
         )}
@@ -253,7 +253,7 @@ function MealCard({ meal }: { meal: MealPreviewMeal }) {
           {meal.time && <span>{meal.time}</span>}
           {meal.totalCalories && (
             <span className="flex items-center gap-1">
-              <Flame className="w-3.5 h-3.5" />
+              <FireIcon size={14} />
               {meal.totalCalories}kcal
             </span>
           )}

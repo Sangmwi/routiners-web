@@ -1,6 +1,6 @@
 'use client';
 
-import { Check } from 'lucide-react';
+import { CheckIcon } from '@phosphor-icons/react';
 import type { AppliedRoutineMetadata, SessionPurpose } from '@/lib/types/chat';
 import type { RoutineAppliedEvent, MealPlanAppliedEvent } from '@/lib/api/conversation';
 import { getEventIcon } from '@/lib/config/eventTheme';
@@ -28,7 +28,7 @@ export default function ChatCompletedBanner({
   const isMeal = purpose === 'meal';
   const appliedData = isMeal ? appliedMealPlan : appliedRoutine;
 
-  const Icon = isMeal ? getEventIcon('meal') : Check;
+  const Icon = isMeal ? getEventIcon('meal') : CheckIcon;
 
   return (
     <div className="p-4 border-t border-border/50 bg-card/80 backdrop-blur-md">

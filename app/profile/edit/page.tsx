@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useProfileProgress, useProfileEdit } from '@/hooks';
-import { Loader2 } from 'lucide-react';
+import { SpinnerGapIcon } from '@phosphor-icons/react';
 import { PageSkeleton } from '@/components/ui/Skeleton';
 import PageHeader from '@/components/common/PageHeader';
 import ProfilePhotoGallery from '@/components/profile/edit/ProfilePhotoGallery';
@@ -78,7 +78,7 @@ function SaveButton({ onClick, disabled, isSaving }: SaveButtonProps) {
         disabled={disabled}
         className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
-        {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+        {isSaving && <SpinnerGapIcon size={16} className="animate-spin" />}
         {isSaving ? '저장 중...' : '저장하기'}
       </button>
     </div>

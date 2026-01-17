@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bot, Sparkles, Loader2 } from 'lucide-react';
+import { RobotIcon, SparkleIcon } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 import { useModalStore } from '@/lib/stores/modalStore';
 import { useShowError } from '@/lib/stores/errorStore';
 import { useCreateAISession } from '@/hooks/aiChat';
@@ -82,15 +83,15 @@ export default function FloatingAIButton({
       aria-label="AI 코치와 대화하기"
     >
       {isNavigating || createSession.isPending ? (
-        <Loader2 className="w-6 h-6 animate-spin" />
+        <LoadingSpinner size="lg" variant="current" />
       ) : (
-        <Bot className="w-6 h-6" />
+        <RobotIcon size={24} weight="fill" />
       )}
 
       {/* 활성 세션 인디케이터 */}
       {hasAnySession && !isNavigating && !createSession.isPending && (
         <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center">
-          <Sparkles className="w-3 h-3 text-white" />
+          <SparkleIcon size={12} weight="fill" className="text-white" />
         </span>
       )}
     </button>

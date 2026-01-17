@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { CalendarEventSummary, EventType } from '@/lib/types/routine';
-import { ChevronRight } from 'lucide-react';
+import { NextIcon } from '@/components/ui/icons';
 import { getStatusConfig, getEventIcon, EventStatus } from '@/lib/config/eventTheme';
 
 interface WeeklyCalendarProps {
@@ -54,7 +54,7 @@ export default function WeeklyCalendar({
           className="flex items-center gap-1 text-sm text-primary font-medium hover:underline"
         >
           전체보기
-          <ChevronRight className="w-4 h-4" />
+          <NextIcon size="sm" weight="emphasis" />
         </button>
       </div>
 

@@ -1,6 +1,7 @@
 'use client';
 
-import { Camera, ImagePlus, Loader2 } from 'lucide-react';
+import { CameraIcon, ImageSquareIcon } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 
 interface ImageSourceDrawerProps {
@@ -48,7 +49,7 @@ export default function ImageSourceDrawer({
       <ModalBody className="pb-8">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-8 gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <LoadingSpinner size="xl" />
             <p className="text-sm text-muted-foreground">이미지 처리 중...</p>
           </div>
         ) : (
@@ -59,7 +60,7 @@ export default function ImageSourceDrawer({
               onClick={handleSelectCamera}
               className="flex-1 aspect-square rounded-2xl border-2 border-border bg-muted/50 hover:bg-muted/80 hover:border-primary/50 transition-all flex flex-col items-center justify-center gap-3 active:scale-[0.98]"
             >
-              <Camera className="w-10 h-10 text-muted-foreground" />
+              <CameraIcon size={40} className="text-muted-foreground" />
               <span className="text-sm font-medium text-foreground">카메라</span>
             </button>
 
@@ -69,7 +70,7 @@ export default function ImageSourceDrawer({
               onClick={handleSelectGallery}
               className="flex-1 aspect-square rounded-2xl border-2 border-border bg-muted/50 hover:bg-muted/80 hover:border-primary/50 transition-all flex flex-col items-center justify-center gap-3 active:scale-[0.98]"
             >
-              <ImagePlus className="w-10 h-10 text-muted-foreground" />
+              <ImageSquareIcon size={40} className="text-muted-foreground" />
               <span className="text-sm font-medium text-foreground">앨범</span>
             </button>
           </div>

@@ -5,6 +5,8 @@
  * DB 타입(snake_case) ↔ 도메인 타입(camelCase) 변환 포함
  */
 
+import type { MealData } from './meal';
+
 // ============================================================================
 // Enums & Constants
 // ============================================================================
@@ -91,6 +93,12 @@ export interface WorkoutData {
   notes?: string;
 }
 
+/**
+ * 이벤트 데이터 타입 (운동 또는 식단)
+ * routine_events.data JSONB 필드에 저장되는 데이터 타입
+ */
+export type EventData = WorkoutData | MealData;
+
 // ============================================================================
 // Chat Message Types
 // ============================================================================
@@ -140,7 +148,7 @@ export interface DbRoutineEvent {
   type: EventType;
   date: string; // DATE as string (YYYY-MM-DD)
   title: string;
-  data: WorkoutData; // JSONB
+  data: EventData; // JSONB - WorkoutData or MealData
   rationale: string | null;
   status: EventStatus;
   completed_at: string | null;
@@ -178,7 +186,7 @@ export interface RoutineEvent {
   type: EventType;
   date: string;
   title: string;
-  data: WorkoutData;
+  data: EventData; // WorkoutData or MealData based on type
   rationale?: string;
   status: EventStatus;
   completedAt?: string;
@@ -218,7 +226,7 @@ export interface RoutineEventCreateData {
   type: EventType;
   date: string;
   title: string;
-  data: WorkoutData;
+  data: EventData;
   rationale?: string;
   source: EventSource;
   aiSessionId?: string;
@@ -229,7 +237,7 @@ export interface RoutineEventCreateData {
  */
 export interface RoutineEventUpdateData {
   title?: string;
-  data?: WorkoutData;
+  data?: EventData;
   status?: EventStatus;
   completedAt?: string;
 }
@@ -341,19 +349,27 @@ export interface CalendarEventSummary {
 }
 
 /**
+ * 타입 가드: WorkoutData인지 확인
+ */
+function isWorkoutData(data: EventData): data is WorkoutData {
+  return 'exercises' in data && Array.isArray((data as WorkoutData).exercises);
+}
+
+/**
  * RoutineEvent → CalendarEventSummary 변환
  */
 export function transformEventToCalendarSummary(
   event: RoutineEvent
 ): CalendarEventSummary {
+  const workoutData = isWorkoutData(event.data) ? event.data : null;
   return {
     id: event.id,
     date: event.date,
     title: event.title,
     type: event.type,
     status: event.status,
-    exerciseCount: event.data.exercises?.length,
-    estimatedDuration: event.data.estimatedDuration,
+    exerciseCount: workoutData?.exercises?.length,
+    estimatedDuration: workoutData?.estimatedDuration,
   };
 }
 

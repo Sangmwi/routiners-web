@@ -17,7 +17,7 @@ import ChatPreviewSummary from './ChatPreviewSummary';
 import { ChatProfileConfirmation } from './ChatProfileConfirmation';
 import { ChatProgressIndicator } from './ChatProgressIndicator';
 import { ChatAppliedBanner } from './ChatAppliedBanner';
-import { Loader2, Play } from 'lucide-react';
+import { SpinnerGapIcon, PlayIcon } from '@phosphor-icons/react';
 import { AI_TOOL_LABELS } from '@/lib/types/fitness';
 import { SessionPurpose } from '@/lib/types/routine';
 
@@ -182,7 +182,7 @@ export default function ChatMessageList({
           return (
             <div className="flex gap-3 items-center">
               <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <SpinnerGapIcon size={16} className="animate-spin" />
               </div>
               <div className="text-sm text-muted-foreground">
                 {toolLabel}...
@@ -196,7 +196,7 @@ export default function ChatMessageList({
          !activeTools.some((t) => t.status === 'running') && (
           <div className="flex gap-3">
             <div className="shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <SpinnerGapIcon size={16} className="animate-spin" />
             </div>
             <div className="bg-card border border-border rounded-2xl rounded-tl-md px-4 py-3">
               <div className="flex gap-1">
@@ -323,7 +323,7 @@ export default function ChatMessageList({
         {pendingStart && onStartConversation && (
           <div className="flex gap-3 items-start">
             <div className="shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-              <Play className="w-4 h-4" />
+              <PlayIcon size={16} weight="fill" />
             </div>
             <div className="bg-card border border-border rounded-2xl rounded-tl-md px-4 py-3 max-w-[85%]">
               <p className="text-sm text-muted-foreground mb-3">
@@ -336,7 +336,7 @@ export default function ChatMessageList({
                 onClick={onStartConversation}
                 className="w-full px-4 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
               >
-                <Play className="w-4 h-4" />
+                <PlayIcon size={16} weight="fill" />
                 시작하기
               </button>
             </div>

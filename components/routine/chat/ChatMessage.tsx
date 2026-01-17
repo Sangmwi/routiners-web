@@ -1,7 +1,7 @@
 'use client';
 
 import { ChatMessage as ChatMessageType } from '@/lib/types/routine';
-import { Bot, User } from 'lucide-react';
+import { RobotIcon } from '@phosphor-icons/react';
 import { Markdown } from '@/components/common/Markdown';
 
 interface ChatMessageProps {
@@ -23,7 +23,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         <div
         className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-primary text-primary-foreground"
       >
-        <Bot className="w-4 h-4" />
+        <RobotIcon size={16} weight="fill" />
       </div>
       )}
 

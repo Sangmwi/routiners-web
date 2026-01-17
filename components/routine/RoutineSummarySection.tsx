@@ -1,8 +1,33 @@
 'use client';
 
-import { Zap, Utensils } from 'lucide-react';
 import RoutineSummaryCard from './RoutineSummaryCard';
-import type { RoutineEvent } from '@/lib/types/routine';
+import { getEventConfig } from '@/lib/config/theme';
+import type { RoutineEvent, WorkoutData } from '@/lib/types/routine';
+import type { MealData } from '@/lib/types/meal';
+
+/**
+ * 타입 가드: WorkoutData인지 확인
+ */
+function isWorkoutData(data: unknown): data is WorkoutData {
+  return (
+    data !== null &&
+    typeof data === 'object' &&
+    'exercises' in data &&
+    Array.isArray((data as WorkoutData).exercises)
+  );
+}
+
+/**
+ * 타입 가드: MealData인지 확인
+ */
+function isMealData(data: unknown): data is MealData {
+  return (
+    data !== null &&
+    typeof data === 'object' &&
+    'meals' in data &&
+    Array.isArray((data as MealData).meals)
+  );
+}
 
 interface RoutineSummarySectionProps {
   /** 운동 이벤트 */
@@ -34,17 +59,26 @@ export default function RoutineSummarySection({
   onNavigateToWorkout,
   onNavigateToMeal,
 }: RoutineSummarySectionProps) {
+  // 운동 데이터 확인
+  const workoutData = workoutEvent?.data && isWorkoutData(workoutEvent.data) ? workoutEvent.data : null;
+  const mealData = mealEvent?.data && isMealData(mealEvent.data) ? mealEvent.data : null;
+
   // 운동 진행률 계산
-  const workoutProgress = workoutEvent?.data?.exercises
+  const workoutProgress = workoutData?.exercises
     ? {
-        total: workoutEvent.data.exercises.length,
-        completed: workoutEvent.data.exercises.filter((e) => e.completed).length,
+        total: workoutData.exercises.length,
+        completed: workoutData.exercises.filter((e) => e.completed).length,
       }
     : undefined;
 
   // 운동 부제목 생성
-  const workoutSubtitle = workoutEvent?.data?.exercises
-    ? `${workoutEvent.data.exercises.length}개 운동 • ${workoutEvent.data.estimatedDuration || 0}분`
+  const workoutSubtitle = workoutData?.exercises
+    ? `${workoutData.exercises.length}개 운동 • ${workoutData.estimatedDuration || 0}분`
+    : undefined;
+
+  // 식단 부제목 생성
+  const mealSubtitle = mealData?.meals
+    ? `${mealData.meals.length}끼 • ${mealData.estimatedTotalCalories || mealData.targetCalories || 0}kcal`
     : undefined;
 
   // 식단 진행률 (향후 구현)
@@ -56,32 +90,42 @@ export default function RoutineSummarySection({
 
       <div className="space-y-3">
         {/* 운동 카드 */}
-        <RoutineSummaryCard
-          type="workout"
-          title={workoutEvent?.title || '운동'}
-          subtitle={workoutSubtitle}
-          progress={workoutProgress}
-          status={workoutEvent?.status}
-          icon={<Zap className="w-6 h-6" />}
-          onClick={onNavigateToWorkout}
-          isLoading={isLoadingWorkout}
-          isEmpty={!workoutEvent}
-          emptyMessage="오늘 예정된 운동이 없습니다"
-        />
+        {(() => {
+          const config = getEventConfig('workout');
+          return (
+            <RoutineSummaryCard
+              type="workout"
+              title={workoutEvent?.title || config.label}
+              subtitle={workoutSubtitle}
+              progress={workoutProgress}
+              status={workoutEvent?.status}
+              icon={<config.icon size={24} weight="fill" />}
+              onClick={onNavigateToWorkout}
+              isLoading={isLoadingWorkout}
+              isEmpty={!workoutEvent}
+              emptyMessage="오늘 예정된 운동이 없습니다"
+            />
+          );
+        })()}
 
         {/* 식단 카드 */}
-        <RoutineSummaryCard
-          type="meal"
-          title={mealEvent?.title || '식단'}
-          subtitle="식단 기능 준비중"
-          progress={mealProgress}
-          status={mealEvent?.status}
-          icon={<Utensils className="w-6 h-6" />}
-          onClick={onNavigateToMeal}
-          isLoading={isLoadingMeal}
-          isEmpty={!mealEvent}
-          emptyMessage="오늘 예정된 식단이 없습니다"
-        />
+        {(() => {
+          const config = getEventConfig('meal');
+          return (
+            <RoutineSummaryCard
+              type="meal"
+              title={mealEvent?.title || config.label}
+              subtitle={mealSubtitle}
+              progress={mealProgress}
+              status={mealEvent?.status}
+              icon={<config.icon size={24} weight="fill" />}
+              onClick={onNavigateToMeal}
+              isLoading={isLoadingMeal}
+              isEmpty={!mealEvent}
+              emptyMessage="오늘 예정된 식단이 없습니다"
+            />
+          );
+        })()}
       </div>
     </section>
   );

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Dumbbell, ChevronDown } from 'lucide-react';
+import { BarbellIcon } from '@phosphor-icons/react';
+import { ExpandIcon } from '@/components/ui/icons';
 import { useFitnessProfile, hasFitnessProfileData } from '@/hooks/fitnessProfile';
 import {
   FITNESS_GOAL_LABELS,
@@ -78,7 +79,7 @@ export default function ProfileFitnessSection() {
   // 빈 상태
   const renderEmpty = () => (
     <EmptyState
-      icon={Dumbbell}
+      icon={BarbellIcon}
       message="아직 운동 프로필이 없어요"
       hint="AI 트레이너와 대화하거나 직접 등록해보세요"
     />
@@ -131,7 +132,7 @@ export default function ProfileFitnessSection() {
           className="mt-4 w-full flex items-center justify-center gap-1 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           자세히 보기
-          <ChevronDown className="w-4 h-4" />
+          <ExpandIcon size="sm" />
         </button>
       </>
     );

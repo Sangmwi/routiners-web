@@ -13,12 +13,29 @@ import {
   useRoutineEventByDate,
   useCompleteRoutineEvent,
   useSkipRoutineEvent,
+  useUpdateWorkoutData,
 } from '@/hooks/routine';
-import { Loader2, Zap, Calendar } from 'lucide-react';
+import type { WorkoutSet } from '@/lib/types/routine';
+import { CalendarIcon } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
+import { getEventConfig } from '@/lib/config/theme';
 import Button from '@/components/ui/Button';
+import type { WorkoutData } from '@/lib/types/routine';
 
 interface WorkoutDetailPageProps {
   params: Promise<{ date: string }>;
+}
+
+/**
+ * 타입 가드: WorkoutData인지 확인
+ */
+function isWorkoutData(data: unknown): data is WorkoutData {
+  return (
+    data !== null &&
+    typeof data === 'object' &&
+    'exercises' in data &&
+    Array.isArray((data as WorkoutData).exercises)
+  );
 }
 
 /**
@@ -41,6 +58,7 @@ export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
   // 완료/건너뛰기 뮤테이션
   const completeEvent = useCompleteRoutineEvent();
   const skipEvent = useSkipRoutineEvent();
+  const updateWorkout = useUpdateWorkoutData();
   // 날짜 포맷
   const formattedDate = new Date(date).toLocaleDateString('ko-KR', {
     year: 'numeric',
@@ -65,11 +83,32 @@ export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
     });
   };
 
+  // 세트 변경 처리
+  const handleSetsChange = (exerciseId: string, sets: WorkoutSet[]) => {
+    if (!event) return;
+
+    const currentData = isWorkoutData(event.data) ? event.data : null;
+    if (!currentData) return;
+
+    // 해당 운동의 세트 데이터 업데이트
+    const updatedExercises = currentData.exercises.map((ex) =>
+      ex.id === exerciseId ? { ...ex, sets } : ex
+    );
+
+    updateWorkout.mutate(
+      { id: event.id, data: { ...currentData, exercises: updatedExercises } },
+      { onError: () => showError('운동 기록 저장에 실패했습니다') }
+    );
+  };
+
+  // 이벤트 설정
+  const eventConfig = getEventConfig('workout');
+
   // 로딩 상태
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <LoadingSpinner size="xl" />
       </div>
     );
   }
@@ -78,7 +117,7 @@ export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
   if (error) {
     return (
       <div className="min-h-screen bg-background">
-        <PageHeader title="운동 루틴" />
+        <PageHeader title={eventConfig.description} />
         <div className="flex flex-col items-center justify-center gap-4 p-8">
           <p className="text-muted-foreground">
             운동 정보를 불러오는데 실패했습니다.
@@ -93,10 +132,10 @@ export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
   if (!event) {
     return (
       <div className="min-h-screen bg-background">
-        <PageHeader title="운동 루틴" />
+        <PageHeader title={eventConfig.description} />
         <div className="flex flex-col items-center justify-center gap-6 p-8 mt-12">
           <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
-            <Calendar className="w-10 h-10 text-muted-foreground" />
+            <CalendarIcon size={40} className="text-muted-foreground" />
           </div>
           <div className="text-center space-y-2">
             <h2 className="text-lg font-bold text-foreground">{formattedDate}</h2>
@@ -112,9 +151,12 @@ export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
     );
   }
 
+  // 운동 데이터 확인
+  const workoutData = isWorkoutData(event.data) ? event.data : null;
+
   return (
     <div className="min-h-screen bg-background pb-32">
-      <PageHeader title="운동 루틴" />
+      <PageHeader title={eventConfig.description} />
 
       <div className="p-4 space-y-6">
         {/* 헤더 섹션 */}
@@ -125,8 +167,8 @@ export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <Zap className="w-6 h-6 text-primary" />
+            <div className={`w-12 h-12 rounded-xl ${eventConfig.bgColor} flex items-center justify-center shrink-0`}>
+              <eventConfig.icon size={24} className={eventConfig.color} weight="fill" />
             </div>
             <div className="flex-1">
               <h1 className="text-xl font-bold text-foreground">
@@ -142,18 +184,20 @@ export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
         </div>
 
         {/* 운동 목록 */}
-        {event.data && event.data.exercises.length > 0 ? (
+        {workoutData && workoutData.exercises.length > 0 ? (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-foreground">
-              운동 목록 ({event.data.exercises.length}개)
+              운동 목록 ({workoutData.exercises.length}개)
             </h2>
             <div className="space-y-3">
-              {event.data.exercises.map((exercise, index) => (
+              {workoutData.exercises.map((exercise, index) => (
                 <ExerciseCard
                   key={exercise.id}
                   exercise={exercise}
                   index={index}
                   isCompleted={event.status === 'completed'}
+                  editable={event.status === 'scheduled'}
+                  onSetsChange={handleSetsChange}
                 />
               ))}
             </div>
@@ -167,12 +211,12 @@ export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
         )}
 
         {/* 추가 정보 */}
-        {event.data?.notes && (
+        {workoutData?.notes && (
           <div className="bg-card border border-border rounded-xl p-4">
             <h3 className="text-sm font-medium text-muted-foreground mb-2">
               메모
             </h3>
-            <p className="text-foreground">{event.data.notes}</p>
+            <p className="text-foreground">{workoutData.notes}</p>
           </div>
         )}
       </div>

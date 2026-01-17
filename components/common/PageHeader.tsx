@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { BackIcon } from '@/components/ui/icons';
 
 interface PageHeaderProps {
   /** 페이지 제목 */
@@ -65,7 +65,7 @@ export default function PageHeader({
               className="p-1 hover:bg-muted/50 rounded-lg transition-colors"
               aria-label="뒤로가기"
             >
-              <ArrowLeft className="w-6 h-6 text-foreground" />
+              <BackIcon size="lg" className="text-foreground" />
             </button>
           ) : (
             <div className="w-8" />
@@ -97,7 +97,7 @@ export default function PageHeader({
               className="p-1 -ml-1 hover:bg-muted/50 rounded-lg transition-colors"
               aria-label="뒤로가기"
             >
-              <ArrowLeft className="w-6 h-6 text-foreground" />
+              <BackIcon size="lg" className="text-foreground" />
             </button>
           )}
           <h1 className="text-lg font-bold text-foreground">{title}</h1>

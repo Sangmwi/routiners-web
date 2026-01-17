@@ -1,6 +1,6 @@
 'use client';
 
-import { Shield } from 'lucide-react';
+import { ShieldIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
 
 interface PassVerificationStepProps {
@@ -35,7 +35,7 @@ export default function PassVerificationStep({ onVerified }: PassVerificationSte
           {/* Icon + Title */}
           <div className="space-y-4">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <Shield className="w-6 h-6 text-primary" />
+              <ShieldIcon size={24} className="text-primary" />
             </div>
             <div className="space-y-2">
               <h1 className="text-2xl font-bold text-foreground">본인 확인이 필요해요</h1>
@@ -83,7 +83,7 @@ export default function PassVerificationStep({ onVerified }: PassVerificationSte
       {/* Fixed Footer */}
       <div className="shrink-0 pt-6 pb-safe">
         <Button variant="primary" size="lg" fullWidth onClick={handlePassVerification}>
-          <Shield className="h-5 w-5" />
+          <ShieldIcon size={20} />
           PASS로 본인 확인
         </Button>
       </div>

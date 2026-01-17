@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { User, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { UserIcon, WarningCircleIcon, CheckCircleIcon, SpinnerGapIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
 import { useCheckNickname, useDebounce } from '@/hooks';
 import { generatePersonalizedNicknames } from '@/lib/utils/nickname';
@@ -131,7 +131,7 @@ export function NicknameStep({
     if (formatError) {
       return (
         <div className="flex items-center gap-1 text-destructive text-sm">
-          <AlertCircle className="w-4 h-4" />
+          <WarningCircleIcon size={16} />
           <span>{formatError}</span>
         </div>
       );
@@ -141,7 +141,7 @@ export function NicknameStep({
     if (isFormatValid && (isChecking || !isCheckValid)) {
       return (
         <div className="flex items-center gap-1 text-muted-foreground text-sm">
-          <Loader2 className="w-4 h-4 animate-spin" />
+          <SpinnerGapIcon size={16} className="animate-spin" />
           <span>확인 중...</span>
         </div>
       );
@@ -151,7 +151,7 @@ export function NicknameStep({
     if (isUnavailable) {
       return (
         <div className="flex items-center gap-1 text-destructive text-sm">
-          <AlertCircle className="w-4 h-4" />
+          <WarningCircleIcon size={16} />
           <span>이미 사용 중인 닉네임이에요</span>
         </div>
       );
@@ -161,7 +161,7 @@ export function NicknameStep({
     if (isAvailable) {
       return (
         <div className="flex items-center gap-1 text-primary text-sm">
-          <CheckCircle2 className="w-4 h-4" />
+          <CheckCircleIcon size={16} />
           <span>사용 가능한 닉네임이에요</span>
         </div>
       );
@@ -184,7 +184,7 @@ export function NicknameStep({
           <div className="space-y-2">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <User className="w-6 h-6 text-primary" />
+                <UserIcon size={24} className="text-primary" />
               </div>
             </div>
             <h2 className="text-2xl font-bold text-foreground">

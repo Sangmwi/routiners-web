@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, X } from 'lucide-react';
+import { MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
 import Input from '@/components/ui/Input';
 import { Unit } from '@/lib/types';
 
@@ -59,13 +59,13 @@ export default function UnitSearch({ units, selectedUnit, onSelect, error }: Uni
             onClick={handleClear}
             className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
           >
-            <X className="h-5 w-5" />
+            <XIcon size={20} />
           </button>
         </div>
       ) : (
         <div className="relative">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+            <MagnifyingGlassIcon size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               value={searchQuery}

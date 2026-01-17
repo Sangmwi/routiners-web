@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageSquarePlus, Filter } from 'lucide-react';
+import { PencilSimpleLineIcon, FunnelIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
 
 interface CommunityHeaderProps {
@@ -17,10 +17,10 @@ export default function CommunityHeader({ onNewPost, onFilter }: CommunityHeader
       <h1 className="text-2xl font-bold text-foreground">커뮤니티</h1>
       <div className="flex items-center gap-2">
         <Button variant="outline" size="sm" onClick={onFilter}>
-          <Filter className="h-4 w-4" />
+          <FunnelIcon size={16} />
         </Button>
         <Button variant="primary" size="sm" onClick={onNewPost}>
-          <MessageSquarePlus className="h-4 w-4" />
+          <PencilSimpleLineIcon size={16} />
           글쓰기
         </Button>
       </div>

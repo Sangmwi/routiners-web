@@ -1,7 +1,7 @@
 'use client';
 
 import Button from '@/components/ui/Button';
-import { Check, SkipForward, RotateCcw } from 'lucide-react';
+import { CheckIcon, SkipForwardIcon, ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
 
 interface EventActionButtonsProps {
   status: 'scheduled' | 'completed' | 'skipped';
@@ -24,7 +24,7 @@ export default function EventActionButtons({
     return (
       <div className="flex gap-3">
         <Button variant="outline" fullWidth disabled>
-          <RotateCcw className="w-4 h-4" />
+          <ArrowCounterClockwiseIcon size={16} weight="bold" />
           상태 변경 불가
         </Button>
       </div>
@@ -39,7 +39,7 @@ export default function EventActionButtons({
         disabled={isLoading}
         className="flex-1"
       >
-        <SkipForward className="w-4 h-4" />
+        <SkipForwardIcon size={16} weight="bold" />
         건너뛰기
       </Button>
       <Button
@@ -48,7 +48,7 @@ export default function EventActionButtons({
         isLoading={isLoading}
         className="flex-1"
       >
-        <Check className="w-4 h-4" />
+        <CheckIcon size={16} weight="bold" />
         완료하기
       </Button>
     </div>

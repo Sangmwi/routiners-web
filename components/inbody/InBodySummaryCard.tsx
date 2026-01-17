@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight } from 'lucide-react';
+import { NextIcon } from '@/components/ui/icons';
 import { MetricsGrid, InBodyChanges } from './MetricsGrid';
 
 // ============================================================
@@ -49,7 +49,7 @@ function EmptyState({ onClick }: { onClick?: () => void }) {
             탭하여 인바디 기록을 추가하세요
           </p>
         </div>
-        {onClick && <ChevronRight className="w-5 h-5 text-muted-foreground" />}
+        {onClick && <NextIcon size="md" className="text-muted-foreground" />}
       </div>
     </div>
   );
@@ -117,12 +117,12 @@ export default function InBodySummaryCard({
         {compact ? (
           <>
             <span>{formattedDate} 측정</span>
-            {onClick && <ChevronRight className="w-3 h-3" />}
+            {onClick && <NextIcon size="xs" />}
           </>
         ) : (
           <>
             <span>총 {totalRecords}개의 기록</span>
-            {onClick && <ChevronRight className="w-3 h-3" />}
+            {onClick && <NextIcon size="xs" />}
           </>
         )}
       </div>

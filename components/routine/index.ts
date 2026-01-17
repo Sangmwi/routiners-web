@@ -11,6 +11,12 @@ export * from './calendar';
 // Event Detail Components
 export * from './event';
 
+// Meal Detail Components
+export * from './meal';
+
+// Stats Components
+export * from './stats';
+
 // Main Page Components
 export { default as TodayEventSection } from './TodayEventSection';
 export { default as WeeklyCalendar } from './WeeklyCalendar';

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
-import { Send, Loader2 } from 'lucide-react';
+import { PaperPlaneRightIcon } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -78,9 +79,9 @@ export default function ChatInput({
         aria-label="메시지 전송"
       >
         {isLoading ? (
-          <Loader2 className="w-5 h-5 animate-spin" />
+          <LoadingSpinner size="md" variant="current" />
         ) : (
-          <Send className="w-5 h-5" />
+          <PaperPlaneRightIcon size={20} weight="fill" />
         )}
       </button>
     </div>

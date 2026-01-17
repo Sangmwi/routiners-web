@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { CaretLeftIcon } from '@phosphor-icons/react';
 import type { MilitaryInfoData, Rank, Specialty } from '@/lib/types/user';
 import { EnlistmentStep } from './EnlistmentStep';
 import { RankStep } from './RankStep';
@@ -111,7 +111,7 @@ export default function MilitaryFlowContainer({
           className="p-2 -ml-2 rounded-full hover:bg-muted active:bg-muted/80 transition-colors"
           aria-label="뒤로가기"
         >
-          <ArrowLeft className="w-5 h-5 text-foreground" />
+          <CaretLeftIcon size={20} className="text-foreground" />
         </button>
 
         {/* Progress bar inline */}

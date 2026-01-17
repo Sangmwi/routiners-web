@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react';
+import { CheckIcon } from '@phosphor-icons/react';
 
 interface StepIndicatorProps {
   steps: string[];
@@ -36,7 +36,7 @@ export default function StepIndicator({ steps, currentStep }: StepIndicatorProps
                   }`}
                 >
                   {isCompleted ? (
-                    <Check className="h-5 w-5" />
+                    <CheckIcon size={20} weight="bold" />
                   ) : (
                     <span className="text-sm font-semibold">{stepNumber}</span>
                   )}

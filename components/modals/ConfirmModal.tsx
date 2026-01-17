@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, Loader2 } from 'lucide-react';
+import { ErrorIcon, LoadingSpinner } from '@/components/ui/icons';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { useShowError } from '@/lib/stores/errorStore';
@@ -81,7 +81,7 @@ export default function ConfirmModal({
           // 로딩 UI
           <div className="text-center py-4">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <LoadingSpinner size="xl" />
             </div>
             <p className="text-sm text-muted-foreground">{loadingMessage}</p>
           </div>
@@ -91,7 +91,7 @@ export default function ConfirmModal({
             {/* 아이콘 (위험 작업일 때만) */}
             {variant === 'danger' && (
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
-                <AlertTriangle className="h-6 w-6 text-destructive" />
+                <ErrorIcon size="lg" className="text-destructive" />
               </div>
             )}
 

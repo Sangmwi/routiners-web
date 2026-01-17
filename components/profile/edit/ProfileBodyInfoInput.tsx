@@ -1,6 +1,6 @@
 'use client';
 
-import { Cigarette, CigaretteOff } from 'lucide-react';
+import { CigaretteIcon, CigaretteSlashIcon } from '@phosphor-icons/react';
 import FormSection from '@/components/ui/FormSection';
 import FormSlider from '@/components/ui/FormSlider';
 
@@ -67,7 +67,7 @@ export default function ProfileBodyInfoInput({
                 }
               `}
             >
-              <CigaretteOff className="w-3.5 h-3.5" />
+              <CigaretteSlashIcon size={14} />
               비흡연
             </button>
             <button
@@ -82,7 +82,7 @@ export default function ProfileBodyInfoInput({
                 }
               `}
             >
-              <Cigarette className="w-3.5 h-3.5" />
+              <CigaretteIcon size={14} />
               흡연
             </button>
           </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
+import { LoadingSpinner } from '@/components/ui/icons';
 
 interface ChatProgressIndicatorProps {
   /** 진행률 (0-100) */
@@ -41,7 +41,7 @@ export function ChatProgressIndicator({
       <div
         className={`shrink-0 w-8 h-8 rounded-full ${styles.iconBg} flex items-center justify-center`}
       >
-        <Loader2 className="w-4 h-4 animate-spin" />
+        <LoadingSpinner size="sm" variant="current" />
       </div>
       <div className="flex-1 bg-muted/30 rounded-2xl rounded-tl-md px-4 py-3">
         <p className="text-sm font-medium text-foreground mb-2">

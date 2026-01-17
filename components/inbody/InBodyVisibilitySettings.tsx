@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { LoadingSpinner } from '@/components/ui/icons';
 import FormToggle from '@/components/ui/FormToggle';
 import { useCurrentUserProfile, useUpdateProfile } from '@/hooks/profile/useProfile';
 
@@ -78,7 +78,7 @@ export default function InBodyVisibilitySettings({
   if (isUserLoading) {
     return (
       <div className="flex items-center justify-center py-4">
-        <Loader2 className="w-5 h-5 text-primary animate-spin" />
+        <LoadingSpinner size="md" />
       </div>
     );
   }
@@ -94,7 +94,7 @@ export default function InBodyVisibilitySettings({
       />
       {isSaving && (
         <div className="absolute right-12 top-1/2 -translate-y-1/2">
-          <Loader2 className="w-4 h-4 text-primary animate-spin" />
+          <LoadingSpinner size="sm" />
         </div>
       )}
     </div>

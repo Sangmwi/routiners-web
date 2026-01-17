@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { LucideIcon } from 'lucide-react';
+import { Icon } from '@phosphor-icons/react';
 
 // ============================================================
 // Types
@@ -10,8 +10,8 @@ import { LucideIcon } from 'lucide-react';
 interface TagProps {
   /** 태그 내용 */
   children: ReactNode;
-  /** 좌측 아이콘 (LucideIcon 또는 ReactNode) */
-  icon?: LucideIcon | ReactNode;
+  /** 좌측 아이콘 (Phosphor Icon 또는 ReactNode) */
+  icon?: Icon | ReactNode;
   /** 스타일 변형 */
   variant?: 'default' | 'muted' | 'outline';
   /** 크기 */
@@ -67,19 +67,20 @@ export default function Tag({
   const renderIcon = () => {
     if (!icon) return null;
 
-    const iconSizeClass = size === 'sm' ? 'w-3 h-3' : 'w-3.5 h-3.5';
+    const iconSize = size === 'sm' ? 12 : 14;
 
-    // LucideIcon은 forwardRef를 사용하므로 $$typeof와 render 속성을 가진 객체
+    // Phosphor Icon은 forwardRef를 사용하므로 $$typeof와 render 속성을 가진 객체
     // typeof === 'function' 또는 $$typeof 속성 존재 여부로 체크
-    const isLucideIcon =
+    const isPhosphorIcon =
       typeof icon === 'function' ||
       (typeof icon === 'object' && icon !== null && '$$typeof' in icon);
 
-    if (isLucideIcon) {
-      const Icon = icon as LucideIcon;
-      return <Icon className={`${iconSizeClass} text-muted-foreground flex-shrink-0`} />;
+    if (isPhosphorIcon) {
+      const IconComponent = icon as Icon;
+      return <IconComponent size={iconSize} className="text-muted-foreground flex-shrink-0" />;
     }
 
+    const iconSizeClass = size === 'sm' ? 'w-3 h-3' : 'w-3.5 h-3.5';
     return (
       <span className={`${iconSizeClass} text-muted-foreground flex-shrink-0 [&>svg]:w-full [&>svg]:h-full`}>
         {icon}

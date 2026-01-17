@@ -1,7 +1,8 @@
 'use client';
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import { WarningIcon, HouseIcon } from '@phosphor-icons/react';
+import { RefreshIcon } from '@/components/ui/icons';
 import Button from '@/components/ui/Button';
 import { isApiError, getErrorMessageByCode, ApiErrorCode } from '@/lib/types';
 
@@ -146,7 +147,7 @@ function ErrorFallback({
       <div className="w-full max-w-sm text-center">
         {/* 에러 아이콘 */}
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-destructive/10">
-          <AlertTriangle className="h-10 w-10 text-destructive" />
+          <WarningIcon size={40} className="text-destructive" />
         </div>
 
         {/* 제목 */}
@@ -181,7 +182,7 @@ function ErrorFallback({
             onClick={onReset}
             className="w-full"
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshIcon size="sm" />
             다시 시도
           </Button>
 
@@ -191,7 +192,7 @@ function ErrorFallback({
             onClick={onGoHome}
             className="w-full"
           >
-            <Home className="h-4 w-4" />
+            <HouseIcon size={16} />
             홈으로 이동
           </Button>
         </div>

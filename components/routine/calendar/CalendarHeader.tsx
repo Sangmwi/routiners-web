@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 
 interface CalendarHeaderProps {
   year: number;
@@ -34,14 +34,14 @@ export default function CalendarHeader({
           className="p-2 rounded-lg hover:bg-muted transition-colors"
           aria-label="이전 달"
         >
-          <ChevronLeft className="w-5 h-5 text-foreground" />
+          <CaretLeftIcon size={20} weight="bold" className="text-foreground" />
         </button>
         <button
           onClick={onNextMonth}
           className="p-2 rounded-lg hover:bg-muted transition-colors"
           aria-label="다음 달"
         >
-          <ChevronRight className="w-5 h-5 text-foreground" />
+          <CaretRightIcon size={20} weight="bold" className="text-foreground" />
         </button>
       </div>
     </div>

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Edit2 } from 'lucide-react';
+import { PencilSimpleIcon } from '@phosphor-icons/react';
+import { ExpandIcon, CollapseIcon } from '@/components/ui/icons';
 import { InBodyCreateData } from '@/lib/types/inbody';
 import FormInput from '@/components/ui/FormInput';
 
@@ -69,7 +70,7 @@ export default function InBodyPreview({
             onClick={() => setIsEditing(!isEditing)}
             className="flex items-center gap-1 text-sm text-primary"
           >
-            <Edit2 className="w-4 h-4" />
+            <PencilSimpleIcon size={16} />
             {isEditing ? '완료' : '수정'}
           </button>
         )}
@@ -156,12 +157,12 @@ export default function InBodyPreview({
         >
           {showDetails ? (
             <>
-              <ChevronUp className="w-4 h-4" />
+              <CollapseIcon size="sm" />
               상세 정보 접기
             </>
           ) : (
             <>
-              <ChevronDown className="w-4 h-4" />
+              <ExpandIcon size="sm" />
               상세 정보 보기
             </>
           )}

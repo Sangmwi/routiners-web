@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Pencil } from 'lucide-react';
+import { PencilSimpleIcon } from '@phosphor-icons/react';
 
 /**
  * 프로필 페이지 전용 헤더
@@ -17,7 +17,7 @@ export default function ProfileHeader() {
         className="p-1.5 hover:bg-muted/50 rounded-lg transition-colors"
         aria-label="프로필 편집"
       >
-        <Pencil className="w-5 h-5 text-muted-foreground" />
+        <PencilSimpleIcon size={20} className="text-muted-foreground" />
       </Link>
     </div>
   );

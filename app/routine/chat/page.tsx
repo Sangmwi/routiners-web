@@ -11,7 +11,7 @@ import {
   PreviewDetailDrawer,
 } from '@/components/routine/chat';
 import { useChatPage } from '@/hooks/aiChat';
-import { Loader2, Menu, AlertCircle } from 'lucide-react';
+import { SpinnerGapIcon, ListIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
 
 /**
@@ -56,7 +56,7 @@ export default function AIChatPage() {
   if (pageState.isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <SpinnerGapIcon size={32} className="animate-spin text-primary" />
       </div>
     );
   }
@@ -103,7 +103,7 @@ export default function AIChatPage() {
       className="p-2 hover:bg-muted/50 rounded-lg transition-colors text-muted-foreground hover:text-foreground"
       aria-label="메뉴 열기"
     >
-      <Menu className="w-5 h-5" />
+      <ListIcon size={20} />
     </button>
   );
 
@@ -163,7 +163,7 @@ export default function AIChatPage() {
         <div className="mx-4 mb-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-destructive">
-              <AlertCircle className="w-4 h-4 shrink-0" />
+              <WarningCircleIcon size={16} className="shrink-0" />
               <span>메시지 전송에 실패했습니다</span>
             </div>
             <div className="flex gap-2">

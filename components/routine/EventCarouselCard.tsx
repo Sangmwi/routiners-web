@@ -1,7 +1,33 @@
 'use client';
 
-import { Zap, Utensils, Check, SkipForward, Moon } from 'lucide-react';
-import type { RoutineEvent, EventType } from '@/lib/types/routine';
+import { CheckIcon, SkipForwardIcon } from '@phosphor-icons/react';
+import { getEventConfig } from '@/lib/config/theme';
+import type { RoutineEvent, EventType, WorkoutData } from '@/lib/types/routine';
+import type { MealData } from '@/lib/types/meal';
+
+/**
+ * 타입 가드: WorkoutData인지 확인
+ */
+function isWorkoutData(data: unknown): data is WorkoutData {
+  return (
+    data !== null &&
+    typeof data === 'object' &&
+    'exercises' in data &&
+    Array.isArray((data as WorkoutData).exercises)
+  );
+}
+
+/**
+ * 타입 가드: MealData인지 확인
+ */
+function isMealData(data: unknown): data is MealData {
+  return (
+    data !== null &&
+    typeof data === 'object' &&
+    'meals' in data &&
+    Array.isArray((data as MealData).meals)
+  );
+}
 
 interface EventCarouselCardProps {
   /** 이벤트 데이터 (null이면 쉬는 날) */
@@ -20,27 +46,16 @@ interface EventCarouselCardProps {
   onClick?: () => void;
 }
 
-// 타입별 스타일 (브랜드 컬러 통일)
-const typeStyles = {
-  workout: {
-    border: 'border-primary/30',
-    bg: 'bg-primary/5',
-    iconBg: 'bg-primary/10',
-    iconColor: 'text-primary',
-  },
-  meal: {
-    border: 'border-primary/30',
-    bg: 'bg-primary/5',
-    iconBg: 'bg-primary/10',
-    iconColor: 'text-primary',
-  },
-};
-
-// 타입별 아이콘
-const typeIcons = {
-  workout: Zap,
-  meal: Utensils,
-};
+// 타입별 스타일 헬퍼 (EVENT_TYPE에서 가져옴)
+function getTypeStyles(type: EventType) {
+  const config = getEventConfig(type);
+  return {
+    border: config.borderColor,
+    bg: 'bg-primary/5',  // 캐러셀 카드용 더 연한 배경
+    iconBg: config.bgColor,
+    iconColor: config.color,
+  };
+}
 
 /**
  * 캐러셀용 이벤트 카드
@@ -60,8 +75,8 @@ export default function EventCarouselCard({
   isTomorrow = false,
   onClick,
 }: EventCarouselCardProps) {
-  const styles = typeStyles[type];
-  const Icon = typeIcons[type];
+  const styles = getTypeStyles(type);
+  const config = getEventConfig(type);
   const { dayNumber, dayOfWeek } = formatDateInfo(date);
 
   // 뱃지 렌더링
@@ -99,23 +114,29 @@ export default function EventCarouselCard({
         </span>
 
         {/* 휴식 아이콘 */}
-        <div className="flex-1 flex flex-col items-center justify-center gap-1">
-          <Moon className="w-6 h-6 text-muted-foreground/60" />
-          <span className="text-xs text-muted-foreground">쉬는 날</span>
-        </div>
+        {(() => {
+          const restConfig = getEventConfig('rest');
+          return (
+            <div className="flex-1 flex flex-col items-center justify-center gap-1">
+              <restConfig.icon size={24} weight="fill" className="text-muted-foreground/60" />
+              <span className="text-xs text-muted-foreground">{restConfig.description}</span>
+            </div>
+          );
+        })()}
       </button>
     );
   }
 
   const isCompleted = event.status === 'completed';
   const isSkipped = event.status === 'skipped';
-  const exerciseCount = event.data?.exercises?.length ?? 0;
+  const exerciseCount = isWorkoutData(event.data) ? event.data.exercises.length : 0;
+  const mealCount = isMealData(event.data) ? event.data.meals.length : 0;
 
   return (
     <button
       onClick={onClick}
       className={`
-        relative flex flex-col items-center w-[140px] h-[180px] p-3 pt-4 rounded-xl
+        relative flex flex-col items-center justify-center w-[140px] h-[180px] p-3 pt-4 rounded-xl
         ${styles.bg}
         ${isToday ? 'ring-1 ring-primary' : ''}
         hover:opacity-80 active:scale-[0.98] transition-all
@@ -125,45 +146,51 @@ export default function EventCarouselCard({
 
       {/* 날짜 */}
       <span
-        className={`text-sm font-medium ${
-          isToday ? 'text-foreground' : 'text-muted-foreground'
-        }`}
+        className={`text-sm font-medium ${isToday ? 'text-foreground' : 'text-muted-foreground'
+          }`}
       >
         {dayNumber}일 ({dayOfWeek})
       </span>
 
-      {/* 아이콘 */}
-      <div
-        className={`
+      <div className="flex-1 flex flex-col items-center justify-center gap-1">
+        {/* 아이콘 */}
+        <div
+          className={`
           mt-2 w-10 h-10 rounded-xl flex items-center justify-center
           ${styles.iconBg}
         `}
-      >
-        {isCompleted ? (
-          <Check className={`w-5 h-5 ${styles.iconColor}`} />
-        ) : isSkipped ? (
-          <SkipForward className="w-5 h-5 text-muted-foreground" />
-        ) : (
-          <Icon className={`w-5 h-5 ${styles.iconColor}`} />
-        )}
-      </div>
+        >
+          {isCompleted ? (
+            <CheckIcon size={20} weight="bold" className={styles.iconColor} />
+          ) : isSkipped ? (
+            <SkipForwardIcon size={20} weight="bold" className="text-muted-foreground" />
+          ) : (
+            <config.icon size={20} weight="fill" className={styles.iconColor} />
+          )}
+        </div>
 
-      {/* 제목 */}
-      <span
-        className={`
+        {/* 제목 */}
+        <span
+          className={`
           mt-2 text-xs font-medium text-center line-clamp-1 w-full
           ${isSkipped ? 'text-muted-foreground line-through' : 'text-foreground'}
         `}
-      >
-        {event.title}
-      </span>
-
-      {/* 부제목 */}
-      {type === 'workout' && exerciseCount > 0 && (
-        <span className="text-[10px] text-muted-foreground">
-          {exerciseCount}개 운동
+        >
+          {event.title}
         </span>
-      )}
+
+        {/* 부제목 */}
+        {type === 'workout' && exerciseCount > 0 && (
+          <span className="text-[10px] text-muted-foreground">
+            {exerciseCount}개 운동
+          </span>
+        )}
+        {type === 'meal' && mealCount > 0 && (
+          <span className="text-[10px] text-muted-foreground">
+            {mealCount}끼 식사
+          </span>
+        )}
+      </div>
     </button>
   );
 }

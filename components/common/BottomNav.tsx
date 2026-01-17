@@ -2,26 +2,20 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Home, CalendarDays, Users, User } from "lucide-react";
 import { shouldShowBottomTab } from "@/lib/routes";
-
-const NAV_ITEMS = [
-  { label: "홈", href: "/", icon: Home },
-  { label: "루틴", href: "/routine", icon: CalendarDays },
-  { label: "커뮤니티", href: "/community", icon: Users },
-  { label: "프로필", href: "/profile", icon: User },
-] as const;
+import { BOTTOM_NAV } from "@/lib/config/theme";
 
 export default function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const { items, style } = BOTTOM_NAV;
 
   // 프리패치 적용
   useEffect(() => {
-    NAV_ITEMS.forEach((item) => {
+    items.forEach((item) => {
       router.prefetch(item.href);
     });
-  }, [router]);
+  }, [router, items]);
 
   // 특정 페이지에서는 탭 숨김
   if (!shouldShowBottomTab(pathname)) {
@@ -31,7 +25,7 @@ export default function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-md border-t border-border bg-background pb-[env(safe-area-inset-bottom)]">
       <div className="flex h-16 items-center justify-around px-4">
-        {NAV_ITEMS.map((item) => {
+        {items.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
 
@@ -42,11 +36,14 @@ export default function BottomNav() {
               onClick={() => router.push(item.href)}
               className={`flex flex-col items-center justify-center gap-1 transition-colors ${
                 isActive
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? style.activeColor
+                  : `${style.inactiveColor} hover:text-foreground`
               }`}
             >
-              <Icon className="h-6 w-6" strokeWidth={isActive ? 2.5 : 2} />
+              <Icon
+                size={style.size}
+                weight={isActive ? style.activeWeight : style.inactiveWeight}
+              />
               <span className="text-xs font-medium">{item.label}</span>
             </button>
           );
@@ -55,4 +52,3 @@ export default function BottomNav() {
     </nav>
   );
 }
-

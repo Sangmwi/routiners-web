@@ -1,10 +1,23 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { RoutineEvent } from '@/lib/types/routine';
-import { Check, SkipForward, Play, ChevronRight } from 'lucide-react';
+import { RoutineEvent, WorkoutData } from '@/lib/types/routine';
+import { CheckIcon, SkipForwardIcon, PlayIcon } from '@phosphor-icons/react';
+import { NextIcon } from '@/components/ui/icons';
 import Button from '@/components/ui/Button';
 import { getEventIcon, getStatusConfig } from '@/lib/config/eventTheme';
+
+/**
+ * 타입 가드: WorkoutData인지 확인
+ */
+function isWorkoutData(data: unknown): data is WorkoutData {
+  return (
+    data !== null &&
+    typeof data === 'object' &&
+    'exercises' in data &&
+    Array.isArray((data as WorkoutData).exercises)
+  );
+}
 
 interface TodayEventSectionProps {
   event: RoutineEvent | null;
@@ -90,7 +103,8 @@ export default function TodayEventSection({
   };
 
   const status = statusConfig[event.status];
-  const exerciseCount = event.data?.exercises?.length ?? 0;
+  const workoutData = isWorkoutData(event.data) ? event.data : null;
+  const exerciseCount = workoutData?.exercises?.length ?? 0;
 
   return (
     <div className={`bg-card border ${status.borderColor} rounded-xl overflow-hidden`}>
@@ -110,9 +124,9 @@ export default function TodayEventSection({
           {/* 아이콘 */}
           <div className={`w-14 h-14 rounded-xl ${status.bgColor} flex items-center justify-center flex-shrink-0`}>
             {event.status === 'completed' ? (
-              <Check className="w-7 h-7 text-primary" />
+              <CheckIcon size={28} weight="bold" className="text-primary" />
             ) : event.status === 'skipped' ? (
-              <SkipForward className="w-7 h-7 text-muted-foreground" />
+              <SkipForwardIcon size={28} weight="bold" className="text-muted-foreground" />
             ) : (
               (() => {
                 const Icon = getEventIcon('workout');
@@ -128,13 +142,13 @@ export default function TodayEventSection({
             </h3>
             <p className="text-sm text-muted-foreground">
               {exerciseCount}개 운동
-              {event.data?.estimatedDuration && (
-                <> • 약 {event.data.estimatedDuration}분</>
+              {workoutData?.estimatedDuration && (
+                <> • 약 {workoutData.estimatedDuration}분</>
               )}
             </p>
           </div>
 
-          <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+          <NextIcon size="md" weight="emphasis" className="text-muted-foreground flex-shrink-0" />
         </button>
 
         {/* 액션 버튼 (scheduled 상태일 때만) */}
@@ -147,7 +161,7 @@ export default function TodayEventSection({
               disabled={isActionLoading}
               className="flex-1"
             >
-              <SkipForward className="w-4 h-4" />
+              <SkipForwardIcon size={16} weight="bold" />
               건너뛰기
             </Button>
             <Button
@@ -157,7 +171,7 @@ export default function TodayEventSection({
               isLoading={isActionLoading}
               className="flex-1"
             >
-              <Play className="w-4 h-4" />
+              <PlayIcon size={16} weight="fill" />
               시작하기
             </Button>
           </div>

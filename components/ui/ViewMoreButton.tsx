@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { NextIcon } from '@/components/ui/icons';
 import Link from 'next/link';
 
 // ============================================================
@@ -71,7 +71,7 @@ export default function ViewMoreButton({
   const content = (
     <>
       <span>{children}</span>
-      {!hideIcon && <ChevronRight className="w-4 h-4" />}
+      {!hideIcon && <NextIcon size="sm" />}
     </>
   );
 

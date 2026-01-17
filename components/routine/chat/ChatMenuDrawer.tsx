@@ -1,6 +1,8 @@
 'use client';
 
-import { RotateCcw, Trash2, Zap, Utensils, CheckCircle, Loader2 } from 'lucide-react';
+import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
+import { DeleteIcon, SuccessIcon, LoadingSpinner } from '@/components/ui/icons';
+import { EventIcons } from '@/lib/config/theme';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import { useAISessions } from '@/hooks/aiChat';
 import type { Conversation, ConversationStatus } from '@/lib/types/chat';
@@ -92,7 +94,7 @@ export default function ChatMenuDrawer({
           <div className="bg-muted/30 rounded-xl overflow-hidden max-h-64 overflow-y-auto">
             {isLoading ? (
               <div className="p-4 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <LoadingSpinner size="sm" />
                 불러오는 중...
               </div>
             ) : !hasAnySessions ? (
@@ -161,7 +163,7 @@ export default function ChatMenuDrawer({
               className="w-full flex items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                <RotateCcw className="w-5 h-5 text-foreground" />
+                <ArrowCounterClockwiseIcon size={20} className="text-foreground" />
               </div>
               <div className="text-left">
                 <p className="font-medium text-foreground">대화 초기화</p>
@@ -179,7 +181,7 @@ export default function ChatMenuDrawer({
               className="w-full flex items-center gap-3 p-4 rounded-xl bg-destructive/5 hover:bg-destructive/10 transition-colors"
             >
               <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
-                <Trash2 className="w-5 h-5 text-destructive" />
+                <DeleteIcon size="md" className="text-destructive" />
               </div>
               <div className="text-left">
                 <p className="font-medium text-destructive">대화 삭제</p>
@@ -214,16 +216,16 @@ function SessionItem({ session, isCurrent, onSelect }: SessionItemProps) {
   const dateStr = `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
 
   // 목적 아이콘
-  const PurposeIcon = purpose === 'meal' ? Utensils : Zap;
+  const PurposeIcon = purpose === 'meal' ? EventIcons.Meal : EventIcons.Workout;
   const purposeLabel = purpose === 'meal' ? '식단 관리' : '운동 루틴';
   const purposeColor = purpose === 'meal' ? 'text-primary' : 'text-primary';
   const purposeBg = purpose === 'meal' ? 'bg-primary/10' : 'bg-primary/10';
 
   // 상태 정보
   const statusInfo = status === 'active'
-    ? { icon: <Loader2 className="w-3 h-3 animate-spin" />, label: '진행 중', color: 'text-primary' }
+    ? { icon: <LoadingSpinner size="xs" />, label: '진행 중', color: 'text-primary' }
     : status === 'completed'
-    ? { icon: <CheckCircle className="w-3 h-3" />, label: '완료', color: 'text-success' }
+    ? { icon: <SuccessIcon size="xs" />, label: '완료', color: 'text-success' }
     : null;
 
   return (
@@ -238,7 +240,7 @@ function SessionItem({ session, isCurrent, onSelect }: SessionItemProps) {
     >
       {/* 목적 아이콘 */}
       <div className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${purposeBg}`}>
-        <PurposeIcon className={`w-4 h-4 ${purposeColor}`} />
+        <PurposeIcon size={16} weight="fill" className={purposeColor} />
       </div>
 
       {/* 세션 정보 */}

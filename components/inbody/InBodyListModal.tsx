@@ -1,6 +1,7 @@
 'use client';
 
-import { ChevronRight, Calendar, Loader2, Plus } from 'lucide-react';
+import { CalendarIcon } from '@phosphor-icons/react';
+import { NextIcon, LoadingSpinner, AddIcon } from '@/components/ui/icons';
 import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { InBodyRecord } from '@/lib/types/inbody';
@@ -30,11 +31,11 @@ export default function InBodyListModal({
       <ModalBody className="min-h-[200px] p-0">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <LoadingSpinner size="xl" />
           </div>
         ) : records.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Calendar className="w-12 h-12 text-muted-foreground mb-4" />
+            <CalendarIcon size={48} className="text-muted-foreground mb-4" />
             <p className="text-lg font-medium text-card-foreground">
               기록이 없습니다
             </p>
@@ -61,7 +62,7 @@ export default function InBodyListModal({
         </Button>
         {onAddNew && (
           <Button onClick={onAddNew} className="flex-1">
-            <Plus className="w-4 h-4 mr-2" />
+            <AddIcon size="sm" className="mr-2" />
             새 기록 추가
           </Button>
         )}
@@ -107,7 +108,7 @@ function InBodyListItem({
           </div>
         )}
       </div>
-      <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+      <NextIcon size="md" className="text-muted-foreground shrink-0" />
     </button>
   );
 }

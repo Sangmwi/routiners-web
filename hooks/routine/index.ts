@@ -21,3 +21,7 @@ export {
   useDeleteRoutineEvent,
   useDeleteRoutineEventsBySession,
 } from './useRoutineEvents';
+
+// Weekly Stats
+export { useWeeklyStats } from './useWeeklyStats';
+export type { WeeklyStats } from './useWeeklyStats';

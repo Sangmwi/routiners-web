@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Pencil } from 'lucide-react';
+import { CheckIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import { ProfileConfirmationRequest } from '@/lib/types/chat';
 
 interface ChatProfileConfirmationProps {
@@ -52,7 +52,7 @@ export function ChatProfileConfirmation({
                      border border-border rounded-lg text-sm font-medium
                      hover:bg-muted transition-colors disabled:opacity-50"
         >
-          <Pencil className="w-4 h-4" />
+          <PencilSimpleIcon size={16} />
           {request.editText || '수정하기'}
         </button>
         <button
@@ -62,7 +62,7 @@ export function ChatProfileConfirmation({
                      bg-primary text-primary-foreground rounded-lg text-sm font-medium
                      hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
-          <Check className="w-4 h-4" />
+          <CheckIcon size={16} />
           {request.confirmText || '확인'}
         </button>
       </div>

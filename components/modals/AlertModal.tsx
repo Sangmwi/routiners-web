@@ -1,6 +1,6 @@
 'use client';
 
-import { Info } from 'lucide-react';
+import { InfoIcon } from '@/components/ui/icons';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import type { ModalDataMap } from '@/lib/stores/modalStore';
@@ -47,7 +47,7 @@ export default function AlertModal({
         <div className="text-center">
           {/* 아이콘 */}
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-            <Info className="h-6 w-6 text-primary" />
+            <InfoIcon size="lg" className="text-primary" />
           </div>
 
           {/* 제목 */}

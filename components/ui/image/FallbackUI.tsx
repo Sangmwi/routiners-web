@@ -1,4 +1,4 @@
-import { ImageOff } from 'lucide-react';
+import { ImageBrokenIcon } from '@phosphor-icons/react';
 
 export interface FallbackUIProps {
   fill: boolean;
@@ -16,14 +16,14 @@ export function FallbackUI({ fill, width, height, showIcon, fallbackClassName, c
   if (fill) {
     return (
       <div className={`absolute inset-0 ${baseClassName}`}>
-        {showIcon && <ImageOff className="h-1/3 w-1/3 text-muted-foreground/50" />}
+        {showIcon && <ImageBrokenIcon className="h-1/3 w-1/3 text-muted-foreground/50" />}
       </div>
     );
   }
 
   return (
     <div className={baseClassName} style={{ width, height }}>
-      {showIcon && <ImageOff className="h-1/3 w-1/3 text-muted-foreground/50" />}
+      {showIcon && <ImageBrokenIcon className="h-1/3 w-1/3 text-muted-foreground/50" />}
     </div>
   );
 }

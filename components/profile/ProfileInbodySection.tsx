@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Scale, Lock } from 'lucide-react';
+import { ScalesIcon, LockIcon } from '@phosphor-icons/react';
 import { useInBodySummary, useUserInBodySummary } from '@/hooks/inbody';
 import { InBodyDetailModal, MetricsGrid } from '@/components/inbody';
 import { InBodyRecord } from '@/lib/types';
@@ -54,7 +54,7 @@ export default function ProfileInbodySection({
 
     return (
       <EmptyState
-        icon={Lock}
+        icon={LockIcon}
         message={
           isOwnProfile
             ? '인바디 정보가 비공개 상태입니다'
@@ -69,7 +69,7 @@ export default function ProfileInbodySection({
   // 데이터 없음 상태 렌더링
   const renderEmptyState = () => (
     <EmptyState
-      icon={Scale}
+      icon={ScalesIcon}
       message={
         isOwnProfile
           ? '아직 등록된 인바디 기록이 없어요'

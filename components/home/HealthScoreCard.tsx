@@ -24,7 +24,7 @@ export default function HealthScoreCard({ score, onViewDetails }: HealthScoreCar
           )}
         </div>
         <div className="flex-shrink-0 relative -translate-y-1 translate-x-1">
-          <ScoreFlag className="h-24 fill-primary dark:fill-primary/50" />
+          <ScoreFlag className="h-24 fill-primary-muted" />
           <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-2/3 text-3xl font-bold text-white">
             {score}
           </span>

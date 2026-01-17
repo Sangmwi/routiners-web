@@ -1,6 +1,7 @@
 'use client';
 
-import { Zap, Utensils, Loader2 } from 'lucide-react';
+import { LoadingSpinner } from '@/components/ui/icons';
+import { EventIcons } from '@/lib/config/theme';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import type { ModalDataMap } from '@/lib/stores/modalStore';
 
@@ -52,7 +53,7 @@ export default function AISelectionDrawer({
         {/* 로딩 중이면 스피너 표시 */}
         {data.isLoading ? (
           <div className="flex flex-col items-center justify-center py-8 gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <LoadingSpinner size="xl" />
             <p className="text-sm text-muted-foreground">세션을 준비하고 있어요...</p>
           </div>
         ) : (
@@ -65,7 +66,7 @@ export default function AISelectionDrawer({
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <Zap className="w-6 h-6 text-primary" />
+                  <EventIcons.Workout size={24} className="text-primary" weight="fill" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -90,7 +91,7 @@ export default function AISelectionDrawer({
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <Utensils className="w-6 h-6 text-primary" />
+                  <EventIcons.Meal size={24} className="text-primary" weight="fill" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">

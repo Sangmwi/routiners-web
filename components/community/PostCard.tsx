@@ -1,6 +1,6 @@
 'use client';
 
-import { Heart, MessageCircle, Share2 } from 'lucide-react';
+import { HeartIcon, ChatCircleIcon, ShareNetworkIcon } from '@phosphor-icons/react';
 import { ImageWithFallback } from '@/components/ui/image';
 
 interface PostCardProps {
@@ -59,15 +59,15 @@ export default function PostCard({
       {/* 액션 버튼 */}
       <div className="flex items-center gap-4 pt-2 border-t border-border/30">
         <button className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors">
-          <Heart className="h-4 w-4" />
+          <HeartIcon size={16} />
           <span className="text-xs font-medium">{likes}</span>
         </button>
         <button className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors">
-          <MessageCircle className="h-4 w-4" />
+          <ChatCircleIcon size={16} />
           <span className="text-xs font-medium">{comments}</span>
         </button>
         <button className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors ml-auto">
-          <Share2 className="h-4 w-4" />
+          <ShareNetworkIcon size={16} />
         </button>
       </div>
     </div>

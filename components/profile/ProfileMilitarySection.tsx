@@ -1,6 +1,6 @@
 'use client';
 
-import { Shield, Users, Award } from 'lucide-react';
+import { ShieldIcon, UsersThreeIcon, MedalIcon } from '@phosphor-icons/react';
 import { Rank, Specialty } from '@/lib/types';
 import SectionHeader from '@/components/ui/SectionHeader';
 import InfoCard from '@/components/ui/InfoCard';
@@ -22,17 +22,17 @@ export default function ProfileMilitarySection({
 
       <div className="space-y-2">
         <InfoCard
-          icon={<Shield />}
+          icon={<ShieldIcon />}
           label="계급"
           value={rank.split('-')[0]}
         />
         <InfoCard
-          icon={<Users />}
+          icon={<UsersThreeIcon />}
           label="부대명"
           value={unitName}
         />
         <InfoCard
-          icon={<Award />}
+          icon={<MedalIcon />}
           label="병과"
           value={specialty}
         />

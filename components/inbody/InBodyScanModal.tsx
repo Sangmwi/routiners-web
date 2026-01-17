@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { LoadingSpinner, ErrorIcon, SuccessIcon } from '@/components/ui/icons';
 import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { ImageSourceDrawer } from '@/components/drawers';
@@ -174,7 +174,7 @@ export default function InBodyScanModal({
         {/* 스캔 중 */}
         {state === 'scanning' && (
           <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <Loader2 className="w-12 h-12 text-primary animate-spin" />
+            <LoadingSpinner size="2xl" />
             <div className="text-center space-y-1">
               <p className="text-lg font-medium text-card-foreground">
                 분석 중...
@@ -209,7 +209,7 @@ export default function InBodyScanModal({
         {/* 저장 중 */}
         {state === 'saving' && (
           <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <Loader2 className="w-12 h-12 text-primary animate-spin" />
+            <LoadingSpinner size="2xl" />
             <p className="text-lg font-medium text-card-foreground">
               저장 중...
             </p>
@@ -219,7 +219,7 @@ export default function InBodyScanModal({
         {/* 에러 상태 */}
         {state === 'error' && (
           <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <AlertCircle className="w-12 h-12 text-destructive" />
+            <ErrorIcon size="2xl" className="text-destructive" />
             <div className="text-center space-y-1">
               <p className="text-lg font-medium text-card-foreground">
                 오류가 발생했습니다
@@ -237,7 +237,7 @@ export default function InBodyScanModal({
               다시 스캔
             </Button>
             <Button onClick={handleSave} className="flex-1">
-              <CheckCircle2 className="w-4 h-4 mr-2" />
+              <SuccessIcon size="sm" className="mr-2" />
               저장하기
             </Button>
           </>
