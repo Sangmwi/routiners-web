@@ -1,6 +1,6 @@
 'use client';
 
-import { RotateCcw, Trash2, Dumbbell, Utensils, CheckCircle, Loader2 } from 'lucide-react';
+import { RotateCcw, Trash2, Zap, Utensils, CheckCircle, Loader2 } from 'lucide-react';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import { useAISessions } from '@/hooks/aiChat';
 import type { Conversation, ConversationStatus } from '@/lib/types/chat';
@@ -214,10 +214,10 @@ function SessionItem({ session, isCurrent, onSelect }: SessionItemProps) {
   const dateStr = `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
 
   // 목적 아이콘
-  const PurposeIcon = purpose === 'meal' ? Utensils : Dumbbell;
+  const PurposeIcon = purpose === 'meal' ? Utensils : Zap;
   const purposeLabel = purpose === 'meal' ? '식단 관리' : '운동 루틴';
-  const purposeColor = purpose === 'meal' ? 'text-meal' : 'text-workout';
-  const purposeBg = purpose === 'meal' ? 'bg-meal/10' : 'bg-workout/10';
+  const purposeColor = purpose === 'meal' ? 'text-primary' : 'text-primary';
+  const purposeBg = purpose === 'meal' ? 'bg-primary/10' : 'bg-primary/10';
 
   // 상태 정보
   const statusInfo = status === 'active'

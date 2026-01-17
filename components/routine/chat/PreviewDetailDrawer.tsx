@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Dumbbell, Utensils, Clock, Flame, Loader2 } from 'lucide-react';
+import { Clock, Flame, Loader2 } from 'lucide-react';
+import { getEventIcon } from '@/lib/config/eventTheme';
 import Modal from '@/components/ui/Modal';
 import type { RoutinePreviewData, RoutinePreviewDay, RoutinePreviewExercise } from '@/lib/types/fitness';
 import type { MealPlanPreviewData, MealPreviewDay, MealPreviewMeal } from '@/lib/types/meal';
@@ -54,15 +55,14 @@ export default function PreviewDetailDrawer({
       {/* 헤더 */}
       <div className="px-5 pt-2 pb-4">
         <div className="flex items-start gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-            isRoutine ? 'bg-primary/10' : 'bg-meal/10'
-          }`}>
-            {isRoutine ? (
-              <Dumbbell className="w-5 h-5 text-primary" />
-            ) : (
-              <Utensils className="w-5 h-5 text-meal" />
-            )}
-          </div>
+          {(() => {
+            const Icon = getEventIcon(isRoutine ? 'workout' : 'meal');
+            return (
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-primary/10">
+                <Icon className="w-5 h-5 text-primary" />
+              </div>
+            );
+          })()}
           <div className="flex-1 min-w-0">
             <h2 className="font-semibold text-foreground text-lg leading-tight">
               {preview.title}
@@ -82,9 +82,7 @@ export default function PreviewDetailDrawer({
             onClick={() => setSelectedWeek(week.weekNumber)}
             className={`px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-all shrink-0 ${
               selectedWeek === week.weekNumber
-                ? isRoutine
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-meal text-meal-foreground'
+                ? 'bg-primary text-primary-foreground'
                 : 'bg-muted/50 text-muted-foreground hover:bg-muted'
             }`}
           >
@@ -95,7 +93,7 @@ export default function PreviewDetailDrawer({
 
       {/* 일별 상세 (스크롤 영역) */}
       <div className="flex-1 overflow-y-auto">
-        <div className="px-4 pb-6 space-y-3">
+        <div className="px-5 pb-6 space-y-4">
           {currentWeek?.days.map((day, idx) => (
             <DayDetailCard
               key={idx}
@@ -107,16 +105,14 @@ export default function PreviewDetailDrawer({
       </div>
 
       {/* 하단 고정 버튼 */}
-      <div className="sticky bottom-0 p-4 bg-card/95 backdrop-blur-sm border-t border-border/50 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+      <div className="sticky bottom-0 p-4 bg-card">
         <button
           onClick={() => onApply(hasConflicts)}
           disabled={isApplying}
           className={`w-full py-3.5 rounded-xl font-medium transition-all disabled:opacity-50 active:scale-[0.98] ${
             hasConflicts
               ? 'bg-amber-500 text-white hover:bg-amber-600'
-              : isRoutine
-                ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                : 'bg-meal text-meal-foreground hover:opacity-90'
+              : 'bg-primary text-primary-foreground hover:bg-primary/90'
           }`}
         >
           {isApplying ? (
@@ -155,14 +151,14 @@ function DayDetailCard({
  */
 function RoutineDayCard({ day }: { day: RoutinePreviewDay }) {
   return (
-    <div className="bg-card rounded-2xl border border-border/60 overflow-hidden">
+    <div className="bg-muted/20 rounded-2xl overflow-hidden">
       {/* 카드 헤더 */}
-      <div className="flex items-center justify-between gap-3 px-4 py-3 bg-primary/5 border-b border-border/40">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <span className="w-9 h-9 rounded-lg bg-primary text-primary-foreground text-sm font-semibold flex items-center justify-center shrink-0">
+      <div className="flex items-center justify-between gap-3 px-4 py-3 bg-primary/10">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          <span className="w-7 h-7 rounded-full bg-primary/15 text-primary text-xs font-semibold flex items-center justify-center shrink-0">
             {DAY_NAMES[day.dayOfWeek]}
           </span>
-          <span className="font-medium text-foreground truncate">{day.title}</span>
+          <span className="text-sm font-medium text-foreground truncate">{day.title}</span>
         </div>
         {day.estimatedDuration && (
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground shrink-0">
@@ -173,23 +169,21 @@ function RoutineDayCard({ day }: { day: RoutinePreviewDay }) {
       </div>
 
       {/* 운동 목록 */}
-      <div className="px-4 py-3">
-        <div className="space-y-0">
-          {day.exercises.map((exercise, idx) => (
-            <ExerciseItem
-              key={idx}
-              exercise={exercise}
-              isLast={idx === day.exercises.length - 1}
-            />
-          ))}
-        </div>
+      <div className="px-4 py-4 space-y-4">
+        {day.exercises.map((exercise, idx) => (
+          <ExerciseItem
+            key={idx}
+            exercise={exercise}
+            isLast={idx === day.exercises.length - 1}
+          />
+        ))}
       </div>
     </div>
   );
 }
 
 /**
- * 운동 항목 - 인라인 텍스트로 밀림 방지
+ * 운동 항목
  */
 function ExerciseItem({
   exercise,
@@ -199,11 +193,9 @@ function ExerciseItem({
   isLast: boolean;
 }) {
   return (
-    <div className={`py-3 ${!isLast ? 'border-b border-border/30' : ''}`}>
-      <p className="text-sm text-foreground leading-relaxed">
-        {exercise.name}
-      </p>
-      <p className="text-xs text-muted-foreground mt-1">
+    <div className={`pb-4 ${!isLast ? 'border-b border-border/20' : ''}`}>
+      <p className="text-sm font-medium text-foreground">{exercise.name}</p>
+      <p className="text-sm text-muted-foreground mt-1.5">
         {exercise.sets}세트 · {exercise.reps}회
         {exercise.rest && (
           <span className="text-primary"> · 휴식 {exercise.rest}</span>
@@ -218,14 +210,14 @@ function ExerciseItem({
  */
 function MealDayCard({ day }: { day: MealPreviewDay }) {
   return (
-    <div className="bg-card rounded-2xl border border-border/60 overflow-hidden">
+    <div className="bg-muted/20 rounded-2xl overflow-hidden">
       {/* 카드 헤더 */}
-      <div className="flex items-center justify-between gap-3 px-4 py-3 bg-meal/5 border-b border-border/40">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <span className="w-9 h-9 rounded-lg bg-meal text-meal-foreground text-sm font-semibold flex items-center justify-center shrink-0">
+      <div className="flex items-center justify-between gap-3 px-4 py-3 bg-primary/10">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          <span className="w-7 h-7 rounded-full bg-primary/15 text-primary text-xs font-semibold flex items-center justify-center shrink-0">
             {DAY_NAMES[day.dayOfWeek]}
           </span>
-          <span className="font-medium text-foreground truncate">
+          <span className="text-sm font-medium text-foreground truncate">
             {DAY_NAMES[day.dayOfWeek]}요일
           </span>
         </div>
@@ -238,7 +230,7 @@ function MealDayCard({ day }: { day: MealPreviewDay }) {
       </div>
 
       {/* 식사 목록 */}
-      <div className="p-3 space-y-2">
+      <div className="p-4 space-y-4">
         {day.meals.map((meal, idx) => (
           <MealCard key={idx} meal={meal} />
         ))}
@@ -252,29 +244,29 @@ function MealDayCard({ day }: { day: MealPreviewDay }) {
  */
 function MealCard({ meal }: { meal: MealPreviewMeal }) {
   return (
-    <div className="bg-meal/5 rounded-xl p-3">
+    <div>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-meal">
+        <span className="text-sm font-semibold text-primary">
           {MEAL_TYPE_LABELS[meal.type]}
         </span>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
           {meal.time && <span>{meal.time}</span>}
           {meal.totalCalories && (
-            <span className="flex items-center gap-0.5">
-              <Flame className="w-3 h-3" />
+            <span className="flex items-center gap-1">
+              <Flame className="w-3.5 h-3.5" />
               {meal.totalCalories}kcal
             </span>
           )}
         </div>
       </div>
-      <div className="space-y-1">
+      <div className="space-y-2">
         {meal.foods.map((food, idx) => (
           <div key={idx} className="flex justify-between text-sm">
             <span className="text-foreground">{food.name}</span>
             <span className="text-muted-foreground">
               {food.portion}
               {food.protein && (
-                <span className="text-meal ml-1">P{food.protein}g</span>
+                <span className="text-primary ml-2">P{food.protein}g</span>
               )}
             </span>
           </div>

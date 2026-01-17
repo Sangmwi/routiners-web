@@ -1,6 +1,6 @@
 'use client';
 
-import { Dumbbell, Utensils, Check, SkipForward, Moon } from 'lucide-react';
+import { Zap, Utensils, Check, SkipForward, Moon } from 'lucide-react';
 import type { RoutineEvent, EventType } from '@/lib/types/routine';
 
 interface EventCarouselCardProps {
@@ -20,25 +20,25 @@ interface EventCarouselCardProps {
   onClick?: () => void;
 }
 
-// 타입별 스타일
+// 타입별 스타일 (브랜드 컬러 통일)
 const typeStyles = {
   workout: {
-    border: 'border-workout/30',
-    bg: 'bg-workout/5',
-    iconBg: 'bg-workout/10',
-    iconColor: 'text-workout',
+    border: 'border-primary/30',
+    bg: 'bg-primary/5',
+    iconBg: 'bg-primary/10',
+    iconColor: 'text-primary',
   },
   meal: {
-    border: 'border-meal/30',
-    bg: 'bg-meal/5',
-    iconBg: 'bg-meal/10',
-    iconColor: 'text-meal',
+    border: 'border-primary/30',
+    bg: 'bg-primary/5',
+    iconBg: 'bg-primary/10',
+    iconColor: 'text-primary',
   },
 };
 
 // 타입별 아이콘
 const typeIcons = {
-  workout: Dumbbell,
+  workout: Zap,
   meal: Utensils,
 };
 
@@ -85,9 +85,9 @@ export default function EventCarouselCard({
       <button
         onClick={onClick}
         className={`
-          relative flex flex-col items-center justify-center w-[120px] h-[140px] p-3 rounded-xl
+          relative flex flex-col items-center justify-center w-[140px] h-[180px] p-3 rounded-xl
           border border-dashed border-border bg-muted/30
-          ${isToday ? 'ring-2 ring-primary' : ''}
+          ${isToday ? 'ring-1 ring-primary' : ''}
           hover:bg-muted/50 transition-all
         `}
       >
@@ -115,10 +115,10 @@ export default function EventCarouselCard({
     <button
       onClick={onClick}
       className={`
-        relative flex flex-col items-center w-[120px] h-[140px] p-3 pt-4 rounded-xl
-        border ${styles.border} ${styles.bg}
-        ${isToday ? 'ring-2 ring-primary' : ''}
-        hover:shadow-md active:scale-[0.98] transition-all
+        relative flex flex-col items-center w-[140px] h-[180px] p-3 pt-4 rounded-xl
+        ${styles.bg}
+        ${isToday ? 'ring-1 ring-primary' : ''}
+        hover:opacity-80 active:scale-[0.98] transition-all
       `}
     >
       {badge}

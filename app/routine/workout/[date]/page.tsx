@@ -14,7 +14,7 @@ import {
   useCompleteRoutineEvent,
   useSkipRoutineEvent,
 } from '@/hooks/routine';
-import { Loader2, Dumbbell, Calendar } from 'lucide-react';
+import { Loader2, Zap, Calendar } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
 interface WorkoutDetailPageProps {
@@ -125,8 +125,8 @@ export default function WorkoutDetailPage({ params }: WorkoutDetailPageProps) {
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="w-12 h-12 rounded-xl bg-workout/10 flex items-center justify-center flex-shrink-0">
-              <Dumbbell className="w-6 h-6 text-workout" />
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Zap className="w-6 h-6 text-primary" />
             </div>
             <div className="flex-1">
               <h1 className="text-xl font-bold text-foreground">

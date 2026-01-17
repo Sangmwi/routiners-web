@@ -13,13 +13,13 @@ interface ChatProgressIndicatorProps {
 
 const VARIANT_STYLES = {
   workout: {
-    iconBg: 'bg-workout text-workout-foreground',
-    progressBar: 'bg-workout',
+    iconBg: 'bg-primary text-primary-foreground',
+    progressBar: 'bg-primary',
     text: '루틴',
   },
   meal: {
-    iconBg: 'bg-meal text-meal-foreground',
-    progressBar: 'bg-meal',
+    iconBg: 'bg-primary text-primary-foreground',
+    progressBar: 'bg-primary',
     text: '식단',
   },
 } as const;
@@ -43,7 +43,7 @@ export function ChatProgressIndicator({
       >
         <Loader2 className="w-4 h-4 animate-spin" />
       </div>
-      <div className="flex-1 bg-card border border-border rounded-2xl rounded-tl-md px-4 py-3">
+      <div className="flex-1 bg-muted/30 rounded-2xl rounded-tl-md px-4 py-3">
         <p className="text-sm font-medium text-foreground mb-2">
           {styles.text} 생성 중... {progress}%
         </p>

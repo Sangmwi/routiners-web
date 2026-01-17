@@ -1,6 +1,6 @@
 'use client';
 
-import { Dumbbell, Utensils } from 'lucide-react';
+import { Zap, Utensils } from 'lucide-react';
 import RoutineSummaryCard from './RoutineSummaryCard';
 import type { RoutineEvent } from '@/lib/types/routine';
 
@@ -62,7 +62,7 @@ export default function RoutineSummarySection({
           subtitle={workoutSubtitle}
           progress={workoutProgress}
           status={workoutEvent?.status}
-          icon={<Dumbbell className="w-6 h-6" />}
+          icon={<Zap className="w-6 h-6" />}
           onClick={onNavigateToWorkout}
           isLoading={isLoadingWorkout}
           isEmpty={!workoutEvent}

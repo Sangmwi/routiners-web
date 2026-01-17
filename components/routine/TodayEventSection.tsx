@@ -2,8 +2,9 @@
 
 import { useRouter } from 'next/navigation';
 import { RoutineEvent } from '@/lib/types/routine';
-import { Check, SkipForward, Dumbbell, Play, ChevronRight } from 'lucide-react';
+import { Check, SkipForward, Play, ChevronRight } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import { getEventIcon, getStatusConfig } from '@/lib/config/eventTheme';
 
 interface TodayEventSectionProps {
   event: RoutineEvent | null;
@@ -44,9 +45,14 @@ export default function TodayEventSection({
       <div className="bg-card border border-border rounded-xl p-6">
         <h2 className="text-lg font-bold text-foreground mb-4">오늘의 운동</h2>
         <div className="text-center py-6">
-          <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center mb-3">
-            <Dumbbell className="w-8 h-8 text-muted-foreground" />
-          </div>
+          {(() => {
+            const Icon = getEventIcon('workout');
+            return (
+              <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center mb-3">
+                <Icon className="w-8 h-8 text-muted-foreground" />
+              </div>
+            );
+          })()}
           <p className="text-muted-foreground mb-4">
             오늘 예정된 운동이 없습니다.
           </p>
@@ -108,7 +114,10 @@ export default function TodayEventSection({
             ) : event.status === 'skipped' ? (
               <SkipForward className="w-7 h-7 text-muted-foreground" />
             ) : (
-              <Dumbbell className="w-7 h-7 text-primary" />
+              (() => {
+                const Icon = getEventIcon('workout');
+                return <Icon className="w-7 h-7 text-primary" />;
+              })()
             )}
           </div>
 

@@ -46,7 +46,7 @@ export default function RoutineSection({
   const config = typeConfig[type];
 
   return (
-    <section className="space-y-3">
+    <section className="space-y-4">
       <SectionHeader
         title={config.title}
         action={{

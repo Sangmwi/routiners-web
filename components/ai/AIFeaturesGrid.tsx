@@ -26,7 +26,7 @@ const FEATURES: Feature[] = [
     icon: Target,
     title: '맞춤 추천',
     description: '당신의 목표에 맞는 운동을 추천합니다',
-    color: 'text-workout',
+    color: 'text-primary',
   },
   {
     icon: Trophy,

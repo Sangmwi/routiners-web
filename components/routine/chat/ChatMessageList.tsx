@@ -145,14 +145,14 @@ export default function ChatMessageList({
 
   return (
     <div className="flex-1 min-h-0 overflow-y-auto p-4">
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5">
         {messages.map((message, index) => (
           <div key={message.id}>
             <ChatMessage message={message} />
 
             {/* 마지막 사용자 메시지 바로 다음에 도구 상태 표시 */}
             {index === lastUserMessageIndex && toolHistory.length > 0 && (
-              <div className="mt-2 ml-1">
+              <div className="mt-6 ml-2">
                 <ToolStatusIndicator tools={toolHistory} />
               </div>
             )}

@@ -19,26 +19,20 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       className={`flex gap-3 ${isAssistant ? 'flex-row' : 'flex-row-reverse'}`}
     >
       {/* 아바타 */}
-      <div
-        className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-          isAssistant
-            ? 'bg-primary text-primary-foreground'
-            : 'bg-muted text-muted-foreground'
-        }`}
+      {isAssistant && (
+        <div
+        className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-primary text-primary-foreground"
       >
-        {isAssistant ? (
-          <Bot className="w-4 h-4" />
-        ) : (
-          <User className="w-4 h-4" />
-        )}
+        <Bot className="w-4 h-4" />
       </div>
+      )}
 
       {/* 메시지 버블 */}
       <div
         className={`max-w-[80%] px-4 py-3 rounded-2xl ${
           isAssistant
-            ? 'bg-card border border-border rounded-tl-md'
-            : 'bg-primary text-primary-foreground rounded-tr-md'
+            ? 'bg-muted/40 rounded-tl-none'
+            : 'bg-primary text-primary-foreground rounded-tr-none'
         }`}
       >
         {isAssistant ? (

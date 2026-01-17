@@ -2,7 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { RoutineEvent, WorkoutExercise } from '@/lib/types/routine';
-import { Check, SkipForward, Dumbbell, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
+import { getEventIcon, getStatusConfig } from '@/lib/config/eventTheme';
 
 interface DayEventCardProps {
   event: RoutineEvent | null;
@@ -25,44 +26,26 @@ export default function DayEventCard({ event, date }: DayEventCardProps) {
   // 이벤트 없음
   if (!event) {
     return (
-      <div className="bg-card border border-border rounded-xl p-4">
+      <div className="bg-muted/30 rounded-xl p-5">
         <p className="text-sm text-muted-foreground mb-1">{formattedDate}</p>
         <p className="text-foreground">예정된 운동이 없습니다.</p>
       </div>
     );
   }
 
-  const statusConfig = {
-    scheduled: {
-      label: '예정',
-      color: 'bg-amber-500',
-      icon: null,
-    },
-    completed: {
-      label: '완료',
-      color: 'bg-primary',
-      icon: Check,
-    },
-    skipped: {
-      label: '건너뜀',
-      color: 'bg-muted-foreground',
-      icon: SkipForward,
-    },
-  };
-
-  const status = statusConfig[event.status];
+  const status = getStatusConfig(event.status);
   const StatusIcon = status.icon;
 
   return (
     <button
       onClick={() => router.push(`/routine/${date}`)}
-      className="w-full bg-card border border-border rounded-xl p-4 text-left hover:shadow-md transition-shadow"
+      className="w-full bg-card rounded-xl p-5 text-left hover:bg-muted/50 transition-colors"
     >
       {/* 상단: 날짜 + 상태 */}
       <div className="flex items-center justify-between mb-3">
         <p className="text-sm text-muted-foreground">{formattedDate}</p>
         <span
-          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-white ${status.color}`}
+          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${status.badgeClass}`}
         >
           {StatusIcon && <StatusIcon className="w-3 h-3" />}
           {status.label}
@@ -71,9 +54,14 @@ export default function DayEventCard({ event, date }: DayEventCardProps) {
 
       {/* 제목 */}
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-          <Dumbbell className="w-5 h-5 text-primary" />
-        </div>
+        {(() => {
+          const Icon = getEventIcon(event.type);
+          return (
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Icon className="w-5 h-5 text-primary" />
+            </div>
+          );
+        })()}
         <div className="flex-1 min-w-0">
           <h3 className="text-base font-semibold text-foreground truncate">
             {event.title}
@@ -89,7 +77,7 @@ export default function DayEventCard({ event, date }: DayEventCardProps) {
 
       {/* 운동 정보 요약 */}
       {event.data && event.data.exercises.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-border">
+        <div className="mt-4">
           <p className="text-sm text-muted-foreground">
             {event.data.exercises.length}개 운동 •{' '}
             {getTotalSets(event.data.exercises)}세트

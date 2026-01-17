@@ -27,15 +27,7 @@ export default function CalendarHeader({
 
   return (
     <div className="flex items-center justify-between py-4">
-      <div className="flex items-center gap-2">
-        <h2 className="text-xl font-bold text-foreground">{monthName}</h2>
-        <button
-          onClick={onToday}
-          className="px-2 py-1 text-xs font-medium text-primary bg-primary/10 rounded-md hover:bg-primary/20 transition-colors"
-        >
-          오늘
-        </button>
-      </div>
+      <h2 className="text-xl font-bold text-foreground">{monthName}</h2>
       <div className="flex items-center gap-1">
         <button
           onClick={onPrevMonth}

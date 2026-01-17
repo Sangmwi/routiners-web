@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Dumbbell, Calendar, Clock, Check, Edit2, AlertTriangle } from 'lucide-react';
+import { ChevronDown, ChevronRight, Calendar, Clock, Check, Edit2, AlertTriangle } from 'lucide-react';
 import type { RoutinePreviewData, RoutinePreviewWeek, RoutinePreviewDay } from '@/lib/types/fitness';
+import { getEventIcon } from '@/lib/config/eventTheme';
 
 interface ChatRoutinePreviewProps {
   /** 루틴 미리보기 데이터 */
@@ -62,10 +63,10 @@ function WeekCard({ week, defaultOpen = false }: { week: RoutinePreviewWeek; def
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="border border-border rounded-lg overflow-hidden">
+    <div className="bg-muted/20 rounded-lg overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-3 bg-muted/30 hover:bg-muted/50 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:bg-muted/40 transition-colors"
       >
         <span className="text-sm font-medium">
           {week.weekNumber}주차
@@ -116,11 +117,14 @@ export default function ChatRoutinePreview({
   };
 
   return (
-    <div className="my-4 mx-1 rounded-xl border border-border bg-card overflow-hidden">
+    <div className="my-4 mx-1 rounded-xl bg-card overflow-hidden">
       {/* 헤더 */}
-      <div className="p-4 border-b border-border bg-muted/30">
+      <div className="p-4 bg-muted/20">
         <div className="flex items-center gap-2 mb-1">
-          <Dumbbell className="w-5 h-5 text-primary" />
+          {(() => {
+            const Icon = getEventIcon('workout');
+            return <Icon className="w-5 h-5 text-primary" />;
+          })()}
           <h3 className="font-semibold text-foreground">{preview.title}</h3>
         </div>
         <p className="text-sm text-muted-foreground">{preview.description}</p>
@@ -151,14 +155,14 @@ export default function ChatRoutinePreview({
       )}
 
       {/* 주차별 목록 */}
-      <div className="p-4 space-y-2 max-h-[400px] overflow-y-auto">
+      <div className="p-4 space-y-3 max-h-[400px] overflow-y-auto">
         {preview.weeks.map((week, idx) => (
           <WeekCard key={week.weekNumber} week={week} defaultOpen={idx === 0} />
         ))}
       </div>
 
       {/* 액션 버튼 */}
-      <div className="p-4 border-t border-border bg-muted/20">
+      <div className="p-4 bg-muted/10">
         {!showRevisionInput ? (
           <div className="flex gap-2">
             <button

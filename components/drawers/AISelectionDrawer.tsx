@@ -1,6 +1,6 @@
 'use client';
 
-import { Dumbbell, Utensils, Loader2 } from 'lucide-react';
+import { Zap, Utensils, Loader2 } from 'lucide-react';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import type { ModalDataMap } from '@/lib/stores/modalStore';
 
@@ -61,17 +61,17 @@ export default function AISelectionDrawer({
             {/* 운동 루틴 */}
             <button
               onClick={() => handleSelect('workout')}
-              className="w-full p-4 rounded-xl border-2 border-border bg-card hover:border-workout/50 hover:bg-workout/5 transition-all text-left active:scale-[0.99]"
+              className="w-full p-4 rounded-xl border-2 border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition-all text-left active:scale-[0.99]"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-workout/10 flex items-center justify-center shrink-0">
-                  <Dumbbell className="w-6 h-6 text-workout" />
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Zap className="w-6 h-6 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-foreground">운동 루틴</h3>
                     {data.workoutSessionActive && (
-                      <span className="px-2 py-0.5 text-xs rounded-full bg-workout/10 text-workout font-medium">
+                      <span className="px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary font-medium">
                         진행중
                       </span>
                     )}
@@ -86,17 +86,17 @@ export default function AISelectionDrawer({
             {/* 식단 관리 */}
             <button
               onClick={() => handleSelect('meal')}
-              className="w-full p-4 rounded-xl border-2 border-border bg-card hover:border-meal/50 hover:bg-meal/5 transition-all text-left active:scale-[0.99]"
+              className="w-full p-4 rounded-xl border-2 border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition-all text-left active:scale-[0.99]"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-meal/10 flex items-center justify-center shrink-0">
-                  <Utensils className="w-6 h-6 text-meal" />
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Utensils className="w-6 h-6 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-foreground">식단 관리</h3>
                     {data.mealSessionActive && (
-                      <span className="px-2 py-0.5 text-xs rounded-full bg-meal/10 text-meal font-medium">
+                      <span className="px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary font-medium">
                         진행중
                       </span>
                     )}

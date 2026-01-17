@@ -1,8 +1,9 @@
 'use client';
 
-import { Check, Utensils } from 'lucide-react';
+import { Check } from 'lucide-react';
 import type { AppliedRoutineMetadata, SessionPurpose } from '@/lib/types/chat';
 import type { RoutineAppliedEvent, MealPlanAppliedEvent } from '@/lib/api/conversation';
+import { getEventIcon } from '@/lib/config/eventTheme';
 
 interface ChatCompletedBannerProps {
   /** 세션 목적 (workout | meal) */
@@ -27,16 +28,14 @@ export default function ChatCompletedBanner({
   const isMeal = purpose === 'meal';
   const appliedData = isMeal ? appliedMealPlan : appliedRoutine;
 
-  const Icon = isMeal ? Utensils : Check;
+  const Icon = isMeal ? getEventIcon('meal') : Check;
 
   return (
     <div className="p-4 border-t border-border/50 bg-card/80 backdrop-blur-md">
       <div className="flex flex-col items-center text-center">
         {/* 아이콘 */}
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
-          isMeal ? 'bg-meal/10' : 'bg-primary/10'
-        }`}>
-          <Icon className={`w-5 h-5 ${isMeal ? 'text-meal' : 'text-primary'}`} />
+        <div className="w-10 h-10 rounded-full flex items-center justify-center mb-2 bg-primary/10">
+          <Icon className="w-5 h-5 text-primary" />
         </div>
 
         {/* 타이틀 */}
@@ -54,11 +53,7 @@ export default function ChatCompletedBanner({
         {/* CTA 버튼 */}
         <button
           onClick={onNavigateToCalendar}
-          className={`mt-3 w-full py-2.5 rounded-xl text-sm font-medium transition-all active:scale-[0.98] ${
-            isMeal
-              ? 'bg-meal text-meal-foreground hover:bg-meal/90'
-              : 'bg-primary text-primary-foreground hover:bg-primary/90'
-          }`}
+          className="mt-3 w-full py-2.5 rounded-xl text-sm font-medium transition-all active:scale-[0.98] bg-primary text-primary-foreground hover:bg-primary/90"
         >
           캘린더에서 확인
         </button>

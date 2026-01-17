@@ -28,9 +28,9 @@ const DAY_NAMES = ['', '월', '화', '수', '목', '금', '토', '일'];
  */
 function MealCard({ meal }: { meal: MealPreviewMeal }) {
   return (
-    <div className="bg-meal/5 rounded-lg p-2">
+    <div className="bg-primary/5 rounded-lg p-2">
       <div className="flex items-center gap-2 mb-1.5">
-        <span className="text-xs font-medium text-meal">
+        <span className="text-xs font-medium text-primary">
           {MEAL_TYPE_LABELS[meal.type]}
         </span>
         {meal.time && (
@@ -55,7 +55,7 @@ function MealCard({ meal }: { meal: MealPreviewMeal }) {
             <span className="truncate">{food.name}</span>
             <span className="text-muted-foreground/60 shrink-0 ml-2">
               {food.portion}
-              {food.protein && <span className="text-meal ml-1">P{food.protein}g</span>}
+              {food.protein && <span className="text-primary ml-1">P{food.protein}g</span>}
             </span>
           </div>
         ))}
@@ -69,7 +69,7 @@ function MealCard({ meal }: { meal: MealPreviewMeal }) {
  */
 function DayCard({ day }: { day: MealPreviewDay }) {
   return (
-    <div className="pl-4 py-2 border-l-2 border-meal/30">
+    <div className="pl-4 py-2 border-l-2 border-primary/30">
       <div className="flex items-center gap-2 mb-2">
         <span className="text-sm font-medium text-foreground">
           {DAY_NAMES[day.dayOfWeek]}요일
@@ -100,10 +100,10 @@ function WeekCard({ week, defaultOpen = false }: { week: MealPreviewWeek; defaul
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="border border-border rounded-lg overflow-hidden">
+    <div className="bg-muted/20 rounded-lg overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-3 bg-meal/5 hover:bg-meal/10 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:bg-primary/10 transition-colors"
       >
         <span className="text-sm font-medium">
           {week.weekNumber}주차
@@ -154,11 +154,11 @@ export default function ChatMealPreview({
   };
 
   return (
-    <div className="my-4 mx-1 rounded-xl border border-meal/30 bg-card overflow-hidden">
+    <div className="my-4 mx-1 rounded-xl bg-card overflow-hidden">
       {/* 헤더 */}
-      <div className="p-4 border-b border-border bg-meal/5">
+      <div className="p-4 border-b border-border bg-primary/5">
         <div className="flex items-center gap-2 mb-1">
-          <Utensils className="w-5 h-5 text-meal" />
+          <Utensils className="w-5 h-5 text-primary" />
           <h3 className="font-semibold text-foreground">{preview.title}</h3>
         </div>
         <p className="text-sm text-muted-foreground">{preview.description}</p>
@@ -196,14 +196,14 @@ export default function ChatMealPreview({
       )}
 
       {/* 주차별 목록 */}
-      <div className="p-4 space-y-2 max-h-[400px] overflow-y-auto">
+      <div className="p-4 space-y-3 max-h-[400px] overflow-y-auto">
         {preview.weeks.map((week, idx) => (
           <WeekCard key={week.weekNumber} week={week} defaultOpen={idx === 0} />
         ))}
       </div>
 
       {/* 액션 버튼 */}
-      <div className="p-4 border-t border-border bg-meal/5">
+      <div className="p-4 bg-muted/10">
         {!showRevisionInput ? (
           <div className="flex gap-2">
             <button
@@ -220,7 +220,7 @@ export default function ChatMealPreview({
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
                 hasConflicts
                   ? 'bg-amber-500 text-white hover:bg-amber-600'
-                  : 'bg-meal text-meal-foreground hover:opacity-90'
+                  : 'bg-primary text-primary-foreground hover:opacity-90'
               }`}
             >
               {isApplying ? (
@@ -249,7 +249,7 @@ export default function ChatMealPreview({
                 onChange={(e) => setRevisionText(e.target.value)}
                 placeholder="수정하고 싶은 내용을 알려주세요... (예: 단백질을 더 추가해줘)"
                 rows={2}
-                className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-meal/50"
+                className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
             <div className="flex gap-2">
@@ -265,7 +265,7 @@ export default function ChatMealPreview({
               <button
                 onClick={handleRevisionSubmit}
                 disabled={!revisionText.trim()}
-                className="flex-1 px-4 py-2 rounded-lg text-sm font-medium bg-meal text-meal-foreground hover:opacity-90 transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-2 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:opacity-90 transition-colors disabled:opacity-50"
               >
                 수정 요청
               </button>

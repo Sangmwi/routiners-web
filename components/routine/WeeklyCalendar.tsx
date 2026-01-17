@@ -1,8 +1,9 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { CalendarEventSummary } from '@/lib/types/routine';
-import { Check, SkipForward, ChevronRight } from 'lucide-react';
+import { CalendarEventSummary, EventType } from '@/lib/types/routine';
+import { ChevronRight } from 'lucide-react';
+import { getStatusConfig, getEventIcon, EventStatus } from '@/lib/config/eventTheme';
 
 interface WeeklyCalendarProps {
   events: CalendarEventSummary[];
@@ -69,16 +70,16 @@ export default function WeeklyCalendar({
               onClick={() => handleDayClick(day.date)}
               className={`
                 flex flex-col items-center py-2 rounded-lg transition-all
-                ${isSelected ? 'bg-primary text-primary-foreground' : ''}
-                ${day.isToday && !isSelected ? 'ring-2 ring-primary ring-inset' : ''}
-                ${!isSelected ? 'hover:bg-muted' : ''}
+                ${isSelected ? 'bg-foreground/10' : ''}
+                ${day.isToday && !isSelected ? 'ring-2 ring-foreground/30 ring-inset' : ''}
+                ${!isSelected ? 'hover:bg-muted/50' : ''}
               `}
             >
               {/* 요일 */}
               <span
                 className={`text-xs font-medium mb-1 ${
                   isSelected
-                    ? 'text-primary-foreground'
+                    ? 'text-foreground'
                     : day.isPast
                       ? 'text-muted-foreground'
                       : 'text-muted-foreground'
@@ -91,7 +92,7 @@ export default function WeeklyCalendar({
               <span
                 className={`text-sm font-semibold mb-1 ${
                   isSelected
-                    ? 'text-primary-foreground'
+                    ? 'text-foreground'
                     : day.isPast
                       ? 'text-muted-foreground'
                       : 'text-foreground'
@@ -104,6 +105,7 @@ export default function WeeklyCalendar({
               <div className="h-4 flex items-center justify-center">
                 {hasEvent && (
                   <EventIndicator
+                    type={day.event!.type}
                     status={day.event!.status}
                     isSelected={isSelected}
                   />
@@ -118,32 +120,32 @@ export default function WeeklyCalendar({
 }
 
 function EventIndicator({
+  type,
   status,
   isSelected,
 }: {
-  status: 'scheduled' | 'completed' | 'skipped';
+  type: EventType;
+  status: EventStatus;
   isSelected: boolean;
 }) {
-  if (status === 'completed') {
-    return (
-      <Check
-        className={`w-3.5 h-3.5 ${isSelected ? 'text-primary-foreground' : 'text-primary'}`}
-      />
-    );
+  const config = getStatusConfig(status);
+  const StatusIcon = config.icon;
+
+  // 아이콘이 있는 경우 (completed, skipped)
+  if (StatusIcon) {
+    const iconColor = isSelected
+      ? 'text-foreground'
+      : status === 'completed'
+        ? 'text-primary'
+        : 'text-muted-foreground';
+    return <StatusIcon className={`w-3.5 h-3.5 ${iconColor}`} />;
   }
 
-  if (status === 'skipped') {
-    return (
-      <SkipForward
-        className={`w-3.5 h-3.5 ${isSelected ? 'text-primary-foreground' : 'text-muted-foreground'}`}
-      />
-    );
-  }
-
-  // scheduled
+  // scheduled - 타입별 아이콘 표시
+  const TypeIcon = getEventIcon(type);
   return (
-    <span
-      className={`w-2 h-2 rounded-full ${isSelected ? 'bg-primary-foreground' : 'bg-amber-500'}`}
+    <TypeIcon
+      className={`w-3.5 h-3.5 ${isSelected ? 'text-foreground' : 'text-amber-500'}`}
     />
   );
 }

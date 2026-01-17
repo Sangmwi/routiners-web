@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { WorkoutExercise } from '@/lib/types/routine';
-import { ChevronDown, ChevronUp, Dumbbell } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { getEventIcon } from '@/lib/config/eventTheme';
 
 interface ExerciseCardProps {
   exercise: WorkoutExercise;
@@ -22,8 +23,8 @@ export default function ExerciseCard({
 
   return (
     <div
-      className={`bg-card border rounded-xl overflow-hidden ${
-        isCompleted ? 'border-primary/30 bg-primary/5' : 'border-border'
+      className={`rounded-xl overflow-hidden ${
+        isCompleted ? 'bg-primary/5' : 'bg-muted/30'
       }`}
     >
       {/* 헤더 */}
@@ -59,7 +60,7 @@ export default function ExerciseCard({
 
       {/* 상세 정보 */}
       {isExpanded && (
-        <div className="px-4 pb-4 space-y-3">
+        <div className="px-4 pb-4 space-y-4">
           {/* 세트 목록 */}
           <div className="bg-muted/50 rounded-lg p-3 space-y-2">
             <div className="grid grid-cols-4 gap-2 text-xs text-muted-foreground font-medium">
@@ -92,7 +93,10 @@ export default function ExerciseCard({
           {/* 추가 정보 */}
           {exercise.notes && (
             <div className="flex items-start gap-2 text-sm">
-              <Dumbbell className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+              {(() => {
+                const Icon = getEventIcon('workout');
+                return <Icon className="w-4 h-4 text-primary shrink-0 mt-0.5" />;
+              })()}
               <p className="text-muted-foreground">{exercise.notes}</p>
             </div>
           )}
