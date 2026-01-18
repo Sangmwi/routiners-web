@@ -49,7 +49,7 @@ export default function MealDetailPage({ params }: MealDetailPageProps) {
   const showError = useShowError();
 
   // 식단 이벤트 조회
-  const { data: event, isLoading, error } = useRoutineEventByDate(date, 'meal');
+  const { data: event, isPending, error } = useRoutineEventByDate(date, 'meal');
 
   // 완료/건너뛰기 뮤테이션
   const completeEvent = useCompleteRoutineEvent();
@@ -83,7 +83,7 @@ export default function MealDetailPage({ params }: MealDetailPageProps) {
   const eventConfig = getEventConfig('meal');
 
   // 로딩 상태
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <LoadingSpinner size="xl" />

@@ -92,7 +92,7 @@ function SaveButton({ onClick, disabled, isSaving }: SaveButtonProps) {
 export default function ProfileEditPage() {
   const {
     user,
-    isLoading,
+    isPending,
     error,
     formData,
     updateFormField,
@@ -106,7 +106,7 @@ export default function ProfileEditPage() {
   const progress = useProfileProgress(user);
 
   // Loading state
-  if (isLoading) {
+  if (isPending) {
     return <LoadingState />;
   }
 

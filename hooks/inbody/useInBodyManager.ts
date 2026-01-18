@@ -21,7 +21,7 @@ interface UseInBodyManagerReturn {
   // Data
   records: InBodyRecord[];
   summary: ReturnType<typeof useInBodySummary>['data'];
-  isLoading: boolean;
+  isPending: boolean;
 
   // View State
   currentView: ManagerView;
@@ -88,12 +88,12 @@ export function useInBodyManager(
   // ========== Data Fetching ==========
   const {
     data: records = [],
-    isLoading: isRecordsLoading
+    isPending: isRecordsPending
   } = useInBodyRecords(initialLimit, 0);
 
   const {
     data: summary,
-    isLoading: isSummaryLoading
+    isPending: isSummaryPending
   } = useInBodySummary();
 
   const deleteInBody = useDeleteInBody();
@@ -226,14 +226,14 @@ export function useInBodyManager(
   };
 
   // ========== Computed State ==========
-  const isLoading = isRecordsLoading || isSummaryLoading;
+  const isPending = isRecordsPending || isSummaryPending;
 
   // ========== Return ==========
   return {
     // Data
     records,
     summary,
-    isLoading,
+    isPending,
 
     // View State
     currentView,

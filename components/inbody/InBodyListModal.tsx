@@ -22,7 +22,7 @@ export default function InBodyListModal({
   onSelect,
   onAddNew,
 }: InBodyListModalProps) {
-  const { data: records = [], isLoading } = useInBodyRecords(50, 0, {
+  const { data: records = [], isPending: isLoading } = useInBodyRecords(50, 0, {
     enabled: isOpen,
   });
 

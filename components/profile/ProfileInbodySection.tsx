@@ -35,7 +35,7 @@ export default function ProfileInbodySection({
   });
 
   // 사용할 데이터 선택
-  const { data: summary, isLoading } = isOwnProfile ? ownSummaryQuery : otherSummaryQuery;
+  const { data: summary, isPending: isLoading } = isOwnProfile ? ownSummaryQuery : otherSummaryQuery;
 
   // 비공개 여부 (API 응답에서 확인)
   const isPrivate = summary?.isPrivate ?? !showInbodyPublic;

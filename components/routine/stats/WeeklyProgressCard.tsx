@@ -11,10 +11,10 @@ import { useWeeklyStats } from '@/hooks/routine';
  * 클릭 시 /routine/stats로 이동
  */
 export default function WeeklyProgressCard() {
-  const { data: stats, isLoading } = useWeeklyStats();
+  const { data: stats, isPending } = useWeeklyStats();
 
   // 로딩 스켈레톤 (실제 카드와 동일한 구조)
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="bg-card border border-border rounded-xl p-4">
         <div className="flex items-center justify-between">

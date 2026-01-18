@@ -108,7 +108,7 @@ export function useWeeklyStats(dateStr?: string) {
   const { startDate, endDate, weekLabel } = getWeekRange(baseDate);
 
   // 주간 이벤트 조회
-  const { data: events, isLoading, error } = useRoutineEvents({
+  const { data: events, isPending, error } = useRoutineEvents({
     startDate,
     endDate,
   });
@@ -206,7 +206,7 @@ export function useWeeklyStats(dateStr?: string) {
 
   return {
     data: stats,
-    isLoading,
+    isPending,
     error,
   };
 }

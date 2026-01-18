@@ -11,10 +11,10 @@ import { LoadingSpinner } from '@/components/ui/icons';
  * 운동/식단 달성률 + 일별 현황 표시
  */
 export default function WeeklyStatsPage() {
-  const { data: stats, isLoading, error } = useWeeklyStats();
+  const { data: stats, isPending, error } = useWeeklyStats();
 
   // 로딩 상태
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="min-h-screen bg-background">
         <PageHeader title="주간 통계" />

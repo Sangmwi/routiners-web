@@ -102,7 +102,7 @@ export default function InBodyManagePage() {
     // Data
     records,
     summary,
-    isLoading,
+    isPending,
 
     // View State
     currentView,
@@ -144,7 +144,7 @@ export default function InBodyManagePage() {
 
   // ========== Render ==========
 
-  if (isLoading) {
+  if (isPending) {
     return <PageSkeleton />;
   }
 

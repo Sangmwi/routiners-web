@@ -17,9 +17,9 @@ export default function RoutinePage() {
   const today = new Date();
 
   // 과거 7일 + 오늘 + 미래 14일 이벤트 조회
-  const { data: workoutEvents = [], isLoading: isLoadingWorkout } =
+  const { data: workoutEvents = [], isPending: isLoadingWorkout } =
     useUpcomingEvents('workout', 7, 14);
-  const { data: mealEvents = [], isLoading: isLoadingMeal } =
+  const { data: mealEvents = [], isPending: isLoadingMeal } =
     useUpcomingEvents('meal', 7, 14);
 
   // 활성 AI 세션 확인

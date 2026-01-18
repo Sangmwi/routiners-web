@@ -76,7 +76,7 @@ export function useChatPage(
 
   const {
     data: session,
-    isLoading: isLoadingSession,
+    isPending: isLoadingSession,
     error: sessionError,
   } = useAISessionWithMessages(sessionId ?? undefined, {
     enabled: !!sessionId,

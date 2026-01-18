@@ -43,7 +43,7 @@ export default function InBodyVisibilitySettings({
   onSaveSuccess,
   onSaveError,
 }: InBodyVisibilitySettingsProps) {
-  const { data: user, isLoading: isUserLoading } = useCurrentUserProfile();
+  const { data: user, isPending: isUserLoading } = useCurrentUserProfile();
   const updateProfile = useUpdateProfile();
 
   // Local state for immediate UI feedback

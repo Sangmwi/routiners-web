@@ -38,7 +38,7 @@ export default function ChatMenuDrawer({
   isStreaming,
 }: ChatMenuDrawerProps) {
   // 모든 AI 세션 조회 (활성 + 완료, 최근 15개)
-  const { data: sessions, isLoading } = useAISessions(
+  const { data: sessions, isPending: isLoading } = useAISessions(
     { limit: 15 },
     { enabled: isOpen }
   );

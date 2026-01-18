@@ -21,7 +21,7 @@ import {
 export interface UseProfileEditReturn {
   // User data
   user: ReturnType<typeof useCurrentUserProfile>['data'];
-  isLoading: boolean;
+  isPending: boolean;
   error: ReturnType<typeof useCurrentUserProfile>['error'];
 
   // Form state
@@ -83,7 +83,7 @@ export function useProfileEdit(): UseProfileEditReturn {
 
   // ========== Data Fetching ==========
 
-  const { data: user, isLoading, error } = useCurrentUserProfile();
+  const { data: user, isPending, error } = useCurrentUserProfile();
   const updateProfile = useUpdateProfile();
 
   // ========== Form State ==========
@@ -226,7 +226,7 @@ export function useProfileEdit(): UseProfileEditReturn {
   return {
     // User data
     user,
-    isLoading,
+    isPending,
     error,
 
     // Form state

@@ -39,7 +39,7 @@ export default function RoutineCalendarPage() {
   const [selectedDate, setSelectedDate] = useState<string>(formatDate(today));
 
   // 캘린더 이벤트 조회
-  const { data: calendarEvents = [], isLoading: isLoadingCalendar } =
+  const { data: calendarEvents = [], isPending: isLoadingCalendar } =
     useCalendarEvents(year, month);
 
   // 필터링된 캘린더 이벤트
@@ -49,11 +49,11 @@ export default function RoutineCalendarPage() {
       : calendarEvents.filter((event) => event.type === filterType);
 
   // 선택된 날짜의 운동 이벤트
-  const { data: workoutEvent, isLoading: isLoadingWorkout } =
+  const { data: workoutEvent, isPending: isLoadingWorkout } =
     useRoutineEventByDate(selectedDate, 'workout');
 
   // 선택된 날짜의 식단 이벤트
-  const { data: mealEvent, isLoading: isLoadingMeal } =
+  const { data: mealEvent, isPending: isLoadingMeal } =
     useRoutineEventByDate(selectedDate, 'meal');
 
   // 필터에 맞는 이벤트 선택

@@ -159,7 +159,7 @@ function TagInput({ value, onChange, placeholder }: TagInputProps) {
 
 export default function FitnessProfilePage() {
   const router = useRouter();
-  const { data: profile, isLoading, error, refetch } = useFitnessProfile();
+  const { data: profile, isPending, error, refetch } = useFitnessProfile();
   const updateProfile = useUpdateFitnessProfile();
 
   // Form state
@@ -237,7 +237,7 @@ export default function FitnessProfilePage() {
   };
 
   // Loading state
-  if (isLoading) {
+  if (isPending) {
     return <PageSkeleton />;
   }
 

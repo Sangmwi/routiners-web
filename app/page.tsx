@@ -141,7 +141,7 @@ const DUMMY_INFLUENCERS: Influencer[] = [
 ];
 
 export default function Home() {
-  const { data: user, isLoading, error, refetch } = useCurrentUserProfile();
+  const { data: user, isPending, error, refetch } = useCurrentUserProfile();
 
   const handleViewHealthDetails = () => {
     // TODO: 건강 점수 상세 페이지로 이동
@@ -168,7 +168,7 @@ export default function Home() {
     console.log('인플루언서 클릭:', influencerId);
   };
 
-  if (isLoading) {
+  if (isPending) {
     return <PageSkeleton />;
   }
 

@@ -29,7 +29,7 @@ export default function InBodyManageModal({
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const showError = useShowError();
 
-  const { data: records = [], isLoading } = useInBodyRecords(50, 0, {
+  const { data: records = [], isPending: isLoading } = useInBodyRecords(50, 0, {
     enabled: isOpen,
   });
 

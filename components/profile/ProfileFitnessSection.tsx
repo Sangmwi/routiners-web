@@ -22,7 +22,7 @@ import { FitnessDetailDrawer } from '@/components/drawers';
  * 태그 형태로 요약 정보 표시 + "자세히 보기" 버튼으로 상세 모달
  */
 export default function ProfileFitnessSection() {
-  const { data: profile, isLoading } = useFitnessProfile();
+  const { data: profile, isPending: isLoading } = useFitnessProfile();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const hasData = hasFitnessProfileData(profile);

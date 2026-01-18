@@ -17,11 +17,11 @@ import { SignOutIcon, UserMinusIcon, SpinnerGapIcon } from '@phosphor-icons/reac
 import { PageSkeleton } from '@/components/ui/Skeleton';
 
 export default function ProfilePage() {
-  const { data: user, isLoading, error, refetch } = useCurrentUserProfile();
+  const { data: user, isPending, error, refetch } = useCurrentUserProfile();
   const { logout, isLoggingOut } = useLogout();
   const { withdraw, isWithdrawing } = useWithdrawal();
 
-  if (isLoading) {
+  if (isPending) {
     return <PageSkeleton />;
   }
 
