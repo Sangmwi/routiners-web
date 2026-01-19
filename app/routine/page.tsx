@@ -4,6 +4,7 @@ import MainTabLayout from '@/components/common/MainTabLayout';
 import { RoutineSection, FloatingAIButton, WeeklyProgressCard } from '@/components/routine';
 import { useUpcomingEvents } from '@/hooks/routine';
 import { useActiveAISession } from '@/hooks/aiChat';
+import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 
 /**
  * 루틴 탭 메인 페이지 (섹션 기반 v2)
@@ -32,7 +33,7 @@ export default function RoutinePage() {
       <div>
         <h1 className="text-2xl font-bold text-foreground">내 루틴</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {formatDisplayDate(today)}
+          {formatKoreanDate(today, { weekday: true })}
         </p>
       </div>
 
@@ -60,13 +61,4 @@ export default function RoutinePage() {
       />
     </MainTabLayout>
   );
-}
-
-function formatDisplayDate(date: Date): string {
-  return date.toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long',
-  });
 }

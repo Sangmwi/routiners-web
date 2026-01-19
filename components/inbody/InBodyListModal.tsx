@@ -6,6 +6,7 @@ import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { InBodyRecord } from '@/lib/types/inbody';
 import { useInBodyRecords } from '@/hooks/inbody';
+import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 
 interface InBodyListModalProps {
   isOpen: boolean;
@@ -80,11 +81,7 @@ function InBodyListItem({
   onClick: () => void;
 }) {
   // 날짜 포맷
-  const formattedDate = new Date(record.measuredAt).toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const formattedDate = formatKoreanDate(record.measuredAt);
 
   return (
     <button

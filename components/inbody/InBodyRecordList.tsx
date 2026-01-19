@@ -4,6 +4,7 @@ import { memo } from 'react';
 import { CalendarIcon } from '@phosphor-icons/react';
 import { NextIcon, LoadingSpinner, DeleteIcon } from '@/components/ui/icons';
 import { InBodyRecord } from '@/lib/types/inbody';
+import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 
 // ============================================================
 // Types
@@ -59,11 +60,7 @@ const RecordItem = memo(function RecordItem({
   onDeleteClick,
   showDeleteButton = true,
 }: RecordItemProps) {
-  const formattedDate = new Date(record.measuredAt).toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const formattedDate = formatKoreanDate(record.measuredAt);
 
   const handleClick = () => {
     onClick?.(record);

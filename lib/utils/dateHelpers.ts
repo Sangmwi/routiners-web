@@ -5,6 +5,62 @@
  */
 
 /**
+ * 한국어 날짜 포맷 옵션
+ */
+export interface FormatKoreanDateOptions {
+  /** 년도 포함 (default: true) */
+  year?: boolean;
+  /** 월 포함 (default: true) */
+  month?: boolean;
+  /** 일 포함 (default: true) */
+  day?: boolean;
+  /** 요일 포함 (default: false) */
+  weekday?: boolean;
+  /** 월 포맷: 'long'='1월', 'short'='1' (default: 'long') */
+  monthFormat?: 'long' | 'short';
+  /** 요일 포맷: 'long'='수요일', 'short'='(수)' (default: 'long') */
+  weekdayFormat?: 'long' | 'short';
+}
+
+/**
+ * 날짜를 한국어 형식으로 포맷
+ *
+ * @param date - Date 객체 또는 YYYY-MM-DD 문자열
+ * @param options - 포맷 옵션
+ * @returns 한국어 날짜 문자열
+ *
+ * @example
+ * formatKoreanDate(new Date()) // "2025년 1월 15일"
+ * formatKoreanDate('2025-01-15', { day: false }) // "2025년 1월"
+ * formatKoreanDate('2025-01-15', { year: false, weekday: true }) // "1월 15일 수요일"
+ * formatKoreanDate('2025-01-15', { year: false, weekday: true, weekdayFormat: 'short' }) // "1월 15일 (수)" 
+ * formatKoreanDate('2025-01-15', { weekday: true }) // "2025년 1월 15일 수요일"
+ */
+export function formatKoreanDate(
+  date: Date | string,
+  options: FormatKoreanDateOptions = {}
+): string {
+  const {
+    year = true,
+    month = true,
+    day = true,
+    weekday = false,
+    monthFormat = 'long',
+    weekdayFormat = 'long'
+  } = options;
+
+  const d = typeof date === 'string' ? new Date(date) : date;
+
+  const parts: Intl.DateTimeFormatOptions = {};
+  if (year) parts.year = 'numeric';
+  if (month) parts.month = monthFormat;
+  if (day) parts.day = 'numeric';
+  if (weekday) parts.weekday = weekdayFormat;
+
+  return d.toLocaleDateString('ko-KR', parts);
+}
+
+/**
  * Date 객체를 YYYY-MM-DD 형식의 문자열로 변환
  *
  * @param date - 변환할 Date 객체

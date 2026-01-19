@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { RoutineEvent, WorkoutExercise, WorkoutData } from '@/lib/types/routine';
 import { CaretRightIcon } from '@phosphor-icons/react';
 import { getEventIcon, getStatusConfig } from '@/lib/config/eventTheme';
+import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 import type { MealData } from '@/lib/types/meal';
 
 /**
@@ -42,11 +43,7 @@ export default function DayEventCard({ event, date }: DayEventCardProps) {
   const router = useRouter();
 
   // 날짜 포맷
-  const formattedDate = new Date(date).toLocaleDateString('ko-KR', {
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long',
-  });
+  const formattedDate = formatKoreanDate(date, { year: false, weekday: true });
 
   // 이벤트 없음
   if (!event) {

@@ -9,6 +9,7 @@ import {
   EQUIPMENT_ACCESS_LABELS,
   FOCUS_AREA_LABELS,
 } from '@/lib/types/fitness';
+import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 
 interface FitnessDetailDrawerProps {
   isOpen: boolean;
@@ -119,12 +120,7 @@ export default function FitnessDetailDrawer({
         {/* 마지막 업데이트 */}
         {profile.updatedAt && (
           <p className="text-xs text-muted-foreground text-center pt-4">
-            마지막 업데이트:{' '}
-            {new Date(profile.updatedAt).toLocaleDateString('ko-KR', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
+            마지막 업데이트: {formatKoreanDate(profile.updatedAt)}
           </p>
         )}
       </ModalBody>

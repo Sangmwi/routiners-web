@@ -14,6 +14,7 @@ import {
   InBodyPreview,
 } from '@/components/inbody';
 import { useInBodyManager } from '@/hooks/inbody';
+import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 
 // ============================================================
 // Sub Components
@@ -148,13 +149,6 @@ export default function InBodyManagePage() {
     return <PageSkeleton />;
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
 
   // 버튼 비활성화 조건: 스캔 중이거나 저장 중
   const isButtonDisabled = scanState === 'scanning' || scanState === 'saving';
@@ -200,7 +194,7 @@ export default function InBodyManagePage() {
               />
             ) : currentView === 'confirm-delete' && recordToDelete ? (
               <DeleteConfirmView
-                recordDate={formatDate(recordToDelete.measuredAt)}
+                recordDate={formatKoreanDate(recordToDelete.measuredAt)}
                 isDeleting={isDeleting}
                 onConfirm={confirmDelete}
                 onCancel={cancelDelete}

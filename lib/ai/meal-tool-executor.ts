@@ -269,28 +269,40 @@ export async function executeCalculateDailyNeeds(
     return { success: false, error: parseResult.error };
   }
 
-  const { activity_level, goal } = parseResult.data;
+  const { activity_level, goal, height_cm, weight_kg, birth_year, gender } = parseResult.data;
 
-  // 사용자 신체 정보 조회
-  const { data: user, error } = await ctx.supabase
+  // DB에서 사용자 신체 정보 조회 (fallback용)
+  const { data: user } = await ctx.supabase
     .from('users')
     .select('height_cm, weight_kg, birth_date, gender')
     .eq('id', ctx.userId)
     .single();
 
-  if (error || !user) {
-    return { success: false, error: '사용자 정보를 찾을 수 없습니다.' };
-  }
+  // 하이브리드 병합: 대화에서 수집한 값 우선, 없으면 DB 값 사용
+  const finalHeight = height_cm ?? user?.height_cm;
+  const finalWeight = weight_kg ?? user?.weight_kg;
+  const finalGender = gender ?? (user?.gender as 'male' | 'female' | null);
+  // birth_year가 제공되면 ISO 문자열로 변환, 아니면 DB의 birth_date 사용
+  const finalBirthDate = birth_year
+    ? `${birth_year}-01-01` // 출생연도 → ISO 문자열
+    : user?.birth_date ?? null;
 
-  if (!user.height_cm || !user.weight_kg || !user.birth_date || !user.gender) {
+  // 부족한 필드 체크 및 구체적 에러 메시지
+  const missing: string[] = [];
+  if (!finalHeight) missing.push('키');
+  if (!finalWeight) missing.push('몸무게');
+  if (!finalBirthDate) missing.push('나이(출생연도)');
+  if (!finalGender) missing.push('성별');
+
+  if (missing.length > 0) {
     return {
       success: false,
-      error: '키, 몸무게, 생년월일, 성별 정보가 필요합니다. 프로필을 먼저 완성해주세요.',
+      error: `다음 정보가 필요합니다: ${missing.join(', ')}. 알려주시거나 프로필을 완성해주세요.`,
     };
   }
 
-  const age = calculateAge(user.birth_date);
-  const bmr = calculateBMR(user.weight_kg, user.height_cm, age, user.gender as 'male' | 'female');
+  const age = calculateAge(finalBirthDate!);
+  const bmr = calculateBMR(finalWeight!, finalHeight!, age, finalGender!);
   const activityMultiplier = ACTIVITY_LEVEL_MULTIPLIERS[activity_level];
   const tdee = Math.round(bmr * activityMultiplier);
 
@@ -317,7 +329,7 @@ export async function executeCalculateDailyNeeds(
   // 매크로 계산 (일반적인 비율 적용)
   // 단백질: 체중 kg당 1.6-2.2g (근육 증가 시 높게)
   const proteinPerKg = goal === 'muscle_gain' ? 2.0 : goal === 'fat_loss' ? 2.2 : 1.6;
-  const targetProtein = Math.round(user.weight_kg * proteinPerKg);
+  const targetProtein = Math.round(finalWeight! * proteinPerKg);
 
   // 지방: 총 칼로리의 25-30%
   const fatCalories = targetCalories * 0.25;
@@ -380,25 +392,45 @@ export function executeGenerateMealPlanPreview(
   const previewId = `meal-preview-${toolCallId}`;
 
   // weeks 데이터를 MealPreviewWeek[] 형태로 변환
+  // totalCalories가 없으면 foods/meals에서 자동 계산
   const weeks: MealPreviewWeek[] = args.weeks.map((week) => ({
     weekNumber: week.weekNumber,
-    days: week.days.map((day): MealPreviewDay => ({
-      dayOfWeek: day.dayOfWeek,
-      meals: day.meals.map((meal): MealPreviewMeal => ({
-        type: meal.type,
-        time: meal.time,
-        foods: meal.foods.map((food) => ({
-          name: food.name,
-          portion: food.portion,
-          calories: food.calories,
-          protein: food.protein,
-          source: food.source,
-        })),
-        totalCalories: meal.totalCalories,
-      })),
-      totalCalories: day.totalCalories,
-      notes: day.notes,
-    })),
+    days: week.days.map((day): MealPreviewDay => {
+      // 각 meal의 totalCalories 계산 (AI 제공값 우선, 없으면 foods 합산)
+      const meals: MealPreviewMeal[] = day.meals.map((meal): MealPreviewMeal => {
+        const foodsCaloriesSum = meal.foods.reduce(
+          (sum, food) => sum + (food.calories ?? 0),
+          0
+        );
+        return {
+          type: meal.type,
+          time: meal.time,
+          foods: meal.foods.map((food) => ({
+            name: food.name,
+            portion: food.portion,
+            calories: food.calories,
+            protein: food.protein,
+            source: food.source,
+          })),
+          // AI가 제공한 값 우선, 없으면 foods에서 합산, 0이면 undefined
+          totalCalories: meal.totalCalories ?? (foodsCaloriesSum > 0 ? foodsCaloriesSum : undefined),
+        };
+      });
+
+      // day의 totalCalories 계산 (AI 제공값 우선, 없으면 meals 합산)
+      const mealsCaloriesSum = meals.reduce(
+        (sum, meal) => sum + (meal.totalCalories ?? 0),
+        0
+      );
+
+      return {
+        dayOfWeek: day.dayOfWeek,
+        meals,
+        // AI가 제공한 값 우선, 없으면 meals에서 합산, 0이면 undefined
+        totalCalories: day.totalCalories ?? (mealsCaloriesSum > 0 ? mealsCaloriesSum : undefined),
+        notes: day.notes,
+      };
+    }),
   }));
 
   const previewData: MealPlanPreviewData = {

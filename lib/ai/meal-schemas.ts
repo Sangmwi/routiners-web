@@ -146,10 +146,17 @@ export type ActivityLevel = (typeof ACTIVITY_LEVELS)[number];
 
 /**
  * 일일 필요량 계산 입력 스키마
+ * - 신체정보는 대화에서 수집 시 전달 (선택적)
+ * - 전달하지 않으면 DB에서 조회
  */
 export const CalculateDailyNeedsInputSchema = z.object({
   activity_level: z.enum(ACTIVITY_LEVELS),
   goal: z.enum(['muscle_gain', 'fat_loss', 'maintenance']),
+  // 선택적 신체정보 - 대화에서 수집 시 전달
+  height_cm: z.number().positive().optional(),
+  weight_kg: z.number().positive().optional(),
+  birth_year: z.number().int().min(1900).max(2015).optional(),
+  gender: z.enum(['male', 'female']).optional(),
 });
 
 export type CalculateDailyNeedsInput = z.infer<typeof CalculateDailyNeedsInputSchema>;

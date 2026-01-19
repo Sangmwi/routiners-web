@@ -20,6 +20,7 @@ import { LoadingSpinner } from '@/components/ui/icons';
 import { getEventConfig } from '@/lib/config/theme';
 import Button from '@/components/ui/Button';
 import type { MealData } from '@/lib/types/meal';
+import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 
 interface MealDetailPageProps {
   params: Promise<{ date: string }>;
@@ -56,12 +57,7 @@ export default function MealDetailPage({ params }: MealDetailPageProps) {
   const skipEvent = useSkipRoutineEvent();
 
   // 날짜 포맷
-  const formattedDate = new Date(date).toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long',
-  });
+  const formattedDate = formatKoreanDate(date, { weekday: true });
 
   // 완료 처리
   const handleComplete = () => {

@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button';
 import { InBodyRecord, InBodyUpdateData } from '@/lib/types/inbody';
 import { useUpdateInBody, useDeleteInBody } from '@/hooks/inbody';
 import InBodyPreview from './InBodyPreview';
+import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 
 interface InBodyDetailModalProps {
   isOpen: boolean;
@@ -107,11 +108,7 @@ export default function InBodyDetailModal({
   };
 
   // 날짜 포맷
-  const formattedDate = new Date(record.measuredAt).toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const formattedDate = formatKoreanDate(record.measuredAt);
 
   return (
     <Modal

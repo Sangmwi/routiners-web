@@ -10,6 +10,7 @@ import { InBodyRecord } from '@/lib/types/inbody';
 import { useInBodyRecords, useDeleteInBody } from '@/hooks/inbody';
 import InBodyScanModal from './InBodyScanModal';
 import InBodyDetailModal from './InBodyDetailModal';
+import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 
 interface InBodyManageModalProps {
   isOpen: boolean;
@@ -82,14 +83,6 @@ export default function InBodyManageModal({
     setIsScanModalOpen(false);
   };
 
-  // 날짜 포맷
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
 
   return (
     <>
@@ -127,7 +120,7 @@ export default function InBodyManageModal({
                     >
                       <div className="flex-1">
                         <p className="font-medium text-card-foreground">
-                          {formatDate(record.measuredAt)}
+                          {formatKoreanDate(record.measuredAt)}
                         </p>
                         <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
                           <span>체중 {record.weight}kg</span>
@@ -170,7 +163,7 @@ export default function InBodyManageModal({
                 이 기록을 삭제할까요?
               </p>
               <p className="text-sm text-muted-foreground mt-2">
-                {formatDate(recordToDelete.measuredAt)} 측정 기록
+                {formatKoreanDate(recordToDelete.measuredAt)} 측정 기록
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 삭제된 기록은 복구할 수 없습니다

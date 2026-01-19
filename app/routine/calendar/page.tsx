@@ -12,6 +12,7 @@ import {
 import { useCalendarEvents, useRoutineEventByDate } from '@/hooks/routine';
 import type { EventType } from '@/lib/types/routine';
 import { SpinnerGapIcon } from '@phosphor-icons/react';
+import { formatKoreanDate, formatDate as formatDateISO } from '@/lib/utils/dateHelpers';
 
 type FilterType = EventType | 'all';
 
@@ -36,7 +37,7 @@ export default function RoutineCalendarPage() {
   const [month, setMonth] = useState(today.getMonth() + 1);
 
   // 선택된 날짜
-  const [selectedDate, setSelectedDate] = useState<string>(formatDate(today));
+  const [selectedDate, setSelectedDate] = useState<string>(formatDateISO(today));
 
   // 캘린더 이벤트 조회
   const { data: calendarEvents = [], isPending: isLoadingCalendar } =
@@ -100,7 +101,7 @@ export default function RoutineCalendarPage() {
     const today = new Date();
     setYear(today.getFullYear());
     setMonth(today.getMonth() + 1);
-    setSelectedDate(formatDate(today));
+    setSelectedDate(formatDateISO(today));
   };
 
   // 날짜 선택
@@ -144,7 +145,7 @@ export default function RoutineCalendarPage() {
         {/* 선택된 날짜의 이벤트 */}
         <div>
           <h2 className="text-lg font-semibold text-foreground mb-3">
-            선택한 날짜
+            {selectedDate ? formatKoreanDate(selectedDate, { year: false, weekday: true, weekdayFormat: 'short' }) : '선택된 날짜'} {'루틴'}
           </h2>
           {isLoadingEvent ? (
             <div className="bg-card border border-border rounded-xl p-4 flex items-center justify-center">
@@ -157,11 +158,4 @@ export default function RoutineCalendarPage() {
       </div>
     </div>
   );
-}
-
-function formatDate(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
 }

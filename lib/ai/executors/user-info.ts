@@ -86,13 +86,17 @@ export async function executeGetUserMilitaryInfo(
 
 /**
  * get_user_body_metrics
+ *
+ * TDEE 계산에 필요한 4개 필드 포함:
+ * - height_cm, weight_kg, birth_date, gender
+ * 시스템 프롬프트와 필드명 일치시킴
  */
 export async function executeGetUserBodyMetrics(
   ctx: ToolExecutorContext
 ): Promise<AIToolResult<UserBodyMetrics>> {
   const { data: user, error } = await ctx.supabase
     .from('users')
-    .select('height_cm, weight_kg, skeletal_muscle_mass_kg, body_fat_percentage')
+    .select('height_cm, weight_kg, birth_date, gender, skeletal_muscle_mass_kg, body_fat_percentage')
     .eq('id', ctx.userId)
     .single();
 
@@ -103,8 +107,12 @@ export async function executeGetUserBodyMetrics(
   return {
     success: true,
     data: {
-      height: user.height_cm,
-      weight: user.weight_kg,
+      // 필수 신체정보 (TDEE 계산용) - 시스템 프롬프트 기대값과 일치
+      height_cm: user.height_cm,
+      weight_kg: user.weight_kg,
+      birth_date: user.birth_date,
+      gender: user.gender as 'male' | 'female' | null,
+      // 추가 신체정보
       muscleMass: user.skeletal_muscle_mass_kg,
       bodyFatPercentage: user.body_fat_percentage,
     },

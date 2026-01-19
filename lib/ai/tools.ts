@@ -64,14 +64,15 @@ export const GET_USER_MILITARY_INFO: AIToolDefinition = {
 
 /**
  * 3. 사용자 신체 정보 조회
- * - 키, 몸무게, 골격근량, 체지방률 (프로필에 저장된 값)
+ * - TDEE 계산에 필요한 4개 필드: 키, 몸무게, 생년월일, 성별
+ * - 추가: 골격근량, 체지방률
  * - 인바디 상세 데이터는 get_latest_inbody 사용
  */
 export const GET_USER_BODY_METRICS: AIToolDefinition = {
   type: 'function',
   name: 'get_user_body_metrics',
   description:
-    '사용자의 기본 신체 정보를 조회합니다. 반환값: height(키, cm), weight(몸무게, kg), muscleMass(골격근량, kg), bodyFatPercentage(체지방률, %). 이 값은 사용자가 프로필에 직접 입력한 값입니다. 더 정확한 인바디 측정 데이터가 필요하면 get_latest_inbody를 사용하세요.',
+    '사용자의 신체 정보를 조회합니다. TDEE 계산에 필요한 필수 정보가 포함됩니다. 반환값: height_cm(키, cm), weight_kg(몸무게, kg), birth_date(생년월일, ISO 형식), gender(성별, "male" 또는 "female"), muscleMass(골격근량, kg), bodyFatPercentage(체지방률, %). 모든 필드는 null일 수 있으며, null인 필드는 사용자에게 질문해야 합니다.',
   parameters: {
     type: 'object',
     properties: {},

@@ -37,6 +37,11 @@ export default function PreviewDetailDrawer({
 }: PreviewDetailDrawerProps) {
   const [selectedWeek, setSelectedWeek] = useState(1);
 
+  // Null guard - preview가 없으면 렌더링하지 않음
+  if (!preview?.weeks) {
+    return null;
+  }
+
   const weeks = preview.weeks;
   const currentWeek = weeks.find(w => w.weekNumber === selectedWeek);
 

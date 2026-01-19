@@ -1,6 +1,7 @@
 'use client';
 
 import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
+import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 
 interface CalendarHeaderProps {
   year: number;
@@ -20,10 +21,7 @@ export default function CalendarHeader({
   onNextMonth,
   onToday,
 }: CalendarHeaderProps) {
-  const monthName = new Date(year, month - 1).toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-  });
+  const monthName = formatKoreanDate(new Date(year, month - 1), { day: false });
 
   return (
     <div className="flex items-center justify-between py-4">

@@ -36,8 +36,12 @@ export interface UserMilitaryInfo {
 }
 
 export interface UserBodyMetrics {
-  height: number | null;
-  weight: number | null;
+  // 필수 신체정보 (TDEE 계산용) - 시스템 프롬프트와 필드명 일치
+  height_cm: number | null;
+  weight_kg: number | null;
+  birth_date: string | null;
+  gender: 'male' | 'female' | null;
+  // 추가 신체정보
   muscleMass: number | null;
   bodyFatPercentage: number | null;
 }

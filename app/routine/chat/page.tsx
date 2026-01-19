@@ -212,23 +212,33 @@ export default function AIChatPage() {
       />
 
       {/* 미리보기 상세 드로어 */}
-      {(chat.pendingRoutinePreview || chat.pendingMealPreview) && (
-        <PreviewDetailDrawer
-          isOpen={previewDrawerOpen}
-          onClose={() => setPreviewDrawerOpen(false)}
-          type={previewDrawerType}
-          preview={previewDrawerType === 'routine' ? chat.pendingRoutinePreview! : chat.pendingMealPreview!}
-          onApply={(forceOverwrite) => {
-            setPreviewDrawerOpen(false);
-            if (previewDrawerType === 'routine') {
-              chat.applyRoutine(forceOverwrite);
-            } else {
-              chat.applyMealPlan(forceOverwrite);
-            }
-          }}
-          isApplying={chat.isStreaming}
-        />
-      )}
+      {(() => {
+        // previewDrawerType에 맞는 실제 preview 데이터 선택
+        const preview = previewDrawerType === 'routine'
+          ? chat.pendingRoutinePreview
+          : chat.pendingMealPreview;
+
+        // preview가 없으면 렌더링하지 않음
+        if (!preview) return null;
+
+        return (
+          <PreviewDetailDrawer
+            isOpen={previewDrawerOpen}
+            onClose={() => setPreviewDrawerOpen(false)}
+            type={previewDrawerType}
+            preview={preview}
+            onApply={(forceOverwrite) => {
+              setPreviewDrawerOpen(false);
+              if (previewDrawerType === 'routine') {
+                chat.applyRoutine(forceOverwrite);
+              } else {
+                chat.applyMealPlan(forceOverwrite);
+              }
+            }}
+            isApplying={chat.isStreaming}
+          />
+        );
+      })()}
     </div>
   );
 }

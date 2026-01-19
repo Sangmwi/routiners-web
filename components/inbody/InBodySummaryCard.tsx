@@ -2,6 +2,7 @@
 
 import { NextIcon } from '@/components/ui/icons';
 import { MetricsGrid, InBodyChanges } from './MetricsGrid';
+import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 
 // ============================================================
 // Types
@@ -87,11 +88,7 @@ export default function InBodySummaryCard({
     return <EmptyState onClick={onClick} />;
   }
 
-  const formattedDate = new Date(latest.measuredAt).toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  const formattedDate = formatKoreanDate(latest.measuredAt, { monthFormat: 'short' });
 
   return (
     <div

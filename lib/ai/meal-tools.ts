@@ -101,12 +101,13 @@ export const UPDATE_DIETARY_PROFILE: AIToolDefinition = {
 /**
  * 3. 일일 영양 필요량 계산
  * - TDEE 및 목표에 따른 매크로 계산
+ * - 신체정보는 대화에서 수집하거나 DB에서 조회 (하이브리드)
  */
 export const CALCULATE_DAILY_NEEDS: AIToolDefinition = {
   type: 'function',
   name: 'calculate_daily_needs',
   description:
-    '사용자의 신체 정보와 활동 수준을 기반으로 일일 영양 필요량(TDEE, 목표 칼로리, 단백질, 탄수화물, 지방)을 계산합니다. 식단 계획 전에 반드시 호출하세요.',
+    '사용자의 신체 정보와 활동 수준을 기반으로 일일 영양 필요량(TDEE, 목표 칼로리, 단백질, 탄수화물, 지방)을 계산합니다. 식단 계획 전에 반드시 호출하세요. 신체정보(키, 몸무게, 나이, 성별)는 대화에서 수집한 값을 전달하거나, 생략하면 DB에서 조회합니다.',
   parameters: {
     type: 'object',
     properties: {
@@ -119,6 +120,24 @@ export const CALCULATE_DAILY_NEEDS: AIToolDefinition = {
         type: 'string',
         enum: ['muscle_gain', 'fat_loss', 'maintenance'],
         description: '목표: muscle_gain(근육 증가, +300-500kcal), fat_loss(체지방 감소, -300-500kcal), maintenance(유지)',
+      },
+      // 선택적 신체정보 - 대화에서 수집 시 전달 (없으면 DB에서 조회)
+      height_cm: {
+        type: 'number',
+        description: '키 (cm). 대화에서 수집했으면 전달, 없으면 DB에서 조회',
+      },
+      weight_kg: {
+        type: 'number',
+        description: '몸무게 (kg). 대화에서 수집했으면 전달, 없으면 DB에서 조회',
+      },
+      birth_year: {
+        type: 'integer',
+        description: '출생연도 (예: 1995). 대화에서 수집했으면 전달, 없으면 DB에서 조회',
+      },
+      gender: {
+        type: 'string',
+        enum: ['male', 'female'],
+        description: '성별. 대화에서 수집했으면 전달, 없으면 DB에서 조회',
       },
     },
     required: ['activity_level', 'goal'],
