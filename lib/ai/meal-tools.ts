@@ -146,13 +146,14 @@ export const CALCULATE_DAILY_NEEDS: AIToolDefinition = {
 
 /**
  * 4. 식단 미리보기 생성
- * - 2주 단위 식단 생성 (DB 저장 X)
+ * - 1주 단위로 생성 후 시스템이 2주로 자동 확장
+ * - 생성 시간 단축을 위해 간소화된 스키마 사용
  */
 export const GENERATE_MEAL_PLAN_PREVIEW: AIToolDefinition = {
   type: 'function',
   name: 'generate_meal_plan_preview',
   description:
-    '2주 식단 미리보기를 생성합니다. duration_weeks는 반드시 2로 설정하세요. 이 도구는 식단을 DB에 저장하지 않고 사용자에게 미리보기 UI만 표시합니다. 사용자가 "적용하기" 버튼을 클릭하면 프론트엔드에서 자동으로 저장 처리됩니다. 수정 요청이 오면 피드백을 반영하여 다시 이 도구를 호출하세요.',
+    '1주 식단 미리보기를 생성합니다. duration_weeks는 반드시 1로 설정하세요. 시스템이 1주차 데이터를 2주차로 자동 복제하여 2주 식단을 완성합니다. 이 도구는 식단을 DB에 저장하지 않고 사용자에게 미리보기 UI만 표시합니다. 사용자가 "적용하기" 버튼을 클릭하면 프론트엔드에서 자동으로 저장 처리됩니다. 수정 요청이 오면 피드백을 반영하여 다시 이 도구를 호출하세요.',
   parameters: {
     type: 'object',
     properties: {
@@ -166,7 +167,7 @@ export const GENERATE_MEAL_PLAN_PREVIEW: AIToolDefinition = {
       },
       duration_weeks: {
         type: 'integer',
-        description: '식단 기간 (항상 2로 설정). 2주 단위로 생성합니다.',
+        description: '식단 기간 (항상 1로 설정). 시스템이 2주로 자동 확장합니다.',
       },
       target_calories: {
         type: 'integer',
@@ -178,14 +179,14 @@ export const GENERATE_MEAL_PLAN_PREVIEW: AIToolDefinition = {
       },
       weeks: {
         type: 'array',
-        description: '주차별 식단 계획',
+        description: '주차별 식단 계획 (1주만 생성)',
         items: {
           type: 'object',
           properties: {
-            weekNumber: { type: 'integer', description: '주차 번호 (1부터 시작)' },
+            weekNumber: { type: 'integer', description: '주차 번호 (1로 고정)' },
             days: {
               type: 'array',
-              description: '해당 주의 식단 일정',
+              description: '해당 주의 식단 일정 (7일)',
               items: {
                 type: 'object',
                 properties: {
@@ -201,7 +202,6 @@ export const GENERATE_MEAL_PLAN_PREVIEW: AIToolDefinition = {
                           enum: ['breakfast', 'lunch', 'dinner', 'snack'],
                           description: '식사 타입',
                         },
-                        time: { type: 'string', description: '식사 시간 (예: "07:00")' },
                         foods: {
                           type: 'array',
                           items: {
@@ -210,12 +210,6 @@ export const GENERATE_MEAL_PLAN_PREVIEW: AIToolDefinition = {
                               name: { type: 'string', description: '음식 이름' },
                               portion: { type: 'string', description: '분량 (예: "1공기", "200g")' },
                               calories: { type: 'integer', description: '칼로리 (kcal)' },
-                              protein: { type: 'integer', description: '단백질 (g)' },
-                              source: {
-                                type: 'string',
-                                enum: ['canteen', 'px', 'outside', 'homemade'],
-                                description: '음식 출처',
-                              },
                             },
                             required: ['name', 'portion'],
                           },

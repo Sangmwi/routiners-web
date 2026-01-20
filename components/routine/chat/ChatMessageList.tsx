@@ -300,7 +300,7 @@ export default function ChatMessageList({
               perSession: `일 ${pendingMealPreview.targetCalories}kcal`,
             }}
             weekSummaries={pendingMealPreview.weeks.map(w =>
-              w.days.map(d => `${d.totalCalories ?? '-'}kcal`).join(', ')
+              w.days.map(d => d.title ?? `${d.totalCalories ?? '-'}kcal`).join(', ')
             )}
             hasConflicts={(pendingMealPreview.conflicts?.length ?? 0) > 0}
             onViewDetails={onViewMealDetails}

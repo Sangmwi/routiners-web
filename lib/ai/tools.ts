@@ -396,13 +396,13 @@ export const CONFIRM_PROFILE_DATA: AIToolDefinition = {
  * 15. 루틴 미리보기 생성
  * - DB에 저장하지 않고 미리보기 UI만 표시
  * - 사용자가 확인 후 프론트엔드에서 apply API 호출
- * - 2주 단위 생성 권장 (토큰 50% 절약, 응답 속도 2배 향상)
+ * - 1주 단위 생성 후 시스템이 2주로 자동 확장 (토큰 50% 절약, 응답 속도 2배 향상)
  */
 export const GENERATE_ROUTINE_PREVIEW: AIToolDefinition = {
   type: 'function',
   name: 'generate_routine_preview',
   description:
-    '2주 운동 루틴 미리보기를 생성합니다. duration_weeks는 반드시 2로 설정하세요. 이 도구는 루틴을 DB에 저장하지 않고 사용자에게 미리보기 UI만 표시합니다. 사용자가 "적용하기" 버튼을 클릭하면 프론트엔드에서 자동으로 저장 처리됩니다. 수정 요청이 오면 피드백을 반영하여 다시 이 도구를 호출하세요.',
+    '1주 운동 루틴 미리보기를 생성합니다. duration_weeks는 반드시 1로 설정하세요. 시스템이 1주차 데이터를 2주차로 자동 복제하여 2주 루틴을 완성합니다. 이 도구는 루틴을 DB에 저장하지 않고 사용자에게 미리보기 UI만 표시합니다. 사용자가 "적용하기" 버튼을 클릭하면 프론트엔드에서 자동으로 저장 처리됩니다. 수정 요청이 오면 피드백을 반영하여 다시 이 도구를 호출하세요.',
   parameters: {
     type: 'object',
     properties: {
@@ -416,7 +416,7 @@ export const GENERATE_ROUTINE_PREVIEW: AIToolDefinition = {
       },
       duration_weeks: {
         type: 'integer',
-        description: '루틴 기간 (항상 2로 설정). 2주 단위로 생성합니다.',
+        description: '루틴 기간 (항상 1로 설정). 시스템이 2주로 자동 확장합니다.',
       },
       days_per_week: {
         type: 'integer',

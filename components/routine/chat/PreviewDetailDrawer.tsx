@@ -255,7 +255,6 @@ function MealCard({ meal }: { meal: MealPreviewMeal }) {
           {MEAL_TYPE_LABELS[meal.type]}
         </span>
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          {meal.time && <span>{meal.time}</span>}
           {meal.totalCalories && (
             <span className="flex items-center gap-1">
               <FireIcon size={14} />
@@ -270,9 +269,6 @@ function MealCard({ meal }: { meal: MealPreviewMeal }) {
             <span className="text-foreground">{food.name}</span>
             <span className="text-muted-foreground">
               {food.portion}
-              {food.protein && (
-                <span className="text-primary ml-2">P{food.protein}g</span>
-              )}
             </span>
           </div>
         ))}

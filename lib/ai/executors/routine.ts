@@ -230,6 +230,7 @@ export function executeRequestUserInput(
  *
  * AI가 생성한 루틴 미리보기 데이터 생성 (DB 저장 없음)
  * 프론트엔드에서 routine_preview SSE 이벤트로 UI 표시
+ * - AI는 1주만 생성, 시스템이 2주로 자동 복제
  */
 export function executeGenerateRoutinePreview(
   args: {
@@ -258,10 +259,9 @@ export function executeGenerateRoutinePreview(
   // 미리보기 ID 생성
   const previewId = `preview-${toolCallId}`;
 
-  // weeks 데이터를 RoutinePreviewWeek[] 형태로 변환
-  const weeks: RoutinePreviewWeek[] = args.weeks.map((week) => ({
-    weekNumber: week.weekNumber,
-    days: week.days.map((day): RoutinePreviewDay => ({
+  // 1주 데이터를 RoutinePreviewDay[]로 변환하는 헬퍼 함수
+  const convertDays = (days: typeof args.weeks[0]['days']): RoutinePreviewDay[] => {
+    return days.map((day): RoutinePreviewDay => ({
       dayOfWeek: day.dayOfWeek,
       title: day.title,
       exercises: day.exercises.map((ex): RoutinePreviewExercise => ({
@@ -272,24 +272,42 @@ export function executeGenerateRoutinePreview(
         notes: ex.notes,
       })),
       estimatedDuration: day.estimatedDuration,
-    })),
-  }));
+    }));
+  };
+
+  // weeks 데이터 처리: 1주면 2주로 복제
+  let weeks: RoutinePreviewWeek[];
+
+  if (args.weeks.length === 1) {
+    // 1주 데이터를 2주로 복제
+    const week1Days = convertDays(args.weeks[0].days);
+    weeks = [
+      { weekNumber: 1, days: week1Days },
+      { weekNumber: 2, days: week1Days.map(day => ({ ...day })) },  // 복제
+    ];
+  } else {
+    // 2주 이상인 경우 그대로 사용
+    weeks = args.weeks.map((week) => ({
+      weekNumber: week.weekNumber,
+      days: convertDays(week.days),
+    }));
+  }
 
   const previewData: RoutinePreviewData = {
     id: previewId,
     title: args.title,
     description: args.description,
-    durationWeeks: args.duration_weeks,
+    durationWeeks: 2,  // 항상 2주로 표시
     daysPerWeek: args.days_per_week,
     weeks,
     // 원본 데이터 저장 (apply_routine에서 사용)
     rawRoutineData: {
       title: args.title,
       description: args.description,
-      duration_weeks: args.duration_weeks,
+      duration_weeks: 2,  // 적용 시에도 2주
       days_per_week: args.days_per_week,
       routine_data: {
-        weeks: args.weeks.map((week) => ({
+        weeks: weeks.map((week) => ({
           weekNumber: week.weekNumber,
           days: week.days.map((day) => ({
             dayOfWeek: day.dayOfWeek,

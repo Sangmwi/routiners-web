@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CalendarIcon, ClockIcon, CheckIcon, PencilSimpleIcon, WarningIcon, FireIcon, CookingPotIcon } from '@phosphor-icons/react';
+import { CalendarIcon, CheckIcon, PencilSimpleIcon, WarningIcon, FireIcon, CookingPotIcon } from '@phosphor-icons/react';
 import { ExpandIcon, CollapseIcon } from '@/components/ui/icons';
 import { EventIcons } from '@/lib/config/theme';
 import type {
@@ -35,12 +35,6 @@ function MealCard({ meal }: { meal: MealPreviewMeal }) {
         <span className="text-xs font-medium text-primary">
           {MEAL_TYPE_LABELS[meal.type]}
         </span>
-        {meal.time && (
-          <span className="text-xs text-muted-foreground flex items-center gap-0.5">
-            <ClockIcon size={12} />
-            {meal.time}
-          </span>
-        )}
         {meal.totalCalories && (
           <span className="text-xs text-muted-foreground flex items-center gap-0.5 ml-auto">
             <FireIcon size={12} />
@@ -57,7 +51,6 @@ function MealCard({ meal }: { meal: MealPreviewMeal }) {
             <span className="truncate">{food.name}</span>
             <span className="text-muted-foreground/60 shrink-0 ml-2">
               {food.portion}
-              {food.protein && <span className="text-primary ml-1">P{food.protein}g</span>}
             </span>
           </div>
         ))}

@@ -322,22 +322,22 @@ export function transformDbDietaryProfile(db: DbDietaryProfile): DietaryProfile 
 // ============================================================================
 
 /**
- * 미리보기용 음식 항목
+ * 미리보기용 음식 항목 (간소화)
+ * - protein, source 제거: 생성 시간 단축
+ * - 저장 시 FoodItem으로 확장됨
  */
 export interface MealPreviewFoodItem {
   name: string;
   portion: string;
   calories?: number;
-  protein?: number;
-  source?: string;
 }
 
 /**
- * 미리보기용 단일 식사
+ * 미리보기용 단일 식사 (간소화)
+ * - time 제거: 저장 시 기본값 적용
  */
 export interface MealPreviewMeal {
   type: MealType;
-  time?: string;
   foods: MealPreviewFoodItem[];
   totalCalories?: number;
 }
@@ -347,6 +347,7 @@ export interface MealPreviewMeal {
  */
 export interface MealPreviewDay {
   dayOfWeek: number; // 1=월, 2=화, ..., 7=일
+  title?: string;    // "월요일", "화요일", ... (미리보기 요약에 사용)
   meals: MealPreviewMeal[];
   totalCalories?: number;
   notes?: string;

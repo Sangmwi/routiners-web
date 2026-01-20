@@ -357,6 +357,8 @@ export async function executeCalculateDailyNeeds(
  * 4. generate_meal_plan_preview
  *
  * 식단 미리보기 생성 (DB 저장 없음)
+ * - AI는 1주만 생성, 시스템이 2주로 자동 복제
+ * - 간소화된 데이터 구조 사용 (생성 시간 단축)
  */
 export function executeGenerateMealPlanPreview(
   args: {
@@ -371,13 +373,13 @@ export function executeGenerateMealPlanPreview(
         dayOfWeek: number;
         meals: Array<{
           type: MealType;
-          time?: string;
+          time?: string;  // 호환성 유지 (무시됨)
           foods: Array<{
             name: string;
             portion: string;
             calories?: number;
-            protein?: number;
-            source?: string;
+            protein?: number;  // 호환성 유지 (무시됨)
+            source?: string;   // 호환성 유지 (무시됨)
           }>;
           totalCalories?: number;
         }>;
@@ -391,11 +393,12 @@ export function executeGenerateMealPlanPreview(
   // 미리보기 ID 생성
   const previewId = `meal-preview-${toolCallId}`;
 
-  // weeks 데이터를 MealPreviewWeek[] 형태로 변환
-  // totalCalories가 없으면 foods/meals에서 자동 계산
-  const weeks: MealPreviewWeek[] = args.weeks.map((week) => ({
-    weekNumber: week.weekNumber,
-    days: week.days.map((day): MealPreviewDay => {
+  // 요일 이름 매핑
+  const DAY_NAMES = ['', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일'];
+
+  // 1주 데이터를 MealPreviewDay[]로 변환하는 헬퍼 함수
+  const convertDays = (days: typeof args.weeks[0]['days']): MealPreviewDay[] => {
+    return days.map((day): MealPreviewDay => {
       // 각 meal의 totalCalories 계산 (AI 제공값 우선, 없으면 foods 합산)
       const meals: MealPreviewMeal[] = day.meals.map((meal): MealPreviewMeal => {
         const foodsCaloriesSum = meal.foods.reduce(
@@ -404,13 +407,11 @@ export function executeGenerateMealPlanPreview(
         );
         return {
           type: meal.type,
-          time: meal.time,
+          // time, protein, source 제거 (간소화)
           foods: meal.foods.map((food) => ({
             name: food.name,
             portion: food.portion,
             calories: food.calories,
-            protein: food.protein,
-            source: food.source,
           })),
           // AI가 제공한 값 우선, 없으면 foods에서 합산, 0이면 undefined
           totalCalories: meal.totalCalories ?? (foodsCaloriesSum > 0 ? foodsCaloriesSum : undefined),
@@ -425,19 +426,38 @@ export function executeGenerateMealPlanPreview(
 
       return {
         dayOfWeek: day.dayOfWeek,
+        title: DAY_NAMES[day.dayOfWeek] || `${day.dayOfWeek}일차`,  // 자동 요일 이름 생성
         meals,
         // AI가 제공한 값 우선, 없으면 meals에서 합산, 0이면 undefined
         totalCalories: day.totalCalories ?? (mealsCaloriesSum > 0 ? mealsCaloriesSum : undefined),
         notes: day.notes,
       };
-    }),
-  }));
+    });
+  };
+
+  // weeks 데이터 처리: 1주면 2주로 복제
+  let weeks: MealPreviewWeek[];
+
+  if (args.weeks.length === 1) {
+    // 1주 데이터를 2주로 복제
+    const week1Days = convertDays(args.weeks[0].days);
+    weeks = [
+      { weekNumber: 1, days: week1Days },
+      { weekNumber: 2, days: week1Days.map(day => ({ ...day })) },  // 복제
+    ];
+  } else {
+    // 2주 이상인 경우 그대로 사용
+    weeks = args.weeks.map((week) => ({
+      weekNumber: week.weekNumber,
+      days: convertDays(week.days),
+    }));
+  }
 
   const previewData: MealPlanPreviewData = {
     id: previewId,
     title: args.title,
     description: args.description,
-    durationWeeks: args.duration_weeks,
+    durationWeeks: 2,  // 항상 2주로 표시
     targetCalories: args.target_calories,
     targetProtein: args.target_protein,
     weeks,
@@ -445,7 +465,7 @@ export function executeGenerateMealPlanPreview(
     rawMealData: {
       title: args.title,
       description: args.description,
-      duration_weeks: args.duration_weeks,
+      duration_weeks: 2,  // 적용 시에도 2주
       target_calories: args.target_calories,
       target_protein: args.target_protein,
       weeks: args.weeks,
