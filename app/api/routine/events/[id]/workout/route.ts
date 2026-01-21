@@ -14,7 +14,7 @@ import {
  * 워크아웃 데이터 업데이트 (실제 수행 기록)
  */
 export const PATCH = withAuth<NextResponse, { id: string }>(
-  async (request: NextRequest, { userId, supabase, params }) => {
+  async (request: NextRequest, { supabase, params }) => {
     const { id } = await params;
 
     let body;
@@ -38,7 +38,6 @@ export const PATCH = withAuth<NextResponse, { id: string }>(
       .from('routine_events')
       .update({ data: validation.data })
       .eq('id', id)
-      .eq('user_id', userId)
       .select()
       .single();
 

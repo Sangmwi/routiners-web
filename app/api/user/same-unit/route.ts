@@ -61,19 +61,13 @@ export const GET = withOptionalAuth(async (request: NextRequest, auth) => {
   }
 
   // Query same unit users - O(log n) with idx_users_unit_id
-  let query = supabase
+  // Note: 자기 자신 제외는 클라이언트에서 처리 (RLS 아키텍처)
+  const { data: usersData, error: queryError } = await supabase
     .from('users')
     .select('*')
     .eq('unit_id', unitId)
     .order('created_at', { ascending: false })
     .limit(limit);
-
-  // Exclude current user if authenticated
-  if (auth?.userId) {
-    query = query.neq('id', auth.userId);
-  }
-
-  const { data: usersData, error: queryError } = await query;
 
   if (queryError) {
     return handleSupabaseError(queryError);

@@ -22,10 +22,11 @@ const ConversationUpdateSchema = z.object({
 export const GET = withAuth(
   async (
     request: NextRequest,
-    { userId, supabase, params }
+    { supabase, params }
   ) => {
     const { id } = await params;
 
+    // RLS가 권한 필터링을 처리
     const { data: conversation, error: convError } = await supabase
       .from('conversations')
       .select('*')
@@ -48,31 +49,6 @@ export const GET = withAuth(
     }
 
     const conv = conversation as DbConversation;
-
-    // 권한 확인 (AI 대화는 생성자만, 그 외는 참여자)
-    if (conv.type === 'ai') {
-      if (conv.created_by !== userId) {
-        return NextResponse.json(
-          { error: '접근 권한이 없습니다.', code: 'FORBIDDEN' },
-          { status: 403 }
-        );
-      }
-    } else {
-      const { data: participant } = await supabase
-        .from('conversation_participants')
-        .select('id')
-        .eq('conversation_id', id)
-        .eq('user_id', userId)
-        .is('left_at', null)
-        .single();
-
-      if (!participant) {
-        return NextResponse.json(
-          { error: '접근 권한이 없습니다.', code: 'FORBIDDEN' },
-          { status: 403 }
-        );
-      }
-    }
 
     // AI 대화인 경우 메시지도 함께 조회
     if (conv.type === 'ai') {
@@ -98,7 +74,7 @@ export const GET = withAuth(
 export const PATCH = withAuth(
   async (
     request: NextRequest,
-    { userId, supabase, params }
+    { supabase, params }
   ) => {
     const { id } = await params;
 
@@ -125,20 +101,6 @@ export const PATCH = withAuth(
     }
 
     const { title, aiStatus, aiResultApplied } = validation.data;
-
-    // 권한 확인
-    const { data: existing } = await supabase
-      .from('conversations')
-      .select('created_by, type')
-      .eq('id', id)
-      .single();
-
-    if (!existing || existing.created_by !== userId) {
-      return NextResponse.json(
-        { error: '접근 권한이 없습니다.', code: 'FORBIDDEN' },
-        { status: 403 }
-      );
-    }
 
     const updateData: Record<string, unknown> = {};
     if (title !== undefined) updateData.title = title;
@@ -176,24 +138,11 @@ export const PATCH = withAuth(
 export const DELETE = withAuth(
   async (
     request: NextRequest,
-    { userId, supabase, params }
+    { supabase, params }
   ) => {
     const { id } = await params;
 
-    // 권한 확인
-    const { data: existing } = await supabase
-      .from('conversations')
-      .select('created_by')
-      .eq('id', id)
-      .single();
-
-    if (!existing || existing.created_by !== userId) {
-      return NextResponse.json(
-        { error: '접근 권한이 없습니다.', code: 'FORBIDDEN' },
-        { status: 403 }
-      );
-    }
-
+    // RLS가 권한 필터링을 처리
     const { error } = await supabase
       .from('conversations')
       .update({ deleted_at: new Date().toISOString() })

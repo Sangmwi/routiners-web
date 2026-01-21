@@ -12,7 +12,7 @@ import { badRequest, parseRequestBody, handleSupabaseError } from '@/lib/utils/a
  * 특정 InBody 기록 조회
  */
 export const GET = withAuth(
-  async (request: NextRequest, { userId, supabase }) => {
+  async (request: NextRequest, { supabase }) => {
     const url = new URL(request.url);
     const id = url.pathname.split('/').pop();
 
@@ -24,7 +24,6 @@ export const GET = withAuth(
       .from('inbody_records')
       .select('*')
       .eq('id', id)
-      .eq('user_id', userId)
       .single();
 
     if (error) {
@@ -42,7 +41,7 @@ export const GET = withAuth(
  * InBody 기록 수정
  */
 export const PATCH = withAuth(
-  async (request: NextRequest, { userId, supabase }) => {
+  async (request: NextRequest, { supabase }) => {
     const url = new URL(request.url);
     const id = url.pathname.split('/').pop();
 
@@ -85,7 +84,6 @@ export const PATCH = withAuth(
       .from('inbody_records')
       .update(updateData)
       .eq('id', id)
-      .eq('user_id', userId)
       .select()
       .single();
 
@@ -104,7 +102,7 @@ export const PATCH = withAuth(
  * InBody 기록 삭제
  */
 export const DELETE = withAuth(
-  async (request: NextRequest, { userId, supabase }) => {
+  async (request: NextRequest, { supabase }) => {
     const url = new URL(request.url);
     const id = url.pathname.split('/').pop();
 
@@ -115,8 +113,7 @@ export const DELETE = withAuth(
     const { error } = await supabase
       .from('inbody_records')
       .delete()
-      .eq('id', id)
-      .eq('user_id', userId);
+      .eq('id', id);
 
     if (error) {
       console.error('[InBody DELETE/:id] Error:', error);

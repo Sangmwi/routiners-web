@@ -10,7 +10,7 @@ import {
  * GET /api/routine/events/calendar
  * 월별 캘린더 요약 조회
  */
-export const GET = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   const { searchParams } = new URL(request.url);
   const yearParam = searchParams.get('year');
   const monthParam = searchParams.get('month');
@@ -40,7 +40,6 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
   const { data, error } = await supabase
     .from('routine_events')
     .select('*')
-    .eq('user_id', userId)
     .gte('date', startDate)
     .lte('date', endDate)
     .order('date', { ascending: true });

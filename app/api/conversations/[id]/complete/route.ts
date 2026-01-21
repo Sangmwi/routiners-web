@@ -9,11 +9,11 @@ import { DbConversation, transformDbConversation } from '@/lib/types/chat';
 export const POST = withAuth(
   async (
     request: NextRequest,
-    { userId, supabase, params }
+    { supabase, params }
   ) => {
     const { id } = await params;
 
-    // 대화 조회 및 권한 확인
+    // RLS가 권한 필터링을 처리
     const { data: existing, error: fetchError } = await supabase
       .from('conversations')
       .select('*')
@@ -28,13 +28,6 @@ export const POST = withAuth(
     }
 
     const conv = existing as DbConversation;
-
-    if (conv.created_by !== userId) {
-      return NextResponse.json(
-        { error: '접근 권한이 없습니다.', code: 'FORBIDDEN' },
-        { status: 403 }
-      );
-    }
 
     if (conv.type !== 'ai') {
       return NextResponse.json(

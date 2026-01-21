@@ -10,9 +10,10 @@ interface RouteParams {
  * POST /api/ai/sessions/[id]/complete
  * 세션 완료 처리
  */
-export const POST = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const POST = withAuth(async (request: NextRequest, { supabase }) => {
   const { id } = await (request as unknown as RouteParams).params;
 
+  // RLS가 user_id 필터링
   const { data, error } = await supabase
     .from('ai_sessions')
     .update({
@@ -20,7 +21,6 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
       completed_at: new Date().toISOString(),
     })
     .eq('id', id)
-    .eq('user_id', userId)
     .eq('status', 'active')
     .select()
     .single();

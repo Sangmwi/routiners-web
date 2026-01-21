@@ -11,7 +11,7 @@ import { RoutineEventCreateSchema } from '@/lib/schemas/routine.schema';
  * GET /api/routine/events
  * 루틴 이벤트 목록 조회
  */
-export const GET = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   const { searchParams } = new URL(request.url);
   const startDate = searchParams.get('startDate');
   const endDate = searchParams.get('endDate');
@@ -23,7 +23,6 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
   let query = supabase
     .from('routine_events')
     .select('*')
-    .eq('user_id', userId)
     .order('date', { ascending: true })
     .range(offset, offset + limit - 1);
 
@@ -58,7 +57,7 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
  * POST /api/routine/events
  * 루틴 이벤트 생성 (단일)
  */
-export const POST = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const POST = withAuth(async (request: NextRequest, { supabase }) => {
   let body;
   try {
     body = await request.json();
@@ -82,7 +81,7 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
     );
   }
 
-  const insertData = transformEventToDbInsert(validation.data, userId);
+  const insertData = transformEventToDbInsert(validation.data);
 
   const { data, error } = await supabase
     .from('routine_events')

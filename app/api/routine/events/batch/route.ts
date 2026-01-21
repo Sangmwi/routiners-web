@@ -11,7 +11,7 @@ import { RoutineBatchCreateSchema } from '@/lib/schemas/routine.schema';
  * POST /api/routine/events/batch
  * 루틴 이벤트 일괄 생성 (AI 생성 4주치)
  */
-export const POST = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const POST = withAuth(async (request: NextRequest, { supabase }) => {
   let body;
   try {
     body = await request.json();
@@ -37,13 +37,12 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
 
   const { events, aiSessionId } = validation.data;
 
-  // AI 대화(conversation) 확인
+  // AI 대화(conversation) 확인 (RLS가 자동으로 권한 필터링)
   const { data: session, error: sessionError } = await supabase
     .from('conversations')
     .select('id, ai_status')
     .eq('id', aiSessionId)
     .eq('type', 'ai')
-    .eq('created_by', userId)
     .single();
 
   if (sessionError || !session) {
@@ -55,18 +54,17 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
 
   // 이벤트 데이터 변환
   const insertData = events.map((event) => ({
-    ...transformEventToDbInsert(event, userId),
+    ...transformEventToDbInsert(event),
     ai_session_id: aiSessionId,
   }));
 
-  // 기존 이벤트와 충돌 확인 (같은 날짜에 같은 타입)
+  // 기존 이벤트와 충돌 확인 (같은 날짜에 같은 타입, RLS가 자동 필터링)
   const dates = events.map((e) => e.date);
   const types = [...new Set(events.map((e) => e.type))];
 
   const { data: existingEvents } = await supabase
     .from('routine_events')
     .select('date, type')
-    .eq('user_id', userId)
     .in('date', dates)
     .in('type', types);
 

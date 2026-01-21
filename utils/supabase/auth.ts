@@ -4,12 +4,15 @@ import { createClient } from './server';
 
 /**
  * 인증된 사용자 정보
+ *
+ * ⚠️ userId 제거됨 (RLS 기반 아키텍처)
+ * - INSERT: DEFAULT current_user_id()가 자동 채움
+ * - SELECT/UPDATE/DELETE: RLS가 자동 필터링
+ * - users 테이블 조회 시: authUser.id (provider_id)로 직접 조회
  */
 export interface AuthContext {
   /** Supabase Auth 사용자 */
   authUser: User;
-  /** DB에 저장된 사용자 ID (users.id) */
-  userId: string;
   /** Supabase 클라이언트 (재사용) */
   supabase: Awaited<ReturnType<typeof createClient>>;
 }
@@ -71,21 +74,9 @@ async function getAuthUserFromToken(accessToken: string): Promise<AuthContext | 
     return null;
   }
 
-  // DB에서 사용자 ID 조회 (토큰 인증된 클라이언트 사용)
-  const { data: dbUser, error: dbError } = await supabaseWithToken
-    .from('users')
-    .select('id')
-    .eq('provider_id', authUser.id)
-    .single();
-
-  if (dbError || !dbUser) {
-    return null;
-  }
-
-  // 토큰 인증된 클라이언트를 그대로 반환 (RLS 정책에서 auth.uid() 작동)
+  // RLS가 current_user_id()로 자동 필터링하므로 DB 조회 불필요
   return {
     authUser,
-    userId: dbUser.id,
     supabase: supabaseWithToken,
   };
 }
@@ -106,20 +97,9 @@ async function getAuthUserFromCookie(): Promise<AuthContext | null> {
     return null;
   }
 
-  // DB에서 사용자 ID 조회
-  const { data: dbUser, error: dbError } = await supabase
-    .from('users')
-    .select('id')
-    .eq('provider_id', authUser.id)
-    .single();
-
-  if (dbError || !dbUser) {
-    return null;
-  }
-
+  // RLS가 current_user_id()로 자동 필터링하므로 DB 조회 불필요
   return {
     authUser,
-    userId: dbUser.id,
     supabase,
   };
 }
@@ -131,7 +111,7 @@ async function getAuthUserFromCookie(): Promise<AuthContext | null> {
  * 1. Authorization 헤더의 Bearer 토큰 (Expo 앱)
  * 2. 쿠키 기반 세션 (웹 브라우저)
  *
- * 인증되지 않았거나 DB에 사용자가 없으면 null 반환
+ * 인증되지 않으면 null 반환
  *
  * @param request - NextRequest 객체 (토큰 인증 시 필요)
  *
@@ -140,7 +120,7 @@ async function getAuthUserFromCookie(): Promise<AuthContext | null> {
  * if (!auth) {
  *   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
  * }
- * const { authUser, userId, supabase } = auth;
+ * const { authUser, supabase } = auth;
  */
 export async function getAuthUser(request?: NextRequest): Promise<AuthContext | null> {
   // 1. Authorization 헤더 체크 (Expo 앱에서 오는 요청)
@@ -172,8 +152,8 @@ export async function getAuthUser(request?: NextRequest): Promise<AuthContext | 
  *
  * @example
  * try {
- *   const { authUser, userId, supabase } = await requireAuth(request);
- *   // 비즈니스 로직
+ *   const { authUser, supabase } = await requireAuth(request);
+ *   // 비즈니스 로직 (RLS가 자동으로 user_id 필터링)
  * } catch (error) {
  *   if (error instanceof AuthError) {
  *     return NextResponse.json({ error: error.message }, { status: error.statusCode });
@@ -206,25 +186,33 @@ export interface AuthContextWithParams<P = Record<string, string>> extends AuthC
  * Authorization 헤더가 있으면 토큰 인증, 없으면 쿠키 인증을 사용합니다.
  *
  * @example
- * // 일반 JSON 응답
- * export const GET = withAuth(async (request, { authUser, userId, supabase }) => {
+ * // 일반 JSON 응답 (RLS가 자동 필터링)
+ * export const GET = withAuth(async (request, { authUser, supabase }) => {
+ *   const { data } = await supabase
+ *     .from('routine_events')
+ *     .select('*');
+ *   // RLS가 current_user_id()로 자동 필터링
+ *   return NextResponse.json(data);
+ * });
+ *
+ * // users 테이블 조회 시 provider_id 사용
+ * export const GET = withAuth(async (request, { authUser, supabase }) => {
  *   const { data: user } = await supabase
  *     .from('users')
  *     .select('*')
- *     .eq('id', userId)
+ *     .eq('provider_id', authUser.id)
  *     .single();
- *
  *   return NextResponse.json(user);
  * });
  *
  * // 동적 라우트 params 사용
- * export const GET = withAuth(async (request, { userId, supabase, params }) => {
+ * export const GET = withAuth(async (request, { supabase, params }) => {
  *   const { id } = await params;
  *   // ...
  * });
  *
  * // SSE 스트리밍 응답
- * export const POST = withAuth(async (request, { userId, supabase }) => {
+ * export const POST = withAuth(async (request, { supabase }) => {
  *   const stream = new ReadableStream({ ... });
  *   return new Response(stream, { headers: { 'Content-Type': 'text/event-stream' } });
  * });

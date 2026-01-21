@@ -5,6 +5,11 @@ import {
   InBodyExtractedDataSchema,
   transformExtractedToCreateData,
 } from '@/lib/types/inbody';
+import {
+  checkRateLimit,
+  INBODY_SCAN_RATE_LIMIT,
+  rateLimitExceeded,
+} from '@/lib/utils/rateLimiter';
 
 // OpenAI 클라이언트 초기화
 const openai = new OpenAI({
@@ -181,7 +186,13 @@ is_valid_inbody: true로 설정하고, rejection_reason: null로 설정한 후 �
  * POST /api/inbody/scan
  * InBody 결과지 이미지에서 데이터 추출 (AI Vision)
  */
-export const POST = withAuth(async (request: NextRequest) => {
+export const POST = withAuth(async (request: NextRequest, { authUser }) => {
+  // Rate Limiting (분당 5회)
+  const rateLimitResult = checkRateLimit(`inbody-scan:${authUser.id}`, INBODY_SCAN_RATE_LIMIT);
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(rateLimitExceeded(rateLimitResult), { status: 429 });
+  }
+
   try {
     const formData = await request.formData();
     const image = formData.get('image') as File | null;

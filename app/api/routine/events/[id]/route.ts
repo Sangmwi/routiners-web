@@ -14,14 +14,13 @@ import {
  * 특정 이벤트 상세 조회
  */
 export const GET = withAuth<NextResponse, { id: string }>(
-  async (_request: NextRequest, { userId, supabase, params }) => {
+  async (_request: NextRequest, { supabase, params }) => {
     const { id } = await params;
 
     const { data, error } = await supabase
       .from('routine_events')
       .select('*')
       .eq('id', id)
-      .eq('user_id', userId)
       .single();
 
     if (error) {
@@ -42,7 +41,7 @@ export const GET = withAuth<NextResponse, { id: string }>(
  * 이벤트 수정
  */
 export const PATCH = withAuth<NextResponse, { id: string }>(
-  async (request: NextRequest, { userId, supabase, params }) => {
+  async (request: NextRequest, { supabase, params }) => {
     const { id } = await params;
 
     let body;
@@ -67,7 +66,6 @@ export const PATCH = withAuth<NextResponse, { id: string }>(
       .from('routine_events')
       .update(updateData)
       .eq('id', id)
-      .eq('user_id', userId)
       .select()
       .single();
 
@@ -89,14 +87,13 @@ export const PATCH = withAuth<NextResponse, { id: string }>(
  * 이벤트 삭제
  */
 export const DELETE = withAuth<NextResponse, { id: string }>(
-  async (_request: NextRequest, { userId, supabase, params }) => {
+  async (_request: NextRequest, { supabase, params }) => {
     const { id } = await params;
 
     const { error } = await supabase
       .from('routine_events')
       .delete()
-      .eq('id', id)
-      .eq('user_id', userId);
+      .eq('id', id);
 
     if (error) {
       console.error('[Routine Event DELETE] Error:', error);

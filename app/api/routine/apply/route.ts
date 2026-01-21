@@ -8,18 +8,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
 import { executeApplyRoutine, type ToolExecutorContext } from '@/lib/ai/executors';
+import { formatDate } from '@/lib/utils/dateHelpers';
 import type { RoutinePreviewData } from '@/lib/types/fitness';
-
-/**
- * 날짜를 YYYY-MM-DD 형식으로 포맷 (로컬 시간대 기준)
- * tool-executor.ts의 formatDate와 동일한 로직
- */
-function formatDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
 
 interface ApplyRoutineRequest {
   conversationId: string;
@@ -28,7 +18,7 @@ interface ApplyRoutineRequest {
   forceOverwrite?: boolean;
 }
 
-export const POST = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const POST = withAuth(async (request: NextRequest, { supabase }) => {
   try {
     // 1. 요청 파싱
     const body: ApplyRoutineRequest = await request.json();
@@ -41,7 +31,7 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
       );
     }
 
-    // 2. conversation 조회 및 권한 확인
+    // 2. conversation 조회 (RLS가 자동으로 권한 필터링)
     const { data: conversation, error: convError } = await supabase
       .from('conversations')
       .select('id, created_by, metadata, ai_result_applied')
@@ -55,15 +45,7 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
       );
     }
 
-    // 3. 권한 확인 (본인 대화만 접근 가능)
-    if (conversation.created_by !== userId) {
-      return NextResponse.json(
-        { success: false, error: '접근 권한이 없습니다.' },
-        { status: 403 }
-      );
-    }
-
-    // 4. 이미 적용된 경우 체크
+    // 3. 이미 적용된 경우 체크
     if (conversation.ai_result_applied) {
       return NextResponse.json(
         { success: false, error: '이미 루틴이 적용되었습니다.' },
@@ -71,7 +53,7 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
       );
     }
 
-    // 5. pending_preview 데이터 확인
+    // 4. pending_preview 데이터 확인
     const metadata = conversation.metadata as { pending_preview?: RoutinePreviewData } | null;
     const previewData = metadata?.pending_preview;
 
@@ -82,7 +64,7 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
       );
     }
 
-    // 6. previewId 일치 확인 (보안 검증)
+    // 5. previewId 일치 확인 (보안 검증)
     if (previewData.id !== previewId) {
       return NextResponse.json(
         { success: false, error: '미리보기 ID가 일치하지 않습니다.' },
@@ -90,7 +72,7 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
       );
     }
 
-    // 7. forceOverwrite 시 기존 루틴 삭제
+    // 6. forceOverwrite 시 기존 루틴 삭제
     if (forceOverwrite && previewData.weeks && previewData.weeks.length > 0) {
       // 루틴이 적용될 날짜들 계산 (다음 월요일 기준)
       const today = new Date();
@@ -115,11 +97,10 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
       }
 
       if (datesToDelete.length > 0) {
-        // 해당 날짜의 기존 workout 이벤트 삭제
+        // 해당 날짜의 기존 workout 이벤트 삭제 (RLS가 자동으로 권한 필터링)
         const { error: deleteError } = await supabase
           .from('routine_events')
           .delete()
-          .eq('user_id', userId)
           .eq('type', 'workout')
           .in('date', datesToDelete);
 
@@ -133,9 +114,9 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
       }
     }
 
-    // 8. 루틴 적용 실행
+    // 7. 루틴 적용 실행
     const toolCtx: ToolExecutorContext = {
-      userId,
+      userId: conversation.created_by, // RLS 통과한 대화의 소유자 ID 사용
       supabase,
       conversationId,
     };
@@ -149,7 +130,7 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
       );
     }
 
-    // 9. 적용 완료 후 대화 상태 업데이트 (completed + metadata)
+    // 8. 적용 완료 후 대화 상태 업데이트 (completed + metadata)
     const appliedAt = new Date().toISOString();
     await supabase
       .from('conversations')
@@ -168,7 +149,7 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
       })
       .eq('id', conversationId);
 
-    // 10. 성공 응답
+    // 9. 성공 응답
     return NextResponse.json({
       success: true,
       data: {

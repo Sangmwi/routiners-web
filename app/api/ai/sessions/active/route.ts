@@ -6,7 +6,7 @@ import { DbAISession, transformDbSessionToSession } from '@/lib/types/routine';
  * GET /api/ai/sessions/active
  * 현재 활성 세션 조회 (purpose별로 1개만 존재)
  */
-export const GET = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   const { searchParams } = new URL(request.url);
   const purpose = searchParams.get('purpose');
 
@@ -17,10 +17,10 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
     );
   }
 
+  // RLS가 user_id 필터링
   const { data, error } = await supabase
     .from('ai_sessions')
     .select('*')
-    .eq('user_id', userId)
     .eq('purpose', purpose)
     .eq('status', 'active')
     .single();

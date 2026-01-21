@@ -43,17 +43,17 @@ const INITIAL_MESSAGES: Record<SessionPurpose, string> = {
  * GET /api/ai/sessions
  * AI 세션 목록 조회
  */
-export const GET = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   const { searchParams } = new URL(request.url);
   const purpose = searchParams.get('purpose');
   const status = searchParams.get('status');
   const limit = parseInt(searchParams.get('limit') || '20', 10);
   const offset = parseInt(searchParams.get('offset') || '0', 10);
 
+  // RLS가 user_id 필터링
   let query = supabase
     .from('ai_sessions')
     .select('*')
-    .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);
 
@@ -85,7 +85,7 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
  * POST /api/ai/sessions
  * 새 AI 세션 생성
  */
-export const POST = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const POST = withAuth(async (request: NextRequest, { supabase }) => {
   let body;
   try {
     body = await request.json();
@@ -111,11 +111,10 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
 
   const { purpose, title } = validation.data;
 
-  // 이미 활성 세션이 있는지 확인
+  // 이미 활성 세션이 있는지 확인 (RLS가 user_id 필터링)
   const { data: existingSession } = await supabase
     .from('ai_sessions')
     .select('id')
-    .eq('user_id', userId)
     .eq('purpose', purpose)
     .eq('status', 'active')
     .single();
@@ -135,11 +134,10 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
     createdAt: new Date().toISOString(),
   };
 
-  // 새 세션 생성 (초기 메시지 포함)
+  // 새 세션 생성 (초기 메시지 포함, user_id는 DB DEFAULT)
   const { data, error } = await supabase
     .from('ai_sessions')
     .insert({
-      user_id: userId,
       purpose,
       title: title || null,
       status: 'active',

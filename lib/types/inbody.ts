@@ -266,13 +266,13 @@ export function transformDbInBodyToInBody(db: DbInBodyRecord): InBodyRecord {
 
 /**
  * InBodyCreateData (camelCase) → DB Insert 데이터 (snake_case) 변환
+ *
+ * ⚠️ user_id는 DB DEFAULT current_user_id()가 자동 채움
  */
 export function transformInBodyToDbInsert(
-  data: InBodyCreateData,
-  userId: string
-): Omit<DbInBodyRecord, 'id' | 'created_at' | 'updated_at'> {
+  data: InBodyCreateData
+): Omit<DbInBodyRecord, 'id' | 'user_id' | 'created_at' | 'updated_at'> {
   return {
-    user_id: userId,
     measured_at: data.measuredAt,
     weight: data.weight,
     skeletal_muscle_mass: data.skeletalMuscleMass,

@@ -6,7 +6,7 @@ import { DbRoutineEvent, transformDbEventToEvent } from '@/lib/types/routine';
  * GET /api/routine/events/by-date
  * 특정 날짜의 이벤트 조회
  */
-export const GET = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   const { searchParams } = new URL(request.url);
   const date = searchParams.get('date');
   const type = searchParams.get('type');
@@ -21,7 +21,6 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
   let query = supabase
     .from('routine_events')
     .select('*')
-    .eq('user_id', userId)
     .eq('date', date);
 
   if (type) {

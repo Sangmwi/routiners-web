@@ -17,17 +17,17 @@ const MessageCreateSchema = z.object({
 export const GET = withAuth(
   async (
     request: NextRequest,
-    { userId, supabase, params }
+    { supabase, params }
   ) => {
     const { id: conversationId } = await params;
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '50', 10);
     const cursor = searchParams.get('cursor'); // created_at 기준
 
-    // 권한 확인 (참여자인지)
+    // RLS가 권한 필터링을 처리
     const { data: conversation } = await supabase
       .from('conversations')
-      .select('type, created_by')
+      .select('type')
       .eq('id', conversationId)
       .single();
 
@@ -36,32 +36,6 @@ export const GET = withAuth(
         { error: '대화를 찾을 수 없습니다.', code: 'NOT_FOUND' },
         { status: 404 }
       );
-    }
-
-    // AI 대화는 생성자만
-    if (conversation.type === 'ai') {
-      if (conversation.created_by !== userId) {
-        return NextResponse.json(
-          { error: '접근 권한이 없습니다.', code: 'FORBIDDEN' },
-          { status: 403 }
-        );
-      }
-    } else {
-      // 일반 대화는 참여자 확인
-      const { data: participant } = await supabase
-        .from('conversation_participants')
-        .select('id')
-        .eq('conversation_id', conversationId)
-        .eq('user_id', userId)
-        .is('left_at', null)
-        .single();
-
-      if (!participant) {
-        return NextResponse.json(
-          { error: '접근 권한이 없습니다.', code: 'FORBIDDEN' },
-          { status: 403 }
-        );
-      }
     }
 
     // 메시지 조회
@@ -109,7 +83,7 @@ export const GET = withAuth(
 export const POST = withAuth(
   async (
     request: NextRequest,
-    { userId, supabase, params }
+    { supabase, params }
   ) => {
     const { id: conversationId } = await params;
 
@@ -137,10 +111,10 @@ export const POST = withAuth(
 
     const { content, contentType, mediaUrl, replyToId } = validation.data;
 
-    // 대화 존재 및 권한 확인
+    // RLS가 권한 필터링을 처리
     const { data: conversation } = await supabase
       .from('conversations')
-      .select('type, created_by')
+      .select('type')
       .eq('id', conversationId)
       .is('deleted_at', null)
       .single();
@@ -152,38 +126,11 @@ export const POST = withAuth(
       );
     }
 
-    // AI 대화는 생성자만
-    if (conversation.type === 'ai') {
-      if (conversation.created_by !== userId) {
-        return NextResponse.json(
-          { error: '접근 권한이 없습니다.', code: 'FORBIDDEN' },
-          { status: 403 }
-        );
-      }
-    } else {
-      // 일반 대화는 참여자 확인
-      const { data: participant } = await supabase
-        .from('conversation_participants')
-        .select('id')
-        .eq('conversation_id', conversationId)
-        .eq('user_id', userId)
-        .is('left_at', null)
-        .single();
-
-      if (!participant) {
-        return NextResponse.json(
-          { error: '접근 권한이 없습니다.', code: 'FORBIDDEN' },
-          { status: 403 }
-        );
-      }
-    }
-
-    // 메시지 생성
+    // 메시지 생성 - sender_id는 DB DEFAULT가 처리
     const { data, error } = await supabase
       .from('chat_messages')
       .insert({
         conversation_id: conversationId,
-        sender_id: userId,
         role: 'user',
         content,
         content_type: contentType,

@@ -12,18 +12,17 @@ import { validateRequest, handleSupabaseError, badRequest } from '@/lib/utils/ap
  * GET /api/fitness-profile
  * 현재 사용자의 피트니스 프로필 조회
  */
-export const GET = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const GET = withAuth(async (_request: NextRequest, { supabase }) => {
   const { data, error } = await supabase
     .from('fitness_profiles')
     .select('*')
-    .eq('user_id', userId)
     .single();
 
   if (error) {
     // 프로필이 없는 경우 빈 프로필 반환
     if (error.code === 'PGRST116') {
       return NextResponse.json({
-        userId,
+        userId: null,
         fitnessGoal: null,
         experienceLevel: null,
         preferredDaysPerWeek: null,
@@ -53,7 +52,7 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
  * PUT /api/fitness-profile
  * 피트니스 프로필 생성 또는 업데이트 (Upsert)
  */
-export const PUT = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const PUT = withAuth(async (request: NextRequest, { supabase }) => {
   const result = await validateRequest(request, FitnessProfileUpdateSchema);
   if (!result.success) return result.response;
 
@@ -62,13 +61,7 @@ export const PUT = withAuth(async (request: NextRequest, { userId, supabase }) =
   // Upsert
   const { data, error } = await supabase
     .from('fitness_profiles')
-    .upsert(
-      {
-        user_id: userId,
-        ...updateData,
-      },
-      { onConflict: 'user_id' }
-    )
+    .upsert(updateData, { onConflict: 'user_id' })
     .select()
     .single();
 
@@ -84,7 +77,7 @@ export const PUT = withAuth(async (request: NextRequest, { userId, supabase }) =
  * PATCH /api/fitness-profile
  * 피트니스 프로필 부분 업데이트
  */
-export const PATCH = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const PATCH = withAuth(async (request: NextRequest, { supabase }) => {
   const result = await validateRequest(request, FitnessProfileUpdateSchema);
   if (!result.success) return result.response;
 
@@ -98,17 +91,13 @@ export const PATCH = withAuth(async (request: NextRequest, { userId, supabase })
   const { data: existing } = await supabase
     .from('fitness_profiles')
     .select('user_id')
-    .eq('user_id', userId)
     .single();
 
   if (!existing) {
     // 프로필이 없으면 생성
     const { data, error } = await supabase
       .from('fitness_profiles')
-      .insert({
-        user_id: userId,
-        ...updateData,
-      })
+      .insert(updateData)
       .select()
       .single();
 
@@ -124,7 +113,6 @@ export const PATCH = withAuth(async (request: NextRequest, { userId, supabase })
   const { data, error } = await supabase
     .from('fitness_profiles')
     .update(updateData)
-    .eq('user_id', userId)
     .select()
     .single();
 
@@ -140,11 +128,11 @@ export const PATCH = withAuth(async (request: NextRequest, { userId, supabase })
  * DELETE /api/fitness-profile
  * 피트니스 프로필 삭제
  */
-export const DELETE = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const DELETE = withAuth(async (_request: NextRequest, { supabase }) => {
   const { error } = await supabase
     .from('fitness_profiles')
     .delete()
-    .eq('user_id', userId);
+    .neq('user_id', '');
 
   if (error) {
     console.error('[Fitness Profile DELETE] Error:', error);

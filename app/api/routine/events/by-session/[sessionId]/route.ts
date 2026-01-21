@@ -9,16 +9,15 @@ interface RouteParams {
  * DELETE /api/routine/events/by-session/[sessionId]
  * AI 세션과 연결된 이벤트들 삭제
  */
-export const DELETE = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const DELETE = withAuth(async (request: NextRequest, { supabase }) => {
   const { sessionId } = await (request as unknown as RouteParams).params;
 
-  // 대화(conversation) 소유권 확인
+  // 대화(conversation) 소유권 확인 (RLS가 자동으로 권한 필터링)
   const { data: session, error: sessionError } = await supabase
     .from('conversations')
     .select('id')
     .eq('id', sessionId)
     .eq('type', 'ai')
-    .eq('created_by', userId)
     .single();
 
   if (sessionError || !session) {
@@ -28,12 +27,11 @@ export const DELETE = withAuth(async (request: NextRequest, { userId, supabase }
     );
   }
 
-  // 해당 세션의 이벤트들 삭제
+  // 해당 세션의 이벤트들 삭제 (RLS가 자동으로 권한 필터링)
   const { error, count } = await supabase
     .from('routine_events')
     .delete({ count: 'exact' })
-    .eq('ai_session_id', sessionId)
-    .eq('user_id', userId);
+    .eq('ai_session_id', sessionId);
 
   if (error) {
     console.error('[Routine Events by-session DELETE] Error:', error);

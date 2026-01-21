@@ -7,11 +7,10 @@ import { handleSupabaseError } from '@/lib/utils/apiResponse';
  * GET /api/inbody/latest
  * 최신 InBody 기록 조회
  */
-export const GET = withAuth(async (_request, { userId, supabase }) => {
+export const GET = withAuth(async (_request, { supabase }) => {
   const { data, error } = await supabase
     .from('inbody_records')
     .select('*')
-    .eq('user_id', userId)
     .order('measured_at', { ascending: false })
     .limit(1)
     .single();

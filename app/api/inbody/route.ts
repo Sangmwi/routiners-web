@@ -12,7 +12,7 @@ import { parseRequestBody, handleSupabaseError, badRequest } from '@/lib/utils/a
  * GET /api/inbody
  * InBody 기록 목록 조회 (최신순)
  */
-export const GET = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   const { searchParams } = new URL(request.url);
   const limit = parseInt(searchParams.get('limit') || '20', 10);
   const offset = parseInt(searchParams.get('offset') || '0', 10);
@@ -20,7 +20,6 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
   const { data, error } = await supabase
     .from('inbody_records')
     .select('*')
-    .eq('user_id', userId)
     .order('measured_at', { ascending: false })
     .range(offset, offset + limit - 1);
 
@@ -37,7 +36,7 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
  * POST /api/inbody
  * 새 InBody 기록 생성
  */
-export const POST = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const POST = withAuth(async (request: NextRequest, { supabase }) => {
   const result = await parseRequestBody<InBodyCreateData>(request);
   if (!result.success) return result.response;
   const body = result.data;
@@ -48,7 +47,7 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
   }
 
   // DB 형식으로 변환
-  const insertData = transformInBodyToDbInsert(body, userId);
+  const insertData = transformInBodyToDbInsert(body);
 
   const { data, error } = await supabase
     .from('inbody_records')

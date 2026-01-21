@@ -4,6 +4,7 @@ import { useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import EventCarouselCard from './EventCarouselCard';
 import type { RoutineEvent, EventType } from '@/lib/types/routine';
+import { formatDate, addDays } from '@/lib/utils/dateHelpers';
 
 interface RoutineEventCarouselProps {
   /** 이벤트 타입 */
@@ -167,15 +168,3 @@ function generateDateRange(
   return dates;
 }
 
-function formatDate(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
-function addDays(date: Date, days: number): Date {
-  const result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
-}

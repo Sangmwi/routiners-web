@@ -28,7 +28,7 @@ const ConversationCreateSchema = z.object({
 // GET /api/conversations - 대화 목록 조회
 // ============================================================================
 
-export const GET = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   const { searchParams } = new URL(request.url);
   const type = searchParams.get('type');
   const aiPurpose = searchParams.get('aiPurpose');
@@ -39,7 +39,6 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
   let query = supabase
     .from('conversations')
     .select('*')
-    .eq('created_by', userId)
     .is('deleted_at', null)
     .order('updated_at', { ascending: false })
     .range(offset, offset + limit - 1);
@@ -72,7 +71,7 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
 // POST /api/conversations - 새 대화 생성
 // ============================================================================
 
-export const POST = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const POST = withAuth(async (request: NextRequest, { supabase }) => {
   let body;
   try {
     body = await request.json();
@@ -105,7 +104,6 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
         ai_status: 'completed',
         updated_at: new Date().toISOString(),
       })
-      .eq('created_by', userId)
       .eq('type', 'ai')
       .eq('ai_purpose', aiPurpose)
       .eq('ai_status', 'active')
@@ -129,7 +127,6 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
       ai_status: type === 'ai' ? 'active' : null,
       ai_result_applied: false,
       title: title || null,
-      created_by: userId,
     })
     .select()
     .single();
@@ -144,12 +141,11 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
 
   const conv = conversation as DbConversation;
 
-  // 참여자 추가 (owner)
+  // 참여자 추가 (owner) - user_id는 DB DEFAULT가 처리
   const { error: participantError } = await supabase
     .from('conversation_participants')
     .insert({
       conversation_id: conv.id,
-      user_id: userId,
       role: 'owner',
     });
 

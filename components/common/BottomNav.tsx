@@ -1,21 +1,13 @@
-"use client";
+'use client';
 
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { shouldShowBottomTab } from "@/lib/routes";
-import { BOTTOM_NAV } from "@/lib/config/theme";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { shouldShowBottomTab } from '@/lib/routes';
+import { BOTTOM_NAV } from '@/lib/config/theme';
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const router = useRouter();
   const { items, style } = BOTTOM_NAV;
-
-  // 프리패치 적용
-  useEffect(() => {
-    items.forEach((item) => {
-      router.prefetch(item.href);
-    });
-  }, [router, items]);
 
   // 특정 페이지에서는 탭 숨김
   if (!shouldShowBottomTab(pathname)) {
@@ -30,10 +22,12 @@ export default function BottomNav() {
           const Icon = item.icon;
 
           return (
-            <button
+            <Link
               key={item.href}
-              type="button"
-              onClick={() => router.push(item.href)}
+              href={item.href}
+              prefetch={true}
+              // URL 미리보기 차단 시도
+              onContextMenu={(e) => e.preventDefault()}
               className={`flex flex-col items-center justify-center gap-1 transition-colors ${
                 isActive
                   ? style.activeColor
@@ -45,7 +39,7 @@ export default function BottomNav() {
                 weight={isActive ? style.activeWeight : style.inactiveWeight}
               />
               <span className="text-xs font-medium">{item.label}</span>
-            </button>
+            </Link>
           );
         })}
       </div>

@@ -18,6 +18,11 @@ import {
 import { SYSTEM_PROMPTS } from '@/lib/ai/system-prompts';
 import type { AIToolName } from '@/lib/types/fitness';
 import { z } from 'zod';
+import {
+  checkRateLimit,
+  AI_RATE_LIMIT,
+  rateLimitExceeded,
+} from '@/lib/utils/rateLimiter';
 
 // OpenAI 클라이언트 초기화
 const openai = new OpenAI({
@@ -135,10 +140,18 @@ function buildConversationInput(
 /**
  * POST /api/conversations/[id]/messages/ai
  * AI 채팅 메시지 전송 (SSE 스트리밍 + Function Calling with Responses API)
+ *
+ * ⚠️ Tool handlers는 userId를 사용하므로 conversation.created_by에서 가져옴
  */
 export const POST = withAuth<Response>(
-  async (request: NextRequest, { userId, supabase, params }) => {
+  async (request: NextRequest, { authUser, supabase, params }) => {
     const { id: conversationId } = await params;
+
+    // Rate Limiting (분당 10회)
+    const rateLimitResult = checkRateLimit(`ai-conversation:${authUser.id}`, AI_RATE_LIMIT);
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(rateLimitExceeded(rateLimitResult), { status: 429 });
+    }
 
     let body;
     try {
@@ -164,7 +177,7 @@ export const POST = withAuth<Response>(
 
     const { message } = validation.data;
 
-    // 대화 조회 및 권한 확인
+    // RLS가 권한 필터링을 처리
     const { data: conversation, error: convError } = await supabase
       .from('conversations')
       .select('*')
@@ -182,12 +195,8 @@ export const POST = withAuth<Response>(
 
     const conv = conversation as DbConversation;
 
-    if (conv.created_by !== userId) {
-      return NextResponse.json(
-        { error: '접근 권한이 없습니다.', code: 'FORBIDDEN' },
-        { status: 403 }
-      );
-    }
+    // Tool handlers에서 사용할 userId (conversation 소유자)
+    const userId = conv.created_by;
 
     if (conv.ai_status !== 'active') {
       return NextResponse.json(
@@ -223,12 +232,11 @@ export const POST = withAuth<Response>(
           content_type: 'text',
         });
     } else {
-      // 일반 사용자 메시지 저장
+      // 일반 사용자 메시지 저장 - sender_id는 DB DEFAULT가 처리
       const { data: userMsg, error: userMsgError } = await supabase
         .from('chat_messages')
         .insert({
           conversation_id: conversationId,
-          sender_id: userId,
           role: 'user',
           content: message,
           content_type: 'text',

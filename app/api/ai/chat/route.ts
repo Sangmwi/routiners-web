@@ -3,6 +3,11 @@ import OpenAI from 'openai';
 import { withAuth } from '@/utils/supabase/auth';
 import { DbAISession, ChatMessage } from '@/lib/types/routine';
 import { ChatSendMessageSchema } from '@/lib/schemas/routine.schema';
+import {
+  checkRateLimit,
+  AI_RATE_LIMIT,
+  rateLimitExceeded,
+} from '@/lib/utils/rateLimiter';
 
 // OpenAI 클라이언트 초기화
 const openai = new OpenAI({
@@ -45,7 +50,13 @@ const SYSTEM_PROMPT = `당신은 "루티너스"라는 한국 군인 대상 피�
  * POST /api/ai/chat
  * AI 채팅 메시지 전송 (SSE 스트리밍 또는 일반 응답)
  */
-export const POST = withAuth<Response>(async (request: NextRequest, { userId, supabase }) => {
+export const POST = withAuth<Response>(async (request: NextRequest, { authUser, supabase }) => {
+  // Rate Limiting (분당 10회)
+  const rateLimitResult = checkRateLimit(`ai-chat:${authUser.id}`, AI_RATE_LIMIT);
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(rateLimitExceeded(rateLimitResult), { status: 429 });
+  }
+
   let body;
   try {
     body = await request.json();
@@ -71,12 +82,11 @@ export const POST = withAuth<Response>(async (request: NextRequest, { userId, su
 
   const { sessionId, message } = validation.data;
 
-  // 세션 조회
+  // 세션 조회 (RLS가 user_id 필터링)
   const { data: session, error: sessionError } = await supabase
     .from('ai_sessions')
     .select('*')
     .eq('id', sessionId)
-    .eq('user_id', userId)
     .single();
 
   if (sessionError || !session) {

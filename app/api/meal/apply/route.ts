@@ -8,17 +8,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
 import { executeApplyMealPlan, MealToolExecutorContext } from '@/lib/ai/meal-tool-executor';
+import { formatDate } from '@/lib/utils/dateHelpers';
 import type { MealPlanPreviewData } from '@/lib/types/meal';
-
-/**
- * 날짜를 YYYY-MM-DD 형식으로 포맷 (로컬 시간대 기준)
- */
-function formatDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
 
 interface ApplyMealPlanRequest {
   conversationId: string;
@@ -27,7 +18,7 @@ interface ApplyMealPlanRequest {
   forceOverwrite?: boolean;
 }
 
-export const POST = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const POST = withAuth(async (request: NextRequest, { supabase }) => {
   try {
     // 1. 요청 파싱
     const body: ApplyMealPlanRequest = await request.json();
@@ -40,7 +31,7 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
       );
     }
 
-    // 2. conversation 조회 및 권한 확인
+    // 2. conversation 조회 (RLS가 권한 검증)
     const { data: conversation, error: convError } = await supabase
       .from('conversations')
       .select('id, created_by, metadata, ai_result_applied')
@@ -51,14 +42,6 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
       return NextResponse.json(
         { success: false, error: '대화를 찾을 수 없습니다.' },
         { status: 404 }
-      );
-    }
-
-    // 3. 권한 확인 (본인 대화만 접근 가능)
-    if (conversation.created_by !== userId) {
-      return NextResponse.json(
-        { success: false, error: '접근 권한이 없습니다.' },
-        { status: 403 }
       );
     }
 
@@ -114,11 +97,10 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
       }
 
       if (datesToDelete.length > 0) {
-        // 해당 날짜의 기존 meal 이벤트 삭제
+        // 해당 날짜의 기존 meal 이벤트 삭제 (RLS가 user_id 필터링)
         const { error: deleteError } = await supabase
           .from('routine_events')
           .delete()
-          .eq('user_id', userId)
           .eq('type', 'meal')
           .in('date', datesToDelete);
 
@@ -134,7 +116,7 @@ export const POST = withAuth(async (request: NextRequest, { userId, supabase }) 
 
     // 8. 식단 적용 실행
     const mealCtx: MealToolExecutorContext = {
-      userId,
+      userId: conversation.created_by,
       supabase,
       conversationId,
     };

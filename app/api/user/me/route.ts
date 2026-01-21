@@ -6,13 +6,15 @@ import { notFound, handleSupabaseError } from '@/lib/utils/apiResponse';
 /**
  * GET /api/user/me
  * Get current authenticated user's profile
+ *
+ * ⚠️ users 테이블은 provider_id로 조회 (authUser.id = Supabase Auth UID)
  */
-export const GET = withAuth(async (_request, { userId, supabase }) => {
-  // Fetch user profile from database (userId already verified by withAuth)
+export const GET = withAuth(async (_request, { authUser, supabase }) => {
+  // Fetch user profile by provider_id
   const { data: user, error } = await supabase
     .from('users')
     .select('*')
-    .eq('id', userId)
+    .eq('provider_id', authUser.id)
     .single();
 
   if (error) {

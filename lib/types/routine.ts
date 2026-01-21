@@ -294,13 +294,13 @@ export function transformDbEventToEvent(db: DbRoutineEvent): RoutineEvent {
 
 /**
  * AISessionCreateData → DB Insert 데이터 변환
+ *
+ * ⚠️ user_id는 DB DEFAULT current_user_id()가 자동 채움
  */
 export function transformSessionToDbInsert(
-  data: AISessionCreateData,
-  userId: string
-): Omit<DbAISession, 'id' | 'created_at' | 'completed_at' | 'result_applied_at'> {
+  data: AISessionCreateData
+): Omit<DbAISession, 'id' | 'user_id' | 'created_at' | 'completed_at' | 'result_applied_at'> {
   return {
-    user_id: userId,
     purpose: data.purpose,
     status: 'active',
     title: data.title ?? null,
@@ -311,13 +311,13 @@ export function transformSessionToDbInsert(
 
 /**
  * RoutineEventCreateData → DB Insert 데이터 변환
+ *
+ * ⚠️ user_id는 DB DEFAULT current_user_id()가 자동 채움
  */
 export function transformEventToDbInsert(
-  data: RoutineEventCreateData,
-  userId: string
-): Omit<DbRoutineEvent, 'id' | 'created_at' | 'completed_at'> {
+  data: RoutineEventCreateData
+): Omit<DbRoutineEvent, 'id' | 'user_id' | 'created_at' | 'completed_at'> {
   return {
-    user_id: userId,
     type: data.type,
     date: data.date,
     title: data.title,

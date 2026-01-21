@@ -8,7 +8,7 @@ import { notFound, handleSupabaseError } from '@/lib/utils/apiResponse';
  * 이벤트 완료 처리
  */
 export const POST = withAuth<NextResponse, { id: string }>(
-  async (_request: NextRequest, { userId, supabase, params }) => {
+  async (_request: NextRequest, { supabase, params }) => {
     const { id } = await params;
 
     const { data, error } = await supabase
@@ -18,7 +18,6 @@ export const POST = withAuth<NextResponse, { id: string }>(
         completed_at: new Date().toISOString(),
       })
       .eq('id', id)
-      .eq('user_id', userId)
       .eq('status', 'scheduled')
       .select()
       .single();

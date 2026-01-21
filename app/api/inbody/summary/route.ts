@@ -11,12 +11,11 @@ import { handleSupabaseError } from '@/lib/utils/apiResponse';
  * GET /api/inbody/summary
  * InBody 요약 정보 조회 (프로필 표시용)
  */
-export const GET = withAuth(async (_request, { userId, supabase }) => {
+export const GET = withAuth(async (_request, { supabase }) => {
   // 최근 2개 기록 조회 (최신 + 이전 기록 비교용)
   const { data, error, count } = await supabase
     .from('inbody_records')
     .select('*', { count: 'exact' })
-    .eq('user_id', userId)
     .order('measured_at', { ascending: false })
     .limit(2);
 

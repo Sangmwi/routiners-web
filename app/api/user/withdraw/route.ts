@@ -6,13 +6,30 @@ import { withAuth } from '@/utils/supabase/auth';
  * DELETE /api/user/withdraw
  *
  * 회원 탈퇴 처리:
- * 1. DB users 테이블에서 사용자 삭제 (Hard Delete)
+ * 1. DB users 테이블에서 사용자 조회 (provider_id로)
  * 2. Storage에서 사용자 프로필 이미지 삭제
- * 3. Supabase Auth에서 사용자 삭제 (service role key 필요)
+ * 3. DB users 테이블에서 사용자 삭제
+ * 4. Supabase Auth에서 사용자 삭제 (service role key 필요)
  */
-export const DELETE = withAuth(async (_request, { userId, supabase, authUser }) => {
+export const DELETE = withAuth(async (_request, { authUser, supabase }) => {
   try {
-    // 1. Storage에서 사용자 프로필 이미지 삭제
+    // 1. 현재 사용자 조회 (users.id가 Storage path에 필요)
+    const { data: currentUser, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('provider_id', authUser.id)
+      .single();
+
+    if (userError || !currentUser) {
+      return NextResponse.json(
+        { error: '사용자를 찾을 수 없습니다.' },
+        { status: 404 }
+      );
+    }
+
+    const userId = currentUser.id;
+
+    // 2. Storage에서 사용자 프로필 이미지 삭제
     const { data: files } = await supabase.storage
       .from('profile-images')
       .list(userId);
@@ -22,11 +39,11 @@ export const DELETE = withAuth(async (_request, { userId, supabase, authUser }) 
       await supabase.storage.from('profile-images').remove(filePaths);
     }
 
-    // 2. DB에서 사용자 삭제 (RLS 정책에 따라 자신의 데이터만 삭제 가능)
+    // 3. DB에서 사용자 삭제 (provider_id로 삭제)
     const { error: deleteError } = await supabase
       .from('users')
       .delete()
-      .eq('id', userId);
+      .eq('provider_id', authUser.id);
 
     if (deleteError) {
       console.error('[Withdraw] DB delete error:', deleteError);

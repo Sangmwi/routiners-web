@@ -12,7 +12,7 @@ import {
  * GET /api/conversations/ai/active
  * 현재 활성 AI 대화 조회 (purpose별로 1개만 존재)
  */
-export const GET = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   const { searchParams } = new URL(request.url);
   const purpose = searchParams.get('purpose');
 
@@ -24,11 +24,10 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
   }
 
   // 활성 대화 조회 (가장 최근 1개만)
-  // ⚠️ .single() 대신 .limit(1) 사용 - 여러 개의 활성 세션이 있을 수 있음
+  // RLS가 created_by 필터링을 처리
   const { data: conversations, error: convError } = await supabase
     .from('conversations')
     .select('*')
-    .eq('created_by', userId)
     .eq('type', 'ai')
     .eq('ai_purpose', purpose)
     .eq('ai_status', 'active')

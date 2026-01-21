@@ -10,14 +10,14 @@ interface RouteParams {
  * GET /api/ai/sessions/[id]
  * 특정 세션 상세 조회
  */
-export const GET = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   const { id } = await (request as unknown as RouteParams).params;
 
+  // RLS가 user_id 필터링
   const { data, error } = await supabase
     .from('ai_sessions')
     .select('*')
     .eq('id', id)
-    .eq('user_id', userId)
     .single();
 
   if (error) {
@@ -42,14 +42,14 @@ export const GET = withAuth(async (request: NextRequest, { userId, supabase }) =
  * DELETE /api/ai/sessions/[id]
  * 세션 삭제
  */
-export const DELETE = withAuth(async (request: NextRequest, { userId, supabase }) => {
+export const DELETE = withAuth(async (request: NextRequest, { supabase }) => {
   const { id } = await (request as unknown as RouteParams).params;
 
+  // RLS가 user_id 필터링
   const { error } = await supabase
     .from('ai_sessions')
     .delete()
-    .eq('id', id)
-    .eq('user_id', userId);
+    .eq('id', id);
 
   if (error) {
     console.error('[AI Session DELETE] Error:', error);

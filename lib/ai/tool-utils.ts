@@ -8,6 +8,10 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
+import { formatDate } from '@/lib/utils/dateHelpers';
+
+// Re-export formatDate for backward compatibility
+export { formatDate };
 
 // =============================================================================
 // Types
@@ -76,15 +80,6 @@ export function getNextMonday(): Date {
   return nextMonday;
 }
 
-/**
- * 날짜를 YYYY-MM-DD 형식으로 포맷
- */
-export function formatDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
 
 /**
  * 미리보기 데이터에서 적용될 날짜 목록 계산

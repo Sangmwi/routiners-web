@@ -8,17 +8,17 @@ import { withAuth } from '@/utils/supabase/auth';
 export const PATCH = withAuth(
   async (
     request: NextRequest,
-    { userId, supabase, params }
+    { supabase, params }
   ) => {
     const conversationId = (await params).id;
 
     const body = await request.json();
     const { clearProfileConfirmation, clearPendingPreview, clearPendingMealPreview } = body;
 
-    // 대화 소유권 확인
+    // RLS가 권한 필터링을 처리
     const { data: conversation, error: convError } = await supabase
       .from('conversations')
-      .select('id, created_by, metadata')
+      .select('id, metadata')
       .eq('id', conversationId)
       .single();
 
@@ -26,13 +26,6 @@ export const PATCH = withAuth(
       return NextResponse.json(
         { error: '대화를 찾을 수 없습니다.', code: 'NOT_FOUND' },
         { status: 404 }
-      );
-    }
-
-    if (conversation.created_by !== userId) {
-      return NextResponse.json(
-        { error: '권한이 없습니다.', code: 'FORBIDDEN' },
-        { status: 403 }
       );
     }
 
