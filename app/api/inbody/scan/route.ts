@@ -10,6 +10,7 @@ import {
   INBODY_SCAN_RATE_LIMIT,
   rateLimitExceeded,
 } from '@/lib/utils/rateLimiter';
+import { AI_MODEL } from '@/lib/constants/aiChat';
 
 // OpenAI 클라이언트 초기화
 const openai = new OpenAI({
@@ -227,7 +228,7 @@ export const POST = withAuth(async (request: NextRequest, { authUser }) => {
 
     // OpenAI Responses API 호출 (최신 모델 지원)
     const response = await openai.responses.create({
-      model: 'gpt-5.1',
+      model: AI_MODEL.DEFAULT,
       instructions: SYSTEM_INSTRUCTIONS,
       input: [
         {
@@ -288,8 +289,6 @@ export const POST = withAuth(async (request: NextRequest, { authUser }) => {
 
     // is_valid_inbody와 rejection_reason 필드 제거 후 Zod 검증
     const { is_valid_inbody, rejection_reason, ...extractedData } = parsedData;
-
-    console.log('[InBody Scan] AI Response:', extractedData);
 
     // Zod 검증 (nullable 필드는 null 허용)
     const validationResult = InBodyExtractedDataSchema.safeParse(extractedData);

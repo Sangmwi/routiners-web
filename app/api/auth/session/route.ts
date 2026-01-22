@@ -96,8 +96,6 @@ export async function POST(request: NextRequest) {
       });
     });
 
-    console.log('[API] Session set for:', data.user?.email, 'cookies:', cookiesToSet.length);
-
     return response;
   } catch (error) {
     console.error('[API] Session error:', error);
@@ -150,8 +148,6 @@ export async function DELETE(request: NextRequest) {
         response.cookies.delete(cookie.name);
       }
     }
-
-    console.log('[API] Session cleared');
 
     return response;
   } catch (error) {

@@ -12,6 +12,7 @@ import {
 } from '@/lib/ai/chat-handlers';
 import {
   AI_CHAT_LIMITS,
+  AI_MODEL,
   isSystemMessage,
   INITIAL_GREETINGS,
 } from '@/lib/constants/aiChat';
@@ -299,7 +300,7 @@ export const POST = withAuth<Response>(
           while (continueLoop && totalToolCalls < AI_CHAT_LIMITS.MAX_TOOL_CALLS_PER_RESPONSE) {
             // Responses API 호출 (스트리밍)
             const stream = await openai.responses.create({
-              model: 'gpt-5.1',
+              model: AI_MODEL.DEFAULT,
               instructions: SYSTEM_PROMPTS[purpose],
               input,
               tools,

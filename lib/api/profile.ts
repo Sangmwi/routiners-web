@@ -25,6 +25,21 @@ export const profileApi = {
   },
 
   /**
+   * 닉네임 사용 가능 여부 확인
+   *
+   * @param nickname - 확인할 닉네임
+   * @returns { available: boolean, message?: string }
+   * @throws {ApiError} 네트워크 오류 발생 시
+   */
+  async checkNickname(
+    nickname: string
+  ): Promise<{ available: boolean; message?: string }> {
+    return api.getOrThrow<{ available: boolean; message?: string }>(
+      `/api/user/check-nickname?nickname=${encodeURIComponent(nickname)}`
+    );
+  },
+
+  /**
    * 특정 사용자 프로필 조회 (공개 정보만)
    *
    * 시간 복잡도: O(1) - indexed user.id lookup

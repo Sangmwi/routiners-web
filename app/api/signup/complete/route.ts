@@ -34,13 +34,10 @@ export async function POST(request: NextRequest) {
       return unauthorized('로그인이 필요합니다');
     }
 
-    console.log('Authenticated user:', authUser.id);
-
     // Parse and validate request body using Zod
     let body;
     try {
       const rawBody = await request.json();
-      console.log('Signup data received:', { ...rawBody, phoneNumber: '***' });
       body = SignupCompleteSchema.parse(rawBody);
     } catch (error) {
       if (error instanceof ZodError) {
@@ -104,8 +101,6 @@ export async function POST(request: NextRequest) {
       console.error('Insert error:', insertError);
       throw insertError;
     }
-
-    console.log('User created successfully:', newUser.id);
 
     // Use centralized transformer
     const transformedUser = transformDbUserToUser(newUser as DbUser);

@@ -114,6 +114,15 @@ export const INBODY_SCAN_RATE_LIMIT: RateLimitConfig = {
 };
 
 /**
+ * 루틴/식단 적용 Rate Limit 설정
+ * - 분당 10회 제한 (과도한 DB 쓰기 방지)
+ */
+export const APPLY_RATE_LIMIT: RateLimitConfig = {
+  maxRequests: 10,
+  windowMs: 60 * 1000, // 1분
+};
+
+/**
  * Rate Limit 초과 응답 생성
  */
 export function rateLimitExceeded(result: RateLimitResult) {

@@ -10,6 +10,11 @@ import { withAuth } from '@/utils/supabase/auth';
 import { executeApplyMealPlan, MealToolExecutorContext } from '@/lib/ai/meal-tool-executor';
 import { formatDate } from '@/lib/utils/dateHelpers';
 import type { MealPlanPreviewData } from '@/lib/types/meal';
+import {
+  checkRateLimit,
+  APPLY_RATE_LIMIT,
+  rateLimitExceeded,
+} from '@/lib/utils/rateLimiter';
 
 interface ApplyMealPlanRequest {
   conversationId: string;
@@ -18,7 +23,13 @@ interface ApplyMealPlanRequest {
   forceOverwrite?: boolean;
 }
 
-export const POST = withAuth(async (request: NextRequest, { supabase }) => {
+export const POST = withAuth(async (request: NextRequest, { supabase, authUser }) => {
+  // Rate Limiting (분당 10회)
+  const rateLimitResult = checkRateLimit(`meal-apply:${authUser.id}`, APPLY_RATE_LIMIT);
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(rateLimitExceeded(rateLimitResult), { status: 429 });
+  }
+
   try {
     // 1. 요청 파싱
     const body: ApplyMealPlanRequest = await request.json();
