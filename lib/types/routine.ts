@@ -1,7 +1,7 @@
 /**
  * Routine Types
  *
- * AI 세션 및 루틴 이벤트 관련 타입 정의
+ * 루틴 이벤트 관련 타입 정의
  * DB 타입(snake_case) ↔ 도메인 타입(camelCase) 변환 포함
  */
 
@@ -12,7 +12,6 @@ import type { MealData } from './meal';
 // ============================================================================
 
 export type SessionPurpose = 'workout' | 'meal';
-export type SessionStatus = 'active' | 'completed' | 'abandoned';
 export type EventType = 'workout' | 'meal';
 export type EventStatus = 'scheduled' | 'completed' | 'skipped';
 export type EventSource = 'user' | 'ai';
@@ -124,22 +123,6 @@ export interface ChatMessage {
 // ============================================================================
 
 /**
- * DB ai_sessions 테이블 Row 타입
- */
-export interface DbAISession {
-  id: string;
-  user_id: string;
-  purpose: SessionPurpose;
-  status: SessionStatus;
-  title: string | null;
-  messages: ChatMessage[];
-  result_applied: boolean;
-  result_applied_at: string | null;
-  created_at: string;
-  completed_at: string | null;
-}
-
-/**
  * DB routine_events 테이블 Row 타입
  */
 export interface DbRoutineEvent {
@@ -162,22 +145,6 @@ export interface DbRoutineEvent {
 // ============================================================================
 
 /**
- * 클라이언트용 AI 세션 타입
- */
-export interface AISession {
-  id: string;
-  userId: string;
-  purpose: SessionPurpose;
-  status: SessionStatus;
-  title?: string;
-  messages: ChatMessage[];
-  resultApplied: boolean;
-  resultAppliedAt?: string;
-  createdAt: string;
-  completedAt?: string;
-}
-
-/**
  * 클라이언트용 루틴 이벤트 타입
  */
 export interface RoutineEvent {
@@ -198,26 +165,6 @@ export interface RoutineEvent {
 // ============================================================================
 // Create/Update Types
 // ============================================================================
-
-/**
- * AI 세션 생성용 데이터
- */
-export interface AISessionCreateData {
-  purpose: SessionPurpose;
-  title?: string;
-}
-
-/**
- * AI 세션 업데이트용 데이터
- */
-export interface AISessionUpdateData {
-  status?: SessionStatus;
-  title?: string;
-  messages?: ChatMessage[];
-  resultApplied?: boolean;
-  resultAppliedAt?: string;
-  completedAt?: string;
-}
 
 /**
  * 루틴 이벤트 생성용 데이터 (AI 생성)
@@ -255,24 +202,6 @@ export interface RoutineBatchCreateData {
 // ============================================================================
 
 /**
- * DbAISession (snake_case) → AISession (camelCase) 변환
- */
-export function transformDbSessionToSession(db: DbAISession): AISession {
-  return {
-    id: db.id,
-    userId: db.user_id,
-    purpose: db.purpose,
-    status: db.status,
-    title: db.title ?? undefined,
-    messages: db.messages,
-    resultApplied: db.result_applied,
-    resultAppliedAt: db.result_applied_at ?? undefined,
-    createdAt: db.created_at,
-    completedAt: db.completed_at ?? undefined,
-  };
-}
-
-/**
  * DbRoutineEvent (snake_case) → RoutineEvent (camelCase) 변환
  */
 export function transformDbEventToEvent(db: DbRoutineEvent): RoutineEvent {
@@ -289,23 +218,6 @@ export function transformDbEventToEvent(db: DbRoutineEvent): RoutineEvent {
     source: db.source,
     aiSessionId: db.ai_session_id ?? undefined,
     createdAt: db.created_at,
-  };
-}
-
-/**
- * AISessionCreateData → DB Insert 데이터 변환
- *
- * ⚠️ user_id는 DB DEFAULT current_user_id()가 자동 채움
- */
-export function transformSessionToDbInsert(
-  data: AISessionCreateData
-): Omit<DbAISession, 'id' | 'user_id' | 'created_at' | 'completed_at' | 'result_applied_at'> {
-  return {
-    purpose: data.purpose,
-    status: 'active',
-    title: data.title ?? null,
-    messages: [],
-    result_applied: false,
   };
 }
 
@@ -373,39 +285,3 @@ export function transformEventToCalendarSummary(
   };
 }
 
-// ============================================================================
-// Session History Types
-// ============================================================================
-
-/**
- * 세션 목록 표시용 요약
- */
-export interface SessionSummary {
-  id: string;
-  purpose: SessionPurpose;
-  status: SessionStatus;
-  title?: string;
-  /** 마지막 메시지 미리보기 */
-  lastMessage?: string;
-  /** 메시지 개수 */
-  messageCount: number;
-  createdAt: string;
-  completedAt?: string;
-}
-
-/**
- * AISession → SessionSummary 변환
- */
-export function transformSessionToSummary(session: AISession): SessionSummary {
-  const lastMsg = session.messages[session.messages.length - 1];
-  return {
-    id: session.id,
-    purpose: session.purpose,
-    status: session.status,
-    title: session.title,
-    lastMessage: lastMsg?.content?.substring(0, 100),
-    messageCount: session.messages.length,
-    createdAt: session.createdAt,
-    completedAt: session.completedAt,
-  };
-}

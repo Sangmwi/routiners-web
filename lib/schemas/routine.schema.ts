@@ -15,9 +15,6 @@ export const SessionPurposeSchema = z.enum(['workout', 'meal'], {
   errorMap: () => ({ message: '유효하지 않은 세션 목적입니다.' }),
 });
 
-export const SessionStatusSchema = z.enum(['active', 'completed', 'abandoned'], {
-  errorMap: () => ({ message: '유효하지 않은 세션 상태입니다.' }),
-});
 
 export const EventTypeSchema = z.enum(['workout', 'meal'], {
   errorMap: () => ({ message: '유효하지 않은 이벤트 타입입니다.' }),
@@ -114,44 +111,6 @@ export const ChatMessageSchema = z.object({
   createdAt: z.string().datetime({ message: '유효하지 않은 날짜 형식입니다.' }),
 });
 
-// ============================================================================
-// AI Session Schemas
-// ============================================================================
-
-/**
- * AI 세션 전체 스키마
- */
-export const AISessionSchema = z.object({
-  id: z.string().uuid(),
-  userId: z.string().uuid(),
-  purpose: SessionPurposeSchema,
-  status: SessionStatusSchema,
-  title: z.string().max(100).optional(),
-  messages: z.array(ChatMessageSchema),
-  resultApplied: z.boolean(),
-  resultAppliedAt: z.string().datetime().optional(),
-  createdAt: z.string().datetime(),
-  completedAt: z.string().datetime().optional(),
-});
-
-/**
- * AI 세션 생성 요청 스키마
- */
-export const AISessionCreateSchema = z.object({
-  purpose: SessionPurposeSchema,
-  title: z.string().max(100).optional(),
-});
-
-/**
- * AI 세션 업데이트 스키마
- */
-export const AISessionUpdateSchema = z.object({
-  status: SessionStatusSchema.optional(),
-  title: z.string().max(100).optional(),
-  messages: z.array(ChatMessageSchema).optional(),
-  resultApplied: z.boolean().optional(),
-  completedAt: z.string().datetime().optional(),
-});
 
 // ============================================================================
 // Routine Event Schemas
@@ -205,29 +164,6 @@ export const RoutineBatchCreateSchema = z.object({
   aiSessionId: z.string().uuid(),
 });
 
-// ============================================================================
-// Chat Request Schemas
-// ============================================================================
-
-/**
- * 채팅 메시지 전송 요청 스키마
- */
-export const ChatSendMessageSchema = z.object({
-  sessionId: z.string().uuid('유효하지 않은 세션 ID입니다.'),
-  message: z
-    .string()
-    .min(1, '메시지를 입력해주세요.')
-    .max(2000, '메시지는 2000자 이내여야 합니다.'),
-});
-
-/**
- * 루틴 생성 요청 스키마 (AI에게 요청)
- */
-export const RoutineGenerateRequestSchema = z.object({
-  sessionId: z.string().uuid(),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '시작 날짜는 YYYY-MM-DD 형식이어야 합니다.'),
-  weeks: z.number().int().min(1).max(8).default(4),
-});
 
 // ============================================================================
 // Query Params Schemas
@@ -245,34 +181,19 @@ export const EventQueryParamsSchema = z.object({
   offset: z.coerce.number().int().min(0).default(0),
 });
 
-/**
- * 세션 목록 조회 쿼리 파라미터
- */
-export const SessionQueryParamsSchema = z.object({
-  purpose: SessionPurposeSchema.optional(),
-  status: SessionStatusSchema.optional(),
-  limit: z.coerce.number().int().min(1).max(50).default(20),
-  offset: z.coerce.number().int().min(0).default(0),
-});
 
 // ============================================================================
 // Type Exports
 // ============================================================================
 
 export type SessionPurposeSchemaType = z.infer<typeof SessionPurposeSchema>;
-export type SessionStatusSchemaType = z.infer<typeof SessionStatusSchema>;
 export type EventTypeSchemaType = z.infer<typeof EventTypeSchema>;
 export type EventStatusSchemaType = z.infer<typeof EventStatusSchema>;
 export type WorkoutSetSchemaType = z.infer<typeof WorkoutSetSchema>;
 export type WorkoutExerciseSchemaType = z.infer<typeof WorkoutExerciseSchema>;
 export type WorkoutDataSchemaType = z.infer<typeof WorkoutDataSchema>;
 export type ChatMessageSchemaType = z.infer<typeof ChatMessageSchema>;
-export type AISessionSchemaType = z.infer<typeof AISessionSchema>;
-export type AISessionCreateSchemaType = z.infer<typeof AISessionCreateSchema>;
 export type RoutineEventSchemaType = z.infer<typeof RoutineEventSchema>;
 export type RoutineEventCreateSchemaType = z.infer<typeof RoutineEventCreateSchema>;
 export type RoutineBatchCreateSchemaType = z.infer<typeof RoutineBatchCreateSchema>;
-export type ChatSendMessageSchemaType = z.infer<typeof ChatSendMessageSchema>;
-export type RoutineGenerateRequestSchemaType = z.infer<typeof RoutineGenerateRequestSchema>;
 export type EventQueryParamsSchemaType = z.infer<typeof EventQueryParamsSchema>;
-export type SessionQueryParamsSchemaType = z.infer<typeof SessionQueryParamsSchema>;
