@@ -14,41 +14,15 @@
   --color-green-900: #17451c;
   --color-green-950: #0a2610;
 
-  /* Teal Palette (운동 - 청록색, 푸른계열) */
-  --color-teal-50: #f0fdfa;
-  --color-teal-100: #ccfbf1;
-  --color-teal-200: #99f6e4;
-  --color-teal-300: #5eead4;
-  --color-teal-400: #2dd4bf;
-  --color-teal-500: #14b8a6; /* 운동 메인 컬러 */
-  --color-teal-600: #0d9488;
-  --color-teal-700: #0f766e;
-  --color-teal-800: #115e59;
-  --color-teal-900: #134e4a;
-  --color-teal-950: #042f2e;
-
-  /* Lime Palette (식단 - 연두색, 노란계열) */
-  --color-lime-50: #f7fee7;
-  --color-lime-100: #ecfccb;
-  --color-lime-200: #d9f99d;
-  --color-lime-300: #bef264;
-  --color-lime-400: #a3e635;
-  --color-lime-500: #84cc16; /* 식단 메인 컬러 */
-  --color-lime-600: #65a30d;
-  --color-lime-700: #4d7c0f;
-  --color-lime-800: #3f6212;
-  --color-lime-900: #365314;
-  --color-lime-950: #1a2e05;
-
   --background: #f8faf8;
   --foreground: #0a2610; /* green-950 */
-  
+
   --primary: #50A76C; /* green-500 */
   --primary-foreground: #ffffff;
-  
+
   --secondary: #dbf5e2; /* green-100 */
   --secondary-foreground: #17451c; /* green-900 */
-  
+
   --muted: #e2e8f0; /* slate-200 - 중립 회색 */
   --muted-foreground: #64748b; /* slate-500 - 중립 회색 텍스트 */
 
@@ -64,22 +38,16 @@
   --success: #22c55e; /* green-500 (Tailwind default) */
   --success-foreground: #ffffff;
 
-  /* Domain Colors - 운동/식단 구분 */
-  --workout: #14b8a6; /* teal-500 - 운동 관련 UI */
-  --workout-foreground: #ffffff;
-  --meal: #84cc16; /* lime-500 - 식단 관련 UI */
-  --meal-foreground: #ffffff;
-
-  /* Warning/Alert Colors - 경고, 예정 상태 */
+  /* Warning/Alert Colors */
   --warning: #d97706; /* amber-600 */
   --warning-foreground: #ffffff;
   --warning-muted: #fef3c7; /* amber-100 - 배경용 */
 
-  /* Scheduled Status - 예정 상태 */
+  /* Scheduled Status */
   --scheduled: #f59e0b; /* amber-500 */
   --scheduled-foreground: #ffffff;
 
-  /* Primary Muted - 다크모드에서 살짝 투명한 primary */
+  /* Primary Muted */
   --primary-muted: var(--primary);
 }
 
@@ -101,17 +69,13 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
-  --color-workout: var(--workout);
-  --color-workout-foreground: var(--workout-foreground);
-  --color-meal: var(--meal);
-  --color-meal-foreground: var(--meal-foreground);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
   --color-warning-muted: var(--warning-muted);
   --color-scheduled: var(--scheduled);
   --color-scheduled-foreground: var(--scheduled-foreground);
 
-  /* Green Brand Scale - Tailwind에서 green-500 등으로 사용 가능 */
+  /* Green Brand Scale */
   --color-green-50: var(--color-green-50);
   --color-green-100: var(--color-green-100);
   --color-green-200: var(--color-green-200);
@@ -123,32 +87,6 @@
   --color-green-800: var(--color-green-800);
   --color-green-900: var(--color-green-900);
   --color-green-950: var(--color-green-950);
-
-  /* Teal Scale (운동) - Tailwind에서 teal-500 등으로 사용 가능 */
-  --color-teal-50: var(--color-teal-50);
-  --color-teal-100: var(--color-teal-100);
-  --color-teal-200: var(--color-teal-200);
-  --color-teal-300: var(--color-teal-300);
-  --color-teal-400: var(--color-teal-400);
-  --color-teal-500: var(--color-teal-500);
-  --color-teal-600: var(--color-teal-600);
-  --color-teal-700: var(--color-teal-700);
-  --color-teal-800: var(--color-teal-800);
-  --color-teal-900: var(--color-teal-900);
-  --color-teal-950: var(--color-teal-950);
-
-  /* Lime Scale (식단) - Tailwind에서 lime-500 등으로 사용 가능 */
-  --color-lime-50: var(--color-lime-50);
-  --color-lime-100: var(--color-lime-100);
-  --color-lime-200: var(--color-lime-200);
-  --color-lime-300: var(--color-lime-300);
-  --color-lime-400: var(--color-lime-400);
-  --color-lime-500: var(--color-lime-500);
-  --color-lime-600: var(--color-lime-600);
-  --color-lime-700: var(--color-lime-700);
-  --color-lime-800: var(--color-lime-800);
-  --color-lime-900: var(--color-lime-900);
-  --color-lime-950: var(--color-lime-950);
 
   --font-sans: var(--font-pretendard-variable);
   --font-mono: var(--font-geist-mono);
@@ -168,12 +106,12 @@
     --secondary: #1e293b; /* slate-800 */
     --secondary-foreground: #e2e8f0; /* slate-200 - 밝은 텍스트 */
 
-    /* 카드: 배경보다 약간 밝은 어두운 톤 (흰색 아님!) */
+    /* 카드: 배경보다 약간 밝은 어두운 톤 */
     --card: #1e293b; /* slate-800 */
     --card-foreground: #f1f5f9; /* slate-100 - 밝은 텍스트 */
 
     /* Muted: 배경과 카드 사이의 중간 톤 */
-    --muted: #334155; /* slate-700 - 카드와 동일 (배경보다 밝음) */
+    --muted: #334155; /* slate-700 */
     --muted-foreground: #94a3b8; /* slate-400 - 중간 밝기 */
 
     /* Border: 미묘한 구분선 */
@@ -188,12 +126,6 @@
     --success: #4ade80; /* green-400 - 어두운 배경에서 더 밝게 */
     --success-foreground: #0f172a;
 
-    /* Domain Colors (Dark) */
-    --workout: #2dd4bf; /* teal-400 - 어두운 배경에서 더 밝게 */
-    --workout-foreground: #042f2e;
-    --meal: #a3e635; /* lime-400 - 어두운 배경에서 더 밝게 */
-    --meal-foreground: #1a2e05;
-
     /* Warning/Alert Colors (Dark) */
     --warning: #fbbf24; /* amber-400 - 다크모드에서 더 밝게 */
     --warning-foreground: #1e1e1e;
@@ -204,46 +136,20 @@
     --scheduled-foreground: #1e1e1e;
 
     /* Primary Muted (Dark) - 50% 투명도 */
-    --primary-muted: rgba(80, 167, 108, 0.5); /* primary at 50% opacity */
+    --primary-muted: rgba(80, 167, 108, 0.5);
 
     /* Green 브랜드 컬러 스케일 반전 */
-    --color-green-50: #0a2610;   /* 950 반전 */
-    --color-green-100: #17451c;  /* 900 반전 */
-    --color-green-200: #1a5421;  /* 800 반전 */
-    --color-green-300: #1B6523;  /* 700 반전 */
-    --color-green-400: #328a4d;  /* 600 반전 */
-    --color-green-500: #50A76C;  /* 500 동일 (중간) */
-    --color-green-600: #5fc07f;  /* 400 반전 */
-    --color-green-700: #88d9a2;  /* 300 반전 */
-    --color-green-800: #b9eac8;  /* 200 반전 */
-    --color-green-900: #dbf5e2;  /* 100 반전 */
-    --color-green-950: #f0faf3;  /* 50 반전 */
-
-    /* Teal 스케일 반전 (운동) */
-    --color-teal-50: #042f2e;
-    --color-teal-100: #134e4a;
-    --color-teal-200: #115e59;
-    --color-teal-300: #0f766e;
-    --color-teal-400: #0d9488;
-    --color-teal-500: #14b8a6;
-    --color-teal-600: #2dd4bf;
-    --color-teal-700: #5eead4;
-    --color-teal-800: #99f6e4;
-    --color-teal-900: #ccfbf1;
-    --color-teal-950: #f0fdfa;
-
-    /* Lime 스케일 반전 (식단) */
-    --color-lime-50: #1a2e05;
-    --color-lime-100: #365314;
-    --color-lime-200: #3f6212;
-    --color-lime-300: #4d7c0f;
-    --color-lime-400: #65a30d;
-    --color-lime-500: #84cc16;
-    --color-lime-600: #a3e635;
-    --color-lime-700: #bef264;
-    --color-lime-800: #d9f99d;
-    --color-lime-900: #ecfccb;
-    --color-lime-950: #f7fee7;
+    --color-green-50: #0a2610;
+    --color-green-100: #17451c;
+    --color-green-200: #1a5421;
+    --color-green-300: #1B6523;
+    --color-green-400: #328a4d;
+    --color-green-500: #50A76C;
+    --color-green-600: #5fc07f;
+    --color-green-700: #88d9a2;
+    --color-green-800: #b9eac8;
+    --color-green-900: #dbf5e2;
+    --color-green-950: #f0faf3;
   }
 }
 
@@ -251,9 +157,9 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
-  overscroll-behavior: none; /* Prevent pull-to-refresh on mobile web if not handled */
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  overscroll-behavior: none;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 ::-webkit-scrollbar {
@@ -269,53 +175,25 @@ body {
   display: none;
 }
 
-/* Page transition animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 /* ============================================================================
-   Modal/Drawer Animations (tailwindcss-animate 대체)
+   Modal/Drawer Animations
    ============================================================================ */
 
-/* animate-in 기본 클래스 */
 .animate-in {
   animation-duration: 300ms;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   animation-fill-mode: both;
 }
 
-/* fade-in: 페이드 인 */
 .fade-in {
   animation-name: fadeInAnimation;
 }
 
 @keyframes fadeInAnimation {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* slide-in-from-bottom: 아래에서 위로 슬라이드 */
 .slide-in-from-bottom {
   animation-name: slideInFromBottom;
 }
@@ -331,7 +209,6 @@ body {
   }
 }
 
-/* zoom-in-95: 살짝 확대되면서 나타남 */
 .zoom-in-95 {
   animation-name: zoomIn95;
 }
@@ -347,32 +224,21 @@ body {
   }
 }
 
-/* ============================================================================
-   닫기 애니메이션 (animate-out)
-   ============================================================================ */
-
-/* animate-out 기본 클래스 */
 .animate-out {
   animation-duration: 200ms;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   animation-fill-mode: both;
 }
 
-/* fade-out: 페이드 아웃 */
 .fade-out {
   animation-name: fadeOutAnimation;
 }
 
 @keyframes fadeOutAnimation {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
-/* slide-out-to-bottom: 아래로 슬라이드 아웃 */
 .slide-out-to-bottom {
   animation-name: slideOutToBottom;
 }
@@ -388,7 +254,6 @@ body {
   }
 }
 
-/* zoom-out-95: 살짝 축소되면서 사라짐 */
 .zoom-out-95 {
   animation-name: zoomOut95;
 }
@@ -404,7 +269,6 @@ body {
   }
 }
 
-/* duration 오버라이드 */
 .duration-200 {
   animation-duration: 200ms;
 }
@@ -413,18 +277,17 @@ body {
   animation-duration: 300ms;
 }
 
-/* Apply smooth transitions to main content */
+/* Main content fade */
 main {
-  animation: fadeIn 0.2s ease-in-out;
+  animation: fadeInAnimation 0.2s ease-in-out;
 }
 
-/* Smooth transitions for route changes */
+/* Smooth scroll */
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;
   }
 
-  /* View transitions API support */
   @supports (view-transition-name: none) {
     ::view-transition-old(root),
     ::view-transition-new(root) {
@@ -434,77 +297,10 @@ main {
 }
 
 /* ============================================================================
-   WebView Performance Optimizations
+   Loader Animations
    ============================================================================ */
 
-/* GPU 가속 레이어 프로모션 */
-.gpu-accelerated {
-  transform: translateZ(0);
-  will-change: transform;
-  backface-visibility: hidden;
-}
-
-/* 스크롤 성능 최적화 */
-.scroll-container {
-  -webkit-overflow-scrolling: touch;
-  overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-
-/* 터치 반응성 개선 */
-.touch-optimized {
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-}
-
-/* 이미지 렌더링 최적화 */
-.image-optimized {
-  content-visibility: auto;
-  contain: layout style paint;
-}
-
-/* 리스트 아이템 최적화 */
-.list-item-optimized {
-  contain: layout style;
-  content-visibility: auto;
-  contain-intrinsic-size: auto 80px;
-}
-
-/* 애니메이션 성능 (transform만 사용) */
-.animate-performance {
-  will-change: transform, opacity;
-  transform: translateZ(0);
-}
-
-/* 고정 헤더/푸터 최적화 */
-.fixed-optimized {
-  position: fixed;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}
-
-/* 카드 호버/탭 상태 최적화 */
-.card-interactive {
-  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
-  will-change: transform;
-}
-
-.card-interactive:active {
-  transform: scale(0.98);
-}
-
-/* 버튼 탭 피드백 */
-.btn-tap-feedback {
-  transition: transform 0.1s ease-out, opacity 0.1s ease-out;
-}
-
-.btn-tap-feedback:active {
-  transform: scale(0.95);
-  opacity: 0.9;
-}
-
-/* 레이지 로딩 이미지 플레이스홀더 */
+/* Lazy image shimmer */
 .lazy-image {
   background: linear-gradient(90deg, var(--muted) 25%, var(--border) 50%, var(--muted) 75%);
   background-size: 200% 100%;
@@ -512,31 +308,26 @@ main {
 }
 
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-/* 가상화 컨테이너 */
-.virtualized-container {
-  contain: strict;
-  overflow: auto;
+/* Pulse loader */
+@keyframes pulse-fade {
+  0%, 100% { opacity: 0; }
+  40%, 60% { opacity: 0.6; }
 }
 
-/* 토스 스타일 스켈레톤 시간차 애니메이션 */
-.skeleton-delay-1 { animation-delay: 0ms; }
-.skeleton-delay-2 { animation-delay: 50ms; }
-.skeleton-delay-3 { animation-delay: 100ms; }
-.skeleton-delay-4 { animation-delay: 150ms; }
-.skeleton-delay-5 { animation-delay: 200ms; }
-.skeleton-delay-6 { animation-delay: 250ms; }
-.skeleton-delay-7 { animation-delay: 300ms; }
-.skeleton-delay-8 { animation-delay: 350ms; }
+.pulse-bar {
+  background: var(--muted);
+  opacity: 0;
+  animation: pulse-fade 1.2s ease-in-out infinite;
+}
 
-/* Reduce motion for users who prefer it */
+/* ============================================================================
+   Accessibility
+   ============================================================================ */
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -546,7 +337,8 @@ main {
     transition-duration: 0.01ms !important;
   }
 
-  .lazy-image {
+  .lazy-image,
+  .pulse-bar {
     animation: none;
     background: var(--muted);
   }

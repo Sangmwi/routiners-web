@@ -1,9 +1,12 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import MainTabLayout from '@/components/common/MainTabLayout';
+import MainTabHeader from '@/components/common/MainTabHeader';
 import CommunityHeader from '@/components/community/CommunityHeader';
 import CategoryTabs from '@/components/community/CategoryTabs';
 import PostCard from '@/components/community/PostCard';
+import { PulseLoader } from '@/components/ui/PulseLoader';
 
 // 더미 데이터
 const DUMMY_POSTS = [
@@ -50,6 +53,15 @@ const DUMMY_POSTS = [
 ];
 
 export default function CommunityPage() {
+  // TODO: 실제 데이터 페칭으로 교체 시 isPending 사용
+  const [isLoading, setIsLoading] = useState(true);
+
+  // 시뮬레이션: 더미 데이터 로딩
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleNewPost = () => {
     // TODO: 새 글 작성 페이지로 이동
     console.log('새 글 작성');
@@ -69,6 +81,15 @@ export default function CommunityPage() {
     // TODO: 게시글 상세 페이지로 이동
     console.log('게시글 클릭:', postId);
   };
+
+  if (isLoading) {
+    return (
+      <MainTabLayout>
+        <MainTabHeader title="커뮤니티" />
+        <PulseLoader />
+      </MainTabLayout>
+    );
+  }
 
   return (
     <MainTabLayout>

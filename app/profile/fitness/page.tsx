@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { SpinnerGapIcon, WarningCircleIcon, CheckIcon } from '@phosphor-icons/react';
 import PageHeader from '@/components/common/PageHeader';
 import Button from '@/components/ui/Button';
-import { PageSkeleton } from '@/components/ui/Skeleton';
+import { PulseLoader } from '@/components/ui/PulseLoader';
 import { useFitnessProfile, useUpdateFitnessProfile } from '@/hooks/fitnessProfile';
 import {
   FitnessGoal,
@@ -238,7 +238,12 @@ export default function FitnessProfilePage() {
 
   // Loading state
   if (isPending) {
-    return <PageSkeleton />;
+    return (
+      <div className="min-h-screen bg-background">
+        <PageHeader title="운동 프로필 관리" centered />
+        <PulseLoader />
+      </div>
+    );
   }
 
   // Error state

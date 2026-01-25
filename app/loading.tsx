@@ -1,5 +1,9 @@
-import { PageSkeleton } from '@/components/ui/Skeleton';
+import { PulseLoader } from '@/components/ui/PulseLoader';
 
 export default function Loading() {
-  return <PageSkeleton />;
+  return (
+    <div className="min-h-screen bg-background">
+      <PulseLoader />
+    </div>
+  );
 }

@@ -5,7 +5,7 @@ import { PlusIcon, SpinnerGapIcon, WarningCircleIcon, CheckCircleIcon } from '@p
 import PageHeader from '@/components/common/PageHeader';
 import Button from '@/components/ui/Button';
 import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
-import { PageSkeleton } from '@/components/ui/Skeleton';
+import { PulseLoader } from '@/components/ui/PulseLoader';
 import {
   InBodyRecordList,
   InBodySummaryCard,
@@ -146,9 +146,13 @@ export default function InBodyManagePage() {
   // ========== Render ==========
 
   if (isPending) {
-    return <PageSkeleton />;
+    return (
+      <div className="min-h-screen bg-background">
+        <PageHeader title="인바디 관리" centered />
+        <PulseLoader />
+      </div>
+    );
   }
-
 
   // 버튼 비활성화 조건: 스캔 중이거나 저장 중
   const isButtonDisabled = scanState === 'scanning' || scanState === 'saving';

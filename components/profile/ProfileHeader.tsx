@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { PencilSimpleIcon } from '@phosphor-icons/react';
+import MainTabHeader from '@/components/common/MainTabHeader';
 
 /**
  * 프로필 페이지 전용 헤더
@@ -9,16 +10,18 @@ import { PencilSimpleIcon } from '@phosphor-icons/react';
  */
 export default function ProfileHeader() {
   return (
-    <div className="flex items-center justify-between -mx-4 -mt-4 px-4 py-3 mb-2">
-      <h1 className="text-xl font-bold text-foreground">내 프로필</h1>
-      <Link
-        href="/profile/edit"
-        prefetch={true}
-        className="p-1.5 hover:bg-muted/50 rounded-lg transition-colors"
-        aria-label="프로필 편집"
-      >
-        <PencilSimpleIcon size={20} className="text-muted-foreground" />
-      </Link>
-    </div>
+    <MainTabHeader
+      title="내 프로필"
+      action={
+        <Link
+          href="/profile/edit"
+          prefetch={true}
+          className="p-1.5 hover:bg-muted/50 rounded-lg transition-colors"
+          aria-label="프로필 편집"
+        >
+          <PencilSimpleIcon size={20} className="text-muted-foreground" />
+        </Link>
+      }
+    />
   );
 }

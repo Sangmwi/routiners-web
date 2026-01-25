@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import type { AISessionCompat } from '@/lib/types/chat';
+import type { AISessionCompat, Conversation } from '@/lib/types/chat';
 import type { useDeleteAISession, useResetAISession } from './useAISession';
 
 // =============================================================================
@@ -35,6 +35,8 @@ interface UseChatPageHandlersParams {
   sendMessage: (message: string) => void;
   /** 미리보기 드로어 열기 콜백 */
   onOpenPreviewDrawer?: (type: 'routine' | 'meal') => void;
+  /** 다른 활성 세션 목록 (삭제 후 스마트 네비게이션용) */
+  otherActiveSessions?: Conversation[];
 }
 
 export interface UseChatPageHandlersReturn {
@@ -77,6 +79,7 @@ export function useChatPageHandlers({
   showError,
   sendMessage,
   onOpenPreviewDrawer,
+  otherActiveSessions,
 }: UseChatPageHandlersParams): UseChatPageHandlersReturn {
   const router = useRouter();
 
@@ -131,10 +134,24 @@ export function useChatPageHandlers({
       onConfirm: () => {
         deleteSession.mutate(session.id, {
           onSuccess: () => {
+            // 스마트 네비게이션: 다른 활성 세션이 있으면 그쪽으로 이동
+            // 1. 같은 목적(workout/meal)의 활성 세션 우선
+            // 2. 없으면 다른 목적의 활성 세션
+            // 3. 모두 없으면 /routine으로 이동
+            const samePurposeSession = otherActiveSessions?.find(
+              (s) => s.aiPurpose === session.purpose
+            );
+            const anyActiveSession = otherActiveSessions?.[0];
+            const targetSession = samePurposeSession || anyActiveSession;
+
+            const redirectUrl = targetSession
+              ? `/routine/chat?session=${targetSession.id}`
+              : '/routine';
+
             if (isInWebView) {
-              window.location.replace('/routine');
+              window.location.replace(redirectUrl);
             } else {
-              router.replace('/routine');
+              router.replace(redirectUrl);
             }
           },
           onError: (err) => {

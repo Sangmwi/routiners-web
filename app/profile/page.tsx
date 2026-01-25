@@ -14,7 +14,7 @@ import ProfileFitnessSection from '@/components/profile/ProfileFitnessSection';
 import ProfileMilitarySection from '@/components/profile/ProfileMilitarySection';
 import ProfileLocationsSection from '@/components/profile/ProfileLocationsSection';
 import { SignOutIcon, UserMinusIcon, SpinnerGapIcon } from '@phosphor-icons/react';
-import { PageSkeleton } from '@/components/ui/Skeleton';
+import { PulseLoader } from '@/components/ui/PulseLoader';
 
 export default function ProfilePage() {
   const { data: user, isPending, error, refetch } = useCurrentUserProfile();
@@ -22,7 +22,12 @@ export default function ProfilePage() {
   const { withdraw, isWithdrawing } = useWithdrawal();
 
   if (isPending) {
-    return <PageSkeleton />;
+    return (
+      <MainTabLayout>
+        <ProfileHeader />
+        <PulseLoader />
+      </MainTabLayout>
+    );
   }
 
   if (error || !user) {

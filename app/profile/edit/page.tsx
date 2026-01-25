@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useProfileProgress, useProfileEdit } from '@/hooks';
 import { SpinnerGapIcon } from '@phosphor-icons/react';
-import { PageSkeleton } from '@/components/ui/Skeleton';
+import { PulseLoader } from '@/components/ui/PulseLoader';
 import PageHeader from '@/components/common/PageHeader';
 import ProfilePhotoGallery from '@/components/profile/edit/ProfilePhotoGallery';
 import ProfileNicknameInput from '@/components/profile/edit/ProfileNicknameInput';
@@ -17,7 +17,12 @@ import ProfileLocationsInput from '@/components/profile/edit/ProfileLocationsInp
 // ============================================================
 
 function LoadingState() {
-  return <PageSkeleton />;
+  return (
+    <div className="min-h-screen bg-background">
+      <PageHeader title="프로필 만들기" centered />
+      <PulseLoader />
+    </div>
+  );
 }
 
 function ErrorState() {

@@ -178,13 +178,13 @@ export default function ChatMenuDrawer({
           {isCompleted && (
             <button
               onClick={handleDelete}
-              className="w-full flex items-center gap-3 p-4 rounded-xl bg-destructive/5 hover:bg-destructive/10 transition-colors"
+              className="w-full flex items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors"
             >
-              <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
-                <DeleteIcon size="md" className="text-destructive" />
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                <DeleteIcon size="md" className="text-muted-foreground" />
               </div>
               <div className="text-left">
-                <p className="font-medium text-destructive">대화 삭제</p>
+                <p className="font-medium text-foreground">대화 삭제</p>
                 <p className="text-xs text-muted-foreground">
                   이 대화를 영구적으로 삭제
                 </p>

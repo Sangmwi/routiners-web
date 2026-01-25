@@ -1,6 +1,8 @@
 'use client';
 
 import MainTabLayout from '@/components/common/MainTabLayout';
+import MainTabHeader from '@/components/common/MainTabHeader';
+import { PulseLoader } from '@/components/ui/PulseLoader';
 import { RoutineSection, FloatingAIButton, WeeklyProgressCard } from '@/components/routine';
 import { useUpcomingEvents } from '@/hooks/routine';
 import { useActiveAISession } from '@/hooks/aiChat';
@@ -27,15 +29,25 @@ export default function RoutinePage() {
   const { data: workoutSession } = useActiveAISession('workout');
   const { data: mealSession } = useActiveAISession('meal');
 
+  // 데이터 로딩 중일 때 통합 로딩 UI
+  if (isLoadingWorkout || isLoadingMeal) {
+    return (
+      <MainTabLayout>
+        <MainTabHeader
+          title="내 루틴"
+          subtitle={formatKoreanDate(today, { weekday: true })}
+        />
+        <PulseLoader />
+      </MainTabLayout>
+    );
+  }
+
   return (
     <MainTabLayout>
-      {/* 페이지 헤더 */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">내 루틴</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {formatKoreanDate(today, { weekday: true })}
-        </p>
-      </div>
+      <MainTabHeader
+        title="내 루틴"
+        subtitle={formatKoreanDate(today, { weekday: true })}
+      />
 
       {/* 주간 통계 카드 */}
       <WeeklyProgressCard />
@@ -44,14 +56,12 @@ export default function RoutinePage() {
       <RoutineSection
         type="workout"
         events={workoutEvents}
-        isLoading={isLoadingWorkout}
       />
 
       {/* 식단 섹션 */}
       <RoutineSection
         type="meal"
         events={mealEvents}
-        isLoading={isLoadingMeal}
       />
 
       {/* AI 코치 플로팅 버튼 */}

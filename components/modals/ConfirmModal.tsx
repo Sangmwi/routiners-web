@@ -90,8 +90,8 @@ export default function ConfirmModal({
           <div className="text-center">
             {/* 아이콘 (위험 작업일 때만) */}
             {variant === 'danger' && (
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
-                <ErrorIcon size="lg" className="text-destructive" />
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                <ErrorIcon size="lg" className="text-foreground" />
               </div>
             )}
 
@@ -113,7 +113,7 @@ export default function ConfirmModal({
                 {cancelText}
               </Button>
               <Button
-                variant={variant === 'danger' ? 'destructive' : 'primary'}
+                variant="primary"
                 size="lg"
                 onClick={handleConfirm}
                 disabled={isLoading}

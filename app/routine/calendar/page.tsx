@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import PageHeader from '@/components/common/PageHeader';
 import {
@@ -13,6 +13,7 @@ import { useCalendarEvents, useRoutineEventByDate } from '@/hooks/routine';
 import type { EventType } from '@/lib/types/routine';
 import { SpinnerGapIcon } from '@phosphor-icons/react';
 import { formatKoreanDate, formatDate as formatDateISO } from '@/lib/utils/dateHelpers';
+import { PulseLoader } from '@/components/ui/PulseLoader';
 
 type FilterType = EventType | 'all';
 
@@ -22,7 +23,7 @@ type FilterType = EventType | 'all';
  * - URL ?type 파라미터로 필터 프리셋 지원
  * - 전체/운동/식단 토글 필터
  */
-export default function RoutineCalendarPage() {
+function CalendarPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -157,5 +158,24 @@ export default function RoutineCalendarPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Suspense boundary로 감싼 캘린더 페이지
+ * useSearchParams 사용 시 Next.js App Router에서 필요
+ */
+export default function RoutineCalendarPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background">
+          <PageHeader title="전체 캘린더" />
+          <PulseLoader />
+        </div>
+      }
+    >
+      <CalendarPageContent />
+    </Suspense>
   );
 }

@@ -7,7 +7,8 @@ import HealthScoreCard from '@/components/home/HealthScoreCard';
 import SectionHeader from '@/components/ui/SectionHeader';
 import ProductSlider from '@/components/home/ProductSlider';
 import InfluencerSlider from '@/components/home/InfluencerSlider';
-import { PageSkeleton } from '@/components/ui/Skeleton';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { PulseLoader } from '@/components/ui/PulseLoader';
 import ErrorState from '@/components/common/ErrorState';
 import { Product, Influencer } from '@/lib/types';
 
@@ -169,7 +170,19 @@ export default function Home() {
   };
 
   if (isPending) {
-    return <PageSkeleton />;
+    return (
+      <MainTabLayout>
+        {/* 인사말 스켈레톤 - MainTabHeader와 동일한 스타일 */}
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-xl font-bold text-foreground flex items-center gap-1">
+            <span>환영합니다,</span>
+            <Skeleton width="80px" height="24px" className="inline-block" />
+            <span>님!</span>
+          </h1>
+        </div>
+        <PulseLoader />
+      </MainTabLayout>
+    );
   }
 
   if (error) {

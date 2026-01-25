@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAISessionWithMessages } from './useAISession';
+import { useAISessionWithMessages, useAISessions } from './useAISession';
 import { useDeleteAISession, useResetAISession } from './useAISession';
 import { useAIChat } from './useAIChat';
 import { useChatPageHandlers } from './useChatPageHandlers';
@@ -82,11 +82,14 @@ export function useChatPage(
     enabled: !!sessionId,
   });
 
+  // 스마트 네비게이션을 위한 세션 목록 (삭제 후 이동할 세션 찾기)
+  const { data: allSessions } = useAISessions({ limit: 15 });
+
   // ---------------------------------------------------------------------------
   // Mutations
   // ---------------------------------------------------------------------------
 
-  const deleteSession = useDeleteAISession({ skipInvalidation: true });
+  const deleteSession = useDeleteAISession();
   const resetSession = useResetAISession();
 
   // ---------------------------------------------------------------------------
@@ -135,6 +138,11 @@ export function useChatPage(
   // 핸들러
   // ---------------------------------------------------------------------------
 
+  // 현재 세션 제외한 다른 활성 세션 (삭제 후 이동 대상)
+  const otherActiveSessions = allSessions?.filter(
+    (s) => s.id !== sessionId && s.aiStatus === 'active'
+  );
+
   const handlers = useChatPageHandlers({
     session,
     isActive,
@@ -145,6 +153,7 @@ export function useChatPage(
     showError,
     sendMessage: chat.sendMessage,
     onOpenPreviewDrawer,
+    otherActiveSessions,
   });
 
   // ---------------------------------------------------------------------------

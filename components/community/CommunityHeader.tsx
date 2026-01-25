@@ -2,6 +2,7 @@
 
 import { PencilSimpleLineIcon, FunnelIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
+import MainTabHeader from '@/components/common/MainTabHeader';
 
 interface CommunityHeaderProps {
   onNewPost?: () => void;
@@ -13,17 +14,19 @@ interface CommunityHeaderProps {
  */
 export default function CommunityHeader({ onNewPost, onFilter }: CommunityHeaderProps) {
   return (
-    <div className="flex items-center justify-between mb-6">
-      <h1 className="text-2xl font-bold text-foreground">커뮤니티</h1>
-      <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" onClick={onFilter}>
-          <FunnelIcon size={16} />
-        </Button>
-        <Button variant="primary" size="sm" onClick={onNewPost}>
-          <PencilSimpleLineIcon size={16} />
-          글쓰기
-        </Button>
-      </div>
-    </div>
+    <MainTabHeader
+      title="커뮤니티"
+      action={
+        <>
+          <Button variant="outline" size="xs" onClick={onFilter}>
+            <FunnelIcon size={16} />
+          </Button>
+          <Button variant="primary" size="xs" onClick={onNewPost}>
+            <PencilSimpleLineIcon size={16} />
+            글쓰기
+          </Button>
+        </>
+      }
+    />
   );
 }

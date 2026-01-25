@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import PageHeader from '@/components/common/PageHeader';
 import {
@@ -11,8 +11,9 @@ import {
   PreviewDetailDrawer,
 } from '@/components/routine/chat';
 import { useChatPage } from '@/hooks/aiChat';
-import { SpinnerGapIcon, ListIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { ListIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
+import { PulseLoader } from '@/components/ui/PulseLoader';
 
 /**
  * AI 트레이너 채팅 페이지
@@ -23,7 +24,7 @@ import Button from '@/components/ui/Button';
  * 세션 생성은 FloatingAIButton/AISelectionModal에서 처리
  * 이 페이지는 세션 표시만 담당
  */
-export default function AIChatPage() {
+function ChatPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session');
@@ -52,11 +53,12 @@ export default function AIChatPage() {
   // 조건부 렌더링
   // ---------------------------------------------------------------------------
 
-  // 로딩 상태
+  // 로딩 상태 - 헤더 유지 + PulseLoader
   if (pageState.isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <SpinnerGapIcon size={32} className="animate-spin text-primary" />
+      <div className="min-h-screen bg-background">
+        <PageHeader title="AI 트레이너" />
+        <PulseLoader />
       </div>
     );
   }
@@ -240,5 +242,24 @@ export default function AIChatPage() {
         );
       })()}
     </div>
+  );
+}
+
+/**
+ * Suspense boundary로 감싼 AI 채팅 페이지
+ * useSearchParams 사용 시 Next.js App Router에서 필요
+ */
+export default function AIChatPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background">
+          <PageHeader title="AI 트레이너" />
+          <PulseLoader />
+        </div>
+      }
+    >
+      <ChatPageContent />
+    </Suspense>
   );
 }
