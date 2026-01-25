@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCurrentUserProfile, useUpdateProfile } from './useProfile';
+import { useCurrentUserProfile } from './queries';
+import { useUpdateProfile } from './mutations';
 import { useProfileImagesDraft } from './useProfileImagesDraft';
 import { useProfileImageUpload } from './useProfileImageUpload';
 import { useModalStore } from '@/lib/stores/modalStore';

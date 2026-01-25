@@ -35,7 +35,7 @@ export function PulseLoader({
 }: PulseLoaderProps) {
   return (
     <div
-      className={`flex flex-col items-start justify-center p-0 ${className}`}
+      className={`flex flex-col items-start justify-center ${className}`}
       {...props}
     >
       {/* 상단 작은 요소들 */}

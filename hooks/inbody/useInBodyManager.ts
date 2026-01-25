@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { InBodyRecord, InBodyCreateData } from '@/lib/types/inbody';
-import { useInBodyRecords, useInBodySummary, useDeleteInBody, useCreateInBody } from './useInBody';
+import { useInBodyRecords, useInBodySummary } from './queries';
+import { useDeleteInBody, useCreateInBody } from './mutations';
 import { useNativeImagePicker } from '@/hooks/webview';
 
 // ============================================================

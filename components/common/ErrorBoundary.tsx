@@ -18,6 +18,8 @@ interface ErrorBoundaryProps {
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
   /** 에러 리포팅 활성화 (프로덕션) */
   reportError?: boolean;
+  /** 리셋 시 콜백 (React Query 연동 등) */
+  onReset?: () => void;
 }
 
 interface ErrorBoundaryState {
@@ -77,6 +79,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   handleReset = (): void => {
+    // React Query 에러 상태 리셋 (useQueryErrorResetBoundary 연동)
+    this.props.onReset?.();
+
     this.setState({
       hasError: false,
       error: null,
