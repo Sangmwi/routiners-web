@@ -12,5 +12,9 @@ export {
   useQueryErrorResetBoundary,
 } from './useSuspenseBaseQuery';
 
-// Event Listener
-export { useEventListener } from './useEventListener';
+// Event Listeners
+export {
+  useDocumentEventListener,
+  useWindowEventListener,
+  useCustomEventListener,
+} from './useEventListener';

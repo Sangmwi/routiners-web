@@ -4,7 +4,7 @@
  * 피트니스 프로필 관련 React Query 훅
  */
 
-import { useQuery, useMutation, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, UseQueryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import { fitnessProfileApi } from '@/lib/api/fitnessProfile';
 import { FitnessProfile, FitnessProfileUpdateData } from '@/lib/types/fitness';
 import { queryKeys } from '@/lib/constants/queryKeys';
@@ -24,6 +24,22 @@ export function useFitnessProfile(
     queryFn: () => fitnessProfileApi.getFitnessProfile(),
     staleTime: 5 * 60 * 1000, // 5분
     ...options,
+  });
+}
+
+/**
+ * 현재 사용자의 피트니스 프로필 조회 (Suspense)
+ *
+ * Suspense boundary 내부에서 사용해야 합니다.
+ * data는 항상 존재합니다 (Suspense가 로딩 처리).
+ *
+ * @returns 피트니스 프로필 (항상 존재)
+ */
+export function useFitnessProfileSuspense() {
+  return useSuspenseQuery({
+    queryKey: queryKeys.fitnessProfile.me(),
+    queryFn: () => fitnessProfileApi.getFitnessProfile(),
+    staleTime: 5 * 60 * 1000, // 5분
   });
 }
 

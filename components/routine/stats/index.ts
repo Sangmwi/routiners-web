@@ -8,3 +8,6 @@ export { default as WeeklyProgressCard } from './WeeklyProgressCard';
 export { default as WeeklyStatsSummary } from './WeeklyStatsSummary';
 export { default as WeeklyProgressChart } from './WeeklyProgressChart';
 export { default as ProgressBar } from './ProgressBar';
+
+// Client Page Component
+export { default as StatsClient } from './StatsClient';

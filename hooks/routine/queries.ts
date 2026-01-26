@@ -122,6 +122,20 @@ export function useCalendarEventsSuspense(year: number, month: number) {
   );
 }
 
+/**
+ * 과거 + 미래 이벤트 조회 (Suspense)
+ */
+export function useUpcomingEventsSuspense(
+  type: EventType,
+  pastDays: number = 7,
+  futureDays: number = 14
+) {
+  const startDate = formatDate(addDays(new Date(), -pastDays));
+  const endDate = formatDate(addDays(new Date(), futureDays));
+
+  return useRoutineEventsSuspense({ type, startDate, endDate });
+}
+
 // ============================================================================
 // Weekly Stats (Derived Query)
 // ============================================================================

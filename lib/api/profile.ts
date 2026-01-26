@@ -17,11 +17,15 @@ export const profileApi = {
   /**
    * 현재 사용자 프로필 조회
    *
-   * @returns User 또는 null (인증되지 않은 경우)
-   * @throws {ApiError} 네트워크 오류 또는 서버 오류 발생 시
+   * @returns User (항상 존재)
+   * @throws {ApiError} 인증되지 않은 경우, 네트워크 오류, 서버 오류
+   *
+   * @description
+   * Suspense 패턴에서 사용 시 ErrorBoundary가 에러를 처리합니다.
+   * 404 응답도 에러로 throw되어 ErrorBoundary에서 처리됩니다.
    */
-  async getCurrentUserProfile(): Promise<User | null> {
-    return api.get<User>('/api/user/me');
+  async getCurrentUserProfile(): Promise<User> {
+    return api.getOrThrow<User>('/api/user/me');
   },
 
   /**
@@ -45,11 +49,14 @@ export const profileApi = {
    * 시간 복잡도: O(1) - indexed user.id lookup
    *
    * @param userId - 조회할 사용자 ID
-   * @returns User 또는 null (사용자 없음)
-   * @throws {ApiError} 네트워크 오류 또는 서버 오류 발생 시
+   * @returns User (항상 존재)
+   * @throws {ApiError} 사용자 없음(404), 네트워크 오류, 서버 오류
+   *
+   * @description
+   * Suspense 패턴에서 사용 시 ErrorBoundary가 에러를 처리합니다.
    */
-  async getUserProfile(userId: string): Promise<User | null> {
-    return api.get<User>(`/api/user/${userId}`);
+  async getUserProfile(userId: string): Promise<User> {
+    return api.getOrThrow<User>(`/api/user/${userId}`);
   },
 
   /**

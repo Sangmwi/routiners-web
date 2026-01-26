@@ -1,74 +1,8 @@
-'use client';
+import RoutineClient from '@/components/routine/RoutineClient';
 
-import MainTabLayout from '@/components/common/MainTabLayout';
-import MainTabHeader from '@/components/common/MainTabHeader';
-import { PulseLoader } from '@/components/ui/PulseLoader';
-import { RoutineSection, FloatingAIButton, WeeklyProgressCard } from '@/components/routine';
-import { useUpcomingEvents } from '@/hooks/routine';
-import { useActiveAISession } from '@/hooks/aiChat';
-import { formatKoreanDate } from '@/lib/utils/dateHelpers';
+// 정적 생성 방지 - 클라이언트 데이터 필요
+export const dynamic = 'force-dynamic';
 
-/**
- * 루틴 탭 메인 페이지 (섹션 기반 v2)
- *
- * - 운동 섹션: 과거 7일 + 오늘 + 미래 14일 캐러셀
- * - 식단 섹션: 과거 7일 + 오늘 + 미래 14일 캐러셀
- * - 초기 로드 시 "오늘" 카드로 자동 스크롤
- * - 전체보기 → 캘린더 (타입 필터 프리셋)
- */
 export default function RoutinePage() {
-  const today = new Date();
-
-  // 과거 7일 + 오늘 + 미래 14일 이벤트 조회
-  const { data: workoutEvents = [], isPending: isLoadingWorkout } =
-    useUpcomingEvents('workout', 7, 14);
-  const { data: mealEvents = [], isPending: isLoadingMeal } =
-    useUpcomingEvents('meal', 7, 14);
-
-  // 활성 AI 세션 확인
-  const { data: workoutSession } = useActiveAISession('workout');
-  const { data: mealSession } = useActiveAISession('meal');
-
-  // 데이터 로딩 중일 때 통합 로딩 UI
-  if (isLoadingWorkout || isLoadingMeal) {
-    return (
-      <MainTabLayout>
-        <MainTabHeader
-          title="내 루틴"
-          subtitle={formatKoreanDate(today, { weekday: true })}
-        />
-        <PulseLoader />
-      </MainTabLayout>
-    );
-  }
-
-  return (
-    <MainTabLayout>
-      <MainTabHeader
-        title="내 루틴"
-        subtitle={formatKoreanDate(today, { weekday: true })}
-      />
-
-      {/* 주간 통계 카드 */}
-      <WeeklyProgressCard />
-
-      {/* 운동 섹션 */}
-      <RoutineSection
-        type="workout"
-        events={workoutEvents}
-      />
-
-      {/* 식단 섹션 */}
-      <RoutineSection
-        type="meal"
-        events={mealEvents}
-      />
-
-      {/* AI 코치 플로팅 버튼 */}
-      <FloatingAIButton
-        workoutSession={workoutSession}
-        mealSession={mealSession}
-      />
-    </MainTabLayout>
-  );
+  return <RoutineClient />;
 }

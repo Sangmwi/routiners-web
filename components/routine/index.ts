@@ -30,3 +30,6 @@ export { default as RoutineSection } from './RoutineSection';
 
 // Floating Button
 export { default as FloatingAIButton } from './FloatingAIButton';
+
+// Client Page Component
+export { default as RoutineClient } from './RoutineClient';

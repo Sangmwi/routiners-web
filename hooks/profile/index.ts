@@ -9,6 +9,7 @@ export * from './useProfile';
 
 // Profile Edit Business Logic Hook
 export * from './useProfileEdit';
+export * from './useProfileEditSuspense';
 
 // Image Handling Hooks
 export * from './useProfileImagesDraft';
