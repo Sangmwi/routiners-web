@@ -72,7 +72,7 @@ export default function CoachChatContent({
   const confirm = useConfirmDialog();
 
   // 표시 조건
-  const showWelcome = messages.length === 0 && !isStreaming && !isMessagesLoading && !conversationId;
+  const showWelcome = messages.length === 0 && !isStreaming && !isMessagesLoading;
   const showActionChips = !isStreaming && (messages.length === 0 || !activePurpose);
 
   // 대화 선택 핸들러
