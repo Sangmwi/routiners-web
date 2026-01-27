@@ -125,6 +125,9 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
   const [pendingProfileConfirmation, setPendingProfileConfirmation] =
     useState<ProfileConfirmationRequest | null>(null);
 
+  // 낙관적 사용자 메시지 (전송 즉시 표시, refetch 후 제거)
+  const [pendingUserMessage, setPendingUserMessage] = useState<ChatMessage | null>(null);
+
   // 요약 상태
   const [summarizationState, setSummarizationState] = useState<SummarizationState>({
     isSummarizing: false,
@@ -172,6 +175,14 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
     // 이전 스트림 취소
     abortControllerRef.current?.abort();
 
+    // 낙관적 사용자 메시지 즉시 표시
+    setPendingUserMessage({
+      id: `pending-${Date.now()}`,
+      role: 'user',
+      content: content.trim(),
+      createdAt: new Date().toISOString(),
+    });
+
     // 스트리밍 시작
     setStreamingContent('');
     setIsStreaming(true);
@@ -191,6 +202,9 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
           queryKey: queryKeys.coach.messages(currentId!),
         });
 
+        // 실제 메시지 로드 완료 → 낙관적 메시지 제거
+        setPendingUserMessage(null);
+
         // 버퍼링된 프로필 확인 요청 적용 (messages 로드 후 → layout shift 방지)
         if (pendingProfileRef.current) {
           setPendingProfileConfirmation(pendingProfileRef.current);
@@ -205,6 +219,7 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
 
       onError: (err) => {
         setStreamingContent('');
+        setPendingUserMessage(null);
         setIsStreaming(false);
         setError(err.message);
       },
@@ -315,6 +330,7 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
       setError(null);
       setActiveTools([]);
       setPendingInput(null);
+      setPendingUserMessage(null);
       setPendingRoutinePreview(null);
       setAppliedRoutine(null);
       setRoutineProgress(null);
@@ -346,6 +362,7 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
     abortControllerRef.current?.abort();
     abortControllerRef.current = null;
     setStreamingContent('');
+    setPendingUserMessage(null);
     setIsStreaming(false);
   };
 
@@ -451,10 +468,15 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
   // Return
   // ---------------------------------------------------------------------------
 
+  // 서버 메시지 + 낙관적 사용자 메시지 병합
+  const allMessages = pendingUserMessage
+    ? [...messages, pendingUserMessage]
+    : messages;
+
   return {
     conversationId,
     conversation: conversation ?? null,
-    messages,
+    messages: allMessages,
     activePurpose,
     streamingContent,
     isStreaming,
