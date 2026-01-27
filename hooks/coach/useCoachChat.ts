@@ -249,17 +249,28 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
     dispatch({ type: 'CLEAR_ERROR' });
   };
 
-  // ── 메타데이터에서 프로필 확인 복원 ──
+  // ── 메타데이터에서 세션 상태 복원 (페이지 재진입 시) ──
   useEffect(() => {
     if (!conversation?.metadata) return;
     const extracted = extractSessionMetadata(conversation.metadata);
-    if (extracted.pendingProfileConfirmation) {
+
+    // 복원할 데이터가 하나라도 있으면 원자적으로 전체 복원
+    const hasData =
+      extracted.pendingRoutinePreview ||
+      extracted.appliedRoutine ||
+      extracted.pendingProfileConfirmation ||
+      extracted.pendingInput;
+
+    if (hasData) {
       dispatch({
-        type: 'RESTORE_PROFILE_CONFIRMATION',
-        request: extracted.pendingProfileConfirmation,
+        type: 'RESTORE_SESSION_METADATA',
+        pendingRoutinePreview: extracted.pendingRoutinePreview,
+        appliedRoutine: extracted.appliedRoutine,
+        pendingProfileConfirmation: extracted.pendingProfileConfirmation,
+        pendingInput: extracted.pendingInput,
       });
     }
-  }, [conversation?.metadata]);
+  }, [conversationId, conversation?.metadata]);
 
   // ── 초기 대화 ID 동기화 ──
   useEffect(() => {

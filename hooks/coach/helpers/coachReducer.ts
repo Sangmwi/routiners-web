@@ -97,7 +97,16 @@ export type CoachChatAction =
 
   // 라이프사이클
   | { type: 'RESET_ALL' }
-  | { type: 'RESTORE_PROFILE_CONFIRMATION'; request: ProfileConfirmationRequest };
+  | { type: 'RESTORE_PROFILE_CONFIRMATION'; request: ProfileConfirmationRequest }
+
+  // 세션 메타데이터 복원 (페이지 재진입 시)
+  | {
+      type: 'RESTORE_SESSION_METADATA';
+      pendingRoutinePreview: RoutinePreviewData | null;
+      appliedRoutine: RoutineAppliedEvent | null;
+      pendingProfileConfirmation: ProfileConfirmationRequest | null;
+      pendingInput: InputRequest | null;
+    };
 
 // =============================================================================
 // Reducer
@@ -230,6 +239,16 @@ export function coachReducer(state: CoachChatState, action: CoachChatAction): Co
     // ── 라이프사이클 ──
     case 'RESET_ALL':
       return INITIAL_STATE;
+
+    // ── 세션 메타데이터 복원 (페이지 재진입 시 원자적 복원) ──
+    case 'RESTORE_SESSION_METADATA':
+      return {
+        ...state,
+        pendingRoutinePreview: action.pendingRoutinePreview,
+        appliedRoutine: action.appliedRoutine,
+        pendingProfileConfirmation: action.pendingProfileConfirmation,
+        pendingInput: action.pendingInput,
+      };
 
     default:
       return state;

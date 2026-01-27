@@ -39,10 +39,15 @@ export function createCoachCallbacks(ctx: CoachCallbackContext): ChatStreamCallb
     onComplete: async () => {
       ctx.dispatch({ type: 'COMPLETE_STREAMING' });
 
-      // 메시지 캐시 무효화 + 대기 (welcome screen flash 방지)
-      await ctx.queryClient.invalidateQueries({
-        queryKey: queryKeys.coach.messages(ctx.conversationId),
-      });
+      // 메시지 + 대화 캐시 무효화 (대화 메타데이터 업데이트 반영 — 뒤로가기 시 상태 복원용)
+      await Promise.all([
+        ctx.queryClient.invalidateQueries({
+          queryKey: queryKeys.coach.messages(ctx.conversationId),
+        }),
+        ctx.queryClient.invalidateQueries({
+          queryKey: queryKeys.coach.conversation(ctx.conversationId),
+        }),
+      ]);
 
       // 서버 메시지 로드 완료 → 스트리밍 플레이스홀더 제거
       ctx.dispatch({ type: 'CLEAR_STREAMING_CONTENT' });
