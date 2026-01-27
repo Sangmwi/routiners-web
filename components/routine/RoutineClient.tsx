@@ -5,9 +5,10 @@ import MainTabLayout from '@/components/common/MainTabLayout';
 import MainTabHeader from '@/components/common/MainTabHeader';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import { PulseLoader } from '@/components/ui/PulseLoader';
-import { RoutineSection, FloatingAIButton, WeeklyProgressCard } from '@/components/routine';
+import { RoutineSection, WeeklyProgressCard } from '@/components/routine';
+import { CoachButton } from '@/components/coach';
 import { useUpcomingEventsSuspense } from '@/hooks/routine';
-import { useActiveAISession } from '@/hooks/aiChat';
+import { useActiveCoachConversation } from '@/hooks/coach';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 
 // ============================================================================
@@ -19,9 +20,8 @@ function RoutineContent() {
   const { data: workoutEvents } = useUpcomingEventsSuspense('workout', 7, 14);
   const { data: mealEvents } = useUpcomingEventsSuspense('meal', 7, 14);
 
-  // 활성 AI 세션 확인 (non-blocking)
-  const { data: workoutSession } = useActiveAISession('workout');
-  const { data: mealSession } = useActiveAISession('meal');
+  // 활성 코치 대화 확인 (non-blocking)
+  const { data: activeConversation } = useActiveCoachConversation();
 
   return (
     <>
@@ -35,10 +35,7 @@ function RoutineContent() {
       <RoutineSection type="meal" events={mealEvents} />
 
       {/* AI 코치 플로팅 버튼 */}
-      <FloatingAIButton
-        workoutSession={workoutSession}
-        mealSession={mealSession}
-      />
+      <CoachButton activeConversation={activeConversation} />
     </>
   );
 }

@@ -39,8 +39,6 @@ export function buildRestoredState(
     messages: displayMessages,
     pendingRoutinePreview: extracted.pendingRoutinePreview,
     appliedRoutine: extracted.appliedRoutine,
-    pendingMealPreview: extracted.pendingMealPreview,
-    appliedMealPlan: extracted.appliedMealPlan,
     pendingProfileConfirmation: extracted.pendingProfileConfirmation,
     pendingInput: extracted.pendingInput,
   };
@@ -85,8 +83,6 @@ export function mergeSessionUpdate(
     // 메타데이터는 DB가 source of truth
     pendingRoutinePreview: extracted.pendingRoutinePreview,
     appliedRoutine: extracted.appliedRoutine,
-    pendingMealPreview: extracted.pendingMealPreview,
-    appliedMealPlan: extracted.appliedMealPlan,
     pendingProfileConfirmation: extracted.pendingProfileConfirmation,
     pendingInput: extracted.pendingInput,
   };

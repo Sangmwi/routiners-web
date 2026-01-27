@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
 import {
   DbRoutineEvent,
-  transformDbEventToEvent,
+  toRoutineEvent,
   transformEventToCalendarSummary,
 } from '@/lib/types/routine';
 
@@ -53,7 +53,7 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   }
 
   const events = (data as DbRoutineEvent[])
-    .map(transformDbEventToEvent)
+    .map(toRoutineEvent)
     .map(transformEventToCalendarSummary);
 
   return NextResponse.json(events);

@@ -11,12 +11,9 @@ import type {
   ToolEvent,
   RoutineAppliedEvent,
   RoutineProgressEvent,
-  MealPlanAppliedEvent,
-  MealPlanProgressEvent,
 } from '@/lib/api/conversation';
 import type { ChatMessage, ProfileConfirmationRequest } from '@/lib/types/chat';
 import type { InputRequest, RoutinePreviewData } from '@/lib/types/fitness';
-import type { MealPlanPreviewData } from '@/lib/types/meal';
 import { AI_CHAT_TIMING } from '@/lib/constants/aiChat';
 import type { useChatCacheSync } from '../useChatCacheSync';
 import type { ChatAction } from './chatReducer';
@@ -129,20 +126,6 @@ export function createChatCallbacks(ctx: CallbackBuilderContext): ChatStreamCall
 
     onRoutineProgress: (event: RoutineProgressEvent) => {
       dispatch({ type: 'SET_ROUTINE_PROGRESS', progress: event });
-    },
-
-    onMealPlanPreview: (preview: MealPlanPreviewData) => {
-      dispatch({ type: 'SET_MEAL_PREVIEW', preview });
-      cacheSync.syncMealPlanPreview(preview);
-    },
-
-    onMealPlanApplied: (event: MealPlanAppliedEvent) => {
-      dispatch({ type: 'SET_APPLIED_MEAL', event });
-      cacheSync.syncMealPlanApplied(event);
-    },
-
-    onMealPlanProgress: (event: MealPlanProgressEvent) => {
-      dispatch({ type: 'SET_MEAL_PROGRESS', progress: event });
     },
 
     onProfileConfirmation: (request: ProfileConfirmationRequest) => {

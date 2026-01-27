@@ -4,57 +4,46 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { RobotIcon, SparkleIcon } from '@phosphor-icons/react';
 import { LoadingSpinner } from '@/components/ui/icons';
-import { useModalStore } from '@/lib/stores/modalStore';
 import { useShowError } from '@/lib/stores/errorStore';
 import { useCreateAISession } from '@/hooks/aiChat';
 import type { AISessionCompat } from '@/lib/types/chat';
-import type { SessionPurpose } from '@/lib/types/routine';
 
 interface FloatingAIButtonProps {
-  /** 운동 활성 세션 */
-  workoutSession?: AISessionCompat | null;
-  /** 식단 활성 세션 */
-  mealSession?: AISessionCompat | null;
+  /** 코치 활성 세션 */
+  coachSession?: AISessionCompat | null;
 }
 
 /**
  * AI 코치 접근용 플로팅 버튼
  *
- * 클릭 시 AI 선택 모달(운동/식단) 표시
+ * 클릭 시 바로 코치 대화방으로 이동
  * - 활성 세션 있음 → 해당 세션으로 바로 이동
  * - 활성 세션 없음 → 새 세션 생성 후 이동
  */
 export default function FloatingAIButton({
-  workoutSession,
-  mealSession,
+  coachSession,
 }: FloatingAIButtonProps) {
   const router = useRouter();
-  const openModal = useModalStore((state) => state.openModal);
-  const closeCurrentModal = useModalStore((state) => state.closeCurrentModal);
   const createSession = useCreateAISession();
   const showError = useShowError();
   const [isNavigating, setIsNavigating] = useState(false);
 
-  const hasAnySession = !!workoutSession || !!mealSession;
+  const hasActiveSession = !!coachSession;
 
-  const handleSelectPurpose = (purpose: SessionPurpose) => {
+  const handleClick = () => {
     // 이미 처리 중이면 무시
     if (isNavigating || createSession.isPending) return;
 
-    const existingSession = purpose === 'workout' ? workoutSession : mealSession;
-
-    if (existingSession) {
+    if (coachSession) {
       // 활성 세션이 있으면 바로 이동
-      closeCurrentModal();
-      router.push(`/routine/chat?session=${existingSession.id}`);
+      router.push(`/routine/chat?session=${coachSession.id}`);
     } else {
       // 활성 세션이 없으면 생성 후 이동
       setIsNavigating(true);
       createSession.mutate(
-        { purpose },
+        { purpose: 'coach' },
         {
           onSuccess: (newSession) => {
-            closeCurrentModal();
             router.push(`/routine/chat?session=${newSession.id}`);
           },
           onError: () => {
@@ -64,15 +53,6 @@ export default function FloatingAIButton({
         }
       );
     }
-  };
-
-  const handleClick = () => {
-    openModal('aiSelection', {
-      workoutSessionActive: !!workoutSession,
-      mealSessionActive: !!mealSession,
-      isLoading: isNavigating || createSession.isPending,
-      onSelectPurpose: handleSelectPurpose,
-    });
   };
 
   return (
@@ -89,7 +69,7 @@ export default function FloatingAIButton({
       )}
 
       {/* 활성 세션 인디케이터 */}
-      {hasAnySession && !isNavigating && !createSession.isPending && (
+      {hasActiveSession && !isNavigating && !createSession.isPending && (
         <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center">
           <SparkleIcon size={12} weight="fill" className="text-white" />
         </span>

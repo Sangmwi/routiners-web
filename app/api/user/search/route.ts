@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
-import { transformDbUsersToPublicUsers, DbUser } from '@/lib/types/user';
+import { toPublicUsers, DbUser } from '@/lib/types/user';
 import { handleError } from '@/lib/utils/apiResponse';
 import { z } from 'zod';
 
@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Use centralized transformer with privacy settings
-    const users = transformDbUsersToPublicUsers((usersData || []) as DbUser[]);
+    const users = toPublicUsers((usersData || []) as DbUser[]);
 
     return NextResponse.json({
       users,

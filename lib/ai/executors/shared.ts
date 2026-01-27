@@ -5,7 +5,7 @@
  */
 
 import type { AIToolResult } from '@/lib/types';
-import { transformDbInBodyToInBody, DbInBodyRecord, InBodyRecord } from '@/lib/types/inbody';
+import { toInBodyRecord, DbInBodyRecord, InBodyRecord } from '@/lib/types/inbody';
 import type { ToolExecutorContext } from './types';
 
 // ============================================================================
@@ -35,7 +35,7 @@ export async function executeGetLatestInbody(
 
   return {
     success: true,
-    data: transformDbInBodyToInBody(data as DbInBodyRecord),
+    data: toInBodyRecord(data as DbInBodyRecord),
   };
 }
 
@@ -61,7 +61,7 @@ export async function executeGetInbodyHistory(
 
   return {
     success: true,
-    data: (data as DbInBodyRecord[]).map(transformDbInBodyToInBody),
+    data: (data as DbInBodyRecord[]).map(toInBodyRecord),
   };
 }
 

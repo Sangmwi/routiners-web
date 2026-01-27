@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
-import { DbRoutineEvent, transformDbEventToEvent } from '@/lib/types/routine';
+import { DbRoutineEvent, toRoutineEvent } from '@/lib/types/routine';
 
 /**
  * GET /api/routine/events/by-date
@@ -40,6 +40,6 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
     );
   }
 
-  const event = transformDbEventToEvent(data as DbRoutineEvent);
+  const event = toRoutineEvent(data as DbRoutineEvent);
   return NextResponse.json(event);
 });

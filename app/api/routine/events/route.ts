@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
 import {
   DbRoutineEvent,
-  transformDbEventToEvent,
+  toRoutineEvent,
   transformEventToDbInsert,
 } from '@/lib/types/routine';
 import { RoutineEventCreateSchema } from '@/lib/schemas/routine.schema';
@@ -49,7 +49,7 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
     );
   }
 
-  const events = (data as DbRoutineEvent[]).map(transformDbEventToEvent);
+  const events = (data as DbRoutineEvent[]).map(toRoutineEvent);
   return NextResponse.json(events);
 });
 
@@ -106,6 +106,6 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
     );
   }
 
-  const event = transformDbEventToEvent(data as DbRoutineEvent);
+  const event = toRoutineEvent(data as DbRoutineEvent);
   return NextResponse.json(event, { status: 201 });
 });

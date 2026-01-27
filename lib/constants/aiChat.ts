@@ -35,10 +35,6 @@ export const SSE_EVENT_TYPES = {
   ROUTINE_PREVIEW: 'routine_preview',
   ROUTINE_APPLIED: 'routine_applied',
 
-  // 식단 관련
-  MEAL_PLAN_PROGRESS: 'meal_plan_progress',
-  MEAL_PLAN_PREVIEW: 'meal_plan_preview',
-  MEAL_PLAN_APPLIED: 'meal_plan_applied',
 } as const;
 
 export type SSEEventType = (typeof SSE_EVENT_TYPES)[keyof typeof SSE_EVENT_TYPES];
@@ -68,22 +64,11 @@ export const ROUTINE_PROGRESS_STAGES: ProgressStage[] = [
 ];
 
 /**
- * 식단 생성 진행률 단계
- */
-export const MEAL_PLAN_PROGRESS_STAGES: ProgressStage[] = [
-  { stage: 'analyzing', progress: 20, message: '식단 요구사항 분석 중...' },
-  { stage: 'calculating', progress: 40, message: '영양소 계산 중...' },
-  { stage: 'generating', progress: 60, message: '식단 생성 중...' },
-  { stage: 'optimizing', progress: 80, message: '최적화 중...' },
-  { stage: 'finalizing', progress: 95, message: '마무리 중...' },
-];
-
-/**
  * 세션 목적별 진행률 단계
  */
 export const PROGRESS_STAGES = {
   workout: ROUTINE_PROGRESS_STAGES,
-  meal: MEAL_PLAN_PROGRESS_STAGES,
+  coach: ROUTINE_PROGRESS_STAGES, // 코치 AI도 루틴 진행률 사용
 } as const;
 
 // =============================================================================
@@ -146,12 +131,17 @@ export const AI_CHAT_LIMITS = {
 // =============================================================================
 
 /**
+ * AI Purpose 타입
+ */
+export type AIPurpose = 'workout' | 'coach';
+
+/**
  * 초기 인사말 (AI 응답 대기 중 표시)
  * 실제 질문은 AI가 request_user_input으로 처리
  */
-export const INITIAL_GREETINGS: Record<'workout' | 'meal', string> = {
+export const INITIAL_GREETINGS: Record<AIPurpose, string> = {
   workout: '안녕하세요! 맞춤 운동 루틴을 만들어 드릴게요.',
-  meal: '안녕하세요! 맞춤 식단을 만들어 드릴게요.',
+  coach: '안녕하세요! 무엇을 도와드릴까요? 운동 루틴, 영양 분석, 또는 다른 궁금한 점이 있으시면 말씀해주세요.',
 };
 
 /**
@@ -159,7 +149,7 @@ export const INITIAL_GREETINGS: Record<'workout' | 'meal', string> = {
  */
 export function createInitialGreetingMessage(
   sessionId: string,
-  purpose: 'workout' | 'meal'
+  purpose: AIPurpose
 ): ChatMessage {
   return {
     id: `initial-greeting-${Date.now()}`,

@@ -36,8 +36,7 @@ export default function BottomNav() {
                 type="button"
                 onClick={() => router.push(item.href)}
                 onMouseDown={(e) => e.preventDefault()}
-                onTouchStart={(e) => e.preventDefault()}
-                className={`flex flex-col items-center justify-center gap-1 transition-colors select-none [-webkit-touch-callout:none] ${
+                className={`flex flex-col items-center justify-center gap-1 transition-colors select-none [-webkit-touch-callout:none] touch-manipulation ${
                   isActive
                     ? style.activeColor
                     : `${style.inactiveColor} hover:text-foreground`

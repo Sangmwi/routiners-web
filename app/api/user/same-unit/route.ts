@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withOptionalAuth } from '@/utils/supabase/auth';
-import { transformDbUsersToPublicUsers, DbUser } from '@/lib/types/user';
+import { toPublicUsers, DbUser } from '@/lib/types/user';
 import { badRequest, handleSupabaseError } from '@/lib/utils/apiResponse';
 import { z } from 'zod';
 
@@ -56,7 +56,7 @@ export const GET = withOptionalAuth(async (request: NextRequest, auth) => {
     }
 
     // Use centralized transformer with privacy settings
-    const users = transformDbUsersToPublicUsers((usersData || []) as DbUser[]);
+    const users = toPublicUsers((usersData || []) as DbUser[]);
     return NextResponse.json(users);
   }
 
@@ -74,7 +74,7 @@ export const GET = withOptionalAuth(async (request: NextRequest, auth) => {
   }
 
   // Use centralized transformer with privacy settings
-  const users = transformDbUsersToPublicUsers((usersData || []) as DbUser[]);
+  const users = toPublicUsers((usersData || []) as DbUser[]);
 
   return NextResponse.json(users);
 });

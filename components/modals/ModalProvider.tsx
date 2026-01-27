@@ -4,7 +4,6 @@ import { useModalStore } from '@/lib/stores';
 import ConfirmModal from './ConfirmModal';
 import AlertModal from './AlertModal';
 import ImagePreviewModal from './ImagePreviewModal';
-import { AISelectionDrawer } from '@/components/drawers';
 import type { ModalInstance, ModalDataMap } from '@/lib/stores/modalStore';
 
 // ============================================================================
@@ -45,15 +44,6 @@ function renderModal(modal: ModalInstance, onClose: () => void) {
           key={modal.id}
           {...commonProps}
           data={modal.data as ModalDataMap['imagePreview']}
-        />
-      );
-
-    case 'aiSelection':
-      return (
-        <AISelectionDrawer
-          key={modal.id}
-          {...commonProps}
-          data={modal.data as ModalDataMap['aiSelection']}
         />
       );
 

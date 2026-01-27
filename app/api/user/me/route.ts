@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
-import { transformDbUserToUser, DbUser } from '@/lib/types/user';
+import { toUser, DbUser } from '@/lib/types/user';
 import { notFound, handleSupabaseError } from '@/lib/utils/apiResponse';
 
 /**
@@ -25,7 +25,7 @@ export const GET = withAuth(async (_request, { authUser, supabase }) => {
   }
 
   // Use centralized transformer
-  const transformedUser = transformDbUserToUser(user as DbUser);
+  const transformedUser = toUser(user as DbUser);
 
   return NextResponse.json(transformedUser);
 });

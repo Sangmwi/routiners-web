@@ -10,13 +10,10 @@
 import type { ChatMessage, AISessionCompat, ProfileConfirmationRequest } from '@/lib/types/chat';
 import type {
   RoutineAppliedEvent,
-  MealPlanAppliedEvent,
   RoutineProgressEvent,
-  MealPlanProgressEvent,
   ToolEvent,
 } from '@/lib/api/conversation';
 import type { AIToolName, AIToolStatus, InputRequest, RoutinePreviewData } from '@/lib/types/fitness';
-import type { MealPlanPreviewData } from '@/lib/types/meal';
 import type { SessionPurpose } from '@/lib/types/routine';
 
 // =============================================================================
@@ -33,9 +30,6 @@ export interface ChatState {
   pendingRoutinePreview: RoutinePreviewData | null;
   appliedRoutine: RoutineAppliedEvent | null;
   routineProgress: RoutineProgressEvent | null;
-  pendingMealPreview: MealPlanPreviewData | null;
-  appliedMealPlan: MealPlanAppliedEvent | null;
-  mealProgress: MealPlanProgressEvent | null;
   pendingProfileConfirmation: ProfileConfirmationRequest | null;
   pendingStart: boolean;
 }
@@ -50,9 +44,6 @@ export const INITIAL_STATE: ChatState = {
   pendingRoutinePreview: null,
   appliedRoutine: null,
   routineProgress: null,
-  pendingMealPreview: null,
-  appliedMealPlan: null,
-  mealProgress: null,
   pendingProfileConfirmation: null,
   pendingStart: false,
 };
@@ -91,18 +82,12 @@ export type ChatAction =
   | { type: 'SET_APPLIED_ROUTINE'; event: RoutineAppliedEvent }
   | { type: 'SET_ROUTINE_PROGRESS'; progress: RoutineProgressEvent | null }
   | { type: 'CLEAR_ROUTINE_PREVIEW' }
-  // Meal
-  | { type: 'SET_MEAL_PREVIEW'; preview: MealPlanPreviewData | null }
-  | { type: 'SET_APPLIED_MEAL'; event: MealPlanAppliedEvent }
-  | { type: 'SET_MEAL_PROGRESS'; progress: MealPlanProgressEvent | null }
-  | { type: 'CLEAR_MEAL_PREVIEW' }
   // Profile confirmation
   | { type: 'SET_PROFILE_CONFIRMATION'; confirmation: ProfileConfirmationRequest | null }
   | { type: 'CLEAR_PROFILE_CONFIRMATION' }
-  // Apply preview (routine/meal)
+  // Apply preview (routine)
   | { type: 'START_APPLYING' }
   | { type: 'APPLY_ROUTINE_SUCCESS'; event: RoutineAppliedEvent }
-  | { type: 'APPLY_MEAL_SUCCESS'; event: MealPlanAppliedEvent }
   | { type: 'APPLY_ERROR'; error: string };
 
 // =============================================================================
@@ -160,7 +145,6 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
         isSending: false,
         error: null,
         routineProgress: null,
-        mealProgress: null,
       };
 
     case 'CANCEL_STREAM':
@@ -261,31 +245,6 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
       return { ...state, pendingRoutinePreview: null };
 
     // -------------------------------------------------------------------------
-    // Meal
-    // -------------------------------------------------------------------------
-    case 'SET_MEAL_PREVIEW':
-      return {
-        ...state,
-        pendingMealPreview: action.preview,
-        pendingInput: null,
-        mealProgress: null,
-        isSending: false,
-      };
-
-    case 'SET_APPLIED_MEAL':
-      return {
-        ...state,
-        appliedMealPlan: action.event,
-        pendingMealPreview: null,
-      };
-
-    case 'SET_MEAL_PROGRESS':
-      return { ...state, mealProgress: action.progress };
-
-    case 'CLEAR_MEAL_PREVIEW':
-      return { ...state, pendingMealPreview: null };
-
-    // -------------------------------------------------------------------------
     // Profile confirmation
     // -------------------------------------------------------------------------
     case 'SET_PROFILE_CONFIRMATION':
@@ -310,14 +269,6 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
         isSending: false,
         pendingRoutinePreview: null,
         appliedRoutine: action.event,
-      };
-
-    case 'APPLY_MEAL_SUCCESS':
-      return {
-        ...state,
-        isSending: false,
-        pendingMealPreview: null,
-        appliedMealPlan: action.event,
       };
 
     case 'APPLY_ERROR':

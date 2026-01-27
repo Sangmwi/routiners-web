@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
-import { transformDbUserToUser, DbUser } from '@/lib/types/user';
+import { toUser, DbUser } from '@/lib/types/user';
 import { SignupCompleteSchema } from '@/lib/schemas/user.schema';
 import {
   unauthorized,
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Use centralized transformer
-    const transformedUser = transformDbUserToUser(newUser as DbUser);
+    const transformedUser = toUser(newUser as DbUser);
 
     return NextResponse.json(transformedUser, { status: 201 });
   } catch (error) {

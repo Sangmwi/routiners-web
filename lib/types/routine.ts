@@ -11,7 +11,7 @@ import type { MealData } from './meal';
 // Enums & Constants
 // ============================================================================
 
-export type SessionPurpose = 'workout' | 'meal';
+export type SessionPurpose = 'workout' | 'coach';
 export type EventType = 'workout' | 'meal';
 export type EventStatus = 'scheduled' | 'completed' | 'skipped';
 export type EventSource = 'user' | 'ai';
@@ -204,7 +204,7 @@ export interface RoutineBatchCreateData {
 /**
  * DbRoutineEvent (snake_case) → RoutineEvent (camelCase) 변환
  */
-export function transformDbEventToEvent(db: DbRoutineEvent): RoutineEvent {
+export function toRoutineEvent(db: DbRoutineEvent): RoutineEvent {
   return {
     id: db.id,
     userId: db.user_id,

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
 import {
   DbRoutineEvent,
-  transformDbEventToEvent,
+  toRoutineEvent,
   transformEventToDbInsert,
 } from '@/lib/types/routine';
 import { RoutineBatchCreateSchema } from '@/lib/schemas/routine.schema';
@@ -103,6 +103,6 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
     })
     .eq('id', aiSessionId);
 
-  const createdEvents = (data as DbRoutineEvent[]).map(transformDbEventToEvent);
+  const createdEvents = (data as DbRoutineEvent[]).map(toRoutineEvent);
   return NextResponse.json(createdEvents, { status: 201 });
 });

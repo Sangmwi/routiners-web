@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
-import { DbRoutineEvent, transformDbEventToEvent } from '@/lib/types/routine';
+import { DbRoutineEvent, toRoutineEvent } from '@/lib/types/routine';
 import { notFound, handleSupabaseError } from '@/lib/utils/apiResponse';
 
 /**
@@ -30,7 +30,7 @@ export const POST = withAuth<NextResponse, { id: string }>(
       return handleSupabaseError(error);
     }
 
-    const event = transformDbEventToEvent(data as DbRoutineEvent);
+    const event = toRoutineEvent(data as DbRoutineEvent);
     return NextResponse.json(event);
   }
 );

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
 import {
-  transformDbInBodyToInBody,
+  toInBodyRecord,
   InBodyUpdateData,
   DbInBodyRecord,
 } from '@/lib/types/inbody';
@@ -31,7 +31,7 @@ export const GET = withAuth(
       return handleSupabaseError(error);
     }
 
-    const record = transformDbInBodyToInBody(data as DbInBodyRecord);
+    const record = toInBodyRecord(data as DbInBodyRecord);
     return NextResponse.json(record);
   }
 );
@@ -92,7 +92,7 @@ export const PATCH = withAuth(
       return handleSupabaseError(error);
     }
 
-    const record = transformDbInBodyToInBody(data as DbInBodyRecord);
+    const record = toInBodyRecord(data as DbInBodyRecord);
     return NextResponse.json(record);
   }
 );

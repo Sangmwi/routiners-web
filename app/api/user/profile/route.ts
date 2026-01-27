@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
-import { transformDbUserToUser, DbUser } from '@/lib/types/user';
+import { toUser, DbUser } from '@/lib/types/user';
 import { ProfileUpdateSchema } from '@/lib/schemas/user.schema';
 import {
   conflict,
@@ -63,7 +63,7 @@ export const PATCH = withAuth(async (request, { authUser, supabase }) => {
   }
 
   // Use centralized transformer
-  const transformedUser = transformDbUserToUser(updatedUser as DbUser);
+  const transformedUser = toUser(updatedUser as DbUser);
 
   return NextResponse.json(transformedUser);
 });

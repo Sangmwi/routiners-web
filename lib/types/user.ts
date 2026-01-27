@@ -93,7 +93,7 @@ export interface User {
  * @param dbUser - DB에서 조회한 사용자 데이터
  * @returns 클라이언트용 User 객체
  */
-export function transformDbUserToUser(dbUser: DbUser): User {
+export function toUser(dbUser: DbUser): User {
   return {
     id: dbUser.id,
     providerId: dbUser.provider_id,
@@ -131,8 +131,8 @@ export function transformDbUserToUser(dbUser: DbUser): User {
  * @param dbUser - DB에서 조회한 사용자 데이터
  * @returns privacy 설정이 적용된 User 객체
  */
-export function transformDbUserToPublicUser(dbUser: DbUser): User {
-  const user = transformDbUserToUser(dbUser);
+export function toPublicUser(dbUser: DbUser): User {
+  const user = toUser(dbUser);
 
   // Privacy 설정에 따라 InBody 데이터 숨김
   if (!dbUser.show_body_metrics) {
@@ -149,8 +149,8 @@ export function transformDbUserToPublicUser(dbUser: DbUser): User {
  * @param dbUsers - DB에서 조회한 사용자 배열
  * @returns privacy 설정이 적용된 User 배열
  */
-export function transformDbUsersToPublicUsers(dbUsers: DbUser[]): User[] {
-  return dbUsers.map(transformDbUserToPublicUser);
+export function toPublicUsers(dbUsers: DbUser[]): User[] {
+  return dbUsers.map(toPublicUser);
 }
 
 // ============================================================================

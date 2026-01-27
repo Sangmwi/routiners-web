@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
 import {
-  transformDbInBodyToInBody,
+  toInBodyRecord,
   transformInBodyToDbInsert,
   InBodyCreateData,
   DbInBodyRecord,
@@ -28,7 +28,7 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
     return handleSupabaseError(error);
   }
 
-  const records = (data as DbInBodyRecord[]).map(transformDbInBodyToInBody);
+  const records = (data as DbInBodyRecord[]).map(toInBodyRecord);
   return NextResponse.json(records);
 });
 
@@ -60,6 +60,6 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
     return handleSupabaseError(error);
   }
 
-  const record = transformDbInBodyToInBody(data as DbInBodyRecord);
+  const record = toInBodyRecord(data as DbInBodyRecord);
   return NextResponse.json(record, { status: 201 });
 });

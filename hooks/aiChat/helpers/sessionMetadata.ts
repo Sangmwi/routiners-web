@@ -9,11 +9,8 @@ import type {
   AISessionMetadata,
   ProfileConfirmationRequest,
   AppliedRoutineMetadata,
-  AppliedMealPlanMetadata,
 } from '@/lib/types/chat';
 import type { RoutinePreviewData, InputRequest } from '@/lib/types/fitness';
-import type { MealPlanPreviewData } from '@/lib/types/meal';
-import type { MealPlanAppliedEvent } from '@/lib/api/conversation';
 
 // =============================================================================
 // Types
@@ -28,10 +25,6 @@ export interface ExtractedSessionMetadata {
   pendingRoutinePreview: RoutinePreviewData | null;
   /** 적용된 루틴 정보 */
   appliedRoutine: AppliedRoutineMetadata | null;
-  /** 대기 중인 식단 미리보기 */
-  pendingMealPreview: MealPlanPreviewData | null;
-  /** 적용된 식단 정보 */
-  appliedMealPlan: MealPlanAppliedEvent | null;
   /** 대기 중인 프로필 확인 요청 */
   pendingProfileConfirmation: ProfileConfirmationRequest | null;
   /** 대기 중인 입력 요청 */
@@ -51,19 +44,6 @@ function isRoutinePreviewData(value: unknown): value is RoutinePreviewData {
 }
 
 function isAppliedRoutineMetadata(value: unknown): value is AppliedRoutineMetadata {
-  return (
-    isObject(value) &&
-    typeof value.previewId === 'string' &&
-    typeof value.eventsCreated === 'number' &&
-    typeof value.startDate === 'string'
-  );
-}
-
-function isMealPlanPreviewData(value: unknown): value is MealPlanPreviewData {
-  return isObject(value) && typeof value.id === 'string' && typeof value.title === 'string';
-}
-
-function isMealPlanAppliedEvent(value: unknown): value is MealPlanAppliedEvent {
   return (
     isObject(value) &&
     typeof value.previewId === 'string' &&
@@ -117,8 +97,6 @@ export function extractSessionMetadata(
     return {
       pendingRoutinePreview: null,
       appliedRoutine: null,
-      pendingMealPreview: null,
-      appliedMealPlan: null,
       pendingProfileConfirmation: null,
       pendingInput: null,
     };
@@ -131,12 +109,6 @@ export function extractSessionMetadata(
       : null,
     appliedRoutine: isAppliedRoutineMetadata(metadata.applied_routine)
       ? metadata.applied_routine
-      : null,
-    pendingMealPreview: isMealPlanPreviewData(metadata.pending_meal_preview)
-      ? metadata.pending_meal_preview
-      : null,
-    appliedMealPlan: isMealPlanAppliedEvent(metadata.applied_meal_plan)
-      ? metadata.applied_meal_plan
       : null,
     pendingProfileConfirmation: isProfileConfirmationRequest(metadata.pending_profile_confirmation)
       ? metadata.pending_profile_confirmation

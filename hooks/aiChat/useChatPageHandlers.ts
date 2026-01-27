@@ -34,7 +34,7 @@ interface UseChatPageHandlersParams {
   /** 메시지 전송 함수 */
   sendMessage: (message: string) => void;
   /** 미리보기 드로어 열기 콜백 */
-  onOpenPreviewDrawer?: (type: 'routine' | 'meal') => void;
+  onOpenPreviewDrawer?: () => void;
   /** 다른 활성 세션 목록 (삭제 후 스마트 네비게이션용) */
   otherActiveSessions?: Conversation[];
 }
@@ -48,8 +48,6 @@ export interface UseChatPageHandlersReturn {
   handleNavigateToCalendar: () => void;
   /** 루틴 미리보기 상세 보기 */
   handleViewRoutineDetails: () => void;
-  /** 식단 미리보기 상세 보기 */
-  handleViewMealDetails: () => void;
   /** 대화 삭제 */
   handleDeleteChat: () => void;
   /** 대화 초기화 */
@@ -92,8 +90,7 @@ export function useChatPageHandlers({
   };
 
   const handleNavigateToCalendar = () => {
-    const type = session?.purpose === 'meal' ? 'meal' : 'workout';
-    router.push(`/routine/calendar?type=${type}`);
+    router.push('/routine/calendar');
   };
 
   // ---------------------------------------------------------------------------
@@ -111,11 +108,7 @@ export function useChatPageHandlers({
   // ---------------------------------------------------------------------------
 
   const handleViewRoutineDetails = () => {
-    onOpenPreviewDrawer?.('routine');
-  };
-
-  const handleViewMealDetails = () => {
-    onOpenPreviewDrawer?.('meal');
+    onOpenPreviewDrawer?.();
   };
 
   // ---------------------------------------------------------------------------
@@ -200,7 +193,6 @@ export function useChatPageHandlers({
     handleSendMessage,
     handleNavigateToCalendar,
     handleViewRoutineDetails,
-    handleViewMealDetails,
     handleDeleteChat,
     handleResetChat,
   };

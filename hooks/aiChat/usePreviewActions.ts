@@ -22,10 +22,6 @@ export interface UsePreviewActionsReturn {
   applyRoutine: (forceOverwrite?: boolean) => void;
   /** 루틴 수정 요청 */
   requestRevision: (feedback: string) => void;
-  /** 식단 미리보기 적용 */
-  applyMealPlan: (forceOverwrite?: boolean) => void;
-  /** 식단 수정 요청 */
-  requestMealRevision: (feedback: string) => void;
 }
 
 // =============================================================================
@@ -35,7 +31,7 @@ export interface UsePreviewActionsReturn {
 /**
  * 미리보기 액션 훅
  *
- * 루틴/식단 미리보기 적용 및 수정 요청 처리
+ * 루틴 미리보기 적용 및 수정 요청 처리
  * - 충돌 시 덮어쓰기 옵션 지원
  * - 수정 요청 시 피드백 메시지 전송
  */
@@ -61,25 +57,8 @@ export function usePreviewActions({
     sendMessage(feedback, {});
   };
 
-  // ---------------------------------------------------------------------------
-  // 식단 미리보기 적용 / 수정 요청
-  // ---------------------------------------------------------------------------
-
-  const applyMealPlan = (forceOverwrite?: boolean) => {
-    if (!sessionId || !state.pendingMealPreview) return;
-    applyPreview('meal', sessionId, state.pendingMealPreview.id, dispatch, cacheSync, forceOverwrite);
-  };
-
-  const requestMealRevision = (feedback: string) => {
-    if (!sessionId || !state.pendingMealPreview) return;
-    dispatch({ type: 'CLEAR_MEAL_PREVIEW' });
-    sendMessage(feedback, {});
-  };
-
   return {
     applyRoutine,
     requestRevision,
-    applyMealPlan,
-    requestMealRevision,
   };
 }

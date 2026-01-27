@@ -28,7 +28,7 @@ export type { SessionPurpose } from './routine';
 export interface DbConversation {
   id: string;
   type: ConversationType;
-  ai_purpose: 'workout' | 'meal' | null;
+  ai_purpose: 'workout' | 'coach' | null;
   ai_status: ConversationStatus | null;
   ai_result_applied: boolean;
   ai_result_applied_at: string | null;
@@ -38,6 +38,10 @@ export interface DbConversation {
   updated_at: string;
   deleted_at: string | null;
   metadata: Record<string, unknown> | null;
+  /** AI-generated summary of previous conversation context */
+  context_summary: string | null;
+  /** Reference to the last message included in context_summary */
+  summarized_until: string | null;
 }
 
 /**
@@ -96,7 +100,7 @@ export interface DbMessageReaction {
 export interface Conversation {
   id: string;
   type: ConversationType;
-  aiPurpose?: 'workout' | 'meal';
+  aiPurpose?: 'workout' | 'coach';
   aiStatus?: ConversationStatus;
   aiResultApplied: boolean;
   aiResultAppliedAt?: string;
@@ -106,6 +110,10 @@ export interface Conversation {
   updatedAt: string;
   /** 대화방 메타데이터 (미리보기 상태 등) */
   metadata?: Record<string, unknown>;
+  /** AI-generated context summary */
+  contextSummary?: string;
+  /** Last message ID included in summary */
+  summarizedUntil?: string;
 
   // 조인 데이터 (optional)
   participants?: ConversationParticipant[];
@@ -177,7 +185,7 @@ export interface MessageReaction {
  */
 export interface ConversationCreateData {
   type: ConversationType;
-  aiPurpose?: 'workout' | 'meal';
+  aiPurpose?: 'workout' | 'coach';
   title?: string;
   /** direct/group 채팅 시 초대할 유저 ID 목록 */
   participantIds?: string[];
@@ -230,6 +238,8 @@ export function transformDbConversation(db: DbConversation): Conversation {
     createdAt: db.created_at,
     updatedAt: db.updated_at,
     metadata: db.metadata ?? undefined,
+    contextSummary: db.context_summary ?? undefined,
+    summarizedUntil: db.summarized_until ?? undefined,
   };
 }
 
@@ -313,15 +323,12 @@ export interface AppliedMealPlanMetadata {
  * AI 세션 메타데이터 (미리보기 상태 복구용)
  */
 export interface AISessionMetadata {
-  // 운동 관련
+  // 루틴 관련
   pending_preview?: import('./fitness').RoutinePreviewData;
   applied_routine?: AppliedRoutineMetadata;
-  // 식단 관련
-  pending_meal_preview?: import('./meal').MealPlanPreviewData;
-  applied_meal_plan?: AppliedMealPlanMetadata;
-  // 프로필 확인 (운동/식단 공통)
+  // 프로필 확인
   pending_profile_confirmation?: ProfileConfirmationRequest;
-  // 선택형 입력 요청 (운동/식단 공통)
+  // 선택형 입력 요청
   pending_input?: import('./fitness').InputRequest;
 }
 
@@ -332,7 +339,7 @@ export interface AISessionMetadata {
 export interface AISessionCompat {
   id: string;
   userId: string;
-  purpose: 'workout' | 'meal';
+  purpose: 'workout' | 'coach';
   status: ConversationStatus;
   title?: string;
   messages: ChatMessage[];

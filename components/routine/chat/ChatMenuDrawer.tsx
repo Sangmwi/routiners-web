@@ -216,10 +216,10 @@ function SessionItem({ session, isCurrent, onSelect }: SessionItemProps) {
   const dateStr = `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
 
   // 목적 아이콘
-  const PurposeIcon = purpose === 'meal' ? EventIcons.Meal : EventIcons.Workout;
-  const purposeLabel = purpose === 'meal' ? '식단 관리' : '운동 루틴';
-  const purposeColor = purpose === 'meal' ? 'text-primary' : 'text-primary';
-  const purposeBg = purpose === 'meal' ? 'bg-primary/10' : 'bg-primary/10';
+  const PurposeIcon = purpose === 'coach' ? EventIcons.Workout : EventIcons.Workout;
+  const purposeLabel = purpose === 'coach' ? 'AI 코치' : '운동 루틴';
+  const purposeColor = 'text-primary';
+  const purposeBg = 'bg-primary/10';
 
   // 상태 정보
   const statusInfo = status === 'active'

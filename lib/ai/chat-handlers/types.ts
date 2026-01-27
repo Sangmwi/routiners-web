@@ -7,8 +7,8 @@
 import { z } from 'zod';
 import { SupabaseClient } from '@supabase/supabase-js';
 import type { RoutinePreviewData, InputRequest } from '@/lib/types/fitness';
-import type { MealPlanPreviewData } from '@/lib/types/meal';
 import type { ProfileConfirmationRequest } from '@/lib/types/chat';
+import type { ActivePurpose } from '@/lib/types/coach';
 
 // =============================================================================
 // Tool Args Schemas (Zod 기반 런타임 검증)
@@ -53,7 +53,7 @@ export const ConfirmProfileArgsSchema = z.object({
 });
 export type ConfirmProfileArgs = z.infer<typeof ConfirmProfileArgsSchema>;
 
-/** apply_routine / apply_meal_plan 도구 인자 스키마 */
+/** apply_routine 도구 인자 스키마 */
 export const ApplyPreviewArgsSchema = z.object({
   preview_id: z.string(),
 });
@@ -93,19 +93,21 @@ export interface FunctionCallInfo {
  * Conversation Metadata 타입
  */
 export interface ConversationMetadata {
+  /** 활성 목적 (구조화된 프로세스 진행 중일 때만) */
+  activePurpose?: ActivePurpose | null;
+  /** 대기 중인 루틴 미리보기 */
   pending_preview?: RoutinePreviewData;
-  pending_meal_preview?: MealPlanPreviewData;
+  /** 대기 중인 프로필 확인 요청 */
   pending_profile_confirmation?: ProfileConfirmationRequest;
+  /** 대기 중인 사용자 입력 요청 */
   pending_input?: InputRequest;
+  /** 적용된 루틴 정보 */
   applied_routine?: {
     previewId: string;
     eventsCreated: number;
     startDate: string;
   };
-  applied_meal_plan?: {
-    previewId: string;
-    eventsCreated: number;
-    startDate: string;
-  };
+  /** 메시지 카운트 (요약 트리거용) */
+  messageCount?: number;
   [key: string]: unknown;
 }

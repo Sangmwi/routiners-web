@@ -1,26 +1,23 @@
 'use client';
 
 import { useState } from 'react';
-import { ClockIcon, FireIcon, SpinnerGapIcon } from '@phosphor-icons/react';
+import { ClockIcon, SpinnerGapIcon } from '@phosphor-icons/react';
 import { getEventIcon } from '@/lib/config/eventTheme';
 import Modal from '@/components/ui/Modal';
 import type { RoutinePreviewData, RoutinePreviewDay, RoutinePreviewExercise } from '@/lib/types/fitness';
-import type { MealPlanPreviewData, MealPreviewDay, MealPreviewMeal } from '@/lib/types/meal';
-import { MEAL_TYPE_LABELS } from '@/lib/types/meal';
 
 const DAY_NAMES = ['', '월', '화', '수', '목', '금', '토', '일'];
 
 interface PreviewDetailDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  type: 'routine' | 'meal';
-  preview: RoutinePreviewData | MealPlanPreviewData;
+  preview: RoutinePreviewData;
   onApply: (forceOverwrite?: boolean) => void;
   isApplying?: boolean;
 }
 
 /**
- * 루틴/식단 상세 보기 드로어
+ * 루틴 상세 보기 드로어
  *
  * 미니멀하고 구조적인 디자인
  * - 카드 기반 레이아웃
@@ -30,7 +27,6 @@ interface PreviewDetailDrawerProps {
 export default function PreviewDetailDrawer({
   isOpen,
   onClose,
-  type,
   preview,
   onApply,
   isApplying = false,
@@ -44,8 +40,6 @@ export default function PreviewDetailDrawer({
 
   const weeks = preview.weeks;
   const currentWeek = weeks.find(w => w.weekNumber === selectedWeek);
-
-  const isRoutine = type === 'routine';
   const hasConflicts = (preview.conflicts?.length ?? 0) > 0;
 
   return (
@@ -61,7 +55,7 @@ export default function PreviewDetailDrawer({
       <div className="px-5 pt-2 pb-4">
         <div className="flex items-start gap-3">
           {(() => {
-            const Icon = getEventIcon(isRoutine ? 'workout' : 'meal');
+            const Icon = getEventIcon('workout');
             return (
               <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-primary/10">
                 <Icon className="w-5 h-5 text-primary" />
@@ -100,11 +94,7 @@ export default function PreviewDetailDrawer({
       <div className="flex-1 overflow-y-auto">
         <div className="px-5 pb-6 space-y-4">
           {currentWeek?.days.map((day, idx) => (
-            <DayDetailCard
-              key={idx}
-              day={day}
-              type={type}
-            />
+            <RoutineDayCard key={idx} day={day} />
           ))}
         </div>
       </div>
@@ -126,7 +116,7 @@ export default function PreviewDetailDrawer({
               적용 중...
             </span>
           ) : (
-            isRoutine ? '이 루틴 적용하기' : '이 식단 적용하기'
+            '이 루틴 적용하기'
           )}
         </button>
       </div>
@@ -137,19 +127,6 @@ export default function PreviewDetailDrawer({
 // =============================================================================
 // Day Cards
 // =============================================================================
-
-function DayDetailCard({
-  day,
-  type,
-}: {
-  day: RoutinePreviewDay | MealPreviewDay;
-  type: 'routine' | 'meal';
-}) {
-  if (type === 'routine') {
-    return <RoutineDayCard day={day as RoutinePreviewDay} />;
-  }
-  return <MealDayCard day={day as MealPreviewDay} />;
-}
 
 /**
  * 루틴 일별 카드 - 미니멀 디자인
@@ -210,69 +187,3 @@ function ExerciseItem({
   );
 }
 
-/**
- * 식단 일별 카드
- */
-function MealDayCard({ day }: { day: MealPreviewDay }) {
-  return (
-    <div className="bg-muted/20 rounded-2xl overflow-hidden">
-      {/* 카드 헤더 */}
-      <div className="flex items-center justify-between gap-3 px-4 py-3 bg-primary/10">
-        <div className="flex items-center gap-2.5 min-w-0 flex-1">
-          <span className="w-7 h-7 rounded-full bg-primary/15 text-primary text-xs font-semibold flex items-center justify-center shrink-0">
-            {DAY_NAMES[day.dayOfWeek]}
-          </span>
-          <span className="text-sm font-medium text-foreground truncate">
-            {DAY_NAMES[day.dayOfWeek]}요일
-          </span>
-        </div>
-        {day.totalCalories && (
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground shrink-0">
-            <FireIcon size={16} />
-            <span>{day.totalCalories}kcal</span>
-          </div>
-        )}
-      </div>
-
-      {/* 식사 목록 */}
-      <div className="p-4 space-y-4">
-        {day.meals.map((meal, idx) => (
-          <MealCard key={idx} meal={meal} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/**
- * 개별 식사 카드 (아침/점심/저녁/간식)
- */
-function MealCard({ meal }: { meal: MealPreviewMeal }) {
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-semibold text-primary">
-          {MEAL_TYPE_LABELS[meal.type]}
-        </span>
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          {meal.totalCalories && (
-            <span className="flex items-center gap-1">
-              <FireIcon size={14} />
-              {meal.totalCalories}kcal
-            </span>
-          )}
-        </div>
-      </div>
-      <div className="space-y-2">
-        {meal.foods.map((food, idx) => (
-          <div key={idx} className="flex justify-between text-sm">
-            <span className="text-foreground">{food.name}</span>
-            <span className="text-muted-foreground">
-              {food.portion}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}

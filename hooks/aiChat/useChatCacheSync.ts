@@ -11,17 +11,14 @@ import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/constants/queryKeys';
 import type { ChatMessage, AISessionCompat, ProfileConfirmationRequest } from '@/lib/types/chat';
 import type { InputRequest, RoutinePreviewData } from '@/lib/types/fitness';
-import type { MealPlanPreviewData } from '@/lib/types/meal';
-import type { RoutineAppliedEvent, MealPlanAppliedEvent } from '@/lib/api/conversation';
+import type { RoutineAppliedEvent } from '@/lib/api/conversation';
 
-type SessionPurpose = 'workout' | 'meal';
+type SessionPurpose = 'workout' | 'coach';
 
 interface AISessionMetadataUpdate {
   pending_input?: InputRequest | null;
   pending_preview?: RoutinePreviewData | null;
   applied_routine?: RoutineAppliedEvent | null;
-  pending_meal_preview?: MealPlanPreviewData | null;
-  applied_meal_plan?: MealPlanAppliedEvent | null;
   pending_profile_confirmation?: ProfileConfirmationRequest | null;
 }
 
@@ -82,14 +79,6 @@ export function useChatCacheSync(purpose: SessionPurpose) {
   /** Applied routine 캐시 동기화 (pending_preview 자동 정리) */
   const syncRoutineApplied = (event: RoutineAppliedEvent) =>
     syncMetadata({ pending_preview: null, applied_routine: event });
-
-  /** Meal plan preview 캐시 동기화 (pending_input 자동 정리) */
-  const syncMealPlanPreview = (preview: MealPlanPreviewData | null) =>
-    syncMetadata({ pending_meal_preview: preview ?? undefined, pending_input: undefined });
-
-  /** Applied meal plan 캐시 동기화 (pending_meal_preview 자동 정리) */
-  const syncMealPlanApplied = (event: MealPlanAppliedEvent) =>
-    syncMetadata({ pending_meal_preview: null, applied_meal_plan: event });
 
   /** Profile confirmation 캐시 동기화 */
   const syncProfileConfirmation = (request: ProfileConfirmationRequest | null) =>
@@ -154,8 +143,6 @@ export function useChatCacheSync(purpose: SessionPurpose) {
     syncPendingInput,
     syncRoutinePreview,
     syncRoutineApplied,
-    syncMealPlanPreview,
-    syncMealPlanApplied,
     syncProfileConfirmation,
     clearPendingStates,
     // Invalidation methods

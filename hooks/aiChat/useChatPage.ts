@@ -60,14 +60,14 @@ export interface UseChatPageReturn {
  */
 export function useChatPage(
   sessionId: string | null,
-  onOpenPreviewDrawer?: (type: 'routine' | 'meal') => void
+  onOpenPreviewDrawer?: () => void
 ): UseChatPageReturn {
   const router = useRouter();
   const { isInWebView } = useWebViewCore();
   const confirmDialog = useConfirmDialog();
   const showError = useShowError();
 
-  // 루틴/식단 적용 완료 상태 추적 (적용 후 리다이렉트 방지)
+  // 루틴 적용 완료 상태 추적 (적용 후 리다이렉트 방지)
   const hasAppliedRef = useRef(false);
 
   // ---------------------------------------------------------------------------
@@ -112,12 +112,12 @@ export function useChatPage(
 
   const chat = useAIChat(session);
 
-  // 루틴/식단 적용 성공 시 ref 설정
+  // 루틴 적용 성공 시 ref 설정
   useEffect(() => {
-    if (chat.appliedRoutine || chat.appliedMealPlan) {
+    if (chat.appliedRoutine) {
       hasAppliedRef.current = true;
     }
-  }, [chat.appliedRoutine, chat.appliedMealPlan]);
+  }, [chat.appliedRoutine]);
 
   // ---------------------------------------------------------------------------
   // 페이지 상태 계산

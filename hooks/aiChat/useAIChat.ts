@@ -5,12 +5,9 @@ import { useChatCacheSync } from './useChatCacheSync';
 import { AI_SYSTEM_MESSAGE } from '@/lib/constants/aiChat';
 import type { ChatMessage, AISessionCompat, ProfileConfirmationRequest } from '@/lib/types/chat';
 import type { AIToolStatus, InputRequest, RoutinePreviewData } from '@/lib/types/fitness';
-import type { MealPlanPreviewData } from '@/lib/types/meal';
 import type {
   RoutineAppliedEvent,
   RoutineProgressEvent,
-  MealPlanAppliedEvent,
-  MealPlanProgressEvent,
 } from '@/lib/api/conversation';
 import { filterDisplayableMessages } from './helpers/sessionStateBuilder';
 import { chatReducer, INITIAL_STATE, type ChatState } from './helpers/chatReducer';
@@ -35,12 +32,6 @@ export interface UseAIChatReturn {
   appliedRoutine: RoutineAppliedEvent | null;
   /** 루틴 생성 진행률 */
   routineProgress: RoutineProgressEvent | null;
-  /** 대기 중인 식단 미리보기 */
-  pendingMealPreview: MealPlanPreviewData | null;
-  /** 식단 적용 완료 정보 */
-  appliedMealPlan: MealPlanAppliedEvent | null;
-  /** 식단 생성 진행률 */
-  mealProgress: MealPlanProgressEvent | null;
   /** 대기 중인 프로필 확인 요청 */
   pendingProfileConfirmation: ProfileConfirmationRequest | null;
   /** 대화 시작 대기 상태 */
@@ -53,10 +44,6 @@ export interface UseAIChatReturn {
   applyRoutine: (forceOverwrite?: boolean) => void;
   /** 루틴 수정 요청 */
   requestRevision: (feedback: string) => void;
-  /** 식단 미리보기 적용 (forceOverwrite: 충돌 시 덮어쓰기) */
-  applyMealPlan: (forceOverwrite?: boolean) => void;
-  /** 식단 수정 요청 */
-  requestMealRevision: (feedback: string) => void;
   /** 프로필 데이터 확인 */
   confirmProfile: () => void;
   /** 프로필 수정 요청 */
@@ -206,9 +193,6 @@ export function useAIChat(
     pendingRoutinePreview: state.pendingRoutinePreview,
     appliedRoutine: state.appliedRoutine,
     routineProgress: state.routineProgress,
-    pendingMealPreview: state.pendingMealPreview,
-    appliedMealPlan: state.appliedMealPlan,
-    mealProgress: state.mealProgress,
     pendingProfileConfirmation: state.pendingProfileConfirmation,
     pendingStart: state.pendingStart,
 
@@ -222,8 +206,6 @@ export function useAIChat(
     // 미리보기 액션
     applyRoutine: previewActions.applyRoutine,
     requestRevision: previewActions.requestRevision,
-    applyMealPlan: previewActions.applyMealPlan,
-    requestMealRevision: previewActions.requestMealRevision,
 
     // 프로필 확인 액션
     confirmProfile: profileConfirmation.confirmProfile,

@@ -35,11 +35,9 @@ function ChatPageContent() {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [previewDrawerOpen, setPreviewDrawerOpen] = useState(false);
-  const [previewDrawerType, setPreviewDrawerType] = useState<'routine' | 'meal'>('routine');
 
   // 미리보기 드로어 열기 콜백
-  const handleOpenPreviewDrawer = (type: 'routine' | 'meal') => {
-    setPreviewDrawerType(type);
+  const handleOpenPreviewDrawer = () => {
     setPreviewDrawerOpen(true);
   };
 
@@ -97,7 +95,7 @@ function ChatPageContent() {
   // 메인 UI
   // ---------------------------------------------------------------------------
 
-  const headerTitle = session.purpose === 'meal' ? 'AI 영양사' : 'AI 트레이너';
+  const headerTitle = session.purpose === 'coach' ? 'AI 코치' : 'AI 트레이너';
 
   const headerAction = (
     <button
@@ -133,12 +131,6 @@ function ChatPageContent() {
           onApplyRoutine={chat.applyRoutine}
           onRequestRevision={chat.requestRevision}
           onViewRoutineDetails={handlers.handleViewRoutineDetails}
-          pendingMealPreview={chat.pendingMealPreview}
-          appliedMealPlan={chat.appliedMealPlan}
-          mealProgress={chat.mealProgress}
-          onApplyMealPlan={chat.applyMealPlan}
-          onRequestMealRevision={chat.requestMealRevision}
-          onViewMealDetails={handlers.handleViewMealDetails}
           pendingProfileConfirmation={chat.pendingProfileConfirmation}
           onConfirmProfile={chat.confirmProfile}
           onRequestProfileEdit={chat.requestProfileEdit}
@@ -153,7 +145,6 @@ function ChatPageContent() {
             <ChatCompletedBanner
               purpose={session.purpose}
               appliedRoutine={chat.appliedRoutine}
-              appliedMealPlan={chat.appliedMealPlan}
               onNavigateToCalendar={handlers.handleNavigateToCalendar}
             />
           </div>
@@ -193,8 +184,8 @@ function ChatPageContent() {
           disabled={chat.isStreaming}
           isLoading={chat.isStreaming}
           placeholder={
-            session.purpose === 'meal'
-              ? '식단 목표를 알려주세요...'
+            session.purpose === 'coach'
+              ? '무엇이든 물어보세요...'
               : '운동 목표를 알려주세요...'
           }
         />
@@ -214,33 +205,18 @@ function ChatPageContent() {
       />
 
       {/* 미리보기 상세 드로어 */}
-      {(() => {
-        // previewDrawerType에 맞는 실제 preview 데이터 선택
-        const preview = previewDrawerType === 'routine'
-          ? chat.pendingRoutinePreview
-          : chat.pendingMealPreview;
-
-        // preview가 없으면 렌더링하지 않음
-        if (!preview) return null;
-
-        return (
-          <PreviewDetailDrawer
-            isOpen={previewDrawerOpen}
-            onClose={() => setPreviewDrawerOpen(false)}
-            type={previewDrawerType}
-            preview={preview}
-            onApply={(forceOverwrite) => {
-              setPreviewDrawerOpen(false);
-              if (previewDrawerType === 'routine') {
-                chat.applyRoutine(forceOverwrite);
-              } else {
-                chat.applyMealPlan(forceOverwrite);
-              }
-            }}
-            isApplying={chat.isStreaming}
-          />
-        );
-      })()}
+      {chat.pendingRoutinePreview && (
+        <PreviewDetailDrawer
+          isOpen={previewDrawerOpen}
+          onClose={() => setPreviewDrawerOpen(false)}
+          preview={chat.pendingRoutinePreview}
+          onApply={(forceOverwrite) => {
+            setPreviewDrawerOpen(false);
+            chat.applyRoutine(forceOverwrite);
+          }}
+          isApplying={chat.isStreaming}
+        />
+      )}
     </div>
   );
 }

@@ -8,7 +8,6 @@
  */
 
 import { ApiError, InputRequest, RoutinePreviewData } from '@/lib/types';
-import { MealPlanPreviewData } from '@/lib/types/meal';
 import { authFetch } from '@/lib/utils/authFetch';
 import {
   Conversation,
@@ -191,17 +190,6 @@ export interface RoutineProgressEvent {
   stage: string;
 }
 
-export interface MealPlanAppliedEvent {
-  previewId: string;
-  eventsCreated: number;
-  startDate: string;
-}
-
-export interface MealPlanProgressEvent {
-  progress: number;
-  stage: string;
-}
-
 export interface ChatStreamCallbacks {
   onMessage: (chunk: string) => void;
   onComplete: (fullMessage: string) => void;
@@ -216,12 +204,6 @@ export interface ChatStreamCallbacks {
   onRoutineApplied?: (event: RoutineAppliedEvent) => void;
   /** 루틴 생성 진행률 */
   onRoutineProgress?: (event: RoutineProgressEvent) => void;
-  /** 식단 미리보기 표시 */
-  onMealPlanPreview?: (preview: MealPlanPreviewData) => void;
-  /** 식단 적용 완료 */
-  onMealPlanApplied?: (event: MealPlanAppliedEvent) => void;
-  /** 식단 생성 진행률 */
-  onMealPlanProgress?: (event: MealPlanProgressEvent) => void;
   /** 프로필 데이터 확인 요청 */
   onProfileConfirmation?: (request: ProfileConfirmationRequest) => void;
 }
@@ -330,15 +312,6 @@ export const aiChatApi = {
                     break;
                   case 'routine_progress':
                     callbacks.onRoutineProgress?.(parsed as RoutineProgressEvent);
-                    break;
-                  case 'meal_plan_preview':
-                    callbacks.onMealPlanPreview?.(parsed as MealPlanPreviewData);
-                    break;
-                  case 'meal_plan_applied':
-                    callbacks.onMealPlanApplied?.(parsed as MealPlanAppliedEvent);
-                    break;
-                  case 'meal_plan_progress':
-                    callbacks.onMealPlanProgress?.(parsed as MealPlanProgressEvent);
                     break;
                   case 'profile_confirmation':
                     callbacks.onProfileConfirmation?.(parsed as ProfileConfirmationRequest);

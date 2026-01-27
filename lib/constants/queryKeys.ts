@@ -75,6 +75,10 @@ export const queryKeys = {
 
     /** 특정 게시글 상세 */
     detail: (id: string) => [...queryKeys.post.details(), id] as const,
+
+    /** 게시글 댓글 목록 */
+    comments: (postId: string) =>
+      [...queryKeys.post.all, 'comments', postId] as const,
   },
 
   /**
@@ -138,7 +142,7 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.aiSession.all, 'detail', id] as const,
 
     /** 현재 활성 세션 (purpose별) */
-    active: (purpose: 'workout' | 'meal') =>
+    active: (purpose: 'workout' | 'coach') =>
       [...queryKeys.aiSession.all, 'active', purpose] as const,
   },
 
@@ -151,6 +155,29 @@ export const queryKeys = {
 
     /** 현재 사용자의 피트니스 프로필 */
     me: () => [...queryKeys.fitnessProfile.all, 'me'] as const,
+  },
+
+  /**
+   * Coach (범용 AI 코치) 관련 Query Keys
+   */
+  coach: {
+    /** 모든 coach 쿼리의 기본 키 */
+    all: ['coach'] as const,
+
+    /** 대화 목록 */
+    conversations: () => [...queryKeys.coach.all, 'conversations'] as const,
+
+    /** 특정 대화 상세 */
+    conversation: (id: string) =>
+      [...queryKeys.coach.all, 'conversation', id] as const,
+
+    /** 대화 메시지 (무한스크롤) */
+    messages: (conversationId: string) =>
+      [...queryKeys.coach.all, 'messages', conversationId] as const,
+
+    /** 활성 대화 */
+    activeConversation: () =>
+      [...queryKeys.coach.all, 'active'] as const,
   },
 
   /**
@@ -189,10 +216,11 @@ export interface ProductFilters {
 }
 
 export interface PostFilters {
-  category?: string;
-  author?: string;
+  category?: string | 'all';
+  authorId?: string;
   search?: string;
   page?: number;
+  limit?: number;
 }
 
 export interface InfluencerFilters {
@@ -215,7 +243,7 @@ export interface ProfileSearchFilters {
 }
 
 export interface AISessionFilters {
-  purpose?: 'workout' | 'meal';
+  purpose?: 'workout' | 'coach';
   status?: 'active' | 'completed' | 'abandoned';
   limit?: number;
   offset?: number;

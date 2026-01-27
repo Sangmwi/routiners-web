@@ -3,12 +3,9 @@
 import { useRef, useEffect, useState } from 'react';
 import { ChatMessage as ChatMessageType, ProfileConfirmationRequest } from '@/lib/types/chat';
 import { AIToolStatus, InputRequest, RoutinePreviewData } from '@/lib/types/fitness';
-import { MealPlanPreviewData } from '@/lib/types/meal';
 import {
   RoutineAppliedEvent,
   RoutineProgressEvent,
-  MealPlanAppliedEvent,
-  MealPlanProgressEvent,
 } from '@/lib/api/conversation';
 import ChatMessage from './ChatMessage';
 import ToolStatusIndicator from './ToolStatusIndicator';
@@ -43,18 +40,6 @@ interface ChatMessageListProps {
   onRequestRevision?: (feedback: string) => void;
   /** 루틴 상세 보기 핸들러 */
   onViewRoutineDetails?: () => void;
-  /** 대기 중인 식단 미리보기 */
-  pendingMealPreview?: MealPlanPreviewData | null;
-  /** 식단 적용 완료 정보 */
-  appliedMealPlan?: MealPlanAppliedEvent | null;
-  /** 식단 생성 진행률 */
-  mealProgress?: MealPlanProgressEvent | null;
-  /** 식단 적용 핸들러 */
-  onApplyMealPlan?: (forceOverwrite?: boolean) => void;
-  /** 식단 수정 요청 핸들러 */
-  onRequestMealRevision?: (feedback: string) => void;
-  /** 식단 상세 보기 핸들러 */
-  onViewMealDetails?: () => void;
   /** 대기 중인 프로필 확인 요청 */
   pendingProfileConfirmation?: ProfileConfirmationRequest | null;
   /** 프로필 확인 핸들러 */
@@ -65,7 +50,7 @@ interface ChatMessageListProps {
   pendingStart?: boolean;
   /** 대화 시작 핸들러 */
   onStartConversation?: () => void;
-  /** 세션 목적 (workout | meal) */
+  /** 세션 목적 (workout | coach) */
   sessionPurpose?: SessionPurpose;
 }
 
@@ -88,12 +73,6 @@ export default function ChatMessageList({
   onApplyRoutine,
   onRequestRevision,
   onViewRoutineDetails,
-  pendingMealPreview,
-  appliedMealPlan,
-  mealProgress,
-  onApplyMealPlan,
-  onRequestMealRevision,
-  onViewMealDetails,
   pendingProfileConfirmation,
   onConfirmProfile,
   onRequestProfileEdit,
@@ -136,7 +115,7 @@ export default function ChatMessageList({
   // 새 메시지가 추가되면 스크롤
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, streamingContent, activeTools, pendingInput, pendingRoutinePreview, routineProgress, pendingMealPreview, mealProgress]);
+  }, [messages, streamingContent, activeTools, pendingInput, pendingRoutinePreview, routineProgress]);
 
   // 마지막 사용자 메시지의 인덱스 찾기
   const lastUserMessageIndex = messages.reduce((lastIndex, msg, index) => {
@@ -176,7 +155,7 @@ export default function ChatMessageList({
           const runningTool = activeTools.find((t) => t.status === 'running');
           if (!runningTool || streamingContent || pendingInput || pendingProfileConfirmation) return null;
           // 미리보기 생성 도구는 진행률 표시로 대체되므로 제외
-          if (runningTool.name === 'generate_routine_preview' || runningTool.name === 'generate_meal_plan_preview') return null;
+          if (runningTool.name === 'generate_routine_preview') return null;
 
           const toolLabel = AI_TOOL_LABELS[runningTool.name] || '처리 중';
           return (
@@ -279,46 +258,6 @@ export default function ChatMessageList({
           />
         )}
 
-        {/* 식단 생성 진행률 */}
-        {mealProgress && !pendingMealPreview && (
-          <ChatProgressIndicator
-            progress={mealProgress.progress}
-            stage={mealProgress.stage}
-            variant="meal"
-          />
-        )}
-
-        {/* 식단 미리보기 - 요약 카드 */}
-        {pendingMealPreview && onApplyMealPlan && onRequestMealRevision && onViewMealDetails && (
-          <ChatPreviewSummary
-            type="meal"
-            title={pendingMealPreview.title}
-            description={pendingMealPreview.description}
-            stats={{
-              duration: `${pendingMealPreview.durationWeeks}주`,
-              frequency: `하루 ${pendingMealPreview.weeks[0]?.days[0]?.meals?.length ?? 3}끼`,
-              perSession: `일 ${pendingMealPreview.targetCalories}kcal`,
-            }}
-            weekSummaries={pendingMealPreview.weeks.map(w =>
-              w.days.map(d => d.title ?? `${d.totalCalories ?? '-'}kcal`).join(', ')
-            )}
-            hasConflicts={(pendingMealPreview.conflicts?.length ?? 0) > 0}
-            onViewDetails={onViewMealDetails}
-            onRevision={onRequestMealRevision}
-            onApply={() => onApplyMealPlan((pendingMealPreview.conflicts?.length ?? 0) > 0)}
-            isApplying={isLoading}
-          />
-        )}
-
-        {/* 식단 적용 완료 메시지 */}
-        {appliedMealPlan && (
-          <ChatAppliedBanner
-            type="meal"
-            eventsCreated={appliedMealPlan.eventsCreated}
-            startDate={appliedMealPlan.startDate}
-          />
-        )}
-
         {/* 대화 시작 버튼 (인라인) */}
         {pendingStart && onStartConversation && (
           <div className="flex gap-3 items-start">
@@ -327,8 +266,8 @@ export default function ChatMessageList({
             </div>
             <div className="bg-card border border-border rounded-2xl rounded-tl-md px-4 py-3 max-w-[85%]">
               <p className="text-sm text-muted-foreground mb-3">
-                {sessionPurpose === 'meal'
-                  ? '맞춤 식단을 만들 준비가 되셨나요?'
+                {sessionPurpose === 'coach'
+                  ? '무엇이든 물어볼 준비가 되셨나요?'
                   : '맞춤 운동 루틴을 만들 준비가 되셨나요?'}
               </p>
               <button
@@ -344,7 +283,7 @@ export default function ChatMessageList({
         )}
 
         {/* 완료 배너를 위한 하단 여백 */}
-        {(appliedRoutine || appliedMealPlan) && (
+        {appliedRoutine && (
           <div className="h-40" aria-hidden="true" />
         )}
 

@@ -235,7 +235,7 @@ export type InBodyUpdateData = Partial<InBodyCreateData>;
 /**
  * DbInBodyRecord (snake_case) → InBodyRecord (camelCase) 변환
  */
-export function transformDbInBodyToInBody(db: DbInBodyRecord): InBodyRecord {
+export function toInBodyRecord(db: DbInBodyRecord): InBodyRecord {
   return {
     id: db.id,
     userId: db.user_id,

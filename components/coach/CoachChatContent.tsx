@@ -1,0 +1,186 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useCoachChat } from '@/hooks/coach';
+import { useCoachConversations } from '@/hooks/coach/queries';
+import CoachHeader from './CoachHeader';
+import WelcomeScreen from './WelcomeScreen';
+import SummarizationIndicator from './SummarizationIndicator';
+import ActionChips from './ActionChips';
+import ChatListDrawer from './ChatListDrawer';
+import ChatMessageList from '@/components/routine/chat/ChatMessageList';
+import ChatInput from '@/components/routine/chat/ChatInput';
+import PreviewDetailDrawer from '@/components/routine/chat/PreviewDetailDrawer';
+
+interface CoachChatContentProps {
+  initialConversationId?: string;
+}
+
+/**
+ * 코치 채팅 메인 컨텐츠
+ *
+ * 비즈니스 로직과 UI 통합
+ * - 메시지 목록 표시
+ * - 스트리밍 응답 처리
+ * - 액션 칩 / 채팅 목록 드로어
+ */
+export default function CoachChatContent({
+  initialConversationId,
+}: CoachChatContentProps) {
+  const router = useRouter();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
+
+  // 코치 채팅 훅
+  const {
+    conversationId,
+    conversation,
+    messages,
+    activePurpose,
+    streamingContent,
+    isStreaming,
+    error,
+    activeTools,
+    pendingInput,
+    pendingRoutinePreview,
+    appliedRoutine,
+    routineProgress,
+    summarizationState,
+    hasNextPage,
+    isFetchingNextPage,
+    handleSend,
+    handleChipClick,
+    handleNewChat,
+    fetchNextPage,
+    submitInput,
+    cancelStream,
+    clearError,
+  } = useCoachChat(initialConversationId);
+
+  // 대화 목록
+  const { data: conversationsData, isPending: isLoadingConversations } = useCoachConversations();
+
+  // 표시 조건
+  const showWelcome = messages.length === 0 && !isStreaming;
+  const showActionChips = messages.length === 0 || !activePurpose;
+
+  // 대화 선택 핸들러
+  const handleSelectConversation = (id: string) => {
+    router.push(`/routine/coach?id=${id}`);
+  };
+
+  // 루틴 적용 핸들러
+  const handleApplyRoutine = async (forceOverwrite?: boolean) => {
+    // TODO: 실제 적용 로직 구현 필요
+    setIsApplying(true);
+    try {
+      // 루틴 적용 메시지 전송
+      const message = forceOverwrite
+        ? '루틴을 덮어쓰기로 적용해주세요'
+        : '루틴을 적용해주세요';
+      await handleSend(message);
+      setIsPreviewOpen(false);
+    } finally {
+      setIsApplying(false);
+    }
+  };
+
+  // 수정 요청 핸들러
+  const handleRequestRevision = (feedback: string) => {
+    handleSend(`수정 요청: ${feedback}`);
+  };
+
+  // 상세 보기 핸들러
+  const handleViewDetails = () => {
+    setIsPreviewOpen(true);
+  };
+
+  return (
+    <div className="flex flex-col h-dvh bg-background pb-[env(safe-area-inset-bottom)]">
+      {/* 헤더 */}
+      <CoachHeader
+        onMenuClick={() => setIsDrawerOpen(true)}
+        hasActivePurpose={!!activePurpose}
+      />
+
+      {/* 컨텐츠 영역 */}
+      <div className="flex-1 overflow-hidden relative">
+        {showWelcome ? (
+          <WelcomeScreen />
+        ) : (
+          <ChatMessageList
+            messages={messages}
+            isLoading={isStreaming}
+            streamingContent={streamingContent}
+            activeTools={activeTools}
+            pendingInput={pendingInput}
+            onSubmitInput={submitInput}
+            pendingRoutinePreview={pendingRoutinePreview}
+            appliedRoutine={appliedRoutine}
+            routineProgress={routineProgress}
+            onApplyRoutine={handleApplyRoutine}
+            onRequestRevision={handleRequestRevision}
+            onViewRoutineDetails={handleViewDetails}
+            sessionPurpose="coach"
+          />
+        )}
+      </div>
+
+      {/* 요약 인디케이터 */}
+      <SummarizationIndicator state={summarizationState} />
+
+      {/* 에러 표시 */}
+      {error && (
+        <div className="flex items-center justify-between px-4 py-2 bg-destructive/10 border-t border-destructive/20">
+          <span className="text-sm text-destructive">{error}</span>
+          <button
+            onClick={clearError}
+            className="text-xs text-destructive underline"
+          >
+            닫기
+          </button>
+        </div>
+      )}
+
+      {/* 액션 칩 */}
+      {showActionChips && (
+        <ActionChips
+          onChipClick={handleChipClick}
+          disabled={isStreaming}
+        />
+      )}
+
+      {/* 인풋 */}
+      <ChatInput
+        onSend={handleSend}
+        disabled={isStreaming}
+        isLoading={isStreaming}
+        placeholder={activePurpose ? '응답을 입력하세요...' : '무엇이든 물어보세요...'}
+      />
+
+      {/* 채팅 목록 드로어 */}
+      <ChatListDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        conversations={conversationsData?.conversations ?? []}
+        currentId={conversationId}
+        onSelect={handleSelectConversation}
+        onNewChat={handleNewChat}
+        isLoading={isLoadingConversations}
+      />
+
+      {/* 루틴 상세 보기 드로어 */}
+      {pendingRoutinePreview && (
+        <PreviewDetailDrawer
+          isOpen={isPreviewOpen}
+          onClose={() => setIsPreviewOpen(false)}
+          preview={pendingRoutinePreview}
+          onApply={handleApplyRoutine}
+          isApplying={isApplying}
+        />
+      )}
+    </div>
+  );
+}

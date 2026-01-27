@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
-import { transformDbUsersToPublicUsers, DbUser } from '@/lib/types/user';
+import { toPublicUsers, DbUser } from '@/lib/types/user';
 import { notFound, handleSupabaseError } from '@/lib/utils/apiResponse';
 import { z } from 'zod';
 
@@ -90,7 +90,7 @@ export const GET = withAuth(async (request: NextRequest, { authUser, supabase })
       .slice(0, limit);
 
     // Use centralized transformer with privacy settings
-    const recommendations = transformDbUsersToPublicUsers(
+    const recommendations = toPublicUsers(
       scoredCandidates.map(({ user }) => user) as DbUser[]
     );
     return NextResponse.json(recommendations);
@@ -101,7 +101,7 @@ export const GET = withAuth(async (request: NextRequest, { authUser, supabase })
   }
 
   // Use centralized transformer with privacy settings
-  const recommendations = transformDbUsersToPublicUsers(scoredUsers as DbUser[]);
+  const recommendations = toPublicUsers(scoredUsers as DbUser[]);
 
   return NextResponse.json(recommendations);
 });

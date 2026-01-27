@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
-import { transformDbInBodyToInBody, DbInBodyRecord } from '@/lib/types/inbody';
+import { toInBodyRecord, DbInBodyRecord } from '@/lib/types/inbody';
 import { handleSupabaseError } from '@/lib/utils/apiResponse';
 
 /**
@@ -24,6 +24,6 @@ export const GET = withAuth(async (_request, { supabase }) => {
     return handleSupabaseError(error);
   }
 
-  const record = transformDbInBodyToInBody(data as DbInBodyRecord);
+  const record = toInBodyRecord(data as DbInBodyRecord);
   return NextResponse.json(record);
 });

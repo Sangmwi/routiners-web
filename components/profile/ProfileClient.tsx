@@ -23,10 +23,18 @@ import { PulseLoader } from '@/components/ui/PulseLoader';
 // ============================================================================
 
 function ProfileContent() {
-  // API가 User를 반환 (null 아님) - 404는 ErrorBoundary가 처리
   const { data: user } = useCurrentUserProfileSuspense();
   const { logout, isLoggingOut } = useLogout();
   const { withdraw, isWithdrawing } = useWithdrawal();
+
+  // 방어적 null 가드 - 프로필이 없는 경우 (가입 미완료 등)
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+        <p>프로필 정보를 불러올 수 없습니다.</p>
+      </div>
+    );
+  }
 
   return (
     <>

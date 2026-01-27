@@ -3,7 +3,6 @@ import OpenAI from 'openai';
 import { withAuth } from '@/utils/supabase/auth';
 import { DbConversation, DbChatMessage } from '@/lib/types/chat';
 import { AI_TRAINER_TOOLS, type AIToolDefinition } from '@/lib/ai/tools';
-import { AI_MEAL_TOOLS } from '@/lib/ai/meal-tools';
 import {
   handleToolCall,
   clearMetadataKeys,
@@ -38,39 +37,23 @@ const MessageSchema = z.object({
 });
 
 /**
- * 공유 도구 목록 (운동/식단 AI 공통)
- * - 사용자 정보 조회 도구들
- * - 사용자 입력 요청 도구
+ * AI Purpose 타입
+ * 'workout': 기존 운동 AI (레거시 지원)
+ * 'coach': 범용 코치 AI (운동 루틴 + 일반 상담)
  */
-const SHARED_TOOL_NAMES = [
-  'get_user_basic_info',
-  'get_user_military_info',
-  'get_user_body_metrics',
-  'get_latest_inbody',
-  'get_inbody_history',
-  'get_fitness_profile',
-  'request_user_input',
-  'confirm_profile_data', // 프로필 확인 UI (운동/식단 AI 공통)
-] as const;
+type AIPurpose = 'workout' | 'coach';
 
 /**
  * purpose에 따라 적절한 도구 목록 반환
+ * 현재는 workout과 coach 모두 동일한 도구 사용 (향후 확장 가능)
  */
-function getToolsForPurpose(purpose: 'workout' | 'meal'): AIToolDefinition[] {
-  if (purpose === 'meal') {
-    // 식단 AI: 공유 도구 + 식단 전용 도구
-    const sharedTools = AI_TRAINER_TOOLS.filter(
-      (tool) => SHARED_TOOL_NAMES.includes(tool.name as typeof SHARED_TOOL_NAMES[number])
-    );
-    return [...sharedTools, ...AI_MEAL_TOOLS];
-  } else {
-    // 운동 AI: 기존 운동 도구 전체
-    return AI_TRAINER_TOOLS;
-  }
+function getToolsForPurpose(_purpose: AIPurpose): AIToolDefinition[] {
+  // 코치 AI: 모든 운동 도구 사용
+  return AI_TRAINER_TOOLS;
 }
 
 // Responses API용 도구 포맷 변환
-function formatToolsForResponsesAPI(purpose: 'workout' | 'meal'): OpenAI.Responses.Tool[] {
+function formatToolsForResponsesAPI(purpose: AIPurpose): OpenAI.Responses.Tool[] {
   const tools = getToolsForPurpose(purpose);
   return tools.map((tool) => ({
     type: 'function' as const,
@@ -216,7 +199,7 @@ export const POST = withAuth<Response>(
 
     const dbMessages = (existingMessages as DbChatMessage[]) || [];
 
-    const purpose = conv.ai_purpose as 'workout' | 'meal';
+    const purpose = (conv.ai_purpose === 'coach' ? 'coach' : 'workout') as AIPurpose;
     const isSystem = isSystemMessage(message);
     let userMsgId: string | null = null;
 
@@ -377,28 +360,6 @@ export const POST = withAuth<Response>(
                     }
                   }
 
-                  // generate_meal_plan_preview 진행률 전송
-                  if (fc.name === 'generate_meal_plan_preview') {
-                    // 예상 토큰: ~2000 (2주 × 7일 × 3끼)
-                    // 글자 수 기준 진행률 계산 (대략 4글자 = 1토큰)
-                    const estimatedChars = 8000; // ~2000 tokens × 4 chars
-                    const progress = Math.min(95, Math.round((fc.arguments.length / estimatedChars) * 100));
-
-                    // 5% 단위로만 이벤트 전송 (너무 자주 보내지 않도록)
-                    const progressStep = Math.floor(progress / 5) * 5;
-                    const lastProgress = (fc as unknown as { lastProgress?: number }).lastProgress ?? 0;
-
-                    if (progressStep > lastProgress) {
-                      (fc as unknown as { lastProgress: number }).lastProgress = progressStep;
-                      sendEvent('meal_plan_progress', {
-                        progress: progressStep,
-                        stage: progress < 30 ? '식단 요구사항 분석 중...' :
-                               progress < 50 ? '영양소 계산 중...' :
-                               progress < 70 ? '식단 구성 중...' :
-                               progress < 90 ? '최적화 중...' : '거의 완료!',
-                      });
-                    }
-                  }
                 }
               }
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
 import {
-  transformDbInBodyToInBody,
+  toInBodyRecord,
   DbInBodyRecord,
   InBodySummary,
 } from '@/lib/types/inbody';
@@ -68,7 +68,7 @@ export const GET = withAuth(
       );
     }
 
-    const records = (data as DbInBodyRecord[]).map(transformDbInBodyToInBody);
+    const records = (data as DbInBodyRecord[]).map(toInBodyRecord);
     const totalRecords = count || 0;
 
     const summary: InBodySummary = {
