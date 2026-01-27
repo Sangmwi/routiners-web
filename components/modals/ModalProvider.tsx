@@ -47,16 +47,6 @@ function renderModal(modal: ModalInstance, onClose: () => void) {
         />
       );
 
-    // TODO: 추가 모달 타입들
-    case 'profileEdit':
-    case 'unitSearch':
-    case 'tagSelect':
-    case 'rankSelect':
-    case 'specialtySelect':
-      // 아직 구현되지 않은 모달은 null 반환
-      console.warn(`Modal type "${modal.type}" is not implemented yet`);
-      return null;
-
     default:
       console.warn(`Unknown modal type: ${(modal as ModalInstance).type}`);
       return null;

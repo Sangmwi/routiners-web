@@ -13,9 +13,6 @@ export * from './inbody';
 // Fitness Profile
 export * from './fitnessProfile';
 
-// AI Chat & Session
-export * from './aiChat';
-
 // Routine Events
 export * from './routine';
 

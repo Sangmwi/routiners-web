@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useLayoutEffect, useState } from 'react';
 import { ChatMessage as ChatMessageType, ProfileConfirmationRequest } from '@/lib/types/chat';
 import { AIToolStatus, InputRequest, RoutinePreviewData } from '@/lib/types/fitness';
 import {
@@ -52,6 +52,12 @@ interface ChatMessageListProps {
   onStartConversation?: () => void;
   /** 세션 목적 (workout | coach) */
   sessionPurpose?: SessionPurpose;
+  /** 무한스크롤 - 다음 페이지 존재 */
+  hasNextPage?: boolean;
+  /** 무한스크롤 - 다음 페이지 로딩 중 */
+  isFetchingNextPage?: boolean;
+  /** 무한스크롤 - 다음 페이지 로드 */
+  onLoadMore?: () => void;
 }
 
 /**
@@ -79,8 +85,15 @@ export default function ChatMessageList({
   pendingStart,
   onStartConversation,
   sessionPurpose,
+  hasNextPage,
+  isFetchingNextPage,
+  onLoadMore,
 }: ChatMessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const topSentinelRef = useRef<HTMLDivElement>(null);
+  const prevScrollHeightRef = useRef<number>(0);
+  const hasInitialScrolled = useRef(false);
 
   // 도구 상태 누적 (사라지지 않고 유지)
   const [toolHistory, setToolHistory] = useState<AIToolStatus[]>([]);
@@ -112,10 +125,58 @@ export default function ChatMessageList({
     setToolHistory([]);
   }, [lastUserMessageId]);
 
-  // 새 메시지가 추가되면 스크롤
+  // 새 메시지가 추가되면 스크롤 (이전 메시지 로드 시에는 스킵)
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // 최초 렌더: 하단으로 즉시 스크롤
+    if (!hasInitialScrolled.current && messages.length > 0) {
+      bottomRef.current?.scrollIntoView();
+      hasInitialScrolled.current = true;
+      return;
+    }
+
+    // 이후 업데이트: 하단 근처일 때만 자동 스크롤
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight < 150;
+    if (isNearBottom) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages, streamingContent, activeTools, pendingInput, pendingRoutinePreview, routineProgress]);
+
+  // 이전 메시지 로드를 위한 IntersectionObserver
+  useEffect(() => {
+    if (!hasNextPage || !onLoadMore) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !isFetchingNextPage) {
+          const container = scrollContainerRef.current;
+          if (container) {
+            prevScrollHeightRef.current = container.scrollHeight;
+          }
+          onLoadMore();
+        }
+      },
+      { root: scrollContainerRef.current, threshold: 0.1 },
+    );
+
+    if (topSentinelRef.current) observer.observe(topSentinelRef.current);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, onLoadMore]);
+
+  // 이전 메시지 로드 후 스크롤 위치 복원
+  useLayoutEffect(() => {
+    if (!isFetchingNextPage && prevScrollHeightRef.current > 0) {
+      const container = scrollContainerRef.current;
+      if (container) {
+        const newScrollHeight = container.scrollHeight;
+        container.scrollTop += newScrollHeight - prevScrollHeightRef.current;
+      }
+      prevScrollHeightRef.current = 0;
+    }
+  }, [isFetchingNextPage, messages]);
 
   // 마지막 사용자 메시지의 인덱스 찾기
   const lastUserMessageIndex = messages.reduce((lastIndex, msg, index) => {
@@ -123,8 +184,17 @@ export default function ChatMessageList({
   }, -1);
 
   return (
-    <div className="h-full overflow-y-auto overflow-x-hidden p-4">
+    <div ref={scrollContainerRef} className="h-full overflow-y-auto overflow-x-hidden p-4">
       <div className="flex flex-col gap-5">
+        {/* 상단 센티널 — 이전 메시지 로드 트리거 */}
+        <div ref={topSentinelRef} className="shrink-0">
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-2">
+              <SpinnerGapIcon size={16} className="animate-spin text-muted-foreground" />
+            </div>
+          )}
+        </div>
+
         {messages.map((message, index) => (
           <div key={message.id}>
             <ChatMessage message={message} />

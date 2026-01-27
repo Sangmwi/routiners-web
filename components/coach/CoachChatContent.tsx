@@ -39,7 +39,6 @@ export default function CoachChatContent({
   // 코치 채팅 훅
   const {
     conversationId,
-    conversation,
     messages,
     activePurpose,
     streamingContent,
@@ -59,7 +58,6 @@ export default function CoachChatContent({
     handleNewChat,
     fetchNextPage,
     submitInput,
-    cancelStream,
     clearError,
     confirmProfile,
     requestProfileEdit,
@@ -73,7 +71,8 @@ export default function CoachChatContent({
 
   // 표시 조건
   const showWelcome = messages.length === 0 && !isStreaming && !isMessagesLoading;
-  const showActionChips = !isStreaming && (messages.length === 0 || !activePurpose);
+  const hasPendingInteraction = !!pendingProfileConfirmation || !!pendingInput || !!pendingRoutinePreview;
+  const showActionChips = !isStreaming && !streamingContent && !hasPendingInteraction && messages.length === 0;
 
   // 대화 선택 핸들러
   const handleSelectConversation = (id: string) => {
@@ -157,6 +156,9 @@ export default function CoachChatContent({
             onConfirmProfile={confirmProfile}
             onRequestProfileEdit={requestProfileEdit}
             sessionPurpose="coach"
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            onLoadMore={fetchNextPage}
           />
         )}
       </div>

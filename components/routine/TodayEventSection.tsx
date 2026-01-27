@@ -72,7 +72,7 @@ export default function TodayEventSection({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => router.push('/routine/chat')}
+            onClick={() => router.push('/routine/coach')}
           >
             AI 트레이너와 루틴 만들기
           </Button>

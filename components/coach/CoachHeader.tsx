@@ -28,7 +28,7 @@ export default function CoachHeader({
   };
 
   return (
-    <header className="flex items-center justify-between px-4 py-3 border-b border-border bg-background">
+    <header className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-border bg-background">
       {/* 뒤로가기 */}
       <button
         onClick={handleBack}

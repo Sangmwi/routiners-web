@@ -22,12 +22,7 @@ import { devtools } from 'zustand/middleware';
 export type ModalType =
   | 'confirm'           // 확인/취소 다이얼로그
   | 'alert'             // 알림 다이얼로그
-  | 'imagePreview'      // 이미지 미리보기
-  | 'profileEdit'       // 프로필 편집
-  | 'unitSearch'        // 부대 검색
-  | 'tagSelect'         // 태그 선택 (관심 운동/장소)
-  | 'rankSelect'        // 계급 선택
-  | 'specialtySelect';  // 병과 선택
+  | 'imagePreview';     // 이미지 미리보기
 
 /**
  * 모달별 데이터 타입 매핑
@@ -53,27 +48,6 @@ export interface ModalDataMap {
   imagePreview: {
     images: string[];
     initialIndex?: number;
-  };
-  profileEdit: {
-    field: 'bio' | 'nickname';
-    currentValue?: string;
-    onSave: (value: string) => void | Promise<void>;
-  };
-  unitSearch: {
-    onSelect: (unit: { id: string; name: string }) => void;
-  };
-  tagSelect: {
-    type: 'exercise' | 'location';
-    selectedTags: string[];
-    onSave: (tags: string[]) => void;
-  };
-  rankSelect: {
-    currentRank?: string;
-    onSelect: (rank: string) => void;
-  };
-  specialtySelect: {
-    currentSpecialty?: string;
-    onSelect: (specialty: string) => void;
   };
 }
 

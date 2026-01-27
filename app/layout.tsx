@@ -43,7 +43,6 @@ export default function RootLayout({
         <QueryProvider>
           <ErrorBoundary>
             <WebViewBridge />
-            <ModalProvider />
             <GlobalErrorToast />
             <div className="mx-auto flex min-h-screen max-w-md flex-col bg-background shadow-2xl">
               <main className="flex-1">
@@ -51,6 +50,7 @@ export default function RootLayout({
               </main>
               <BottomNav />
             </div>
+            <ModalProvider />
           </ErrorBoundary>
         </QueryProvider>
       </body>

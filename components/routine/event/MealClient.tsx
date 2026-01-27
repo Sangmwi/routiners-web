@@ -104,7 +104,7 @@ function MealContent({ date }: { date: string }) {
             <Button variant="outline" onClick={() => router.push('/routine')}>
               돌아가기
             </Button>
-            <Button onClick={() => router.push('/routine/chat?purpose=meal')}>
+            <Button onClick={() => router.push('/routine/coach')}>
               AI와 대화하기
             </Button>
           </div>

@@ -1,19 +1,16 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useReducer, useRef, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { queryKeys } from '@/lib/constants/queryKeys';
-import { aiChatApi, conversationApi } from '@/lib/api/conversation';
 import { coachContextApi } from '@/lib/api/coach';
 import { shouldTriggerSummarization } from '@/lib/types/coach';
 import type { ChatMessage, ProfileConfirmationRequest } from '@/lib/types/chat';
-import type { AIToolStatus, AIToolName, InputRequest, RoutinePreviewData } from '@/lib/types/fitness';
+import type { AIToolStatus, InputRequest, RoutinePreviewData } from '@/lib/types/fitness';
 import type { RoutineAppliedEvent, RoutineProgressEvent } from '@/lib/api/conversation';
 import type {
   ActionChip,
   CoachConversation,
-  CoachMessagePage,
   SummarizationState,
   ActivePurpose,
 } from '@/lib/types/coach';
@@ -26,7 +23,11 @@ import {
   useSetActivePurpose,
   useTriggerSummarization,
 } from './mutations';
-import { extractSessionMetadata } from '@/hooks/aiChat/helpers/sessionMetadata';
+import { coachReducer, INITIAL_STATE } from './helpers/coachReducer';
+import { extractSessionMetadata } from './helpers/sessionMetadata';
+import { useCoachMessageSender } from './useCoachMessageSender';
+import { useCoachPreviewActions } from './useCoachPreviewActions';
+import { useCoachProfileConfirmation } from './useCoachProfileConfirmation';
 
 // ============================================================================
 // Types
@@ -96,398 +97,210 @@ export interface UseCoachChatReturn {
 /**
  * 코치 채팅 훅
  *
- * 코치 AI 채팅의 비즈니스 로직을 관리합니다.
- * - 스트리밍 메시지 처리
- * - 액션 칩 핸들러
- * - 컨텍스트 요약 트리거
- * - 무한스크롤 지원
+ * useReducer로 transient UI 상태를 관리하고,
+ * 서브훅으로 관심사를 분리합니다.
+ * 메시지는 React Query(무한스크롤)가 관리합니다.
  */
 export function useCoachChat(initialConversationId?: string): UseCoachChatReturn {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  // 대화 ID 상태
+  // ── 대화 ID ──
   const [conversationId, setConversationId] = useState<string | null>(
     initialConversationId ?? null
   );
 
-  // 스트리밍 상태
-  const [streamingContent, setStreamingContent] = useState('');
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // ── 리듀서 ──
+  const [state, dispatch] = useReducer(coachReducer, INITIAL_STATE);
+  const profileBufferRef = useRef<ProfileConfirmationRequest | null>(null);
 
-  // 도구/입력 상태
-  const [activeTools, setActiveTools] = useState<AIToolStatus[]>([]);
-  const [pendingInput, setPendingInput] = useState<InputRequest | null>(null);
-  const [pendingRoutinePreview, setPendingRoutinePreview] = useState<RoutinePreviewData | null>(null);
-  const [appliedRoutine, setAppliedRoutine] = useState<RoutineAppliedEvent | null>(null);
-  const [routineProgress, setRoutineProgress] = useState<RoutineProgressEvent | null>(null);
-  const [pendingProfileConfirmation, setPendingProfileConfirmation] =
-    useState<ProfileConfirmationRequest | null>(null);
-
-  // 낙관적 사용자 메시지 (전송 즉시 표시, refetch 후 제거)
-  const [pendingUserMessage, setPendingUserMessage] = useState<ChatMessage | null>(null);
-
-  // 요약 상태
-  const [summarizationState, setSummarizationState] = useState<SummarizationState>({
-    isSummarizing: false,
-  });
-
-  // Refs
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const pendingProfileRef = useRef<ProfileConfirmationRequest | null>(null);
-
-  // Queries
+  // ── Queries ──
   const { data: conversation } = useCoachConversation(conversationId ?? undefined);
   const messagesQuery = useInfiniteCoachMessages(conversationId);
   const messages = messagesQuery.data?.pages.flatMap((p) => p.messages) ?? [];
+  const activePurpose = conversation?.metadata?.activePurpose;
 
-  // Mutations
+  // ── Mutations ──
   const createConversation = useCreateCoachConversation();
   const setActivePurpose = useSetActivePurpose();
   const triggerSummarization = useTriggerSummarization();
 
-  // 활성 목적 추출
-  const activePurpose = conversation?.metadata?.activePurpose;
-
-  // ---------------------------------------------------------------------------
-  // 메시지 전송
-  // ---------------------------------------------------------------------------
-
-  const handleSend = async (content: string) => {
-    if (!content.trim() || isStreaming) return;
-
-    // 대화가 없으면 생성
-    let currentId = conversationId;
-    if (!currentId) {
-      try {
-        const newConversation = await createConversation.mutateAsync(undefined);
-        currentId = newConversation.id;
-        setConversationId(currentId);
-        // URL 업데이트
-        window.history.pushState({}, '', `/routine/coach?id=${currentId}`);
-      } catch (e) {
-        setError('대화 생성에 실패했습니다.');
-        return;
-      }
-    }
-
-    // 이전 스트림 취소
-    abortControllerRef.current?.abort();
-
-    // 낙관적 사용자 메시지 즉시 표시
-    setPendingUserMessage({
-      id: `pending-${Date.now()}`,
-      role: 'user',
-      content: content.trim(),
-      createdAt: new Date().toISOString(),
-    });
-
-    // 스트리밍 시작
-    setStreamingContent('');
-    setIsStreaming(true);
-    setError(null);
-    setActiveTools([]);
-
-    abortControllerRef.current = aiChatApi.sendMessage(currentId, content, {
-      onMessage: (chunk) => {
-        setStreamingContent((prev) => prev + chunk);
-      },
-
-      onComplete: async (fullMessage) => {
-        setStreamingContent('');
-
-        // 메시지 캐시 무효화 완료 대기 (welcome screen flash 방지)
-        await queryClient.invalidateQueries({
-          queryKey: queryKeys.coach.messages(currentId!),
-        });
-
-        // 실제 메시지 로드 완료 → 낙관적 메시지 제거
-        setPendingUserMessage(null);
-
-        // 버퍼링된 프로필 확인 요청 적용 (messages 로드 후 → layout shift 방지)
-        if (pendingProfileRef.current) {
-          setPendingProfileConfirmation(pendingProfileRef.current);
-          pendingProfileRef.current = null;
-        }
-
-        setIsStreaming(false);
-
-        // 요약 체크 (non-blocking)
-        checkAndSummarize(currentId!);
-      },
-
-      onError: (err) => {
-        setStreamingContent('');
-        setPendingUserMessage(null);
-        setIsStreaming(false);
-        setError(err.message);
-      },
-
-      onToolStart: (event) => {
-        setActiveTools((prev) => [
-          ...prev,
-          { toolCallId: event.toolCallId, name: event.name as AIToolName, status: 'running' },
-        ]);
-      },
-
-      onToolDone: (event) => {
-        setActiveTools((prev) =>
-          prev.map((t) =>
-            t.toolCallId === event.toolCallId
-              ? { ...t, status: event.success ? 'completed' : 'error' }
-              : t
-          )
-        );
-      },
-
-      onInputRequest: (request) => {
-        setPendingInput(request);
-      },
-
-      onRoutinePreview: (preview) => {
-        setPendingRoutinePreview(preview);
-        setRoutineProgress(null);
-      },
-
-      onRoutineApplied: (event) => {
-        setAppliedRoutine(event);
-        setPendingRoutinePreview(null);
-      },
-
-      onRoutineProgress: (event) => {
-        setRoutineProgress(event);
-      },
-
-      onProfileConfirmation: (request) => {
-        // 스트리밍 중에는 ref에 버퍼링 (onComplete에서 messages refetch 후 적용)
-        // → 메시지보다 카드가 먼저 렌더되는 layout shift 방지
-        pendingProfileRef.current = request;
-      },
-    });
-  };
-
-  // ---------------------------------------------------------------------------
-  // 액션 칩 핸들러
-  // ---------------------------------------------------------------------------
-
-  const handleChipClick = async (chip: ActionChip) => {
-    if (chip.triggersPurpose) {
-      // 대화가 없으면 생성
-      let currentId = conversationId;
-      if (!currentId) {
-        try {
-          const newConversation = await createConversation.mutateAsync({
-            activePurpose: {
-              type: chip.triggersPurpose,
-              stage: 'init',
-              collectedData: {},
-              startedAt: new Date().toISOString(),
-            },
-          });
-          currentId = newConversation.id;
-          setConversationId(currentId);
-          window.history.pushState({}, '', `/routine/coach?id=${currentId}`);
-        } catch (e) {
-          setError('대화 생성에 실패했습니다.');
-          return;
-        }
-      } else {
-        // 기존 대화에 활성 목적 설정
-        await setActivePurpose.mutateAsync({
-          conversationId: currentId,
-          data: {
-            activePurpose: {
-              type: chip.triggersPurpose,
-              stage: 'init',
-              collectedData: {},
-              startedAt: new Date().toISOString(),
-            },
-          },
-        });
-      }
-
-      // 프로세스 시작 메시지 전송
-      await handleSend(`[${chip.label}] 시작`);
-    } else if (chip.action) {
-      // 라우팅 액션
-      router.push(chip.action);
-    }
-  };
-
-  // ---------------------------------------------------------------------------
-  // 새 채팅 생성
-  // ---------------------------------------------------------------------------
-
-  const handleNewChat = async () => {
-    try {
-      const newConversation = await createConversation.mutateAsync(undefined);
-      setConversationId(newConversation.id);
-
-      // 상태 초기화
-      setStreamingContent('');
-      setIsStreaming(false);
-      setError(null);
-      setActiveTools([]);
-      setPendingInput(null);
-      setPendingUserMessage(null);
-      setPendingRoutinePreview(null);
-      setAppliedRoutine(null);
-      setRoutineProgress(null);
-      setPendingProfileConfirmation(null);
-      pendingProfileRef.current = null;
-
-      // URL 업데이트
-      window.history.pushState({}, '', `/routine/coach?id=${newConversation.id}`);
-    } catch (e) {
-      setError('새 대화 생성에 실패했습니다.');
-    }
-  };
-
-  // ---------------------------------------------------------------------------
-  // 선택형 입력 제출
-  // ---------------------------------------------------------------------------
-
-  const submitInput = (value: string | string[]) => {
-    const messageText = Array.isArray(value) ? value.join(', ') : value;
-    setPendingInput(null);
-    handleSend(messageText);
-  };
-
-  // ---------------------------------------------------------------------------
-  // 스트리밍 취소
-  // ---------------------------------------------------------------------------
-
-  const cancelStream = () => {
-    abortControllerRef.current?.abort();
-    abortControllerRef.current = null;
-    setStreamingContent('');
-    setPendingUserMessage(null);
-    setIsStreaming(false);
-  };
-
-  // ---------------------------------------------------------------------------
-  // 에러 클리어
-  // ---------------------------------------------------------------------------
-
-  const clearError = () => {
-    setError(null);
-  };
-
-  // ---------------------------------------------------------------------------
-  // 프로필 확인/수정 핸들러
-  // ---------------------------------------------------------------------------
-
-  const confirmProfile = () => {
-    if (!pendingProfileConfirmation) return;
-    const labels = pendingProfileConfirmation.fields.map((f) => f.label).join(', ');
-    setPendingProfileConfirmation(null);
-    if (conversationId) {
-      conversationApi.clearProfileConfirmation(conversationId).catch(console.error);
-    }
-    handleSend(
-      `[프로필 확인 완료] ${labels} 정보를 확인했습니다. 모두 정확합니다. 다음 단계로 진행해주세요.`
-    );
-  };
-
-  const requestProfileEdit = () => {
-    if (!pendingProfileConfirmation) return;
-    const labels = pendingProfileConfirmation.fields.map((f) => f.label).join(', ');
-    setPendingProfileConfirmation(null);
-    if (conversationId) {
-      conversationApi.clearProfileConfirmation(conversationId).catch(console.error);
-    }
-    handleSend(`[프로필 수정 요청] ${labels} 중에서 수정하고 싶은 정보가 있어요.`);
-  };
-
-  // ---------------------------------------------------------------------------
-  // 요약 체크 (non-blocking)
-  // ---------------------------------------------------------------------------
-
+  // ── 요약 체크 (non-blocking) ──
   const checkAndSummarize = async (id: string) => {
     try {
-      // 요약 상태 조회
       const status = await coachContextApi.getSummarizationStatus(id);
-
       if (shouldTriggerSummarization(status.messageCount, status.summarizedUntil)) {
-        setSummarizationState({
-          isSummarizing: true,
-          message: '이전 대화를 정리하고 있어요...',
+        dispatch({
+          type: 'SET_SUMMARIZATION',
+          state: { isSummarizing: true, message: '이전 대화를 정리하고 있어요...' },
         });
-
         try {
           await triggerSummarization.mutateAsync(id);
-          setSummarizationState({
-            isSummarizing: true,
-            message: '정리 완료!',
+          dispatch({
+            type: 'SET_SUMMARIZATION',
+            state: { isSummarizing: true, message: '정리 완료!' },
           });
           await new Promise((r) => setTimeout(r, 1500));
         } finally {
-          setSummarizationState({ isSummarizing: false });
+          dispatch({ type: 'SET_SUMMARIZATION', state: { isSummarizing: false } });
         }
       }
     } catch (e) {
-      // 요약 실패는 무시 (사용자 경험에 영향 없음)
       console.error('[useCoachChat] Summarization check failed:', e);
     }
   };
 
-  // ---------------------------------------------------------------------------
-  // 메타데이터에서 프로필 확인 복원
-  // ---------------------------------------------------------------------------
+  // ── 서브훅 ──
+  const { sendMessage, cancelStream } = useCoachMessageSender({
+    conversationId,
+    state,
+    dispatch,
+    queryClient,
+    profileBufferRef,
+    onStreamComplete: checkAndSummarize,
+  });
 
+  const { applyRoutine, requestRevision } = useCoachPreviewActions({
+    sendMessage,
+  });
+
+  const { confirmProfile, requestProfileEdit } = useCoachProfileConfirmation({
+    conversationId,
+    state,
+    dispatch,
+    sendMessage,
+  });
+
+  // ── 대화 확보 (없으면 생성) → conversationId 반환 ──
+  const ensureConversation = async (
+    activePurposeData?: ActivePurpose
+  ): Promise<string | null> => {
+    if (conversationId) return conversationId;
+    try {
+      const newConversation = await createConversation.mutateAsync(
+        activePurposeData ? { activePurpose: activePurposeData } : undefined
+      );
+      const newId = newConversation.id;
+      setConversationId(newId);
+      window.history.pushState({}, '', `/routine/coach?id=${newId}`);
+      return newId;
+    } catch {
+      dispatch({ type: 'SET_ERROR', error: '대화 생성에 실패했습니다.' });
+      return null;
+    }
+  };
+
+  // ── 메시지 전송 ──
+  const handleSend = async (content: string) => {
+    if (!content.trim() || state.isStreaming) return;
+    const currentId = await ensureConversation();
+    if (!currentId) return;
+    sendMessage(currentId, content);
+  };
+
+  // ── 액션 칩 핸들러 ──
+  const handleChipClick = async (chip: ActionChip) => {
+    if (chip.triggersPurpose) {
+      const purposeData: ActivePurpose = {
+        type: chip.triggersPurpose,
+        stage: 'init',
+        collectedData: {},
+        startedAt: new Date().toISOString(),
+      };
+
+      let currentId = conversationId;
+      if (!currentId) {
+        currentId = await ensureConversation(purposeData);
+        if (!currentId) return;
+      } else {
+        await setActivePurpose.mutateAsync({
+          conversationId: currentId,
+          data: { activePurpose: purposeData },
+        });
+      }
+
+      // sendMessage 직접 호출 (setState 반영 전 handleSend → ensureConversation 중복 호출 방지)
+      sendMessage(currentId, `[${chip.label}] 시작`);
+    } else if (chip.action) {
+      router.push(chip.action);
+    }
+  };
+
+  // ── 새 채팅 생성 ──
+  const handleNewChat = async () => {
+    try {
+      const newConversation = await createConversation.mutateAsync(undefined);
+      setConversationId(newConversation.id);
+      dispatch({ type: 'RESET_ALL' });
+      profileBufferRef.current = null;
+      window.history.pushState({}, '', `/routine/coach?id=${newConversation.id}`);
+    } catch {
+      dispatch({ type: 'SET_ERROR', error: '새 대화 생성에 실패했습니다.' });
+    }
+  };
+
+  // ── 선택형 입력 제출 ──
+  const submitInput = (value: string | string[]) => {
+    const messageText = Array.isArray(value) ? value.join(', ') : value;
+    dispatch({ type: 'CLEAR_PENDING_INPUT' });
+    handleSend(messageText);
+  };
+
+  // ── 에러 클리어 ──
+  const clearError = () => {
+    dispatch({ type: 'CLEAR_ERROR' });
+  };
+
+  // ── 메타데이터에서 프로필 확인 복원 ──
   useEffect(() => {
     if (!conversation?.metadata) return;
     const extracted = extractSessionMetadata(conversation.metadata);
     if (extracted.pendingProfileConfirmation) {
-      setPendingProfileConfirmation(extracted.pendingProfileConfirmation);
+      dispatch({
+        type: 'RESTORE_PROFILE_CONFIRMATION',
+        request: extracted.pendingProfileConfirmation,
+      });
     }
   }, [conversation?.metadata]);
 
-  // ---------------------------------------------------------------------------
-  // 초기 대화 ID 동기화
-  // ---------------------------------------------------------------------------
-
+  // ── 초기 대화 ID 동기화 ──
   useEffect(() => {
-    if (initialConversationId && initialConversationId !== conversationId) {
-      setConversationId(initialConversationId);
+    const targetId = initialConversationId ?? null;
+    if (targetId !== conversationId) {
+      setConversationId(targetId);
+      // ID가 null이면 전체 상태 리셋 (삭제 후 복귀 등)
+      if (!targetId) {
+        dispatch({ type: 'RESET_ALL' });
+        profileBufferRef.current = null;
+      }
     }
   }, [initialConversationId]);
 
-  // ---------------------------------------------------------------------------
-  // Cleanup
-  // ---------------------------------------------------------------------------
-
-  useEffect(() => {
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, []);
-
-  // ---------------------------------------------------------------------------
-  // Return
-  // ---------------------------------------------------------------------------
-
-  // 서버 메시지 + 낙관적 사용자 메시지 병합
-  const allMessages = pendingUserMessage
-    ? [...messages, pendingUserMessage]
-    : messages;
+  // ── 메시지 병합 (서버 + 낙관적, 중복 방지) ──
+  const allMessages = (() => {
+    if (!state.pendingUserMessage) return messages;
+    // 서버에 이미 동일 메시지가 존재하면 pending 스킵 (invalidation↔dispatch 사이 중복 방지)
+    const isDuplicate = messages.some(
+      (m) => m.role === 'user' && m.content === state.pendingUserMessage!.content,
+    );
+    return isDuplicate ? messages : [...messages, state.pendingUserMessage];
+  })();
 
   return {
     conversationId,
     conversation: conversation ?? null,
     messages: allMessages,
     activePurpose,
-    streamingContent,
-    isStreaming,
-    error,
-    activeTools,
-    pendingInput,
-    pendingRoutinePreview,
-    appliedRoutine,
-    routineProgress,
-    pendingProfileConfirmation,
-    summarizationState,
+    streamingContent: state.streamingContent,
+    isStreaming: state.isStreaming,
+    error: state.error,
+    activeTools: state.activeTools,
+    pendingInput: state.pendingInput,
+    pendingRoutinePreview: state.pendingRoutinePreview,
+    appliedRoutine: state.appliedRoutine,
+    routineProgress: state.routineProgress,
+    pendingProfileConfirmation: state.pendingProfileConfirmation,
+    summarizationState: state.summarizationState,
     hasNextPage: messagesQuery.hasNextPage ?? false,
     isFetchingNextPage: messagesQuery.isFetchingNextPage,
     isMessagesLoading: messagesQuery.isLoading,
