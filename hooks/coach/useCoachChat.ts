@@ -4,10 +4,10 @@ import { useState, useRef, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { queryKeys } from '@/lib/constants/queryKeys';
-import { aiChatApi } from '@/lib/api/conversation';
+import { aiChatApi, conversationApi } from '@/lib/api/conversation';
 import { coachContextApi } from '@/lib/api/coach';
 import { shouldTriggerSummarization } from '@/lib/types/coach';
-import type { ChatMessage } from '@/lib/types/chat';
+import type { ChatMessage, ProfileConfirmationRequest } from '@/lib/types/chat';
 import type { AIToolStatus, AIToolName, InputRequest, RoutinePreviewData } from '@/lib/types/fitness';
 import type { RoutineAppliedEvent, RoutineProgressEvent } from '@/lib/api/conversation';
 import type {
@@ -26,6 +26,7 @@ import {
   useSetActivePurpose,
   useTriggerSummarization,
 } from './mutations';
+import { extractSessionMetadata } from '@/hooks/aiChat/helpers/sessionMetadata';
 
 // ============================================================================
 // Types
@@ -56,12 +57,16 @@ export interface UseCoachChatReturn {
   appliedRoutine: RoutineAppliedEvent | null;
   /** 루틴 진행률 */
   routineProgress: RoutineProgressEvent | null;
+  /** 대기 중인 프로필 확인 요청 */
+  pendingProfileConfirmation: ProfileConfirmationRequest | null;
   /** 요약 상태 */
   summarizationState: SummarizationState;
   /** 무한스크롤 - 다음 페이지 존재 */
   hasNextPage: boolean;
   /** 무한스크롤 - 다음 페이지 로딩 중 */
   isFetchingNextPage: boolean;
+  /** 메시지 초기 로딩 중 여부 */
+  isMessagesLoading: boolean;
 
   // Actions
   /** 메시지 전송 */
@@ -78,6 +83,10 @@ export interface UseCoachChatReturn {
   cancelStream: () => void;
   /** 에러 클리어 */
   clearError: () => void;
+  /** 프로필 데이터 확인 */
+  confirmProfile: () => void;
+  /** 프로필 수정 요청 */
+  requestProfileEdit: () => void;
 }
 
 // ============================================================================
@@ -113,6 +122,8 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
   const [pendingRoutinePreview, setPendingRoutinePreview] = useState<RoutinePreviewData | null>(null);
   const [appliedRoutine, setAppliedRoutine] = useState<RoutineAppliedEvent | null>(null);
   const [routineProgress, setRoutineProgress] = useState<RoutineProgressEvent | null>(null);
+  const [pendingProfileConfirmation, setPendingProfileConfirmation] =
+    useState<ProfileConfirmationRequest | null>(null);
 
   // 요약 상태
   const [summarizationState, setSummarizationState] = useState<SummarizationState>({
@@ -121,6 +132,7 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
 
   // Refs
   const abortControllerRef = useRef<AbortController | null>(null);
+  const pendingProfileRef = useRef<ProfileConfirmationRequest | null>(null);
 
   // Queries
   const { data: conversation } = useCoachConversation(conversationId ?? undefined);
@@ -173,12 +185,19 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
 
       onComplete: async (fullMessage) => {
         setStreamingContent('');
-        setIsStreaming(false);
 
-        // 메시지 캐시 무효화
-        queryClient.invalidateQueries({
+        // 메시지 캐시 무효화 완료 대기 (welcome screen flash 방지)
+        await queryClient.invalidateQueries({
           queryKey: queryKeys.coach.messages(currentId!),
         });
+
+        // 버퍼링된 프로필 확인 요청 적용 (messages 로드 후 → layout shift 방지)
+        if (pendingProfileRef.current) {
+          setPendingProfileConfirmation(pendingProfileRef.current);
+          pendingProfileRef.current = null;
+        }
+
+        setIsStreaming(false);
 
         // 요약 체크 (non-blocking)
         checkAndSummarize(currentId!);
@@ -223,6 +242,12 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
 
       onRoutineProgress: (event) => {
         setRoutineProgress(event);
+      },
+
+      onProfileConfirmation: (request) => {
+        // 스트리밍 중에는 ref에 버퍼링 (onComplete에서 messages refetch 후 적용)
+        // → 메시지보다 카드가 먼저 렌더되는 layout shift 방지
+        pendingProfileRef.current = request;
       },
     });
   };
@@ -293,6 +318,8 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
       setPendingRoutinePreview(null);
       setAppliedRoutine(null);
       setRoutineProgress(null);
+      setPendingProfileConfirmation(null);
+      pendingProfileRef.current = null;
 
       // URL 업데이트
       window.history.pushState({}, '', `/routine/coach?id=${newConversation.id}`);
@@ -331,6 +358,32 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
   };
 
   // ---------------------------------------------------------------------------
+  // 프로필 확인/수정 핸들러
+  // ---------------------------------------------------------------------------
+
+  const confirmProfile = () => {
+    if (!pendingProfileConfirmation) return;
+    const labels = pendingProfileConfirmation.fields.map((f) => f.label).join(', ');
+    setPendingProfileConfirmation(null);
+    if (conversationId) {
+      conversationApi.clearProfileConfirmation(conversationId).catch(console.error);
+    }
+    handleSend(
+      `[프로필 확인 완료] ${labels} 정보를 확인했습니다. 모두 정확합니다. 다음 단계로 진행해주세요.`
+    );
+  };
+
+  const requestProfileEdit = () => {
+    if (!pendingProfileConfirmation) return;
+    const labels = pendingProfileConfirmation.fields.map((f) => f.label).join(', ');
+    setPendingProfileConfirmation(null);
+    if (conversationId) {
+      conversationApi.clearProfileConfirmation(conversationId).catch(console.error);
+    }
+    handleSend(`[프로필 수정 요청] ${labels} 중에서 수정하고 싶은 정보가 있어요.`);
+  };
+
+  // ---------------------------------------------------------------------------
   // 요약 체크 (non-blocking)
   // ---------------------------------------------------------------------------
 
@@ -361,6 +414,18 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
       console.error('[useCoachChat] Summarization check failed:', e);
     }
   };
+
+  // ---------------------------------------------------------------------------
+  // 메타데이터에서 프로필 확인 복원
+  // ---------------------------------------------------------------------------
+
+  useEffect(() => {
+    if (!conversation?.metadata) return;
+    const extracted = extractSessionMetadata(conversation.metadata);
+    if (extracted.pendingProfileConfirmation) {
+      setPendingProfileConfirmation(extracted.pendingProfileConfirmation);
+    }
+  }, [conversation?.metadata]);
 
   // ---------------------------------------------------------------------------
   // 초기 대화 ID 동기화
@@ -399,9 +464,11 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
     pendingRoutinePreview,
     appliedRoutine,
     routineProgress,
+    pendingProfileConfirmation,
     summarizationState,
     hasNextPage: messagesQuery.hasNextPage ?? false,
     isFetchingNextPage: messagesQuery.isFetchingNextPage,
+    isMessagesLoading: messagesQuery.isLoading,
 
     handleSend,
     handleChipClick,
@@ -410,5 +477,7 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
     submitInput,
     cancelStream,
     clearError,
+    confirmProfile,
+    requestProfileEdit,
   };
 }

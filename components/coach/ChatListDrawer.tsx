@@ -1,6 +1,6 @@
 'use client';
 
-import { PlusIcon, RobotIcon } from '@phosphor-icons/react';
+import { PlusIcon, RobotIcon, TrashSimpleIcon } from '@phosphor-icons/react';
 import { LoadingSpinner, SuccessIcon } from '@/components/ui/icons';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import type { CoachConversationListItem } from '@/lib/types/coach';
@@ -16,6 +16,8 @@ interface ChatListDrawerProps {
   onSelect: (id: string) => void;
   /** 새 채팅 생성 핸들러 */
   onNewChat: () => void;
+  /** 대화 삭제 핸들러 */
+  onDelete: (id: string) => void;
   /** 로딩 중 */
   isLoading?: boolean;
 }
@@ -34,6 +36,7 @@ export default function ChatListDrawer({
   currentId,
   onSelect,
   onNewChat,
+  onDelete,
   isLoading = false,
 }: ChatListDrawerProps) {
   // 날짜별 그룹핑
@@ -103,6 +106,7 @@ export default function ChatListDrawer({
                       item={item}
                       isCurrent={item.conversation.id === currentId}
                       onSelect={() => handleSelect(item.conversation.id)}
+                      onDelete={() => onDelete(item.conversation.id)}
                     />
                   ))}
                 </div>
@@ -123,9 +127,10 @@ interface ConversationItemProps {
   item: CoachConversationListItem;
   isCurrent: boolean;
   onSelect: () => void;
+  onDelete: () => void;
 }
 
-function ConversationItem({ item, isCurrent, onSelect }: ConversationItemProps) {
+function ConversationItem({ item, isCurrent, onSelect, onDelete }: ConversationItemProps) {
   const { conversation, hasActivePurpose, lastMessage } = item;
   const isActive = conversation.aiStatus === 'active';
   const isCompleted = conversation.aiStatus === 'completed';
@@ -144,13 +149,14 @@ function ConversationItem({ item, isCurrent, onSelect }: ConversationItemProps) 
     : null;
 
   return (
-    <button
-      onClick={onSelect}
-      disabled={isCurrent}
-      className={`w-full px-3 py-3 flex items-center gap-3 transition-colors border-t border-border/30 ${
+    <div
+      role="button"
+      tabIndex={isCurrent ? undefined : 0}
+      onClick={isCurrent ? undefined : onSelect}
+      className={`relative w-full px-3 py-3 pr-10 flex items-center gap-3 transition-colors border-t border-border/30 ${
         isCurrent
           ? 'bg-primary/5 cursor-default'
-          : 'hover:bg-muted/50 active:bg-muted'
+          : 'hover:bg-muted/50 active:bg-muted cursor-pointer'
       }`}
     >
       {/* 아이콘 */}
@@ -188,7 +194,19 @@ function ConversationItem({ item, isCurrent, onSelect }: ConversationItemProps) 
           </p>
         )}
       </div>
-    </button>
+
+      {/* 삭제 버튼 */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete();
+        }}
+        className="absolute top-2.5 right-1.5 p-1.5 rounded-full text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-colors"
+        aria-label="대화 삭제"
+      >
+        <TrashSimpleIcon size={14} />
+      </button>
+    </div>
   );
 }
 

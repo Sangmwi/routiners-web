@@ -29,7 +29,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
 
       {/* 메시지 버블 */}
       <div
-        className={`max-w-[80%] px-4 py-3 rounded-2xl ${
+        className={`max-w-[80%] px-4 py-3 rounded-2xl wrap-break-word overflow-hidden ${
           isAssistant
             ? 'bg-muted/40 rounded-tl-none'
             : 'bg-primary text-primary-foreground rounded-tr-none'

@@ -54,6 +54,7 @@ export const GET = withAuth(
       .select('*')
       .eq('conversation_id', id)
       .is('deleted_at', null)
+      .in('content_type', ['text'])
       .order('created_at', { ascending: false })
       .limit(limit + 1); // +1 for hasMore check
 
@@ -72,6 +73,13 @@ export const GET = withAuth(
     }
 
     const dbMessages = messages as DbChatMessage[];
+
+    // DEV: 메시지 내역 디버깅 로그
+    console.log(`[Coach Messages] conv=${id}, total=${dbMessages.length}, cursor=${cursor ?? 'none'}`);
+    dbMessages.forEach((m, i) => {
+      console.log(`  [${i}] role=${m.role} type=${m.content_type} content=${m.content?.slice(0, 80)}${(m.content?.length ?? 0) > 80 ? '...' : ''}`);
+    });
+
     const hasMore = dbMessages.length > limit;
     const resultMessages = hasMore ? dbMessages.slice(0, limit) : dbMessages;
 

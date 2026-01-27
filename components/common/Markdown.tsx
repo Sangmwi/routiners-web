@@ -45,7 +45,7 @@ export function Markdown({ content, className }: MarkdownProps) {
         ),
         // 인라인 코드
         code: ({ children }) => (
-          <code className="bg-muted px-1 py-0.5 rounded text-xs font-mono">
+          <code className="bg-muted px-1 py-0.5 rounded text-xs font-mono break-all">
             {children}
           </code>
         ),

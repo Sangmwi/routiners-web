@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCoachChat } from '@/hooks/coach';
 import { useCoachConversations } from '@/hooks/coach/queries';
+import { useDeleteCoachConversation } from '@/hooks/coach/mutations';
+import { useConfirmDialog } from '@/lib/stores/modalStore';
 import CoachHeader from './CoachHeader';
 import WelcomeScreen from './WelcomeScreen';
 import SummarizationIndicator from './SummarizationIndicator';
@@ -12,6 +14,7 @@ import ChatListDrawer from './ChatListDrawer';
 import ChatMessageList from '@/components/routine/chat/ChatMessageList';
 import ChatInput from '@/components/routine/chat/ChatInput';
 import PreviewDetailDrawer from '@/components/routine/chat/PreviewDetailDrawer';
+import { PulseLoader } from '@/components/ui/PulseLoader';
 
 interface CoachChatContentProps {
   initialConversationId?: string;
@@ -47,6 +50,7 @@ export default function CoachChatContent({
     pendingRoutinePreview,
     appliedRoutine,
     routineProgress,
+    pendingProfileConfirmation,
     summarizationState,
     hasNextPage,
     isFetchingNextPage,
@@ -57,14 +61,19 @@ export default function CoachChatContent({
     submitInput,
     cancelStream,
     clearError,
+    confirmProfile,
+    requestProfileEdit,
+    isMessagesLoading,
   } = useCoachChat(initialConversationId);
 
   // 대화 목록
   const { data: conversationsData, isPending: isLoadingConversations } = useCoachConversations();
+  const deleteConversation = useDeleteCoachConversation();
+  const confirm = useConfirmDialog();
 
   // 표시 조건
-  const showWelcome = messages.length === 0 && !isStreaming;
-  const showActionChips = messages.length === 0 || !activePurpose;
+  const showWelcome = messages.length === 0 && !isStreaming && !isMessagesLoading && !conversationId;
+  const showActionChips = !isStreaming && (messages.length === 0 || !activePurpose);
 
   // 대화 선택 핸들러
   const handleSelectConversation = (id: string) => {
@@ -97,6 +106,25 @@ export default function CoachChatContent({
     setIsPreviewOpen(true);
   };
 
+  // 대화 삭제 핸들러
+  const handleDeleteConversation = (id: string) => {
+    confirm({
+      title: '대화 삭제',
+      message: '이 대화를 삭제하시겠습니까?\n삭제된 대화는 복구할 수 없습니다.',
+      confirmText: '삭제',
+      cancelText: '취소',
+      variant: 'danger',
+      onConfirm: async () => {
+        await deleteConversation.mutateAsync(id);
+        // 현재 대화 삭제 시 새 채팅 화면으로 이동
+        if (id === conversationId) {
+          setIsDrawerOpen(false);
+          router.push('/routine/coach');
+        }
+      },
+    });
+  };
+
   return (
     <div className="flex flex-col h-dvh bg-background pb-[env(safe-area-inset-bottom)]">
       {/* 헤더 */}
@@ -107,7 +135,9 @@ export default function CoachChatContent({
 
       {/* 컨텐츠 영역 */}
       <div className="flex-1 overflow-hidden relative">
-        {showWelcome ? (
+        {isMessagesLoading ? (
+          <PulseLoader variant="chat" className="p-4" />
+        ) : showWelcome ? (
           <WelcomeScreen />
         ) : (
           <ChatMessageList
@@ -123,6 +153,9 @@ export default function CoachChatContent({
             onApplyRoutine={handleApplyRoutine}
             onRequestRevision={handleRequestRevision}
             onViewRoutineDetails={handleViewDetails}
+            pendingProfileConfirmation={pendingProfileConfirmation}
+            onConfirmProfile={confirmProfile}
+            onRequestProfileEdit={requestProfileEdit}
             sessionPurpose="coach"
           />
         )}
@@ -168,6 +201,7 @@ export default function CoachChatContent({
         currentId={conversationId}
         onSelect={handleSelectConversation}
         onNewChat={handleNewChat}
+        onDelete={handleDeleteConversation}
         isLoading={isLoadingConversations}
       />
 

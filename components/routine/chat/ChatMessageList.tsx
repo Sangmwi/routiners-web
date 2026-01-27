@@ -123,10 +123,10 @@ export default function ChatMessageList({
   }, -1);
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto p-4">
+    <div className="h-full overflow-y-auto overflow-x-hidden p-4">
       <div className="flex flex-col gap-5">
         {messages.map((message, index) => (
-          <div key={message.id}>
+          <div key={message.id} className="chat-message-in">
             <ChatMessage message={message} />
 
             {/* 마지막 사용자 메시지 바로 다음에 도구 상태 표시 */}
@@ -140,14 +140,16 @@ export default function ChatMessageList({
 
         {/* 스트리밍 중인 메시지 */}
         {streamingContent && (
-          <ChatMessage
-            message={{
-              id: 'streaming',
-              role: 'assistant',
-              content: streamingContent,
-              createdAt: new Date().toISOString(),
-            }}
-          />
+          <div className="chat-message-in">
+            <ChatMessage
+              message={{
+                id: 'streaming',
+                role: 'assistant',
+                content: streamingContent,
+                createdAt: new Date().toISOString(),
+              }}
+            />
+          </div>
         )}
 
         {/* 도구 실행 중 피드백 (프로필 조회중 등) */}
@@ -159,7 +161,7 @@ export default function ChatMessageList({
 
           const toolLabel = AI_TOOL_LABELS[runningTool.name] || '처리 중';
           return (
-            <div className="flex gap-3 items-center">
+            <div className="flex gap-3 items-center chat-message-in">
               <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
                 <SpinnerGapIcon size={16} className="animate-spin" />
               </div>
@@ -173,7 +175,7 @@ export default function ChatMessageList({
         {/* 로딩 인디케이터 (도구 실행 중이 아닐 때만 표시) */}
         {isLoading && !streamingContent && !pendingInput && !pendingProfileConfirmation &&
          !activeTools.some((t) => t.status === 'running') && (
-          <div className="flex gap-3">
+          <div className="flex gap-3 chat-message-in">
             <div className="shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
               <SpinnerGapIcon size={16} className="animate-spin" />
             </div>
@@ -189,7 +191,7 @@ export default function ChatMessageList({
 
         {/* 선택형 입력 UI (AI 메시지 + 버튼) */}
         {pendingInput && onSubmitInput && (
-          <>
+          <div className="chat-card-in">
             {/* AI 질문 메시지 */}
             {pendingInput.message && (
               <ChatMessage
@@ -203,50 +205,56 @@ export default function ChatMessageList({
             )}
             {/* 선택 버튼 UI */}
             <ChatInputRequest request={pendingInput} onSubmit={onSubmitInput} />
-          </>
+          </div>
         )}
 
         {/* 프로필 확인 UI */}
         {pendingProfileConfirmation && onConfirmProfile && onRequestProfileEdit && (
-          <ChatProfileConfirmation
-            request={pendingProfileConfirmation}
-            onConfirm={onConfirmProfile}
-            onEdit={onRequestProfileEdit}
-            disabled={isLoading}
-          />
+          <div className="chat-card-in">
+            <ChatProfileConfirmation
+              request={pendingProfileConfirmation}
+              onConfirm={onConfirmProfile}
+              onEdit={onRequestProfileEdit}
+              disabled={isLoading}
+            />
+          </div>
         )}
 
         {/* 루틴 생성 진행률 */}
         {routineProgress && !pendingRoutinePreview && (
-          <ChatProgressIndicator
-            progress={routineProgress.progress}
-            stage={routineProgress.stage}
-            variant="workout"
-          />
+          <div className="chat-card-in">
+            <ChatProgressIndicator
+              progress={routineProgress.progress}
+              stage={routineProgress.stage}
+              variant="workout"
+            />
+          </div>
         )}
 
         {/* 루틴 미리보기 - 요약 카드 */}
         {pendingRoutinePreview && onApplyRoutine && onRequestRevision && onViewRoutineDetails && (
-          <ChatPreviewSummary
-            type="routine"
-            title={pendingRoutinePreview.title}
-            description={pendingRoutinePreview.description}
-            stats={{
-              duration: `${pendingRoutinePreview.durationWeeks}주`,
-              frequency: `주 ${pendingRoutinePreview.daysPerWeek}회`,
-              perSession: pendingRoutinePreview.weeks[0]?.days[0]?.estimatedDuration
-                ? `약 ${pendingRoutinePreview.weeks[0].days[0].estimatedDuration}분`
-                : undefined,
-            }}
-            weekSummaries={pendingRoutinePreview.weeks.map(w =>
-              w.days.map(d => d.title).join(', ')
-            )}
-            hasConflicts={(pendingRoutinePreview.conflicts?.length ?? 0) > 0}
-            onViewDetails={onViewRoutineDetails}
-            onRevision={onRequestRevision}
-            onApply={onApplyRoutine}
-            isApplying={isLoading}
-          />
+          <div className="chat-card-in">
+            <ChatPreviewSummary
+              type="routine"
+              title={pendingRoutinePreview.title}
+              description={pendingRoutinePreview.description}
+              stats={{
+                duration: `${pendingRoutinePreview.durationWeeks}주`,
+                frequency: `주 ${pendingRoutinePreview.daysPerWeek}회`,
+                perSession: pendingRoutinePreview.weeks[0]?.days[0]?.estimatedDuration
+                  ? `약 ${pendingRoutinePreview.weeks[0].days[0].estimatedDuration}분`
+                  : undefined,
+              }}
+              weekSummaries={pendingRoutinePreview.weeks.map(w =>
+                w.days.map(d => d.title).join(', ')
+              )}
+              hasConflicts={(pendingRoutinePreview.conflicts?.length ?? 0) > 0}
+              onViewDetails={onViewRoutineDetails}
+              onRevision={onRequestRevision}
+              onApply={onApplyRoutine}
+              isApplying={isLoading}
+            />
+          </div>
         )}
 
         {/* 루틴 적용 완료 메시지 */}
@@ -260,7 +268,7 @@ export default function ChatMessageList({
 
         {/* 대화 시작 버튼 (인라인) */}
         {pendingStart && onStartConversation && (
-          <div className="flex gap-3 items-start">
+          <div className="flex gap-3 items-start chat-card-in">
             <div className="shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
               <PlayIcon size={16} weight="fill" />
             </div>
