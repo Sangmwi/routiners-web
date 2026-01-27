@@ -114,6 +114,7 @@ export function coachReducer(state: CoachChatState, action: CoachChatAction): Co
         error: null,
         activeTools: [],
         pendingUserMessage: action.pendingMessage,
+        pendingInput: null, // 새 스트림 시작 → 이전 인풋 요청 클리어
       };
 
     case 'APPEND_STREAMING':

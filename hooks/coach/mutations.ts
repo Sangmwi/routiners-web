@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/constants/queryKeys';
 import { coachApi, coachPurposeApi, coachContextApi } from '@/lib/api/coach';
+import { api } from '@/lib/api/client';
 import type {
   CoachConversation,
   CoachConversationsResponse,
@@ -147,6 +148,42 @@ export function useDeleteCoachConversation() {
       });
       queryClient.removeQueries({
         queryKey: queryKeys.coach.messages(conversationId),
+      });
+    },
+  });
+}
+
+// ============================================================================
+// Routine Apply Mutation
+// ============================================================================
+
+/**
+ * 루틴 적용 (AI 미경유, REST API 직접 호출)
+ *
+ * conversation.metadata.pending_preview 데이터를 DB에 저장
+ * forceOverwrite 시 겹치는 날짜의 기존 루틴 삭제 후 적용
+ */
+export function useApplyRoutine() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (params: {
+      conversationId: string;
+      previewId: string;
+      forceOverwrite?: boolean;
+    }) =>
+      api.post<{ previewId: string; eventsCreated: number; startDate: string }>(
+        '/api/routine/apply',
+        params
+      ),
+
+    onSuccess: (_, { conversationId }) => {
+      // 대화 캐시 무효화 (서버에서 metadata 업데이트됨)
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.coach.conversation(conversationId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.coach.conversations(),
       });
     },
   });

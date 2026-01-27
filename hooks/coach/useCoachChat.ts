@@ -26,7 +26,7 @@ import {
 import { coachReducer, INITIAL_STATE } from './helpers/coachReducer';
 import { extractSessionMetadata } from './helpers/sessionMetadata';
 import { useCoachMessageSender } from './useCoachMessageSender';
-import { useCoachPreviewActions } from './useCoachPreviewActions';
+
 import { useCoachProfileConfirmation } from './useCoachProfileConfirmation';
 
 // ============================================================================
@@ -160,10 +160,6 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
     onStreamComplete: checkAndSummarize,
   });
 
-  const { applyRoutine, requestRevision } = useCoachPreviewActions({
-    sendMessage,
-  });
-
   const { confirmProfile, requestProfileEdit } = useCoachProfileConfirmation({
     conversationId,
     state,
@@ -241,9 +237,11 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
 
   // ── 선택형 입력 제출 ──
   const submitInput = (value: string | string[]) => {
+    if (!conversationId) return;
     const messageText = Array.isArray(value) ? value.join(', ') : value;
     dispatch({ type: 'CLEAR_PENDING_INPUT' });
-    handleSend(messageText);
+    // sendMessage 직접 호출 (handleSend의 isStreaming 가드 우회 — 인풋 응답은 스트리밍 중에도 전송 가능해야 함)
+    sendMessage(conversationId, messageText);
   };
 
   // ── 에러 클리어 ──

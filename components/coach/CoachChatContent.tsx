@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCoachChat } from '@/hooks/coach';
 import { useCoachConversations } from '@/hooks/coach/queries';
-import { useDeleteCoachConversation } from '@/hooks/coach/mutations';
+import { useDeleteCoachConversation, useApplyRoutine } from '@/hooks/coach/mutations';
 import { useConfirmDialog } from '@/lib/stores/modalStore';
 import CoachHeader from './CoachHeader';
 import WelcomeScreen from './WelcomeScreen';
@@ -64,9 +64,10 @@ export default function CoachChatContent({
     isMessagesLoading,
   } = useCoachChat(initialConversationId);
 
-  // 대화 목록
+  // 대화 목록 & 뮤테이션
   const { data: conversationsData, isPending: isLoadingConversations } = useCoachConversations();
   const deleteConversation = useDeleteCoachConversation();
+  const applyRoutine = useApplyRoutine();
   const confirm = useConfirmDialog();
 
   // 표시 조건
@@ -81,14 +82,15 @@ export default function CoachChatContent({
 
   // 루틴 적용 핸들러
   const handleApplyRoutine = async (forceOverwrite?: boolean) => {
-    // TODO: 실제 적용 로직 구현 필요
+    if (!conversationId || !pendingRoutinePreview?.id) return;
+
     setIsApplying(true);
     try {
-      // 루틴 적용 메시지 전송
-      const message = forceOverwrite
-        ? '루틴을 덮어쓰기로 적용해주세요'
-        : '루틴을 적용해주세요';
-      await handleSend(message);
+      await applyRoutine.mutateAsync({
+        conversationId,
+        previewId: pendingRoutinePreview.id,
+        forceOverwrite,
+      });
       setIsPreviewOpen(false);
     } finally {
       setIsApplying(false);

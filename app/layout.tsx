@@ -28,6 +28,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  interactiveWidget: 'resizes-content',
 };
 
 export default function RootLayout({
@@ -44,7 +45,7 @@ export default function RootLayout({
           <ErrorBoundary>
             <WebViewBridge />
             <GlobalErrorToast />
-            <div className="mx-auto flex min-h-screen max-w-md flex-col bg-background shadow-2xl">
+            <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-background shadow-2xl">
               <main className="flex-1">
                 {children}
               </main>

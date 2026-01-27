@@ -259,23 +259,9 @@ export default function ChatMessageList({
           </div>
         )}
 
-        {/* 선택형 입력 UI (AI 메시지 + 버튼) */}
+        {/* 선택형 입력 UI (서버 메시지에 AI 질문이 이미 포함되므로 선택 버튼만 렌더링) */}
         {pendingInput && onSubmitInput && (
-          <div>
-            {/* AI 질문 메시지 */}
-            {pendingInput.message && (
-              <ChatMessage
-                message={{
-                  id: `input-request-message-${pendingInput.id}`,
-                  role: 'assistant',
-                  content: pendingInput.message,
-                  createdAt: new Date().toISOString(),
-                }}
-              />
-            )}
-            {/* 선택 버튼 UI */}
-            <ChatInputRequest request={pendingInput} onSubmit={onSubmitInput} />
-          </div>
+          <ChatInputRequest request={pendingInput} onSubmit={onSubmitInput} />
         )}
 
         {/* 프로필 확인 UI */}
