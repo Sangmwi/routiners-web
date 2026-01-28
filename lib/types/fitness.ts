@@ -237,6 +237,8 @@ export const AI_TOOL_NAMES = [
   // 식단 관련
   'generate_meal_plan_preview', // 식단 미리보기 생성 (DB 저장 X)
   'apply_meal_plan', // 식단 적용 (DB 저장)
+  // 프로세스 관리
+  'set_active_purpose', // 구조화된 프로세스 활성화
 ] as const;
 
 export type AIToolName = (typeof AI_TOOL_NAMES)[number];
@@ -264,6 +266,8 @@ export const AI_TOOL_LABELS: Record<AIToolName, string> = {
   calculate_daily_needs: '일일 영양 필요량 계산 중',
   generate_meal_plan_preview: '식단 미리보기 생성 중',
   apply_meal_plan: '식단 적용 중',
+  // 프로세스 관리
+  set_active_purpose: '프로세스 활성화 중',
 };
 
 /**

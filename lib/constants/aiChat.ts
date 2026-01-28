@@ -7,7 +7,6 @@
  * - 타이밍/제한 상수
  */
 
-import type { ChatMessage } from '@/lib/types/chat';
 
 // =============================================================================
 // SSE 이벤트 타입
@@ -64,11 +63,10 @@ export const ROUTINE_PROGRESS_STAGES: ProgressStage[] = [
 ];
 
 /**
- * 세션 목적별 진행률 단계
+ * 세션 진행률 단계 (코치 AI 기본)
  */
 export const PROGRESS_STAGES = {
-  workout: ROUTINE_PROGRESS_STAGES,
-  coach: ROUTINE_PROGRESS_STAGES, // 코치 AI도 루틴 진행률 사용
+  coach: ROUTINE_PROGRESS_STAGES,
 } as const;
 
 // =============================================================================
@@ -125,42 +123,6 @@ export const AI_CHAT_LIMITS = {
   /** 메시지 최소 길이 */
   MIN_MESSAGE_LENGTH: 1,
 } as const;
-
-// =============================================================================
-// 초기 인사말
-// =============================================================================
-
-/**
- * AI Purpose 타입
- */
-export type AIPurpose = 'workout' | 'coach';
-
-/**
- * 초기 인사말 (AI 응답 대기 중 표시)
- * 실제 질문은 AI가 request_user_input으로 처리
- */
-export const INITIAL_GREETINGS: Record<AIPurpose, string> = {
-  workout: '안녕하세요! 맞춤 운동 루틴을 만들어 드릴게요.',
-  coach: '안녕하세요! 무엇을 도와드릴까요? 운동 루틴, 영양 분석, 또는 다른 궁금한 점이 있으시면 말씀해주세요.',
-};
-
-/**
- * 초기 인사 메시지 생성
- */
-export function createInitialGreetingMessage(
-  sessionId: string,
-  purpose: AIPurpose
-): ChatMessage {
-  return {
-    id: `initial-greeting-${Date.now()}`,
-    conversationId: sessionId,
-    senderId: undefined,
-    role: 'assistant',
-    content: INITIAL_GREETINGS[purpose],
-    contentType: 'text',
-    createdAt: new Date().toISOString(),
-  };
-}
 
 // =============================================================================
 // 유틸리티 함수

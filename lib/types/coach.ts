@@ -285,20 +285,6 @@ export function transformCoachConversationToDb(
 // ============================================================================
 
 /**
- * 활성 목적 타입에 따른 기본 프롬프트 가져오기
- */
-export function getActivePurposePrompt(purpose: ActivePurpose): string {
-  switch (purpose.type) {
-    case 'routine_generation':
-      return `현재 운동 루틴 생성 프로세스 진행 중입니다.
-단계: ${purpose.stage}
-수집된 정보: ${JSON.stringify(purpose.collectedData)}`;
-    default:
-      return '';
-  }
-}
-
-/**
  * 요약 트리거 조건 확인
  */
 export function shouldTriggerSummarization(

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { withAuth } from '@/utils/supabase/auth';
 import { DbConversation, DbChatMessage } from '@/lib/types/chat';
-import { AI_TRAINER_TOOLS, type AIToolDefinition } from '@/lib/ai/tools';
+import { AI_TRAINER_TOOLS } from '@/lib/ai/tools';
 import {
   handleToolCall,
   clearMetadataKeys,
@@ -13,9 +13,9 @@ import {
   AI_CHAT_LIMITS,
   AI_MODEL,
   isSystemMessage,
-  INITIAL_GREETINGS,
 } from '@/lib/constants/aiChat';
-import { SYSTEM_PROMPTS } from '@/lib/ai/system-prompts';
+import { composeCoachPrompt } from '@/lib/ai/system-prompts';
+import type { CoachConversationMetadata } from '@/lib/types/coach';
 import type { AIToolName } from '@/lib/types/fitness';
 import { z } from 'zod';
 import {
@@ -36,26 +36,9 @@ const MessageSchema = z.object({
     .max(AI_CHAT_LIMITS.MAX_MESSAGE_LENGTH, `메시지는 ${AI_CHAT_LIMITS.MAX_MESSAGE_LENGTH}자 이내여야 합니다.`),
 });
 
-/**
- * AI Purpose 타입
- * 'workout': 기존 운동 AI (레거시 지원)
- * 'coach': 범용 코치 AI (운동 루틴 + 일반 상담)
- */
-type AIPurpose = 'workout' | 'coach';
-
-/**
- * purpose에 따라 적절한 도구 목록 반환
- * 현재는 workout과 coach 모두 동일한 도구 사용 (향후 확장 가능)
- */
-function getToolsForPurpose(_purpose: AIPurpose): AIToolDefinition[] {
-  // 코치 AI: 모든 운동 도구 사용
-  return AI_TRAINER_TOOLS;
-}
-
 // Responses API용 도구 포맷 변환
-function formatToolsForResponsesAPI(purpose: AIPurpose): OpenAI.Responses.Tool[] {
-  const tools = getToolsForPurpose(purpose);
-  return tools.map((tool) => ({
+function formatToolsForResponsesAPI(): OpenAI.Responses.Tool[] {
+  return AI_TRAINER_TOOLS.map((tool) => ({
     type: 'function' as const,
     name: tool.name,
     description: tool.description,
@@ -199,13 +182,19 @@ export const POST = withAuth<Response>(
 
     const dbMessages = (existingMessages as DbChatMessage[]) || [];
 
-    const purpose = (conv.ai_purpose === 'coach' ? 'coach' : 'workout') as AIPurpose;
+    // 동적 프롬프트 구성: activePurpose에 따라 프로세스 규칙 포함
+    const metadata = conv.metadata as CoachConversationMetadata | null;
+    const processType = metadata?.activePurpose?.type;
+    const systemPrompt = composeCoachPrompt(processType);
+
     const isSystem = isSystemMessage(message);
     let userMsgId: string | null = null;
 
     // __START__ 메시지인 경우: 인사말을 DB에 저장 (세션 복귀 시에도 유지)
     if (isSystem) {
-      const greeting = INITIAL_GREETINGS[purpose];
+      const greeting = processType
+        ? '안녕하세요! 맞춤 운동 루틴을 만들어 드릴게요.'
+        : '안녕하세요! 무엇을 도와드릴까요? 운동, 영양, 건강 등 궁금한 점이 있으면 말씀해주세요.';
       await supabase
         .from('chat_messages')
         .insert({
@@ -273,7 +262,7 @@ export const POST = withAuth<Response>(
         try {
           // Responses API용 input 구성
           const input = buildConversationInput(dbMessages, message);
-          const tools = formatToolsForResponsesAPI(purpose);
+          const tools = formatToolsForResponsesAPI();
 
           let continueLoop = true;
           let fullContent = '';
@@ -284,7 +273,7 @@ export const POST = withAuth<Response>(
             // Responses API 호출 (스트리밍)
             const stream = await openai.responses.create({
               model: AI_MODEL.DEFAULT,
-              instructions: SYSTEM_PROMPTS[purpose],
+              instructions: systemPrompt,
               input,
               tools,
               stream: true,

@@ -95,6 +95,9 @@ class ToolRegistry {
       // 사용자 상호작용 도구
       request_user_input: { category: 'interaction', specialHandling: true },
       confirm_profile_data: { category: 'interaction', specialHandling: true },
+
+      // 프로세스 관리 도구
+      set_active_purpose: { category: 'general', specialHandling: true },
     };
 
     return metadataMap[name] ?? { category: 'general' };

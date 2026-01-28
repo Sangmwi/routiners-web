@@ -50,6 +50,7 @@ export const POST = withAuth(
       .from('chat_messages')
       .select('*')
       .eq('conversation_id', id)
+      .eq('content_type', 'text')
       .is('deleted_at', null)
       .order('created_at', { ascending: true });
 
@@ -200,6 +201,7 @@ export const GET = withAuth(
       .from('chat_messages')
       .select('*', { count: 'exact', head: true })
       .eq('conversation_id', id)
+      .eq('content_type', 'text')
       .is('deleted_at', null);
 
     if (countError) {

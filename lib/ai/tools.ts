@@ -486,6 +486,29 @@ export const APPLY_ROUTINE: AIToolDefinition = {
   },
 };
 
+/**
+ * 16. 프로세스 활성화
+ * - 구조화된 프로세스(루틴 생성 등)를 활성화
+ * - 자연 대화 중 사용자 의도 감지 시 호출
+ */
+export const SET_ACTIVE_PURPOSE: AIToolDefinition = {
+  type: 'function',
+  name: 'set_active_purpose',
+  description:
+    '구조화된 프로세스를 활성화합니다. 사용자가 "루틴 짜줘", "운동 계획 세워줘" 등 특정 프로세스를 요청할 때 호출하세요. 활성화 후 도구 결과에 포함된 시작 절차를 따르세요.',
+  parameters: {
+    type: 'object',
+    properties: {
+      purposeType: {
+        type: 'string',
+        enum: ['routine_generation'],
+        description: '활성화할 프로세스 타입',
+      },
+    },
+    required: ['purposeType'],
+  },
+};
+
 // ============================================================================
 // All Tools Export
 // ============================================================================
@@ -510,6 +533,8 @@ export const AI_TRAINER_TOOLS: AIToolDefinition[] = [
   // 루틴 미리보기/적용
   GENERATE_ROUTINE_PREVIEW,
   APPLY_ROUTINE,
+  // 프로세스 관리
+  SET_ACTIVE_PURPOSE,
 ];
 
 /**
