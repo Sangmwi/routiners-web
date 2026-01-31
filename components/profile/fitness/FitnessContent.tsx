@@ -1,12 +1,9 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { SpinnerGapIcon, CheckIcon } from '@phosphor-icons/react';
-import PageHeader from '@/components/common/PageHeader';
 import Button from '@/components/ui/Button';
-import { PulseLoader } from '@/components/ui/PulseLoader';
-import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import { useFitnessProfileSuspense, useUpdateFitnessProfile } from '@/hooks/fitnessProfile';
 import {
   FitnessGoal,
@@ -155,10 +152,16 @@ function TagInput({ value, onChange, placeholder }: TagInputProps) {
 }
 
 // ============================================================
-// Content Component (Suspense 내부)
+// Main Content Component
 // ============================================================
 
-function FitnessProfileContent() {
+/**
+ * 운동 프로필 콘텐츠 (Suspense 내부)
+ *
+ * - useSuspenseQuery로 운동 프로필 조회
+ * - 상위 page.tsx의 DetailLayout에서 Header + Suspense 처리
+ */
+export default function FitnessContent() {
   const router = useRouter();
   const { data: profile } = useFitnessProfileSuspense();
   const updateProfile = useUpdateFitnessProfile();
@@ -215,10 +218,6 @@ function FitnessProfileContent() {
   }, [formData, profile]);
 
   // Handlers
-  const handleBack = () => {
-    router.back();
-  };
-
   const handleSave = () => {
     setSaveError(null);
 
@@ -239,9 +238,7 @@ function FitnessProfileContent() {
 
   return (
     <>
-      <PageHeader title="운동 프로필 관리" onBack={handleBack} centered />
-
-      <div className="p-4 space-y-6 pb-32">
+      <div className="space-y-6 pb-32">
         {/* 운동 목표 */}
         <Section title="운동 목표" description="어떤 목표를 향해 운동하시나요?">
           <div className="flex flex-wrap gap-2">
@@ -407,7 +404,7 @@ function FitnessProfileContent() {
       </div>
 
       {/* 저장 버튼 */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border/50">
+      <div className="fixed bottom-0 left-0 right-0 p-4 pb-safe bg-background border-t border-border/50">
         <Button
           onClick={handleSave}
           className="w-full"
@@ -424,34 +421,5 @@ function FitnessProfileContent() {
         </Button>
       </div>
     </>
-  );
-}
-
-// ============================================================
-// Loading Fallback
-// ============================================================
-
-function LoadingFallback() {
-  return (
-    <>
-      <PageHeader title="운동 프로필 관리" centered />
-      <PulseLoader />
-    </>
-  );
-}
-
-// ============================================================
-// Main Export
-// ============================================================
-
-export default function FitnessProfileClient() {
-  return (
-    <div className="min-h-screen bg-background">
-      <QueryErrorBoundary>
-        <Suspense fallback={<LoadingFallback />}>
-          <FitnessProfileContent />
-        </Suspense>
-      </QueryErrorBoundary>
-    </div>
   );
 }

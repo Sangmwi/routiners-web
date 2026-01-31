@@ -1,26 +1,33 @@
 'use client';
 
+import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
+import { MainTabLayout } from '@/components/layouts';
+import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import { PulseLoader } from '@/components/ui/PulseLoader';
-import MainTabLayout from '@/components/common/MainTabLayout';
-import MainTabHeader from '@/components/common/MainTabHeader';
+import ProfileHeader from '@/components/profile/ProfileHeader';
 
-const ProfileClient = dynamic(() => import('@/components/profile/ProfileClient'), {
-  ssr: false,
-  loading: () => (
-    <MainTabLayout>
-      <MainTabHeader title="내 프로필" />
-      <PulseLoader />
-    </MainTabLayout>
-  ),
-});
+const ProfileContent = dynamic(
+  () => import('@/components/profile/ProfileContent'),
+  { ssr: false, loading: () => <PulseLoader /> }
+);
 
 /**
- * 프로필 페이지 (정적)
+ * 프로필 페이지
  *
- * ssr: false → 빌드 시 MainTabLayout + 헤더 + PulseLoader 셸 생성
- * 클라이언트: dynamic import → React Query 캐시 → 즉시 렌더
+ * - Layout + Header: 즉시 렌더링 (Suspense 밖)
+ * - 단일 Suspense: 번들 + 데이터 로딩 모두 처리
+ * - 깜빡임 없는 로딩 UX
  */
 export default function ProfilePage() {
-  return <ProfileClient />;
+  return (
+    <MainTabLayout>
+      <ProfileHeader />
+      <QueryErrorBoundary>
+        <Suspense fallback={<PulseLoader />}>
+          <ProfileContent />
+        </Suspense>
+      </QueryErrorBoundary>
+    </MainTabLayout>
+  );
 }

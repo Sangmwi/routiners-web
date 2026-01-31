@@ -57,7 +57,7 @@ export default function ChatInput({
   const displayPlaceholder = isLoading ? '응답을 기다리는 중...' : placeholder;
 
   return (
-    <div className="shrink-0 flex items-end gap-2 p-4 border-t border-border bg-background">
+    <div className="shrink-0 flex items-end gap-2 p-4 pb-safe border-t border-border bg-background">
       <textarea
         ref={textareaRef}
         value={message}

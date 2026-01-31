@@ -1,13 +1,8 @@
 'use client';
 
-import { Suspense } from 'react';
-import { useRouter } from 'next/navigation';
 import { PlusIcon, SpinnerGapIcon, WarningCircleIcon, CheckCircleIcon } from '@phosphor-icons/react';
-import PageHeader from '@/components/common/PageHeader';
 import Button from '@/components/ui/Button';
 import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
-import { PulseLoader } from '@/components/ui/PulseLoader';
-import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import {
   InBodyRecordList,
   InBodySummaryCard,
@@ -76,12 +71,16 @@ function DeleteConfirmView({
 }
 
 // ============================================================
-// Content Component (Suspense 내부)
+// Main Content Component
 // ============================================================
 
-function InBodyContent() {
-  const router = useRouter();
-
+/**
+ * 인바디 관리 콘텐츠 (Suspense 내부)
+ *
+ * - useSuspenseQuery로 인바디 데이터 조회
+ * - 상위 page.tsx의 DetailLayout에서 Header + Suspense 처리
+ */
+export default function InBodyContent() {
   const {
     // Data (항상 존재 - Suspense가 로딩 처리)
     records,
@@ -119,18 +118,12 @@ function InBodyContent() {
     isDeleting,
   } = useInBodyManagerSuspense();
 
-  const handleBack = () => {
-    router.back();
-  };
-
   // 버튼 비활성화 조건: 스캔 중이거나 저장 중
   const isButtonDisabled = scanState === 'scanning' || scanState === 'saving';
 
   return (
     <>
-      <PageHeader title="인바디 관리" onBack={handleBack} centered />
-
-      <div className="p-4 space-y-6 pb-32">
+      <div className="space-y-6 pb-32">
         {/* Summary Card */}
         <section>
           <h2 className="text-sm font-medium text-muted-foreground mb-3">
@@ -179,7 +172,7 @@ function InBodyContent() {
 
       {/* Fixed Bottom Button */}
       {currentView === 'list' && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border/50">
+        <div className="fixed bottom-0 left-0 right-0 p-4 pb-safe bg-background border-t border-border/50">
           <Button
             onClick={startScan}
             className="w-full"
@@ -274,34 +267,5 @@ function InBodyContent() {
         />
       )}
     </>
-  );
-}
-
-// ============================================================
-// Loading Fallback
-// ============================================================
-
-function LoadingFallback() {
-  return (
-    <>
-      <PageHeader title="인바디 관리" centered />
-      <PulseLoader />
-    </>
-  );
-}
-
-// ============================================================
-// Main Export
-// ============================================================
-
-export default function InBodyClient() {
-  return (
-    <div className="min-h-screen bg-background">
-      <QueryErrorBoundary>
-        <Suspense fallback={<LoadingFallback />}>
-          <InBodyContent />
-        </Suspense>
-      </QueryErrorBoundary>
-    </div>
   );
 }

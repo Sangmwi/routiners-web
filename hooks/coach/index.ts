@@ -30,3 +30,7 @@ export {
 // Business Logic
 export { useCoachChat } from './useCoachChat';
 export type { UseCoachChatReturn } from './useCoachChat';
+
+// UI State Hooks (SRP)
+export { useCoachDrawer } from './useCoachDrawer';
+export { useRoutinePreview } from './useRoutinePreview';

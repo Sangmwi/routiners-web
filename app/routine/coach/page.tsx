@@ -1,29 +1,31 @@
 'use client';
 
+import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
+import { ChatLayout } from '@/components/layouts';
+import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import { PulseLoader } from '@/components/ui/PulseLoader';
-import MainTabLayout from '@/components/common/MainTabLayout';
-import MainTabHeader from '@/components/common/MainTabHeader';
 
-const CoachPageClient = dynamic(
-  () => import('./CoachPageClient').then(mod => ({ default: mod.CoachPageClient })),
-  {
-    ssr: false,
-    loading: () => (
-      <MainTabLayout>
-        <MainTabHeader title="AI 코치" />
-        <PulseLoader />
-      </MainTabLayout>
-    ),
-  },
+const CoachContent = dynamic(
+  () => import('@/components/coach/CoachContent'),
+  { ssr: false, loading: () => <PulseLoader /> }
 );
 
 /**
- * 코치 채팅 페이지 (정적)
+ * 코치 채팅 페이지
  *
- * ssr: false → 빌드 시 MainTabLayout + 헤더 + PulseLoader 셸 생성
- * 클라이언트: dynamic import → React Query 캐시 → 즉시 렌더
+ * - ChatLayout: 즉시 렌더링
+ * - QueryErrorBoundary: 에러 처리
+ * - Suspense: 데이터 로딩 처리
  */
 export default function CoachPage() {
-  return <CoachPageClient />;
+  return (
+    <ChatLayout>
+      <QueryErrorBoundary>
+        <Suspense fallback={<PulseLoader />}>
+          <CoachContent />
+        </Suspense>
+      </QueryErrorBoundary>
+    </ChatLayout>
+  );
 }

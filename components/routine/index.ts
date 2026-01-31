@@ -28,5 +28,5 @@ export { default as EventCarouselCard } from './EventCarouselCard';
 export { default as RoutineEventCarousel } from './RoutineEventCarousel';
 export { default as RoutineSection } from './RoutineSection';
 
-// Client Page Component
-export { default as RoutineClient } from './RoutineClient';
+// Content Page Component
+export { default as RoutineContent } from './RoutineContent';

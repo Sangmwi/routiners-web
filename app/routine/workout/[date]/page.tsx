@@ -1,36 +1,38 @@
-import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
-import { getQueryClient } from '@/lib/query-client';
-import { queryKeys } from '@/lib/constants/queryKeys';
-import { fetchRoutineEventByDateServer } from '@/lib/api/routine.server';
-import { WorkoutClient } from '@/components/routine';
+'use client';
 
-// 정적 생성 방지 - 인증 기반 데이터 필요
-export const dynamic = 'force-dynamic';
+import { Suspense } from 'react';
+import { use } from 'react';
+import dynamic from 'next/dynamic';
+import { DetailLayout } from '@/components/layouts';
+import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
+import { PulseLoader } from '@/components/ui/PulseLoader';
+
+const WorkoutContent = dynamic(
+  () => import('@/components/routine/event/WorkoutContent'),
+  { ssr: false, loading: () => <PulseLoader /> }
+);
 
 interface WorkoutPageProps {
   params: Promise<{ date: string }>;
 }
 
 /**
- * 운동 상세 페이지 (Server Component)
+ * 운동 상세 페이지
  *
- * SSR 흐름:
- * 1. Server: 해당 날짜의 운동 이벤트 prefetch
- * 2. HydrationBoundary로 클라이언트에 데이터 전달
- * 3. Client: 동일한 queryKey로 즉시 hydrate (refetch 없음)
+ * - DetailLayout + Header: 즉시 렌더링
+ * - QueryErrorBoundary: 에러 처리
+ * - Suspense: 데이터 로딩 처리
  */
-export default async function WorkoutPage({ params }: WorkoutPageProps) {
-  const { date } = await params;
-  const queryClient = getQueryClient();
-
-  await queryClient.prefetchQuery({
-    queryKey: queryKeys.routineEvent.byDate(date, 'workout'),
-    queryFn: () => fetchRoutineEventByDateServer(date, 'workout'),
-  });
+export default function WorkoutPage({ params }: WorkoutPageProps) {
+  const { date } = use(params);
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <WorkoutClient params={params} />
-    </HydrationBoundary>
+    <DetailLayout title="운동 루틴" bottomPadding={false}>
+      <QueryErrorBoundary>
+        <Suspense fallback={<PulseLoader />}>
+          <WorkoutContent date={date} />
+        </Suspense>
+      </QueryErrorBoundary>
+    </DetailLayout>
   );
 }

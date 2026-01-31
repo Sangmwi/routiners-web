@@ -64,19 +64,23 @@ async function getAuthUserFromToken(accessToken: string): Promise<AuthContext | 
     }
   );
 
+  // getSession(): JWT 로컬 파싱 (네트워크 없음)
+  // - JWT 서명 검증 ✅
+  // - 만료 시간 체크 ✅
+  // - 만료 시 자동 refresh 시도 ✅
   const {
-    data: { user: authUser },
-    error: authError,
-  } = await supabaseWithToken.auth.getUser();
+    data: { session },
+    error: sessionError,
+  } = await supabaseWithToken.auth.getSession();
 
-  if (authError || !authUser) {
-    console.log('[Auth] Token verification failed:', authError?.message);
+  if (sessionError || !session?.user) {
+    console.log('[Auth] Token verification failed:', sessionError?.message);
     return null;
   }
 
   // RLS가 current_user_id()로 자동 필터링하므로 DB 조회 불필요
   return {
-    authUser,
+    authUser: session.user,
     supabase: supabaseWithToken,
   };
 }
@@ -88,18 +92,22 @@ async function getAuthUserFromToken(accessToken: string): Promise<AuthContext | 
 async function getAuthUserFromCookie(): Promise<AuthContext | null> {
   const supabase = await createClient();
 
+  // getSession(): JWT 로컬 파싱 (네트워크 없음)
+  // - JWT 서명 검증 ✅
+  // - 만료 시간 체크 ✅
+  // - 만료 시 자동 refresh 시도 ✅
   const {
-    data: { user: authUser },
-    error: authError,
-  } = await supabase.auth.getUser();
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
 
-  if (authError || !authUser) {
+  if (sessionError || !session?.user) {
     return null;
   }
 
   // RLS가 current_user_id()로 자동 필터링하므로 DB 조회 불필요
   return {
-    authUser,
+    authUser: session.user,
     supabase,
   };
 }

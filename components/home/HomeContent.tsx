@@ -1,15 +1,11 @@
 'use client';
 
-import { Suspense } from 'react';
 import { useCurrentUserProfileSuspense } from '@/hooks/profile';
-import MainTabLayout from '@/components/common/MainTabLayout';
-import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import GreetingSection from '@/components/home/GreetingSection';
 import HealthScoreCard from '@/components/home/HealthScoreCard';
 import SectionHeader from '@/components/ui/SectionHeader';
 import ProductSlider from '@/components/home/ProductSlider';
 import InfluencerSlider from '@/components/home/InfluencerSlider';
-import { PulseLoader } from '@/components/ui/PulseLoader';
 import { Product, Influencer } from '@/lib/types';
 
 // 더미 데이터
@@ -41,11 +37,13 @@ const DUMMY_INFLUENCERS: Influencer[] = [
   { id: '10', author: 'pt_specialist', title: '아침 PT 전 꼭 해야 할 스트레칭', votes: 56 },
 ];
 
-// ============================================================================
-// HomeContent - Suspense 내부 컴포넌트
-// ============================================================================
-
-function HomeContent() {
+/**
+ * 홈 페이지 콘텐츠 (Suspense 내부)
+ *
+ * - useSuspenseQuery로 사용자 프로필 조회
+ * - 상위 page.tsx의 Suspense boundary에서 로딩 처리
+ */
+export default function HomeContent() {
   const { data: user } = useCurrentUserProfileSuspense();
 
   const handleViewHealthDetails = () => {
@@ -70,9 +68,10 @@ function HomeContent() {
 
   return (
     <>
-      <GreetingSection nickname={user?.nickname || '사용자'} />
-
-      <HealthScoreCard score={DUMMY_HEALTH_SCORE} onViewDetails={handleViewHealthDetails} />
+      <section>
+        <GreetingSection nickname={user?.nickname || '사용자'} />
+        <HealthScoreCard score={DUMMY_HEALTH_SCORE} onViewDetails={handleViewHealthDetails} />
+      </section>
 
       <section>
         <SectionHeader
@@ -92,21 +91,5 @@ function HomeContent() {
         <InfluencerSlider influencers={DUMMY_INFLUENCERS} onCardClick={handleInfluencerClick} />
       </section>
     </>
-  );
-}
-
-// ============================================================================
-// HomeClient - 메인 export
-// ============================================================================
-
-export default function HomeClient() {
-  return (
-    <MainTabLayout>
-      <QueryErrorBoundary>
-        <Suspense fallback={<PulseLoader />}>
-          <HomeContent />
-        </Suspense>
-      </QueryErrorBoundary>
-    </MainTabLayout>
   );
 }

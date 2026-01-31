@@ -1,10 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
 import { SpinnerGapIcon } from '@phosphor-icons/react';
-import { PulseLoader } from '@/components/ui/PulseLoader';
-import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
-import PageHeader from '@/components/common/PageHeader';
 import ProfilePhotoGallery from '@/components/profile/edit/ProfilePhotoGallery';
 import ProfileNicknameInput from '@/components/profile/edit/ProfileNicknameInput';
 import ProfileBioInput from '@/components/profile/edit/ProfileBioInput';
@@ -23,19 +19,17 @@ interface ProgressBarProps {
 
 function ProgressBar({ progress }: ProgressBarProps) {
   return (
-    <div className="px-4 py-4">
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">
-            프로필 완성도: {progress}%
-          </span>
-        </div>
-        <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-          <div
-            className="h-full bg-primary transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+    <div className="space-y-2 mb-6">
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-muted-foreground">
+          프로필 완성도: {progress}%
+        </span>
+      </div>
+      <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+        <div
+          className="h-full bg-primary transition-all duration-300"
+          style={{ width: `${progress}%` }}
+        />
       </div>
     </div>
   );
@@ -63,17 +57,22 @@ function SaveButton({ onClick, disabled, isSaving }: SaveButtonProps) {
 }
 
 // ============================================================
-// Content Component (Suspense 내부)
+// Main Content Component
 // ============================================================
 
-function ProfileEditContent() {
+/**
+ * 프로필 수정 콘텐츠 (Suspense 내부)
+ *
+ * - useSuspenseQuery로 프로필 데이터 조회
+ * - 상위 page.tsx의 DetailLayout에서 Header + Suspense 처리
+ */
+export default function ProfileEditContent() {
   const {
     user,
     formData,
     updateFormField,
     handleDraftChange,
     handleSave,
-    handleBack,
     isSaving,
     hasChanges,
   } = useProfileEditSuspense();
@@ -82,11 +81,10 @@ function ProfileEditContent() {
 
   return (
     <>
-      <PageHeader title="프로필 만들기" centered onBack={handleBack} />
       <ProgressBar progress={progress} />
 
       {/* Content */}
-      <div className="px-4 pb-32 space-y-8">
+      <div className="pb-32 space-y-8">
         <ProfilePhotoGallery
           initialImages={user.profileImages || []}
           isSaving={isSaving}
@@ -129,34 +127,5 @@ function ProfileEditContent() {
         isSaving={isSaving}
       />
     </>
-  );
-}
-
-// ============================================================
-// Loading Fallback
-// ============================================================
-
-function LoadingFallback() {
-  return (
-    <>
-      <PageHeader title="프로필 만들기" centered />
-      <PulseLoader />
-    </>
-  );
-}
-
-// ============================================================
-// Main Export
-// ============================================================
-
-export default function ProfileEditClient() {
-  return (
-    <div className="min-h-screen bg-background">
-      <QueryErrorBoundary>
-        <Suspense fallback={<LoadingFallback />}>
-          <ProfileEditContent />
-        </Suspense>
-      </QueryErrorBoundary>
-    </div>
   );
 }

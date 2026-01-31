@@ -1,9 +1,7 @@
 'use client';
 
-import { use, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
-import PageHeader from '@/components/common/PageHeader';
-import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
+import EmptyState from '@/components/common/EmptyState';
 import { useShowError } from '@/lib/stores/errorStore';
 import {
   ExerciseCard,
@@ -18,9 +16,7 @@ import {
 } from '@/hooks/routine';
 import type { WorkoutSet, WorkoutData } from '@/lib/types/routine';
 import { CalendarIcon } from '@phosphor-icons/react';
-import { PulseLoader } from '@/components/ui/PulseLoader';
 import { getEventConfig } from '@/lib/config/theme';
-import Button from '@/components/ui/Button';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 
 // ============================================================
@@ -40,7 +36,17 @@ function isWorkoutData(data: unknown): data is WorkoutData {
 // Content Component (Suspense 내부)
 // ============================================================
 
-function WorkoutContent({ date }: { date: string }) {
+interface WorkoutContentProps {
+  date: string;
+}
+
+/**
+ * 운동 상세 콘텐츠 (Suspense 내부)
+ *
+ * - useSuspenseQuery로 운동 이벤트 조회
+ * - 상위 page.tsx의 DetailLayout에서 Header + Suspense 처리
+ */
+export default function WorkoutContent({ date }: WorkoutContentProps) {
   const router = useRouter();
   const showError = useShowError();
 
@@ -92,23 +98,19 @@ function WorkoutContent({ date }: { date: string }) {
   // 이벤트 없음 (예정된 운동 없음)
   if (!event) {
     return (
-      <>
-        <PageHeader title={eventConfig.description} />
-        <div className="flex flex-col items-center justify-center gap-6 p-8 mt-12">
-          <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
-            <CalendarIcon size={40} className="text-muted-foreground" />
-          </div>
-          <div className="text-center space-y-2">
-            <h2 className="text-lg font-bold text-foreground">{formattedDate}</h2>
-            <p className="text-muted-foreground text-sm">
-              이 날짜에 예정된 운동이 없습니다.
-            </p>
-          </div>
-          <Button variant="outline" onClick={() => router.push('/routine')}>
-            캘린더로 돌아가기
-          </Button>
-        </div>
-      </>
+      <div className="mt-8">
+        <EmptyState
+          icon={CalendarIcon}
+          message={`${formattedDate}에 예정된 운동이 없습니다`}
+          hint="AI 코치와 대화하여 맞춤 운동을 생성해보세요"
+          showIconBackground
+          size="lg"
+          action={{
+            label: '돌아가기',
+            onClick: () => router.push('/routine'),
+          }}
+        />
+      </div>
     );
   }
 
@@ -117,9 +119,7 @@ function WorkoutContent({ date }: { date: string }) {
 
   return (
     <>
-      <PageHeader title={eventConfig.description} />
-
-      <div className="p-4 space-y-6">
+      <div className="space-y-6 pb-32">
         {/* 헤더 섹션 */}
         <div className="bg-card border border-border rounded-xl p-4">
           <div className="flex items-start justify-between mb-3">
@@ -183,7 +183,7 @@ function WorkoutContent({ date }: { date: string }) {
       </div>
 
       {/* 하단 액션 버튼 */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-background border-t border-border">
+      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 pb-safe bg-background border-t border-border">
         <EventActionButtons
           status={event.status}
           onComplete={handleComplete}
@@ -192,41 +192,5 @@ function WorkoutContent({ date }: { date: string }) {
         />
       </div>
     </>
-  );
-}
-
-// ============================================================
-// Loading Fallback
-// ============================================================
-
-function LoadingFallback() {
-  const eventConfig = getEventConfig('workout');
-  return (
-    <>
-      <PageHeader title={eventConfig.description} />
-      <PulseLoader />
-    </>
-  );
-}
-
-// ============================================================
-// Main Export
-// ============================================================
-
-interface WorkoutClientProps {
-  params: Promise<{ date: string }>;
-}
-
-export default function WorkoutClient({ params }: WorkoutClientProps) {
-  const { date } = use(params);
-
-  return (
-    <div className="min-h-screen bg-background pb-32">
-      <QueryErrorBoundary>
-        <Suspense fallback={<LoadingFallback />}>
-          <WorkoutContent date={date} />
-        </Suspense>
-      </QueryErrorBoundary>
-    </div>
   );
 }

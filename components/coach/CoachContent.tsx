@@ -1,11 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useCoachChat } from '@/hooks/coach';
+import { useSearchParams } from 'next/navigation';
+import { useCoachChat, useCoachDrawer, useRoutinePreview } from '@/hooks/coach';
 import { useCoachConversations } from '@/hooks/coach/queries';
-import { useDeleteCoachConversation, useApplyRoutine } from '@/hooks/coach/mutations';
-import { useConfirmDialog } from '@/lib/stores/modalStore';
 import CoachHeader from './CoachHeader';
 import WelcomeScreen from './WelcomeScreen';
 import SummarizationIndicator from './SummarizationIndicator';
@@ -16,25 +13,18 @@ import ChatInput from '@/components/routine/chat/ChatInput';
 import PreviewDetailDrawer from '@/components/routine/chat/PreviewDetailDrawer';
 import { PulseLoader } from '@/components/ui/PulseLoader';
 
-interface CoachChatContentProps {
-  initialConversationId?: string;
-}
-
 /**
- * 코치 채팅 메인 컨텐츠
+ * 코치 채팅 콘텐츠 (Suspense 내부)
  *
- * 비즈니스 로직과 UI 통합
- * - 메시지 목록 표시
- * - 스트리밍 응답 처리
- * - 액션 칩 / 채팅 목록 드로어
+ * SOLID SRP 적용:
+ * - useCoachChat: 채팅 상태 및 메시지 관리
+ * - useCoachDrawer: 대화 목록 드로어 관리
+ * - useRoutinePreview: 루틴 프리뷰 드로어 관리
+ * - 이 컴포넌트: 순수 UI 조합만 담당
  */
-export default function CoachChatContent({
-  initialConversationId,
-}: CoachChatContentProps) {
-  const router = useRouter();
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [isApplying, setIsApplying] = useState(false);
+export default function CoachContent() {
+  const searchParams = useSearchParams();
+  const conversationIdFromUrl = searchParams.get('id') ?? undefined;
 
   // 코치 채팅 훅
   const {
@@ -62,75 +52,38 @@ export default function CoachChatContent({
     confirmProfile,
     requestProfileEdit,
     isMessagesLoading,
-  } = useCoachChat(initialConversationId);
+  } = useCoachChat(conversationIdFromUrl);
 
-  // 대화 목록 & 뮤테이션
+  // 드로어 관리 훅
+  const drawer = useCoachDrawer({
+    conversationId,
+    onNewChat: handleNewChat,
+  });
+
+  // 루틴 프리뷰 관리 훅
+  const preview = useRoutinePreview({
+    conversationId,
+    pendingRoutinePreview,
+  });
+
+  // 대화 목록
   const { data: conversationsData, isPending: isLoadingConversations } = useCoachConversations();
-  const deleteConversation = useDeleteCoachConversation();
-  const applyRoutine = useApplyRoutine();
-  const confirm = useConfirmDialog();
 
   // 표시 조건
   const showWelcome = messages.length === 0 && !isStreaming && !isMessagesLoading;
   const hasPendingInteraction = !!pendingProfileConfirmation || !!pendingInput || !!pendingRoutinePreview;
   const showActionChips = !isStreaming && !streamingContent && !hasPendingInteraction && messages.length === 0;
 
-  // 대화 선택 핸들러
-  const handleSelectConversation = (id: string) => {
-    router.push(`/routine/coach?id=${id}`);
-  };
-
-  // 루틴 적용 핸들러
-  const handleApplyRoutine = async (forceOverwrite?: boolean) => {
-    if (!conversationId || !pendingRoutinePreview?.id) return;
-
-    setIsApplying(true);
-    try {
-      await applyRoutine.mutateAsync({
-        conversationId,
-        previewId: pendingRoutinePreview.id,
-        forceOverwrite,
-      });
-      setIsPreviewOpen(false);
-    } finally {
-      setIsApplying(false);
-    }
-  };
-
   // 수정 요청 핸들러
   const handleRequestRevision = (feedback: string) => {
     handleSend(`수정 요청: ${feedback}`);
   };
 
-  // 상세 보기 핸들러
-  const handleViewDetails = () => {
-    setIsPreviewOpen(true);
-  };
-
-  // 대화 삭제 핸들러
-  const handleDeleteConversation = (id: string) => {
-    confirm({
-      title: '대화 삭제',
-      message: '이 대화를 삭제하시겠습니까?\n삭제된 대화는 복구할 수 없습니다.',
-      confirmText: '삭제',
-      cancelText: '취소',
-      variant: 'danger',
-      onConfirm: async () => {
-        await deleteConversation.mutateAsync(id);
-        // 현재 대화 삭제 시 새 채팅 화면으로 이동
-        if (id === conversationId) {
-          setIsDrawerOpen(false);
-          router.push('/routine/coach');
-        }
-      },
-    });
-  };
-
   return (
-    <div className="flex flex-col h-dvh bg-background pb-[env(safe-area-inset-bottom)]">
+    <>
       {/* 헤더 */}
       <CoachHeader
-        onMenuClick={() => setIsDrawerOpen(true)}
+        onMenuClick={drawer.open}
         hasActivePurpose={!!activePurpose}
       />
 
@@ -151,9 +104,9 @@ export default function CoachChatContent({
             pendingRoutinePreview={pendingRoutinePreview}
             appliedRoutine={appliedRoutine}
             routineProgress={routineProgress}
-            onApplyRoutine={handleApplyRoutine}
+            onApplyRoutine={preview.apply}
             onRequestRevision={handleRequestRevision}
-            onViewRoutineDetails={handleViewDetails}
+            onViewRoutineDetails={preview.open}
             pendingProfileConfirmation={pendingProfileConfirmation}
             onConfirmProfile={confirmProfile}
             onRequestProfileEdit={requestProfileEdit}
@@ -199,26 +152,26 @@ export default function CoachChatContent({
 
       {/* 채팅 목록 드로어 */}
       <ChatListDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
+        isOpen={drawer.isOpen}
+        onClose={drawer.close}
         conversations={conversationsData?.conversations ?? []}
         currentId={conversationId}
-        onSelect={handleSelectConversation}
-        onNewChat={handleNewChat}
-        onDelete={handleDeleteConversation}
+        onSelect={drawer.selectConversation}
+        onNewChat={drawer.onNewChat}
+        onDelete={drawer.deleteWithConfirm}
         isLoading={isLoadingConversations}
       />
 
       {/* 루틴 상세 보기 드로어 */}
       {pendingRoutinePreview && (
         <PreviewDetailDrawer
-          isOpen={isPreviewOpen}
-          onClose={() => setIsPreviewOpen(false)}
+          isOpen={preview.isOpen}
+          onClose={preview.close}
           preview={pendingRoutinePreview}
-          onApply={handleApplyRoutine}
-          isApplying={isApplying}
+          onApply={preview.apply}
+          isApplying={preview.isApplying}
         />
       )}
-    </div>
+    </>
   );
 }

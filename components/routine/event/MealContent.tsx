@@ -1,9 +1,7 @@
 'use client';
 
-import { use, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
-import PageHeader from '@/components/common/PageHeader';
-import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
+import EmptyState from '@/components/common/EmptyState';
 import { useShowError } from '@/lib/stores/errorStore';
 import {
   MealCard,
@@ -16,10 +14,8 @@ import {
   useCompleteRoutineEvent,
   useSkipRoutineEvent,
 } from '@/hooks/routine';
-import { SparkleIcon } from '@phosphor-icons/react';
-import { PulseLoader } from '@/components/ui/PulseLoader';
+import { CalendarIcon } from '@phosphor-icons/react';
 import { getEventConfig } from '@/lib/config/theme';
-import Button from '@/components/ui/Button';
 import type { MealData } from '@/lib/types/meal';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 
@@ -40,7 +36,17 @@ function isMealData(data: unknown): data is MealData {
 // Content Component (Suspense 내부)
 // ============================================================
 
-function MealContent({ date }: { date: string }) {
+interface MealContentProps {
+  date: string;
+}
+
+/**
+ * 식단 상세 콘텐츠 (Suspense 내부)
+ *
+ * - useSuspenseQuery로 식단 이벤트 조회
+ * - 상위 page.tsx의 DetailLayout에서 Header + Suspense 처리
+ */
+export default function MealContent({ date }: MealContentProps) {
   const router = useRouter();
   const showError = useShowError();
 
@@ -71,45 +77,22 @@ function MealContent({ date }: { date: string }) {
     });
   };
 
-  // 이벤트 없음 - 플레이스홀더 표시
+  // 이벤트 없음 (예정된 식단 없음)
   if (!event) {
     return (
-      <>
-        <PageHeader title={eventConfig.description} />
-
-        <div className="flex flex-col items-center justify-center gap-6 p-8 mt-12">
-          {/* 아이콘 */}
-          <div className="relative">
-            <div className={`w-24 h-24 rounded-full ${eventConfig.bgColor} flex items-center justify-center`}>
-              <eventConfig.icon size={48} className={eventConfig.color} />
-            </div>
-            <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center">
-              <SparkleIcon size={16} className="text-white" weight="fill" />
-            </div>
-          </div>
-
-          {/* 텍스트 */}
-          <div className="text-center space-y-3">
-            <p className="text-sm text-muted-foreground">{formattedDate}</p>
-            <h2 className="text-xl font-bold text-foreground">
-              이 날짜에 예정된 식단이 없습니다
-            </h2>
-            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              AI 영양사와 대화하여 맞춤형 식단을 생성해보세요.
-            </p>
-          </div>
-
-          {/* 버튼 */}
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={() => router.push('/routine')}>
-              돌아가기
-            </Button>
-            <Button onClick={() => router.push('/routine/coach')}>
-              AI와 대화하기
-            </Button>
-          </div>
-        </div>
-      </>
+      <div className="mt-8">
+        <EmptyState
+          icon={CalendarIcon}
+          message={`${formattedDate}에 예정된 식단이 없습니다`}
+          hint="AI 영양사와 대화하여 맞춤 식단을 생성해보세요"
+          showIconBackground
+          size="lg"
+          action={{
+            label: '돌아가기',
+            onClick: () => router.push('/routine'),
+          }}
+        />
+      </div>
     );
   }
 
@@ -118,9 +101,7 @@ function MealContent({ date }: { date: string }) {
 
   return (
     <>
-      <PageHeader title={eventConfig.description} />
-
-      <div className="p-4 space-y-6">
+      <div className="space-y-6 pb-32">
         {/* 헤더 섹션 */}
         <div className="bg-card border border-border rounded-xl p-4">
           <div className="flex items-start justify-between mb-3">
@@ -180,7 +161,7 @@ function MealContent({ date }: { date: string }) {
       </div>
 
       {/* 하단 액션 버튼 */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-background border-t border-border">
+      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 pb-safe bg-background border-t border-border">
         <EventActionButtons
           status={event.status}
           onComplete={handleComplete}
@@ -189,41 +170,5 @@ function MealContent({ date }: { date: string }) {
         />
       </div>
     </>
-  );
-}
-
-// ============================================================
-// Loading Fallback
-// ============================================================
-
-function LoadingFallback() {
-  const eventConfig = getEventConfig('meal');
-  return (
-    <>
-      <PageHeader title={eventConfig.description} />
-      <PulseLoader />
-    </>
-  );
-}
-
-// ============================================================
-// Main Export
-// ============================================================
-
-interface MealClientProps {
-  params: Promise<{ date: string }>;
-}
-
-export default function MealClient({ params }: MealClientProps) {
-  const { date } = use(params);
-
-  return (
-    <div className="min-h-screen bg-background pb-32">
-      <QueryErrorBoundary>
-        <Suspense fallback={<LoadingFallback />}>
-          <MealContent date={date} />
-        </Suspense>
-      </QueryErrorBoundary>
-    </div>
   );
 }

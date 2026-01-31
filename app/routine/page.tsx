@@ -1,26 +1,38 @@
 'use client';
 
+import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
+import { MainTabLayout, MainTabHeader } from '@/components/layouts';
+import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import { PulseLoader } from '@/components/ui/PulseLoader';
-import MainTabLayout from '@/components/common/MainTabLayout';
-import MainTabHeader from '@/components/common/MainTabHeader';
+import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 
-const RoutineClient = dynamic(() => import('@/components/routine/RoutineClient'), {
-  ssr: false,
-  loading: () => (
-    <MainTabLayout>
-      <MainTabHeader title="내 루틴" />
-      <PulseLoader />
-    </MainTabLayout>
-  ),
-});
+const RoutineContent = dynamic(
+  () => import('@/components/routine/RoutineContent'),
+  { ssr: false, loading: () => <PulseLoader /> }
+);
 
 /**
- * 루틴 페이지 (정적)
+ * 루틴 페이지
  *
- * ssr: false → 빌드 시 MainTabLayout + 헤더 + PulseLoader 셸 생성
- * 클라이언트: dynamic import → React Query 캐시 → 즉시 렌더
+ * - Layout + Header: 즉시 렌더링 (Suspense 밖)
+ * - 단일 Suspense: 번들 + 데이터 로딩 모두 처리
+ * - 깜빡임 없는 로딩 UX
  */
 export default function RoutinePage() {
-  return <RoutineClient />;
+  const today = new Date();
+
+  return (
+    <MainTabLayout>
+      <MainTabHeader
+        title="내 루틴"
+        subtitle={formatKoreanDate(today, { weekday: true })}
+      />
+      <QueryErrorBoundary>
+        <Suspense fallback={<PulseLoader />}>
+          <RoutineContent />
+        </Suspense>
+      </QueryErrorBoundary>
+    </MainTabLayout>
+  );
 }

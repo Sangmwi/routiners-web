@@ -5,9 +5,7 @@
  */
 
 // Page Components
-export { CoachChatClient } from './CoachChatClient';
-export { default as CoachChatContent } from './CoachChatContent';
-export { default as CoachPageSkeleton } from './CoachPageSkeleton';
+export { default as CoachContent } from './CoachContent';
 
 // Layout Components
 export { default as CoachHeader } from './CoachHeader';
