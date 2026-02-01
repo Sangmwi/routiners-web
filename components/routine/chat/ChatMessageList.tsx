@@ -1,8 +1,8 @@
 'use client';
 
 import { useRef } from 'react';
-import { ChatMessage as ChatMessageType, ProfileConfirmationRequest } from '@/lib/types/chat';
-import { AIToolStatus, InputRequest, RoutinePreviewData } from '@/lib/types/fitness';
+import { ChatMessage as ChatMessageType } from '@/lib/types/chat';
+import { AIToolStatus } from '@/lib/types/fitness';
 import {
   RoutineAppliedEvent,
   RoutineProgressEvent,
@@ -19,17 +19,35 @@ import {
 } from '@/hooks/chat';
 
 // Components
-import ChatMessage from './ChatMessage';
+import ChatMessage, { type MessageActionType } from './ChatMessage';
 import ToolStatusIndicator from './ToolStatusIndicator';
-import ChatInputRequest from './ChatInputRequest';
-import ChatPreviewSummary from './ChatPreviewSummary';
-import { ChatProfileConfirmation } from './ChatProfileConfirmation';
 import { ChatProgressIndicator } from './ChatProgressIndicator';
 import { ChatAppliedBanner } from './ChatAppliedBanner';
 import { ChatStreamingMessage } from './ChatStreamingMessage';
-import { ChatRunningToolFeedback } from './ChatRunningToolFeedback';
 import { ChatLoadingDots } from './ChatLoadingDots';
 import { ChatStartButton } from './ChatStartButton';
+
+// ============================================================================
+// Sub-components
+// ============================================================================
+
+interface FloatingToolStatusProps {
+  tools: AIToolStatus[];
+}
+
+/**
+ * 플로팅 도구 상태
+ * AI 응답 메시지 위에 absolute로 배치
+ */
+function FloatingToolStatus({ tools }: FloatingToolStatusProps) {
+  if (tools.length === 0) return null;
+
+  return (
+    <div className="absolute left-0 right-0 bottom-full mb-1 ml-11">
+      <ToolStatusIndicator tools={tools} />
+    </div>
+  );
+}
 
 // ============================================================================
 // Types
@@ -41,28 +59,14 @@ interface ChatMessageListProps {
   streamingContent?: string;
   /** AI 도구 실행 상태 */
   activeTools?: AIToolStatus[];
-  /** 사용자 입력 대기 중인 요청 */
-  pendingInput?: InputRequest | null;
-  /** 선택형 입력 제출 핸들러 */
-  onSubmitInput?: (value: string | string[]) => void;
-  /** 대기 중인 루틴 미리보기 */
-  pendingRoutinePreview?: RoutinePreviewData | null;
+  /** Phase 9: 메시지 액션 핸들러 (content_type별 트랜지언트 UI용) */
+  onMessageAction?: (action: MessageActionType, messageId: string, value?: string | string[]) => void;
+  /** 루틴 적용 중 상태 */
+  isApplyingRoutine?: boolean;
   /** 루틴 적용 완료 정보 */
   appliedRoutine?: RoutineAppliedEvent | null;
   /** 루틴 생성 진행률 */
   routineProgress?: RoutineProgressEvent | null;
-  /** 루틴 적용 핸들러 (forceOverwrite: 충돌 시 덮어쓰기) */
-  onApplyRoutine?: (forceOverwrite?: boolean) => void;
-  /** 루틴 생성 취소 핸들러 */
-  onCancelRoutine?: () => void;
-  /** 루틴 상세 보기 핸들러 */
-  onViewRoutineDetails?: () => void;
-  /** 대기 중인 프로필 확인 요청 */
-  pendingProfileConfirmation?: ProfileConfirmationRequest | null;
-  /** 프로필 확인 핸들러 */
-  onConfirmProfile?: () => void;
-  /** 프로필 수정 요청 핸들러 */
-  onRequestProfileEdit?: () => void;
   /** 대화 시작 대기 상태 */
   pendingStart?: boolean;
   /** 대화 시작 핸들러 */
@@ -96,17 +100,10 @@ export default function ChatMessageList({
   isLoading = false,
   streamingContent,
   activeTools = [],
-  pendingInput,
-  onSubmitInput,
-  pendingRoutinePreview,
+  onMessageAction,
+  isApplyingRoutine = false,
   appliedRoutine,
   routineProgress,
-  onApplyRoutine,
-  onCancelRoutine,
-  onViewRoutineDetails,
-  pendingProfileConfirmation,
-  onConfirmProfile,
-  onRequestProfileEdit,
   pendingStart,
   onStartConversation,
   sessionPurpose,
@@ -121,7 +118,7 @@ export default function ChatMessageList({
 
   // 추출된 훅들
   const showLoadingSpinner = useMinimumLoadingTime(isFetchingNextPage ?? false);
-  const { displayedTools, toolsFadingOut } = useToolDisplayState(
+  const { displayedTools } = useToolDisplayState(
     activeTools,
     streamingContent,
     messages
@@ -131,8 +128,6 @@ export default function ChatMessageList({
     messages,
     streamingContent,
     activeTools,
-    pendingInput,
-    pendingRoutinePreview,
     routineProgress,
   ]);
 
@@ -142,35 +137,12 @@ export default function ChatMessageList({
     onLoadMore,
   });
 
-  // 파생 상태
-  const lastUserMessageIndex = messages.reduce(
-    (lastIndex, msg, index) => (msg.role === 'user' ? index : lastIndex),
-    -1
-  );
-
-  const runningTool = activeTools.find(
-    (t) => t.status === 'running' && t.name !== 'generate_routine_preview'
-  );
-
-  const showRunningToolFeedback =
-    runningTool &&
-    !streamingContent &&
-    !pendingInput &&
-    !pendingProfileConfirmation;
-
-  const showLoadingDots =
-    isLoading &&
-    !streamingContent &&
-    !pendingInput &&
-    !pendingProfileConfirmation &&
-    !activeTools.some((t) => t.status === 'running');
-
   return (
     <div
       ref={scrollContainerRef}
       className="h-full overflow-y-auto overflow-x-hidden p-4"
     >
-      <div className="flex flex-col gap-7">
+      <div className="flex flex-col gap-9">
         {/* 상단 센티널 — 이전 메시지 로드 트리거 */}
         <div ref={topSentinelRef} className="shrink-0">
           {showLoadingSpinner && (
@@ -184,59 +156,32 @@ export default function ChatMessageList({
         </div>
 
         {/* 메시지 목록 */}
-        {messages.map((message, index) => {
-          const isLastUserMessage = index === lastUserMessageIndex;
-          const showTools = isLastUserMessage && displayedTools.length > 0;
+        {messages.map((message) => (
+          <ChatMessage
+            key={message.id}
+            message={message}
+            onAction={onMessageAction}
+            isApplyingRoutine={isApplyingRoutine}
+          />
+        ))}
 
-          return (
-            <div
-              key={message.id}
-              className={isLastUserMessage ? 'relative' : undefined}
-            >
-              <ChatMessage message={message} />
-
-              {/* 마지막 사용자 메시지 바로 다음에 도구 상태 표시 */}
-              {showTools && (
-                <div
-                  className={`absolute left-10 bottom-1 translate-y-full pt-1.5 transition-opacity duration-700 ${
-                    toolsFadingOut ? 'opacity-0' : 'opacity-100'
-                  }`}
-                >
-                  <ToolStatusIndicator tools={displayedTools} />
-                </div>
-              )}
-            </div>
-          );
-        })}
-
-        {/* 스트리밍 중인 메시지 */}
-        {streamingContent && <ChatStreamingMessage content={streamingContent} />}
-
-        {/* 도구 실행 중 피드백 */}
-        {showRunningToolFeedback && <ChatRunningToolFeedback tool={runningTool} />}
-
-        {/* 로딩 인디케이터 */}
-        {showLoadingDots && <ChatLoadingDots />}
-
-        {/* 선택형 입력 UI */}
-        {pendingInput && onSubmitInput && (
-          <ChatInputRequest request={pendingInput} onSubmit={onSubmitInput} />
-        )}
-
-        {/* 프로필 확인 UI */}
-        {pendingProfileConfirmation && onConfirmProfile && onRequestProfileEdit && (
-          <div>
-            <ChatProfileConfirmation
-              request={pendingProfileConfirmation}
-              onConfirm={onConfirmProfile}
-              onEdit={onRequestProfileEdit}
-              disabled={isLoading}
-            />
+        {/* AI 응답 영역 - 스트리밍/로딩 중일 때만 */}
+        {(streamingContent || isLoading) && (
+          <div className="relative">
+            <FloatingToolStatus tools={displayedTools} />
+            {streamingContent ? (
+              <ChatStreamingMessage content={streamingContent} />
+            ) : (
+              <ChatLoadingDots />
+            )}
           </div>
         )}
 
+        {/* Phase 9: profile_confirmation, input_request는 메시지로 렌더링됨
+            위의 messages.map()에서 ChatMessage가 contentType별로 렌더링함 */}
+
         {/* 루틴 생성 진행률 */}
-        {routineProgress && !pendingRoutinePreview && (
+        {routineProgress && (
           <div>
             <ChatProgressIndicator
               progress={routineProgress.progress}
@@ -246,35 +191,8 @@ export default function ChatMessageList({
           </div>
         )}
 
-        {/* 루틴 미리보기 - 요약 카드 */}
-        {pendingRoutinePreview &&
-          onApplyRoutine &&
-          onCancelRoutine &&
-          onViewRoutineDetails && (
-            <div>
-              <ChatPreviewSummary
-                type="routine"
-                title={pendingRoutinePreview.title}
-                description={pendingRoutinePreview.description}
-                stats={{
-                  duration: `${pendingRoutinePreview.durationWeeks}주`,
-                  frequency: `주 ${pendingRoutinePreview.daysPerWeek}회`,
-                  perSession: pendingRoutinePreview.weeks[0]?.days[0]
-                    ?.estimatedDuration
-                    ? `약 ${pendingRoutinePreview.weeks[0].days[0].estimatedDuration}분`
-                    : undefined,
-                }}
-                weekSummaries={pendingRoutinePreview.weeks.map((w) =>
-                  w.days.map((d) => d.title).join(', ')
-                )}
-                hasConflicts={(pendingRoutinePreview.conflicts?.length ?? 0) > 0}
-                onViewDetails={onViewRoutineDetails}
-                onCancel={onCancelRoutine}
-                onApply={onApplyRoutine}
-                isApplying={isLoading}
-              />
-            </div>
-          )}
+        {/* Phase 9: routine_preview는 메시지로 렌더링됨
+            위의 messages.map()에서 ChatMessage가 contentType별로 렌더링함 */}
 
         {/* 루틴 적용 완료 메시지 */}
         {appliedRoutine && (

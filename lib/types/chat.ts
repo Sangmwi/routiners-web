@@ -13,7 +13,21 @@ export type ConversationType = 'ai' | 'direct' | 'group';
 export type ConversationStatus = 'active' | 'completed';
 export type ParticipantRole = 'owner' | 'admin' | 'member';
 export type MessageRole = 'user' | 'assistant' | 'system';
-export type ContentType = 'text' | 'image' | 'file' | 'audio' | 'video' | 'location' | 'call' | 'tool_call' | 'tool_result';
+export type ContentType =
+  | 'text'
+  | 'image'
+  | 'file'
+  | 'audio'
+  | 'video'
+  | 'location'
+  | 'call'
+  | 'tool_call'
+  | 'tool_result'
+  | 'system_log'
+  // Transient UI types (메시지로 저장되어 영구 보존됨)
+  | 'profile_confirmation'  // 프로필 확인 카드
+  | 'routine_preview'       // 루틴 미리보기 카드
+  | 'input_request';        // 선택형 입력 UI
 
 // SessionPurpose는 routine.ts에서 가져오기 (호환성)
 export type { SessionPurpose } from './routine';
@@ -446,4 +460,35 @@ export interface ProfileConfirmationRequest {
   confirmText?: string;
   /** 수정 버튼 텍스트 (기본값: "수정하기") */
   editText?: string;
+}
+
+// ============================================================================
+// Transient UI Message Types (메시지 기반 트랜지언트 UI)
+// ============================================================================
+
+/**
+ * 프로필 확인 메시지 상태
+ */
+export type ProfileConfirmationStatus = 'pending' | 'confirmed' | 'edited';
+
+/**
+ * 루틴 미리보기 메시지 상태
+ */
+export type RoutinePreviewStatus = 'pending' | 'applied' | 'cancelled';
+
+/**
+ * 입력 요청 메시지 상태
+ */
+export type InputRequestStatus = 'pending' | 'submitted' | 'cancelled';
+
+/**
+ * 트랜지언트 UI 메시지 메타데이터
+ */
+export interface TransientUIMessageMetadata {
+  /** 현재 상태 */
+  status: ProfileConfirmationStatus | RoutinePreviewStatus | InputRequestStatus;
+  /** 상태 업데이트 시각 */
+  updatedAt?: string;
+  /** 제출된 값 (input_request인 경우) */
+  submittedValue?: string;
 }

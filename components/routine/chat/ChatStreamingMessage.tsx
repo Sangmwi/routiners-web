@@ -18,8 +18,10 @@ export function ChatStreamingMessage({ content }: ChatStreamingMessageProps) {
       <ChatMessage
         message={{
           id: 'streaming',
+          conversationId: '',
           role: 'assistant',
           content,
+          contentType: 'text',
           createdAt: new Date().toISOString(),
         }}
       />

@@ -1,11 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { InputRequest } from '@/lib/types/fitness';
+import { CheckIcon } from '@phosphor-icons/react';
+import type { InputRequest } from '@/lib/types/fitness';
+import type { InputRequestStatus } from '@/lib/types/chat';
 
 interface ChatInputRequestProps {
   /** 입력 요청 데이터 */
   request: InputRequest;
+  /** 메시지 상태 (Phase 9) */
+  status?: InputRequestStatus;
   /** 선택 완료 시 호출 */
   onSubmit: (value: string | string[]) => void;
 }
@@ -13,12 +17,17 @@ interface ChatInputRequestProps {
 /**
  * AI 선택형 입력 UI 컴포넌트
  *
+ * Phase 9: status prop 추가
+ * - pending: 버튼 활성화
+ * - submitted: 제출된 값 표시
+ * - cancelled: 취소됨 표시
+ *
  * 모든 타입에서 선택 후 확인 버튼으로 전송
  * - radio: 단일 선택 후 확인
  * - checkbox: 다중 선택 후 확인
  * - slider: 값 조정 후 확인
  */
-export default function ChatInputRequest({ request, onSubmit }: ChatInputRequestProps) {
+export default function ChatInputRequest({ request, status = 'pending', onSubmit }: ChatInputRequestProps) {
   // Radio: 선택된 값 (단일)
   const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
 
@@ -72,10 +81,46 @@ export default function ChatInputRequest({ request, onSubmit }: ChatInputRequest
     onSubmit(`${sliderValue}${unit}`);
   };
 
+  const isActionable = status === 'pending';
+
+  // 제출됨 상태: 선택된 값만 표시
+  if (status === 'submitted') {
+    return (
+      <div className="py-3 px-1 opacity-75">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-green-500/10 text-green-600">
+            <CheckIcon size={12} weight="bold" />
+            제출됨
+          </span>
+        </div>
+        {/* 선택된 값 표시 (읽기 전용) */}
+        <div className="flex flex-wrap gap-2">
+          {request.options?.map((option) => (
+            <span
+              key={option.value}
+              className="px-4 py-2 rounded-full text-sm font-medium bg-muted/50 text-muted-foreground"
+            >
+              {option.label}
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // 취소됨 상태
+  if (status === 'cancelled') {
+    return (
+      <div className="py-3 px-1 opacity-50">
+        <span className="text-xs text-muted-foreground">입력이 취소되었습니다</span>
+      </div>
+    );
+  }
+
   return (
     <div className="py-3 px-1">
       {/* Radio 버튼 */}
-      {request.type === 'radio' && request.options && (
+      {request.type === 'radio' && request.options && isActionable && (
         <div className="space-y-3">
           <div className="flex flex-wrap gap-2">
             {request.options.map((option) => {
@@ -107,7 +152,7 @@ export default function ChatInputRequest({ request, onSubmit }: ChatInputRequest
       )}
 
       {/* Checkbox 버튼 */}
-      {request.type === 'checkbox' && request.options && (
+      {request.type === 'checkbox' && request.options && isActionable && (
         <div className="space-y-3">
           <div className="flex flex-wrap gap-2">
             {request.options.map((option) => {
@@ -139,7 +184,7 @@ export default function ChatInputRequest({ request, onSubmit }: ChatInputRequest
       )}
 
       {/* Slider */}
-      {request.type === 'slider' && request.sliderConfig && (
+      {request.type === 'slider' && request.sliderConfig && isActionable && (
         <div className="space-y-3 px-2">
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <span>

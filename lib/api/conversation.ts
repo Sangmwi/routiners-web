@@ -121,6 +121,32 @@ export const conversationApi = {
   async clearProfileConfirmation(id: string): Promise<void> {
     await api.patch(`${BASE_URL}/${id}/metadata`, { clearProfileConfirmation: true });
   },
+
+  /**
+   * 시스템 메시지 삽입 (대화 히스토리에만 기록, AI 응답 없음)
+   * - 루틴 적용/프로필 확인 완료 시 요약 메시지용
+   */
+  async insertSystemMessage(
+    conversationId: string,
+    content: string,
+    metadata?: Record<string, unknown>
+  ): Promise<void> {
+    const response = await authFetch(`/api/coach/conversations/${conversationId}/messages/system`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content, metadata }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('[insertSystemMessage] API Error:', {
+        status: response.status,
+        error: errorData,
+        conversationId,
+      });
+      throw new Error(errorData.error || '시스템 메시지 추가 실패');
+    }
+  },
 };
 
 // ============================================================================

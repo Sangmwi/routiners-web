@@ -331,7 +331,7 @@ export const POST = withAuth<Response>(
                   if (fc.name === 'generate_routine_preview') {
                     // 예상 토큰: ~1500 (2주 × 4일 × 6운동)
                     // 글자 수 기준 진행률 계산 (대략 4글자 = 1토큰)
-                    const estimatedChars = 6000; // ~1500 tokens × 4 chars
+                    const estimatedChars = 3000; // ~1500 tokens × 4 chars
                     const progress = Math.min(95, Math.round((fc.arguments.length / estimatedChars) * 100));
 
                     // 5% 단위로만 이벤트 전송 (너무 자주 보내지 않도록)

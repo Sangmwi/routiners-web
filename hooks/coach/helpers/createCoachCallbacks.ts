@@ -2,12 +2,11 @@
  * Coach Chat SSE Callback Factory
  *
  * SSE 스트리밍 콜백을 생성하여 리듀서와 연결
- * 프로필 확인 버퍼링으로 layout shift 방지
+ * Phase 9: 트랜지언트 UI는 메시지로 저장되므로 즉시 invalidate
  */
 
-import type { Dispatch, MutableRefObject } from 'react';
+import type { Dispatch } from 'react';
 import type { QueryClient } from '@tanstack/react-query';
-import type { ProfileConfirmationRequest } from '@/lib/types/chat';
 import type { AIToolName } from '@/lib/types/fitness';
 import type { ChatStreamCallbacks } from '@/lib/api/conversation';
 import type { CoachChatAction } from './coachReducer';
@@ -21,7 +20,6 @@ export interface CoachCallbackContext {
   conversationId: string;
   dispatch: Dispatch<CoachChatAction>;
   queryClient: QueryClient;
-  profileBufferRef: MutableRefObject<ProfileConfirmationRequest | null>;
   /** 스트리밍 완료 후 호출 (요약 체크 등) */
   onStreamComplete?: (conversationId: string) => void;
 }
@@ -39,7 +37,7 @@ export function createCoachCallbacks(ctx: CoachCallbackContext): ChatStreamCallb
     onComplete: async () => {
       ctx.dispatch({ type: 'COMPLETE_STREAMING' });
 
-      // 메시지 + 대화 캐시 무효화 (대화 메타데이터 업데이트 반영 — 뒤로가기 시 상태 복원용)
+      // 메시지 + 대화 캐시 무효화 (서버 메시지 반영)
       await Promise.all([
         ctx.queryClient.invalidateQueries({
           queryKey: queryKeys.coach.messages(ctx.conversationId),
@@ -54,12 +52,6 @@ export function createCoachCallbacks(ctx: CoachCallbackContext): ChatStreamCallb
 
       // 실제 메시지 로드 완료 → 낙관적 메시지 제거
       ctx.dispatch({ type: 'CLEAR_PENDING_USER_MESSAGE' });
-
-      // 버퍼링된 프로필 확인 요청 적용 (messages 로드 후 → layout shift 방지)
-      if (ctx.profileBufferRef.current) {
-        ctx.dispatch({ type: 'APPLY_BUFFERED_PROFILE_CONFIRMATION' });
-        ctx.profileBufferRef.current = null;
-      }
 
       // 요약 체크 (non-blocking)
       ctx.onStreamComplete?.(ctx.conversationId);
@@ -85,12 +77,18 @@ export function createCoachCallbacks(ctx: CoachCallbackContext): ChatStreamCallb
       });
     },
 
-    onInputRequest: (request) => {
-      ctx.dispatch({ type: 'SET_PENDING_INPUT', request });
+    onInputRequest: async () => {
+      // Phase 9: 서버에서 이미 메시지를 저장했으므로 즉시 쿼리 invalidate
+      await ctx.queryClient.invalidateQueries({
+        queryKey: queryKeys.coach.messages(ctx.conversationId),
+      });
     },
 
-    onRoutinePreview: (preview) => {
-      ctx.dispatch({ type: 'SET_ROUTINE_PREVIEW', preview });
+    onRoutinePreview: async () => {
+      // Phase 9: 서버에서 이미 메시지를 저장했으므로 즉시 쿼리 invalidate
+      await ctx.queryClient.invalidateQueries({
+        queryKey: queryKeys.coach.messages(ctx.conversationId),
+      });
     },
 
     onRoutineApplied: (event) => {
@@ -101,11 +99,12 @@ export function createCoachCallbacks(ctx: CoachCallbackContext): ChatStreamCallb
       ctx.dispatch({ type: 'SET_ROUTINE_PROGRESS', event });
     },
 
-    onProfileConfirmation: (request) => {
-      // 스트리밍 중에는 ref에 버퍼링 (onComplete에서 messages refetch 후 적용)
-      // → 메시지보다 카드가 먼저 렌더되는 layout shift 방지
-      ctx.profileBufferRef.current = request;
-      ctx.dispatch({ type: 'BUFFER_PROFILE_CONFIRMATION', request });
+    onProfileConfirmation: async () => {
+      // Phase 9: 서버에서 이미 메시지를 저장했으므로 즉시 쿼리 invalidate
+      // → messages 배열에 포함되어 ChatMessage 컴포넌트에서 렌더링됨
+      await ctx.queryClient.invalidateQueries({
+        queryKey: queryKeys.coach.messages(ctx.conversationId),
+      });
     },
   };
 }

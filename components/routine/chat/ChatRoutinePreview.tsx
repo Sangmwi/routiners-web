@@ -117,7 +117,7 @@ export default function ChatRoutinePreview({
   };
 
   return (
-    <div className="my-4 mx-1 rounded-xl bg-card overflow-hidden">
+    <div className="rounded-xl bg-card overflow-hidden">
       {/* 헤더 */}
       <div className="p-4 bg-muted/20">
         <div className="flex items-center gap-2 mb-1">

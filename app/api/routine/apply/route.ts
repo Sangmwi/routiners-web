@@ -141,12 +141,12 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
       );
     }
 
-    // 8. 적용 완료 후 대화 상태 업데이트 (completed + metadata)
+    // 8. 적용 완료 후 대화 상태 업데이트 (대화는 active 유지 → 계속 대화 가능)
     const appliedAt = new Date().toISOString();
     await supabase
       .from('conversations')
       .update({
-        ai_status: 'completed',
+        // ai_status는 변경하지 않음 (active 유지 → 루틴 적용 후에도 대화 계속 가능)
         ai_result_applied: true,
         ai_result_applied_at: appliedAt,
         metadata: {

@@ -9,9 +9,8 @@
  * - SSE 콜백 연결
  */
 
-import { useRef, useEffect, type Dispatch, type MutableRefObject } from 'react';
+import { useRef, useEffect, type Dispatch } from 'react';
 import type { QueryClient } from '@tanstack/react-query';
-import type { ProfileConfirmationRequest } from '@/lib/types/chat';
 import { aiChatApi } from '@/lib/api/conversation';
 import type { CoachChatState, CoachChatAction } from './helpers/coachReducer';
 import { createCoachCallbacks } from './helpers/createCoachCallbacks';
@@ -25,7 +24,6 @@ interface UseCoachMessageSenderParams {
   state: CoachChatState;
   dispatch: Dispatch<CoachChatAction>;
   queryClient: QueryClient;
-  profileBufferRef: MutableRefObject<ProfileConfirmationRequest | null>;
   /** 스트리밍 완료 후 호출 (요약 체크용) */
   onStreamComplete?: (id: string) => void;
 }
@@ -42,9 +40,9 @@ interface UseCoachMessageSenderReturn {
 // =============================================================================
 
 export function useCoachMessageSender({
+  conversationId,
   dispatch,
   queryClient,
-  profileBufferRef,
   onStreamComplete,
 }: UseCoachMessageSenderParams): UseCoachMessageSenderReturn {
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -71,7 +69,6 @@ export function useCoachMessageSender({
       conversationId,
       dispatch,
       queryClient,
-      profileBufferRef,
       onStreamComplete,
     });
 

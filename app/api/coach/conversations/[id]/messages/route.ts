@@ -54,7 +54,7 @@ export const GET = withAuth(
       .select('*')
       .eq('conversation_id', id)
       .is('deleted_at', null)
-      .in('content_type', ['text'])
+      .in('content_type', ['text', 'system_log', 'profile_confirmation', 'routine_preview', 'input_request'])
       .order('created_at', { ascending: false })
       .limit(limit + 1); // +1 for hasMore check
 

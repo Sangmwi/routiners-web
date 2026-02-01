@@ -191,14 +191,15 @@ export const DELETE = withAuth(
       );
     }
 
-    // activePurpose 제거
+    // activePurpose + pending_preview 제거 (루틴 생성 프로세스 전체 취소)
     const currentMetadata = (current.metadata as CoachConversationMetadata) || {};
-    const { activePurpose: _, ...restMetadata } = currentMetadata;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { activePurpose: _, pending_preview: __, ...restMetadata } = currentMetadata as CoachConversationMetadata & { pending_preview?: unknown };
 
     const { data: updated, error: updateError } = await supabase
       .from('conversations')
       .update({
-        metadata: { ...restMetadata, activePurpose: null },
+        metadata: { ...restMetadata, activePurpose: null, pending_preview: null },
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)

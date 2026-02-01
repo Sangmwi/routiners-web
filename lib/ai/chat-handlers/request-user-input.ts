@@ -3,10 +3,14 @@
  *
  * request_user_input 도구 처리
  * 사용자에게 선택형 입력 UI를 표시
+ *
+ * Phase 9: 메시지 기반 트랜지언트 UI
+ * - 입력 요청 카드를 chat_messages 테이블에 저장
+ * - content_type: 'input_request'
+ * - 액션 후에도 히스토리에서 확인 가능
  */
 
 import { executeRequestUserInput } from '@/lib/ai/executors';
-import { updateMetadata } from './metadata-manager';
 import type { ToolHandlerContext, ToolHandlerResult, FunctionCallInfo } from './types';
 import type { InputRequestType, InputRequestOption, InputRequestSliderConfig } from '@/lib/types/fitness';
 
@@ -24,12 +28,9 @@ export async function handleRequestUserInput(
 ): Promise<ToolHandlerResult> {
   const inputResult = executeRequestUserInput(args, fc.id);
 
-  // SSE 이벤트 전송
-  if (inputResult.success && inputResult.data) {
-    ctx.sendEvent('input_request', inputResult.data);
-  }
+  let messageId: string | undefined;
 
-  // message가 있으면 별도 text 메시지로 저장 (새로고침 후에도 표시되도록)
+  // message가 있으면 별도 text 메시지로 저장 (카드와 분리)
   if (args.message?.trim()) {
     await ctx.supabase.from('chat_messages').insert({
       conversation_id: ctx.conversationId,
@@ -40,10 +41,33 @@ export async function handleRequestUserInput(
     });
   }
 
-  // pending_input을 metadata에 저장 (새로고침 후에도 버튼 UI 표시)
+  // 🆕 Phase 9: 메시지 테이블에 저장 (영구 보존)
   if (inputResult.success && inputResult.data) {
-    await updateMetadata(ctx.supabase, ctx.conversationId, {
-      pending_input: inputResult.data,
+    const { data: insertedMessage, error: insertError } = await ctx.supabase
+      .from('chat_messages')
+      .insert({
+        conversation_id: ctx.conversationId,
+        sender_id: null,
+        role: 'assistant',
+        content: JSON.stringify(inputResult.data),
+        content_type: 'input_request',
+        metadata: {
+          status: 'pending', // 'pending' | 'submitted' | 'cancelled'
+        },
+      })
+      .select('id')
+      .single();
+
+    if (insertError) {
+      console.error('[request_user_input] Failed to save message:', insertError);
+    } else {
+      messageId = insertedMessage?.id;
+    }
+
+    // input_request SSE 이벤트 전송 (messageId 포함)
+    ctx.sendEvent('input_request', {
+      ...inputResult.data,
+      messageId, // 클라이언트에서 상태 업데이트용
     });
   }
 
@@ -51,7 +75,7 @@ export async function handleRequestUserInput(
     toolCallId: fc.id,
     name: 'request_user_input',
     success: inputResult.success,
-    data: inputResult.data,
+    data: { ...inputResult.data, messageId },
     error: inputResult.error,
   });
 

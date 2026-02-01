@@ -14,7 +14,7 @@ export function ChatLoadingDots() {
       <div className="shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
         <SpinnerGapIcon size={16} className="animate-spin" />
       </div>
-      <div className="bg-card border border-border rounded-2xl rounded-tl-md px-4 py-3">
+      <div className="bg-card border border-border rounded-2xl rounded-tl-md px-4 py-3 mt-1">
         <div className="flex gap-1">
           {[0, 150, 300].map((delay) => (
             <span

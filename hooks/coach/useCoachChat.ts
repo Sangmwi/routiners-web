@@ -5,8 +5,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { coachContextApi } from '@/lib/api/coach';
 import { shouldTriggerSummarization } from '@/lib/types/coach';
-import type { ChatMessage, ProfileConfirmationRequest } from '@/lib/types/chat';
-import type { AIToolStatus, InputRequest, RoutinePreviewData } from '@/lib/types/fitness';
+import type { ChatMessage } from '@/lib/types/chat';
+import type { AIToolStatus } from '@/lib/types/fitness';
 import type { RoutineAppliedEvent, RoutineProgressEvent } from '@/lib/api/conversation';
 import type {
   ActionChip,
@@ -25,7 +25,6 @@ import {
   useTriggerSummarization,
 } from './mutations';
 import { coachReducer, INITIAL_STATE } from './helpers/coachReducer';
-import { extractSessionMetadata } from './helpers/sessionMetadata';
 import { useCoachMessageSender } from './useCoachMessageSender';
 
 import { useCoachProfileConfirmation } from './useCoachProfileConfirmation';
@@ -51,16 +50,10 @@ export interface UseCoachChatReturn {
   error: string | null;
   /** 활성 도구 상태 */
   activeTools: AIToolStatus[];
-  /** 대기 중인 입력 요청 */
-  pendingInput: InputRequest | null;
-  /** 루틴 미리보기 */
-  pendingRoutinePreview: RoutinePreviewData | null;
   /** 적용된 루틴 */
   appliedRoutine: RoutineAppliedEvent | null;
   /** 루틴 진행률 */
   routineProgress: RoutineProgressEvent | null;
-  /** 대기 중인 프로필 확인 요청 */
-  pendingProfileConfirmation: ProfileConfirmationRequest | null;
   /** 요약 상태 */
   summarizationState: SummarizationState;
   /** 무한스크롤 - 다음 페이지 존재 */
@@ -79,16 +72,18 @@ export interface UseCoachChatReturn {
   handleNewChat: () => Promise<void>;
   /** 다음 페이지 로드 */
   fetchNextPage: () => void;
-  /** 선택형 입력 제출 */
-  submitInput: (value: string | string[]) => void;
+  /** 선택형 입력 제출 (Phase 9: messageId 기반) */
+  submitInput: (messageId: string, value: string | string[]) => void;
   /** 스트리밍 취소 */
   cancelStream: () => void;
   /** 에러 클리어 */
   clearError: () => void;
-  /** 프로필 데이터 확인 */
-  confirmProfile: () => void;
-  /** 프로필 수정 요청 */
-  requestProfileEdit: () => void;
+  /** 프로필 데이터 확인 (Phase 9: messageId 기반) */
+  confirmProfile: (messageId: string) => Promise<void>;
+  /** 프로필 수정 요청 (Phase 9: messageId 기반) */
+  editProfile: (messageId: string) => Promise<void>;
+  /** 메시지 refetch 함수 */
+  refetchMessages: () => Promise<unknown>;
 }
 
 // ============================================================================
@@ -113,7 +108,6 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
 
   // ── 리듀서 ──
   const [state, dispatch] = useReducer(coachReducer, INITIAL_STATE);
-  const profileBufferRef = useRef<ProfileConfirmationRequest | null>(null);
 
   // ── Queries ──
   const { data: conversation } = useCoachConversation(conversationId ?? undefined);
@@ -169,15 +163,14 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
     state,
     dispatch,
     queryClient,
-    profileBufferRef,
     onStreamComplete: checkAndSummarize,
   });
 
-  const { confirmProfile, requestProfileEdit } = useCoachProfileConfirmation({
+  // Phase 9: messageId 기반 프로필 확인 훅
+  const { confirmProfile, editProfile } = useCoachProfileConfirmation({
     conversationId,
-    state,
-    dispatch,
     sendMessage,
+    refetchMessages: () => messagesQuery.refetch(),
   });
 
   // ── 대화 확보 (없으면 생성) → conversationId 반환 ──
@@ -241,49 +234,48 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
       const newConversation = await createConversation.mutateAsync(undefined);
       setConversationId(newConversation.id);
       dispatch({ type: 'RESET_ALL' });
-      profileBufferRef.current = null;
       window.history.pushState({}, '', `/routine/coach?id=${newConversation.id}`);
     } catch {
       dispatch({ type: 'SET_ERROR', error: '새 대화 생성에 실패했습니다.' });
     }
   };
 
-  // ── 선택형 입력 제출 ──
-  const submitInput = (value: string | string[]) => {
+  // ── 선택형 입력 제출 (Phase 9: messageId 기반) ──
+  const submitInput = async (messageId: string, value: string | string[]) => {
     if (!conversationId) return;
     const messageText = Array.isArray(value) ? value.join(', ') : value;
-    dispatch({ type: 'CLEAR_PENDING_INPUT' });
-    // sendMessage 직접 호출 (handleSend의 isStreaming 가드 우회 — 인풋 응답은 스트리밍 중에도 전송 가능해야 함)
-    sendMessage(conversationId, messageText);
+
+    try {
+      // 메시지 상태 업데이트 (pending → submitted)
+      const response = await fetch(
+        `/api/coach/conversations/${conversationId}/messages/${messageId}/status`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'submitted', submittedValue: messageText }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to update message status');
+      }
+
+      // 메시지 목록 리프레시 (상태 반영) - await로 완료 대기
+      await messagesQuery.refetch();
+
+      // AI에게 응답 전송 (상태 업데이트 반영 후)
+      sendMessage(conversationId, messageText);
+    } catch (error) {
+      console.error('[Submit Input] Failed to submit:', error);
+      // 폴백: 그냥 메시지만 전송
+      sendMessage(conversationId, messageText);
+    }
   };
 
   // ── 에러 클리어 ──
   const clearError = () => {
     dispatch({ type: 'CLEAR_ERROR' });
   };
-
-  // ── 메타데이터에서 세션 상태 복원 (페이지 재진입 시) ──
-  useEffect(() => {
-    if (!conversation?.metadata) return;
-    const extracted = extractSessionMetadata(conversation.metadata);
-
-    // 복원할 데이터가 하나라도 있으면 원자적으로 전체 복원
-    const hasData =
-      extracted.pendingRoutinePreview ||
-      extracted.appliedRoutine ||
-      extracted.pendingProfileConfirmation ||
-      extracted.pendingInput;
-
-    if (hasData) {
-      dispatch({
-        type: 'RESTORE_SESSION_METADATA',
-        pendingRoutinePreview: extracted.pendingRoutinePreview,
-        appliedRoutine: extracted.appliedRoutine,
-        pendingProfileConfirmation: extracted.pendingProfileConfirmation,
-        pendingInput: extracted.pendingInput,
-      });
-    }
-  }, [conversationId, conversation?.metadata]);
 
   // ── 초기 대화 ID 동기화 ──
   useEffect(() => {
@@ -293,7 +285,6 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
       // ID가 null이면 전체 상태 리셋 (삭제 후 복귀 등)
       if (!targetId) {
         dispatch({ type: 'RESET_ALL' });
-        profileBufferRef.current = null;
       }
     }
   }, [initialConversationId]);
@@ -308,6 +299,7 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
     return isDuplicate ? messages : [...messages, state.pendingUserMessage];
   })();
 
+
   return {
     conversationId,
     conversation: conversation ?? null,
@@ -317,11 +309,8 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
     isStreaming: state.isStreaming,
     error: state.error,
     activeTools: state.activeTools,
-    pendingInput: state.pendingInput,
-    pendingRoutinePreview: state.pendingRoutinePreview,
     appliedRoutine: state.appliedRoutine,
     routineProgress: state.routineProgress,
-    pendingProfileConfirmation: state.pendingProfileConfirmation,
     summarizationState: state.summarizationState,
     hasNextPage: messagesQuery.hasNextPage ?? false,
     isFetchingNextPage: messagesQuery.isFetchingNextPage,
@@ -335,6 +324,7 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
     cancelStream,
     clearError,
     confirmProfile,
-    requestProfileEdit,
+    editProfile,
+    refetchMessages: () => messagesQuery.refetch(),
   };
 }
