@@ -12,7 +12,7 @@
 import { useRef, useEffect, type Dispatch } from 'react';
 import type { QueryClient } from '@tanstack/react-query';
 import { aiChatApi } from '@/lib/api/conversation';
-import type { CoachChatState, CoachChatAction } from './helpers/coachReducer';
+import type { CoachChatAction } from './helpers/coachReducer';
 import { createCoachCallbacks } from './helpers/createCoachCallbacks';
 
 // =============================================================================
@@ -21,7 +21,6 @@ import { createCoachCallbacks } from './helpers/createCoachCallbacks';
 
 interface UseCoachMessageSenderParams {
   conversationId: string | null;
-  state: CoachChatState;
   dispatch: Dispatch<CoachChatAction>;
   queryClient: QueryClient;
   /** 스트리밍 완료 후 호출 (요약 체크용) */

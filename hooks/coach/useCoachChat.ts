@@ -28,6 +28,7 @@ import { coachReducer, INITIAL_STATE } from './helpers/coachReducer';
 import { useCoachMessageSender } from './useCoachMessageSender';
 
 import { useCoachProfileConfirmation } from './useCoachProfileConfirmation';
+import { useMessageStatusUpdate } from './useMessageStatusUpdate';
 
 // ============================================================================
 // Types
@@ -160,7 +161,6 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
   // ── 서브훅 ──
   const { sendMessage, cancelStream } = useCoachMessageSender({
     conversationId,
-    state,
     dispatch,
     queryClient,
     onStreamComplete: checkAndSummarize,
@@ -171,6 +171,12 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
     conversationId,
     sendMessage,
     refetchMessages: () => messagesQuery.refetch(),
+  });
+
+  // 공통 메시지 상태 업데이트 훅 (submitInput에서 사용)
+  const { updateStatus } = useMessageStatusUpdate({
+    conversationId,
+    onError: () => messagesQuery.refetch(),
   });
 
   // ── 대화 확보 (없으면 생성) → conversationId 반환 ──
@@ -247,21 +253,7 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
 
     try {
       // 메시지 상태 업데이트 (pending → submitted)
-      const response = await fetch(
-        `/api/coach/conversations/${conversationId}/messages/${messageId}/status`,
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'submitted', submittedValue: messageText }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to update message status');
-      }
-
-      // 메시지 목록 리프레시 (상태 반영) - await로 완료 대기
-      await messagesQuery.refetch();
+      await updateStatus(messageId, 'submitted', { submittedValue: messageText });
 
       // AI에게 응답 전송 (상태 업데이트 반영 후)
       sendMessage(conversationId, messageText);

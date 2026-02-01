@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { useApplyRoutine, useClearActivePurpose } from './mutations';
-import { queryKeys } from '@/lib/constants/queryKeys';
+import { useMessageStatusUpdate } from './useMessageStatusUpdate';
 import type { RoutinePreviewData } from '@/lib/types/fitness';
 
 interface UseRoutinePreviewOptions {
@@ -12,7 +11,6 @@ interface UseRoutinePreviewOptions {
   /** 메시지 refetch 함수 */
   refetchMessages: () => Promise<unknown>;
 }
-
 /**
  * 루틴 프리뷰 드로어 관리 훅 (SRP)
  *
@@ -20,6 +18,10 @@ interface UseRoutinePreviewOptions {
  * - 루틴 미리보기 카드는 chat_messages 테이블에 저장됨
  * - 액션 시 메시지 상태만 업데이트 (applied | cancelled)
  * - 카드는 히스토리에 영구 보존됨
+ *
+ * SOLID 원칙 적용:
+ * - SRP: 루틴 프리뷰 드로어 관리만 담당
+ * - DRY: 공통 메시지 상태 업데이트 훅 사용
  *
  * 책임:
  * - 프리뷰 드로어 열림/닫힘 상태
@@ -30,7 +32,6 @@ export function useRoutinePreview({
   conversationId,
   refetchMessages,
 }: UseRoutinePreviewOptions) {
-  const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
@@ -47,28 +48,11 @@ export function useRoutinePreview({
     setCurrentPreviewMessageId(null);
   };
 
-  /**
-   * 메시지 상태 업데이트 헬퍼
-   */
-  const updateMessageStatus = async (messageId: string, status: 'applied' | 'cancelled') => {
-    if (!conversationId) return;
-
-    const response = await fetch(
-      `/api/coach/conversations/${conversationId}/messages/${messageId}/status`,
-      {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error('Failed to update message status');
-    }
-
-    // 메시지 목록 즉시 refetch (상태 반영)
-    await refetchMessages();
-  };
+  // 공통 메시지 상태 업데이트 훅 사용 (DRY)
+  const { updateStatus } = useMessageStatusUpdate({
+    conversationId,
+    onError: refetchMessages,
+  });
 
   /**
    * 루틴 적용 (messageId 기반)
@@ -92,7 +76,7 @@ export function useRoutinePreview({
       });
 
       // 메시지 상태 업데이트 (pending → applied)
-      await updateMessageStatus(messageId, 'applied');
+      await updateStatus(messageId, 'applied');
 
       close();
     } catch (error) {
@@ -116,7 +100,7 @@ export function useRoutinePreview({
       await clearActivePurpose.mutateAsync(conversationId);
 
       // 메시지 상태 업데이트 (pending → cancelled)
-      await updateMessageStatus(messageId, 'cancelled');
+      await updateStatus(messageId, 'cancelled');
 
       close();
     } catch (error) {
