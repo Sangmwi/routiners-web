@@ -123,7 +123,7 @@ export default function InBodyContent() {
 
   return (
     <>
-      <div className="space-y-6 pb-32">
+      <div className="space-y-6 pb-24">
         {/* Summary Card */}
         <section>
           <h2 className="text-sm font-medium text-muted-foreground mb-3">

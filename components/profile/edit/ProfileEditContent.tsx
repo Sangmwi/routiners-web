@@ -84,7 +84,7 @@ export default function ProfileEditContent() {
       <ProgressBar progress={progress} />
 
       {/* Content */}
-      <div className="pb-32 space-y-8">
+      <div className="pb-24 space-y-8">
         <ProfilePhotoGallery
           initialImages={user.profileImages || []}
           isSaving={isSaving}

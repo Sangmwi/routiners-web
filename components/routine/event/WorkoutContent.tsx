@@ -119,7 +119,7 @@ export default function WorkoutContent({ date }: WorkoutContentProps) {
 
   return (
     <>
-      <div className="space-y-6 pb-32">
+      <div className="space-y-6 pb-24">
         {/* 헤더 섹션 */}
         <div className="bg-card border border-border rounded-xl p-4">
           <div className="flex items-start justify-between mb-3">
