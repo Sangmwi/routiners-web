@@ -70,14 +70,11 @@ export default function CoachContent() {
   const { data: conversationsData, isPending: isLoadingConversations } = useCoachConversations();
 
   // 표시 조건
+  // 낙관적 메시지(isStreaming 중 pendingUserMessage)가 있으면 로딩 상태여도 채팅 표시
+  const showChatLoader = isMessagesLoading && !isStreaming && messages.length === 0;
   const showWelcome = messages.length === 0 && !isStreaming && !isMessagesLoading;
   const hasPendingInteraction = !!pendingProfileConfirmation || !!pendingInput || !!pendingRoutinePreview;
   const showActionChips = !isStreaming && !streamingContent && !hasPendingInteraction && messages.length === 0;
-
-  // 수정 요청 핸들러
-  const handleRequestRevision = (feedback: string) => {
-    handleSend(`수정 요청: ${feedback}`);
-  };
 
   return (
     <>
@@ -89,7 +86,7 @@ export default function CoachContent() {
 
       {/* 컨텐츠 영역 */}
       <div className="flex-1 overflow-hidden relative">
-        {isMessagesLoading ? (
+        {showChatLoader ? (
           <PulseLoader variant="chat" className="p-4" />
         ) : showWelcome ? (
           <WelcomeScreen />
@@ -105,7 +102,7 @@ export default function CoachContent() {
             appliedRoutine={appliedRoutine}
             routineProgress={routineProgress}
             onApplyRoutine={preview.apply}
-            onRequestRevision={handleRequestRevision}
+            onCancelRoutine={preview.cancel}
             onViewRoutineDetails={preview.open}
             pendingProfileConfirmation={pendingProfileConfirmation}
             onConfirmProfile={confirmProfile}

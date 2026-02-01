@@ -4,6 +4,7 @@ import { CheckIcon, SkipForwardIcon } from '@phosphor-icons/react';
 import { getEventConfig } from '@/lib/config/theme';
 import type { RoutineEvent, EventType, WorkoutData } from '@/lib/types/routine';
 import type { MealData } from '@/lib/types/meal';
+import AppLink from '@/components/common/AppLink';
 
 /**
  * 타입 가드: WorkoutData인지 확인
@@ -36,14 +37,14 @@ interface EventCarouselCardProps {
   date: string;
   /** 이벤트 타입 */
   type: EventType;
+  /** 네비게이션 경로 */
+  href: string;
   /** 오늘 여부 */
   isToday?: boolean;
   /** 어제 여부 */
   isYesterday?: boolean;
   /** 내일 여부 */
   isTomorrow?: boolean;
-  /** 클릭 핸들러 */
-  onClick?: () => void;
 }
 
 // 타입별 스타일 헬퍼 (EVENT_TYPE에서 가져옴)
@@ -70,10 +71,10 @@ export default function EventCarouselCard({
   event,
   date,
   type,
+  href,
   isToday = false,
   isYesterday = false,
   isTomorrow = false,
-  onClick,
 }: EventCarouselCardProps) {
   const styles = getTypeStyles(type);
   const config = getEventConfig(type);
@@ -97,8 +98,8 @@ export default function EventCarouselCard({
   // 쉬는 날 (이벤트 없음)
   if (!event) {
     return (
-      <button
-        onClick={onClick}
+      <AppLink
+        href={href}
         className={`
           relative flex flex-col items-center justify-center w-[140px] h-[180px] p-3 rounded-xl
           border border-dashed border-border bg-muted/30
@@ -123,7 +124,7 @@ export default function EventCarouselCard({
             </div>
           );
         })()}
-      </button>
+      </AppLink>
     );
   }
 
@@ -133,8 +134,8 @@ export default function EventCarouselCard({
   const mealCount = isMealData(event.data) ? event.data.meals.length : 0;
 
   return (
-    <button
-      onClick={onClick}
+    <AppLink
+      href={href}
       className={`
         relative flex flex-col items-center justify-center w-[140px] h-[180px] p-3 pt-4 rounded-xl
         ${styles.bg}
@@ -191,7 +192,7 @@ export default function EventCarouselCard({
           </span>
         )}
       </div>
-    </button>
+    </AppLink>
   );
 }
 

@@ -17,7 +17,7 @@ import {
 } from './types';
 import type { AIToolName } from '@/lib/types/fitness';
 import type { ActivePurposeType } from '@/lib/types/coach';
-import { setActivePurpose as setActivePurposeFn } from './metadata-manager';
+import { setActivePurpose as setActivePurposeFn, clearActivePurpose as clearActivePurposeFn } from './metadata-manager';
 
 // Re-export types
 export type { ToolHandlerContext, ToolHandlerResult, FunctionCallInfo, ConversationMetadata } from './types';
@@ -123,6 +123,25 @@ export async function handleToolCall(
           instructions: startInstructions[purposeType] ?? '',
         }),
         continueLoop: true, // AI가 바로 다음 도구 호출 가능
+      };
+    }
+
+    case 'clear_active_purpose': {
+      await clearActivePurposeFn(ctx.supabase, ctx.conversationId);
+
+      ctx.sendEvent('tool_done', {
+        toolCallId: fc.id,
+        name: toolName,
+        success: true,
+      });
+
+      // 프로세스 종료 후 사용자에게 안내 메시지를 보내도록 지시
+      return {
+        toolResult: JSON.stringify({
+          success: true,
+          message: '프로세스가 취소되었습니다. 일반 대화 모드로 돌아갑니다.',
+        }),
+        continueLoop: true, // AI가 사용자에게 취소 확인 메시지를 보낼 수 있도록
       };
     }
 

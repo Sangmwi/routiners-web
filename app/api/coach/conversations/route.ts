@@ -75,8 +75,9 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
     }
   }
 
-  // 활성 대화 ID 찾기
-  const activeConversation = conversations.find((c) => c.ai_status === 'active');
+  // 활성 대화 ID 찾기 (가장 최근 대화)
+  // 코치 대화는 범용이므로 status와 무관하게 최근 대화를 활성으로 간주
+  const activeConversation = conversations[0]; // 이미 updated_at DESC 정렬됨
 
   // 응답 구성
   const items: CoachConversationListItem[] = (conversations as DbCoachConversation[]).map((conv) => ({
@@ -127,25 +128,8 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
 
   const { activePurpose } = validation.data;
 
-  // 기존 활성 코치 세션 자동 완료 처리
-  const { error: completeError } = await supabase
-    .from('conversations')
-    .update({
-      ai_status: 'completed',
-      updated_at: new Date().toISOString(),
-    })
-    .eq('type', 'ai')
-    .eq('ai_purpose', 'coach')
-    .eq('ai_status', 'active')
-    .is('deleted_at', null);
-
-  if (completeError) {
-    console.error('[Coach POST] Complete existing error:', completeError);
-    return NextResponse.json(
-      { error: '기존 세션 종료에 실패했습니다.', code: 'SESSION_CLEANUP_FAILED' },
-      { status: 500 }
-    );
-  }
+  // 코치 대화는 범용 대화이므로 기존 대화를 자동 완료하지 않음
+  // 사용자가 언제든 기존 대화로 돌아가서 계속 대화할 수 있음
 
   // 메타데이터 구성
   const metadata = activePurpose

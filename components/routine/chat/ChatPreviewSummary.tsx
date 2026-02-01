@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { ListIcon, PencilSimpleIcon, CheckIcon, WarningIcon, SpinnerGapIcon } from '@phosphor-icons/react';
+import { XIcon, ListIcon, CheckIcon, WarningIcon, SpinnerGapIcon } from '@phosphor-icons/react';
 import { getEventIcon } from '@/lib/config/eventTheme';
 
 interface PreviewStats {
@@ -18,13 +17,15 @@ interface ChatPreviewSummaryProps {
   weekSummaries: string[]; // ["상체A, 하체A, 상체B, 하체B", ...]
   hasConflicts?: boolean;
   onViewDetails: () => void;
-  onRevision: (feedback: string) => void;
+  onCancel: () => void;
   onApply: (forceOverwrite?: boolean) => void;
   isApplying?: boolean;
 }
 
 /**
  * 미리보기 요약 카드 - 모던 디자인
+ *
+ * 수정 요청은 채팅 입력창을 통해 자연스럽게 가능
  */
 export default function ChatPreviewSummary({
   type,
@@ -34,22 +35,11 @@ export default function ChatPreviewSummary({
   weekSummaries,
   hasConflicts = false,
   onViewDetails,
-  onRevision,
+  onCancel,
   onApply,
   isApplying = false,
 }: ChatPreviewSummaryProps) {
-  const [showRevisionInput, setShowRevisionInput] = useState(false);
-  const [revisionText, setRevisionText] = useState('');
-
   const Icon = getEventIcon(type === 'routine' ? 'workout' : 'meal');
-
-  const handleRevisionSubmit = () => {
-    if (revisionText.trim()) {
-      onRevision(revisionText.trim());
-      setRevisionText('');
-      setShowRevisionInput(false);
-    }
-  };
 
   return (
     <div className="my-4 mx-1">
@@ -110,79 +100,47 @@ export default function ChatPreviewSummary({
 
         {/* 액션 버튼 */}
         <div className="p-3 bg-primary/5">
-          {!showRevisionInput ? (
-            <div className="flex gap-2">
-              {/* 상세 보기 */}
-              <button
-                onClick={onViewDetails}
-                className="flex-1 flex items-center justify-center gap-1.5 h-11 rounded-xl text-sm font-medium bg-muted/40 hover:bg-muted/60 transition-colors"
-              >
-                <ListIcon size={16} />
-                상세 보기
-              </button>
+          <div className="flex gap-2">
+            {/* 취소 */}
+            <button
+              onClick={onCancel}
+              disabled={isApplying}
+              className="flex items-center justify-center w-11 h-11 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors disabled:opacity-50"
+              aria-label="취소"
+            >
+              <XIcon size={16} />
+            </button>
 
-              {/* 수정 요청 */}
-              <button
-                onClick={() => setShowRevisionInput(true)}
-                disabled={isApplying}
-                className="flex items-center justify-center w-11 h-11 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors disabled:opacity-50"
-                aria-label="수정 요청"
-              >
-                <PencilSimpleIcon size={16} />
-              </button>
+            {/* 상세 보기 */}
+            <button
+              onClick={onViewDetails}
+              disabled={isApplying}
+              className="flex-1 flex items-center justify-center gap-1.5 h-11 rounded-xl text-sm font-medium bg-muted/40 hover:bg-muted/60 transition-colors disabled:opacity-50"
+            >
+              <ListIcon size={16} />
+              상세 보기
+            </button>
 
-              {/* 적용 */}
-              <button
-                onClick={() => onApply(hasConflicts)}
-                disabled={isApplying}
-                className={`flex-1 flex items-center justify-center gap-1.5 h-11 rounded-xl text-sm font-medium transition-all active:scale-[0.98] disabled:opacity-50 ${
-                  hasConflicts
-                    ? 'bg-amber-500 text-white hover:bg-amber-600'
-                    : 'bg-primary text-primary-foreground hover:bg-primary/90'
-                }`}
-              >
-                {isApplying ? (
-                  <SpinnerGapIcon size={16} className="animate-spin" />
-                ) : (
-                  <>
-                    <CheckIcon size={16} />
-                    적용
-                  </>
-                )}
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <textarea
-                value={revisionText}
-                onChange={(e) => setRevisionText(e.target.value)}
-                placeholder={type === 'routine'
-                  ? "수정하고 싶은 내용을 알려주세요... (예: 하체 운동을 더 추가해줘)"
-                  : "수정하고 싶은 내용을 알려주세요... (예: 단백질을 더 추가해줘)"
-                }
-                rows={2}
-                className="w-full px-3 py-2.5 text-sm rounded-xl bg-muted/30 text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
-              />
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    setShowRevisionInput(false);
-                    setRevisionText('');
-                  }}
-                  className="flex-1 h-11 rounded-xl text-sm font-medium bg-muted/40 text-foreground hover:bg-muted/60 transition-colors"
-                >
-                  취소
-                </button>
-                <button
-                  onClick={handleRevisionSubmit}
-                  disabled={!revisionText.trim()}
-                  className="flex-1 h-11 rounded-xl text-sm font-medium transition-all active:scale-[0.98] disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  수정 요청
-                </button>
-              </div>
-            </div>
-          )}
+            {/* 적용 */}
+            <button
+              onClick={() => onApply(hasConflicts)}
+              disabled={isApplying}
+              className={`flex-1 flex items-center justify-center gap-1.5 h-11 rounded-xl text-sm font-medium transition-all active:scale-[0.98] disabled:opacity-50 ${
+                hasConflicts
+                  ? 'bg-amber-500 text-white hover:bg-amber-600'
+                  : 'bg-primary text-primary-foreground hover:bg-primary/90'
+              }`}
+            >
+              {isApplying ? (
+                <SpinnerGapIcon size={16} className="animate-spin" />
+              ) : (
+                <>
+                  <CheckIcon size={16} />
+                  적용
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -83,16 +83,19 @@ export const GET = withAuth(
     const hasMore = dbMessages.length > limit;
     const resultMessages = hasMore ? dbMessages.slice(0, limit) : dbMessages;
 
-    // 오래된 순으로 정렬해서 반환
-    const sortedMessages = resultMessages.reverse().map(transformDbMessage);
+    // nextCursor는 reverse 전에 계산 (가장 오래된 메시지 = DESC 기준 마지막)
+    const nextCursor = hasMore
+      ? resultMessages[resultMessages.length - 1].created_at
+      : undefined;
+
+    // 오래된 순으로 정렬해서 반환 (toReversed로 원본 보존)
+    const sortedMessages = resultMessages.toReversed().map(transformDbMessage);
 
     const response: CoachMessagePage = {
       messages: sortedMessages,
       conversation: transformDbCoachConversation(conversation as DbCoachConversation),
       hasMore,
-      nextCursor: hasMore
-        ? resultMessages[resultMessages.length - 1].created_at
-        : undefined,
+      nextCursor,
     };
 
     return NextResponse.json(response);

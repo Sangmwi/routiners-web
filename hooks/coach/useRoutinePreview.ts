@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useApplyRoutine } from './mutations';
+import { useApplyRoutine, useClearActivePurpose } from './mutations';
 import type { RoutinePreviewData } from '@/lib/types/fitness';
 
 interface UseRoutinePreviewOptions {
@@ -17,6 +17,7 @@ interface UseRoutinePreviewOptions {
  * 책임:
  * - 프리뷰 드로어 열림/닫힘 상태
  * - 루틴 적용 처리 (isApplying 상태 포함)
+ * - 루틴 생성 프로세스 취소
  */
 export function useRoutinePreview({
   conversationId,
@@ -24,7 +25,9 @@ export function useRoutinePreview({
 }: UseRoutinePreviewOptions) {
   const [isOpen, setIsOpen] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
   const applyRoutine = useApplyRoutine();
+  const clearActivePurpose = useClearActivePurpose();
 
   const open = () => setIsOpen(true);
   const close = () => setIsOpen(false);
@@ -45,11 +48,30 @@ export function useRoutinePreview({
     }
   };
 
+  /**
+   * 루틴 생성 프로세스 취소
+   * - activePurpose 해제
+   * - 드로어 닫기
+   */
+  const cancel = async () => {
+    if (!conversationId) return;
+
+    setIsCanceling(true);
+    try {
+      await clearActivePurpose.mutateAsync(conversationId);
+      close();
+    } finally {
+      setIsCanceling(false);
+    }
+  };
+
   return {
     isOpen,
     isApplying,
+    isCanceling,
     open,
     close,
     apply,
+    cancel,
   };
 }

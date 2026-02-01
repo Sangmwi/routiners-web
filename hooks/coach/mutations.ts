@@ -129,15 +129,19 @@ export function useDeleteCoachConversation() {
         (old) => {
           if (!old) return old;
 
+          const wasActive = old.activeConversationId === conversationId;
+
+          // 활성 대화였으면 activeConversation 캐시도 클리어
+          if (wasActive) {
+            queryClient.setQueryData(queryKeys.coach.activeConversation(), null);
+          }
+
           return {
             ...old,
             conversations: old.conversations.filter(
               (item) => item.conversation.id !== conversationId
             ),
-            activeConversationId:
-              old.activeConversationId === conversationId
-                ? undefined
-                : old.activeConversationId,
+            activeConversationId: wasActive ? undefined : old.activeConversationId,
           };
         }
       );

@@ -1,11 +1,11 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { RoutineEvent, WorkoutExercise, WorkoutData } from '@/lib/types/routine';
 import { CaretRightIcon } from '@phosphor-icons/react';
 import { getEventIcon, getStatusConfig } from '@/lib/config/eventTheme';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 import type { MealData } from '@/lib/types/meal';
+import AppLink from '@/components/common/AppLink';
 
 /**
  * 타입 가드: WorkoutData인지 확인
@@ -40,8 +40,6 @@ interface DayEventCardProps {
  * 선택된 날짜의 이벤트 카드
  */
 export default function DayEventCard({ event, date }: DayEventCardProps) {
-  const router = useRouter();
-
   // 날짜 포맷
   const formattedDate = formatKoreanDate(date, { year: false, weekday: true });
 
@@ -59,8 +57,8 @@ export default function DayEventCard({ event, date }: DayEventCardProps) {
   const StatusIcon = status.icon;
 
   return (
-    <button
-      onClick={() => router.push(`/routine/${event.type}/${date}`)}
+    <AppLink
+      href={`/routine/${event.type}/${date}`}
       className="w-full bg-card rounded-xl p-5 text-left hover:bg-muted/50 transition-colors"
     >
       {/* 상단: 날짜 + 상태 */}
@@ -114,7 +112,7 @@ export default function DayEventCard({ event, date }: DayEventCardProps) {
           )}
         </div>
       )}
-    </button>
+    </AppLink>
   );
 }
 

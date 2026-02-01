@@ -98,6 +98,7 @@ class ToolRegistry {
 
       // 프로세스 관리 도구
       set_active_purpose: { category: 'general', specialHandling: true },
+      clear_active_purpose: { category: 'general', specialHandling: true },
     };
 
     return metadataMap[name] ?? { category: 'general' };

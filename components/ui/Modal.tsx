@@ -200,9 +200,9 @@ export default function Modal({
       aria-modal="true"
       aria-labelledby={title ? 'modal-title' : undefined}
     >
-      {/* Backdrop */}
+      {/* Backdrop - pointer-events-none으로 클릭이 container로 전달됨 */}
       <div
-        className={`absolute inset-0 bg-black/50 backdrop-blur-sm ${backdropAnimationClass}`}
+        className={`absolute inset-0 bg-black/50 backdrop-blur-sm pointer-events-none ${backdropAnimationClass}`}
       />
 
       {/* Modal Content */}

@@ -1,12 +1,24 @@
 'use client';
 
-import { useRef, useEffect, useLayoutEffect, useState } from 'react';
+import { useRef } from 'react';
 import { ChatMessage as ChatMessageType, ProfileConfirmationRequest } from '@/lib/types/chat';
 import { AIToolStatus, InputRequest, RoutinePreviewData } from '@/lib/types/fitness';
 import {
   RoutineAppliedEvent,
   RoutineProgressEvent,
 } from '@/lib/api/conversation';
+import { SessionPurpose } from '@/lib/types/routine';
+import { SpinnerGapIcon } from '@phosphor-icons/react';
+
+// Hooks
+import {
+  useMinimumLoadingTime,
+  useToolDisplayState,
+  useChatAutoScroll,
+  useInfiniteScrollObserver,
+} from '@/hooks/chat';
+
+// Components
 import ChatMessage from './ChatMessage';
 import ToolStatusIndicator from './ToolStatusIndicator';
 import ChatInputRequest from './ChatInputRequest';
@@ -14,9 +26,14 @@ import ChatPreviewSummary from './ChatPreviewSummary';
 import { ChatProfileConfirmation } from './ChatProfileConfirmation';
 import { ChatProgressIndicator } from './ChatProgressIndicator';
 import { ChatAppliedBanner } from './ChatAppliedBanner';
-import { SpinnerGapIcon, PlayIcon } from '@phosphor-icons/react';
-import { AI_TOOL_LABELS } from '@/lib/types/fitness';
-import { SessionPurpose } from '@/lib/types/routine';
+import { ChatStreamingMessage } from './ChatStreamingMessage';
+import { ChatRunningToolFeedback } from './ChatRunningToolFeedback';
+import { ChatLoadingDots } from './ChatLoadingDots';
+import { ChatStartButton } from './ChatStartButton';
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface ChatMessageListProps {
   messages: ChatMessageType[];
@@ -36,8 +53,8 @@ interface ChatMessageListProps {
   routineProgress?: RoutineProgressEvent | null;
   /** 루틴 적용 핸들러 (forceOverwrite: 충돌 시 덮어쓰기) */
   onApplyRoutine?: (forceOverwrite?: boolean) => void;
-  /** 루틴 수정 요청 핸들러 */
-  onRequestRevision?: (feedback: string) => void;
+  /** 루틴 생성 취소 핸들러 */
+  onCancelRoutine?: () => void;
   /** 루틴 상세 보기 핸들러 */
   onViewRoutineDetails?: () => void;
   /** 대기 중인 프로필 확인 요청 */
@@ -60,11 +77,19 @@ interface ChatMessageListProps {
   onLoadMore?: () => void;
 }
 
+// ============================================================================
+// Component
+// ============================================================================
+
 /**
  * 채팅 메시지 목록 컴포넌트
  *
- * 도구 상태는 마지막 사용자 메시지 바로 다음에 표시됩니다.
- * 결과는 사라지지 않고 영구 표시됩니다.
+ * @description
+ * SOLID 원칙에 따라 리팩토링된 컴포넌트입니다.
+ * - 스크롤 로직: useChatAutoScroll, useInfiniteScrollObserver
+ * - 도구 상태: useToolDisplayState
+ * - 로딩 상태: useMinimumLoadingTime
+ * - 하위 UI: ChatStreamingMessage, ChatRunningToolFeedback, ChatLoadingDots, ChatStartButton
  */
 export default function ChatMessageList({
   messages,
@@ -77,7 +102,7 @@ export default function ChatMessageList({
   appliedRoutine,
   routineProgress,
   onApplyRoutine,
-  onRequestRevision,
+  onCancelRoutine,
   onViewRoutineDetails,
   pendingProfileConfirmation,
   onConfirmProfile,
@@ -89,177 +114,111 @@ export default function ChatMessageList({
   isFetchingNextPage,
   onLoadMore,
 }: ChatMessageListProps) {
+  // Refs
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const topSentinelRef = useRef<HTMLDivElement>(null);
-  const prevScrollHeightRef = useRef<number>(0);
-  const hasInitialScrolled = useRef(false);
 
-  // 도구 상태 누적 (사라지지 않고 유지)
-  const [toolHistory, setToolHistory] = useState<AIToolStatus[]>([]);
+  // 추출된 훅들
+  const showLoadingSpinner = useMinimumLoadingTime(isFetchingNextPage ?? false);
+  const { displayedTools, toolsFadingOut } = useToolDisplayState(
+    activeTools,
+    streamingContent,
+    messages
+  );
 
-  // activeTools 변경 시 누적
-  useEffect(() => {
-    if (activeTools.length > 0) {
-      setToolHistory((prev) => {
-        // 새 도구 추가 또는 기존 도구 상태 업데이트
-        const newTools = [...prev];
-        for (const tool of activeTools) {
-          const existingIndex = newTools.findIndex(
-            (t) => t.toolCallId === tool.toolCallId
-          );
-          if (existingIndex >= 0) {
-            newTools[existingIndex] = tool;
-          } else {
-            newTools.push(tool);
-          }
-        }
-        return newTools;
-      });
-    }
-  }, [activeTools]);
+  useChatAutoScroll(scrollContainerRef, bottomRef, [
+    messages,
+    streamingContent,
+    activeTools,
+    pendingInput,
+    pendingRoutinePreview,
+    routineProgress,
+  ]);
 
-  // 새 사용자 메시지가 추가되면 도구 히스토리 초기화
-  const lastUserMessageId = messages.filter((m) => m.role === 'user').pop()?.id;
-  useEffect(() => {
-    setToolHistory([]);
-  }, [lastUserMessageId]);
+  useInfiniteScrollObserver(scrollContainerRef, topSentinelRef, {
+    hasNextPage,
+    isFetchingNextPage,
+    onLoadMore,
+  });
 
-  // 새 메시지가 추가되면 스크롤 (이전 메시지 로드 시에는 스킵)
-  useEffect(() => {
-    // 최초 렌더: 하단으로 즉시 스크롤
-    if (!hasInitialScrolled.current && messages.length > 0) {
-      bottomRef.current?.scrollIntoView();
-      hasInitialScrolled.current = true;
-      return;
-    }
+  // 파생 상태
+  const lastUserMessageIndex = messages.reduce(
+    (lastIndex, msg, index) => (msg.role === 'user' ? index : lastIndex),
+    -1
+  );
 
-    // 이후 업데이트: 하단 근처일 때만 자동 스크롤
-    const container = scrollContainerRef.current;
-    if (!container) return;
+  const runningTool = activeTools.find(
+    (t) => t.status === 'running' && t.name !== 'generate_routine_preview'
+  );
 
-    const isNearBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight < 150;
-    if (isNearBottom) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages, streamingContent, activeTools, pendingInput, pendingRoutinePreview, routineProgress]);
+  const showRunningToolFeedback =
+    runningTool &&
+    !streamingContent &&
+    !pendingInput &&
+    !pendingProfileConfirmation;
 
-  // 이전 메시지 로드를 위한 IntersectionObserver
-  useEffect(() => {
-    if (!hasNextPage || !onLoadMore) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !isFetchingNextPage) {
-          const container = scrollContainerRef.current;
-          if (container) {
-            prevScrollHeightRef.current = container.scrollHeight;
-          }
-          onLoadMore();
-        }
-      },
-      { root: scrollContainerRef.current, threshold: 0.1 },
-    );
-
-    if (topSentinelRef.current) observer.observe(topSentinelRef.current);
-    return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, onLoadMore]);
-
-  // 이전 메시지 로드 후 스크롤 위치 복원
-  useLayoutEffect(() => {
-    if (!isFetchingNextPage && prevScrollHeightRef.current > 0) {
-      const container = scrollContainerRef.current;
-      if (container) {
-        const newScrollHeight = container.scrollHeight;
-        container.scrollTop += newScrollHeight - prevScrollHeightRef.current;
-      }
-      prevScrollHeightRef.current = 0;
-    }
-  }, [isFetchingNextPage, messages]);
-
-  // 마지막 사용자 메시지의 인덱스 찾기
-  const lastUserMessageIndex = messages.reduce((lastIndex, msg, index) => {
-    return msg.role === 'user' ? index : lastIndex;
-  }, -1);
+  const showLoadingDots =
+    isLoading &&
+    !streamingContent &&
+    !pendingInput &&
+    !pendingProfileConfirmation &&
+    !activeTools.some((t) => t.status === 'running');
 
   return (
-    <div ref={scrollContainerRef} className="h-full overflow-y-auto overflow-x-hidden p-4">
-      <div className="flex flex-col gap-5">
+    <div
+      ref={scrollContainerRef}
+      className="h-full overflow-y-auto overflow-x-hidden p-4"
+    >
+      <div className="flex flex-col gap-7">
         {/* 상단 센티널 — 이전 메시지 로드 트리거 */}
         <div ref={topSentinelRef} className="shrink-0">
-          {isFetchingNextPage && (
+          {showLoadingSpinner && (
             <div className="flex justify-center py-2">
-              <SpinnerGapIcon size={16} className="animate-spin text-muted-foreground" />
+              <SpinnerGapIcon
+                size={16}
+                className="animate-spin text-muted-foreground"
+              />
             </div>
           )}
         </div>
 
-        {messages.map((message, index) => (
-          <div key={message.id}>
-            <ChatMessage message={message} />
+        {/* 메시지 목록 */}
+        {messages.map((message, index) => {
+          const isLastUserMessage = index === lastUserMessageIndex;
+          const showTools = isLastUserMessage && displayedTools.length > 0;
 
-            {/* 마지막 사용자 메시지 바로 다음에 도구 상태 표시 */}
-            {index === lastUserMessageIndex && toolHistory.length > 0 && (
-              <div className="mt-6 ml-2">
-                <ToolStatusIndicator tools={toolHistory} />
-              </div>
-            )}
-          </div>
-        ))}
-
-        {/* 스트리밍 중인 메시지 */}
-        {streamingContent && (
-          <div>
-            <ChatMessage
-              message={{
-                id: 'streaming',
-                role: 'assistant',
-                content: streamingContent,
-                createdAt: new Date().toISOString(),
-              }}
-            />
-          </div>
-        )}
-
-        {/* 도구 실행 중 피드백 (프로필 조회중 등) */}
-        {(() => {
-          const runningTool = activeTools.find((t) => t.status === 'running');
-          if (!runningTool || streamingContent || pendingInput || pendingProfileConfirmation) return null;
-          // 미리보기 생성 도구는 진행률 표시로 대체되므로 제외
-          if (runningTool.name === 'generate_routine_preview') return null;
-
-          const toolLabel = AI_TOOL_LABELS[runningTool.name] || '처리 중';
           return (
-            <div className="flex gap-3 items-center">
-              <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                <SpinnerGapIcon size={16} className="animate-spin" />
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {toolLabel}...
-              </div>
+            <div
+              key={message.id}
+              className={isLastUserMessage ? 'relative' : undefined}
+            >
+              <ChatMessage message={message} />
+
+              {/* 마지막 사용자 메시지 바로 다음에 도구 상태 표시 */}
+              {showTools && (
+                <div
+                  className={`absolute left-10 bottom-1 translate-y-full pt-1.5 transition-opacity duration-700 ${
+                    toolsFadingOut ? 'opacity-0' : 'opacity-100'
+                  }`}
+                >
+                  <ToolStatusIndicator tools={displayedTools} />
+                </div>
+              )}
             </div>
           );
-        })()}
+        })}
 
-        {/* 로딩 인디케이터 (도구 실행 중이 아닐 때만 표시) */}
-        {isLoading && !streamingContent && !pendingInput && !pendingProfileConfirmation &&
-         !activeTools.some((t) => t.status === 'running') && (
-          <div className="flex gap-3">
-            <div className="shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-              <SpinnerGapIcon size={16} className="animate-spin" />
-            </div>
-            <div className="bg-card border border-border rounded-2xl rounded-tl-md px-4 py-3">
-              <div className="flex gap-1">
-                <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
-            </div>
-          </div>
-        )}
+        {/* 스트리밍 중인 메시지 */}
+        {streamingContent && <ChatStreamingMessage content={streamingContent} />}
 
-        {/* 선택형 입력 UI (서버 메시지에 AI 질문이 이미 포함되므로 선택 버튼만 렌더링) */}
+        {/* 도구 실행 중 피드백 */}
+        {showRunningToolFeedback && <ChatRunningToolFeedback tool={runningTool} />}
+
+        {/* 로딩 인디케이터 */}
+        {showLoadingDots && <ChatLoadingDots />}
+
+        {/* 선택형 입력 UI */}
         {pendingInput && onSubmitInput && (
           <ChatInputRequest request={pendingInput} onSubmit={onSubmitInput} />
         )}
@@ -288,30 +247,34 @@ export default function ChatMessageList({
         )}
 
         {/* 루틴 미리보기 - 요약 카드 */}
-        {pendingRoutinePreview && onApplyRoutine && onRequestRevision && onViewRoutineDetails && (
-          <div>
-            <ChatPreviewSummary
-              type="routine"
-              title={pendingRoutinePreview.title}
-              description={pendingRoutinePreview.description}
-              stats={{
-                duration: `${pendingRoutinePreview.durationWeeks}주`,
-                frequency: `주 ${pendingRoutinePreview.daysPerWeek}회`,
-                perSession: pendingRoutinePreview.weeks[0]?.days[0]?.estimatedDuration
-                  ? `약 ${pendingRoutinePreview.weeks[0].days[0].estimatedDuration}분`
-                  : undefined,
-              }}
-              weekSummaries={pendingRoutinePreview.weeks.map(w =>
-                w.days.map(d => d.title).join(', ')
-              )}
-              hasConflicts={(pendingRoutinePreview.conflicts?.length ?? 0) > 0}
-              onViewDetails={onViewRoutineDetails}
-              onRevision={onRequestRevision}
-              onApply={onApplyRoutine}
-              isApplying={isLoading}
-            />
-          </div>
-        )}
+        {pendingRoutinePreview &&
+          onApplyRoutine &&
+          onCancelRoutine &&
+          onViewRoutineDetails && (
+            <div>
+              <ChatPreviewSummary
+                type="routine"
+                title={pendingRoutinePreview.title}
+                description={pendingRoutinePreview.description}
+                stats={{
+                  duration: `${pendingRoutinePreview.durationWeeks}주`,
+                  frequency: `주 ${pendingRoutinePreview.daysPerWeek}회`,
+                  perSession: pendingRoutinePreview.weeks[0]?.days[0]
+                    ?.estimatedDuration
+                    ? `약 ${pendingRoutinePreview.weeks[0].days[0].estimatedDuration}분`
+                    : undefined,
+                }}
+                weekSummaries={pendingRoutinePreview.weeks.map((w) =>
+                  w.days.map((d) => d.title).join(', ')
+                )}
+                hasConflicts={(pendingRoutinePreview.conflicts?.length ?? 0) > 0}
+                onViewDetails={onViewRoutineDetails}
+                onCancel={onCancelRoutine}
+                onApply={onApplyRoutine}
+                isApplying={isLoading}
+              />
+            </div>
+          )}
 
         {/* 루틴 적용 완료 메시지 */}
         {appliedRoutine && (
@@ -322,34 +285,16 @@ export default function ChatMessageList({
           />
         )}
 
-        {/* 대화 시작 버튼 (인라인) */}
+        {/* 대화 시작 버튼 */}
         {pendingStart && onStartConversation && (
-          <div className="flex gap-3 items-start">
-            <div className="shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-              <PlayIcon size={16} weight="fill" />
-            </div>
-            <div className="bg-card border border-border rounded-2xl rounded-tl-md px-4 py-3 max-w-[85%]">
-              <p className="text-sm text-muted-foreground mb-3">
-                {sessionPurpose === 'coach'
-                  ? '무엇이든 물어볼 준비가 되셨나요?'
-                  : '맞춤 운동 루틴을 만들 준비가 되셨나요?'}
-              </p>
-              <button
-                type="button"
-                onClick={onStartConversation}
-                className="w-full px-4 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
-              >
-                <PlayIcon size={16} weight="fill" />
-                시작하기
-              </button>
-            </div>
-          </div>
+          <ChatStartButton
+            sessionPurpose={sessionPurpose}
+            onStart={onStartConversation}
+          />
         )}
 
         {/* 완료 배너를 위한 하단 여백 */}
-        {appliedRoutine && (
-          <div className="h-40" aria-hidden="true" />
-        )}
+        {appliedRoutine && <div className="h-40" aria-hidden="true" />}
 
         <div ref={bottomRef} />
       </div>

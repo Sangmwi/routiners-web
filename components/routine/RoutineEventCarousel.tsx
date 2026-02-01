@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import EventCarouselCard from './EventCarouselCard';
 import type { RoutineEvent, EventType } from '@/lib/types/routine';
 import { formatDate, addDays } from '@/lib/utils/dateHelpers';
@@ -35,7 +34,6 @@ export default function RoutineEventCarousel({
   futureDays = 14,
   isLoading = false,
 }: RoutineEventCarouselProps) {
-  const router = useRouter();
   const scrollTargetRef = useRef<HTMLDivElement>(null);
 
   // 과거 + 오늘 + 미래 날짜 배열 생성
@@ -72,10 +70,6 @@ export default function RoutineEventCarousel({
     );
   }
 
-  const handleCardClick = (dateStr: string) => {
-    router.push(`/routine/${type}/${dateStr}`);
-  };
-
   return (
     <div className="-mx-4 px-4">
       <div
@@ -93,10 +87,10 @@ export default function RoutineEventCarousel({
                 event={event}
                 date={date}
                 type={type}
+                href={`/routine/${type}/${date}`}
                 isToday={isToday}
                 isYesterday={isYesterday}
                 isTomorrow={isTomorrow}
-                onClick={() => handleCardClick(date)}
               />
             </div>
           )

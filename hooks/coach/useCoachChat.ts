@@ -17,6 +17,7 @@ import type {
 import {
   useInfiniteCoachMessages,
   useCoachConversation,
+  useActiveCoachConversation,
 } from './queries';
 import {
   useCreateCoachConversation,
@@ -117,8 +118,20 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
   // ── Queries ──
   const { data: conversation } = useCoachConversation(conversationId ?? undefined);
   const messagesQuery = useInfiniteCoachMessages(conversationId);
-  const messages = messagesQuery.data?.pages.flatMap((p) => p.messages) ?? [];
+  // 페이지 역순으로 flat: 오래된 페이지가 먼저 → 시간순 정렬
+  const messages = messagesQuery.data?.pages.toReversed().flatMap((p) => p.messages) ?? [];
   const activePurpose = conversation?.metadata?.activePurpose;
+
+  // 활성 대화 조회 (id 없이 진입 시 리다이렉트용)
+  const { data: activeConversationData } = useActiveCoachConversation();
+
+  // ── 활성 대화 리다이렉트 ──
+  useEffect(() => {
+    // id 없이 진입했는데 활성 대화가 있으면 리다이렉트
+    if (!initialConversationId && activeConversationData?.id) {
+      router.replace(`/routine/coach?id=${activeConversationData.id}`);
+    }
+  }, [initialConversationId, activeConversationData?.id, router]);
 
   // ── Mutations ──
   const createConversation = useCreateCoachConversation();

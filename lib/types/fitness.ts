@@ -239,6 +239,7 @@ export const AI_TOOL_NAMES = [
   'apply_meal_plan', // 식단 적용 (DB 저장)
   // 프로세스 관리
   'set_active_purpose', // 구조화된 프로세스 활성화
+  'clear_active_purpose', // 프로세스 취소
 ] as const;
 
 export type AIToolName = (typeof AI_TOOL_NAMES)[number];
@@ -268,6 +269,7 @@ export const AI_TOOL_LABELS: Record<AIToolName, string> = {
   apply_meal_plan: '식단 적용 중',
   // 프로세스 관리
   set_active_purpose: '프로세스 활성화 중',
+  clear_active_purpose: '프로세스 종료 중',
 };
 
 /**

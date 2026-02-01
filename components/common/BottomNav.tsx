@@ -1,13 +1,12 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { shouldShowBottomTab } from '@/lib/routes';
 import { BOTTOM_NAV } from '@/lib/config/theme';
+import AppLink from './AppLink';
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const router = useRouter();
   const { items, style } = BOTTOM_NAV;
 
   // 특정 페이지에서는 탭 숨김
@@ -23,32 +22,21 @@ export default function BottomNav() {
           const Icon = item.icon;
 
           return (
-            <div key={item.href} className="relative flex flex-col items-center justify-center">
-              {/* Link는 prefetch만을 위해 숨김 */}
-              <Link
-                href={item.href}
-                prefetch={true}
-                className="absolute inset-0 opacity-0 pointer-events-none"
-                aria-hidden="true"
+            <AppLink
+              key={item.href}
+              href={item.href}
+              className={`flex flex-col items-center justify-center gap-1 transition-colors ${
+                isActive
+                  ? style.activeColor
+                  : `${style.inactiveColor} hover:text-foreground`
+              }`}
+            >
+              <Icon
+                size={style.size}
+                weight={isActive ? style.activeWeight : style.inactiveWeight}
               />
-              {/* 실제 클릭 가능한 버튼 레이어 */}
-              <button
-                type="button"
-                onClick={() => router.push(item.href)}
-                onMouseDown={(e) => e.preventDefault()}
-                className={`flex flex-col items-center justify-center gap-1 transition-colors select-none [-webkit-touch-callout:none] touch-manipulation ${
-                  isActive
-                    ? style.activeColor
-                    : `${style.inactiveColor} hover:text-foreground`
-                }`}
-              >
-                <Icon
-                  size={style.size}
-                  weight={isActive ? style.activeWeight : style.inactiveWeight}
-                />
-                <span className="text-xs font-medium">{item.label}</span>
-              </button>
-            </div>
+              <span className="text-xs font-medium">{item.label}</span>
+            </AppLink>
           );
         })}
       </div>

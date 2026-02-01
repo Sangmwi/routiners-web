@@ -509,6 +509,22 @@ export const SET_ACTIVE_PURPOSE: AIToolDefinition = {
   },
 };
 
+/**
+ * 17. 프로세스 취소
+ * - 활성화된 구조화된 프로세스를 종료
+ * - 사용자가 "취소해줘", "그만하자", "다음에 할게" 등 종료 의사 표현 시 호출
+ */
+export const CLEAR_ACTIVE_PURPOSE: AIToolDefinition = {
+  type: 'function',
+  name: 'clear_active_purpose',
+  description:
+    '활성화된 프로세스를 취소합니다. 사용자가 "취소해줘", "그만", "다음에 할게", "안 할래" 등 현재 진행 중인 루틴 생성 프로세스를 종료하고 싶다는 의사를 표현하면 호출하세요. 호출 후 일반 대화 모드로 돌아갑니다.',
+  parameters: {
+    type: 'object',
+    properties: {},
+  },
+};
+
 // ============================================================================
 // All Tools Export
 // ============================================================================
@@ -535,6 +551,7 @@ export const AI_TRAINER_TOOLS: AIToolDefinition[] = [
   APPLY_ROUTINE,
   // 프로세스 관리
   SET_ACTIVE_PURPOSE,
+  CLEAR_ACTIVE_PURPOSE,
 ];
 
 /**
