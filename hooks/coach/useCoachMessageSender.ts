@@ -4,16 +4,18 @@
  * Coach Message Sender Sub-Hook
  *
  * 메시지 전송 + SSE 스트리밍 관리
- * - 낙관적 메시지 생성
- * - AbortController 라이프사이클
- * - SSE 콜백 연결
+ *
+ * Phase 13: onMutate 패턴 전환
+ * - flushSync 제거: React Query 캐시가 동기적으로 업데이트됨
+ * - useSendCoachMessage로 낙관적 업데이트 처리
+ * - AbortController 라이프사이클 유지
  */
 
 import { useRef, useEffect, type Dispatch } from 'react';
 import type { QueryClient } from '@tanstack/react-query';
-import { aiChatApi } from '@/lib/api/conversation';
 import type { CoachChatAction } from './helpers/coachReducer';
 import { createCoachCallbacks } from './helpers/createCoachCallbacks';
+import { useSendCoachMessage, removeOptimisticMessages } from './useSendCoachMessage';
 
 // =============================================================================
 // Types
@@ -45,42 +47,45 @@ export function useCoachMessageSender({
   onStreamComplete,
 }: UseCoachMessageSenderParams): UseCoachMessageSenderReturn {
   const abortControllerRef = useRef<AbortController | null>(null);
+  const sendCoachMessage = useSendCoachMessage();
 
-  const sendMessage = (conversationId: string, content: string) => {
+  const sendMessage = (convId: string, content: string) => {
     // 이전 스트림 취소
     abortControllerRef.current?.abort();
 
-    // 낙관적 사용자 메시지 생성 + 스트리밍 시작
-    dispatch({
-      type: 'START_STREAMING',
-      pendingMessage: {
-        id: `pending-${Date.now()}`,
-        conversationId,
-        role: 'user',
-        content: content.trim(),
-        contentType: 'text',
-        createdAt: new Date().toISOString(),
-      },
-    });
+    // 스트리밍 상태 시작 (낙관적 메시지는 mutation의 onMutate에서 처리)
+    dispatch({ type: 'START_STREAMING' });
 
-    // SSE 콜백 생성 + 스트리밍 시작
+    // SSE 콜백 생성
     const callbacks = createCoachCallbacks({
-      conversationId,
+      conversationId: convId,
       dispatch,
       queryClient,
       onStreamComplete,
     });
 
-    abortControllerRef.current = aiChatApi.sendMessage(
-      conversationId,
-      content,
-      callbacks
+    // 뮤테이션 실행 (onMutate에서 낙관적 메시지 삽입)
+    sendCoachMessage.mutate(
+      { conversationId: convId, content, callbacks },
+      {
+        onSuccess: (controller) => {
+          abortControllerRef.current = controller;
+        },
+        onError: () => {
+          // 오류 시 optimistic 메시지는 mutation의 onError에서 처리됨
+          abortControllerRef.current = null;
+        },
+      }
     );
   };
 
   const cancelStream = () => {
     abortControllerRef.current?.abort();
     abortControllerRef.current = null;
+    // optimistic 메시지 제거
+    if (conversationId) {
+      removeOptimisticMessages(queryClient, conversationId);
+    }
     dispatch({ type: 'CANCEL_STREAM' });
   };
 

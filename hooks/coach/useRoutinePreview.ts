@@ -1,120 +1,163 @@
 'use client';
 
+/**
+ * Routine Preview Management Hook
+ *
+ * Phase 10: 루틴 적용/취소 AI 대화 흐름
+ * - 상태 업데이트 + 실제 API 호출 + AI 메시지 전송
+ * - AI가 대화 맥락을 유지할 수 있도록 메시지로 알림
+ * - 프로필 확인 패턴과 동일한 구조
+ *
+ * SOLID 원칙 적용:
+ * - SRP: 루틴 프리뷰 관리만 담당
+ * - DRY: 공통 메시지 상태 업데이트 훅 사용
+ */
+
 import { useState } from 'react';
 import { useApplyRoutine, useClearActivePurpose } from './mutations';
 import { useMessageStatusUpdate } from './useMessageStatusUpdate';
 import type { RoutinePreviewData } from '@/lib/types/fitness';
 
+// =============================================================================
+// Types
+// =============================================================================
+
 interface UseRoutinePreviewOptions {
   /** 현재 대화 ID */
   conversationId: string | null;
-  /** 메시지 refetch 함수 */
+  /** 메시지 전송 함수 (conversationId, content) - AI 대화 맥락 유지용 */
+  sendMessage: (conversationId: string, content: string) => void;
+  /** 메시지 refetch 함수 (상태 업데이트 후 UI 갱신용) */
   refetchMessages: () => Promise<unknown>;
 }
+
+// =============================================================================
+// Hook
+// =============================================================================
+
 /**
  * 루틴 프리뷰 드로어 관리 훅 (SRP)
  *
- * Phase 9: 메시지 기반 트랜지언트 UI
- * - 루틴 미리보기 카드는 chat_messages 테이블에 저장됨
- * - 액션 시 메시지 상태만 업데이트 (applied | cancelled)
- * - 카드는 히스토리에 영구 보존됨
- *
- * SOLID 원칙 적용:
- * - SRP: 루틴 프리뷰 드로어 관리만 담당
- * - DRY: 공통 메시지 상태 업데이트 훅 사용
+ * Phase 10: 상태 업데이트 + API 호출 + AI 메시지
+ * - 적용: updateStatus('applied') → applyRoutine API → AI 메시지
+ * - 취소: updateStatus('cancelled') → clearActivePurpose API → AI 메시지
+ * - 대화 히스토리에 전체 맥락이 남음
  *
  * 책임:
  * - 프리뷰 드로어 열림/닫힘 상태
- * - 루틴 적용 처리 (isApplying 상태 포함)
- * - 루틴 생성 프로세스 취소
+ * - 루틴 적용/취소 (상태 + API + 메시지)
  */
 export function useRoutinePreview({
   conversationId,
+  sendMessage,
   refetchMessages,
 }: UseRoutinePreviewOptions) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isApplying, setIsApplying] = useState(false);
-  const [isCanceling, setIsCanceling] = useState(false);
   const [currentPreviewMessageId, setCurrentPreviewMessageId] = useState<string | null>(null);
+  const [isApplying, setIsApplying] = useState(false);
+
+  // Mutations
   const applyRoutine = useApplyRoutine();
   const clearActivePurpose = useClearActivePurpose();
 
-  const open = (messageId?: string) => {
-    if (messageId) setCurrentPreviewMessageId(messageId);
-    setIsOpen(true);
-  };
-  const close = () => {
-    setIsOpen(false);
-    setCurrentPreviewMessageId(null);
-  };
-
-  // 공통 메시지 상태 업데이트 훅 사용 (DRY)
+  // 공통 메시지 상태 업데이트 훅 (DRY)
   const { updateStatus } = useMessageStatusUpdate({
     conversationId,
     onError: refetchMessages,
   });
 
+  const open = (messageId?: string) => {
+    if (messageId) setCurrentPreviewMessageId(messageId);
+    setIsOpen(true);
+  };
+
+  const close = () => {
+    setIsOpen(false);
+    setCurrentPreviewMessageId(null);
+  };
+
   /**
-   * 루틴 적용 (messageId 기반)
+   * 루틴 적용
+   *
+   * Phase 10: 상태 업데이트 + API 호출 + AI 메시지
+   * Phase 11: weekCount 파라미터 추가
+   *
+   * 1. 메시지 상태를 'applied'로 업데이트
+   * 2. applyRoutine API 호출 (실제 DB 저장)
+   * 3. AI에게 메시지 전송 (대화 맥락 유지)
+   *
    * @param messageId 루틴 미리보기 메시지 ID
    * @param previewData 메시지에서 파싱된 프리뷰 데이터
    * @param forceOverwrite 충돌 시 덮어쓰기 여부
+   * @param weekCount 적용할 주차 수 (Phase 11)
    */
   const apply = async (
     messageId: string,
     previewData: RoutinePreviewData,
-    forceOverwrite?: boolean
+    forceOverwrite?: boolean,
+    weekCount?: number
   ) => {
     if (!conversationId || !previewData?.id) return;
 
     setIsApplying(true);
     try {
+      // 1. 루틴 적용 API 호출 (Phase 11: weekCount 전달)
       await applyRoutine.mutateAsync({
         conversationId,
         previewId: previewData.id,
         forceOverwrite,
+        weekCount,
       });
 
-      // 메시지 상태 업데이트 (pending → applied)
+      // 2. 메시지 상태 업데이트 (pending → applied)
       await updateStatus(messageId, 'applied');
+
+      // 3. AI에게 메시지 전송 (대화 맥락 유지)
+      sendMessage(conversationId, '루틴을 적용했습니다.');
 
       close();
     } catch (error) {
       console.error('[Routine Preview] Failed to apply:', error);
-      throw error;
+      // 에러 시 롤백은 useMessageStatusUpdate에서 처리
     } finally {
       setIsApplying(false);
     }
   };
 
   /**
-   * 루틴 생성 프로세스 취소 (messageId 기반)
+   * 루틴 생성 프로세스 취소
+   *
+   * Phase 10: 상태 업데이트 + API 호출 + AI 메시지
+   * 1. 메시지 상태를 'cancelled'로 업데이트
+   * 2. clearActivePurpose API 호출
+   * 3. AI에게 메시지 전송 (대화 맥락 유지)
+   *
    * @param messageId 루틴 미리보기 메시지 ID
    */
   const cancel = async (messageId: string) => {
     if (!conversationId) return;
 
-    setIsCanceling(true);
     try {
-      // activePurpose 해제
+      // 1. 메시지 상태 업데이트 (pending → cancelled)
+      await updateStatus(messageId, 'cancelled');
+
+      // 2. activePurpose 클리어 API 호출
       await clearActivePurpose.mutateAsync(conversationId);
 
-      // 메시지 상태 업데이트 (pending → cancelled)
-      await updateStatus(messageId, 'cancelled');
+      // 3. AI에게 메시지 전송 (대화 맥락 유지)
+      sendMessage(conversationId, '루틴 생성을 취소했습니다.');
 
       close();
     } catch (error) {
       console.error('[Routine Preview] Failed to cancel:', error);
-    } finally {
-      setIsCanceling(false);
+      // 에러 시 롤백은 useMessageStatusUpdate에서 처리
     }
   };
 
   return {
     isOpen,
-    isApplying,
-    isCanceling,
     currentPreviewMessageId,
+    isApplying,
     open,
     close,
     apply,

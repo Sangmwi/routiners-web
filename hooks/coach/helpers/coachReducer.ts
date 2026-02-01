@@ -3,9 +3,12 @@
  *
  * transient UI 상태만 관리 (메시지는 React Query 담당)
  * 원자적 상태 전이로 상태 불일치 방지
+ *
+ * Phase 13: pendingUserMessage 제거
+ * - 낙관적 메시지는 React Query 캐시에서 관리
+ * - useSendCoachMessage의 onMutate 패턴 사용
  */
 
-import type { ChatMessage } from '@/lib/types/chat';
 import type { AIToolStatus, AIToolName } from '@/lib/types/fitness';
 import type { RoutineAppliedEvent, RoutineProgressEvent } from '@/lib/api/conversation';
 import type { SummarizationState } from '@/lib/types/coach';
@@ -25,9 +28,6 @@ export interface CoachChatState {
   /** 활성 도구 상태 */
   activeTools: AIToolStatus[];
 
-  /** 낙관적 사용자 메시지 (전송 즉시 표시, refetch 후 제거) */
-  pendingUserMessage: ChatMessage | null;
-
   /** 적용된 루틴 */
   appliedRoutine: RoutineAppliedEvent | null;
   /** 루틴 진행률 */
@@ -42,7 +42,6 @@ export const INITIAL_STATE: CoachChatState = {
   isStreaming: false,
   error: null,
   activeTools: [],
-  pendingUserMessage: null,
   appliedRoutine: null,
   routineProgress: null,
   summarizationState: { isSummarizing: false },
@@ -54,16 +53,13 @@ export const INITIAL_STATE: CoachChatState = {
 
 export type CoachChatAction =
   // 스트리밍 라이프사이클
-  | { type: 'START_STREAMING'; pendingMessage: ChatMessage }
+  | { type: 'START_STREAMING' }
   | { type: 'APPEND_STREAMING'; chunk: string }
   | { type: 'COMPLETE_STREAMING' }
   | { type: 'CLEAR_STREAMING_CONTENT' }
   | { type: 'SET_ERROR'; error: string }
   | { type: 'CLEAR_ERROR' }
   | { type: 'CANCEL_STREAM' }
-
-  // 낙관적 메시지
-  | { type: 'CLEAR_PENDING_USER_MESSAGE' }
 
   // 도구
   | { type: 'TOOL_START'; toolCallId: string; name: AIToolName }
@@ -73,6 +69,7 @@ export type CoachChatAction =
   // 대기 상태
   | { type: 'SET_APPLIED_ROUTINE'; event: RoutineAppliedEvent }
   | { type: 'SET_ROUTINE_PROGRESS'; event: RoutineProgressEvent }
+  | { type: 'CLEAR_ROUTINE_PROGRESS' }
 
   // 요약
   | { type: 'SET_SUMMARIZATION'; state: SummarizationState }
@@ -94,7 +91,6 @@ export function coachReducer(state: CoachChatState, action: CoachChatAction): Co
         isStreaming: true,
         error: null,
         activeTools: [],
-        pendingUserMessage: action.pendingMessage,
       };
 
     case 'APPEND_STREAMING':
@@ -106,9 +102,8 @@ export function coachReducer(state: CoachChatState, action: CoachChatAction): Co
     case 'COMPLETE_STREAMING':
       return {
         ...state,
-        // streamingContent 유지 — invalidateQueries 완료 후 CLEAR_STREAMING_CONTENT로 제거
+        // streamingContent 유지 — refetch 완료 후 CLEAR_STREAMING_CONTENT로 제거
         isStreaming: false,
-        // pendingUserMessage는 유지 — 메시지 refetch 완료 후 별도 클리어
       };
 
     case 'CLEAR_STREAMING_CONTENT':
@@ -119,7 +114,6 @@ export function coachReducer(state: CoachChatState, action: CoachChatAction): Co
         ...state,
         streamingContent: '',
         isStreaming: false,
-        pendingUserMessage: null,
         error: action.error,
       };
 
@@ -131,12 +125,7 @@ export function coachReducer(state: CoachChatState, action: CoachChatAction): Co
         ...state,
         streamingContent: '',
         isStreaming: false,
-        pendingUserMessage: null,
       };
-
-    // ── 낙관적 메시지 ──
-    case 'CLEAR_PENDING_USER_MESSAGE':
-      return { ...state, pendingUserMessage: null };
 
     // ── 도구 ──
     case 'TOOL_START':
@@ -170,6 +159,9 @@ export function coachReducer(state: CoachChatState, action: CoachChatAction): Co
 
     case 'SET_ROUTINE_PROGRESS':
       return { ...state, routineProgress: action.event };
+
+    case 'CLEAR_ROUTINE_PROGRESS':
+      return { ...state, routineProgress: null };
 
     // ── 요약 ──
     case 'SET_SUMMARIZATION':

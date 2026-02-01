@@ -51,6 +51,7 @@ export default function CoachContent() {
     confirmProfile,
     editProfile,
     isMessagesLoading,
+    sendMessage,
     refetchMessages,
   } = useCoachChat(conversationIdFromUrl);
 
@@ -60,9 +61,10 @@ export default function CoachContent() {
     onNewChat: handleNewChat,
   });
 
-  // 루틴 프리뷰 관리 훅 (Phase 9: messageId 기반)
+  // 루틴 프리뷰 관리 훅 (Phase 10: AI 대화 흐름)
   const preview = useRoutinePreview({
     conversationId,
+    sendMessage,
     refetchMessages,
   });
 
@@ -145,7 +147,6 @@ export default function CoachContent() {
             streamingContent={streamingContent}
             activeTools={activeTools}
             onMessageAction={handleMessageAction}
-            isApplyingRoutine={preview.isApplying}
             appliedRoutine={appliedRoutine}
             routineProgress={routineProgress}
             sessionPurpose="coach"
@@ -207,24 +208,27 @@ export default function CoachContent() {
         const previewMessage = previewMessageId
           ? messages.find((m) => m.id === previewMessageId)
           : null;
-        
+
         if (!previewMessage || previewMessage.contentType !== 'routine_preview') {
           return null;
         }
 
         const previewData = JSON.parse(previewMessage.content) as RoutinePreviewData;
+        const previewStatus = (previewMessage.metadata?.status as 'pending' | 'applied' | 'cancelled') || 'pending';
 
         return (
           <PreviewDetailDrawer
             isOpen={preview.isOpen}
             onClose={preview.close}
             preview={previewData}
-            onApply={(forceOverwrite) => {
+            status={previewStatus}
+            isApplying={preview.isApplying}
+            onApply={(forceOverwrite, weekCount) => {
               if (previewMessageId) {
-                preview.apply(previewMessageId, previewData, forceOverwrite);
+                // Phase 11: weekCount 전달
+                preview.apply(previewMessageId, previewData, forceOverwrite, weekCount);
               }
             }}
-            isApplying={preview.isApplying}
           />
         );
       })()}

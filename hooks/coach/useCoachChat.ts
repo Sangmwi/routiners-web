@@ -85,6 +85,8 @@ export interface UseCoachChatReturn {
   editProfile: (messageId: string) => Promise<void>;
   /** 메시지 refetch 함수 */
   refetchMessages: () => Promise<unknown>;
+  /** 메시지 전송 함수 (conversationId, content) - Phase 10: 루틴 적용/취소용 */
+  sendMessage: (conversationId: string, content: string) => void;
 }
 
 // ============================================================================
@@ -281,21 +283,13 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
     }
   }, [initialConversationId]);
 
-  // ── 메시지 병합 (서버 + 낙관적, 중복 방지) ──
-  const allMessages = (() => {
-    if (!state.pendingUserMessage) return messages;
-    // 서버에 이미 동일 메시지가 존재하면 pending 스킵 (invalidation↔dispatch 사이 중복 방지)
-    const isDuplicate = messages.some(
-      (m) => m.role === 'user' && m.content === state.pendingUserMessage!.content,
-    );
-    return isDuplicate ? messages : [...messages, state.pendingUserMessage];
-  })();
-
+  // Phase 13: 낙관적 메시지는 React Query 캐시에 직접 삽입됨
+  // → 별도 병합 로직 불필요
 
   return {
     conversationId,
     conversation: conversation ?? null,
-    messages: allMessages,
+    messages,
     activePurpose,
     streamingContent: state.streamingContent,
     isStreaming: state.isStreaming,
@@ -318,5 +312,6 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
     confirmProfile,
     editProfile,
     refetchMessages: () => messagesQuery.refetch(),
+    sendMessage,
   };
 }

@@ -3,10 +3,11 @@
  *
  * apply_routine 도구 처리
  * 미리보기 루틴을 실제 일정에 적용
+ *
+ * Phase 9: chat_messages 테이블에서 routine_preview 메시지로 데이터 가져와서 적용
  */
 
 import { executeApplyRoutine, type ToolExecutorContext } from '@/lib/ai/executors';
-import { getMetadata, transitionToApplied } from './metadata-manager';
 import type { ToolHandlerContext, ToolHandlerResult, FunctionCallInfo } from './types';
 import type { RoutinePreviewData } from '@/lib/types/fitness';
 
@@ -21,16 +22,58 @@ export async function handleApplyRoutine(
 ): Promise<ToolHandlerResult> {
   const previewId = args.preview_id;
 
-  // conversation.metadata에서 pending_preview 가져오기
-  const metadata = await getMetadata(ctx.supabase, ctx.conversationId);
-  const previewData = metadata.pending_preview as RoutinePreviewData | undefined;
+  // Phase 9: chat_messages에서 routine_preview 메시지 조회
+  const { data: previewMessage, error: msgError } = await ctx.supabase
+    .from('chat_messages')
+    .select('id, content, metadata')
+    .eq('conversation_id', ctx.conversationId)
+    .eq('content_type', 'routine_preview')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
 
-  // previewId가 일치하는지 확인 (보안 검증)
-  if (!previewData || previewData.id !== previewId) {
+  if (msgError || !previewMessage) {
     return {
       toolResult: JSON.stringify({
         success: false,
         error: '미리보기 데이터를 찾을 수 없습니다. 다시 루틴을 생성해주세요.',
+      }),
+      continueLoop: false,
+    };
+  }
+
+  // 메시지 상태 확인 (이미 적용됨/취소됨 체크)
+  const msgMetadata = previewMessage.metadata as { status?: string } | null;
+  if (msgMetadata?.status === 'applied') {
+    return {
+      toolResult: JSON.stringify({
+        success: false,
+        error: '이미 적용된 루틴입니다.',
+      }),
+      continueLoop: false,
+    };
+  }
+
+  // content에서 preview 데이터 파싱
+  let previewData: RoutinePreviewData;
+  try {
+    previewData = JSON.parse(previewMessage.content) as RoutinePreviewData;
+  } catch {
+    return {
+      toolResult: JSON.stringify({
+        success: false,
+        error: '미리보기 데이터 파싱에 실패했습니다.',
+      }),
+      continueLoop: false,
+    };
+  }
+
+  // previewId 일치 확인 (보안 검증)
+  if (previewData.id !== previewId) {
+    return {
+      toolResult: JSON.stringify({
+        success: false,
+        error: '미리보기 ID가 일치하지 않습니다.',
       }),
       continueLoop: false,
     };
@@ -60,18 +103,35 @@ export async function handleApplyRoutine(
       startDate: applyResult.data.startDate,
     });
 
-    // pending_preview 제거하고 applied_routine 저장
-    await transitionToApplied(
-      ctx.supabase,
-      ctx.conversationId,
-      'pending_preview',
-      'applied_routine',
-      {
-        previewId,
-        eventsCreated: applyResult.data.eventsCreated,
-        startDate: applyResult.data.startDate,
-      }
-    );
+    // Phase 9: 메시지 상태를 'applied'로 업데이트
+    const appliedAt = new Date().toISOString();
+    await ctx.supabase
+      .from('chat_messages')
+      .update({
+        metadata: {
+          status: 'applied',
+          appliedAt,
+        },
+      })
+      .eq('id', previewMessage.id);
+
+    // 대화 상태 업데이트
+    await ctx.supabase
+      .from('conversations')
+      .update({
+        ai_result_applied: true,
+        ai_result_applied_at: appliedAt,
+        metadata: {
+          applied_routine: {
+            previewId,
+            messageId: previewMessage.id,
+            eventsCreated: applyResult.data.eventsCreated,
+            startDate: applyResult.data.startDate,
+            appliedAt,
+          },
+        },
+      })
+      .eq('id', ctx.conversationId);
   }
 
   return {

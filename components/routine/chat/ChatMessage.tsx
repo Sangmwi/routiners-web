@@ -90,7 +90,7 @@ export default function ChatMessage({ message, onAction, isApplyingRoutine = fal
           <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-primary text-primary-foreground">
             <RobotIcon size={16} weight="fill" />
           </div>
-          <div className="max-w-[80%] px-4 py-3 mt-1 rounded-2xl bg-muted/40 rounded-tl-none">
+          <div className="max-w-[80%] px-4 py-3 mt-2 rounded-2xl bg-muted/40 rounded-tl-none">
             <p className="text-sm text-muted-foreground">
               프로필 확인 데이터를 불러올 수 없습니다.
             </p>
@@ -150,7 +150,7 @@ export default function ChatMessage({ message, onAction, isApplyingRoutine = fal
   // 기본 텍스트 메시지
   return (
     <div
-      className={`flex gap-3 ${isAssistant ? 'flex-row' : 'flex-row-reverse'}`}
+      className={`flex gap-3 ${isAssistant ? 'flex-row mt-2' : 'flex-row-reverse'}`}
     >
       {/* 아바타 */}
       {isAssistant && (
@@ -161,9 +161,9 @@ export default function ChatMessage({ message, onAction, isApplyingRoutine = fal
 
       {/* 메시지 버블 */}
       <div
-        className={`max-w-[80%] px-4 py-3 mt-1 rounded-2xl wrap-break-word overflow-hidden ${
+        className={`max-w-[80%] px-4 py-3 rounded-2xl wrap-break-word overflow-hidden ${
           isAssistant
-            ? 'bg-muted/40 rounded-tl-none'
+            ? 'bg-muted/40 rounded-tl-none mt-2'
             : 'bg-primary text-primary-foreground rounded-tr-none'
         }`}
       >

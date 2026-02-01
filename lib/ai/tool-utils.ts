@@ -69,6 +69,7 @@ export function calculateAge(birthDate: string): number {
 
 /**
  * 다음 월요일 날짜 계산
+ * @deprecated Phase 11: getRoutineStartDate 사용 권장
  */
 export function getNextMonday(): Date {
   const today = new Date();
@@ -80,22 +81,94 @@ export function getNextMonday(): Date {
   return nextMonday;
 }
 
+/**
+ * Phase 11: 루틴 시작일 계산
+ * - 오늘부터 가장 가까운 targetDaysOfWeek 중 하나 반환
+ * - dayOfWeek: 1=월, 2=화, ..., 7=일 (루틴 데이터 형식)
+ *
+ * @param targetDaysOfWeek 루틴에 포함된 요일들 (1=월 ~ 7=일)
+ * @returns 첫 매칭 요일의 Date 객체
+ *
+ * @example
+ * // 오늘이 화요일이고 루틴이 월/수/금일 때 → 수요일 반환
+ * getRoutineStartDate([1, 3, 5])
+ */
+export function getRoutineStartDate(targetDaysOfWeek: number[]): Date {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayDow = today.getDay(); // JS: 0=일, 1=월, ..., 6=토
+
+  // 루틴 dayOfWeek(1~7)를 JS dayOfWeek(0~6)로 변환
+  const jsDays = targetDaysOfWeek.map(d => d % 7); // 7(일) → 0
+
+  // 오늘 포함해서 가장 가까운 매칭 요일 찾기
+  for (let offset = 0; offset <= 6; offset++) {
+    const checkDow = (todayDow + offset) % 7;
+    if (jsDays.includes(checkDow)) {
+      const result = new Date(today);
+      result.setDate(today.getDate() + offset);
+      return result;
+    }
+  }
+
+  return today; // fallback (이론상 도달 불가)
+}
+
+/**
+ * Phase 11: 특정 날짜가 속한 주의 월요일 반환
+ */
+export function getMondayOfWeek(date: Date): Date {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  const day = d.getDay(); // 0=일, 1=월, ..., 6=토
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  return d;
+}
 
 /**
  * 미리보기 데이터에서 적용될 날짜 목록 계산
+ *
+ * Phase 11: 오늘부터 첫 매칭 요일 기준으로 계산
+ *
+ * @param previewData 미리보기 데이터
+ * @param weekCount 적용할 주차 수 (기본: 전체 주차)
  */
-export function calculatePreviewDates(previewData: PreviewDataWithWeeks): string[] {
-  const nextMonday = getNextMonday();
+export function calculatePreviewDates(
+  previewData: PreviewDataWithWeeks,
+  weekCount?: number
+): string[] {
   const dates: string[] = [];
 
-  for (const week of previewData.weeks) {
+  // 적용할 주차 제한
+  const weeksToApply = weekCount
+    ? previewData.weeks.slice(0, weekCount)
+    : previewData.weeks;
+
+  if (weeksToApply.length === 0 || weeksToApply[0].days.length === 0) {
+    return dates;
+  }
+
+  // 루틴에 포함된 모든 요일 추출 (첫 주 기준)
+  const targetDays = weeksToApply[0].days.map(d => d.dayOfWeek);
+
+  // 오늘부터 첫 매칭 요일
+  const startDate = getRoutineStartDate(targetDays);
+  // 시작일이 속한 주의 월요일
+  const baseMonday = getMondayOfWeek(startDate);
+
+  for (const week of weeksToApply) {
     for (const day of week.days) {
       const weekOffset = week.weekNumber - 1;
-      const dayOffset = day.dayOfWeek - 1;
+      const dayOffset = day.dayOfWeek - 1; // dayOfWeek: 1=월 → 0
 
-      const targetDate = new Date(nextMonday);
-      targetDate.setDate(targetDate.getDate() + weekOffset * 7 + dayOffset);
-      dates.push(formatDate(targetDate));
+      const targetDate = new Date(baseMonday);
+      targetDate.setDate(baseMonday.getDate() + weekOffset * 7 + dayOffset);
+
+      // 오늘 이전 날짜는 제외
+      if (targetDate >= startDate) {
+        dates.push(formatDate(targetDate));
+      }
     }
   }
 

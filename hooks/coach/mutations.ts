@@ -166,6 +166,8 @@ export function useDeleteCoachConversation() {
  *
  * conversation.metadata.pending_preview 데이터를 DB에 저장
  * forceOverwrite 시 겹치는 날짜의 기존 루틴 삭제 후 적용
+ *
+ * Phase 11: weekCount 파라미터 추가 - 사용자가 선택한 주차 수만큼 적용
  */
 export function useApplyRoutine() {
   const queryClient = useQueryClient();
@@ -175,6 +177,7 @@ export function useApplyRoutine() {
       conversationId: string;
       previewId: string;
       forceOverwrite?: boolean;
+      weekCount?: number; // Phase 11: 적용할 주차 수
     }) =>
       api.post<{ previewId: string; eventsCreated: number; startDate: string }>(
         '/api/routine/apply',

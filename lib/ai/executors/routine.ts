@@ -18,7 +18,7 @@ import type {
 } from '@/lib/types';
 import type { WorkoutData, WorkoutExercise, EventType } from '@/lib/types/routine';
 import { parseRoutineData, type AIRoutineData } from '../schemas';
-import { getNextMonday, formatDate, checkEventDateConflicts } from '../tool-utils';
+import { formatDate, checkEventDateConflicts, getRoutineStartDate, getMondayOfWeek } from '../tool-utils';
 import { insertEventsWithConflictCheck, updateConversationApplied, type EventInsertData } from '../event-factory';
 import type { ToolExecutorContext } from './types';
 
@@ -29,16 +29,20 @@ import type { ToolExecutorContext } from './types';
 /**
  * AI routine_data(Zod 검증 완료)를 routine_events INSERT 데이터로 변환
  *
+ * Phase 11: 오늘부터 첫 매칭 요일 기준 시작, weekCount로 적용 주차 제한
+ *
  * @param routineData - Zod 스키마로 검증된 AIRoutineData
  * @param userId - 사용자 ID
  * @param conversationId - 대화 ID (ai_session_id로 사용)
  * @param title - 루틴 제목
+ * @param weekCount - 적용할 주차 수 (기본: 전체)
  */
 function convertAIRoutineToEvents(
   routineData: AIRoutineData,
   userId: string,
   conversationId: string,
-  title: string
+  title: string,
+  weekCount?: number
 ): Array<{
   user_id: string;
   type: EventType;
@@ -62,16 +66,37 @@ function convertAIRoutineToEvents(
     ai_session_id: string;
   }> = [];
 
-  const startDate = getNextMonday();
+  // 적용할 주차 제한
+  const weeksToApply = weekCount
+    ? routineData.weeks.slice(0, weekCount)
+    : routineData.weeks;
 
-  routineData.weeks.forEach((week, weekIndex) => {
+  if (weeksToApply.length === 0) {
+    return events;
+  }
+
+  // 루틴에 포함된 요일들 추출 (첫 주 기준)
+  const firstWeekDays = weeksToApply[0].days || [];
+  const targetDays = firstWeekDays.map(d => d.dayOfWeek);
+
+  // Phase 11: 오늘부터 첫 매칭 요일 찾기
+  const routineStartDate = getRoutineStartDate(targetDays);
+  // 시작일이 속한 주의 월요일
+  const baseMonday = getMondayOfWeek(routineStartDate);
+
+  weeksToApply.forEach((week, weekIndex) => {
     const weekDays = week.days || [];
 
     weekDays.forEach((day) => {
       // dayOfWeek: 1=월요일 → 0, 2=화요일 → 1, ...
       const dayOffset = (day.dayOfWeek - 1) + (weekIndex * 7);
-      const eventDate = new Date(startDate);
-      eventDate.setDate(startDate.getDate() + dayOffset);
+      const eventDate = new Date(baseMonday);
+      eventDate.setDate(baseMonday.getDate() + dayOffset);
+
+      // 오늘 이전 날짜는 건너뛰기
+      if (eventDate < routineStartDate) {
+        return;
+      }
 
       // WorkoutExercise[] 변환
       const exercises: WorkoutExercise[] = (day.exercises || []).map((ex, idx) => ({
@@ -130,6 +155,8 @@ function convertAIRoutineToEvents(
  *
  * AI가 생성한 루틴을 routine_events 테이블에 실제로 저장
  * 성공 시 conversations.ai_result_applied = true 업데이트
+ *
+ * Phase 11: weekCount 파라미터 추가 - 사용자가 선택한 주차 수만큼 적용
  */
 export async function executeSaveRoutineDraft(
   ctx: ToolExecutorContext,
@@ -139,6 +166,7 @@ export async function executeSaveRoutineDraft(
     duration_weeks: number;
     days_per_week: number;
     routine_data: Record<string, unknown>; // object 타입으로 직접 전달
+    weekCount?: number; // Phase 11: 적용할 주차 수
   }
 ): Promise<AIToolResult<{ saved: boolean; eventsCreated: number; startDate: string }>> {
   try {
@@ -150,11 +178,13 @@ export async function executeSaveRoutineDraft(
     const validatedRoutineData = parseResult.data;
 
     // 1. AI routine_data를 routine_events INSERT 데이터로 변환
+    // Phase 11: weekCount 전달하여 선택한 주차만큼만 이벤트 생성
     const events = convertAIRoutineToEvents(
       validatedRoutineData,
       ctx.userId,
       ctx.conversationId,
-      args.title
+      args.title,
+      args.weekCount
     );
 
     // 2. 팩토리로 충돌 체크 + 삽입 (workout은 충돌 시 에러)
@@ -275,15 +305,17 @@ export function executeGenerateRoutinePreview(
     }));
   };
 
-  // weeks 데이터 처리: 1주면 2주로 복제
+  // weeks 데이터 처리: 1주면 4주로 복제 (Phase 11.5)
   let weeks: RoutinePreviewWeek[];
 
   if (args.weeks.length === 1) {
-    // 1주 데이터를 2주로 복제
+    // 1주 데이터를 4주로 복제
     const week1Days = convertDays(args.weeks[0].days);
     weeks = [
       { weekNumber: 1, days: week1Days },
-      { weekNumber: 2, days: week1Days.map(day => ({ ...day })) },  // 복제
+      { weekNumber: 2, days: week1Days.map(day => ({ ...day })) },
+      { weekNumber: 3, days: week1Days.map(day => ({ ...day })) },
+      { weekNumber: 4, days: week1Days.map(day => ({ ...day })) },
     ];
   } else {
     // 2주 이상인 경우 그대로 사용
@@ -297,14 +329,14 @@ export function executeGenerateRoutinePreview(
     id: previewId,
     title: args.title,
     description: args.description,
-    durationWeeks: 2,  // 항상 2주로 표시
+    durationWeeks: 4,  // 최대 4주 (Phase 11.5)
     daysPerWeek: args.days_per_week,
     weeks,
     // 원본 데이터 저장 (apply_routine에서 사용)
     rawRoutineData: {
       title: args.title,
       description: args.description,
-      duration_weeks: 2,  // 적용 시에도 2주
+      duration_weeks: 4,  // 최대 4주 (Phase 11.5)
       days_per_week: args.days_per_week,
       routine_data: {
         weeks: weeks.map((week) => ({
@@ -355,10 +387,13 @@ export async function checkDateConflicts(
  *
  * 미리보기 데이터를 실제 DB에 저장
  * previewData는 API route에서 메시지 metadata에서 가져와서 전달
+ *
+ * Phase 11: weekCount 파라미터 추가 - 사용자가 선택한 주차 수만큼 적용
  */
 export async function executeApplyRoutine(
   ctx: ToolExecutorContext,
-  previewData: RoutinePreviewData
+  previewData: RoutinePreviewData,
+  weekCount?: number
 ): Promise<AIToolResult<{ saved: boolean; eventsCreated: number; startDate: string }>> {
   try {
     if (!previewData.rawRoutineData) {
@@ -374,12 +409,14 @@ export async function executeApplyRoutine(
     };
 
     // 기존 executeSaveRoutineDraft 로직 재사용
+    // Phase 11: weekCount 전달
     return await executeSaveRoutineDraft(ctx, {
       title: rawData.title,
       description: rawData.description,
       duration_weeks: rawData.duration_weeks,
       days_per_week: rawData.days_per_week,
       routine_data: rawData.routine_data,
+      weekCount,
     });
   } catch (err) {
     console.error('[apply_routine] Unexpected error:', err);

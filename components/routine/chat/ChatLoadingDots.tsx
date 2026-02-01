@@ -10,11 +10,11 @@ import { SpinnerGapIcon } from '@phosphor-icons/react';
  */
 export function ChatLoadingDots() {
   return (
-    <div className="flex gap-3">
+    <div className="flex gap-3 mt-2">
       <div className="shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
         <SpinnerGapIcon size={16} className="animate-spin" />
       </div>
-      <div className="bg-card border border-border rounded-2xl rounded-tl-md px-4 py-3 mt-1">
+      <div className="bg-card rounded-2xl rounded-tl-none px-4 py-3 mt-2">
         <div className="flex gap-1">
           {[0, 150, 300].map((delay) => (
             <span

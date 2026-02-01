@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { ClockIcon, SpinnerGapIcon } from '@phosphor-icons/react';
-import { getEventIcon } from '@/lib/config/eventTheme';
+import { CheckIcon, ClockIcon, ProhibitIcon, SpinnerGapIcon } from '@phosphor-icons/react';
 import Modal from '@/components/ui/Modal';
 import type { RoutinePreviewData, RoutinePreviewDay, RoutinePreviewExercise } from '@/lib/types/fitness';
+import type { RoutinePreviewStatus } from '@/lib/types/chat';
 
 const DAY_NAMES = ['', '월', '화', '수', '목', '금', '토', '일'];
 
@@ -12,26 +12,31 @@ interface PreviewDetailDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   preview: RoutinePreviewData;
-  onApply: (forceOverwrite?: boolean) => void;
+  /** 메시지 상태 (Phase 10) */
+  status?: RoutinePreviewStatus;
+  /** Phase 11: weekCount 추가 */
+  onApply: (forceOverwrite?: boolean, weekCount?: number) => void;
   isApplying?: boolean;
 }
 
 /**
  * 루틴 상세 보기 드로어
  *
- * 미니멀하고 구조적인 디자인
- * - 카드 기반 레이아웃
- * - 하단 버튼 고정
- * - 명확한 시각적 계층
+ * Phase 11.5: UX 개선
+ * - 아이콘 제거, 배지 + 타이틀 + 설명 구조
+ * - 설명 전체 표시 (line-clamp 제거)
+ * - 주차 탭 제거 (동일 루틴이므로 첫 주만 표시)
+ * - 주차 선택 UI 하단 고정
  */
 export default function PreviewDetailDrawer({
   isOpen,
   onClose,
   preview,
+  status = 'pending',
   onApply,
   isApplying = false,
 }: PreviewDetailDrawerProps) {
-  const [selectedWeek, setSelectedWeek] = useState(1);
+  const [selectedWeekCount, setSelectedWeekCount] = useState(2); // 적용할 주차 수
 
   // Null guard - preview가 없으면 렌더링하지 않음
   if (!preview?.weeks) {
@@ -39,8 +44,20 @@ export default function PreviewDetailDrawer({
   }
 
   const weeks = preview.weeks;
-  const currentWeek = weeks.find(w => w.weekNumber === selectedWeek);
+  const firstWeek = weeks[0]; // 첫 주만 표시 (동일 루틴)
   const hasConflicts = (preview.conflicts?.length ?? 0) > 0;
+  const isActionable = status === 'pending' && !isApplying;
+
+  // 선택한 주차까지의 총 일수 계산
+  const totalDays = weeks
+    .slice(0, selectedWeekCount)
+    .reduce((sum, w) => sum + w.days.length, 0);
+
+  // 주차 선택 옵션 (최대 4주)
+  const weekOptions = Array.from({ length: Math.min(weeks.length, 4) }, (_, i) => ({
+    value: i + 1,
+    label: `${i + 1}주`,
+  }));
 
   return (
     <Modal
@@ -51,74 +68,108 @@ export default function PreviewDetailDrawer({
       height="full"
       showCloseButton={false}
     >
-      {/* 헤더 */}
+      {/* 헤더 - 배지 + 타이틀 + 설명 */}
       <div className="px-5 pt-2 pb-4">
-        <div className="flex items-start gap-3">
-          {(() => {
-            const Icon = getEventIcon('workout');
-            return (
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-primary/10">
-                <Icon className="w-5 h-5 text-primary" />
-              </div>
-            );
-          })()}
-          <div className="flex-1 min-w-0">
-            <h2 className="font-semibold text-foreground text-lg leading-tight">
-              {preview.title}
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-              {preview.description}
-            </p>
-          </div>
+        {/* 배지들 */}
+        <div className="flex items-center gap-2 mb-4">
+          <span className="px-2.5 py-1 text-xs font-medium bg-muted/50 text-muted-foreground rounded-full">
+            주 {preview.daysPerWeek}회
+          </span>
+          {firstWeek?.days[0]?.estimatedDuration && (
+            <span className="px-2.5 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
+              {firstWeek.days[0].estimatedDuration}분
+            </span>
+          )}
         </div>
+
+        {/* 타이틀 */}
+        <h2 className="font-semibold text-foreground text-lg leading-tight">
+          {preview.title}
+        </h2>
+
+        {/* 설명 - 전체 표시 */}
+        {preview.description && (
+          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+            {preview.description}
+          </p>
+        )}
       </div>
 
-      {/* 주차 탭 */}
-      <div className="flex px-5 gap-2 pb-3 overflow-x-auto scrollbar-hide">
-        {weeks.map((week) => (
-          <button
-            key={week.weekNumber}
-            onClick={() => setSelectedWeek(week.weekNumber)}
-            className={`px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-all shrink-0 ${
-              selectedWeek === week.weekNumber
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-            }`}
-          >
-            {week.weekNumber}주차
-          </button>
-        ))}
-      </div>
-
-      {/* 일별 상세 (스크롤 영역) */}
+      {/* 일별 상세 (스크롤 영역) - 첫 주만 표시 */}
       <div className="flex-1 overflow-y-auto">
         <div className="px-5 pb-6 space-y-4">
-          {currentWeek?.days.map((day, idx) => (
+          {firstWeek?.days.map((day, idx) => (
             <RoutineDayCard key={idx} day={day} />
           ))}
         </div>
       </div>
 
-      {/* 하단 고정 버튼 */}
-      <div className="sticky bottom-0 p-4 bg-card">
-        <button
-          onClick={() => onApply(hasConflicts)}
-          disabled={isApplying}
-          className={`w-full py-3.5 rounded-xl font-medium transition-all disabled:opacity-50 active:scale-[0.98] ${
-            hasConflicts
-              ? 'bg-amber-500 text-white hover:bg-amber-600'
-              : 'bg-primary text-primary-foreground hover:bg-primary/90'
-          }`}
-        >
-          {isApplying ? (
-            <span className="flex items-center justify-center gap-2">
-              <SpinnerGapIcon size={16} className="animate-spin" />
-              적용 중...
+      {/* 하단 고정: 주차 선택 + 버튼 */}
+      <div className="sticky bottom-0 p-4 bg-card space-y-3">
+        {status === 'pending' ? (
+          <>
+            {/* 주차 선택 */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+                {weekOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setSelectedWeekCount(opt.value)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap transition-all shrink-0 ${
+                      selectedWeekCount === opt.value
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
+                총 {totalDays}일
+              </span>
+            </div>
+
+            {/* 적용 버튼 */}
+            <button
+              onClick={() => onApply(hasConflicts, selectedWeekCount)}
+              disabled={!isActionable}
+              className={`w-full py-3.5 rounded-xl font-medium transition-all disabled:opacity-50 active:scale-[0.98] ${
+                hasConflicts
+                  ? 'bg-amber-500 text-white hover:bg-amber-600'
+                  : 'bg-primary text-primary-foreground hover:bg-primary/90'
+              }`}
+            >
+              {isApplying ? (
+                <span className="flex items-center justify-center gap-2">
+                  <SpinnerGapIcon size={16} className="animate-spin" />
+                  적용 중...
+                </span>
+              ) : (
+                `${selectedWeekCount}주 루틴 적용하기`
+              )}
+            </button>
+          </>
+        ) : (
+          /* 상태 표시 (중앙 정렬) */
+          <div className="flex items-center justify-center py-3.5">
+            <span className={`text-sm font-medium flex items-center gap-1.5 ${
+              status === 'applied' ? 'text-green-600' : 'text-muted-foreground'
+            }`}>
+              {status === 'applied' ? (
+                <>
+                  <CheckIcon size={16} weight="bold" />
+                  이미 적용된 루틴입니다
+                </>
+              ) : (
+                <>
+                  <ProhibitIcon size={16} />
+                  취소된 루틴입니다
+                </>
+              )}
             </span>
-          ) : (
-            '이 루틴 적용하기'
-          )}
-        </button>
+          </div>
+        )}
       </div>
     </Modal>
   );
@@ -186,4 +237,3 @@ function ExerciseItem({
     </div>
   );
 }
-

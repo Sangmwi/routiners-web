@@ -2,11 +2,11 @@
  * Coach Chat SSE Callback Factory
  *
  * SSE 스트리밍 콜백을 생성하여 리듀서와 연결
- * Phase 9: 트랜지언트 UI는 메시지로 저장되므로 즉시 invalidate
  *
- * SOLID 원칙 적용:
- * - SRP: 스트리밍 상태와 서버 동기화를 핸들러로 분리
- * - DIP: 인터페이스에 의존, 구체 구현은 핸들러에서
+ * Phase 13: 낙관적 업데이트 개선
+ * - invalidateAll → 단일 refetchQueries
+ * - 중복 refetch 제거 (onComplete에서만 1회)
+ * - optimistic 메시지는 refetch로 자동 교체
  */
 
 import type { Dispatch } from 'react';
@@ -14,10 +14,8 @@ import type { QueryClient } from '@tanstack/react-query';
 import type { AIToolName } from '@/lib/types/fitness';
 import type { ChatStreamCallbacks } from '@/lib/api/conversation';
 import type { CoachChatAction } from './coachReducer';
-import type { StreamingStateDispatcher } from '../interfaces/streamingStateDispatcher';
-import type { ServerDataSync } from '../interfaces/serverDataSync';
-import { DispatchStreamingStateHandler } from './streamingStateHandler';
-import { QueryClientServerDataSyncHandler } from './serverDataSyncHandler';
+import { queryKeys } from '@/lib/constants/queryKeys';
+import { removeOptimisticMessages } from '../useSendCoachMessage';
 
 // =============================================================================
 // Types
@@ -38,69 +36,89 @@ export interface CoachCallbackContext {
 /**
  * 코치 채팅 콜백 생성
  *
- * 스트리밍 상태 관리와 서버 데이터 동기화를 핸들러로 분리 (SRP)
- * 인터페이스에 의존하여 테스트 및 확장 가능 (DIP)
+ * Phase 13: 낙관적 업데이트 개선
+ * - 단일 refetch로 통합 (onComplete에서만)
+ * - 이벤트 핸들러에서 중복 refetch 제거
+ * - optimistic 메시지는 refetch로 자동 교체
  */
 export function createCoachCallbacks(ctx: CoachCallbackContext): ChatStreamCallbacks {
-  // 핸들러 생성 (인터페이스 구현)
-  const stateHandler: StreamingStateDispatcher = new DispatchStreamingStateHandler(ctx.dispatch);
-  const syncHandler: ServerDataSync = new QueryClientServerDataSyncHandler(ctx.queryClient);
+  const { dispatch, queryClient, conversationId, onStreamComplete } = ctx;
+
+  // 메시지 + 대화 캐시 동시 갱신 (단일 호출)
+  const refreshCache = async () => {
+    await Promise.all([
+      queryClient.refetchQueries({
+        queryKey: queryKeys.coach.messages(conversationId),
+      }),
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.coach.conversation(conversationId),
+      }),
+    ]);
+  };
 
   return {
     onMessage: (chunk) => {
-      stateHandler.appendChunk(chunk);
+      dispatch({ type: 'APPEND_STREAMING', chunk });
     },
 
     onComplete: async () => {
-      stateHandler.completeStreaming();
+      dispatch({ type: 'COMPLETE_STREAMING' });
 
-      // 메시지 + 대화 캐시 무효화 (서버 메시지 반영)
-      await syncHandler.invalidateAll(ctx.conversationId);
+      // 서버 메시지 반영 (optimistic 메시지가 실제 메시지로 교체됨)
+      await refreshCache();
 
-      // 서버 메시지 로드 완료 → 스트리밍 플레이스홀더 제거
-      stateHandler.clearStreamingContent();
-
-      // 실제 메시지 로드 완료 → 낙관적 메시지 제거
-      stateHandler.clearPendingUserMessage();
+      // 스트리밍 플레이스홀더 제거
+      dispatch({ type: 'CLEAR_STREAMING_CONTENT' });
 
       // 요약 체크 (non-blocking)
-      ctx.onStreamComplete?.(ctx.conversationId);
+      onStreamComplete?.(conversationId);
     },
 
     onError: (err) => {
-      stateHandler.setError(err.message);
+      // 오류 시 optimistic 메시지 제거
+      removeOptimisticMessages(queryClient, conversationId);
+      dispatch({ type: 'SET_ERROR', error: err.message });
     },
 
     onToolStart: (event) => {
-      stateHandler.toolStart(event.toolCallId, event.name as AIToolName);
+      dispatch({
+        type: 'TOOL_START',
+        toolCallId: event.toolCallId,
+        name: event.name as AIToolName,
+      });
     },
 
     onToolDone: (event) => {
-      stateHandler.toolDone(event.toolCallId, event.success ?? true);
+      dispatch({
+        type: 'TOOL_DONE',
+        toolCallId: event.toolCallId,
+        success: event.success ?? true,
+      });
     },
 
-    onInputRequest: async () => {
-      // Phase 9: 서버에서 이미 메시지를 저장했으므로 즉시 쿼리 invalidate
-      await syncHandler.invalidateMessages(ctx.conversationId);
+    // Phase 13: 이벤트별 refetch 제거
+    // → onComplete에서 통합 refetch하므로 개별 refetch 불필요
+    // → 서버에서 메시지로 저장 후 onComplete의 refreshCache에서 반영
+    onInputRequest: () => {
+      // No-op: onComplete에서 처리
     },
 
-    onRoutinePreview: async () => {
-      // Phase 9: 서버에서 이미 메시지를 저장했으므로 즉시 쿼리 invalidate
-      await syncHandler.invalidateMessages(ctx.conversationId);
+    onRoutinePreview: () => {
+      // 루틴 생성 완료 → 프로그래스바 제거
+      dispatch({ type: 'CLEAR_ROUTINE_PROGRESS' });
+      // No-op for refetch: onComplete에서 처리
+    },
+
+    onProfileConfirmation: () => {
+      // No-op: onComplete에서 처리
     },
 
     onRoutineApplied: (event) => {
-      stateHandler.setAppliedRoutine(event);
+      dispatch({ type: 'SET_APPLIED_ROUTINE', event });
     },
 
     onRoutineProgress: (event) => {
-      stateHandler.setRoutineProgress(event);
-    },
-
-    onProfileConfirmation: async () => {
-      // Phase 9: 서버에서 이미 메시지를 저장했으므로 즉시 쿼리 invalidate
-      // → messages 배열에 포함되어 ChatMessage 컴포넌트에서 렌더링됨
-      await syncHandler.invalidateMessages(ctx.conversationId);
+      dispatch({ type: 'SET_ROUTINE_PROGRESS', event });
     },
   };
 }

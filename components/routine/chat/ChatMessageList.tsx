@@ -43,7 +43,7 @@ function FloatingToolStatus({ tools }: FloatingToolStatusProps) {
   if (tools.length === 0) return null;
 
   return (
-    <div className="absolute left-0 right-0 bottom-full mb-1 ml-11">
+    <div className="absolute left-0 right-0 bottom-full -mb-2 ml-11">
       <ToolStatusIndicator tools={tools} />
     </div>
   );
@@ -142,7 +142,7 @@ export default function ChatMessageList({
       ref={scrollContainerRef}
       className="h-full overflow-y-auto overflow-x-hidden p-4"
     >
-      <div className="flex flex-col gap-9">
+      <div className="flex flex-col gap-6">
         {/* 상단 센티널 — 이전 메시지 로드 트리거 */}
         <div ref={topSentinelRef} className="shrink-0">
           {showLoadingSpinner && (
@@ -165,8 +165,8 @@ export default function ChatMessageList({
           />
         ))}
 
-        {/* AI 응답 영역 - 스트리밍/로딩 중일 때만 */}
-        {(streamingContent || isLoading) && (
+        {/* AI 응답 영역 - 스트리밍 중이거나 로딩 중일 때 (프로그래스바 있으면 로딩 점 생략) */}
+        {(streamingContent || (isLoading && !routineProgress)) && (
           <div className="relative">
             <FloatingToolStatus tools={displayedTools} />
             {streamingContent ? (

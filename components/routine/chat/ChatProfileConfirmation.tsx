@@ -15,10 +15,10 @@ interface ChatProfileConfirmationProps {
 /**
  * 프로필 확인 카드 컴포넌트
  *
- * Phase 9: status prop 추가
- * - pending: 버튼 활성화
- * - confirmed: "✓ 확인됨" 배지 표시
- * - edited: "✎ 수정됨" 배지 표시
+ * Phase 10: status에 따라 버튼 자리에 상태 텍스트 표시
+ * - pending: 수정/확인 버튼
+ * - confirmed: "확인되었습니다" 중앙 정렬
+ * - edited: "수정 요청됨" 중앙 정렬
  */
 export function ChatProfileConfirmation({
   request,
@@ -30,35 +30,11 @@ export function ChatProfileConfirmation({
   const isActionable = status === 'pending' && !disabled;
 
   return (
-    <div className={`rounded-2xl overflow-hidden bg-linear-to-b from-primary/5 to-transparent ${
-      status !== 'pending' ? 'opacity-75' : ''
-    }`}>
-      {/* 상태 배지 */}
-      {status !== 'pending' && (
-        <div className="px-3 pt-4">
-          <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full ${
-            status === 'confirmed'
-              ? 'text-success'
-              : 'text-warning'
-          }`}>
-            {status === 'confirmed' ? (
-              <>
-                <CheckIcon size={12} weight="bold" />
-                확인됨
-              </>
-            ) : (
-              <>
-                <PencilSimpleIcon size={12} />
-                수정 요청
-              </>
-            )}
-          </span>
-        </div>
-      )}
-
+    <div className={`rounded-2xl overflow-hidden bg-linear-to-b from-primary/5 to-transparent ${status !== 'pending' ? 'opacity-75' : ''
+      }`}>
       {/* 헤더 */}
-      <div className={`p-5 ${status !== 'pending' ? 'pt-2' : ''} pb-4`}>
-        <div className="flex items-start gap-3">
+      <div className="p-5 pb-4">
+        <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-primary/10">
             <UserIcon className="w-5 h-5 text-primary" />
           </div>
@@ -90,16 +66,17 @@ export function ChatProfileConfirmation({
         ))}
       </div>
 
-      {/* 버튼 - pending 상태에서만 표시 */}
-      {status === 'pending' && (
-        <div className="p-3 bg-primary/5">
+      {/* 액션 영역: 버튼 OR 상태 표시 */}
+      <div className="p-3 bg-primary/5">
+        {status === 'pending' ? (
+          /* 액션 버튼 */
           <div className="flex gap-2">
             {/* 수정 */}
             <button
               onClick={onEdit}
               disabled={!isActionable}
               className="flex-1 flex items-center justify-center gap-1.5 h-11 rounded-xl text-sm font-medium
-                           bg-muted/40 hover:bg-muted/60 transition-colors active:scale-[0.98] disabled:opacity-50"
+                         bg-muted/40 hover:bg-muted/60 transition-colors active:scale-[0.98] disabled:opacity-50"
             >
               <PencilSimpleIcon size={16} />
               수정
@@ -109,14 +86,32 @@ export function ChatProfileConfirmation({
               onClick={onConfirm}
               disabled={!isActionable}
               className="flex-1 flex items-center justify-center gap-1.5 h-11 rounded-xl text-sm font-medium
-                           bg-primary text-primary-foreground hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50"
+                         bg-primary text-primary-foreground hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50"
             >
               <CheckIcon size={16} />
               {request.confirmText || '확인'}
             </button>
           </div>
-        </div>
-      )}
+        ) : (
+          /* 상태 표시 (중앙 정렬) */
+          <div className="flex items-center justify-center h-11">
+            <span className={`text-xs font-medium flex items-center gap-1.5 ${status === 'confirmed' ? 'text-green-600' : 'text-amber-600'
+              }`}>
+              {status === 'confirmed' ? (
+                <>
+                  <CheckIcon size={14} weight="bold" />
+                  확인되었습니다
+                </>
+              ) : (
+                <>
+                  <PencilSimpleIcon size={14} />
+                  수정 요청됨
+                </>
+              )}
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

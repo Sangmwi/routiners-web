@@ -129,6 +129,26 @@ export async function handleToolCall(
     case 'clear_active_purpose': {
       await clearActivePurposeFn(ctx.supabase, ctx.conversationId);
 
+      // Phase 10: 최신 pending 상태의 routine_preview 메시지를 'cancelled'로 업데이트
+      const { data: previewMessage } = await ctx.supabase
+        .from('chat_messages')
+        .select('id')
+        .eq('conversation_id', ctx.conversationId)
+        .eq('content_type', 'routine_preview')
+        .eq('metadata->>status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (previewMessage) {
+        await ctx.supabase
+          .from('chat_messages')
+          .update({
+            metadata: { status: 'cancelled', cancelledAt: new Date().toISOString() },
+          })
+          .eq('id', previewMessage.id);
+      }
+
       ctx.sendEvent('tool_done', {
         toolCallId: fc.id,
         name: toolName,
@@ -140,6 +160,7 @@ export async function handleToolCall(
         toolResult: JSON.stringify({
           success: true,
           message: '프로세스가 취소되었습니다. 일반 대화 모드로 돌아갑니다.',
+          next_action: '사용자에게 "알겠습니다. 다음에 언제든 루틴 만들어드릴게요!"라고 친근하게 응답하세요.',
         }),
         continueLoop: true, // AI가 사용자에게 취소 확인 메시지를 보낼 수 있도록
       };

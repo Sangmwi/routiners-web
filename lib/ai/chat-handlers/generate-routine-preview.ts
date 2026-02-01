@@ -84,12 +84,14 @@ export async function handleGenerateRoutinePreview(
     error: previewResult.error,
   });
 
+  // Phase 11: AI 응답 간소화
   return {
     toolResult: JSON.stringify({
       success: true,
       waiting_for_confirmation: true,
-      message: '루틴 미리보기가 표시되었습니다. 사용자가 "적용하기" 또는 수정 요청을 할 때까지 기다리세요.',
       preview_id: previewResult.data?.id,
+      message: '루틴 미리보기가 표시되었습니다.',
+      next_action: '사용자가 "루틴을 적용했습니다"라고 하면 "화이팅!" 정도로 짧게 응원하세요. "루틴 생성을 취소했습니다"면 "알겠어요!"라고만 응답하세요.',
     }),
     continueLoop: false, // 사용자 확인 대기
   };

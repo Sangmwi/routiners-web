@@ -27,14 +27,19 @@ interface ChatPreviewSummaryProps {
 }
 
 /**
- * 미리보기 요약 카드 - 모던 디자인
+ * 미리보기 요약 카드 - Phase 10 디자인
  *
- * Phase 9: status prop 추가
- * - pending: 버튼 활성화
- * - applied: "✓ 적용됨" 배지 표시
- * - cancelled: "취소됨" 배지 표시 (흐리게)
+ * 레이아웃:
+ * - Row 1: 아이콘 + 배지들(end정렬) + 자세히 버튼
+ * - Row 2: 타이틀
+ * - Row 3: 디스크립션
+ * - 주차별 요약
+ * - 액션 버튼 OR 상태 표시 (중앙 정렬)
  *
- * 수정 요청은 채팅 입력창을 통해 자연스럽게 가능
+ * Phase 10: status에 따라 버튼 자리에 상태 텍스트 표시
+ * - pending: 취소/적용 버튼
+ * - applied: "루틴이 적용되었습니다" 중앙 정렬
+ * - cancelled: "취소되었습니다" 중앙 정렬
  */
 export default function ChatPreviewSummary({
   type,
@@ -56,63 +61,43 @@ export default function ChatPreviewSummary({
     <div className={`rounded-2xl overflow-hidden bg-linear-to-b from-primary/5 to-transparent ${
       status !== 'pending' ? 'opacity-75' : ''
     }`}>
-      {/* 상태 배지 */}
-      {status !== 'pending' && (
-        <div className="px-5 pt-3">
-          <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full ${
-            status === 'applied'
-              ? 'bg-green-500/10 text-green-600'
-              : 'bg-muted text-muted-foreground'
-          }`}>
-            {status === 'applied' ? (
-              <>
-                <CheckIcon size={12} weight="bold" />
-                적용됨
-              </>
-            ) : (
-              <>
-                <ProhibitIcon size={12} />
-                취소됨
-              </>
+      {/* 헤더 Row 1: 아이콘 + 배지들 + 자세히 */}
+      <div className="p-5 pb-3">
+        <div className="flex items-center gap-3">
+          {/* 배지들 + 자세히 버튼 (우측 정렬) */}
+          <div className="flex-1 flex items-center gap-2">
+            <span className="px-2.5 py-1 text-xs font-medium bg-muted/50 text-muted-foreground rounded-full">
+              {stats.duration}
+            </span>
+            <span className="px-2.5 py-1 text-xs font-medium bg-muted/50 text-muted-foreground rounded-full">
+              {stats.frequency}
+            </span>
+            {stats.perSession && (
+              <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary">
+                {stats.perSession}
+              </span>
             )}
-          </span>
+          </div>
+          <ViewMoreButton onClick={onViewDetails} variant="muted">
+            자세히
+          </ViewMoreButton>
         </div>
-      )}
 
-      {/* 헤더 */}
-      <div className={`p-5 ${status !== 'pending' ? 'pt-2' : ''} pb-4`}>
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-primary/10">
-            <Icon className="w-5 h-5 text-primary" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground text-lg leading-tight">{title}</h3>
-            <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2">{description}</p>
-            {/* 통계 칩 + 상세보기 */}
-            <div className="flex items-center justify-between mt-3">
-              <div className="flex flex-wrap gap-2">
-                <span className="px-2.5 py-1 text-xs font-medium bg-muted/50 text-muted-foreground rounded-full">
-                  {stats.duration}
-                </span>
-                <span className="px-2.5 py-1 text-xs font-medium bg-muted/50 text-muted-foreground rounded-full">
-                  {stats.frequency}
-                </span>
-                {stats.perSession && (
-                  <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary">
-                    {stats.perSession}
-                  </span>
-                )}
-              </div>
-              <ViewMoreButton onClick={onViewDetails} variant="muted">
-                자세히
-              </ViewMoreButton>
-            </div>
-          </div>
-        </div>
+        {/* Row 2: 타이틀 */}
+        <h3 className="font-semibold text-foreground text-lg leading-tight mt-5">
+          {title}
+        </h3>
+
+        {/* Row 3: 디스크립션, 줄간격 넓게*/}
+        {description && (
+          <p className="text-xs text-muted-foreground mt-3 line-clamp-2 leading-relaxed">
+            {description}
+          </p>
+        )}
       </div>
 
       {/* 주차별 요약 */}
-      <div className="px-5 pb-5 space-y-2">
+      <div className="px-5 pb-4 space-y-2">
         {weekSummaries.slice(0, 2).map((summary, idx) => (
           <div key={idx} className="flex items-start gap-3 p-3 bg-muted/30 rounded-xl">
             <span className="shrink-0 text-xs font-semibold text-primary">
@@ -129,7 +114,7 @@ export default function ChatPreviewSummary({
       </div>
 
       {/* 충돌 경고 */}
-      {hasConflicts && (
+      {hasConflicts && status === 'pending' && (
         <div className="px-4 pb-3">
           <div className="flex items-center gap-2 text-warning">
             <WarningIcon size={14} className="shrink-0" />
@@ -138,9 +123,10 @@ export default function ChatPreviewSummary({
         </div>
       )}
 
-      {/* 액션 버튼 - pending 상태에서만 표시 */}
-      {status === 'pending' && (
-        <div className="p-3 bg-primary/5">
+      {/* 액션 영역: 버튼 OR 상태 표시 */}
+      <div className="p-3 bg-primary/5">
+        {status === 'pending' ? (
+          /* 액션 버튼 */
           <div className="flex gap-2">
             {/* 취소 */}
             <button
@@ -172,8 +158,27 @@ export default function ChatPreviewSummary({
               )}
             </button>
           </div>
-        </div>
-      )}
+        ) : (
+          /* 상태 표시 (중앙 정렬) */
+          <div className="flex items-center justify-center h-11">
+            <span className={`text-xs font-medium flex items-center gap-1.5 ${
+              status === 'applied' ? 'text-green-600' : 'text-muted-foreground'
+            }`}>
+              {status === 'applied' ? (
+                <>
+                  <CheckIcon size={14} weight="bold" />
+                  루틴이 적용되었습니다
+                </>
+              ) : (
+                <>
+                  <ProhibitIcon size={14} />
+                  취소되었습니다
+                </>
+              )}
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
