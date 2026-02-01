@@ -16,6 +16,7 @@ interface UseSwipeGestureReturn {
   deltaY: number;
   isDragging: boolean;
   isSwipeClosing: boolean;
+  isSnappingBack: boolean;
   handlers: {
     onTouchStart: (e: React.TouchEvent) => void;
     onTouchMove: (e: React.TouchEvent) => void;
@@ -53,6 +54,7 @@ export function useSwipeGesture(
     isDragging: false,
   });
   const [isSwipeClosing, setIsSwipeClosing] = useState(false);
+  const [isSnappingBack, setIsSnappingBack] = useState(false);
 
   const handleDragStart = useCallback(
     (clientY: number) => {
@@ -79,6 +81,10 @@ export function useSwipeGesture(
         // isSwipeClosing은 모달 닫힌 후 reset()에서 리셋됨
         setIsSwipeClosing(true);
         onSwipeClose();
+      } else if (prev.deltaY > 0) {
+        // 임계치 미달: 스냅백 애니메이션으로 부드럽게 복귀
+        setIsSnappingBack(true);
+        setTimeout(() => setIsSnappingBack(false), ANIMATION_DURATION);
       }
 
       return { startY: null, deltaY: 0, isDragging: false };
@@ -88,6 +94,7 @@ export function useSwipeGesture(
   const reset = useCallback(() => {
     setState({ startY: null, deltaY: 0, isDragging: false });
     setIsSwipeClosing(false);
+    setIsSnappingBack(false);
   }, []);
 
   const handlers = {
@@ -108,6 +115,7 @@ export function useSwipeGesture(
     deltaY: state.deltaY,
     isDragging: state.isDragging,
     isSwipeClosing,
+    isSnappingBack,
     handlers,
     reset,
   };

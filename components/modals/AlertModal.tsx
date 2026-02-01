@@ -41,6 +41,8 @@ export default function AlertModal({
       isOpen={isOpen}
       onClose={handleClose}
       showCloseButton={false}
+      closeOnBackdrop={false}
+      closeOnEsc={false}
       size="sm"
     >
       <ModalBody>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, ReactNode } from 'react';
+import { useEffect, useRef, useState, ReactNode } from 'react';
 import { CloseIcon } from '@/components/ui/icons';
 import {
   useModalState,
@@ -57,8 +57,10 @@ function getModalAnimationClass(
   isBottom: boolean,
   isAnimating: boolean,
   isSwipeClosing: boolean,
+  isSnappingBack: boolean,
   hasOpened: boolean,
-  isDragging: boolean
+  isDragging: boolean,
+  hasEverDragged: boolean
 ): string {
   const baseClass = isBottom
     ? 'rounded-t-3xl sm:rounded-2xl'
@@ -72,7 +74,8 @@ function getModalAnimationClass(
       : `${baseClass} animate-out zoom-out-95 fade-out duration-200`;
   }
 
-  if (hasOpened || isDragging) return baseClass;
+  // 한 번이라도 드래그했으면 애니메이션 재실행 방지
+  if (hasOpened || isDragging || isSnappingBack || hasEverDragged) return baseClass;
 
   return isBottom
     ? `${baseClass} animate-in slide-in-from-bottom duration-300`
@@ -91,8 +94,11 @@ function getBackdropAnimationClass(
 
 function getSwipeTransform(
   isSwipeClosing: boolean,
+  isSnappingBack: boolean,
   isDragging: boolean,
-  deltaY: number
+  deltaY: number,
+  hasOpened: boolean,
+  hasEverDragged: boolean
 ): React.CSSProperties | undefined {
   // 스와이프로 닫히는 중
   if (isSwipeClosing) {
@@ -102,15 +108,33 @@ function getSwipeTransform(
     };
   }
 
+  // 임계치 미달로 복귀 중 (스냅백 애니메이션)
+  if (isSnappingBack) {
+    return {
+      transform: 'translateY(0)',
+      transition: `transform ${ANIMATION_DURATION}ms ease-out`,
+      animation: 'none',
+    };
+  }
+
   // 드래그 중
   if (isDragging && deltaY > 0) {
     return {
       transform: `translateY(${deltaY}px)`,
       transition: 'none',
+      animation: 'none',
     };
   }
 
-  // 그 외: CSS 애니메이션이 제어하도록 undefined 반환
+  // 이미 열린 상태 또는 드래그 경험 있으면 위치 고정 + 애니메이션 명시적 비활성화
+  if (hasOpened || hasEverDragged) {
+    return {
+      transform: 'translateY(0)',
+      animation: 'none',
+    };
+  }
+
+  // 초기 오픈 애니메이션: CSS가 처리
   return undefined;
 }
 
@@ -150,9 +174,21 @@ export default function Modal({
     executeClose
   );
 
+  // 드래그 상호작용 추적 (한 번 드래그하면 애니메이션 재실행 방지)
+  const [hasEverDragged, setHasEverDragged] = useState(false);
+
+  useEffect(() => {
+    if (swipe.isDragging && !hasEverDragged) {
+      setHasEverDragged(true);
+    }
+  }, [swipe.isDragging, hasEverDragged]);
+
   // 모달 닫힐 때 스와이프 상태 초기화
   useEffect(() => {
-    if (!isVisible) swipe.reset();
+    if (!isVisible) {
+      swipe.reset();
+      setHasEverDragged(false);
+    }
   }, [isVisible, swipe]);
 
   // 스크롤 잠금
@@ -178,8 +214,10 @@ export default function Modal({
     isBottom,
     isAnimating,
     swipe.isSwipeClosing,
+    swipe.isSnappingBack,
     hasOpened,
-    swipe.isDragging
+    swipe.isDragging,
+    hasEverDragged
   );
 
   const backdropAnimationClass = getBackdropAnimationClass(
@@ -189,7 +227,7 @@ export default function Modal({
   );
 
   const swipeStyle = isBottom
-    ? getSwipeTransform(swipe.isSwipeClosing, swipe.isDragging, swipe.deltaY)
+    ? getSwipeTransform(swipe.isSwipeClosing, swipe.isSnappingBack, swipe.isDragging, swipe.deltaY, hasOpened, hasEverDragged)
     : undefined;
 
   return (

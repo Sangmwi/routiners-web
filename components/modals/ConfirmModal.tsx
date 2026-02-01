@@ -72,8 +72,8 @@ export default function ConfirmModal({
       isOpen={isOpen}
       onClose={handleCancel}
       showCloseButton={false}
-      closeOnBackdrop={!isLoading}
-      closeOnEsc={!isLoading}
+      closeOnBackdrop={false}
+      closeOnEsc={false}
       size="sm"
     >
       <ModalBody>
