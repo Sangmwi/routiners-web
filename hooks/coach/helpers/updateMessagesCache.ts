@@ -54,6 +54,7 @@ export function updateCacheWithCompleteData(
   }
 
   // 2. AI 메시지 추가
+  // Phase 21: metadata 포함 (트랜지언트 UI 상태)
   if (completeData.aiMessages?.length) {
     for (const msg of completeData.aiMessages) {
       newMessages.push({
@@ -63,6 +64,7 @@ export function updateCacheWithCompleteData(
         content: msg.content,
         contentType: msg.contentType as ChatMessage['contentType'],
         createdAt: msg.createdAt,
+        metadata: msg.metadata,
       });
     }
   }

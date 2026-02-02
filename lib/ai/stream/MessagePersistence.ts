@@ -24,6 +24,7 @@ export interface SavedAiMessage {
   content: string;
   contentType: string;
   createdAt: string;
+  metadata?: Record<string, unknown>;  // Phase 21: 트랜지언트 UI 상태 포함
 }
 
 export interface ToolCallData {
@@ -163,9 +164,10 @@ export async function fetchAiMessagesForComplete(
   conversationId: string,
   afterCreatedAt: string
 ): Promise<SavedAiMessage[]> {
+  // Phase 21: metadata 추가 (트랜지언트 UI 상태 포함)
   const { data } = await supabase
     .from('chat_messages')
-    .select('id, content, content_type, created_at')
+    .select('id, content, content_type, created_at, metadata')
     .eq('conversation_id', conversationId)
     .eq('role', 'assistant')
     .gt('created_at', afterCreatedAt)
@@ -179,6 +181,7 @@ export async function fetchAiMessagesForComplete(
     content: m.content,
     contentType: m.content_type,
     createdAt: m.created_at,
+    metadata: m.metadata as Record<string, unknown> | undefined,
   }));
 }
 

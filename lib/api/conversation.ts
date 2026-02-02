@@ -197,6 +197,7 @@ export interface CompleteEventMessage {
   content: string;
   contentType: string;
   createdAt: string;
+  metadata?: Record<string, unknown>;  // Phase 21: 트랜지언트 UI 상태 포함
 }
 
 /** Phase 16: SSE complete 이벤트 데이터 (ISP: 옵셔널 파라미터) */
