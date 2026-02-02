@@ -135,14 +135,12 @@ async function handleSetActivePurpose(
   await setActivePurposeFn(ctx.supabase, ctx.conversationId, purposeType);
 
   const startInstructions: Record<string, string> = {
-    routine_generation: `루틴 생성 프로세스 활성화됨.
-시작 절차:
-1. get_user_basic_info → 이름 확인
-2. get_fitness_profile → 기존 프로필 조회
-3. 프로필 있으면 → confirm_profile_data로 확인
-4. 없으면 → 운동 목표부터 순서대로 질문
-질문 형식: request_user_input 사용 (radio/checkbox/slider)
-운동 목표 options: 근육 증가(muscle_gain), 체지방 감소(fat_loss), 지구력 향상(endurance), 전반적 체력(general_fitness)`,
+    routine_generation: `🚨 즉시 실행: get_user_basic_info, get_fitness_profile 호출 후 프로필이 비어있으면 request_user_input을 반드시 호출하세요.
+
+⛔ 절대 금지: 텍스트로만 옵션 나열 (버튼이 표시되지 않음)
+
+✅ 다음 응답에서 request_user_input 도구를 호출하세요:
+{"message":"운동 목표를 선택해주세요","type":"radio","options":[{"value":"muscle_gain","label":"근육 증가 💪"},{"value":"fat_loss","label":"체지방 감소 🔥"},{"value":"endurance","label":"지구력 향상 🏃"},{"value":"general_fitness","label":"전반적 체력 🌟"}],"sliderConfig":null}`,
   };
 
   ctx.sendEvent('tool_done', {

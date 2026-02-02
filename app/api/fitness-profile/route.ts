@@ -113,6 +113,7 @@ export const PATCH = withAuth(async (request: NextRequest, { supabase }) => {
   const { data, error } = await supabase
     .from('fitness_profiles')
     .update(updateData)
+    .eq('user_id', existing.user_id)
     .select()
     .single();
 

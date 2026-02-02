@@ -11,7 +11,8 @@ export type MessageStatus =
   | 'edited'
   | 'applied'
   | 'cancelled'
-  | 'submitted';
+  | 'submitted'
+  | 'answered_via_text';  // Phase 21: 텍스트로 답변 시
 
 export interface UpdateMessageStatusParams {
   conversationId: string;

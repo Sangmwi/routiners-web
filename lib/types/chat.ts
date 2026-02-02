@@ -405,8 +405,12 @@ export type RoutinePreviewStatus = 'pending' | 'applied' | 'edited' | 'cancelled
 
 /**
  * 입력 요청 메시지 상태
+ * - pending: 대기 중 (사용자 응답 필요)
+ * - submitted: UI로 제출됨
+ * - answered_via_text: 텍스트로 답변됨 (UI 대신 직접 입력)
+ * - cancelled: 취소됨 (더 이상 사용 안 함)
  */
-export type InputRequestStatus = 'pending' | 'submitted' | 'cancelled';
+export type InputRequestStatus = 'pending' | 'submitted' | 'answered_via_text' | 'cancelled';
 
 /**
  * 트랜지언트 UI 메시지 메타데이터

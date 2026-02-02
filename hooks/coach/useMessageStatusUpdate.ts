@@ -68,6 +68,10 @@ export function useMessageStatusUpdate({
                     metadata: {
                       ...msg.metadata,
                       status: status as never,
+                      // Phase 20 fix: submittedValue도 optimistic update에 포함
+                      ...(options?.submittedValue !== undefined && {
+                        submittedValue: options.submittedValue,
+                      }),
                     },
                   }
                 : msg

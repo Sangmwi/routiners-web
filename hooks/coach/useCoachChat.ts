@@ -210,6 +210,19 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
     if (!content.trim() || state.isStreaming) return;
     const currentId = await ensureConversation();
     if (!currentId) return;
+
+    // Phase 21: pending input_request가 있으면 answered_via_text로 마킹
+    const pendingInputRequest = messages.find(
+      (m) => m.contentType === 'input_request' && m.metadata?.status === 'pending'
+    );
+    if (pendingInputRequest) {
+      try {
+        await updateStatus(pendingInputRequest.id, 'answered_via_text');
+      } catch (error) {
+        console.error('[handleSend] Failed to mark input_request as answered_via_text:', error);
+      }
+    }
+
     sendMessage(currentId, content);
   };
 

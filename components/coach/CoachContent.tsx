@@ -144,6 +144,16 @@ export default function CoachContent({ isDrawerOpen, onDrawerClose }: CoachConte
   });
   const showActionChips = !isStreaming && !streamingContent && !hasPendingInteraction && messages.length === 0;
 
+  // Phase 21: profile_confirmation, routine_preview pending 시 입력 차단
+  // input_request는 텍스트로 답변 가능하므로 차단하지 않음
+  const hasPendingBlockingUI = messages.some(m => {
+    const status = m.metadata?.status as string;
+    return (
+      (m.contentType === 'profile_confirmation' && status === 'pending') ||
+      (m.contentType === 'routine_preview' && status === 'pending')
+    );
+  });
+
   return (
     <>
       {/* 컨텐츠 영역 */}
@@ -196,9 +206,15 @@ export default function CoachContent({ isDrawerOpen, onDrawerClose }: CoachConte
       {/* 인풋 */}
       <ChatInput
         onSend={handleSend}
-        disabled={isStreaming}
+        disabled={isStreaming || hasPendingBlockingUI}
         isLoading={isStreaming}
-        placeholder={activePurpose ? '응답을 입력하세요...' : '무엇이든 물어보세요...'}
+        placeholder={
+          hasPendingBlockingUI
+            ? '위 카드에서 선택해주세요'
+            : activePurpose
+              ? '응답을 입력하세요...'
+              : '무엇이든 물어보세요...'
+        }
       />
 
       {/* 채팅 목록 드로어 */}

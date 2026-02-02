@@ -404,7 +404,7 @@ export const POST = withAuth<Response>(
 
                   // 루틴 생성 함수의 경우 진행률 전송 (큰 JSON이라 시간 소요)
                   if (fc.name === 'generate_routine_preview') {
-                    const estimatedChars = 3000; // 예상 총 문자 수
+                    const estimatedChars = 2000; // 예상 총 문자 수
                     const progress = Math.min(95, Math.round((fc.arguments.length / estimatedChars) * 100));
                     const progressStep = Math.floor(progress / 5) * 5; // 5% 단위
 
