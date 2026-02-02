@@ -3,9 +3,9 @@
  *
  * PATCH /api/coach/conversations/[id]/messages/[messageId]/status
  * - 트랜지언트 UI 메시지의 상태 업데이트
- * - 프로필 확인: pending → confirmed | edited
- * - 루틴 미리보기: pending → applied | cancelled
- * - 입력 요청: pending → submitted | cancelled
+ * - 프로필 확인: pending → confirmed | edited | cancelled
+ * - 루틴 미리보기: pending → applied | edited | cancelled
+ * - 입력 요청: pending → submitted | answered_via_text | cancelled
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -28,6 +28,7 @@ const StatusUpdateSchema = z.object({
     'cancelled',
     // InputRequestStatus
     'submitted',
+    'answered_via_text',  // Phase 21: 텍스트로 답변 시
   ]),
   submittedValue: z.string().optional(), // input_request의 경우 제출된 값
 });
