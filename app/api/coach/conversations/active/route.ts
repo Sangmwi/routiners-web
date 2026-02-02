@@ -16,12 +16,12 @@ import {
 // ============================================================================
 
 export const GET = withAuth(async (request: NextRequest, { supabase }) => {
-  // 코치 대화는 범용이므로 status와 무관하게 가장 최근 대화를 반환
+  // 코치 대화는 범용이므로 가장 최근 대화를 반환
+  // Phase 18: ai_purpose 필터 제거 (모든 AI 대화가 코치 대화)
   const { data: conversation, error } = await supabase
     .from('conversations')
     .select('*')
     .eq('type', 'ai')
-    .eq('ai_purpose', 'coach')
     .is('deleted_at', null)
     .order('updated_at', { ascending: false })
     .limit(1)

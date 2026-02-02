@@ -18,6 +18,16 @@ const SIGNUP_PREFIX = '/signup'
 const AUTH_CHECK_ROUTES = new Set(['/login', '/signup'])
 
 // ============================================================================
+// User Exists Cache Configuration
+// ============================================================================
+
+/** 유저 존재 캐시 쿠키명 */
+const USER_EXISTS_COOKIE = 'routiners_user_verified'
+
+/** 캐시 유효기간 (24시간) */
+const USER_EXISTS_TTL = 60 * 60 * 24
+
+// ============================================================================
 // Helpers
 // ============================================================================
 
@@ -32,6 +42,45 @@ const redirectTo = (request: NextRequest, path: string) => {
   const url = request.nextUrl.clone()
   url.pathname = path
   return NextResponse.redirect(url)
+}
+
+// ============================================================================
+// User Exists Cache Helpers
+// ============================================================================
+
+/**
+ * 유저 존재 여부 캐시 확인
+ * 쿠키 값이 user.id와 일치하면 캐시 유효
+ * 형식: {userId}:{timestamp}
+ */
+const getUserExistsCache = (request: NextRequest, userId: string): boolean => {
+  const cached = request.cookies.get(USER_EXISTS_COOKIE)?.value
+  if (!cached) return false
+
+  const [cachedUserId, timestampStr] = cached.split(':')
+  if (cachedUserId !== userId) return false
+
+  const timestamp = parseInt(timestampStr, 10)
+  if (isNaN(timestamp)) return false
+
+  const now = Math.floor(Date.now() / 1000)
+  if (now - timestamp > USER_EXISTS_TTL) return false
+
+  return true
+}
+
+/**
+ * 유저 존재 여부 캐시 설정
+ */
+const setUserExistsCache = (response: NextResponse, userId: string): void => {
+  const timestamp = Math.floor(Date.now() / 1000)
+  response.cookies.set(USER_EXISTS_COOKIE, `${userId}:${timestamp}`, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: USER_EXISTS_TTL,
+    path: '/',
+  })
 }
 
 // ============================================================================
@@ -78,6 +127,18 @@ export async function middleware(request: NextRequest) {
     const needsDbCheck = AUTH_CHECK_ROUTES.has(pathname) || (!isPublic && !isSignup)
 
     if (needsDbCheck) {
+      // 1. 캐시 확인 (DB 조회 스킵)
+      const isCached = getUserExistsCache(request, user.id)
+
+      if (isCached) {
+        // 캐시된 유저 → 로그인/회원가입 페이지 접근 시 홈으로
+        if (AUTH_CHECK_ROUTES.has(pathname)) {
+          return redirectTo(request, '/')
+        }
+        return supabaseResponse
+      }
+
+      // 2. 캐시 없음 → DB 조회
       const { data: dbUser, error } = await supabase
         .from('users')
         .select('id')
@@ -86,12 +147,16 @@ export async function middleware(request: NextRequest) {
 
       const userExistsInDb = !!dbUser && !error
 
-      // 기존 유저 → 로그인/회원가입 페이지 접근 시 홈으로
-      if (userExistsInDb && AUTH_CHECK_ROUTES.has(pathname)) {
-        return redirectTo(request, '/')
+      // 3. 기존 유저 → 캐시 설정 + 리다이렉트 처리
+      if (userExistsInDb) {
+        setUserExistsCache(supabaseResponse, user.id)
+
+        if (AUTH_CHECK_ROUTES.has(pathname)) {
+          return redirectTo(request, '/')
+        }
       }
 
-      // 신규 유저 (DB에 없음) → 회원가입으로
+      // 4. 신규 유저 (DB에 없음) → 회원가입으로
       if (!userExistsInDb && !isSignup) {
         return redirectTo(request, '/signup')
       }

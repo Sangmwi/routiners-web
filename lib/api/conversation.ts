@@ -15,21 +15,19 @@ import {
   ConversationUpdateData,
   ChatMessage,
   MessageCreateData,
-  AISessionCompat,
-  ConversationStatus,
   ProfileConfirmationRequest,
 } from '@/lib/types/chat';
-import { SessionPurpose } from '@/lib/types/routine';
 import { api } from './client';
 
 // ============================================================================
 // Query Parameters Types
 // ============================================================================
 
+/**
+ * Phase 18: aiPurpose, aiStatus 필터 제거 (레거시)
+ */
 export interface ConversationListParams {
   type?: 'ai' | 'direct' | 'group';
-  aiPurpose?: SessionPurpose;
-  aiStatus?: ConversationStatus;
   limit?: number;
   offset?: number;
 }
@@ -48,12 +46,12 @@ const BASE_URL = '/api/conversations';
 export const conversationApi = {
   /**
    * 대화방 목록 조회
+   *
+   * Phase 18: aiPurpose, aiStatus 필터 제거 (레거시)
    */
   async getConversations(params: ConversationListParams = {}): Promise<Conversation[]> {
     const searchParams = new URLSearchParams();
     if (params.type) searchParams.set('type', params.type);
-    if (params.aiPurpose) searchParams.set('aiPurpose', params.aiPurpose);
-    if (params.aiStatus) searchParams.set('aiStatus', params.aiStatus);
     if (params.limit) searchParams.set('limit', String(params.limit));
     if (params.offset) searchParams.set('offset', String(params.offset));
 
@@ -64,14 +62,6 @@ export const conversationApi = {
   },
 
   /**
-   * 활성 AI 대화 조회 (purpose별 1개)
-   * - 활성 세션 없으면 null 반환 (200 + null body)
-   */
-  async getActiveAIConversation(purpose: SessionPurpose): Promise<AISessionCompat | null> {
-    return api.getOrThrow<AISessionCompat | null>(`${BASE_URL}/ai/active?purpose=${purpose}`);
-  },
-
-  /**
    * 특정 대화방 조회
    */
   async getConversation(id: string): Promise<Conversation | null> {
@@ -79,18 +69,10 @@ export const conversationApi = {
   },
 
   /**
-   * AI 대화 상세 조회 (메시지 포함)
-   * - AI 타입 대화인 경우 메시지가 포함된 AISessionCompat 반환
-   */
-  async getAISession(id: string): Promise<AISessionCompat | null> {
-    return api.get<AISessionCompat>(`${BASE_URL}/${id}`);
-  },
-
-  /**
    * 새 대화방 생성
    */
-  async createConversation(data: ConversationCreateData): Promise<AISessionCompat> {
-    return api.post<AISessionCompat>(BASE_URL, data);
+  async createConversation(data: ConversationCreateData): Promise<Conversation> {
+    return api.post<Conversation>(BASE_URL, data);
   },
 
   /**
@@ -98,13 +80,6 @@ export const conversationApi = {
    */
   async updateConversation(id: string, data: ConversationUpdateData): Promise<Conversation> {
     return api.patch<Conversation>(`${BASE_URL}/${id}`, data);
-  },
-
-  /**
-   * AI 대화 완료 처리
-   */
-  async completeAIConversation(id: string): Promise<Conversation> {
-    return api.post<Conversation>(`${BASE_URL}/${id}/complete`);
   },
 
   /**
@@ -216,9 +191,24 @@ export interface RoutineProgressEvent {
   stage: string;
 }
 
+/** Phase 16: SSE complete 이벤트 메시지 형식 */
+export interface CompleteEventMessage {
+  id: string;
+  content: string;
+  contentType: string;
+  createdAt: string;
+}
+
+/** Phase 16: SSE complete 이벤트 데이터 (ISP: 옵셔널 파라미터) */
+export interface CompleteEventData {
+  userMessage?: CompleteEventMessage;
+  aiMessages?: CompleteEventMessage[];
+}
+
 export interface ChatStreamCallbacks {
   onMessage: (chunk: string) => void;
-  onComplete: (fullMessage: string) => void;
+  /** Phase 16: data 파라미터 추가 (LSP: 기존 호출도 정상 동작) */
+  onComplete: (fullMessage: string, data?: CompleteEventData) => void;
   onError: (error: Error) => void;
   onToolStart?: (event: ToolEvent) => void;
   onToolDone?: (event: ToolEvent) => void;
@@ -342,8 +332,9 @@ export const aiChatApi = {
                   case 'profile_confirmation':
                     callbacks.onProfileConfirmation?.(parsed as ProfileConfirmationRequest);
                     break;
-                  case 'done':
-                    callbacks.onComplete(fullMessage);
+                  // Phase 16: 'complete' + data 전달 (7.5KB refetch → 0KB 부분 업데이트)
+                  case 'complete':
+                    callbacks.onComplete(fullMessage, parsed as CompleteEventData);
                     return;
                   case 'error':
                     throw new Error(parsed.error || 'Unknown error');

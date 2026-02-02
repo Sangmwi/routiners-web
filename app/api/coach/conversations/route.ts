@@ -35,11 +35,11 @@ const CreateConversationSchema = z.object({
 
 export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   // 코치 대화만 조회 (최근 순, 삭제 제외)
+  // Phase 18: ai_purpose 필터 제거 (모든 AI 대화가 코치 대화)
   const { data: conversations, error } = await supabase
     .from('conversations')
     .select('*')
     .eq('type', 'ai')
-    .eq('ai_purpose', 'coach')
     .is('deleted_at', null)
     .order('updated_at', { ascending: false })
     .limit(50);
@@ -143,12 +143,11 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
     : { messageCount: 0 };
 
   // 새 코치 대화 생성
+  // Phase 18: ai_purpose, ai_status 컬럼 제거됨
   const { data: conversation, error: convError } = await supabase
     .from('conversations')
     .insert({
       type: 'ai',
-      ai_purpose: 'coach',
-      ai_status: 'active',
       ai_result_applied: false,
       metadata,
     })

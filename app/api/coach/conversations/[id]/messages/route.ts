@@ -25,12 +25,12 @@ export const GET = withAuth(
     const cursor = searchParams.get('cursor'); // created_at 기준
 
     // 대화 정보 조회 (메타데이터 포함)
+    // Phase 18: ai_purpose 필터 제거
     const { data: conversation, error: convError } = await supabase
       .from('conversations')
       .select('*')
       .eq('id', id)
       .eq('type', 'ai')
-      .eq('ai_purpose', 'coach')
       .is('deleted_at', null)
       .single();
 

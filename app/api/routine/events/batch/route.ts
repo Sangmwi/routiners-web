@@ -38,9 +38,10 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
   const { events, aiSessionId } = validation.data;
 
   // AI 대화(conversation) 확인 (RLS가 자동으로 권한 필터링)
+  // Phase 18: ai_status 컬럼 제거됨
   const { data: session, error: sessionError } = await supabase
     .from('conversations')
-    .select('id, ai_status')
+    .select('id')
     .eq('id', aiSessionId)
     .eq('type', 'ai')
     .single();

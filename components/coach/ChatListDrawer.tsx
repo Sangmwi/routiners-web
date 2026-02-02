@@ -1,9 +1,9 @@
 'use client';
 
 import { PlusIcon, RobotIcon, TrashSimpleIcon } from '@phosphor-icons/react';
-import { LoadingSpinner, SuccessIcon } from '@/components/ui/icons';
+import { LoadingSpinner } from '@/components/ui/icons';
 import Modal, { ModalBody } from '@/components/ui/Modal';
-import type { CoachConversationListItem } from '@/lib/types/coach';
+import type { CoachConversationListItem, ActivePurposeType } from '@/lib/types/coach';
 
 interface ChatListDrawerProps {
   isOpen: boolean;
@@ -132,20 +132,15 @@ interface ConversationItemProps {
 
 function ConversationItem({ item, isCurrent, onSelect, onDelete }: ConversationItemProps) {
   const { conversation, hasActivePurpose, lastMessage } = item;
-  const isActive = conversation.aiStatus === 'active';
-  const isCompleted = conversation.aiStatus === 'completed';
+  const activePurposeType = conversation.metadata?.activePurpose?.type;
 
   // 시간 포맷 (HH:MM)
   const date = new Date(conversation.createdAt);
   const timeStr = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 
-  // 상태 정보
-  const statusInfo = hasActivePurpose
-    ? { icon: <LoadingSpinner size="xs" />, label: '진행 중', color: 'text-primary' }
-    : isActive
-    ? { icon: null, label: '활성', color: 'text-muted-foreground' }
-    : isCompleted
-    ? { icon: <SuccessIcon size="xs" />, label: '완료', color: 'text-success' }
+  // 상태 정보 (활성 목적이 있을 때만 표시)
+  const statusInfo = hasActivePurpose && activePurposeType
+    ? { icon: <LoadingSpinner size="xs" />, label: getPurposeLabel(activePurposeType), color: 'text-primary' }
     : null;
 
   return (
@@ -213,6 +208,18 @@ function ConversationItem({ item, isCurrent, onSelect, onDelete }: ConversationI
 // ============================================================================
 // Helpers
 // ============================================================================
+
+/**
+ * 활성 목적 타입에 따른 상태 라벨
+ */
+function getPurposeLabel(type: ActivePurposeType): string {
+  switch (type) {
+    case 'routine_generation':
+      return '운동 루틴 생성 중';
+    default:
+      return '진행 중';
+  }
+}
 
 /**
  * 날짜별 그룹핑

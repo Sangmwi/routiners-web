@@ -126,44 +126,8 @@ export function useSendCoachMessage() {
 }
 
 // =============================================================================
-// Utility: 낙관적 메시지 → 실제 메시지 교체
+// Utility: 낙관적 메시지 관리
 // =============================================================================
-
-/**
- * 낙관적 메시지를 실제 서버 메시지로 교체
- *
- * SSE onComplete 콜백에서 호출:
- * - optimistic- prefix 메시지 제거
- * - 실제 유저 메시지 + AI 응답 메시지 삽입
- */
-export function replaceOptimisticWithReal(
-  queryClient: ReturnType<typeof useQueryClient>,
-  conversationId: string,
-  newMessages: ChatMessage[]
-) {
-  queryClient.setQueryData<InfiniteData<CoachMessagePage>>(
-    queryKeys.coach.messages(conversationId),
-    (old) => {
-      if (!old?.pages?.length) return old;
-
-      const newPages = old.pages.map((page, idx) => {
-        if (idx !== 0) return page; // 첫 페이지만 수정
-
-        // optimistic- 메시지 제거하고 실제 메시지로 교체
-        const filteredMessages = page.messages.filter(
-          (m) => !m.id.startsWith('optimistic-')
-        );
-
-        return {
-          ...page,
-          messages: [...filteredMessages, ...newMessages],
-        };
-      });
-
-      return { ...old, pages: newPages };
-    }
-  );
-}
 
 /**
  * 낙관적 메시지 제거 (오류 시 또는 스트림 취소 시)

@@ -51,6 +51,7 @@ export default function CoachContent() {
     confirmProfile,
     editProfile,
     isMessagesLoading,
+    isRefetching,
     sendMessage,
     refetchMessages,
   } = useCoachChat(conversationIdFromUrl);
@@ -143,7 +144,7 @@ export default function CoachContent() {
         ) : (
           <ChatMessageList
             messages={messages}
-            isLoading={isStreaming}
+            isLoading={isStreaming || isRefetching}
             streamingContent={streamingContent}
             activeTools={activeTools}
             onMessageAction={handleMessageAction}

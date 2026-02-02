@@ -7,15 +7,21 @@
  * - invalidateAll → 단일 refetchQueries
  * - 중복 refetch 제거 (onComplete에서만 1회)
  * - optimistic 메시지는 refetch로 자동 교체
+ *
+ * Phase 16: SSE 부분 업데이트
+ * - complete 이벤트에 AI 메시지 포함 시 setQueryData로 부분 업데이트
+ * - 데이터 없으면 fallback으로 refetch
  */
 
 import type { Dispatch } from 'react';
-import type { QueryClient } from '@tanstack/react-query';
+import type { QueryClient, InfiniteData } from '@tanstack/react-query';
 import type { AIToolName } from '@/lib/types/fitness';
 import type { ChatStreamCallbacks } from '@/lib/api/conversation';
 import type { CoachChatAction } from './coachReducer';
+import type { CoachMessagePage } from '@/lib/types/coach';
 import { queryKeys } from '@/lib/constants/queryKeys';
 import { removeOptimisticMessages } from '../useSendCoachMessage';
+import { updateCacheWithCompleteData } from './updateMessagesCache';
 
 // =============================================================================
 // Types
@@ -61,14 +67,27 @@ export function createCoachCallbacks(ctx: CoachCallbackContext): ChatStreamCallb
       dispatch({ type: 'APPEND_STREAMING', chunk });
     },
 
-    onComplete: async () => {
+    // Phase 16: data 파라미터 추가 (LSP: 기존 호출도 정상 동작)
+    onComplete: async (_fullMessage, data) => {
+      // 스트리밍 UI 먼저 제거 (캐시 메시지와 중복 방지)
       dispatch({ type: 'COMPLETE_STREAMING' });
-
-      // 서버 메시지 반영 (optimistic 메시지가 실제 메시지로 교체됨)
-      await refreshCache();
-
-      // 스트리밍 플레이스홀더 제거
       dispatch({ type: 'CLEAR_STREAMING_CONTENT' });
+
+      // Phase 16: 부분 업데이트 또는 fallback
+      if (data?.userMessage || data?.aiMessages?.length) {
+        // 부분 업데이트: setQueryData로 캐시 직접 수정 (네트워크 요청 없음)
+        queryClient.setQueryData<InfiniteData<CoachMessagePage>>(
+          queryKeys.coach.messages(conversationId),
+          (old) => updateCacheWithCompleteData(old, data)
+        );
+        // 대화 메타데이터만 갱신
+        await queryClient.invalidateQueries({
+          queryKey: queryKeys.coach.conversation(conversationId),
+        });
+      } else {
+        // Fallback: 데이터 없으면 전체 refetch
+        await refreshCache();
+      }
 
       // 요약 체크 (non-blocking)
       onStreamComplete?.(conversationId);

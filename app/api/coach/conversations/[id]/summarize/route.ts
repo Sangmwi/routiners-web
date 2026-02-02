@@ -27,8 +27,7 @@ export const POST = withAuth(
       .select('metadata, context_summary, summarized_until')
       .eq('id', id)
       .eq('type', 'ai')
-      .eq('ai_purpose', 'coach')
-      .is('deleted_at', null)
+            .is('deleted_at', null)
       .single();
 
     if (convError) {
@@ -178,8 +177,7 @@ export const GET = withAuth(
       .select('context_summary, summarized_until')
       .eq('id', id)
       .eq('type', 'ai')
-      .eq('ai_purpose', 'coach')
-      .is('deleted_at', null)
+            .is('deleted_at', null)
       .single();
 
     if (convError) {

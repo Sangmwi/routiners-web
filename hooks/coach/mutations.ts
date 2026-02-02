@@ -71,49 +71,6 @@ export function useCreateCoachConversation() {
 }
 
 /**
- * 코치 대화 완료 처리
- */
-export function useCompleteCoachConversation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (conversationId: string) => coachApi.completeConversation(conversationId),
-
-    onSuccess: (completed, conversationId) => {
-      // 대화 목록 업데이트
-      queryClient.setQueryData<CoachConversationsResponse>(
-        queryKeys.coach.conversations(),
-        (old) => {
-          if (!old) return old;
-
-          return {
-            ...old,
-            conversations: old.conversations.map((item) =>
-              item.conversation.id === conversationId
-                ? { ...item, conversation: completed, hasActivePurpose: false }
-                : item
-            ),
-            activeConversationId:
-              old.activeConversationId === conversationId
-                ? undefined
-                : old.activeConversationId,
-          };
-        }
-      );
-
-      // 개별 대화 캐시 업데이트
-      queryClient.setQueryData(
-        queryKeys.coach.conversation(conversationId),
-        completed
-      );
-
-      // 활성 대화 캐시 클리어
-      queryClient.setQueryData(queryKeys.coach.activeConversation(), null);
-    },
-  });
-}
-
-/**
  * 코치 대화 삭제
  */
 export function useDeleteCoachConversation() {

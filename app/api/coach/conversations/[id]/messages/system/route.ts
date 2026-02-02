@@ -45,12 +45,12 @@ export const POST = withAuth(
     const { content, metadata } = validation.data;
 
     // 대화 존재 여부 확인 (RLS가 권한 필터링)
+    // Phase 18: ai_purpose 필터 제거
     const { data: conversation, error: convError } = await supabase
       .from('conversations')
       .select('id')
       .eq('id', conversationId)
       .eq('type', 'ai')
-      .eq('ai_purpose', 'coach')
       .is('deleted_at', null)
       .single();
 

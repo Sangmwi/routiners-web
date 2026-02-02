@@ -9,7 +9,7 @@
  */
 
 import type { RoutinePreviewData } from './fitness';
-import type { ChatMessage, Conversation, ConversationStatus, AppliedRoutineMetadata } from './chat';
+import type { ChatMessage, Conversation, AppliedRoutineMetadata } from './chat';
 
 // ============================================================================
 // Active Purpose Types
@@ -145,13 +145,12 @@ export interface CoachConversationMetadata {
 
 /**
  * 코치 시스템용 확장 DB Conversation 타입
- * 새로 추가된 컬럼 포함
+ *
+ * Phase 18: ai_purpose, ai_status 컬럼 제거됨
  */
 export interface DbCoachConversation {
   id: string;
   type: 'ai';
-  ai_purpose: 'coach';
-  ai_status: ConversationStatus | null;
   ai_result_applied: boolean;
   ai_result_applied_at: string | null;
   title: string | null;
@@ -172,9 +171,12 @@ export interface DbCoachConversation {
 
 /**
  * 코치 시스템용 확장 대화 타입
+ *
+ * Phase 18: aiPurpose, aiStatus 제거 (레거시)
+ * - 코치 시스템에서만 사용되므로 purpose 구분 불필요
+ * - 범용 대화로 완료 개념 없음
  */
-export interface CoachConversation extends Omit<Conversation, 'aiPurpose' | 'metadata'> {
-  aiPurpose: 'coach';
+export interface CoachConversation extends Omit<Conversation, 'metadata'> {
   /** 코치 메타데이터 */
   metadata?: CoachConversationMetadata;
   /** 컨텍스트 요약 */
@@ -244,13 +246,13 @@ export interface UpdateActivePurposeData {
 
 /**
  * DbCoachConversation → CoachConversation 변환
+ *
+ * Phase 18: ai_purpose, ai_status 변환 제거 (레거시)
  */
 export function transformDbCoachConversation(db: DbCoachConversation): CoachConversation {
   return {
     id: db.id,
     type: db.type,
-    aiPurpose: db.ai_purpose,
-    aiStatus: db.ai_status ?? undefined,
     aiResultApplied: db.ai_result_applied,
     aiResultAppliedAt: db.ai_result_applied_at ?? undefined,
     title: db.title ?? undefined,
@@ -265,17 +267,18 @@ export function transformDbCoachConversation(db: DbCoachConversation): CoachConv
 
 /**
  * CoachConversation → DB Update 데이터 변환 (partial)
+ *
+ * Phase 18: aiStatus 제거 (레거시)
  */
 export function transformCoachConversationToDb(
-  data: Partial<Pick<CoachConversation, 'metadata' | 'contextSummary' | 'summarizedUntil' | 'title' | 'aiStatus'>>
-): Partial<Pick<DbCoachConversation, 'metadata' | 'context_summary' | 'summarized_until' | 'title' | 'ai_status'>> {
-  const result: Partial<Pick<DbCoachConversation, 'metadata' | 'context_summary' | 'summarized_until' | 'title' | 'ai_status'>> = {};
+  data: Partial<Pick<CoachConversation, 'metadata' | 'contextSummary' | 'summarizedUntil' | 'title'>>
+): Partial<Pick<DbCoachConversation, 'metadata' | 'context_summary' | 'summarized_until' | 'title'>> {
+  const result: Partial<Pick<DbCoachConversation, 'metadata' | 'context_summary' | 'summarized_until' | 'title'>> = {};
 
   if (data.metadata !== undefined) result.metadata = data.metadata;
   if (data.contextSummary !== undefined) result.context_summary = data.contextSummary;
   if (data.summarizedUntil !== undefined) result.summarized_until = data.summarizedUntil;
   if (data.title !== undefined) result.title = data.title;
-  if (data.aiStatus !== undefined) result.ai_status = data.aiStatus;
 
   return result;
 }

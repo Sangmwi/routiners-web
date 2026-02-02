@@ -42,8 +42,7 @@ export const GET = withAuth(
       .select('metadata')
       .eq('id', id)
       .eq('type', 'ai')
-      .eq('ai_purpose', 'coach')
-      .is('deleted_at', null)
+            .is('deleted_at', null)
       .single();
 
     if (error) {
@@ -105,8 +104,7 @@ export const POST = withAuth(
       .select('metadata')
       .eq('id', id)
       .eq('type', 'ai')
-      .eq('ai_purpose', 'coach')
-      .is('deleted_at', null)
+            .is('deleted_at', null)
       .single();
 
     if (fetchError) {
@@ -173,8 +171,7 @@ export const DELETE = withAuth(
       .select('metadata')
       .eq('id', id)
       .eq('type', 'ai')
-      .eq('ai_purpose', 'coach')
-      .is('deleted_at', null)
+            .is('deleted_at', null)
       .single();
 
     if (fetchError) {

@@ -122,10 +122,11 @@ export const useWebViewCommands = () => {
         const success = await setSession(cmd.access_token, cmd.refresh_token);
         notifySessionSet(success);
 
-        // 브라우저 네이티브 네비게이션 (SESSION_SET 전달 시간 확보 후)
+        // 브라우저 네이티브 네비게이션
+        // SESSION_SET 메시지 전송 완료 보장 후 리다이렉트 (queueMicrotask)
         const currentPath = pathnameRef.current;
         if (currentPath === "/login" || currentPath === "/app-init") {
-          await new Promise((resolve) => setTimeout(resolve, 100));
+          await new Promise<void>((resolve) => queueMicrotask(resolve));
 
           if (success) {
             window.location.replace("/");

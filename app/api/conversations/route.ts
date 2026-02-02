@@ -1,25 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
-import {
-  DbConversation,
-  transformDbConversation,
-  toAISessionCompat,
-} from '@/lib/types/chat';
+import { DbConversation, transformDbConversation } from '@/lib/types/chat';
 import { z } from 'zod';
-
-// ============================================================================
-// AI 초기 메시지 - 더 이상 사용하지 않음
-// 세션 생성 후 프론트엔드에서 자동으로 __START__ 메시지를 전송하여
-// AI가 직접 첫 질문 UI를 표시합니다.
-// ============================================================================
 
 // ============================================================================
 // Validation Schema
 // ============================================================================
 
+/**
+ * Phase 18: aiPurpose 제거 (AI 대화는 항상 coach)
+ */
 const ConversationCreateSchema = z.object({
   type: z.enum(['ai', 'direct', 'group']),
-  aiPurpose: z.enum(['workout', 'meal']).optional(),
   title: z.string().optional(),
   participantIds: z.array(z.string().uuid()).optional(),
 });
@@ -28,11 +20,12 @@ const ConversationCreateSchema = z.object({
 // GET /api/conversations - 대화 목록 조회
 // ============================================================================
 
+/**
+ * Phase 18: aiPurpose, aiStatus 필터 제거 (레거시)
+ */
 export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   const { searchParams } = new URL(request.url);
   const type = searchParams.get('type');
-  const aiPurpose = searchParams.get('aiPurpose');
-  const aiStatus = searchParams.get('aiStatus');
   const limit = parseInt(searchParams.get('limit') || '20', 10);
   const offset = parseInt(searchParams.get('offset') || '0', 10);
 
@@ -45,12 +38,6 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
 
   if (type) {
     query = query.eq('type', type);
-  }
-  if (aiPurpose) {
-    query = query.eq('ai_purpose', aiPurpose);
-  }
-  if (aiStatus) {
-    query = query.eq('ai_status', aiStatus);
   }
 
   const { data, error } = await query;
@@ -94,37 +81,15 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
     );
   }
 
-  const { type, aiPurpose, title } = validation.data;
+  const { type, title } = validation.data;
 
-  // AI 대화인 경우: 기존 활성 세션이 있으면 자동 완료 처리
-  if (type === 'ai' && aiPurpose) {
-    const { error: completeError } = await supabase
-      .from('conversations')
-      .update({
-        ai_status: 'completed',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('type', 'ai')
-      .eq('ai_purpose', aiPurpose)
-      .eq('ai_status', 'active')
-      .is('deleted_at', null);
-
-    if (completeError) {
-      console.error('[Conversations POST] Complete existing error:', completeError);
-      return NextResponse.json(
-        { error: '기존 세션 종료에 실패했습니다. 다시 시도해주세요.', code: 'SESSION_CLEANUP_FAILED' },
-        { status: 500 }
-      );
-    }
-  }
+  // Phase 18: ai_purpose, ai_status 컬럼 제거됨
 
   // 대화방 생성
   const { data: conversation, error: convError } = await supabase
     .from('conversations')
     .insert({
       type,
-      ai_purpose: type === 'ai' ? aiPurpose : null,
-      ai_status: type === 'ai' ? 'active' : null,
       ai_result_applied: false,
       title: title || null,
     })
@@ -159,12 +124,6 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
     );
   }
 
-  // AI 대화인 경우: AISessionCompat 형태로 반환 (기존 코드 호환)
-  // 초기 메시지 없이 빈 세션 반환 - 프론트엔드에서 자동으로 AI 시작 트리거
-  if (type === 'ai') {
-    const result = toAISessionCompat(transformDbConversation(conv), []);
-    return NextResponse.json(result, { status: 201 });
-  }
-
+  // Phase 18: toAISessionCompat 제거 - 모든 대화는 Conversation 타입으로 반환
   return NextResponse.json(transformDbConversation(conv), { status: 201 });
 });

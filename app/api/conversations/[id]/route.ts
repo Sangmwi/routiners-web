@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
-import {
-  DbConversation,
-  DbChatMessage,
-  transformDbConversation,
-  transformDbMessage,
-  toAISessionCompat,
-} from '@/lib/types/chat';
+import { DbConversation, transformDbConversation } from '@/lib/types/chat';
 import { z } from 'zod';
 
+/**
+ * Phase 18: aiStatus 제거 (범용 대화로 완료 개념 없음)
+ */
 const ConversationUpdateSchema = z.object({
   title: z.string().optional(),
-  aiStatus: z.enum(['active', 'completed', 'abandoned']).optional(),
   aiResultApplied: z.boolean().optional(),
 });
 
@@ -50,19 +46,8 @@ export const GET = withAuth(
 
     const conv = conversation as DbConversation;
 
-    // AI 대화인 경우 메시지도 함께 조회
-    if (conv.type === 'ai') {
-      const { data: messages } = await supabase
-        .from('chat_messages')
-        .select('*')
-        .eq('conversation_id', id)
-        .is('deleted_at', null)
-        .order('created_at', { ascending: true });
-
-      const chatMessages = (messages as DbChatMessage[] || []).map(transformDbMessage);
-      return NextResponse.json(toAISessionCompat(transformDbConversation(conv), chatMessages));
-    }
-
+    // Phase 18: toAISessionCompat 제거 - 모든 대화는 Conversation 타입으로 반환
+    // AI 대화 메시지는 별도 /messages 엔드포인트 사용
     return NextResponse.json(transformDbConversation(conv));
   }
 );
@@ -100,11 +85,11 @@ export const PATCH = withAuth(
       );
     }
 
-    const { title, aiStatus, aiResultApplied } = validation.data;
+    const { title, aiResultApplied } = validation.data;
 
+    // Phase 18: aiStatus 업데이트 로직 제거
     const updateData: Record<string, unknown> = {};
     if (title !== undefined) updateData.title = title;
-    if (aiStatus !== undefined) updateData.ai_status = aiStatus;
     if (aiResultApplied !== undefined) {
       updateData.ai_result_applied = aiResultApplied;
       if (aiResultApplied) {

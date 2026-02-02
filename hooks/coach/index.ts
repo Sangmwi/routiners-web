@@ -10,17 +10,14 @@
 // Queries
 export {
   useCoachConversations,
-  useCoachConversationsSuspense,
   useActiveCoachConversation,
   useCoachConversation,
   useInfiniteCoachMessages,
-  useHasActivePurpose,
 } from './queries';
 
 // Mutations
 export {
   useCreateCoachConversation,
-  useCompleteCoachConversation,
   useDeleteCoachConversation,
   useSetActivePurpose,
   useClearActivePurpose,

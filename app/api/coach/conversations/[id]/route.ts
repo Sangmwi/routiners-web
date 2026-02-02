@@ -20,12 +20,12 @@ export const GET = withAuth(
   async (request: NextRequest, { supabase, params }) => {
     const { id } = await params;
 
+    // Phase 18: ai_purpose 필터 제거
     const { data: conversation, error } = await supabase
       .from('conversations')
       .select('*')
       .eq('id', id)
       .eq('type', 'ai')
-      .eq('ai_purpose', 'coach')
       .is('deleted_at', null)
       .single();
 
@@ -57,12 +57,12 @@ export const DELETE = withAuth(
   async (request: NextRequest, { supabase, params }) => {
     const { id } = await params;
 
+    // Phase 18: ai_purpose 필터 제거
     const { error } = await supabase
       .from('conversations')
       .update({ deleted_at: new Date().toISOString() })
       .eq('id', id)
-      .eq('type', 'ai')
-      .eq('ai_purpose', 'coach');
+      .eq('type', 'ai');
 
     if (error) {
       console.error('[Coach Conversation DELETE] Error:', error);

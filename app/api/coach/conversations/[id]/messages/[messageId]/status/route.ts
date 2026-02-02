@@ -67,8 +67,7 @@ export const PATCH = withAuth(
       .select('id')
       .eq('id', conversationId)
       .eq('type', 'ai')
-      .eq('ai_purpose', 'coach')
-      .is('deleted_at', null)
+            .is('deleted_at', null)
       .single();
 
     if (convError || !conversation) {

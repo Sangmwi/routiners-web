@@ -43,10 +43,11 @@ export const useWebViewLifecycle = () => {
   };
 
   // 최초 마운트 시 준비 완료 신호 전송 (한 번만)
+  // useEffect는 DOM 커밋 후 실행되므로 추가 지연 불필요
   useEffect(() => {
     if (isInWebView && !isWebReadySent) {
-      const timer = setTimeout(() => sendWebReady(), 100);
-      return () => clearTimeout(timer);
+      // queueMicrotask로 현재 태스크 완료 후 즉시 실행
+      queueMicrotask(() => sendWebReady());
     }
   }, [isInWebView]);
 

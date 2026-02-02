@@ -59,13 +59,6 @@ export const coachApi = {
   },
 
   /**
-   * 대화 완료 처리
-   */
-  async completeConversation(id: string): Promise<CoachConversation> {
-    return api.post<CoachConversation>(`${BASE_URL}/${id}/complete`);
-  },
-
-  /**
    * 대화 삭제 (소프트 삭제)
    */
   async deleteConversation(id: string): Promise<{ success: boolean }> {

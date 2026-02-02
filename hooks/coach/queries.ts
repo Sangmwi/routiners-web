@@ -13,7 +13,7 @@ import type {
   CoachConversationsResponse,
   CoachMessagePage,
 } from '@/lib/types/coach';
-import { useBaseQuery, useSuspenseBaseQuery, STALE_TIME } from '@/hooks/common';
+import { useBaseQuery, STALE_TIME } from '@/hooks/common';
 
 // ============================================================================
 // Standard Query Hooks
@@ -63,21 +63,6 @@ export function useCoachConversation(conversationId: string | undefined) {
 }
 
 // ============================================================================
-// Suspense Query Hooks
-// ============================================================================
-
-/**
- * 코치 대화 목록 조회 (Suspense)
- */
-export function useCoachConversationsSuspense() {
-  return useSuspenseBaseQuery<CoachConversationsResponse>(
-    queryKeys.coach.conversations(),
-    fetchCoachConversations,
-    { staleTime: 'medium' }
-  );
-}
-
-// ============================================================================
 // Infinite Query Hooks (메시지 무한스크롤)
 // ============================================================================
 
@@ -110,14 +95,3 @@ export function useInfiniteCoachMessages(
   });
 }
 
-// ============================================================================
-// Utility Hooks
-// ============================================================================
-
-/**
- * 활성 목적 존재 여부 확인
- */
-export function useHasActivePurpose(conversationId: string | undefined): boolean {
-  const { data } = useCoachConversation(conversationId);
-  return !!data?.metadata?.activePurpose;
-}

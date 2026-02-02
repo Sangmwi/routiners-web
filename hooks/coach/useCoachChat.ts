@@ -63,6 +63,8 @@ export interface UseCoachChatReturn {
   isFetchingNextPage: boolean;
   /** 메시지 초기 로딩 중 여부 */
   isMessagesLoading: boolean;
+  /** 메시지 refetch 중 여부 (스트리밍 완료 후 DB 동기화) */
+  isRefetching: boolean;
 
   // Actions
   /** 메시지 전송 */
@@ -301,6 +303,7 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
     hasNextPage: messagesQuery.hasNextPage ?? false,
     isFetchingNextPage: messagesQuery.isFetchingNextPage,
     isMessagesLoading: messagesQuery.isLoading,
+    isRefetching: messagesQuery.isFetching && !messagesQuery.isPending,
 
     handleSend,
     handleChipClick,

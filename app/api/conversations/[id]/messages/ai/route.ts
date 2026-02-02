@@ -1,7 +1,73 @@
+/**
+ * =============================================================================
+ * POST /api/conversations/[id]/messages/ai
+ * =============================================================================
+ *
+ * AI 코치 채팅 API - SSE 스트리밍 + OpenAI Function Calling
+ *
+ * ## 전체 흐름 요약
+ * ```
+ * 클라이언트                     서버 (이 파일)                    OpenAI
+ *    |                              |                              |
+ *    |--- POST 메시지 전송 -------->|                              |
+ *    |                              |--- 유저 메시지 DB 저장        |
+ *    |                              |                              |
+ *    |                              |--- 스트리밍 요청 ------------>|
+ *    |                              |                              |
+ *    |<-- SSE: content (텍스트) ----|<--- 텍스트 청크 -------------|
+ *    |<-- SSE: content (텍스트) ----|<--- 텍스트 청크 -------------|
+ *    |                              |                              |
+ *    |<-- SSE: tool_start ---------|<--- 함수 호출 시작 ----------|
+ *    |                              |--- 함수 실행 (프로필 조회 등) |
+ *    |<-- SSE: profile_confirm ----|                              |
+ *    |                              |--- 결과를 OpenAI에 전달 ---->|
+ *    |                              |                              |
+ *    |<-- SSE: content (텍스트) ----|<--- 추가 응답 ---------------|
+ *    |                              |                              |
+ *    |                              |--- AI 메시지 DB 저장         |
+ *    |<-- SSE: complete ------------|                              |
+ *    |    (유저메시지 + AI메시지)   |                              |
+ * ```
+ *
+ * ## 핵심 개념
+ *
+ * ### 1. SSE (Server-Sent Events)
+ * - HTTP 연결을 유지하면서 서버 → 클라이언트로 실시간 이벤트 전송
+ * - 이벤트 타입: content, tool_start, tool_done, routine_progress, complete, error
+ *
+ * ### 2. Function Calling (Tool Use)
+ * - OpenAI가 특정 작업이 필요하다고 판단하면 함수 호출 요청
+ * - 예: generate_routine_preview, request_profile_confirmation
+ * - 서버에서 함수 실행 후 결과를 다시 OpenAI에 전달 → 추가 응답 생성
+ *
+ * ### 3. While 루프 패턴
+ * - OpenAI 호출 → 응답 처리 → 함수 있으면 실행 → 다시 OpenAI 호출
+ * - 함수가 없거나 최대 호출 수 초과 시 루프 종료
+ *
+ * ## 데이터 흐름
+ *
+ * ### 입력 데이터
+ * - message: 사용자 입력 텍스트
+ * - conversationId: 대화 ID (URL 파라미터)
+ *
+ * ### DB 저장 순서
+ * 1. 유저 메시지 저장 (savedUserMessage)
+ * 2. [루프 중] AI 텍스트 응답 저장 (tool 호출 전)
+ * 3. [루프 중] Tool call 메타데이터 저장
+ * 4. [루프 중] Tool result 저장
+ * 5. 최종 텍스트 응답 저장 (tool 호출 후 남은 텍스트)
+ *
+ * ### SSE 출력
+ * - content: 실시간 텍스트 청크 (스트리밍 UI용)
+ * - tool_start/tool_done: 도구 실행 상태
+ * - routine_progress: 루틴 생성 진행률
+ * - complete: 모든 처리 완료 + DB에 저장된 메시지 데이터
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { withAuth } from '@/utils/supabase/auth';
-import { DbConversation, DbChatMessage } from '@/lib/types/chat';
+import { DbConversation } from '@/lib/types/chat';
 import { AI_TRAINER_TOOLS } from '@/lib/ai/tools';
 import {
   handleToolCall,
@@ -24,11 +90,30 @@ import {
   rateLimitExceeded,
 } from '@/lib/utils/rateLimiter';
 
+import {
+  SSEWriter,
+  fetchMessagesForAI,
+  buildConversationInput,
+  saveUserMessage,
+  saveAiTextMessage,
+  saveGreetingMessage,
+  saveToolCallMessage,
+  saveToolResultMessage,
+  fetchAiMessagesForComplete,
+  updateConversationTimestamp,
+  type SavedUserMessage,
+  type ToolCallData,
+} from '@/lib/ai/stream';
+
+// =============================================================================
 // OpenAI 클라이언트 초기화
+// =============================================================================
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// 입력 검증 스키마
 const MessageSchema = z.object({
   message: z
     .string()
@@ -36,7 +121,17 @@ const MessageSchema = z.object({
     .max(AI_CHAT_LIMITS.MAX_MESSAGE_LENGTH, `메시지는 ${AI_CHAT_LIMITS.MAX_MESSAGE_LENGTH}자 이내여야 합니다.`),
 });
 
-// Responses API용 도구 포맷 변환
+// =============================================================================
+// OpenAI Responses API 도구 포맷 변환
+// =============================================================================
+
+/**
+ * AI_TRAINER_TOOLS를 OpenAI Responses API 형식으로 변환
+ *
+ * OpenAI Responses API는 기존 Chat Completions API와 다른 도구 형식 사용:
+ * - type: 'function'
+ * - name, description, parameters 필드
+ */
 function formatToolsForResponsesAPI(): OpenAI.Responses.Tool[] {
   return AI_TRAINER_TOOLS.map((tool) => ({
     type: 'function' as const,
@@ -47,79 +142,25 @@ function formatToolsForResponsesAPI(): OpenAI.Responses.Tool[] {
   }));
 }
 
-// DB 메시지를 Responses API input 형식으로 변환
-function buildConversationInput(
-  existingMessages: DbChatMessage[],
-  newMessage: string
-): OpenAI.Responses.ResponseInputItem[] {
-  const input: OpenAI.Responses.ResponseInputItem[] = [];
+// =============================================================================
+// 메인 라우트 핸들러
+// =============================================================================
 
-  for (const m of existingMessages) {
-    if (m.content_type === 'tool_call' && m.metadata?.tool_calls) {
-      // Function call 출력 (이전 AI 응답)
-      const toolCalls = m.metadata.tool_calls as Array<{
-        id: string;
-        name: string;
-        arguments: string;
-        call_id?: string;
-      }>;
-      for (const tc of toolCalls) {
-        input.push({
-          type: 'function_call',
-          id: tc.id,
-          call_id: tc.call_id || tc.id,
-          name: tc.name,
-          arguments: tc.arguments,
-        });
-      }
-    } else if (m.content_type === 'tool_result' && m.metadata?.tool_call_id) {
-      // Function call 결과
-      input.push({
-        type: 'function_call_output',
-        call_id: m.metadata.tool_call_id as string,
-        output: m.content,
-      });
-    } else if (m.role === 'user') {
-      input.push({
-        type: 'message',
-        role: 'user',
-        content: m.content,
-      });
-    } else if (m.role === 'assistant' && m.content_type === 'text' && m.content) {
-      input.push({
-        type: 'message',
-        role: 'assistant',
-        content: m.content,
-      });
-    }
-  }
-
-  // 새 사용자 메시지 추가
-  input.push({
-    type: 'message',
-    role: 'user',
-    content: newMessage,
-  });
-
-  return input;
-}
-
-/**
- * POST /api/conversations/[id]/messages/ai
- * AI 채팅 메시지 전송 (SSE 스트리밍 + Function Calling with Responses API)
- *
- * ⚠️ Tool handlers는 userId를 사용하므로 conversation.created_by에서 가져옴
- */
 export const POST = withAuth<Response>(
   async (request: NextRequest, { authUser, supabase, params }) => {
     const { id: conversationId } = await params;
 
-    // Rate Limiting (분당 10회)
+    // =========================================================================
+    // STEP 1: 사전 검증 (Rate Limit, 입력 검증, 대화 존재 확인)
+    // =========================================================================
+
+    // Rate Limiting: 분당 최대 요청 수 제한
     const rateLimitResult = checkRateLimit(`ai-conversation:${authUser.id}`, AI_RATE_LIMIT);
     if (!rateLimitResult.allowed) {
       return NextResponse.json(rateLimitExceeded(rateLimitResult), { status: 429 });
     }
 
+    // JSON 파싱
     let body;
     try {
       body = await request.json();
@@ -130,6 +171,7 @@ export const POST = withAuth<Response>(
       );
     }
 
+    // Zod 스키마로 입력 검증
     const validation = MessageSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
@@ -144,7 +186,7 @@ export const POST = withAuth<Response>(
 
     const { message } = validation.data;
 
-    // RLS가 권한 필터링을 처리
+    // 대화 존재 및 권한 확인 (RLS가 권한 필터링 처리)
     const { data: conversation, error: convError } = await supabase
       .from('conversations')
       .select('*')
@@ -161,117 +203,136 @@ export const POST = withAuth<Response>(
     }
 
     const conv = conversation as DbConversation;
+    const userId = conv.created_by; // Tool handler에서 사용할 유저 ID
 
-    // Tool handlers에서 사용할 userId (conversation 소유자)
-    const userId = conv.created_by;
+    // Phase 18: ai_status 체크 제거 (범용 대화로 완료 개념 없음)
 
-    if (conv.ai_status !== 'active') {
-      return NextResponse.json(
-        { error: '이미 종료된 대화입니다.', code: 'SESSION_CLOSED' },
-        { status: 400 }
-      );
-    }
+    // =========================================================================
+    // STEP 2: 대화 컨텍스트 준비
+    // =========================================================================
 
-    // 기존 메시지 조회
-    const { data: existingMessages } = await supabase
-      .from('chat_messages')
-      .select('*')
-      .eq('conversation_id', conversationId)
-      .is('deleted_at', null)
-      .order('created_at', { ascending: true });
+    /**
+     * 기존 메시지 조회 (OpenAI에 전달할 대화 히스토리)
+     *
+     * Phase 16.5: summarized_until 필터링
+     * - 요약이 있으면 요약 이후 메시지만 조회 (토큰 50% 절감)
+     * - 요약 내용은 system prompt에 포함
+     */
+    const dbMessages = await fetchMessagesForAI(supabase, {
+      conversationId,
+      summarizedUntil: conv.summarized_until,
+    });
 
-    const dbMessages = (existingMessages as DbChatMessage[]) || [];
-
-    // 동적 프롬프트 구성: activePurpose에 따라 프로세스 규칙 포함
+    /**
+     * 시스템 프롬프트 구성
+     *
+     * 구성 요소:
+     * 1. COACH_BASE_PROMPT: 기본 코치 역할 정의
+     * 2. context_summary: 이전 대화 요약 (있는 경우)
+     * 3. PROCESS_RULES: 활성 프로세스 규칙 (예: 루틴 생성 단계)
+     */
     const metadata = conv.metadata as CoachConversationMetadata | null;
     const processType = metadata?.activePurpose?.type;
-    const systemPrompt = composeCoachPrompt(processType);
+    const systemPrompt = composeCoachPrompt(processType, conv.context_summary);
 
+    // =========================================================================
+    // STEP 3: 유저 메시지 저장
+    // =========================================================================
+
+    /**
+     * 메시지 타입 판별:
+     * - __START__: 대화 시작 시스템 메시지 → AI 인사말 저장
+     * - 일반 메시지: 유저 메시지 DB 저장
+     */
     const isSystem = isSystemMessage(message);
-    let userMsgId: string | null = null;
+    let savedUserMessage: SavedUserMessage | null = null;
 
-    // __START__ 메시지인 경우: 인사말을 DB에 저장 (세션 복귀 시에도 유지)
     if (isSystem) {
-      const greeting = processType
-        ? '안녕하세요! 맞춤 운동 루틴을 만들어 드릴게요.'
-        : '안녕하세요! 무엇을 도와드릴까요? 운동, 영양, 건강 등 궁금한 점이 있으면 말씀해주세요.';
-      await supabase
-        .from('chat_messages')
-        .insert({
-          conversation_id: conversationId,
-          sender_id: null,
-          role: 'assistant',
-          content: greeting,
-          content_type: 'text',
-        });
+      // 시스템 메시지: AI 인사말만 저장 (유저 메시지 없음)
+      await saveGreetingMessage(supabase, conversationId, !!processType);
     } else {
-      // 일반 사용자 메시지 저장 - sender_id는 DB DEFAULT가 처리
-      const { data: userMsg, error: userMsgError } = await supabase
-        .from('chat_messages')
-        .insert({
-          conversation_id: conversationId,
-          role: 'user',
-          content: message,
-          content_type: 'text',
-        })
-        .select()
-        .single();
-
-      if (userMsgError) {
-        console.error('[AI Chat] User Message Error:', userMsgError);
+      // 일반 메시지: 유저 메시지 저장
+      savedUserMessage = await saveUserMessage(supabase, conversationId, message);
+      if (!savedUserMessage) {
         return NextResponse.json(
           { error: '메시지 저장에 실패했습니다.', code: 'DATABASE_ERROR' },
           { status: 500 }
         );
       }
-      userMsgId = userMsg.id;
 
-      // 사용자가 응답하면 pending_profile_confirmation, pending_input 정리
+      // 이전 pending 상태 정리 (유저가 응답했으므로)
       await clearMetadataKeys(supabase, conversationId, [
         'pending_profile_confirmation',
         'pending_input',
       ]);
     }
 
-    // SSE 스트리밍 응답
-    const encoder = new TextEncoder();
+    // =========================================================================
+    // STEP 4: SSE 스트리밍 응답 생성
+    // =========================================================================
 
+    /**
+     * ReadableStream + SSEWriter로 실시간 스트리밍 구현
+     *
+     * SSE 이벤트 형식:
+     * ```
+     * event: content
+     * data: {"content": "안녕"}
+     *
+     * event: tool_start
+     * data: {"toolCallId": "...", "name": "generate_routine_preview"}
+     *
+     * event: complete
+     * data: {"userMessage": {...}, "aiMessages": [...]}
+     * ```
+     */
     const stream = new ReadableStream({
       async start(controller) {
-        let controllerClosed = false;
-
-        // ✅ sendEvent에 에러 핸들링 추가 - 컨트롤러 닫힘 상태 대응
-        const sendEvent = (event: string, data: unknown) => {
-          if (controllerClosed) return; // 이미 닫힌 경우 무시
-
-          try {
-            controller.enqueue(
-              encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
-            );
-          } catch (error) {
-            // Controller가 닫힌 경우 (클라이언트 연결 종료 등)
-            if ((error as Error)?.message?.includes('Controller is already closed')) {
-              controllerClosed = true;
-              console.warn('[SSE] Controller closed, skipping event:', event);
-            } else {
-              throw error; // 다른 에러는 re-throw
-            }
-          }
-        };
+        const writer = new SSEWriter(controller);
 
         try {
-          // Responses API용 input 구성
+          // =================================================================
+          // STEP 4-1: OpenAI 입력 준비
+          // =================================================================
+
+          /**
+           * 대화 히스토리를 OpenAI Responses API 형식으로 변환
+           *
+           * 형식:
+           * - { type: 'message', role: 'user', content: '...' }
+           * - { type: 'message', role: 'assistant', content: '...' }
+           * - { type: 'function_call', id: '...', name: '...', arguments: '...' }
+           * - { type: 'function_call_output', call_id: '...', output: '...' }
+           */
           const input = buildConversationInput(dbMessages, message);
           const tools = formatToolsForResponsesAPI();
 
+          // =================================================================
+          // STEP 4-2: OpenAI 스트리밍 루프
+          // =================================================================
+
+          /**
+           * While 루프 패턴:
+           *
+           * 1. OpenAI 스트리밍 호출
+           * 2. 텍스트 청크 → SSE로 클라이언트에 전송
+           * 3. 함수 호출 발견 → 함수 실행 → 결과를 input에 추가
+           * 4. 함수가 있었으면 다시 OpenAI 호출 (루프 계속)
+           * 5. 함수가 없으면 루프 종료
+           *
+           * 예시 시나리오:
+           * - 1차 호출: "루틴을 만들어드릴게요" + generate_routine_preview 함수 호출
+           * - 함수 실행: 루틴 미리보기 데이터 생성
+           * - 2차 호출: "위 루틴 어떠세요?" (함수 결과 기반 추가 응답)
+           */
           let continueLoop = true;
-          let fullContent = '';
-          let totalToolCalls = 0;
-          let savedTextLength = 0; // tool과 함께 이미 저장된 텍스트 길이 추적
+          let fullContent = '';        // 전체 텍스트 누적 (DB 저장용)
+          let totalToolCalls = 0;      // 총 함수 호출 수 (무한루프 방지)
+          let savedTextLength = 0;     // 이미 DB에 저장된 텍스트 길이
 
           while (continueLoop && totalToolCalls < AI_CHAT_LIMITS.MAX_TOOL_CALLS_PER_RESPONSE) {
-            // Responses API 호출 (스트리밍)
-            const stream = await openai.responses.create({
+            // OpenAI Responses API 스트리밍 호출
+            const openaiStream = await openai.responses.create({
               model: AI_MODEL.DEFAULT,
               instructions: systemPrompt,
               input,
@@ -279,68 +340,77 @@ export const POST = withAuth<Response>(
               stream: true,
             });
 
-            // Function call 추적용
+            /**
+             * 현재 루프에서 발견된 함수 호출들
+             * - key: 함수 호출 ID
+             * - value: 함수 정보 (이름, 인자 등)
+             */
             const functionCalls: Map<string, {
               id: string;
               callId: string;
               name: string;
               arguments: string;
+              lastProgress?: number;
             }> = new Map();
 
-            let contentBuffer = '';
-            let hasToolCalls = false;
+            let contentBuffer = '';   // 현재 루프의 텍스트 버퍼
+            let hasToolCalls = false; // 현재 루프에서 함수 호출 발생 여부
 
-            for await (const event of stream) {
-              // 텍스트 델타
+            // =============================================================
+            // STEP 4-3: 스트리밍 이벤트 처리
+            // =============================================================
+
+            for await (const event of openaiStream) {
+              /**
+               * 텍스트 델타 이벤트
+               * - OpenAI가 텍스트를 청크 단위로 전송
+               * - 즉시 클라이언트에 SSE로 전달 (실시간 타이핑 효과)
+               */
               if (event.type === 'response.output_text.delta') {
-                const delta = event.delta;
-                contentBuffer += delta;
-                fullContent += delta;
-                sendEvent('content', { content: delta });
+                contentBuffer += event.delta;
+                fullContent += event.delta;
+                writer.send('content', { content: event.delta });
               }
 
-              // Function call 시작
+              /**
+               * 함수 호출 시작 이벤트
+               * - OpenAI가 특정 도구 사용을 결정
+               * - 예: "프로필을 확인해볼게요" → request_profile_confirmation
+               */
               if (event.type === 'response.output_item.added') {
                 const item = event.item;
                 if (item.type === 'function_call' && item.id) {
                   hasToolCalls = true;
-                  const itemId = item.id;
-                  functionCalls.set(itemId, {
-                    id: itemId,
+                  functionCalls.set(item.id, {
+                    id: item.id,
                     callId: item.call_id,
                     name: item.name,
                     arguments: '',
                   });
-
-                  // tool_start 이벤트 전송
-                  sendEvent('tool_start', {
-                    toolCallId: itemId,
-                    name: item.name,
-                  });
+                  // 클라이언트에 도구 실행 시작 알림 (로딩 UI 표시용)
+                  writer.send('tool_start', { toolCallId: item.id, name: item.name });
                 }
               }
 
-              // Function call arguments 델타
+              /**
+               * 함수 인자 스트리밍 이벤트
+               * - 함수 호출의 JSON 인자가 청크 단위로 전송
+               * - generate_routine_preview의 경우 진행률 UI 표시
+               */
               if (event.type === 'response.function_call_arguments.delta') {
-                const itemId = event.item_id;
-                const fc = functionCalls.get(itemId);
+                const fc = functionCalls.get(event.item_id);
                 if (fc) {
                   fc.arguments += event.delta;
 
-                  // generate_routine_preview 진행률 전송
+                  // 루틴 생성 함수의 경우 진행률 전송 (큰 JSON이라 시간 소요)
                   if (fc.name === 'generate_routine_preview') {
-                    // 예상 토큰: ~1500 (2주 × 4일 × 6운동)
-                    // 글자 수 기준 진행률 계산 (대략 4글자 = 1토큰)
-                    const estimatedChars = 3000; // ~1500 tokens × 4 chars
+                    const estimatedChars = 3000; // 예상 총 문자 수
                     const progress = Math.min(95, Math.round((fc.arguments.length / estimatedChars) * 100));
+                    const progressStep = Math.floor(progress / 5) * 5; // 5% 단위
 
-                    // 5% 단위로만 이벤트 전송 (너무 자주 보내지 않도록)
-                    const progressStep = Math.floor(progress / 5) * 5;
-                    const lastProgress = (fc as unknown as { lastProgress?: number }).lastProgress ?? 0;
-
-                    if (progressStep > lastProgress) {
-                      (fc as unknown as { lastProgress: number }).lastProgress = progressStep;
-                      sendEvent('routine_progress', {
+                    if (progressStep > (fc.lastProgress ?? 0)) {
+                      fc.lastProgress = progressStep;
+                      writer.send('routine_progress', {
                         progress: progressStep,
                         stage: progress < 30 ? '운동 목록 구성 중...' :
                                progress < 60 ? '세트/반복 설정 중...' :
@@ -348,117 +418,110 @@ export const POST = withAuth<Response>(
                       });
                     }
                   }
-
                 }
               }
 
-              // Function call arguments 완료
+              /**
+               * 함수 인자 완료 이벤트
+               * - 전체 JSON 인자가 완성됨
+               */
               if (event.type === 'response.function_call_arguments.done') {
-                const itemId = event.item_id;
-                const fc = functionCalls.get(itemId);
+                const fc = functionCalls.get(event.item_id);
                 if (fc) {
                   fc.arguments = event.arguments;
                 }
               }
             }
 
-            // Tool calls가 있으면 실행
+            // =============================================================
+            // STEP 4-4: 함수 실행 및 다음 루프 준비
+            // =============================================================
+
             if (hasToolCalls && functionCalls.size > 0) {
               totalToolCalls += functionCalls.size;
 
-              // ✅ 텍스트 응답이 있으면 먼저 text 메시지로 별도 저장
-              // (tool_call에 저장하면 클라이언트에서 필터링되어 표시 안됨)
+              /**
+               * 텍스트 응답 먼저 저장
+               * - 함수 호출 전에 생성된 텍스트가 있으면 별도 저장
+               * - tool_call 메시지에 포함하면 클라이언트에서 표시 안됨
+               */
               if (contentBuffer.trim()) {
-                await supabase.from('chat_messages').insert({
-                  conversation_id: conversationId,
-                  sender_id: null,
-                  role: 'assistant',
-                  content: contentBuffer,
-                  content_type: 'text',
-                });
-                savedTextLength += contentBuffer.length; // 저장된 길이 추적
+                await saveAiTextMessage(supabase, conversationId, contentBuffer);
+                savedTextLength += contentBuffer.length;
               }
 
-              // Tool calls를 DB에 저장
-              // ✅ call_id 일관성 보장: call_id가 없으면 id를 fallback으로 사용
-              const formattedToolCalls: Array<{
-                id: string;
-                call_id: string;
-                name: string;
-                arguments: string;
-              }> = Array.from(functionCalls.values()).map((fc) => ({
+              /**
+               * 함수 호출 메타데이터 DB 저장
+               * - 나중에 대화 히스토리 복원 시 필요
+               */
+              const formattedToolCalls: ToolCallData[] = Array.from(functionCalls.values()).map((fc) => ({
                 id: fc.id,
                 call_id: fc.callId || fc.id,
                 name: fc.name,
                 arguments: fc.arguments,
               }));
+              await saveToolCallMessage(supabase, conversationId, formattedToolCalls);
 
-              // tool_call 메시지 삽입 (텍스트는 위에서 별도 저장했으므로 비움)
-              await supabase.from('chat_messages').insert({
-                conversation_id: conversationId,
-                sender_id: null,
-                role: 'assistant',
-                content: '',
-                content_type: 'tool_call',
-                metadata: { tool_calls: formattedToolCalls },
-              });
-
-              // Tool Handler Context 생성
+              /**
+               * Tool Handler Context
+               * - 각 도구 핸들러에 전달할 컨텍스트
+               * - sendEvent: SSE 이벤트 전송 함수 (도구가 직접 클라이언트에 알림)
+               */
               const toolHandlerCtx: ToolHandlerContext = {
                 userId,
                 supabase,
                 conversationId,
-                sendEvent,
+                sendEvent: (event, data) => writer.send(event, data),
               };
 
-              // 각 function call 실행
+              /**
+               * 각 함수 실행
+               * - handleToolCall: 함수 이름에 따라 적절한 핸들러 호출
+               * - 결과를 input에 추가하여 다음 OpenAI 호출에 포함
+               */
               for (const fc of functionCalls.values()) {
                 const toolName = fc.name as AIToolName;
                 let args: Record<string, unknown> = {};
-
                 try {
                   args = JSON.parse(fc.arguments || '{}');
                 } catch {
                   args = {};
                 }
 
-                // ✅ call_id 일관성 보장: call_id가 없으면 id를 fallback으로 사용
-              // (buildConversationInput에서 tool_call 읽을 때도 동일한 로직 사용)
-              const effectiveCallId = fc.callId || fc.id;
+                const effectiveCallId = fc.callId || fc.id;
+                const fcInfo: FunctionCallInfo = {
+                  id: fc.id,
+                  callId: effectiveCallId,
+                  name: fc.name,
+                  arguments: fc.arguments,
+                };
 
-              // FunctionCallInfo 생성
-              const fcInfo: FunctionCallInfo = {
-                id: fc.id,
-                callId: effectiveCallId,
-                name: fc.name,
-                arguments: fc.arguments,
-              };
+                /**
+                 * 도구 실행
+                 * - toolResult: 도구 실행 결과 (OpenAI에 전달)
+                 * - continueLoop: 추가 OpenAI 호출 필요 여부
+                 *   - true: 결과 기반으로 추가 응답 생성
+                 *   - false: 여기서 대화 종료 (예: 유저 입력 대기)
+                 */
+                const { toolResult, continueLoop: shouldContinue } = await handleToolCall(
+                  fcInfo,
+                  toolName,
+                  args,
+                  toolHandlerCtx
+                );
 
-              // Handler 호출
-              const { toolResult, continueLoop: shouldContinue } = await handleToolCall(
-                fcInfo,
-                toolName,
-                args,
-                toolHandlerCtx
-              );
+                if (!shouldContinue) {
+                  continueLoop = false;
+                }
 
-              // continueLoop 업데이트
-              if (!shouldContinue) {
-                continueLoop = false;
-              }
+                // 도구 결과 DB 저장
+                await saveToolResultMessage(supabase, conversationId, effectiveCallId, toolName, toolResult);
 
-              // Tool result DB 저장
-              await supabase.from('chat_messages').insert({
-                conversation_id: conversationId,
-                sender_id: null,
-                role: 'assistant',
-                content: toolResult,
-                content_type: 'tool_result',
-                metadata: { tool_call_id: effectiveCallId, tool_name: toolName },
-              });
-
-                // 다음 루프를 위해 input에 function_call과 output 추가
-                // ✅ effectiveCallId 사용으로 일관성 보장
+                /**
+                 * 다음 OpenAI 호출을 위해 input에 추가
+                 * - function_call: AI가 요청한 함수 호출
+                 * - function_call_output: 서버에서 실행한 결과
+                 */
                 input.push({
                   type: 'function_call',
                   id: fc.id,
@@ -466,7 +529,6 @@ export const POST = withAuth<Response>(
                   name: fc.name,
                   arguments: fc.arguments,
                 });
-
                 input.push({
                   type: 'function_call_output',
                   call_id: effectiveCallId,
@@ -474,52 +536,82 @@ export const POST = withAuth<Response>(
                 });
               }
 
-              // 도구 실행 후 계속 여부 결정
-              // request_user_input이 실행된 경우 continueLoop가 이미 false로 설정됨
-              // 그 외의 경우에만 true로 설정하여 AI가 추가 응답 생성
+              // 도구 실행 후에도 루프 계속 (shouldContinue가 false가 아니면)
               if (continueLoop !== false) {
                 continueLoop = true;
               }
             } else {
-              // Tool calls가 없으면 루프 종료
+              // 함수 호출이 없으면 루프 종료
               continueLoop = false;
             }
           }
 
-          // 최종 텍스트 응답 저장 (tool_call과 함께 이미 저장된 부분 제외)
-          // savedTextLength: tool 호출 시 이미 저장된 텍스트 길이
+          // =================================================================
+          // STEP 5: 최종 처리 및 complete 이벤트
+          // =================================================================
+
+          /**
+           * 최종 텍스트 저장
+           * - 마지막 루프에서 함수 호출 없이 끝난 경우
+           * - 이미 저장된 부분(savedTextLength)을 제외한 나머지 저장
+           */
           const unsavedContent = fullContent.slice(savedTextLength);
           if (unsavedContent.trim()) {
-            await supabase.from('chat_messages').insert({
-              conversation_id: conversationId,
-              sender_id: null,
-              role: 'assistant',
-              content: unsavedContent,
-              content_type: 'text',
-            });
+            await saveAiTextMessage(supabase, conversationId, unsavedContent);
           }
 
-          // 대화 업데이트 시간 갱신
-          await supabase
-            .from('conversations')
-            .update({ updated_at: new Date().toISOString() })
-            .eq('id', conversationId);
+          // 대화 updated_at 갱신
+          await updateConversationTimestamp(supabase, conversationId);
 
-          sendEvent('done', { messageId: userMsgId });
-          controllerClosed = true;
-          controller.close();
+          /**
+           * Phase 16: complete 이벤트용 AI 메시지 조회
+           *
+           * 왜 DB에서 다시 조회하는가?
+           * - 도구 핸들러가 직접 저장한 메시지 포함 (예: profile_confirmation)
+           * - 모든 AI 메시지를 한번에 클라이언트에 전달
+           * - 클라이언트는 이 데이터로 캐시 업데이트 (refetch 불필요)
+           */
+          let allAiMessages: Array<{
+            id: string;
+            content: string;
+            contentType: string;
+            createdAt: string;
+          }> = [];
+
+          if (savedUserMessage) {
+            allAiMessages = await fetchAiMessagesForComplete(
+              supabase,
+              conversationId,
+              savedUserMessage.createdAt
+            );
+          }
+
+          /**
+           * complete 이벤트 전송
+           *
+           * 포함 데이터:
+           * - userMessage: DB에 저장된 유저 메시지 (id, content, createdAt)
+           * - aiMessages: 이 요청에서 생성된 모든 AI 메시지
+           *
+           * 클라이언트에서:
+           * - optimistic 유저 메시지를 실제 메시지로 교체
+           * - AI 메시지를 캐시에 추가
+           * - 네트워크 refetch 불필요 (Phase 16 최적화)
+           */
+          writer.send('complete', {
+            userMessage: savedUserMessage,
+            aiMessages: allAiMessages,
+          });
+          writer.close();
         } catch (error) {
           console.error('[AI Chat Stream] Error:', error);
-
-          sendEvent('error', {
-            error: 'AI 응답 생성 중 오류가 발생했습니다.',
-          });
-          controllerClosed = true;
-          controller.close();
+          writer.send('error', { error: 'AI 응답 생성 중 오류가 발생했습니다.' });
+          writer.close();
         }
       },
     });
 
+    // SSE 응답 헤더 설정
     return new Response(stream, {
       headers: {
         'Content-Type': 'text/event-stream',

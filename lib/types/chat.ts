@@ -10,7 +10,7 @@
 // ============================================================================
 
 export type ConversationType = 'ai' | 'direct' | 'group';
-export type ConversationStatus = 'active' | 'completed';
+// Phase 18: ConversationStatus 제거 (ai_status 컬럼 삭제됨)
 export type ParticipantRole = 'owner' | 'admin' | 'member';
 export type MessageRole = 'user' | 'assistant' | 'system';
 export type ContentType =
@@ -38,12 +38,12 @@ export type { SessionPurpose } from './routine';
 
 /**
  * DB conversations 테이블 Row 타입
+ *
+ * Phase 18: ai_purpose, ai_status 컬럼 제거됨
  */
 export interface DbConversation {
   id: string;
   type: ConversationType;
-  ai_purpose: 'workout' | 'coach' | null;
-  ai_status: ConversationStatus | null;
   ai_result_applied: boolean;
   ai_result_applied_at: string | null;
   title: string | null;
@@ -110,12 +110,14 @@ export interface DbMessageReaction {
 
 /**
  * 클라이언트용 대화방 타입
+ *
+ * Phase 18: ai_purpose, ai_status 레거시 필드 제거
+ * - AI 대화는 항상 coach 용도 (ai_purpose 불필요)
+ * - 범용 대화로 완료 개념 없음 (ai_status 불필요)
  */
 export interface Conversation {
   id: string;
   type: ConversationType;
-  aiPurpose?: 'workout' | 'coach';
-  aiStatus?: ConversationStatus;
   aiResultApplied: boolean;
   aiResultAppliedAt?: string;
   title?: string;
@@ -196,10 +198,11 @@ export interface MessageReaction {
 
 /**
  * 대화방 생성용 데이터
+ *
+ * Phase 18: aiPurpose 제거 (AI 대화는 항상 coach)
  */
 export interface ConversationCreateData {
   type: ConversationType;
-  aiPurpose?: 'workout' | 'coach';
   title?: string;
   /** direct/group 채팅 시 초대할 유저 ID 목록 */
   participantIds?: string[];
@@ -207,10 +210,11 @@ export interface ConversationCreateData {
 
 /**
  * 대화방 업데이트용 데이터
+ *
+ * Phase 18: aiStatus 제거 (완료 개념 없음)
  */
 export interface ConversationUpdateData {
   title?: string;
-  aiStatus?: ConversationStatus;
   aiResultApplied?: boolean;
 }
 
@@ -238,13 +242,13 @@ export interface MessageUpdateData {
 
 /**
  * DbConversation → Conversation 변환
+ *
+ * Phase 18: ai_purpose, ai_status 변환 제거 (레거시)
  */
 export function transformDbConversation(db: DbConversation): Conversation {
   return {
     id: db.id,
     type: db.type,
-    aiPurpose: db.ai_purpose ?? undefined,
-    aiStatus: db.ai_status ?? undefined,
     aiResultApplied: db.ai_result_applied,
     aiResultAppliedAt: db.ai_result_applied_at ?? undefined,
     title: db.title ?? undefined,
@@ -310,7 +314,7 @@ export function transformDbReaction(db: DbMessageReaction): MessageReaction {
 }
 
 // ============================================================================
-// AI Session 호환 타입 (기존 AISession과 호환)
+// Metadata Types
 // ============================================================================
 
 /**
@@ -321,91 +325,6 @@ export interface AppliedRoutineMetadata {
   eventsCreated: number;
   startDate: string;
   appliedAt: string;
-}
-
-/**
- * 적용된 식단 메타데이터
- */
-export interface AppliedMealPlanMetadata {
-  previewId: string;
-  eventsCreated: number;
-  startDate: string;
-  appliedAt: string;
-}
-
-/**
- * AI 세션 메타데이터 (미리보기 상태 복구용)
- */
-export interface AISessionMetadata {
-  // 루틴 관련
-  pending_preview?: import('./fitness').RoutinePreviewData;
-  applied_routine?: AppliedRoutineMetadata;
-  // 프로필 확인
-  pending_profile_confirmation?: ProfileConfirmationRequest;
-  // 선택형 입력 요청
-  pending_input?: import('./fitness').InputRequest;
-}
-
-/**
- * AI 세션 호환 타입 (기존 코드와의 호환성을 위해)
- * Conversation을 AISession처럼 사용할 수 있도록 변환
- */
-export interface AISessionCompat {
-  id: string;
-  userId: string;
-  purpose: 'workout' | 'coach';
-  status: ConversationStatus;
-  title?: string;
-  messages: ChatMessage[];
-  resultApplied: boolean;
-  resultAppliedAt?: string;
-  createdAt: string;
-  completedAt?: string;
-  /** 세션 메타데이터 (미리보기 상태 등) */
-  metadata?: AISessionMetadata;
-}
-
-/**
- * Conversation + messages → AISessionCompat 변환
- */
-export function toAISessionCompat(
-  conversation: Conversation,
-  messages: ChatMessage[]
-): AISessionCompat {
-  return {
-    id: conversation.id,
-    userId: conversation.createdBy,
-    purpose: conversation.aiPurpose!,
-    status: conversation.aiStatus ?? 'active',
-    title: conversation.title,
-    messages,
-    resultApplied: conversation.aiResultApplied,
-    resultAppliedAt: conversation.aiResultAppliedAt,
-    createdAt: conversation.createdAt,
-    completedAt: conversation.aiStatus === 'completed' ? conversation.updatedAt : undefined,
-    metadata: conversation.metadata as AISessionMetadata | undefined,
-  };
-}
-
-// ============================================================================
-// Legacy ChatMessage 호환 (routine.ts의 ChatMessage와 호환)
-// ============================================================================
-
-/**
- * 기존 ChatMessage 형식으로 변환 (간단한 형태)
- */
-export function toLegacyChatMessage(msg: ChatMessage): {
-  id: string;
-  role: MessageRole;
-  content: string;
-  createdAt: string;
-} {
-  return {
-    id: msg.id,
-    role: msg.role,
-    content: msg.content,
-    createdAt: msg.createdAt,
-  };
 }
 
 // ============================================================================
