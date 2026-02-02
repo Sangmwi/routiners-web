@@ -1,6 +1,6 @@
 'use client';
 
-import { XIcon, CheckIcon, WarningIcon, SpinnerGapIcon, ProhibitIcon } from '@phosphor-icons/react';
+import { CheckIcon, WarningIcon, SpinnerGapIcon, ProhibitIcon, PencilSimpleIcon, ArrowRightIcon } from '@phosphor-icons/react';
 import { getEventIcon } from '@/lib/config/eventTheme';
 import ViewMoreButton from '@/components/ui/ViewMoreButton';
 import type { RoutinePreviewStatus } from '@/lib/types/chat';
@@ -22,24 +22,17 @@ interface ChatPreviewSummaryProps {
   status?: RoutinePreviewStatus;
   onViewDetails: () => void;
   onCancel: () => void;
+  onEdit: () => void;
   onApply: (forceOverwrite?: boolean) => void;
   isApplying?: boolean;
 }
 
 /**
- * 미리보기 요약 카드 - Phase 10 디자인
+ * 미리보기 요약 카드
  *
- * 레이아웃:
- * - Row 1: 아이콘 + 배지들(end정렬) + 자세히 버튼
- * - Row 2: 타이틀
- * - Row 3: 디스크립션
- * - 주차별 요약
- * - 액션 버튼 OR 상태 표시 (중앙 정렬)
- *
- * Phase 10: status에 따라 버튼 자리에 상태 텍스트 표시
- * - pending: 취소/적용 버튼
- * - applied: "루틴이 적용되었습니다" 중앙 정렬
- * - cancelled: "취소되었습니다" 중앙 정렬
+ * Phase 19: 칩 + CTA 디자인
+ * - pending: [종료] [수정] (outline 칩) + [적용 →] (solid CTA)
+ * - applied/edited/cancelled: 상태 표시
  */
 export default function ChatPreviewSummary({
   type,
@@ -51,25 +44,42 @@ export default function ChatPreviewSummary({
   status = 'pending',
   onViewDetails,
   onCancel,
+  onEdit,
   onApply,
   isApplying = false,
 }: ChatPreviewSummaryProps) {
   const Icon = getEventIcon(type === 'routine' ? 'workout' : 'meal');
   const isActionable = status === 'pending' && !isApplying;
 
+  // 상태별 표시
+  const statusDisplay: Record<Exclude<RoutinePreviewStatus, 'pending'>, { icon: React.ReactNode; text: string; className: string }> = {
+    applied: {
+      icon: <CheckIcon size={14} weight="bold" />,
+      text: '루틴이 적용되었습니다',
+      className: 'text-green-600',
+    },
+    edited: {
+      icon: <PencilSimpleIcon size={14} />,
+      text: '수정 요청됨',
+      className: 'text-amber-600',
+    },
+    cancelled: {
+      icon: <ProhibitIcon size={14} />,
+      text: '종료됨',
+      className: 'text-muted-foreground',
+    },
+  };
+
   return (
-    <div className={`rounded-2xl overflow-hidden bg-linear-to-b from-primary/5 to-transparent ${
-      status !== 'pending' ? 'opacity-75' : ''
-    }`}>
-      {/* 헤더 Row 1: 아이콘 + 배지들 + 자세히 */}
-      <div className="p-5 pb-3">
+    <div className={`rounded-2xl overflow-hidden ${status !== 'pending' ? 'opacity-60' : ''}`}>
+      {/* 헤더: 배지들 + 자세히 */}
+      <div className="px-5 pt-5 pb-4">
         <div className="flex items-center gap-3">
-          {/* 배지들 + 자세히 버튼 (우측 정렬) */}
           <div className="flex-1 flex items-center gap-2">
-            <span className="px-2.5 py-1 text-xs font-medium bg-muted/50 text-muted-foreground rounded-full">
+            <span className="px-2.5 py-1 text-xs font-medium bg-muted/40 text-muted-foreground rounded-full">
               {stats.duration}
             </span>
-            <span className="px-2.5 py-1 text-xs font-medium bg-muted/50 text-muted-foreground rounded-full">
+            <span className="px-2.5 py-1 text-xs font-medium bg-muted/40 text-muted-foreground rounded-full">
               {stats.frequency}
             </span>
             {stats.perSession && (
@@ -83,14 +93,14 @@ export default function ChatPreviewSummary({
           </ViewMoreButton>
         </div>
 
-        {/* Row 2: 타이틀 */}
-        <h3 className="font-semibold text-foreground text-lg leading-tight mt-5">
+        {/* 타이틀 */}
+        <h3 className="font-semibold text-foreground text-lg leading-tight mt-4">
           {title}
         </h3>
 
-        {/* Row 3: 디스크립션, 줄간격 넓게*/}
+        {/* 디스크립션 */}
         {description && (
-          <p className="text-xs text-muted-foreground mt-3 line-clamp-2 leading-relaxed">
+          <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
             {description}
           </p>
         )}
@@ -99,7 +109,7 @@ export default function ChatPreviewSummary({
       {/* 주차별 요약 */}
       <div className="px-5 pb-4 space-y-2">
         {weekSummaries.slice(0, 2).map((summary, idx) => (
-          <div key={idx} className="flex items-start gap-3 p-3 bg-muted/30 rounded-xl">
+          <div key={idx} className="flex items-start gap-3 py-3 px-4 bg-muted/25 rounded-xl">
             <span className="shrink-0 text-xs font-semibold text-primary">
               {idx + 1}주차
             </span>
@@ -107,7 +117,7 @@ export default function ChatPreviewSummary({
           </div>
         ))}
         {weekSummaries.length > 2 && (
-          <p className="text-xs text-muted-foreground/60 pl-3">
+          <p className="text-xs text-muted-foreground/60 pl-4">
             +{weekSummaries.length - 2}주 더...
           </p>
         )}
@@ -115,66 +125,70 @@ export default function ChatPreviewSummary({
 
       {/* 충돌 경고 */}
       {hasConflicts && status === 'pending' && (
-        <div className="px-4 pb-3">
-          <div className="flex items-center gap-2 text-warning">
+        <div className="px-5 pb-4">
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/10 text-amber-600">
             <WarningIcon size={14} className="shrink-0" />
             <span className="text-xs font-medium">기존 일정과 겹치는 날이 있습니다</span>
           </div>
         </div>
       )}
 
-      {/* 액션 영역: 버튼 OR 상태 표시 */}
-      <div className="p-3 bg-primary/5">
+      {/* 액션 영역 */}
+      <div className="px-5 pb-5">
         {status === 'pending' ? (
-          /* 액션 버튼 */
-          <div className="flex gap-2">
-            {/* 취소 */}
+          <div className="flex items-center gap-2">
+            {/* 종료 - Outline 칩 */}
             <button
               onClick={onCancel}
               disabled={!isActionable}
-              className="flex-1 flex items-center justify-center gap-1.5 h-11 rounded-xl text-sm font-medium
-                         bg-muted/40 hover:bg-muted/60 transition-colors active:scale-[0.98] disabled:opacity-50"
+              className="h-11 px-5 rounded-full text-sm font-medium
+                         border border-border/60 text-muted-foreground
+                         hover:bg-muted/30 hover:border-border
+                         transition-all active:scale-[0.97] disabled:opacity-50"
             >
-              <XIcon size={16} />
-              취소
+              종료
             </button>
 
-            {/* 적용 */}
+            {/* 수정 - Outline 칩 */}
+            <button
+              onClick={onEdit}
+              disabled={!isActionable}
+              className="h-11 px-5 rounded-full text-sm font-medium
+                         border border-border/60 text-muted-foreground
+                         hover:bg-muted/30 hover:border-border
+                         transition-all active:scale-[0.97] disabled:opacity-50"
+            >
+              수정
+            </button>
+
+            {/* 적용 - Solid CTA (나머지 공간) */}
             <button
               onClick={() => onApply(hasConflicts)}
               disabled={!isActionable}
-              className={`flex-1 flex items-center justify-center gap-1.5 h-11 rounded-xl text-sm font-medium transition-all active:scale-[0.98] disabled:opacity-50 ${hasConflicts
-                  ? 'bg-amber-500 text-white hover:bg-amber-600'
-                  : 'bg-primary text-primary-foreground hover:bg-primary/90'
-                }`}
+              className={`flex-1 h-11 rounded-full text-sm font-semibold
+                         shadow-sm transition-all active:scale-[0.98] disabled:opacity-50
+                         flex items-center justify-center gap-2
+                         ${hasConflicts
+                           ? 'bg-amber-500 text-white hover:bg-amber-600'
+                           : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                         }`}
             >
               {isApplying ? (
                 <SpinnerGapIcon size={16} className="animate-spin" />
               ) : (
                 <>
-                  <CheckIcon size={16} />
                   적용
+                  <ArrowRightIcon size={16} weight="bold" />
                 </>
               )}
             </button>
           </div>
         ) : (
-          /* 상태 표시 (중앙 정렬) */
-          <div className="flex items-center justify-center h-11">
-            <span className={`text-xs font-medium flex items-center gap-1.5 ${
-              status === 'applied' ? 'text-green-600' : 'text-muted-foreground'
-            }`}>
-              {status === 'applied' ? (
-                <>
-                  <CheckIcon size={14} weight="bold" />
-                  루틴이 적용되었습니다
-                </>
-              ) : (
-                <>
-                  <ProhibitIcon size={14} />
-                  취소되었습니다
-                </>
-              )}
+          /* 상태 표시 */
+          <div className="flex items-center justify-center h-11 rounded-full bg-muted/20">
+            <span className={`text-sm font-medium flex items-center gap-1.5 ${statusDisplay[status as Exclude<RoutinePreviewStatus, 'pending'>].className}`}>
+              {statusDisplay[status as Exclude<RoutinePreviewStatus, 'pending'>].icon}
+              {statusDisplay[status as Exclude<RoutinePreviewStatus, 'pending'>].text}
             </span>
           </div>
         )}

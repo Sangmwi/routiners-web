@@ -5,7 +5,6 @@ import { useCoachChat, useCoachDrawer, useRoutinePreview } from '@/hooks/coach';
 import { useCoachConversations } from '@/hooks/coach/queries';
 import type { MessageActionType } from '@/components/routine/chat/ChatMessage';
 import type { RoutinePreviewData } from '@/lib/types/fitness';
-import CoachHeader from './CoachHeader';
 import WelcomeScreen from './WelcomeScreen';
 import SummarizationIndicator from './SummarizationIndicator';
 import ActionChips from './ActionChips';
@@ -15,16 +14,27 @@ import ChatInput from '@/components/routine/chat/ChatInput';
 import PreviewDetailDrawer from '@/components/routine/chat/PreviewDetailDrawer';
 import { PulseLoader } from '@/components/ui/PulseLoader';
 
+interface CoachContentProps {
+  /** 드로어 열림 상태 (page.tsx에서 관리) */
+  isDrawerOpen: boolean;
+  /** 드로어 닫기 핸들러 */
+  onDrawerClose: () => void;
+}
+
 /**
  * 코치 채팅 콘텐츠 (Suspense 내부)
  *
  * SOLID SRP 적용:
  * - useCoachChat: 채팅 상태 및 메시지 관리
- * - useCoachDrawer: 대화 목록 드로어 관리
+ * - useCoachDrawer: 대화 목록 드로어 액션 관리
  * - useRoutinePreview: 루틴 프리뷰 드로어 관리
  * - 이 컴포넌트: 순수 UI 조합만 담당
+ *
+ * 드로어 상태 분리:
+ * - isOpen/close: page.tsx에서 관리 (헤더 즉시 동작)
+ * - 드로어 액션: 이 컴포넌트 내부 (데이터 필요)
  */
-export default function CoachContent() {
+export default function CoachContent({ isDrawerOpen, onDrawerClose }: CoachContentProps) {
   const searchParams = useSearchParams();
   const conversationIdFromUrl = searchParams.get('id') ?? undefined;
 
@@ -50,6 +60,7 @@ export default function CoachContent() {
     clearError,
     confirmProfile,
     editProfile,
+    cancelProfile,
     isMessagesLoading,
     isRefetching,
     sendMessage,
@@ -91,6 +102,12 @@ export default function CoachContent() {
       case 'edit':
         editProfile(messageId);
         break;
+      case 'cancelProfile':
+        cancelProfile(messageId);
+        break;
+      case 'editPreview':
+        preview.edit(messageId);
+        break;
       case 'apply':
         if (message?.contentType === 'routine_preview') {
           const previewData = JSON.parse(message.content) as RoutinePreviewData;
@@ -129,12 +146,6 @@ export default function CoachContent() {
 
   return (
     <>
-      {/* 헤더 */}
-      <CoachHeader
-        onMenuClick={drawer.open}
-        hasActivePurpose={!!activePurpose}
-      />
-
       {/* 컨텐츠 영역 */}
       <div className="flex-1 overflow-hidden relative">
         {showChatLoader ? (
@@ -192,8 +203,8 @@ export default function CoachContent() {
 
       {/* 채팅 목록 드로어 */}
       <ChatListDrawer
-        isOpen={drawer.isOpen}
-        onClose={drawer.close}
+        isOpen={isDrawerOpen}
+        onClose={onDrawerClose}
         conversations={conversationsData?.conversations ?? []}
         currentId={conversationId}
         onSelect={drawer.selectConversation}

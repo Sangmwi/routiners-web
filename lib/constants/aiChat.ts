@@ -125,6 +125,65 @@ export const AI_CHAT_LIMITS = {
 } as const;
 
 // =============================================================================
+// 코치 페르소나 메타데이터
+// =============================================================================
+
+/**
+ * 코치 페르소나 타입 정의
+ * 향후 다양한 AI 페르소나 확장을 위한 구조
+ */
+export interface CoachPersona {
+  /** 고유 식별자 */
+  id: string;
+  /** 표시 이름 */
+  name: string;
+  /** 간단한 설명 */
+  description: string;
+  /** 아이콘 타입 (Phosphor Icons 이름) */
+  iconType: 'robot' | 'barbell' | 'heart' | 'brain' | 'lightning';
+  /** 테마 색상 (CSS 변수 또는 색상값) - 향후 확장용 */
+  themeColor?: string;
+}
+
+/**
+ * 기본 코치 페르소나
+ * 현재는 단일 코치만 사용, 향후 다양한 페르소나 추가 가능
+ *
+ * @example 향후 확장 예시
+ * ```ts
+ * const trainer: CoachPersona = {
+ *   id: 'trainer',
+ *   name: '트레이너',
+ *   description: '체계적인 운동 지도',
+ *   iconType: 'barbell',
+ * };
+ * ```
+ */
+export const COACH_PERSONAS: Record<string, CoachPersona> = {
+  default: {
+    id: 'default',
+    name: '코치',
+    description: '운동 루틴 생성을 도와드립니다',
+    iconType: 'robot',
+  },
+  // 향후 확장:
+  // trainer: { id: 'trainer', name: '트레이너', ... },
+  // nutritionist: { id: 'nutritionist', name: '영양사', ... },
+} as const;
+
+/** 현재 활성화된 기본 페르소나 */
+export const DEFAULT_COACH_PERSONA = COACH_PERSONAS.default;
+
+/**
+ * 페르소나 ID로 페르소나 정보 조회
+ * @param personaId - 페르소나 ID (기본값: 'default')
+ * @returns 코치 페르소나 정보
+ */
+export function getCoachPersona(personaId: string = 'default'): CoachPersona {
+  return COACH_PERSONAS[personaId] ?? DEFAULT_COACH_PERSONA;
+}
+
+// =============================================================================
 // 유틸리티 함수
 // =============================================================================
 

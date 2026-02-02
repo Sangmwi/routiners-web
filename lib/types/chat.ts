@@ -387,13 +387,21 @@ export interface ProfileConfirmationRequest {
 
 /**
  * 프로필 확인 메시지 상태
+ * - pending: 대기 중 (버튼 표시)
+ * - confirmed: 확인됨
+ * - edited: 수정 요청됨
+ * - cancelled: 종료됨
  */
-export type ProfileConfirmationStatus = 'pending' | 'confirmed' | 'edited';
+export type ProfileConfirmationStatus = 'pending' | 'confirmed' | 'edited' | 'cancelled';
 
 /**
  * 루틴 미리보기 메시지 상태
+ * - pending: 대기 중 (버튼 표시)
+ * - applied: 적용됨
+ * - edited: 수정 요청됨
+ * - cancelled: 종료됨
  */
-export type RoutinePreviewStatus = 'pending' | 'applied' | 'cancelled';
+export type RoutinePreviewStatus = 'pending' | 'applied' | 'edited' | 'cancelled';
 
 /**
  * 입력 요청 메시지 상태

@@ -20,14 +20,14 @@ interface PulseLoaderProps extends HTMLAttributes<HTMLDivElement> {
 function ChatPulseContent() {
   return (
     <div className="flex flex-col gap-5 w-full">
-      {/* 좌측 assistant 메시지 (긴) */}
-      <div className="flex gap-3" style={{ animationDelay: '0ms' }}>
+      {/* 좌측 assistant 메시지 (긴) - ChatMessage 스타일 일치 */}
+      <div className="flex gap-3 mt-2">
         <div
           className="pulse-bar shrink-0 w-8 h-8 rounded-full"
           style={{ animationDelay: '0ms' }}
         />
         <div
-          className="pulse-bar rounded-2xl rounded-tl-md"
+          className="pulse-bar rounded-2xl rounded-tl-none mt-2"
           style={{ width: '65%', height: 48, animationDelay: '60ms' }}
         />
       </div>
@@ -35,19 +35,19 @@ function ChatPulseContent() {
       {/* 우측 user 메시지 (짧) */}
       <div className="flex justify-end">
         <div
-          className="pulse-bar rounded-2xl rounded-tr-md"
+          className="pulse-bar rounded-2xl rounded-tr-none"
           style={{ width: '40%', height: 40, animationDelay: '120ms' }}
         />
       </div>
 
       {/* 좌측 assistant 메시지 (중간) */}
-      <div className="flex gap-3">
+      <div className="flex gap-3 mt-2">
         <div
           className="pulse-bar shrink-0 w-8 h-8 rounded-full"
           style={{ animationDelay: '180ms' }}
         />
         <div
-          className="pulse-bar rounded-2xl rounded-tl-md"
+          className="pulse-bar rounded-2xl rounded-tl-none mt-2"
           style={{ width: '55%', height: 56, animationDelay: '240ms' }}
         />
       </div>

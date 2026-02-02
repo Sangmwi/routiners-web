@@ -85,6 +85,8 @@ export interface UseCoachChatReturn {
   confirmProfile: (messageId: string) => Promise<void>;
   /** 프로필 수정 요청 (Phase 9: messageId 기반) */
   editProfile: (messageId: string) => Promise<void>;
+  /** 프로필 확인 프로세스 종료 (Phase 19: messageId 기반) */
+  cancelProfile: (messageId: string) => Promise<void>;
   /** 메시지 refetch 함수 */
   refetchMessages: () => Promise<unknown>;
   /** 메시지 전송 함수 (conversationId, content) - Phase 10: 루틴 적용/취소용 */
@@ -171,7 +173,8 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
   });
 
   // Phase 9: messageId 기반 프로필 확인 훅
-  const { confirmProfile, editProfile } = useCoachProfileConfirmation({
+  // Phase 19: cancelProfile 추가
+  const { confirmProfile, editProfile, cancelProfile } = useCoachProfileConfirmation({
     conversationId,
     sendMessage,
     refetchMessages: () => messagesQuery.refetch(),
@@ -314,6 +317,7 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
     clearError,
     confirmProfile,
     editProfile,
+    cancelProfile,
     refetchMessages: () => messagesQuery.refetch(),
     sendMessage,
   };

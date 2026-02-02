@@ -8,6 +8,9 @@
  * - AI가 대화 맥락을 유지할 수 있도록 메시지로 알림
  * - 프로필 확인 패턴과 동일한 구조
  *
+ * Phase 19: 3버튼 구조 (종료/수정/적용)
+ * - edit 함수 추가 (루틴 수정 요청)
+ *
  * SOLID 원칙 적용:
  * - SRP: 루틴 프리뷰 관리만 담당
  * - DRY: 공통 메시지 상태 업데이트 훅 사용
@@ -39,13 +42,15 @@ interface UseRoutinePreviewOptions {
  * 루틴 프리뷰 드로어 관리 훅 (SRP)
  *
  * Phase 10: 상태 업데이트 + API 호출 + AI 메시지
+ * Phase 19: 3버튼 구조 (종료/수정/적용)
  * - 적용: updateStatus('applied') → applyRoutine API → AI 메시지
- * - 취소: updateStatus('cancelled') → clearActivePurpose API → AI 메시지
+ * - 수정: updateStatus('edited') → AI 메시지 (뭘 수정할지 물어봄)
+ * - 종료: updateStatus('cancelled') → clearActivePurpose API → AI 메시지
  * - 대화 히스토리에 전체 맥락이 남음
  *
  * 책임:
  * - 프리뷰 드로어 열림/닫힘 상태
- * - 루틴 적용/취소 (상태 + API + 메시지)
+ * - 루틴 적용/수정/종료 (상태 + API + 메시지)
  */
 export function useRoutinePreview({
   conversationId,
@@ -125,9 +130,35 @@ export function useRoutinePreview({
   };
 
   /**
-   * 루틴 생성 프로세스 취소
+   * 루틴 수정 요청
+   *
+   * Phase 19: 3버튼 구조 추가
+   * 1. 메시지 상태를 'edited'로 업데이트
+   * 2. AI에게 수정 요청 메시지 전송 (AI가 뭘 수정할지 물어봄)
+   *
+   * @param messageId 루틴 미리보기 메시지 ID
+   */
+  const edit = async (messageId: string) => {
+    if (!conversationId) return;
+
+    try {
+      // 1. 메시지 상태 업데이트 (pending → edited)
+      await updateStatus(messageId, 'edited');
+
+      // 2. AI에게 수정 요청 메시지 전송
+      sendMessage(conversationId, '루틴을 수정하고 싶어요.');
+
+      close();
+    } catch (error) {
+      console.error('[Routine Preview] Failed to edit:', error);
+    }
+  };
+
+  /**
+   * 루틴 생성 프로세스 종료
    *
    * Phase 10: 상태 업데이트 + API 호출 + AI 메시지
+   * Phase 19: 취소 → 종료로 명칭 변경
    * 1. 메시지 상태를 'cancelled'로 업데이트
    * 2. clearActivePurpose API 호출
    * 3. AI에게 메시지 전송 (대화 맥락 유지)
@@ -161,6 +192,7 @@ export function useRoutinePreview({
     open,
     close,
     apply,
+    edit,
     cancel,
   };
 }

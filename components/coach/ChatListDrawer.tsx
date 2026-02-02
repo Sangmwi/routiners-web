@@ -4,6 +4,7 @@ import { PlusIcon, RobotIcon, TrashSimpleIcon } from '@phosphor-icons/react';
 import { LoadingSpinner } from '@/components/ui/icons';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import type { CoachConversationListItem, ActivePurposeType } from '@/lib/types/coach';
+import { formatMessagePreview } from '@/lib/utils/formatMessagePreview';
 
 interface ChatListDrawerProps {
   isOpen: boolean;
@@ -183,9 +184,9 @@ function ConversationItem({ item, isCurrent, onSelect, onDelete }: ConversationI
             </>
           )}
         </div>
-        {lastMessage && (
+        {lastMessage && formatMessagePreview(lastMessage) && (
           <p className="text-xs text-muted-foreground truncate mt-0.5">
-            {lastMessage.content}
+            {formatMessagePreview(lastMessage)}
           </p>
         )}
       </div>

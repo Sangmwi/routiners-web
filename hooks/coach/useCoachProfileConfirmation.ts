@@ -5,15 +5,19 @@
  *
  * Phase 9: 메시지 기반 트랜지언트 UI
  * - 프로필 확인 카드는 chat_messages 테이블에 저장됨
- * - 액션 시 메시지 상태만 업데이트 (confirmed | edited)
+ * - 액션 시 메시지 상태만 업데이트 (confirmed | edited | cancelled)
  * - 카드는 히스토리에 영구 보존됨
  *
+ * Phase 19: 3버튼 구조 (종료/수정/확인)
+ * - cancelProfile 추가 (프로세스 종료)
+ *
  * SOLID 원칙 적용:
- * - SRP: 프로필 확인/수정 로직만 담당
+ * - SRP: 프로필 확인/수정/종료 로직만 담당
  * - DRY: 공통 메시지 상태 업데이트 훅 사용
  */
 
 import { useMessageStatusUpdate } from './useMessageStatusUpdate';
+import { useClearActivePurpose } from './mutations';
 
 // =============================================================================
 // Types
@@ -32,6 +36,8 @@ interface UseCoachProfileConfirmationReturn {
   confirmProfile: (messageId: string) => Promise<void>;
   /** 프로필 수정 요청 (messageId 기반) */
   editProfile: (messageId: string) => Promise<void>;
+  /** 프로필 확인 프로세스 종료 (messageId 기반) */
+  cancelProfile: (messageId: string) => Promise<void>;
 }
 
 // =============================================================================
@@ -48,6 +54,9 @@ export function useCoachProfileConfirmation({
     conversationId,
     onError: refetchMessages,
   });
+
+  // activePurpose 클리어 mutation
+  const clearActivePurpose = useClearActivePurpose();
 
   /**
    * 프로필 확인 → 메시지 상태를 'confirmed'로 업데이트
@@ -83,5 +92,26 @@ export function useCoachProfileConfirmation({
     }
   };
 
-  return { confirmProfile, editProfile };
+  /**
+   * 프로필 확인 프로세스 종료 → 메시지 상태를 'cancelled'로 업데이트
+   * Phase 19: 3버튼 구조 추가
+   */
+  const cancelProfile = async (messageId: string) => {
+    if (!conversationId) return;
+
+    try {
+      // 1. 메시지 상태 업데이트 (pending → cancelled)
+      await updateStatus(messageId, 'cancelled');
+
+      // 2. activePurpose 클리어
+      await clearActivePurpose.mutateAsync(conversationId);
+
+      // 3. AI에게 종료 메시지 전송
+      sendMessage(conversationId, '프로필 확인을 종료합니다.');
+    } catch (error) {
+      console.error('[Profile Confirmation] Failed to cancel:', error);
+    }
+  };
+
+  return { confirmProfile, editProfile, cancelProfile };
 }

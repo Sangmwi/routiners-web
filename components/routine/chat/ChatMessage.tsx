@@ -16,14 +16,20 @@ import ChatPreviewSummary from './ChatPreviewSummary';
 
 /**
  * 메시지 액션 콜백 타입
+ *
+ * Phase 19: 3버튼 구조
+ * - profile_confirmation: cancelProfile / edit / confirm
+ * - routine_preview: cancel / editPreview / apply
  */
 export type MessageActionType =
-  | 'confirm'      // 프로필 확인
-  | 'edit'         // 프로필 수정
-  | 'apply'        // 루틴 적용
-  | 'cancel'       // 취소
-  | 'viewDetails'  // 상세 보기
-  | 'submitInput'; // 입력 제출
+  | 'confirm'        // 프로필 확인
+  | 'edit'           // 프로필 수정
+  | 'cancelProfile'  // 프로필 확인 종료 (Phase 19)
+  | 'apply'          // 루틴 적용
+  | 'editPreview'    // 루틴 수정 (Phase 19)
+  | 'cancel'         // 루틴 종료
+  | 'viewDetails'    // 상세 보기
+  | 'submitInput';   // 입력 제출
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -76,6 +82,7 @@ export default function ChatMessage({ message, onAction, isApplyingRoutine = fal
           status={status}
           onConfirm={() => onAction?.('confirm', message.id)}
           onEdit={() => onAction?.('edit', message.id)}
+          onCancel={() => onAction?.('cancelProfile', message.id)}
           disabled={status !== 'pending'}
         />
       );
@@ -128,6 +135,7 @@ export default function ChatMessage({ message, onAction, isApplyingRoutine = fal
         status={status}
         onViewDetails={() => onAction?.('viewDetails', message.id)}
         onCancel={() => onAction?.('cancel', message.id)}
+        onEdit={() => onAction?.('editPreview', message.id)}
         onApply={(forceOverwrite) => onAction?.('apply', message.id, forceOverwrite ? 'force' : undefined)}
         isApplying={isApplyingRoutine}
       />
