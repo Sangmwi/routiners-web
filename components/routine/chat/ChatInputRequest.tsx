@@ -10,6 +10,8 @@ interface ChatInputRequestProps {
   request: InputRequest;
   /** 메시지 상태 (Phase 9) */
   status?: InputRequestStatus;
+  /** 제출된 값 (Phase 20: submitted 상태에서 표시용) */
+  submittedValue?: string;
   /** 선택 완료 시 호출 */
   onSubmit: (value: string | string[]) => void;
 }
@@ -27,7 +29,7 @@ interface ChatInputRequestProps {
  * - checkbox: 다중 선택 후 확인
  * - slider: 값 조정 후 확인
  */
-export default function ChatInputRequest({ request, status = 'pending', onSubmit }: ChatInputRequestProps) {
+export default function ChatInputRequest({ request, status = 'pending', submittedValue, onSubmit }: ChatInputRequestProps) {
   // Radio: 선택된 값 (단일)
   const [selectedRadio, setSelectedRadio] = useState<string | null>(null);
 
@@ -83,7 +85,11 @@ export default function ChatInputRequest({ request, status = 'pending', onSubmit
 
   const isActionable = status === 'pending';
 
-  // 제출됨 상태: 선택된 값만 표시
+  /**
+   * Phase 20: 제출됨 상태 개선
+   * - submittedValue를 사용하여 실제 제출된 값 표시
+   * - slider 타입도 정상 표시
+   */
   if (status === 'submitted') {
     return (
       <div className="py-3 px-1 opacity-75">
@@ -93,16 +99,24 @@ export default function ChatInputRequest({ request, status = 'pending', onSubmit
             제출됨
           </span>
         </div>
-        {/* 선택된 값 표시 (읽기 전용) */}
+        {/* 제출된 값 표시 (읽기 전용) */}
         <div className="flex flex-wrap gap-2">
-          {request.options?.map((option) => (
-            <span
-              key={option.value}
-              className="px-4 py-2 rounded-full text-sm font-medium bg-muted/50 text-muted-foreground"
-            >
-              {option.label}
+          {submittedValue ? (
+            // 제출된 값이 있으면 그대로 표시
+            <span className="px-4 py-2 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20">
+              {submittedValue}
             </span>
-          ))}
+          ) : (
+            // fallback: 모든 옵션 표시 (이전 호환성)
+            request.options?.map((option) => (
+              <span
+                key={option.value}
+                className="px-4 py-2 rounded-full text-sm font-medium bg-muted/50 text-muted-foreground"
+              >
+                {option.label}
+              </span>
+            ))
+          )}
         </div>
       </div>
     );

@@ -1,63 +1,34 @@
 /**
  * AI Chat Handler Types
  *
- * Tool handler 공통 타입 정의 및 입력 검증 스키마
+ * Phase 21-E: SRP 준수 - Context/Result 타입만 정의
+ * Zod 스키마는 schemas/ 디렉토리로 분리
  */
 
-import { z } from 'zod';
 import { SupabaseClient } from '@supabase/supabase-js';
 import type { RoutinePreviewData, InputRequest } from '@/lib/types/fitness';
 import type { ProfileConfirmationRequest } from '@/lib/types/chat';
 import type { ActivePurpose } from '@/lib/types/coach';
 
 // =============================================================================
-// Tool Args Schemas (Zod 기반 런타임 검증)
+// Re-export Schemas (하위 호환성)
 // =============================================================================
+export {
+  RequestUserInputArgsSchema,
+  type RequestUserInputArgs,
+  ConfirmProfileArgsSchema,
+  type ConfirmProfileArgs,
+  ApplyRoutineArgsSchema as ApplyPreviewArgsSchema,
+  type ApplyRoutineArgs as ApplyPreviewArgs,
+  SetActivePurposeArgsSchema,
+  type SetActivePurposeArgs,
+  GenerateRoutinePreviewArgsSchema,
+  type GenerateRoutinePreviewArgs,
+} from './schemas';
 
-/** request_user_input 도구 인자 스키마 */
-export const RequestUserInputArgsSchema = z.object({
-  message: z.string().optional(),
-  type: z.enum(['radio', 'checkbox', 'slider']),
-  options: z
-    .array(
-      z.object({
-        value: z.string(),
-        label: z.string(),
-      })
-    )
-    .optional(),
-  sliderConfig: z
-    .object({
-      min: z.number(),
-      max: z.number(),
-      step: z.number(),
-      unit: z.string(),
-      defaultValue: z.number().optional(),
-    })
-    .optional(),
-});
-export type RequestUserInputArgs = z.infer<typeof RequestUserInputArgsSchema>;
-
-/** confirm_profile_data 도구 인자 스키마 */
-export const ConfirmProfileArgsSchema = z.object({
-  title: z.string(),
-  description: z.string().optional(),
-  fields: z.array(
-    z.object({
-      key: z.string(),
-      label: z.string(),
-      value: z.string(),
-      displayValue: z.string(),
-    })
-  ),
-});
-export type ConfirmProfileArgs = z.infer<typeof ConfirmProfileArgsSchema>;
-
-/** apply_routine 도구 인자 스키마 */
-export const ApplyPreviewArgsSchema = z.object({
-  preview_id: z.string(),
-});
-export type ApplyPreviewArgs = z.infer<typeof ApplyPreviewArgsSchema>;
+// =============================================================================
+// Handler Context & Result Types
+// =============================================================================
 
 /**
  * Tool Handler Context
@@ -88,6 +59,10 @@ export interface FunctionCallInfo {
   name: string;
   arguments: string;
 }
+
+// =============================================================================
+// Conversation Metadata
+// =============================================================================
 
 /**
  * Conversation Metadata 타입

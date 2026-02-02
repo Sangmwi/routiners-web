@@ -146,10 +146,13 @@ export default function ChatMessage({ message, onAction, isApplyingRoutine = fal
   if (contentType === 'input_request') {
     const inputData = JSON.parse(message.content) as InputRequest;
     const status = (message.metadata?.status as InputRequestStatus) || 'pending';
+    // Phase 20: 제출된 값 전달 (slider 포함 모든 타입에서 정상 표시)
+    const submittedValue = message.metadata?.submittedValue as string | undefined;
     return (
       <ChatInputRequest
         request={inputData}
         status={status}
+        submittedValue={submittedValue}
         onSubmit={(value) => onAction?.('submitInput', message.id, value)}
       />
     );

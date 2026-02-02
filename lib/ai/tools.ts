@@ -303,12 +303,17 @@ export const SAVE_ROUTINE_DRAFT: AIToolDefinition = {
  * - 객관식 선택, 슬라이더 등 UI를 통한 사용자 입력 요청
  * - 사용자가 직접 타이핑하지 않고 버튼/슬라이더로 쉽게 답변 가능
  * - 중요: 텍스트로 옵션을 나열하지 말고 반드시 이 도구를 사용할 것
+ *
+ * Phase 20: Structured Outputs 강화
+ * - strict: true로 스키마 강제 준수
+ * - C. 프롬프트에 필수 조건 명시
  */
 export const REQUEST_USER_INPUT: AIToolDefinition = {
   type: 'function',
   name: 'request_user_input',
+  strict: true,
   description:
-    '사용자에게 선택형 질문을 할 때 반드시 이 도구를 사용하세요. 절대로 텍스트로 "1. 근육증가 2. 체지방감소" 같이 나열하지 마세요. 이 도구를 호출하면 사용자 화면에 클릭 가능한 버튼이나 슬라이더가 표시됩니다. message 파라미터에 사용자에게 보여줄 질문 메시지를 반드시 포함하세요.',
+    '사용자에게 선택형 질문을 할 때 반드시 이 도구를 사용하세요. 절대로 텍스트로 "1. 근육증가 2. 체지방감소" 같이 나열하지 마세요. 이 도구를 호출하면 사용자 화면에 클릭 가능한 버튼이나 슬라이더가 표시됩니다.\n\n⚠️ 필수 조건:\n- type이 "radio" 또는 "checkbox"면 반드시 options 배열을 포함해야 합니다 (최소 2개 이상)\n- type이 "slider"면 반드시 sliderConfig 객체를 포함해야 합니다\n- options 없이 radio/checkbox를 호출하면 UI가 표시되지 않습니다!',
   parameters: {
     type: 'object',
     properties: {
@@ -321,10 +326,10 @@ export const REQUEST_USER_INPUT: AIToolDefinition = {
         type: 'string',
         enum: ['radio', 'checkbox', 'slider'],
         description:
-          'UI 타입. radio: 단일 선택, checkbox: 다중 선택, slider: 숫자 범위 선택',
+          'UI 타입. radio: 단일 선택 (options 필수), checkbox: 다중 선택 (options 필수), slider: 숫자 범위 선택 (sliderConfig 필수)',
       },
       options: {
-        type: 'array',
+        type: ['array', 'null'],
         items: {
           type: 'object',
           properties: {
@@ -332,11 +337,12 @@ export const REQUEST_USER_INPUT: AIToolDefinition = {
             label: { type: 'string', description: '화면에 표시될 텍스트' },
           },
           required: ['value', 'label'],
+          additionalProperties: false,
         },
-        description: 'radio, checkbox 타입에서 사용할 선택지 목록',
+        description: '⚠️ radio/checkbox 타입에서 필수! 최소 2개 이상의 선택지를 포함해야 합니다.',
       },
       sliderConfig: {
-        type: 'object',
+        type: ['object', 'null'],
         properties: {
           min: { type: 'number', description: '최소값' },
           max: { type: 'number', description: '최대값' },
@@ -344,11 +350,13 @@ export const REQUEST_USER_INPUT: AIToolDefinition = {
           unit: { type: 'string', description: '단위 (예: 일, 분, kg)' },
           defaultValue: { type: 'number', description: '기본값' },
         },
-        required: ['min', 'max', 'step', 'unit'],
-        description: 'slider 타입에서 사용할 설정',
+        required: ['min', 'max', 'step', 'unit', 'defaultValue'],
+        additionalProperties: false,
+        description: '⚠️ slider 타입에서 필수! 슬라이더 설정을 포함해야 합니다.',
       },
     },
-    required: ['message', 'type'],
+    required: ['message', 'type', 'options', 'sliderConfig'],
+    additionalProperties: false,
   },
 };
 
@@ -356,12 +364,14 @@ export const REQUEST_USER_INPUT: AIToolDefinition = {
  * 14. 프로필 데이터 확인 요청
  * - 기존 저장된 프로필 데이터를 사용자에게 확인받음
  * - 자동 스킵 대신 확인 UI 표시
+ *
+ * Phase 21-D: AI 프롬프트 강화
  */
 export const CONFIRM_PROFILE_DATA: AIToolDefinition = {
   type: 'function',
   name: 'confirm_profile_data',
   description:
-    '기존 저장된 프로필 데이터를 사용자에게 확인받습니다. 프로필 정보(운동 목표, 경험 수준 등)가 이미 있을 때, 자동으로 넘어가지 않고 이 도구를 사용해 사용자에게 현재 값을 보여주고 "확인" 또는 "수정" 선택권을 줍니다. 사용자가 확인하면 다음 단계로, 수정을 원하면 해당 정보를 다시 질문합니다.',
+    '기존 저장된 프로필 데이터를 사용자에게 확인받습니다. 프로필 정보(운동 목표, 경험 수준 등)가 이미 있을 때, 자동으로 넘어가지 않고 이 도구를 사용해 사용자에게 현재 값을 보여주고 "확인" 또는 "수정" 선택권을 줍니다.\n\n⚠️ 필수 조건:\n- fields 배열은 최소 1개 이상의 필드를 포함해야 합니다\n- 각 필드는 key, label, value, displayValue가 모두 있어야 합니다\n- displayValue는 사용자에게 보여줄 한국어 값입니다 (예: "muscle_gain" → "근육 증가")',
   parameters: {
     type: 'object',
     properties: {
@@ -396,13 +406,15 @@ export const CONFIRM_PROFILE_DATA: AIToolDefinition = {
  * 15. 루틴 미리보기 생성
  * - DB에 저장하지 않고 미리보기 UI만 표시
  * - 사용자가 확인 후 프론트엔드에서 apply API 호출
- * - 1주 단위 생성 후 시스템이 2주로 자동 확장 (토큰 50% 절약, 응답 속도 2배 향상)
+ * - 1주 단위 생성 후 시스템이 4주로 자동 확장 (토큰 75% 절약)
+ *
+ * Phase 21-D: AI 프롬프트 강화
  */
 export const GENERATE_ROUTINE_PREVIEW: AIToolDefinition = {
   type: 'function',
   name: 'generate_routine_preview',
   description:
-    '1주 운동 루틴 미리보기를 생성합니다. duration_weeks는 반드시 1로 설정하세요. 시스템이 1주차 데이터를 2주차로 자동 복제하여 2주 루틴을 완성합니다. 이 도구는 루틴을 DB에 저장하지 않고 사용자에게 미리보기 UI만 표시합니다. 사용자가 "적용하기" 버튼을 클릭하면 프론트엔드에서 자동으로 저장 처리됩니다. 수정 요청이 오면 피드백을 반영하여 다시 이 도구를 호출하세요.',
+    '1주 운동 루틴 미리보기를 생성합니다. 시스템이 1주차 데이터를 4주로 자동 확장합니다.\n\n⚠️ 필수 조건:\n- duration_weeks는 반드시 1로 설정 (시스템이 4주로 확장)\n- weeks 배열은 정확히 1개만 포함\n- 각 week의 days 배열 길이는 days_per_week와 일치해야 함\n- 각 day는 최소 1개 이상의 exercise 포함 필수\n- exercise는 name(문자열), sets(숫자), reps(문자열 "8-12"), rest(문자열 "90초") 모두 필수\n\n수정 요청이 오면 피드백을 반영하여 다시 이 도구를 호출하세요.',
   parameters: {
     type: 'object',
     properties: {
@@ -468,10 +480,13 @@ export const GENERATE_ROUTINE_PREVIEW: AIToolDefinition = {
  * 15. 루틴 적용 (미리보기 확정)
  * - 미리보기 데이터를 실제 DB에 저장
  * - 사용자가 "적용하기" 버튼을 클릭하면 호출됨
+ *
+ * Phase 21-C: strict: true 적용
  */
 export const APPLY_ROUTINE: AIToolDefinition = {
   type: 'function',
   name: 'apply_routine',
+  strict: true,
   description:
     '미리보기 중인 루틴을 실제로 적용합니다. 이 도구는 사용자가 루틴 미리보기에서 "적용하기" 버튼을 클릭했을 때만 호출됩니다. preview_id는 generate_routine_preview에서 생성된 미리보기 ID입니다.',
   parameters: {
@@ -483,6 +498,7 @@ export const APPLY_ROUTINE: AIToolDefinition = {
       },
     },
     required: ['preview_id'],
+    additionalProperties: false,
   },
 };
 
@@ -490,10 +506,13 @@ export const APPLY_ROUTINE: AIToolDefinition = {
  * 16. 프로세스 활성화
  * - 구조화된 프로세스(루틴 생성 등)를 활성화
  * - 자연 대화 중 사용자 의도 감지 시 호출
+ *
+ * Phase 21-C: strict: true 적용
  */
 export const SET_ACTIVE_PURPOSE: AIToolDefinition = {
   type: 'function',
   name: 'set_active_purpose',
+  strict: true,
   description:
     '구조화된 프로세스를 활성화합니다. 사용자가 "루틴 짜줘", "운동 계획 세워줘" 등 특정 프로세스를 요청할 때 호출하세요. 활성화 후 도구 결과에 포함된 시작 절차를 따르세요.',
   parameters: {
@@ -506,6 +525,7 @@ export const SET_ACTIVE_PURPOSE: AIToolDefinition = {
       },
     },
     required: ['purposeType'],
+    additionalProperties: false,
   },
 };
 

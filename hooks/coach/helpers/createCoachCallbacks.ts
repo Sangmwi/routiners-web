@@ -113,6 +113,12 @@ export function createCoachCallbacks(ctx: CoachCallbackContext): ChatStreamCallb
         toolCallId: event.toolCallId,
         success: event.success ?? true,
       });
+
+      // Phase 20: generate_routine_preview 완료 시 progress bar 클리어
+      // (성공/실패 무관하게 클리어 - 실패 시에도 progress가 남아있으면 안 됨)
+      if (event.name === 'generate_routine_preview') {
+        dispatch({ type: 'CLEAR_ROUTINE_PROGRESS' });
+      }
     },
 
     // Phase 13: 이벤트별 refetch 제거
