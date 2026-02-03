@@ -29,7 +29,7 @@ export default function BottomNav() {
             <AppLink
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center gap-1 transition-colors ${
+              className={`ripple flex flex-col items-center justify-center gap-1 rounded-xl px-4 py-2 transition-colors ${
                 isActive
                   ? style.activeColor
                   : `${style.inactiveColor} hover:text-foreground`
