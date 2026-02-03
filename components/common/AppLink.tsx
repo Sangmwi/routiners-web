@@ -15,9 +15,12 @@ interface AppLinkProps {
 /**
  * 앱 전용 네비게이션 컴포넌트
  *
- * - router.prefetch()로 프리페칭
  * - button 렌더링으로 Long-press 미리보기 방지
  * - SEO 불필요한 앱 내부 네비게이션용
+ *
+ * Prefetch 전략:
+ * - 탭 라우트(/,/routine,/community,/profile)는 useTabRoutePrefetch에서 중앙 관리
+ * - 그 외 라우트(상세 페이지 등)는 개별 prefetch (마운트 시 1회)
  */
 export default function AppLink({
   href,
@@ -29,10 +32,10 @@ export default function AppLink({
 }: AppLinkProps) {
   const router = useRouter();
 
+  // 비탭 라우트 단순 prefetch (마운트 시 1회)
   useEffect(() => {
-    if (prefetch) {
-      router.prefetch(href);
-    }
+    if (!prefetch) return;
+    router.prefetch(href);
   }, [href, prefetch, router]);
 
   const handleClick = () => {

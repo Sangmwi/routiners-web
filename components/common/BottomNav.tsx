@@ -3,10 +3,14 @@
 import { usePathname } from 'next/navigation';
 import { shouldShowBottomTab } from '@/lib/routes';
 import { BOTTOM_NAV } from '@/lib/config/theme';
+import { useTabRoutePrefetch } from '@/hooks/navigation/useTabRoutePrefetch';
 import AppLink from './AppLink';
 
 export default function BottomNav() {
   const pathname = usePathname();
+
+  // 탭 라우트 중앙 집중식 prefetch (뒤로가기 후 정상작동하는 것과 동일한 효과)
+  useTabRoutePrefetch();
   const { items, style } = BOTTOM_NAV;
 
   // 특정 페이지에서는 탭 숨김

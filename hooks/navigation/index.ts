@@ -1,0 +1,1 @@
+export { useTabRoutePrefetch } from './useTabRoutePrefetch';

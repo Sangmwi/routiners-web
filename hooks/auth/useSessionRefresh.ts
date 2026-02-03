@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 
 // ============================================================================
@@ -10,9 +9,6 @@ import { createClient } from '@/utils/supabase/client';
 
 const REFRESH_COOLDOWN_MS = 5 * 60 * 1000; // 5분
 const REFRESH_THRESHOLD_MS = 10 * 60 * 1000; // 만료 10분 전
-
-// Router refresh 쿨다운 (테스트용: 30초, 원래 5분 권장)
-const ROUTER_REFRESH_COOLDOWN_MS = 30 * 1000;
 
 // ============================================================================
 // Hook
@@ -24,18 +20,13 @@ const ROUTER_REFRESH_COOLDOWN_MS = 30 * 1000;
  * 문제: 앱이 백그라운드에서 1시간+ 있다가 복귀하면 JWT Access Token이 만료됨
  * 해결: visibilitychange 이벤트로 포그라운드 복귀 감지 → refreshSession() 호출
  *
- * 추가 문제: 백그라운드 복귀 후 router.push() Concurrent Navigation이 stuck됨
- * 해결: router.refresh()로 Next.js Router 상태 리셋
- *
  * 최적화:
  * - 세션이 있을 때만 갱신 시도
  * - 만료 10분 전에만 갱신 (불필요한 호출 방지)
  * - 5분 쿨다운 (잦은 탭 전환 시 중복 방지)
  */
 export function useSessionRefresh() {
-  const router = useRouter();
   const lastRefreshRef = useRef<number>(0);
-  const lastRouterRefreshRef = useRef<number>(0);
 
   useEffect(() => {
     const supabase = createClient();
@@ -44,19 +35,6 @@ export function useSessionRefresh() {
       if (document.visibilityState !== 'visible') return;
 
       const now = Date.now();
-
-      // ─────────────────────────────────────────────────────────────────────
-      // 1. Router 상태 리셋 (Concurrent Navigation stuck 방지)
-      // ─────────────────────────────────────────────────────────────────────
-      if (now - lastRouterRefreshRef.current > ROUTER_REFRESH_COOLDOWN_MS) {
-        lastRouterRefreshRef.current = now;
-        console.log('[SessionRefresh] Router refresh on visibility change');
-        router.refresh();
-      }
-
-      // ─────────────────────────────────────────────────────────────────────
-      // 2. Supabase 세션 갱신 (기존 로직)
-      // ─────────────────────────────────────────────────────────────────────
       if (now - lastRefreshRef.current < REFRESH_COOLDOWN_MS) return;
 
       try {
@@ -79,5 +57,5 @@ export function useSessionRefresh() {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [router]);
+  }, []);
 }
