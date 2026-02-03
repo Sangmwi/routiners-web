@@ -20,8 +20,8 @@ function createQueryClient() {
     defaultOptions: {
       queries: {
         // 캐싱 시간 설정
-        staleTime: 5 * 60 * 1000, // 5분: 데이터가 신선한 것으로 간주
-        gcTime: 10 * 60 * 1000,   // 10분: 캐시 유지 시간
+        staleTime: 30 * 1000,     // 30초: 테스트용 (원래 5분)
+        gcTime: 60 * 1000,        // 1분: 테스트용 (원래 10분)
 
         // 리패치 정책
         refetchOnWindowFocus: false,  // WebView에서 불필요한 리패치 방지
