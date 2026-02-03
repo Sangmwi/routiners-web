@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { BOTTOM_NAV } from '@/lib/config/theme';
 
 // ============================================================================
@@ -9,6 +9,7 @@ import { BOTTOM_NAV } from '@/lib/config/theme';
 // ============================================================================
 
 const TAB_ROUTES = BOTTOM_NAV.items.map((item) => item.href);
+const PREFETCH_INTERVAL_MS = 4 * 60 * 1000; // 4분 (Next.js 캐시 만료 전 갱신)
 
 // ============================================================================
 // Hook
@@ -24,41 +25,47 @@ const TAB_ROUTES = BOTTOM_NAV.items.map((item) => item.href);
  *
  * 해결:
  * - 마운트 시 모든 탭 라우트 prefetch
- * - 탭 전환(pathname 변경) 시 모든 탭 prefetch 갱신
- *   → 첫 클릭은 지연될 수 있지만, 이후 전환은 빠름
- *   → 뒤로가기 후 정상작동하는 것과 동일한 원리
- * - interval 없이 사용자 상호작용 기반 갱신
+ * - requestIdleCallback으로 유휴 시간에만 갱신 (리소스 낭비 최소화)
+ * - 백그라운드 복귀 시 즉시 갱신
  */
 export function useTabRoutePrefetch() {
   const router = useRouter();
-  const pathname = usePathname();
-  const isFirstMount = useRef(true);
 
-  const prefetchAllTabs = useCallback(() => {
+  const prefetchAllTabs = () => {
     TAB_ROUTES.forEach((route) => {
       router.prefetch(route);
     });
-  }, [router]);
+  };
 
-  // 마운트 시 prefetch
+  // 마운트 시 prefetch + 유휴 시간에 주기적 갱신
   useEffect(() => {
     prefetchAllTabs();
-  }, [prefetchAllTabs]);
 
-  // 탭 전환 시 prefetch 갱신 (첫 마운트 제외)
-  useEffect(() => {
-    if (isFirstMount.current) {
-      isFirstMount.current = false;
-      return;
-    }
+    let timeoutId: ReturnType<typeof setTimeout>;
+    let idleCallbackId: number;
 
-    // 탭 라우트로 이동했을 때만 갱신 (하위 페이지 이동 시 불필요)
-    if ((TAB_ROUTES as readonly string[]).includes(pathname)) {
-      prefetchAllTabs();
-    }
-  }, [pathname, prefetchAllTabs]);
+    const scheduleIdlePrefetch = () => {
+      timeoutId = setTimeout(() => {
+        // 브라우저가 유휴 상태일 때만 prefetch (스크롤, 입력 중엔 안 함)
+        idleCallbackId = requestIdleCallback(
+          () => {
+            prefetchAllTabs();
+            scheduleIdlePrefetch();
+          },
+          { timeout: 10000 }
+        );
+      }, PREFETCH_INTERVAL_MS);
+    };
 
-  // 백그라운드 복귀 시 prefetch 갱신
+    scheduleIdlePrefetch();
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (idleCallbackId) cancelIdleCallback(idleCallbackId);
+    };
+  }, []);
+
+  // 백그라운드 복귀 시 즉시 갱신
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
@@ -70,5 +77,5 @@ export function useTabRoutePrefetch() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [prefetchAllTabs]);
+  }, []);
 }
