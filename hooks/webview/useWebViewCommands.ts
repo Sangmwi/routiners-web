@@ -17,7 +17,6 @@ import { useRouter, usePathname } from "next/navigation";
 import type { AppToWebMessage } from "@/lib/webview";
 import { useWebViewAuth } from "./useWebViewAuth";
 import { useWebViewNavigation } from "./useWebViewNavigation";
-import { resetWebReadyState } from "./useWebViewLifecycle";
 import { LOG_PREFIX } from "./useWebViewCore";
 
 // ============================================================================
@@ -73,7 +72,11 @@ export const unregisterCommandHandler = <T extends AppToWebMessage>(
 // Hook
 // ============================================================================
 
-export const useWebViewCommands = () => {
+interface UseWebViewCommandsOptions {
+  resetSessionCheck: () => void;
+}
+
+export const useWebViewCommands = ({ resetSessionCheck }: UseWebViewCommandsOptions) => {
   const router = useRouter();
   const pathname = usePathname();
   const pathnameRef = useRef(pathname);
@@ -135,8 +138,8 @@ export const useWebViewCommands = () => {
     cleanups.push(
       registerCommandHandler("CLEAR_SESSION", async () => {
         await clearSession();
-        // WEB_READY 상태 리셋하여 재로그인 시 다시 전송되도록 함
-        resetWebReadyState();
+        // 세션 체크 상태 리셋하여 재로그인 시 다시 전송되도록 함
+        resetSessionCheck();
         // window.location.replace로 히스토리 완전 교체 (뒤로가기 방지)
         window.location.replace("/login");
       })
@@ -145,7 +148,7 @@ export const useWebViewCommands = () => {
     return () => {
       cleanups.forEach((cleanup) => cleanup());
     };
-  }, [router, setSession, clearSession, notifySessionSet, sendRouteInfo]);
+  }, [router, setSession, clearSession, notifySessionSet, sendRouteInfo, resetSessionCheck]);
 
   // ──────────────────────────────────────────────────────────────────────────
   // 중앙 이벤트 리스너

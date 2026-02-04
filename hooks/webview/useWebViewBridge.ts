@@ -36,10 +36,10 @@ export const useWebViewBridge = () => {
   const { isInWebView, sendMessage } = useWebViewCore();
   const { requestLogin, sendLogout } = useWebViewAuth();
   const { sendRouteInfo } = useWebViewNavigation();
-  const { sendWebReady } = useWebViewLifecycle();
+  const { sendWebReady, resetSessionCheck } = useWebViewLifecycle();
 
   // 앱 명령 처리 (내부에서 이벤트 리스너 등록)
-  useWebViewCommands();
+  useWebViewCommands({ resetSessionCheck });
 
   return {
     // Core

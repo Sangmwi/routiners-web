@@ -8,23 +8,10 @@
  * - WEB_READY 또는 REQUEST_SESSION_REFRESH 전송
  */
 
-import { useEffect } from "react";
+import { useEffect, useRef, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import { useWebViewCore } from "./useWebViewCore";
 import { createClient } from "@/utils/supabase/client";
-
-// ============================================================================
-// Module State
-// ============================================================================
-
-let isSessionCheckDone = false;
-
-/**
- * 세션 체크 상태를 리셋합니다.
- * 로그아웃 시 호출하여 재로그인 시 다시 체크할 수 있게 합니다.
- */
-export const resetWebReadyState = () => {
-  isSessionCheckDone = false;
-};
 
 // ============================================================================
 // Helper
@@ -45,6 +32,10 @@ const isSessionExpired = (expiresAt: number): boolean => {
 
 export const useWebViewLifecycle = () => {
   const { isInWebView, sendMessage } = useWebViewCore();
+  const pathname = usePathname();
+
+  // 세션 체크 완료 여부 (useRef로 리렌더 없이 상태 유지)
+  const isSessionCheckDoneRef = useRef(false);
 
   /**
    * 웹 준비 완료 신호를 앱에 전송합니다.
@@ -62,10 +53,19 @@ export const useWebViewLifecycle = () => {
     return sendMessage({ type: "REQUEST_SESSION_REFRESH" });
   };
 
+  /**
+   * 세션 체크 상태를 리셋합니다.
+   * 로그아웃 시 호출하여 재로그인 시 다시 체크할 수 있게 합니다.
+   */
+  const resetSessionCheck = useCallback(() => {
+    isSessionCheckDoneRef.current = false;
+  }, []);
+
   // 쿠키 세션 확인 후 조건부 메시지 전송
   useEffect(() => {
-    if (!isInWebView || isSessionCheckDone) return;
-    isSessionCheckDone = true;
+    // /login 페이지에서는 세션 체크 스킵 (비로그인 사용자용 페이지)
+    if (!isInWebView || isSessionCheckDoneRef.current || pathname === "/login") return;
+    isSessionCheckDoneRef.current = true;
 
     const checkSessionAndNotify = async () => {
       try {
@@ -90,11 +90,12 @@ export const useWebViewLifecycle = () => {
 
     // DOM 커밋 후 실행
     queueMicrotask(checkSessionAndNotify);
-  }, [isInWebView, sendMessage]);
+  }, [isInWebView, sendMessage, pathname]);
 
   return {
     sendWebReady,
     requestSessionRefresh,
-    isReady: isSessionCheckDone,
+    resetSessionCheck,
+    isReady: isSessionCheckDoneRef.current,
   };
 };
