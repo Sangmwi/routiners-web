@@ -116,23 +116,17 @@ export const useWebViewCommands = () => {
     );
 
     // SET_SESSION
-    // window.location.replace 사용 (router.replace보다 확실함)
+    // /login에서만 리다이렉트 (홈에서 refresh 후 SET_SESSION은 리다이렉트 불필요)
     cleanups.push(
       registerCommandHandler<SetSessionMessage>("SET_SESSION", async (cmd) => {
         const success = await setSession(cmd.access_token, cmd.refresh_token);
         notifySessionSet(success);
 
-        // 브라우저 네이티브 네비게이션
-        // SESSION_SET 메시지 전송 완료 보장 후 리다이렉트 (queueMicrotask)
+        // /login에서 로그인 성공 시에만 홈으로 리다이렉트
         const currentPath = pathnameRef.current;
-        if (currentPath === "/login" || currentPath === "/app-init") {
+        if (currentPath === "/login" && success) {
           await new Promise<void>((resolve) => queueMicrotask(resolve));
-
-          if (success) {
-            window.location.replace("/");
-          } else {
-            window.location.replace("/login");
-          }
+          window.location.replace("/");
         }
       })
     );
