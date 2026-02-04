@@ -1,18 +1,23 @@
 "use client";
 
 import { createClient } from "@/utils/supabase/client";
-import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { SpinnerGap } from "@phosphor-icons/react";
 import GoogleLogo from "@/assets/logos/google.svg";
 import logoImage from "@/assets/images/splash-image-md.png";
 import { useWebViewAuth, useLoginCommands } from "@/hooks";
 
-function LoginContent() {
+/**
+ * 로그인 페이지
+ *
+ * 구조: Layout(배경) + Content가 동시에 렌더링 (Suspense 없음)
+ * - 다른 페이지들과 동일한 패턴으로 즉시 렌더링
+ * - 앱 스플래시 → 페이지 전환 시 깜빡임 방지
+ */
+export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const searchParams = useSearchParams();
   const supabase = createClient();
   const { requestLogin } = useWebViewAuth();
 
@@ -25,12 +30,14 @@ function LoginContent() {
     },
   });
 
+  // URL에서 에러 파라미터 확인 (Suspense 없이 직접 처리)
   useEffect(() => {
-    const errorParam = searchParams.get("error");
+    const params = new URLSearchParams(window.location.search);
+    const errorParam = params.get("error");
     if (errorParam) {
       setError(decodeURIComponent(errorParam));
     }
-  }, [searchParams]);
+  }, []);
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
@@ -75,14 +82,14 @@ function LoginContent() {
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden bg-background">
-      {/* Background decoration */}
+      {/* Background decoration - 즉시 렌더링 */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
       </div>
 
-      {/* Content */}
+      {/* Content - 즉시 렌더링 */}
       <div className="relative z-10 w-full max-w-sm px-6">
         {/* Logo & Branding */}
         <div className="mb-24 flex flex-col items-center">
@@ -142,19 +149,5 @@ function LoginContent() {
         </p>
       </div>
     </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="fixed inset-0 flex items-center justify-center bg-background">
-          <SpinnerGap size={32} className="animate-spin text-primary" />
-        </div>
-      }
-    >
-      <LoginContent />
-    </Suspense>
   );
 }
