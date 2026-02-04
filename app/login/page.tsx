@@ -1,12 +1,12 @@
 "use client";
 
 import { createClient } from "@/utils/supabase/client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { SpinnerGap } from "@phosphor-icons/react";
 import GoogleLogo from "@/assets/logos/google.svg";
 import logoImage from "@/assets/images/splash-image-md.png";
-import { useWebViewAuth, useLoginCommands } from "@/hooks";
+import { useWebViewAuth, useLoginCommands, useWebViewCore } from "@/hooks";
 
 /**
  * 로그인 페이지
@@ -14,12 +14,15 @@ import { useWebViewAuth, useLoginCommands } from "@/hooks";
  * 구조: Layout(배경) + Content가 동시에 렌더링 (Suspense 없음)
  * - 다른 페이지들과 동일한 패턴으로 즉시 렌더링
  * - 앱 스플래시 → 페이지 전환 시 깜빡임 방지
+ * - PAGE_RENDERED를 이 페이지에서 직접 전송 (정확한 타이밍 보장)
  */
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
   const { requestLogin } = useWebViewAuth();
+  const { isInWebView, sendMessage } = useWebViewCore();
+  const hasRenderedRef = useRef(false);
 
   // WebView 환경: 로그인 관련 명령 처리
   useLoginCommands({
@@ -38,6 +41,19 @@ export default function LoginPage() {
       setError(decodeURIComponent(errorParam));
     }
   }, []);
+
+  // 페이지 렌더링 완료 신호 전송 (이 페이지 컴포넌트 마운트 후)
+  useEffect(() => {
+    if (!isInWebView || hasRenderedRef.current) return;
+
+    // Double RAF: 이 컴포넌트가 실제로 화면에 그려진 후 전송
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        hasRenderedRef.current = true;
+        sendMessage({ type: "PAGE_RENDERED" });
+      });
+    });
+  }, [isInWebView, sendMessage]);
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);

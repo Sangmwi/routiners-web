@@ -53,8 +53,9 @@ export const useWebViewNavigation = () => {
   }, [pathname, isInWebView]);
 
   // 초기 렌더링 완료 시 앱에 알림 (double RAF로 실제 페인트 후 전송)
+  // /login 페이지는 해당 페이지에서 직접 전송 (RootLayout보다 늦게 마운트되므로)
   useEffect(() => {
-    if (!isInWebView || hasRenderedRef.current) return;
+    if (!isInWebView || hasRenderedRef.current || pathname === "/login") return;
 
     // Double requestAnimationFrame: 브라우저가 실제로 화면에 그린 후 실행
     requestAnimationFrame(() => {
@@ -63,7 +64,7 @@ export const useWebViewNavigation = () => {
         sendPageRendered();
       });
     });
-  }, [isInWebView]);
+  }, [isInWebView, pathname]);
 
   return {
     pathname,
