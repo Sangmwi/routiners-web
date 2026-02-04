@@ -46,11 +46,13 @@ export default function LoginPage() {
   useEffect(() => {
     if (!isInWebView || hasRenderedRef.current) return;
 
-    // Double RAF: 이 컴포넌트가 실제로 화면에 그려진 후 전송
+    // Double RAF + 50ms 딜레이: blur 효과 등 GPU 연산이 완료된 후 전송
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        hasRenderedRef.current = true;
-        sendMessage({ type: "PAGE_RENDERED" });
+        setTimeout(() => {
+          hasRenderedRef.current = true;
+          sendMessage({ type: "PAGE_RENDERED" });
+        }, 50);
       });
     });
   }, [isInWebView, sendMessage]);
