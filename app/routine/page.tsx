@@ -5,7 +5,6 @@ import dynamic from 'next/dynamic';
 import { MainTabLayout, MainTabHeader } from '@/components/layouts';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import { PulseLoader } from '@/components/ui/PulseLoader';
-import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 
 const RoutineContent = dynamic(
   () => import('@/components/routine/RoutineContent'),
@@ -20,14 +19,9 @@ const RoutineContent = dynamic(
  * - 깜빡임 없는 로딩 UX
  */
 export default function RoutinePage() {
-  const today = new Date();
-
   return (
     <MainTabLayout>
-      <MainTabHeader
-        title="내 루틴"
-        subtitle={formatKoreanDate(today, { weekday: true })}
-      />
+      <MainTabHeader title="내 루틴" />
       <QueryErrorBoundary>
         <Suspense fallback={<PulseLoader />}>
           <RoutineContent />
