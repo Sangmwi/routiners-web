@@ -57,7 +57,7 @@ export default function RoutineEventCarousel({
   // 로딩 스켈레톤 (실제 EventCarouselCard 크기: 140x180)
   if (isLoading) {
     return (
-      <div className="-mx-4 px-4">
+      <div className="-mx-(--layout-padding-x) px-(--layout-padding-x)">
         <div className="flex gap-3 overflow-hidden py-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
@@ -71,7 +71,7 @@ export default function RoutineEventCarousel({
   }
 
   return (
-    <div className="-mx-4 px-4">
+    <div className="-mx-(--layout-padding-x) px-(--layout-padding-x)">
       <div
         className="flex gap-3 overflow-x-scroll py-2 snap-x snap-mandatory scrollbar-hide"
         style={{ WebkitOverflowScrolling: 'touch' }}

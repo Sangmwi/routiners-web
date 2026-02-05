@@ -7,6 +7,13 @@ interface ChatLayoutProps {
   children: ReactNode;
 }
 
+interface ChatContentProps {
+  /** 콘텐츠 */
+  children: ReactNode;
+  /** 추가 클래스 */
+  className?: string;
+}
+
 /**
  * 채팅 페이지용 레이아웃 (순수 배치만 담당)
  *
@@ -20,11 +27,12 @@ interface ChatLayoutProps {
  * @example
  * // page.tsx에서 사용
  * <ChatLayout>
- *   <QueryErrorBoundary>
- *     <Suspense fallback={<PulseLoader />}>
+ *   <CoachHeader />
+ *   <ChatLayout.Content>
+ *     <Suspense fallback={<PulseLoader variant="chat" />}>
  *       <CoachChatContent />
  *     </Suspense>
- *   </QueryErrorBoundary>
+ *   </ChatLayout.Content>
  * </ChatLayout>
  */
 export function ChatLayout({ children }: ChatLayoutProps) {
@@ -34,5 +42,24 @@ export function ChatLayout({ children }: ChatLayoutProps) {
     </div>
   );
 }
+
+/**
+ * 채팅 콘텐츠 영역 래퍼
+ *
+ * - CSS Variable 기반 패딩 적용
+ * - flex-1로 남은 공간 채움
+ * - 스크롤 가능
+ */
+function ChatContent({ children, className = '' }: ChatContentProps) {
+  return (
+    <div
+      className={`flex-1 overflow-y-auto px-(--layout-padding-x) py-(--layout-padding-y) ${className}`.trim()}
+    >
+      {children}
+    </div>
+  );
+}
+
+ChatLayout.Content = ChatContent;
 
 export default ChatLayout;

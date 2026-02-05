@@ -27,7 +27,7 @@ export default function MealPage({ params }: MealPageProps) {
   const { date } = use(params);
 
   return (
-    <DetailLayout title="식단 관리" bottomPadding={false}>
+    <DetailLayout title="식단 관리">
       <QueryErrorBoundary>
         <Suspense fallback={<PulseLoader />}>
           <MealContent date={date} />

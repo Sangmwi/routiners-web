@@ -17,6 +17,8 @@ interface HorizontalSliderProps {
   enableDrag?: boolean;
   /** 스크롤 속도 배율 (기본: 2) */
   scrollSpeed?: number;
+  /** 레이아웃 패딩 무시하고 전체 너비 사용 */
+  fullBleed?: boolean;
 }
 
 interface SlotProps {
@@ -80,7 +82,7 @@ function ScrollIndicator({ progress, isVisible }: ScrollIndicatorProps) {
  *
  * @example
  * ```tsx
- * <HorizontalSlider gap="gap-4">
+ * <HorizontalSlider gap="gap-4" fullBleed>
  *   {items.map(item => (
  *     <HorizontalSlider.Item key={item.id}>
  *       <Card {...item} />
@@ -98,6 +100,7 @@ function HorizontalSlider({
   className = '',
   enableDrag = true,
   scrollSpeed = 2,
+  fullBleed = false,
 }: HorizontalSliderProps) {
   const { containerRef, handlers } = useDragScroll<HTMLDivElement>({
     enabled: enableDrag,
@@ -106,6 +109,10 @@ function HorizontalSlider({
 
   const { progress, isVisible } = useScrollProgress(containerRef);
 
+  const fullBleedClass = fullBleed
+    ? '-mx-(--layout-padding-x) px-(--layout-padding-x)'
+    : '';
+
   return (
     <div className="relative w-full">
       <div
@@ -113,8 +120,9 @@ function HorizontalSlider({
         className={`
           flex ${gap} overflow-x-auto scrollbar-hide pb-2
           ${enableDrag ? 'select-none' : ''}
+          ${fullBleedClass}
           ${className}
-        `}
+        `.trim()}
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',

@@ -49,6 +49,14 @@
 
   /* Primary Muted */
   --primary-muted: var(--primary);
+
+  /* Layout Spacing */
+  --layout-padding-x: 1rem;      /* 16px - 좌우 패딩 */
+  --layout-padding-y: 1rem;      /* 16px - 상하 패딩 */
+
+  /* Navigation Clearance */
+  --nav-height: 4rem;            /* 64px - BottomNav 높이 */
+  --nav-clearance: 6rem;         /* 96px - BottomNav + 여유 공간 */
 }
 
 @theme inline {

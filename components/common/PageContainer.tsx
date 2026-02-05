@@ -29,9 +29,9 @@ const SPACING_MAP = {
 /**
  * 페이지 콘텐츠를 감싸는 컨테이너 컴포넌트
  *
- * - 일관된 패딩 (p-4) 적용
+ * - CSS Variable 기반 패딩 (--layout-padding-x)
  * - 섹션간 간격 통일
- * - BottomNav 공간 확보
+ * - BottomNav 공간 확보 (--nav-clearance)
  *
  * @example
  * <PageContainer>
@@ -51,9 +51,9 @@ export default function PageContainer({
   spacing = 'normal',
   withBottomNav = true,
 }: PageContainerProps) {
-  const paddingClass = padded ? 'p-4' : '';
+  const paddingClass = padded ? 'p-(--layout-padding-x)' : '';
   const spacingClass = SPACING_MAP[spacing];
-  const bottomClass = withBottomNav ? 'pb-24' : '';
+  const bottomClass = withBottomNav ? 'pb-(--nav-clearance)' : '';
 
   return (
     <div

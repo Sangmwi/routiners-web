@@ -2,39 +2,23 @@
 
 import Link from 'next/link';
 import { ChartBarIcon, CaretRightIcon, SparkleIcon } from '@phosphor-icons/react';
-import { useWeeklyStats } from '@/hooks/routine';
+import type { WeeklyStats } from '@/hooks/routine';
+
+interface WeeklyProgressCardProps {
+  /** 주간 통계 데이터 (부모에서 Suspense 쿼리로 전달) */
+  stats: WeeklyStats;
+}
 
 /**
  * 주간 진행률 요약 카드
  *
  * /routine 메인 페이지에서 컴팩트하게 표시
  * 클릭 시 /routine/stats로 이동
+ *
+ * - Suspense boundary에서 로딩 처리
+ * - props로 stats 데이터를 받아 렌더링만 담당
  */
-export default function WeeklyProgressCard() {
-  const { data: stats, isPending } = useWeeklyStats();
-
-  // 로딩 스켈레톤 (실제 카드와 동일한 구조)
-  if (isPending) {
-    return (
-      <div className="bg-card border border-border rounded-xl p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-muted rounded-xl animate-pulse" />
-            <div className="space-y-1.5">
-              <div className="w-14 h-4 bg-muted rounded animate-pulse" />
-              <div className="w-36 h-3.5 bg-muted rounded animate-pulse" />
-            </div>
-          </div>
-          <div className="w-5 h-5 bg-muted rounded animate-pulse" />
-        </div>
-      </div>
-    );
-  }
-
-  // 데이터 로드 실패
-  if (!stats) {
-    return null;
-  }
+export default function WeeklyProgressCard({ stats }: WeeklyProgressCardProps) {
 
   // 이벤트 수 계산
   const totalEvents =

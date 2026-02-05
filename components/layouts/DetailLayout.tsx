@@ -63,7 +63,9 @@ export function DetailLayout({
   children,
 }: DetailLayoutProps) {
   return (
-    <div className={`min-h-screen bg-background ${bottomPadding ? 'pb-24' : ''}`}>
+    <div
+      className={`min-h-screen bg-background ${bottomPadding ? 'pb-(--nav-clearance)' : ''}`}
+    >
       <PageHeader
         title={title}
         showBackButton={showBack}
@@ -72,7 +74,7 @@ export function DetailLayout({
         centered={centered}
         transparent={headerTransparent}
       />
-      <div className={padding ? 'p-4' : ''}>{children}</div>
+      <div className={padding ? 'p-(--layout-padding-x)' : ''}>{children}</div>
     </div>
   );
 }

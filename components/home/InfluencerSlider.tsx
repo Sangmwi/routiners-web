@@ -14,7 +14,7 @@ interface InfluencerSliderProps {
  */
 export default function InfluencerSlider({ influencers, onCardClick }: InfluencerSliderProps) {
   return (
-    <HorizontalSlider gap="gap-4" enableDrag>
+    <HorizontalSlider gap="gap-4" enableDrag fullBleed>
       {influencers.map((influencer) => (
         <HorizontalSlider.Item key={influencer.id}>
           <InfluencerCard

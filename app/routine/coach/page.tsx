@@ -9,7 +9,7 @@ import CoachHeader from '@/components/coach/CoachHeader';
 
 const CoachContent = dynamic(
   () => import('@/components/coach/CoachContent'),
-  { ssr: false, loading: () => <PulseLoader variant="chat" className="p-4" /> }
+  { ssr: false, loading: () => <PulseLoader variant="chat" /> }
 );
 
 /**
@@ -32,14 +32,16 @@ export default function CoachPage() {
       <CoachHeader onMenuClick={() => setIsDrawerOpen(true)} />
 
       {/* 컨텐츠: Suspense 내부 - 데이터 로딩 */}
-      <QueryErrorBoundary>
-        <Suspense fallback={<PulseLoader variant="chat" className="flex-1 p-4" />}>
-          <CoachContent
-            isDrawerOpen={isDrawerOpen}
-            onDrawerClose={() => setIsDrawerOpen(false)}
-          />
-        </Suspense>
-      </QueryErrorBoundary>
+      <ChatLayout.Content>
+        <QueryErrorBoundary>
+          <Suspense fallback={<PulseLoader variant="chat" />}>
+            <CoachContent
+              isDrawerOpen={isDrawerOpen}
+              onDrawerClose={() => setIsDrawerOpen(false)}
+            />
+          </Suspense>
+        </QueryErrorBoundary>
+      </ChatLayout.Content>
     </ChatLayout>
   );
 }

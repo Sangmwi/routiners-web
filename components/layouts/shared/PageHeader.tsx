@@ -57,7 +57,7 @@ export function PageHeader({
   if (centered) {
     return (
       <header className={`sticky top-0 z-40 ${bgClass}`}>
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center justify-between px-(--layout-padding-x) py-3">
           {/* 왼쪽: 뒤로가기 버튼 */}
           {showBackButton ? (
             <button
@@ -88,7 +88,7 @@ export function PageHeader({
   // 기본 왼쪽 정렬 레이아웃
   return (
     <header className={`sticky top-0 z-40 ${bgClass}`}>
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between px-(--layout-padding-x) py-3">
         {/* 왼쪽: 뒤로가기 버튼 + 제목 */}
         <div className="flex items-center gap-3">
           {showBackButton && (

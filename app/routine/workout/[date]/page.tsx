@@ -27,7 +27,7 @@ export default function WorkoutPage({ params }: WorkoutPageProps) {
   const { date } = use(params);
 
   return (
-    <DetailLayout title="운동 루틴" bottomPadding={false}>
+    <DetailLayout title="운동 루틴">
       <QueryErrorBoundary>
         <Suspense fallback={<PulseLoader />}>
           <WorkoutContent date={date} />

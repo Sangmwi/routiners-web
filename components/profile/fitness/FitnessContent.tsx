@@ -238,7 +238,7 @@ export default function FitnessContent() {
 
   return (
     <>
-      <div className="space-y-6 pb-24">
+      <div className="space-y-6">
         {/* 운동 목표 */}
         <Section title="운동 목표" description="어떤 목표를 향해 운동하시나요?">
           <div className="flex flex-wrap gap-2">

@@ -14,7 +14,7 @@ interface ProductSliderProps {
  */
 export default function ProductSlider({ products, onCardClick }: ProductSliderProps) {
   return (
-    <HorizontalSlider gap="gap-4" enableDrag>
+    <HorizontalSlider gap="gap-4" enableDrag fullBleed>
       {products.map((product) => (
         <HorizontalSlider.Item key={product.id} className="w-64">
           <ProductCard
