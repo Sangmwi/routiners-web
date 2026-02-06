@@ -155,9 +155,9 @@ export default function CoachContent({ isDrawerOpen, onDrawerClose }: CoachConte
   });
 
   return (
-    <>
-      {/* 컨텐츠 영역 */}
-      <div className="flex-1 overflow-hidden relative">
+    <div className="flex-1 flex flex-col min-h-0">
+      {/* 컨텐츠 영역 - 스크롤 가능 */}
+      <div className="flex-1 overflow-y-auto min-h-0">
         {showChatLoader ? (
           <PulseLoader variant="chat" className="p-4" />
         ) : showWelcome ? (
@@ -260,6 +260,6 @@ export default function CoachContent({ isDrawerOpen, onDrawerClose }: CoachConte
           />
         );
       })()}
-    </>
+    </div>
   );
 }

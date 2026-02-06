@@ -37,7 +37,7 @@ interface ChatContentProps {
  */
 export function ChatLayout({ children }: ChatLayoutProps) {
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex flex-col h-dvh bg-background">
       {children}
     </div>
   );
@@ -53,7 +53,7 @@ export function ChatLayout({ children }: ChatLayoutProps) {
 function ChatContent({ children, className = '' }: ChatContentProps) {
   return (
     <div
-      className={`flex-1 overflow-y-auto px-(--layout-padding-x) py-(--layout-padding-y) ${className}`.trim()}
+      className={`flex-1 flex flex-col min-h-0 ${className}`.trim()}
     >
       {children}
     </div>
