@@ -18,7 +18,7 @@ import { formatDate } from '@/lib/utils/dateHelpers';
  * 구조:
  * 1. 오늘 섹션 (Hero) - 즉시 행동 가능
  * 2. 이번 주 현황 - 진행 상태 한눈에
- * 3. 다가오는 일정 - 컴팩트 리스트
+ * 3. 다가오는 루틴 - 컴팩트 리스트
  * 4. AI 코치 버튼 - 플로팅
  */
 export default function RoutineContent() {
@@ -31,7 +31,7 @@ export default function RoutineContent() {
   const { data: todayWorkout } = useRoutineEventByDateSuspense(today, 'workout');
   const { data: todayMeal } = useRoutineEventByDateSuspense(today, 'meal');
 
-  // 미래 이벤트 조회 (다가오는 일정용)
+  // 미래 이벤트 조회 (다가오는 루틴용)
   const { data: workoutEvents } = useUpcomingEventsSuspense('workout', 0, 14);
   const { data: mealEvents } = useUpcomingEventsSuspense('meal', 0, 14);
 
@@ -52,7 +52,7 @@ export default function RoutineContent() {
       {/* 2. 이번 주 현황 */}
       <WeeklyOverview stats={weeklyStats} />
 
-      {/* 3. 다가오는 일정 */}
+      {/* 3. 다가오는 루틴 */}
       <UpcomingSection events={allUpcomingEvents} maxItems={5} />
 
       {/* 4. AI 코치 플로팅 버튼 */}

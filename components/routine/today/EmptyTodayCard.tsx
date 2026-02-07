@@ -1,7 +1,7 @@
 'use client';
 
 import AppLink from '@/components/common/AppLink';
-import { Barbell, ForkKnife, CaretRight } from '@phosphor-icons/react';
+import { BarbellIcon, ForkKnifeIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { formatDate } from '@/lib/utils/dateHelpers';
 
 interface EmptyTodayCardProps {
@@ -23,26 +23,26 @@ export function EmptyTodayCard({ type }: EmptyTodayCardProps) {
     return (
       <AppLink
         href={`/routine/workout/${today}`}
-        className="flex items-center gap-4 py-5 w-full active:bg-muted/30 transition-colors"
+        className="w-full flex items-center gap-4 px-2 py-5 active:bg-muted/30 transition-colors rounded-xl"
       >
-        <Barbell size={32} weight="duotone" className="text-muted-foreground/60 shrink-0" />
+        <BarbellIcon size={32} weight="duotone" className="text-muted-foreground/60 shrink-0" />
         <div className="flex-1 min-w-0 text-left">
           <h3 className="text-base font-medium text-muted-foreground">오늘 운동 없음</h3>
           <p className="text-sm text-muted-foreground/60 mt-1">기록을 추가해보세요</p>
         </div>
-        <CaretRight size={20} weight="bold" className="text-muted-foreground/50 shrink-0" />
+        <CaretRightIcon size={20} weight="bold" className="text-muted-foreground/50 shrink-0" />
       </AppLink>
     );
   }
 
   return (
-    <div className="flex items-center gap-4 py-5 w-full">
-      <ForkKnife size={32} weight="duotone" className="text-muted-foreground/60 shrink-0" />
+    <div className="w-full flex items-center gap-4 px-2 py-5 active:bg-muted/30 transition-colors rounded-xl">
+      <ForkKnifeIcon size={32} weight="duotone" className="text-muted-foreground/60 shrink-0" />
       <div className="flex-1 min-w-0 text-left">
         <h3 className="text-base font-medium text-muted-foreground">오늘 식단 없음</h3>
         <p className="text-sm text-muted-foreground/60 mt-1">곧 추가될 예정이에요</p>
       </div>
-      <CaretRight size={20} weight="bold" className="text-muted-foreground/50 shrink-0" />
+      <CaretRightIcon size={20} weight="bold" className="text-muted-foreground/50 shrink-0" />
     </div>
   );
 }

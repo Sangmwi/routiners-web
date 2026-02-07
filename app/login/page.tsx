@@ -3,7 +3,7 @@
 import { createClient } from "@/utils/supabase/client";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { SpinnerGap } from "@phosphor-icons/react";
+import { SpinnerGapIcon } from "@phosphor-icons/react";
 import GoogleLogo from "@/assets/logos/google.svg";
 import logoImage from "@/assets/images/splash-image-md.png";
 import { useWebViewAuth, useLoginCommands, useWebViewCore } from "@/hooks";
@@ -134,7 +134,7 @@ export default function LoginPage() {
           className="group relative flex w-full items-center justify-center gap-3 rounded-2xl bg-card px-6 py-4 text-sm font-medium text-card-foreground shadow-md ring-1 ring-border transition-all duration-200 hover:shadow-lg hover:ring-primary/50 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
-            <SpinnerGap size={20} className="animate-spin text-primary" />
+            <SpinnerGapIcon size={20} className="animate-spin text-primary" />
           ) : (
             <>
               <GoogleLogo className="h-5 w-5" />

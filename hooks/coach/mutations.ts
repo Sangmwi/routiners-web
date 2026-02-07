@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/constants/queryKeys';
 import { coachApi, coachPurposeApi, coachContextApi } from '@/lib/api/coach';
 import { api } from '@/lib/api/client';
+import { invalidateAfterRoutineApply } from '@/lib/utils/routineEventCacheHelper';
 import type {
   CoachConversation,
   CoachConversationsResponse,
@@ -142,13 +143,8 @@ export function useApplyRoutine() {
       ),
 
     onSuccess: (_, { conversationId }) => {
-      // 대화 캐시 무효화 (서버에서 metadata 업데이트됨)
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.coach.conversation(conversationId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.coach.conversations(),
-      });
+      // 대화 + 루틴 이벤트 + AI 세션 캐시 무효화
+      invalidateAfterRoutineApply(queryClient, conversationId);
     },
   });
 }

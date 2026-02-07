@@ -1,7 +1,7 @@
 'use client';
 
 import AppLink from '@/components/common/AppLink';
-import { Sparkle, CaretRight } from '@phosphor-icons/react';
+import { SparkleIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { WeekDots } from './WeekDots';
 import type { WeeklyStats } from '@/hooks/routine';
 
@@ -31,7 +31,7 @@ export function WeeklyOverview({ stats }: WeeklyOverviewProps) {
       <section>
         <h2 className="text-xl font-bold text-foreground mb-4">이번 주</h2>
         <div className="rounded-2xl bg-muted/30 p-4 text-center">
-          <Sparkle size={24} weight="duotone" className="text-muted-foreground mx-auto mb-2" />
+          <SparkleIcon size={24} weight="duotone" className="text-muted-foreground mx-auto mb-2" />
           <p className="text-sm text-muted-foreground">
             AI 코치로 루틴을 생성해보세요
           </p>
@@ -59,7 +59,7 @@ export function WeeklyOverview({ stats }: WeeklyOverviewProps) {
         <h2 className="text-xl font-bold text-foreground">이번 주</h2>
         <AppLink href="/routine/stats" className="text-sm font-medium text-primary flex items-center gap-0.5">
           통계 보기
-          <CaretRight size={16} weight="bold" />
+          <CaretRightIcon size={16} weight="bold" />
         </AppLink>
       </div>
 

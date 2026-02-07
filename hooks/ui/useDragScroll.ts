@@ -1,6 +1,14 @@
 'use client';
 
-import { useRef, useState, useEffect, RefObject } from 'react';
+import { useRef, useState, useEffect, useCallback, RefObject } from 'react';
+import { snapToNearest } from './useSnapScroll';
+
+interface SnapConfig {
+  /** snap 활성화 여부 */
+  enabled: boolean;
+  /** snap 대상 아이템 선택자 */
+  itemSelector?: string;
+}
 
 interface UseDragScrollOptions {
   /** 드래그 활성화 여부 */
@@ -9,6 +17,8 @@ interface UseDragScrollOptions {
   scrollSpeed?: number;
   /** 드래그로 간주할 최소 이동 거리 (px) */
   dragThreshold?: number;
+  /** scroll-snap 설정 */
+  snap?: SnapConfig;
 }
 
 interface UseDragScrollReturn<T extends HTMLElement> {
@@ -18,30 +28,30 @@ interface UseDragScrollReturn<T extends HTMLElement> {
   isDragging: boolean;
   /** 드래그 동작이 발생했는지 (클릭과 구분용) */
   hasDragged: boolean;
-  /** 마우스 이벤트 핸들러들 */
+  /** 이벤트 핸들러들 */
   handlers: {
     onMouseDown: (e: React.MouseEvent) => void;
     onMouseMove: (e: React.MouseEvent) => void;
     onMouseUp: () => void;
     onMouseLeave: () => void;
-    onTouchStart: (e: React.TouchEvent) => void;
-    onTouchMove: (e: React.TouchEvent) => void;
-    onTouchEnd: () => void;
   };
 }
 
 /**
  * 드래그 스크롤 기능을 제공하는 커스텀 훅
  *
- * 마우스 드래그와 터치 스크롤을 지원하며,
- * 클릭과 드래그를 자동으로 구분합니다.
+ * 마우스 드래그를 지원하며, 클릭과 드래그를 자동으로 구분합니다.
+ * snap 활성화 시 드래그 종료 후 가장 가까운 아이템으로 스냅합니다.
+ * 모바일 터치는 네이티브 스크롤 + CSS scroll-snap에 위임합니다.
  *
  * @example
  * ```tsx
- * const { containerRef, handlers, hasDragged } = useDragScroll<HTMLDivElement>();
+ * const { containerRef, handlers } = useDragScroll<HTMLDivElement>({
+ *   snap: { enabled: true },
+ * });
  *
  * return (
- *   <div ref={containerRef} {...handlers} className="overflow-x-auto">
+ *   <div ref={containerRef} {...handlers} className="overflow-x-auto snap-x snap-proximity">
  *     {children}
  *   </div>
  * );
@@ -51,6 +61,7 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>({
   enabled = true,
   scrollSpeed = 2,
   dragThreshold = 5,
+  snap,
 }: UseDragScrollOptions = {}): UseDragScrollReturn<T> {
   const containerRef = useRef<T | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -60,68 +71,46 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>({
   const dragStateRef = useRef({ startX: 0, scrollLeft: 0 });
 
   // 마우스 드래그 시작
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!enabled || !containerRef.current) return;
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (!enabled || !containerRef.current) return;
 
-    setIsDragging(true);
-    setHasDragged(false);
-    dragStateRef.current = {
-      startX: e.pageX - containerRef.current.offsetLeft,
-      scrollLeft: containerRef.current.scrollLeft,
-    };
-    e.preventDefault();
-  };
+      setIsDragging(true);
+      setHasDragged(false);
+      dragStateRef.current = {
+        startX: e.pageX - containerRef.current.offsetLeft,
+        scrollLeft: containerRef.current.scrollLeft,
+      };
+      e.preventDefault();
+    },
+    [enabled]
+  );
 
   // 마우스 드래그 중
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !containerRef.current) return;
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!isDragging || !containerRef.current) return;
 
-    e.preventDefault();
-    const x = e.pageX - containerRef.current.offsetLeft;
-    const walk = (x - dragStateRef.current.startX) * scrollSpeed;
+      e.preventDefault();
+      const x = e.pageX - containerRef.current.offsetLeft;
+      const walk = (x - dragStateRef.current.startX) * scrollSpeed;
 
-    if (Math.abs(walk) > dragThreshold) {
-      setHasDragged(true);
+      if (Math.abs(walk) > dragThreshold) {
+        setHasDragged(true);
+      }
+
+      containerRef.current.scrollLeft = dragStateRef.current.scrollLeft - walk;
+    },
+    [isDragging, scrollSpeed, dragThreshold]
+  );
+
+  // 마우스 드래그 종료 + snap
+  const handleMouseUpOrLeave = useCallback(() => {
+    if (isDragging && snap?.enabled && containerRef.current && hasDragged) {
+      snapToNearest(containerRef.current, snap.itemSelector);
     }
-
-    containerRef.current.scrollLeft = dragStateRef.current.scrollLeft - walk;
-  };
-
-  // 마우스 드래그 종료
-  const handleMouseUpOrLeave = () => {
     setIsDragging(false);
-  };
-
-  // 터치 드래그 시작
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!enabled || !containerRef.current) return;
-
-    setIsDragging(true);
-    setHasDragged(false);
-    dragStateRef.current = {
-      startX: e.touches[0].pageX - containerRef.current.offsetLeft,
-      scrollLeft: containerRef.current.scrollLeft,
-    };
-  };
-
-  // 터치 드래그 중
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || !containerRef.current) return;
-
-    const x = e.touches[0].pageX - containerRef.current.offsetLeft;
-    const walk = (x - dragStateRef.current.startX) * scrollSpeed;
-
-    if (Math.abs(walk) > dragThreshold) {
-      setHasDragged(true);
-    }
-
-    containerRef.current.scrollLeft = dragStateRef.current.scrollLeft - walk;
-  };
-
-  // 터치 드래그 종료
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-  };
+  }, [isDragging, hasDragged, snap]);
 
   // 커서 스타일 변경
   useEffect(() => {
@@ -157,9 +146,6 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>({
       onMouseMove: handleMouseMove,
       onMouseUp: handleMouseUpOrLeave,
       onMouseLeave: handleMouseUpOrLeave,
-      onTouchStart: handleTouchStart,
-      onTouchMove: handleTouchMove,
-      onTouchEnd: handleTouchEnd,
     },
   };
 }

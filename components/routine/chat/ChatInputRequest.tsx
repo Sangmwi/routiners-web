@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckCircle, Circle, CheckSquare, Square } from '@phosphor-icons/react';
+import { CheckCircleIcon, CircleIcon, CheckSquareIcon, SquareIcon } from '@phosphor-icons/react';
 import type { InputRequest } from '@/lib/types/fitness';
 import type { InputRequestStatus } from '@/lib/types/chat';
 
@@ -86,7 +86,7 @@ export default function ChatInputRequest({
     return (
       <div className="py-2 px-1">
         <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-          <CheckCircle size={14} weight="fill" className="text-green-500" />
+          <CheckCircleIcon size={14} weight="fill" className="text-green-500" />
           응답 완료
         </span>
       </div>
@@ -98,7 +98,7 @@ export default function ChatInputRequest({
     return (
       <div className="py-2 px-1">
         <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-          <CheckCircle size={14} weight="fill" className="text-muted-foreground/50" />
+          <CheckCircleIcon size={14} weight="fill" className="text-muted-foreground/50" />
           응답 완료
         </span>
       </div>
@@ -133,9 +133,9 @@ export default function ChatInputRequest({
               >
                 {/* 라디오 인디케이터 */}
                 {isSelected ? (
-                  <CheckCircle size={20} weight="fill" className="text-primary shrink-0" />
+                  <CheckCircleIcon size={20} weight="fill" className="text-primary shrink-0" />
                 ) : (
-                  <Circle size={20} weight="regular" className="text-muted-foreground/50 shrink-0" />
+                  <CircleIcon size={20} weight="regular" className="text-muted-foreground/50 shrink-0" />
                 )}
                 {/* 라벨 */}
                 <span
@@ -194,9 +194,9 @@ export default function ChatInputRequest({
               >
                 {/* 체크박스 인디케이터 */}
                 {isSelected ? (
-                  <CheckSquare size={18} weight="fill" className="text-primary shrink-0" />
+                  <CheckSquareIcon size={18} weight="fill" className="text-primary shrink-0" />
                 ) : (
-                  <Square size={18} weight="regular" className="text-muted-foreground/50 shrink-0" />
+                  <SquareIcon size={18} weight="regular" className="text-muted-foreground/50 shrink-0" />
                 )}
                 {/* 라벨 */}
                 <span

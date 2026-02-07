@@ -9,6 +9,44 @@ import type { QueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/constants/queryKeys';
 import type { RoutineEvent } from '@/lib/types/routine';
 
+// ============================================================================
+// Cross-Domain Composite Invalidation
+// ============================================================================
+
+/**
+ * 루틴 적용 후 관련 캐시 전체 무효화
+ *
+ * 코치 채팅에서 루틴 적용 시 사용 (coach + routineEvent + aiSession 3개 도메인)
+ *
+ * @param queryClient - React Query 클라이언트
+ * @param conversationId - 대화 ID
+ *
+ * @example
+ * onSuccess: (_, { conversationId }) => {
+ *   invalidateAfterRoutineApply(queryClient, conversationId);
+ * }
+ */
+export function invalidateAfterRoutineApply(
+  queryClient: QueryClient,
+  conversationId: string
+): void {
+  // 코치 대화 캐시
+  queryClient.invalidateQueries({
+    queryKey: queryKeys.coach.conversation(conversationId),
+  });
+  queryClient.invalidateQueries({
+    queryKey: queryKeys.coach.conversations(),
+  });
+  // 루틴 이벤트 캐시
+  invalidateEventLists(queryClient);
+  // AI 세션 캐시
+  invalidateAISessions(queryClient);
+}
+
+// ============================================================================
+// Single-Domain Cache Helpers
+// ============================================================================
+
 /**
  * 루틴 이벤트 캐시 업데이트 (상세 + 날짜별)
  *

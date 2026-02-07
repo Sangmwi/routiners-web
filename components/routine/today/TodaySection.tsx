@@ -25,7 +25,7 @@ export function TodaySection({ workoutEvent, mealEvent }: TodaySectionProps) {
         </p>
       </div>
 
-      <div className="divide-y divide-border/50 px-2">
+      <div className="divide-y divide-border/50">
         {workoutEvent ? (
           <TodayEventCard event={workoutEvent} type="workout" />
         ) : (

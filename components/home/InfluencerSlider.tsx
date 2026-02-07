@@ -1,7 +1,7 @@
 'use client';
 
 import InfluencerCard from './InfluencerCard';
-import HorizontalSlider from '@/components/ui/HorizontalSlider';
+import { Carousel } from '@/components/ui/carousel';
 import { Influencer } from '@/lib/types';
 
 interface InfluencerSliderProps {
@@ -10,13 +10,13 @@ interface InfluencerSliderProps {
 }
 
 /**
- * 인플루언서 카드 슬라이더
+ * 인플루언서 카드 캐러셀
  */
 export default function InfluencerSlider({ influencers, onCardClick }: InfluencerSliderProps) {
   return (
-    <HorizontalSlider gap="gap-4" enableDrag fullBleed>
+    <Carousel gap="gap-4" enableDrag fullBleed snap>
       {influencers.map((influencer) => (
-        <HorizontalSlider.Item key={influencer.id}>
+        <Carousel.Item key={influencer.id}>
           <InfluencerCard
             author={influencer.author}
             title={influencer.title}
@@ -24,11 +24,8 @@ export default function InfluencerSlider({ influencers, onCardClick }: Influence
             votes={influencer.votes}
             onClick={() => onCardClick?.(influencer.id)}
           />
-        </HorizontalSlider.Item>
+        </Carousel.Item>
       ))}
-    </HorizontalSlider>
+    </Carousel>
   );
 }
-
-
-

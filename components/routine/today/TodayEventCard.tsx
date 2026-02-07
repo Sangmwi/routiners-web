@@ -1,7 +1,7 @@
 'use client';
 
 import AppLink from '@/components/common/AppLink';
-import { Barbell, ForkKnife, CaretRight } from '@phosphor-icons/react';
+import { BarbellIcon, ForkKnifeIcon, CaretRightIcon } from '@phosphor-icons/react';
 import type { RoutineEvent, EventType, WorkoutData } from '@/lib/types/routine';
 import type { MealData } from '@/lib/types/meal';
 
@@ -61,13 +61,13 @@ export function TodayEventCard({ event, type }: TodayEventCardProps) {
   return (
     <AppLink
       href={href}
-      className="flex items-center gap-4 py-5 w-full active:bg-muted/30 transition-colors"
+      className="w-full flex items-center gap-4 px-2 py-5 active:bg-muted/30 transition-colors rounded-xl"
     >
       {/* 아이콘 - 배경 없음, 32px */}
       {isWorkout ? (
-        <Barbell size={32} weight="fill" className="text-primary shrink-0" />
+        <BarbellIcon size={32} weight="fill" className="text-primary shrink-0" />
       ) : (
-        <ForkKnife size={32} weight="fill" className="text-primary shrink-0" />
+        <ForkKnifeIcon size={32} weight="fill" className="text-primary shrink-0" />
       )}
 
       {/* 콘텐츠 */}
@@ -81,7 +81,7 @@ export function TodayEventCard({ event, type }: TodayEventCardProps) {
       </div>
 
       {/* 화살표 */}
-      <CaretRight size={20} weight="bold" className="text-muted-foreground shrink-0" />
+      <CaretRightIcon size={20} weight="bold" className="text-muted-foreground shrink-0" />
     </AppLink>
   );
 }

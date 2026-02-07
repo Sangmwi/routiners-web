@@ -1,7 +1,7 @@
 'use client';
 
 import AppLink from '@/components/common/AppLink';
-import { Barbell, ForkKnife, CaretRight } from '@phosphor-icons/react';
+import { BarbellIcon, ForkKnifeIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { formatDate, getDayOfWeek } from '@/lib/utils/dateHelpers';
 import type { RoutineEvent, WorkoutData } from '@/lib/types/routine';
 import type { MealData } from '@/lib/types/meal';
@@ -71,7 +71,7 @@ export function UpcomingEventItem({ event }: UpcomingEventItemProps) {
   return (
     <AppLink
       href={`/routine/${event.type}/${event.date}`}
-      className="flex items-center gap-3 py-3.5 active:bg-muted/30 transition-colors"
+      className="w-full flex items-center gap-3 px-2 py-3.5 active:bg-muted/30 transition-colors rounded-xl"
     >
       {/* 날짜 */}
       <span className="text-sm text-muted-foreground w-14 shrink-0 text-left">
@@ -80,9 +80,9 @@ export function UpcomingEventItem({ event }: UpcomingEventItemProps) {
 
       {/* 아이콘 - 배경 없음, 20px */}
       {isWorkout ? (
-        <Barbell size={20} weight="fill" className="text-primary shrink-0" />
+        <BarbellIcon size={20} weight="fill" className="text-primary shrink-0" />
       ) : (
-        <ForkKnife size={20} weight="fill" className="text-orange-500 shrink-0" />
+        <ForkKnifeIcon size={20} weight="fill" className="text-orange-500 shrink-0" />
       )}
 
       {/* 제목 + 상세 - flex 구조로 분리 */}
@@ -96,7 +96,7 @@ export function UpcomingEventItem({ event }: UpcomingEventItemProps) {
       </div>
 
       {/* 화살표 */}
-      <CaretRight size={16} className="text-muted-foreground/50 shrink-0" />
+      <CaretRightIcon size={16} className="text-muted-foreground/50 shrink-0" />
     </AppLink>
   );
 }

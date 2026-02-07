@@ -1,7 +1,7 @@
 'use client';
 
 import ProductCard from './ProductCard';
-import HorizontalSlider from '@/components/ui/HorizontalSlider';
+import { Carousel } from '@/components/ui/carousel';
 import { Product } from '@/lib/types';
 
 interface ProductSliderProps {
@@ -10,13 +10,13 @@ interface ProductSliderProps {
 }
 
 /**
- * 상품 카드 슬라이더
+ * 상품 카드 캐러셀
  */
 export default function ProductSlider({ products, onCardClick }: ProductSliderProps) {
   return (
-    <HorizontalSlider gap="gap-4" enableDrag fullBleed>
+    <Carousel gap="gap-3" enableDrag fullBleed snap>
       {products.map((product) => (
-        <HorizontalSlider.Item key={product.id} className="w-64">
+        <Carousel.Item key={product.id} className="w-64">
           <ProductCard
             brand={product.brand}
             name={product.name}
@@ -24,8 +24,8 @@ export default function ProductSlider({ products, onCardClick }: ProductSliderPr
             imageUrl={product.imageUrl}
             onClick={() => onCardClick?.(product.id)}
           />
-        </HorizontalSlider.Item>
+        </Carousel.Item>
       ))}
-    </HorizontalSlider>
+    </Carousel>
   );
 }
