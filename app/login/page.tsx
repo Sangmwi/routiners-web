@@ -2,10 +2,10 @@
 
 import { createClient } from "@/utils/supabase/client";
 import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
 import { SpinnerGapIcon } from "@phosphor-icons/react";
 import GoogleLogo from "@/assets/logos/google.svg";
-import logoImage from "@/assets/images/splash-image-md.png";
+import LogoFillRow from "@/assets/logos/brand/routiners-logo-fill-row.svg";
+import LogoFillRowDark from "@/assets/logos/brand/routiners-logo-fill-row-dark.svg";
 import { useWebViewAuth, useLoginCommands, useWebViewCore } from "@/hooks";
 
 /**
@@ -99,72 +99,51 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden bg-background">
-      {/* Background decoration - 즉시 렌더링 */}
+    <div className="fixed inset-0 flex flex-col overflow-hidden bg-background">
+      {/* Background blur - 로고 위치에서 발산 */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-primary/20 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute top-[42%] left-1/2 -translate-x-1/2 -translate-y-1/2 h-[16rem] w-[16rem] rounded-full bg-primary/10 blur-3xl" />
       </div>
 
-      {/* Content - 즉시 렌더링 */}
-      <div className="relative z-10 w-full max-w-sm px-6">
-        {/* Logo & Branding */}
-        <div className="mb-24 flex flex-col items-center">
-          <Image
-            src={logoImage}
-            alt="루티너스 로고"
-            width={200}
-            height={200}
-            className="object-contain"
-            priority
-          />
-        </div>
+      {/* Logo - 화면 상단 ~40% 위치 */}
+      <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-3 pt-4">
+        <LogoFillRow className="h-12 w-auto dark:hidden" />
+        <LogoFillRowDark className="hidden h-13 w-auto dark:block" />
+        <p className="text-xs text-muted-foreground/90">
+          군에서 시작되는 평생 루틴.
+        </p>
+      </div>
 
-        {error && (
-          <div className="mb-4 rounded-xl bg-destructive/10 p-3 text-center text-sm text-destructive ring-1 ring-destructive/20">
-            {error}
-          </div>
-        )}
-
-        {/* Google Login Button */}
-        <button
-          onClick={handleGoogleLogin}
-          disabled={isLoading}
-          className="group relative flex w-full items-center justify-center gap-3 rounded-2xl bg-card px-6 py-4 text-sm font-medium text-card-foreground shadow-md ring-1 ring-border transition-all duration-200 hover:shadow-lg hover:ring-primary/50 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? (
-            <SpinnerGapIcon size={20} className="animate-spin text-primary" />
-          ) : (
-            <>
-              <GoogleLogo className="h-5 w-5" />
-              <span>Google로 계속하기</span>
-            </>
+      {/* Bottom section - 로그인 버튼 + 푸터 */}
+      <div className="relative z-10 w-full px-6 pb-12">
+        <div className="mx-auto max-w-sm">
+          {error && (
+            <div className="mb-4 rounded-xl bg-destructive/10 p-3 text-center text-sm text-destructive ring-1 ring-destructive/20">
+              {error}
+            </div>
           )}
-        </button>
 
-        {/* Divider */}
-        <div className="my-6 flex items-center gap-4">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+          {/* Google Login Button */}
+          <button
+            onClick={handleGoogleLogin}
+            disabled={isLoading}
+            className="group relative flex w-full items-center justify-center gap-3 rounded-2xl bg-card px-6 py-4 text-sm font-medium text-card-foreground shadow-md ring-1 ring-border transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? (
+              <SpinnerGapIcon size={20} className="animate-spin text-primary" />
+            ) : (
+              <>
+                <GoogleLogo className="h-5 w-5" />
+                <span>Google로 시작하기</span>
+              </>
+            )}
+          </button>
+
+          {/* Footer */}
+          <p className="mt-6 text-center text-xs text-muted-foreground/60">
+            © 2024 루티너스. All rights reserved.
+          </p>
         </div>
-
-        {/* Terms */}
-        <p className="text-center text-xs text-muted-foreground leading-relaxed">
-          로그인 시{" "}
-          <span className="text-foreground/70 underline underline-offset-2">
-            서비스 이용약관
-          </span>{" "}
-          및{" "}
-          <span className="text-foreground/70 underline underline-offset-2">
-            개인정보 처리방침
-          </span>
-          에 동의합니다.
-        </p>
-
-        {/* Footer */}
-        <p className="mt-8 text-center text-xs text-muted-foreground/60">
-          © 2024 루티너스. All rights reserved.
-        </p>
       </div>
     </div>
   );
