@@ -30,7 +30,7 @@ export function EmptyTodayCard({ type }: EmptyTodayCardProps) {
           <h3 className="text-base font-medium text-muted-foreground">오늘 운동 없음</h3>
           <p className="text-sm text-muted-foreground/60 mt-1">기록을 추가해보세요</p>
         </div>
-        <CaretRight size={20} weight="bold" className="text-muted-foreground shrink-0" />
+        <CaretRight size={20} weight="bold" className="text-muted-foreground/50 shrink-0" />
       </AppLink>
     );
   }
