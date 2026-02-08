@@ -19,7 +19,7 @@ export default function ProfileRankInput({
   return (
     <FormSection
       title="계급"
-      description={disabled ? "복무 정보에서 입력한 계급입니다." : "현재 계급을 선택하세요."}
+      description={disabled ? "복무 정보에서 입력한 계급이에요." : "현재 계급을 선택하세요."}
     >
       <FormSelect
         value={value}

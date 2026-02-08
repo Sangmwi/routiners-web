@@ -55,7 +55,7 @@ export default function ChatMessage({ message, onAction, isApplyingRoutine = fal
   if (contentType === 'system_log') {
     return (
       <div className="flex justify-center py-2">
-        <div className="px-4 py-2.5 bg-muted/30 rounded-2xl max-w-[85%]">
+        <div className="px-4 py-2.5 bg-muted/20 rounded-2xl max-w-[85%]">
           <Markdown
             content={message.content}
             className="text-sm text-muted-foreground text-center"
@@ -99,7 +99,7 @@ export default function ChatMessage({ message, onAction, isApplyingRoutine = fal
           </div>
           <div className="max-w-[80%] px-4 py-3 mt-2 rounded-2xl bg-muted/40 rounded-tl-none">
             <p className="text-sm text-muted-foreground">
-              프로필 확인 데이터를 불러올 수 없습니다.
+              프로필 확인 데이터를 불러올 수 없어요.
             </p>
           </div>
         </div>

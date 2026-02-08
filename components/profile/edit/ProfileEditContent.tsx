@@ -93,6 +93,8 @@ export default function ProfileEditContent() {
 
         <ProfileNicknameInput
           value={formData.nickname}
+          originalNickname={user.nickname}
+          userId={user.id}
           onChange={(value) => updateFormField('nickname', value)}
         />
 

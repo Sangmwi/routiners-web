@@ -173,6 +173,31 @@ export function getWeekRange(date: Date = new Date()): {
 }
 
 /**
+ * 월간 범위 반환 (1일 ~ 말일)
+ *
+ * @param year - 연도
+ * @param month - 월 (1-12)
+ * @returns { startDate, endDate, monthLabel } 월간 범위 정보
+ *
+ * @example
+ * getMonthRange(2026, 2) // { startDate: '2026-02-01', endDate: '2026-02-28', monthLabel: '2026년 2월' }
+ */
+export function getMonthRange(year: number, month: number): {
+  startDate: string;
+  endDate: string;
+  monthLabel: string;
+} {
+  const firstDay = new Date(year, month - 1, 1);
+  const lastDay = new Date(year, month, 0); // 다음 달 0일 = 이번 달 마지막 날
+
+  return {
+    startDate: formatDate(firstDay),
+    endDate: formatDate(lastDay),
+    monthLabel: `${year}년 ${month}월`,
+  };
+}
+
+/**
  * 요일 레이블 반환
  *
  * @param date - Date 객체 또는 YYYY-MM-DD 문자열

@@ -95,30 +95,36 @@ export function useRoutinePreview({
    * @param previewData 메시지에서 파싱된 프리뷰 데이터
    * @param forceOverwrite 충돌 시 덮어쓰기 여부
    * @param weekCount 적용할 주차 수 (Phase 11)
+   * @param appendMode 이어붙이기 모드 (기존 스케줄 유지, 이후부터 시작)
    */
   const apply = async (
     messageId: string,
     previewData: RoutinePreviewData,
     forceOverwrite?: boolean,
-    weekCount?: number
+    weekCount?: number,
+    appendMode?: boolean
   ) => {
     if (!conversationId || !previewData?.id) return;
 
     setIsApplying(true);
     try {
-      // 1. 루틴 적용 API 호출 (Phase 11: weekCount 전달)
+      // 1. 루틴 적용 API 호출
       await applyRoutine.mutateAsync({
         conversationId,
         previewId: previewData.id,
         forceOverwrite,
         weekCount,
+        appendMode,
       });
 
       // 2. 메시지 상태 업데이트 (pending → applied)
       await updateStatus(messageId, 'applied');
 
-      // 3. AI에게 메시지 전송 (대화 맥락 유지)
-      sendMessage(conversationId, '루틴을 적용했습니다.');
+      // 3. AI에게 액션 메시지 전송 (유저 버블 없이 AI만 트리거)
+      const actionToken = appendMode
+        ? '__ROUTINE_APPLIED_APPEND__'
+        : '__ROUTINE_APPLIED__';
+      sendMessage(conversationId, actionToken);
 
       close();
     } catch (error) {
@@ -176,7 +182,7 @@ export function useRoutinePreview({
       await clearActivePurpose.mutateAsync(conversationId);
 
       // 3. AI에게 메시지 전송 (대화 맥락 유지)
-      sendMessage(conversationId, '루틴 생성을 취소했습니다.');
+      sendMessage(conversationId, '루틴 생성을 취소했어요.');
 
       close();
     } catch (error) {

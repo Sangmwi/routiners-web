@@ -38,7 +38,7 @@ export function useWithdrawal(): UseWithdrawalResult {
   const withdraw = () => {
     openModal('confirm', {
       title: '회원 탈퇴',
-      message: '정말 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.',
+      message: '정말 탈퇴할까요?\n모든 데이터가 삭제되며 복구할 수 없어요.',
       confirmText: '탈퇴하기',
       cancelText: '취소',
       onConfirm: async () => {
@@ -51,7 +51,7 @@ export function useWithdrawal(): UseWithdrawalResult {
 
           if (!response.ok) {
             const data = await response.json().catch(() => ({}));
-            throw new Error(data.error || '탈퇴 처리에 실패했습니다.');
+            throw new Error(data.error || '탈퇴 처리에 실패했어요.');
           }
 
           // 탈퇴 완료 후 로그아웃 처리
@@ -67,7 +67,7 @@ export function useWithdrawal(): UseWithdrawalResult {
             message:
               error instanceof Error
                 ? error.message
-                : '탈퇴 처리 중 오류가 발생했습니다.',
+                : '탈퇴 처리 중 오류가 발생했어요.',
             buttonText: '확인',
           });
           setIsWithdrawing(false);

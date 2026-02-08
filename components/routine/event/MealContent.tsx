@@ -14,10 +14,12 @@ import {
   useCompleteRoutineEvent,
   useSkipRoutineEvent,
 } from '@/hooks/routine';
-import { CalendarIcon } from '@phosphor-icons/react';
+import { CalendarIcon, PlusIcon, RobotIcon } from '@phosphor-icons/react';
 import { getEventConfig } from '@/lib/config/theme';
 import type { MealData } from '@/lib/types/meal';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
+import { useState } from 'react';
+import AddMealSheet from '@/components/routine/sheets/AddMealSheet';
 
 // ============================================================
 // Type Guard
@@ -65,7 +67,7 @@ export default function MealContent({ date }: MealContentProps) {
   const handleComplete = () => {
     if (!event) return;
     completeEvent.mutate(event.id, {
-      onError: () => showError('식단 완료에 실패했습니다'),
+      onError: () => showError('식단 완료에 실패했어요'),
     });
   };
 
@@ -73,26 +75,47 @@ export default function MealContent({ date }: MealContentProps) {
   const handleSkip = () => {
     if (!event) return;
     skipEvent.mutate(event.id, {
-      onError: () => showError('식단 스킵에 실패했습니다'),
+      onError: () => showError('식단 스킵에 실패했어요'),
     });
   };
+
+  // 직접 추가 바텀시트
+  const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
 
   // 이벤트 없음 (예정된 식단 없음)
   if (!event) {
     return (
-      <div className="mt-8">
-        <EmptyState
-          icon={CalendarIcon}
-          message={`${formattedDate}에 예정된 식단이 없습니다`}
-          hint="AI 영양사와 대화하여 맞춤 식단을 생성해보세요"
-          showIconBackground
-          size="lg"
-          action={{
-            label: '돌아가기',
-            onClick: () => router.push('/routine'),
-          }}
+      <>
+        <div className="mt-8">
+          <EmptyState
+            icon={CalendarIcon}
+            message={`${formattedDate}에 예정된 식단이 없어요`}
+            showIconBackground
+            size="lg"
+          />
+          <div className="flex flex-col gap-3 mt-6 px-4">
+            <button
+              onClick={() => router.push('/routine/coach')}
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-primary text-primary-foreground"
+            >
+              <RobotIcon size={18} />
+              AI 추천받기
+            </button>
+            <button
+              onClick={() => setIsAddSheetOpen(true)}
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-muted/50 text-muted-foreground"
+            >
+              <PlusIcon size={18} weight="bold" />
+              식단 직접 입력
+            </button>
+          </div>
+        </div>
+        <AddMealSheet
+          isOpen={isAddSheetOpen}
+          onClose={() => setIsAddSheetOpen(false)}
+          date={date}
         />
-      </div>
+      </>
     );
   }
 
@@ -101,18 +124,16 @@ export default function MealContent({ date }: MealContentProps) {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* 헤더 섹션 */}
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="flex items-start justify-between mb-3">
+        <div>
+          <div className="flex items-center justify-between mb-3">
             <p className="text-sm text-muted-foreground">{formattedDate}</p>
             <EventStatusBadge status={event.status} />
           </div>
 
-          <div className="flex items-start gap-3">
-            <div className={`w-12 h-12 rounded-xl ${eventConfig.bgColor} flex items-center justify-center shrink-0`}>
-              <eventConfig.icon size={24} className={eventConfig.color} weight="fill" />
-            </div>
+          <div className="flex items-center gap-3">
+            <eventConfig.icon size={28} className={eventConfig.color} weight="fill" />
             <div className="flex-1">
               <h1 className="text-xl font-bold text-foreground">{event.title}</h1>
               {event.rationale && (
@@ -145,13 +166,13 @@ export default function MealContent({ date }: MealContentProps) {
           </div>
         ) : (
           <div className="bg-muted/50 rounded-xl p-6 text-center">
-            <p className="text-muted-foreground">상세 식단 정보가 없습니다.</p>
+            <p className="text-muted-foreground">상세 식단 정보가 없어요.</p>
           </div>
         )}
 
         {/* 추가 정보 */}
         {mealData?.notes && (
-          <div className="bg-card border border-border rounded-xl p-4">
+          <div className="bg-muted/20 rounded-2xl p-4">
             <h3 className="text-sm font-medium text-muted-foreground mb-2">
               메모
             </h3>

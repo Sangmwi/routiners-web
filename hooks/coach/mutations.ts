@@ -135,9 +135,16 @@ export function useApplyRoutine() {
       conversationId: string;
       previewId: string;
       forceOverwrite?: boolean;
-      weekCount?: number; // Phase 11: 적용할 주차 수
+      weekCount?: number;
+      appendMode?: boolean;
     }) =>
-      api.post<{ previewId: string; eventsCreated: number; startDate: string }>(
+      api.post<{
+        previewId: string;
+        eventsCreated: number;
+        eventsPreserved: number;
+        startDate: string;
+        isReapply: boolean;
+      }>(
         '/api/routine/apply',
         params
       ),
@@ -145,6 +152,22 @@ export function useApplyRoutine() {
     onSuccess: (_, { conversationId }) => {
       // 대화 + 루틴 이벤트 + AI 세션 캐시 무효화
       invalidateAfterRoutineApply(queryClient, conversationId);
+
+      // 대화 목록에서 activePurpose 즉시 제거 (서버 refetch 전 UI 반영)
+      queryClient.setQueryData<CoachConversationsResponse>(
+        queryKeys.coach.conversations(),
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            conversations: old.conversations.map((item) =>
+              item.conversation.id === conversationId
+                ? { ...item, hasActivePurpose: false }
+                : item
+            ),
+          };
+        }
+      );
     },
   });
 }

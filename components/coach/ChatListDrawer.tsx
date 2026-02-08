@@ -82,7 +82,7 @@ export default function ChatListDrawer({
         </button>
 
         {/* 대화 목록 */}
-        <div className="bg-muted/30 rounded-xl overflow-hidden max-h-64 overflow-y-auto">
+        <div className="bg-muted/20 rounded-xl overflow-hidden max-h-64 overflow-y-auto">
           {isLoading ? (
             <div className="p-4 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
               <LoadingSpinner size="sm" />
@@ -90,7 +90,7 @@ export default function ChatListDrawer({
             </div>
           ) : conversations.length === 0 ? (
             <div className="p-4 text-center text-sm text-muted-foreground">
-              대화 내역이 없습니다
+              대화 내역이 없어요
             </div>
           ) : (
             <div>

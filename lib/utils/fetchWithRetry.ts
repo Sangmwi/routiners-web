@@ -97,13 +97,13 @@ export async function fetchWithRetry(
 export function getUploadErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     if (error.message === 'TIMEOUT') {
-      return '업로드 시간이 초과되었습니다. 네트워크 연결을 확인하고 다시 시도해주세요.';
+      return '업로드 시간이 초과됐어요. 네트워크 연결을 확인하고 다시 시도해주세요.';
     }
   }
 
   if (error instanceof TypeError) {
-    return '네트워크 연결에 문제가 있습니다. 인터넷 연결을 확인해주세요.';
+    return '네트워크 연결에 문제가 있어요. 인터넷 연결을 확인해주세요.';
   }
 
-  return '사진 업로드에 실패했습니다. 다시 시도해주세요.';
+  return '사진 업로드에 실패했어요. 다시 시도해주세요.';
 }

@@ -1,8 +1,12 @@
 'use client';
 
 import { useCurrentUserProfileSuspense } from '@/hooks/profile';
+import { useWeeklyStatsSuspense } from '@/hooks/routine';
+import { useInBodySummarySuspense } from '@/hooks/inbody/queries';
 import GreetingSection from '@/components/home/GreetingSection';
 import HealthScoreCard from '@/components/home/HealthScoreCard';
+import RoutineMiniCard from '@/components/home/RoutineMiniCard';
+import InBodyMiniCard from '@/components/home/InBodyMiniCard';
 import SectionHeader from '@/components/ui/SectionHeader';
 import ProductSlider from '@/components/home/ProductSlider';
 import InfluencerSlider from '@/components/home/InfluencerSlider';
@@ -45,6 +49,8 @@ const DUMMY_INFLUENCERS: Influencer[] = [
  */
 export default function HomeContent() {
   const { data: user } = useCurrentUserProfileSuspense();
+  const weeklyStats = useWeeklyStatsSuspense();
+  const { data: inbodySummary } = useInBodySummarySuspense();
 
   const handleViewHealthDetails = () => {
     console.log('건강 점수 상세 보기');
@@ -67,11 +73,15 @@ export default function HomeContent() {
   };
 
   return (
-    <>
+    <div className="space-y-8">
       <section>
         <GreetingSection nickname={user?.nickname || '사용자'} />
         <HealthScoreCard score={DUMMY_HEALTH_SCORE} onViewDetails={handleViewHealthDetails} />
       </section>
+
+      {/* 대시보드 미니카드 */}
+      <RoutineMiniCard stats={weeklyStats} />
+      <InBodyMiniCard summary={inbodySummary} />
 
       <section>
         <SectionHeader
@@ -90,6 +100,6 @@ export default function HomeContent() {
         />
         <InfluencerSlider influencers={DUMMY_INFLUENCERS} onCardClick={handleInfluencerClick} />
       </section>
-    </>
+    </div>
   );
 }

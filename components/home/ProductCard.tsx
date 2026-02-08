@@ -19,7 +19,7 @@ export default function ProductCard({ brand, name, price, imageUrl, badge, onCli
                  transition-all duration-200 active:scale-[0.98] cursor-pointer
                  hover:shadow-md hover:border-border/60"
     >
-      <div className="relative w-full aspect-[4/3] bg-muted/30">
+      <div className="relative w-full aspect-[4/3] bg-muted/20">
         <ImageWithFallback
           src={imageUrl}
           alt={name}

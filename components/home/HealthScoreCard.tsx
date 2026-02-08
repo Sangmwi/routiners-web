@@ -15,7 +15,7 @@ export default function HealthScoreCard({ score, onViewDetails }: HealthScoreCar
         <div className="flex-1">
           <h2 className="text-xl font-bold text-card-foreground mb-2">종합 건강 점수</h2>
           <p className="text-xs text-card-foreground/70 mb-4">
-            인바디 점수, 운동 루틴, 식단 등을 종합적으로 산출한 점수입니다.
+            인바디 점수, 운동 루틴, 식단 등을 종합적으로 산출한 점수예요.
           </p>
           {onViewDetails && (
             <ViewMoreButton onClick={onViewDetails}>

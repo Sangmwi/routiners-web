@@ -67,7 +67,7 @@ export default function ProfileInterestsInput({ value, onChange }: ProfileIntere
 
       {/* Selected Interests */}
       {value.length > 0 && (
-        <div className="flex flex-wrap gap-2 p-3 rounded-xl bg-muted/30 border border-border">
+        <div className="flex flex-wrap gap-2 p-3 rounded-xl bg-muted/20">
           {value.map((interest, index) => (
             <div
               key={index}

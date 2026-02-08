@@ -83,6 +83,7 @@ export const WorkoutExerciseSchema = z.object({
   rir: z.number().int().min(0).max(5).optional(),
   technique: z.string().max(100).optional(),
   notes: z.string().max(500).optional(),
+  distance: z.number().min(0).max(200).optional(),
   completed: z.boolean().optional(),
   skipped: z.boolean().optional(),
 });
@@ -97,6 +98,7 @@ export const WorkoutDataSchema = z.object({
   intensity: z.number().int().min(1).max(10).optional(),
   warmup: z.string().max(500).optional(),
   cooldown: z.string().max(500).optional(),
+  estimatedCaloriesBurned: z.number().int().min(0).max(5000).optional(),
   tips: z.array(z.string().max(200)).max(5).optional(),
 });
 

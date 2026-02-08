@@ -43,7 +43,7 @@ export function ChatProgressIndicator({
       >
         <LoadingSpinner size="sm" variant="current" />
       </div>
-      <div className="flex-1 bg-muted/30 rounded-2xl rounded-tl-md px-4 py-3">
+      <div className="flex-1 bg-muted/20 rounded-2xl rounded-tl-md px-4 py-3">
         <p className="text-sm font-medium text-foreground mb-2">
           {styles.text} 생성 중... {progress}%
         </p>

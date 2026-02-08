@@ -73,7 +73,7 @@ const RecordItem = memo(function RecordItem({
 
   return (
     <div
-      className="flex items-center justify-between px-4 py-4 hover:bg-muted/30 transition-colors cursor-pointer"
+      className="flex items-center justify-between px-4 py-4 hover:bg-muted/20 transition-colors cursor-pointer"
       onClick={handleClick}
     >
       <div className="flex-1 min-w-0">

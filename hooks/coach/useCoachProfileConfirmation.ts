@@ -68,7 +68,7 @@ export function useCoachProfileConfirmation({
       await updateStatus(messageId, 'confirmed');
 
       // AI에게 진행 요청
-      sendMessage(conversationId, '프로필 정보를 확인했습니다. 다음 단계로 진행해주세요.');
+      sendMessage(conversationId, '프로필 정보를 확인했어요. 다음 단계로 진행해주세요.');
     } catch (error) {
       console.error('[Profile Confirmation] Failed to confirm:', error);
       // 에러는 useMessageStatusUpdate에서 이미 처리됨 (롤백 포함)
@@ -85,7 +85,7 @@ export function useCoachProfileConfirmation({
       await updateStatus(messageId, 'edited');
 
       // AI에게 수정 필요 메시지 전송 → AI가 "어떤 정보가 틀렸나요?" 물어봄
-      sendMessage(conversationId, '정보가 정확하지 않아요. 수정이 필요합니다.');
+      sendMessage(conversationId, '정보가 정확하지 않아요. 수정이 필요해요.');
     } catch (error) {
       console.error('[Profile Confirmation] Failed to edit:', error);
       // 에러는 useMessageStatusUpdate에서 이미 처리됨 (롤백 포함)
@@ -107,7 +107,7 @@ export function useCoachProfileConfirmation({
       await clearActivePurpose.mutateAsync(conversationId);
 
       // 3. AI에게 종료 메시지 전송
-      sendMessage(conversationId, '프로필 확인을 종료합니다.');
+      sendMessage(conversationId, '프로필 확인을 종료할게요.');
     } catch (error) {
       console.error('[Profile Confirmation] Failed to cancel:', error);
     }

@@ -145,7 +145,7 @@ export function useProfileEditSuspense(): UseProfileEditSuspenseReturn {
     if (currentFormChanged || currentImageChanged) {
       openModal('confirm', {
         title: '변경사항 저장 안 함',
-        message: '저장하지 않은 변경사항이 있습니다.\n정말 나가시겠습니까?',
+        message: '저장하지 않은 변경사항이 있어요.\n정말 나갈까요?',
         confirmText: '나가기',
         cancelText: '계속 편집',
         onConfirm: () => router.back(),
@@ -187,13 +187,13 @@ export function useProfileEditSuspense(): UseProfileEditSuspenseReturn {
         },
         onError: (err: Error) => {
           console.error('Failed to update profile:', err);
-          showError('프로필 저장에 실패했습니다. 다시 시도해 주세요.');
+          showError('프로필 저장에 실패했어요. 다시 시도해 주세요.');
           setIsSaving(false);
         },
       });
     } catch (err) {
       console.error('Save failed:', err);
-      showError(err instanceof Error ? err.message : '저장에 실패했습니다.');
+      showError(err instanceof Error ? err.message : '저장에 실패했어요.');
       setIsSaving(false);
     }
   };

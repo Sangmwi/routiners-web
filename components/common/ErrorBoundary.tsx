@@ -142,7 +142,7 @@ function ErrorFallback({
   // 에러 코드에 따른 메시지
   const errorMessage = errorCode
     ? getErrorMessageByCode(errorCode)
-    : '예상치 못한 오류가 발생했습니다.';
+    : '예상치 못한 오류가 발생했어요.';
 
   // 개발 환경에서만 상세 정보 표시
   const isDev = process.env.NODE_ENV === 'development';
@@ -157,7 +157,7 @@ function ErrorFallback({
 
         {/* 제목 */}
         <h1 className="text-xl font-bold text-foreground">
-          문제가 발생했습니다
+          문제가 발생했어요
         </h1>
 
         {/* 메시지 */}

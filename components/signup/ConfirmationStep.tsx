@@ -36,12 +36,12 @@ export default function ConfirmationStep({
             </div>
             <div className="space-y-2">
               <h1 className="text-2xl font-bold text-foreground">입력하신 정보를 확인해 주세요</h1>
-              <p className="text-muted-foreground">아래 정보로 가입을 완료합니다</p>
+              <p className="text-muted-foreground">아래 정보로 가입을 완료해요</p>
             </div>
           </div>
 
           {/* Info Summary */}
-          <div className="space-y-3 rounded-2xl bg-muted/30 p-5 border border-border">
+          <div className="space-y-3 rounded-2xl bg-muted/20 p-5 border border-border">
             <InfoRow label="닉네임" value={militaryData.nickname} />
             <InfoRow label="입대 시기" value={formatDate(militaryData.enlistmentMonth)} />
             <InfoRow label="계급" value={militaryData.rank.replace('-', ' ')} />
@@ -54,7 +54,7 @@ export default function ConfirmationStep({
             <p className="text-xs text-muted-foreground">
               <span className="font-semibold text-foreground">본인 확인 완료</span>
               <br />
-              실명, 전화번호, 생년월일 정보는 본인 확인용으로만 사용되며 다른 사용자에게 공개되지 않습니다.
+              실명, 전화번호, 생년월일 정보는 본인 확인용으로만 사용되며 다른 사용자에게 공개되지 않아요.
             </p>
           </div>
         </div>

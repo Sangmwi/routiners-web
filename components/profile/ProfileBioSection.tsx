@@ -11,16 +11,18 @@ export default function ProfileBioSection({ bio }: ProfileBioSectionProps) {
   return (
     <div className="space-y-3">
       <SectionHeader title="소개" />
-      {bio ? (
-        <p className="text-sm text-card-foreground/90 leading-relaxed whitespace-pre-line">
-          {bio}
-        </p>
-      ) : (
-        <EmptyState
-          message="소개글이 없습니다"
-          size="sm"
-        />
-      )}
+      <div className="bg-muted/20 rounded-2xl p-4">
+        {bio ? (
+          <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">
+            {bio}
+          </p>
+        ) : (
+          <EmptyState
+            message="소개글이 없어요"
+            size="sm"
+          />
+        )}
+      </div>
     </div>
   );
 }

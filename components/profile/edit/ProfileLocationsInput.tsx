@@ -47,7 +47,7 @@ export default function ProfileLocationsInput({ value, onChange }: ProfileLocati
           onChange={(e) => setInputValue(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="예: 육군훈련소 체력단련실"
-          className="flex-1 px-4 py-3 rounded-xl bg-muted/30 border border-border text-sm text-card-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+          className="flex-1 px-4 py-3 rounded-xl bg-muted/20 border border-border/50 text-sm text-card-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
         />
         <button
           type="button"

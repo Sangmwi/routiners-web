@@ -41,7 +41,7 @@ export default function ProfileInbodyInput({
         <div className="space-y-4">
           {/* 현재 인바디 요약 */}
           <div
-            className="bg-muted/30 rounded-xl p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+            className="bg-muted/20 rounded-xl p-4 cursor-pointer hover:bg-muted/50 transition-colors"
             onClick={() => setIsManageModalOpen(true)}
           >
             {latest ? (
@@ -70,7 +70,7 @@ export default function ProfileInbodyInput({
           {/* 공개 설정 토글 */}
           <FormToggle
             label="인바디 정보 공개"
-            description="다른 사용자에게 인바디 정보를 공개합니다"
+            description="다른 사용자에게 인바디 정보를 공개해요"
             checked={showInbodyPublic}
             onChange={onShowInbodyPublicChange}
           />

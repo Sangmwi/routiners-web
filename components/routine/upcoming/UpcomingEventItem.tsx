@@ -71,7 +71,7 @@ export function UpcomingEventItem({ event }: UpcomingEventItemProps) {
   return (
     <AppLink
       href={`/routine/${event.type}/${event.date}`}
-      className="w-full flex items-center gap-3 px-2 py-3.5 active:bg-muted/30 transition-colors rounded-xl"
+      className="w-full flex items-center gap-3 px-2 py-3.5 active:bg-muted/20 transition-colors rounded-xl"
     >
       {/* 날짜 */}
       <span className="text-sm text-muted-foreground w-14 shrink-0 text-left">

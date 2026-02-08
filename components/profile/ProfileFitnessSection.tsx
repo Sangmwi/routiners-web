@@ -146,7 +146,7 @@ export default function ProfileFitnessSection() {
           action={{ label: '관리', href: '/profile/fitness' }}
         />
 
-        <div className="rounded-[20px] bg-card p-4 shadow-sm border border-border/50">
+        <div className="bg-muted/20 rounded-2xl p-4">
           {isLoading ? renderLoading() : !hasData ? renderEmpty() : renderData()}
         </div>
       </div>

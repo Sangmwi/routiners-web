@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckIcon, ClockIcon, ProhibitIcon, SpinnerGapIcon } from '@phosphor-icons/react';
+import { CheckIcon, ClockIcon, ProhibitIcon, SpinnerGapIcon, ArrowsClockwiseIcon, PlusCircleIcon } from '@phosphor-icons/react';
 import Modal from '@/components/ui/Modal';
 import type { RoutinePreviewData, RoutinePreviewDay, RoutinePreviewExercise } from '@/lib/types/fitness';
 import type { RoutinePreviewStatus } from '@/lib/types/chat';
 
 const DAY_NAMES = ['', '월', '화', '수', '목', '금', '토', '일'];
+
+type ApplyMode = 'replace' | 'append';
 
 interface PreviewDetailDrawerProps {
   isOpen: boolean;
@@ -14,9 +16,11 @@ interface PreviewDetailDrawerProps {
   preview: RoutinePreviewData;
   /** 메시지 상태 (Phase 10) */
   status?: RoutinePreviewStatus;
-  /** Phase 11: weekCount 추가 */
-  onApply: (forceOverwrite?: boolean, weekCount?: number) => void;
+  /** Phase 11: weekCount, appendMode 추가 */
+  onApply: (forceOverwrite?: boolean, weekCount?: number, appendMode?: boolean) => void;
   isApplying?: boolean;
+  /** 기존 예정된 루틴 존재 여부 (대체/이어붙이기 선택 표시용) */
+  hasExistingScheduled?: boolean;
 }
 
 /**
@@ -35,8 +39,10 @@ export default function PreviewDetailDrawer({
   status = 'pending',
   onApply,
   isApplying = false,
+  hasExistingScheduled = false,
 }: PreviewDetailDrawerProps) {
   const [selectedWeekCount, setSelectedWeekCount] = useState(2); // 적용할 주차 수
+  const [applyMode, setApplyMode] = useState<ApplyMode>('replace'); // 대체 or 이어붙이기
 
   // Null guard - preview가 없으면 렌더링하지 않음
   if (!preview?.weeks) {
@@ -130,12 +136,44 @@ export default function PreviewDetailDrawer({
               </span>
             </div>
 
+            {/* 대체/이어붙이기 선택 (기존 스케줄이 있을 때만) */}
+            {hasExistingScheduled && (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setApplyMode('replace')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium rounded-xl transition-all ${
+                    applyMode === 'replace'
+                      ? 'bg-primary/10 text-primary ring-1 ring-primary/30'
+                      : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                  }`}
+                >
+                  <ArrowsClockwiseIcon size={14} weight={applyMode === 'replace' ? 'bold' : 'regular'} />
+                  기존 루틴 대체
+                </button>
+                <button
+                  onClick={() => setApplyMode('append')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium rounded-xl transition-all ${
+                    applyMode === 'append'
+                      ? 'bg-primary/10 text-primary ring-1 ring-primary/30'
+                      : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                  }`}
+                >
+                  <PlusCircleIcon size={14} weight={applyMode === 'append' ? 'bold' : 'regular'} />
+                  기존 루틴 이후에 추가
+                </button>
+              </div>
+            )}
+
             {/* 적용 버튼 */}
             <button
-              onClick={() => onApply(hasConflicts, selectedWeekCount)}
+              onClick={() => onApply(
+                hasConflicts && applyMode === 'replace',
+                selectedWeekCount,
+                applyMode === 'append'
+              )}
               disabled={!isActionable}
               className={`w-full py-3.5 rounded-xl font-medium transition-all disabled:opacity-50 active:scale-[0.98] ${
-                hasConflicts
+                hasConflicts && applyMode === 'replace'
                   ? 'bg-amber-500 text-white hover:bg-amber-600'
                   : 'bg-primary text-primary-foreground hover:bg-primary/90'
               }`}
@@ -146,7 +184,7 @@ export default function PreviewDetailDrawer({
                   적용 중...
                 </span>
               ) : (
-                `${selectedWeekCount}주 루틴 적용하기`
+                `${selectedWeekCount}주 루틴 ${applyMode === 'append' ? '이어붙이기' : '적용하기'}`
               )}
             </button>
           </>
@@ -159,12 +197,12 @@ export default function PreviewDetailDrawer({
               {status === 'applied' ? (
                 <>
                   <CheckIcon size={16} weight="bold" />
-                  이미 적용된 루틴입니다
+                  이미 적용된 루틴이에요
                 </>
               ) : (
                 <>
                   <ProhibitIcon size={16} />
-                  취소된 루틴입니다
+                  취소된 루틴이에요
                 </>
               )}
             </span>

@@ -21,7 +21,7 @@ export default function ProfileBioInput({ value, onChange }: ProfileBioInputProp
           onChange={(e) => onChange(e.target.value)}
           maxLength={maxLength}
           placeholder="소개글을 입력하세요..."
-          className="w-full h-32 px-4 py-3 rounded-xl bg-muted/30 border border-border text-sm text-card-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+          className="w-full h-32 px-4 py-3 rounded-xl bg-muted/20 border border-border text-sm text-card-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
         />
         <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
           {value.length}/{maxLength}

@@ -57,7 +57,7 @@ export default function SignupPage() {
         }
       },
       onError: (error) => {
-        showError(getErrorMessage(error, '가입에 실패했습니다'));
+        showError(getErrorMessage(error, '가입에 실패했어요'));
       },
     });
   };

@@ -48,14 +48,14 @@ export default function PassVerificationStep({ onVerified }: PassVerificationSte
           </div>
 
           {/* Steps Guide */}
-          <div className="space-y-4 rounded-2xl bg-muted/30 border border-border p-5">
+          <div className="space-y-4 rounded-2xl bg-muted/20 border border-border p-5">
             <div className="flex items-start gap-3">
               <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground shrink-0">
                 1
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-foreground">PASS 앱 실행</p>
-                <p className="text-xs text-muted-foreground">본인 확인을 위해 PASS 앱이 실행됩니다</p>
+                <p className="text-xs text-muted-foreground">본인 확인을 위해 PASS 앱이 실행돼요</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -73,7 +73,7 @@ export default function PassVerificationStep({ onVerified }: PassVerificationSte
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-foreground">자동 진행</p>
-                <p className="text-xs text-muted-foreground">인증 완료 시 다음 단계로 이동합니다</p>
+                <p className="text-xs text-muted-foreground">인증 완료 시 다음 단계로 이동해요</p>
               </div>
             </div>
           </div>

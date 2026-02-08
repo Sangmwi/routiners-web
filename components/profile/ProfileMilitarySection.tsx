@@ -20,21 +20,24 @@ export default function ProfileMilitarySection({
     <div className="space-y-3">
       <SectionHeader title="군 정보" />
 
-      <div className="space-y-2">
+      <div className="bg-muted/20 rounded-2xl divide-y divide-border/50">
         <InfoCard
           icon={<ShieldIcon />}
           label="계급"
           value={rank.split('-')[0]}
+          variant="flat"
         />
         <InfoCard
           icon={<UsersThreeIcon />}
           label="부대명"
           value={unitName}
+          variant="flat"
         />
         <InfoCard
           icon={<MedalIcon />}
           label="병과"
           value={specialty}
+          variant="flat"
         />
       </div>
     </div>

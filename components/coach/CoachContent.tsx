@@ -251,10 +251,10 @@ export default function CoachContent({ isDrawerOpen, onDrawerClose }: CoachConte
             preview={previewData}
             status={previewStatus}
             isApplying={preview.isApplying}
-            onApply={(forceOverwrite, weekCount) => {
+            hasExistingScheduled={(previewData.conflicts?.length ?? 0) > 0}
+            onApply={(forceOverwrite, weekCount, appendMode) => {
               if (previewMessageId) {
-                // Phase 11: weekCount 전달
-                preview.apply(previewMessageId, previewData, forceOverwrite, weekCount);
+                preview.apply(previewMessageId, previewData, forceOverwrite, weekCount, appendMode);
               }
             }}
           />

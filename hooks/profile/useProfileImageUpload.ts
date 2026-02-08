@@ -55,7 +55,7 @@ async function uploadSingleImage(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.error || '이미지 업로드에 실패했습니다.');
+    throw new Error(error.error || '이미지 업로드에 실패했어요.');
   }
 
   const data = await response.json();
@@ -163,7 +163,7 @@ export function useProfileImageUpload(options: UseProfileImageUploadOptions = {}
       return { success: true, imageUrls: finalImageUrls };
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : '이미지 업로드에 실패했습니다.';
+        error instanceof Error ? error.message : '이미지 업로드에 실패했어요.';
       return { success: false, error: message };
     } finally {
       setIsUploading(false);

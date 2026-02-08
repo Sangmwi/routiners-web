@@ -32,12 +32,18 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient();
 
-    // Check if nickname exists
-    const { data, error } = await supabase
+    // Check if nickname exists (본인 제외)
+    let query = supabase
       .from('users')
       .select('id')
-      .eq('nickname', validation.data.nickname)
-      .maybeSingle();
+      .eq('nickname', validation.data.nickname);
+
+    const excludeUserId = searchParams.get('excludeUserId');
+    if (excludeUserId) {
+      query = query.neq('id', excludeUserId);
+    }
+
+    const { data, error } = await query.maybeSingle();
 
     if (error) {
       throw error;

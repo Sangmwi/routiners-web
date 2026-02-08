@@ -47,7 +47,7 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   if (error) {
     console.error('[Coach Conversations GET] Error:', error);
     return NextResponse.json(
-      { error: '대화 목록을 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
+      { error: '대화 목록을 불러오는데 실패했어요.', code: 'DATABASE_ERROR' },
       { status: 500 }
     );
   }
@@ -109,7 +109,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
     }
   } catch {
     return NextResponse.json(
-      { error: '잘못된 요청 형식입니다.', code: 'BAD_REQUEST' },
+      { error: '잘못된 요청 형식이에요.', code: 'BAD_REQUEST' },
       { status: 400 }
     );
   }
@@ -118,7 +118,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
   if (!validation.success) {
     return NextResponse.json(
       {
-        error: '입력값이 유효하지 않습니다.',
+        error: '입력값이 유효하지 않아요.',
         code: 'VALIDATION_ERROR',
         details: validation.error.flatten(),
       },
@@ -157,7 +157,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
   if (convError) {
     console.error('[Coach POST] Error:', convError);
     return NextResponse.json(
-      { error: '대화 생성에 실패했습니다.', code: 'DATABASE_ERROR' },
+      { error: '대화 생성에 실패했어요.', code: 'DATABASE_ERROR' },
       { status: 500 }
     );
   }
@@ -174,7 +174,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
     console.error('[Coach POST] Participant Error:', participantError);
     await supabase.from('conversations').delete().eq('id', conversation.id);
     return NextResponse.json(
-      { error: '참여자 추가에 실패했습니다.', code: 'DATABASE_ERROR' },
+      { error: '참여자 추가에 실패했어요.', code: 'DATABASE_ERROR' },
       { status: 500 }
     );
   }

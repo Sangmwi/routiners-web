@@ -75,7 +75,7 @@ export default function ProfileHeroSection({ user }: ProfileHeroSectionProps) {
   return (
     <div
       ref={containerRef}
-      className="relative h-[600px] rounded-[20px] overflow-hidden bg-card shadow-sm border border-border/50"
+      className="relative h-[600px] rounded-2xl overflow-hidden bg-card"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >

@@ -38,7 +38,7 @@ export default function InBodyListModal({
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <CalendarIcon size={48} className="text-muted-foreground mb-4" />
             <p className="text-lg font-medium text-card-foreground">
-              기록이 없습니다
+              기록이 없어요
             </p>
             <p className="text-sm text-muted-foreground mt-1">
               인바디 스캔으로 첫 기록을 추가해보세요
@@ -86,7 +86,7 @@ function InBodyListItem({
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center justify-between px-4 py-4 hover:bg-muted/30 transition-colors text-left"
+      className="w-full flex items-center justify-between px-4 py-4 hover:bg-muted/20 transition-colors text-left"
     >
       <div className="flex-1">
         <p className="font-medium text-card-foreground">{formattedDate}</p>

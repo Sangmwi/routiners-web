@@ -43,11 +43,11 @@ export default function MealCard({ meal, isCompleted = false }: MealCardProps) {
   const mealConfig = getMealTimeConfig(meal.type);
 
   return (
-    <div className={`bg-card border border-border rounded-xl overflow-hidden ${
+    <div className={`bg-muted/20 rounded-2xl overflow-hidden ${
       isCompleted ? 'opacity-75' : ''
     }`}>
       {/* 헤더 */}
-      <div className="flex items-center justify-between p-4 bg-primary/5 border-b border-border/50">
+      <div className="flex items-center justify-between px-4 pt-4 pb-3">
         <div className="flex items-center gap-2">
           <mealConfig.icon size={20} className="text-primary" weight="fill" />
           <span className="font-semibold text-foreground">
@@ -76,7 +76,7 @@ export default function MealCard({ meal, isCompleted = false }: MealCardProps) {
       </div>
 
       {/* 음식 목록 */}
-      <div className="p-4">
+      <div className="px-4 pb-4">
         {meal.foods.map((food, idx) => (
           <FoodItemRow key={food.id || idx} food={food} />
         ))}
@@ -87,7 +87,7 @@ export default function MealCard({ meal, isCompleted = false }: MealCardProps) {
         <div className="px-4 pb-4">
           <div className="bg-warning-muted rounded-lg p-3">
             <p className="text-xs text-warning">
-              💡 {meal.tips[0]}
+              {meal.tips[0]}
             </p>
           </div>
         </div>

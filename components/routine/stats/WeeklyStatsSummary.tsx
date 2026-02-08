@@ -1,7 +1,6 @@
 'use client';
 
-import { LightningIcon, ForkKnifeIcon } from '@phosphor-icons/react';
-import ProgressBar from './ProgressBar';
+import { BarbellIcon, ForkKnifeIcon, CalendarCheckIcon } from '@phosphor-icons/react';
 import type { WeeklyStats } from '@/hooks/routine';
 
 interface WeeklyStatsSummaryProps {
@@ -9,75 +8,191 @@ interface WeeklyStatsSummaryProps {
 }
 
 /**
- * 주간 통계 요약 (상세 페이지용)
+ * 주간 통계 요약
  *
- * 운동/식단 달성률 + 추가 정보 표시
+ * - 완료일 배너 / 예정 배너
+ * - 달성률 카드 2장
+ * - 운동 요약 (실제 or 예정)
+ * - 영양 섭취 (실제 or 예정)
  */
 export default function WeeklyStatsSummary({ stats }: WeeklyStatsSummaryProps) {
   const { workout, meal } = stats;
 
-  // 운동 완료 일수
   const workoutTotal = workout.completed + workout.scheduled + workout.skipped;
-  const workoutText = workoutTotal > 0
-    ? `${workout.completed}/${workoutTotal}일 (${workout.completionRate}%)`
-    : '예정된 운동 없음';
-
-  // 식단 완료 일수
   const mealTotal = meal.completed + meal.scheduled + meal.skipped;
-  const mealText = mealTotal > 0
-    ? `${meal.completed}/${mealTotal}일 (${meal.completionRate}%)`
-    : '예정된 식단 없음';
+  const hasCompleted = workout.completed > 0 || meal.completed > 0;
 
-  // 볼륨 포맷
-  const volumeText = workout.totalVolume > 0
-    ? `총 볼륨: ${workout.totalVolume.toLocaleString()}kg`
-    : null;
+  // 운동 메트릭: 완료 실적 → 예정 메트릭 fallback
+  const workoutMetrics: { label: string; value: string }[] = [];
+  if (workout.totalDuration > 0) {
+    workoutMetrics.push({ label: '운동 시간', value: `${workout.totalDuration}분` });
+  } else if (workout.plannedDuration > 0) {
+    workoutMetrics.push({ label: '예상 시간', value: `${workout.plannedDuration}분` });
+  }
+  if (workout.totalCaloriesBurned > 0) {
+    workoutMetrics.push({ label: '소모 칼로리', value: `${workout.totalCaloriesBurned.toLocaleString()}kcal` });
+  } else if (workout.plannedCaloriesBurned > 0) {
+    workoutMetrics.push({ label: '예상 소모', value: `${workout.plannedCaloriesBurned.toLocaleString()}kcal` });
+  }
+  if (workout.totalVolume > 0) {
+    workoutMetrics.push({ label: '총 볼륨', value: `${workout.totalVolume.toLocaleString()}kg` });
+  } else if (workout.plannedVolume > 0) {
+    workoutMetrics.push({ label: '예상 볼륨', value: `${workout.plannedVolume.toLocaleString()}kg` });
+  }
+  if (workout.totalDistance > 0) {
+    workoutMetrics.push({ label: '런닝 거리', value: `${workout.totalDistance.toFixed(1)}km` });
+  } else if (workout.plannedDistance > 0) {
+    workoutMetrics.push({ label: '예상 거리', value: `${workout.plannedDistance.toFixed(1)}km` });
+  }
 
-  // 식단 영양소 포맷
-  const nutritionText =
-    meal.avgCalories > 0 || meal.avgProtein > 0
-      ? `평균: ${meal.avgCalories.toLocaleString()}kcal • 단백질 ${meal.avgProtein}g`
-      : null;
+  // 영양 메트릭: 완료 실적 → 예정 메트릭 fallback
+  const nutritionMetrics: { label: string; value: string }[] = [];
+  if (meal.totalCalories > 0) {
+    nutritionMetrics.push({ label: '총 섭취', value: `${meal.totalCalories.toLocaleString()}kcal` });
+  } else if (meal.plannedCalories > 0) {
+    nutritionMetrics.push({ label: '예상 섭취', value: `${meal.plannedCalories.toLocaleString()}kcal` });
+  }
+  if (meal.totalProtein > 0) {
+    nutritionMetrics.push({ label: '총 단백질', value: `${meal.totalProtein}g` });
+  } else if (meal.plannedProtein > 0) {
+    nutritionMetrics.push({ label: '예상 단백질', value: `${meal.plannedProtein}g` });
+  }
+  if (meal.avgCalories > 0) {
+    nutritionMetrics.push({ label: '일평균', value: `${meal.avgCalories.toLocaleString()}kcal` });
+  }
+
+  // 매크로 (완료 데이터만)
+  const macroMetrics: { label: string; value: string }[] = [];
+  if (meal.totalCarbs > 0) {
+    macroMetrics.push({ label: '탄수화물', value: `${meal.totalCarbs}g` });
+  }
+  if (meal.totalProtein > 0) {
+    macroMetrics.push({ label: '단백질', value: `${meal.totalProtein}g` });
+  }
+  if (meal.totalFat > 0) {
+    macroMetrics.push({ label: '지방', value: `${meal.totalFat}g` });
+  }
+
+  const hasNutrition = nutritionMetrics.length > 0;
+  const hasMacros = macroMetrics.length >= 2;
+  const isPlannedOnly = !hasCompleted && workoutMetrics.length > 0;
+
+  const gridCols = (n: number) =>
+    n <= 1 ? 'grid-cols-1' : n === 2 ? 'grid-cols-2' : 'grid-cols-3';
 
   return (
-    <div className="space-y-4">
-      {/* 운동 섹션 */}
-      <div className="bg-card border border-border rounded-xl p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-            <LightningIcon size={18} weight="fill" className="text-primary" />
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <span className="font-medium text-foreground">운동</span>
-              <span className="text-sm text-muted-foreground">{workoutText}</span>
-            </div>
-          </div>
+    <div className="space-y-6">
+      {/* 완료일 배너 */}
+      {stats.completedDays > 0 && (
+        <div className="flex items-center gap-2 bg-primary/10 rounded-xl px-4 py-3">
+          <CalendarCheckIcon size={20} weight="fill" className="text-primary" />
+          <span className="text-sm font-medium text-foreground">
+            7일 중 <span className="text-primary">{stats.completedDays}일</span> 완료
+          </span>
         </div>
-        <ProgressBar value={workout.completionRate} size="md" />
-        {volumeText && (
-          <p className="text-sm text-muted-foreground mt-2">{volumeText}</p>
-        )}
+      )}
+
+      {/* 달성률 카드 */}
+      <div className="grid grid-cols-2 gap-3">
+        {/* 운동 */}
+        <div className="bg-muted/20 rounded-2xl p-4">
+          <div className="flex items-center gap-1.5 mb-3">
+            <BarbellIcon size={16} weight="fill" className="text-primary" />
+            <span className="text-xs font-medium text-muted-foreground">운동</span>
+          </div>
+          <p className="text-2xl font-bold text-foreground mb-2">
+            {workout.completionRate}%
+          </p>
+          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary rounded-full transition-all duration-300"
+              style={{ width: `${Math.min(100, Math.max(0, workout.completionRate))}%` }}
+            />
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-3">
+            {workoutTotal > 0 ? `${workout.completed}/${workoutTotal}일 완료` : '예정 없음'}
+          </p>
+        </div>
+
+        {/* 식단 */}
+        <div className="bg-muted/20 rounded-2xl p-4">
+          <div className="flex items-center gap-1.5 mb-3">
+            <ForkKnifeIcon size={16} weight="fill" className="text-primary/70" />
+            <span className="text-xs font-medium text-muted-foreground">식단</span>
+          </div>
+          <p className="text-2xl font-bold text-foreground mb-2">
+            {meal.completionRate}%
+          </p>
+          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary/50 rounded-full transition-all duration-300"
+              style={{ width: `${Math.min(100, Math.max(0, meal.completionRate))}%` }}
+            />
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-3">
+            {mealTotal > 0 ? `${meal.completed}/${mealTotal}일 완료` : '예정 없음'}
+          </p>
+        </div>
       </div>
 
-      {/* 식단 섹션 */}
-      <div className="bg-card border border-border rounded-xl p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-            <ForkKnifeIcon size={18} weight="fill" className="text-primary" />
+      {/* 운동 요약 */}
+      {workoutMetrics.length > 0 && (
+        <div>
+          <div className="flex items-center gap-1.5 mb-3">
+            <h3 className="text-sm font-medium text-foreground">운동 요약</h3>
+            {isPlannedOnly && (
+              <span className="text-[10px] text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-md">예정</span>
+            )}
           </div>
-          <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <span className="font-medium text-foreground">식단</span>
-              <span className="text-sm text-muted-foreground">{mealText}</span>
+          <div className="bg-muted/20 rounded-2xl p-4">
+            <div className={`grid ${gridCols(workoutMetrics.length)} gap-3`}>
+              {workoutMetrics.map(({ label, value }) => (
+                <div key={label} className="text-center">
+                  <p className="text-[11px] text-muted-foreground mb-1">{label}</p>
+                  <p className="text-base font-bold text-foreground">{value}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-        <ProgressBar value={meal.completionRate} size="md" />
-        {nutritionText && (
-          <p className="text-sm text-muted-foreground mt-2">{nutritionText}</p>
-        )}
-      </div>
+      )}
+
+      {/* 영양 섭취 */}
+      {hasNutrition && (
+        <div>
+          <div className="flex items-center gap-1.5 mb-3">
+            <h3 className="text-sm font-medium text-foreground">영양 섭취</h3>
+            {meal.completed === 0 && meal.plannedCalories > 0 && (
+              <span className="text-[10px] text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-md">예정</span>
+            )}
+          </div>
+          <div className="bg-muted/20 rounded-2xl p-4 space-y-4">
+            <div className={`grid ${gridCols(nutritionMetrics.length)} gap-3`}>
+              {nutritionMetrics.map(({ label, value }) => (
+                <div key={label} className="text-center">
+                  <p className="text-[11px] text-muted-foreground mb-1">{label}</p>
+                  <p className="text-base font-bold text-foreground">{value}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* 매크로 비율 */}
+            {hasMacros && (
+              <div className="border-t border-border/20 pt-3">
+                <p className="text-[11px] text-muted-foreground mb-2 text-center">매크로 비율</p>
+                <div className={`grid ${gridCols(macroMetrics.length)} gap-3`}>
+                  {macroMetrics.map(({ label, value }) => (
+                    <div key={label} className="text-center">
+                      <p className="text-sm font-bold text-foreground">{value}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -223,7 +223,7 @@ export default function FitnessContent() {
 
     updateProfile.mutate(formData, {
       onSuccess: () => router.back(),
-      onError: () => setSaveError('저장에 실패했습니다.'),
+      onError: () => setSaveError('저장에 실패했어요.'),
     });
   };
 

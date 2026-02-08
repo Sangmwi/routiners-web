@@ -1,6 +1,14 @@
 'use client';
 
-import { CheckCircleIcon, XCircleIcon, ClockIcon, MinusIcon } from '@phosphor-icons/react';
+import {
+  CheckCircleIcon,
+  XCircleIcon,
+  ClockIcon,
+  MinusIcon,
+  BarbellIcon,
+  ForkKnifeIcon,
+} from '@phosphor-icons/react';
+import { formatDate } from '@/lib/utils/dateHelpers';
 import type { WeeklyStats } from '@/hooks/routine';
 import type { EventStatus } from '@/lib/types/routine';
 
@@ -11,67 +19,129 @@ interface WeeklyProgressChartProps {
 /**
  * 일별 현황 차트
  *
- * 요일별 운동/식단 완료 상태를 테이블로 표시
+ * 운동/식단 분리 섹션, 7-column 상태 아이콘 그리드
+ * WeeklyOverview와 동일한 레이아웃/스타일
  */
 export default function WeeklyProgressChart({ stats }: WeeklyProgressChartProps) {
   const { dailyStats } = stats;
+  const today = formatDate(new Date());
+
+  const wCompleted = dailyStats.filter(d => d.workout === 'completed').length;
+  const wTotal = dailyStats.filter(d => d.workout !== null).length;
+
+  const mCompleted = dailyStats.filter(d => d.meal === 'completed').length;
+  const mTotal = dailyStats.filter(d => d.meal !== null).length;
 
   return (
-    <div className="bg-card border border-border rounded-xl p-4">
-      <h3 className="text-sm font-medium text-foreground mb-4">일별 현황</h3>
+    <div className="space-y-6">
+      <h3 className="text-sm font-medium text-foreground">일별 현황</h3>
 
-      {/* 테이블 헤더 */}
-      <div className="grid grid-cols-8 gap-1 text-center mb-2">
-        <div className="text-xs text-muted-foreground" />
-        {dailyStats.map((day) => (
-          <div
-            key={day.date}
-            className="text-xs font-medium text-muted-foreground"
-          >
-            {day.dayOfWeek}
+      {/* 운동 */}
+      <div>
+        <div className="flex items-center justify-between mb-3 px-2">
+          <div className="flex items-center gap-1.5">
+            <BarbellIcon size={16} weight="fill" className="text-primary" />
+            <span className="text-sm font-medium text-foreground">운동</span>
           </div>
-        ))}
+          {wTotal > 0 ? (
+            <span className="text-xs font-medium text-muted-foreground">{wCompleted}/{wTotal}</span>
+          ) : (
+            <span className="text-xs text-muted-foreground/60">예정 없음</span>
+          )}
+        </div>
+        <div className="rounded-xl bg-muted/20 px-2.5 py-4">
+          <div className="grid grid-cols-7 gap-1 text-center mb-2">
+            {dailyStats.map((day) => (
+              <span
+                key={day.date}
+                className={`text-[10px] ${day.date === today ? 'text-primary font-semibold' : 'text-muted-foreground font-medium'}`}
+              >
+                {day.dayOfWeek}
+              </span>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-1 items-center">
+            {dailyStats.map((day) => (
+              <StatusIcon
+                key={`w-${day.date}`}
+                status={day.workout}
+                isToday={day.date === today}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* 운동 행 */}
-      <div className="grid grid-cols-8 gap-1 items-center mb-2">
-        <div className="text-xs text-muted-foreground">운동</div>
-        {dailyStats.map((day) => (
-          <div key={`workout-${day.date}`} className="flex justify-center">
-            <StatusIcon status={day.workout} />
+      {/* 식단 */}
+      <div>
+        <div className="flex items-center justify-between mb-3 px-2">
+          <div className="flex items-center gap-1.5">
+            <ForkKnifeIcon size={16} weight="fill" className="text-primary/70" />
+            <span className="text-sm font-medium text-foreground">식단</span>
           </div>
-        ))}
-      </div>
-
-      {/* 식단 행 */}
-      <div className="grid grid-cols-8 gap-1 items-center">
-        <div className="text-xs text-muted-foreground">식단</div>
-        {dailyStats.map((day) => (
-          <div key={`meal-${day.date}`} className="flex justify-center">
-            <StatusIcon status={day.meal} />
+          {mTotal > 0 ? (
+            <span className="text-xs font-medium text-muted-foreground">{mCompleted}/{mTotal}</span>
+          ) : (
+            <span className="text-xs text-muted-foreground/60">예정 없음</span>
+          )}
+        </div>
+        <div className="rounded-xl bg-muted/20 px-2.5 py-4">
+          <div className="grid grid-cols-7 gap-1 text-center mb-2">
+            {dailyStats.map((day) => (
+              <span
+                key={day.date}
+                className={`text-[10px] ${day.date === today ? 'text-primary font-semibold' : 'text-muted-foreground font-medium'}`}
+              >
+                {day.dayOfWeek}
+              </span>
+            ))}
           </div>
-        ))}
+          <div className="grid grid-cols-7 gap-1 items-center">
+            {dailyStats.map((day) => (
+              <StatusIcon
+                key={`m-${day.date}`}
+                status={day.meal}
+                isToday={day.date === today}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-/**
- * 상태 아이콘 컴포넌트
- */
-function StatusIcon({ status }: { status: EventStatus | null }) {
-  if (status === null) {
-    return <MinusIcon size={16} className="text-muted-foreground/40" />;
-  }
+function StatusIcon({ status, isToday }: { status: EventStatus | null; isToday: boolean }) {
+  const size = 16;
 
-  switch (status) {
-    case 'completed':
-      return <CheckCircleIcon size={16} weight="fill" className="text-primary" />;
-    case 'scheduled':
-      return <ClockIcon size={16} weight="duotone" className="text-amber-500" />;
-    case 'skipped':
-      return <XCircleIcon size={16} weight="fill" className="text-muted-foreground" />;
-    default:
-      return <MinusIcon size={16} className="text-muted-foreground/40" />;
+  if (status === 'completed') {
+    return (
+      <div className="flex justify-center">
+        <CheckCircleIcon size={size} weight="fill" className="text-primary" />
+      </div>
+    );
   }
+  if (status === 'scheduled') {
+    return (
+      <div className="flex justify-center">
+        <ClockIcon
+          size={size}
+          weight="duotone"
+          className={isToday ? 'text-primary' : 'text-amber-500'}
+        />
+      </div>
+    );
+  }
+  if (status === 'skipped') {
+    return (
+      <div className="flex justify-center">
+        <XCircleIcon size={size} weight="fill" className="text-muted-foreground" />
+      </div>
+    );
+  }
+  return (
+    <div className="flex justify-center">
+      <MinusIcon size={size} className="text-muted-foreground/30" />
+    </div>
+  );
 }

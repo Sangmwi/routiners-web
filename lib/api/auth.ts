@@ -20,9 +20,11 @@ export const authApi = {
    * @returns 사용 가능 여부
    * @throws {ApiError} 확인 실패 시
    */
-  async checkNickname(nickname: string): Promise<{ available: boolean }> {
+  async checkNickname(nickname: string, excludeUserId?: string): Promise<{ available: boolean }> {
+    const params = new URLSearchParams({ nickname });
+    if (excludeUserId) params.set('excludeUserId', excludeUserId);
     return api.getOrThrow<{ available: boolean }>(
-      `/api/user/check-nickname?nickname=${encodeURIComponent(nickname)}`
+      `/api/user/check-nickname?${params.toString()}`
     );
   },
 

@@ -46,9 +46,9 @@ export default function DayEventCard({ event, date }: DayEventCardProps) {
   // 이벤트 없음
   if (!event) {
     return (
-      <div className="bg-muted/30 rounded-xl p-5">
+      <div className="bg-muted/20 rounded-xl p-5">
         <p className="text-sm text-muted-foreground mb-1">{formattedDate}</p>
-        <p className="text-foreground">예정된 운동이 없습니다.</p>
+        <p className="text-foreground">예정된 운동이 없어요.</p>
       </div>
     );
   }
@@ -59,59 +59,47 @@ export default function DayEventCard({ event, date }: DayEventCardProps) {
   return (
     <AppLink
       href={`/routine/${event.type}/${date}`}
-      className="w-full bg-card rounded-xl p-5 text-left hover:bg-muted/50 transition-colors"
+      className="flex w-full items-center gap-4 px-2 py-5 text-left hover:bg-muted/20 transition-colors active:bg-muted/20 rounded-xl"
     >
-      {/* 상단: 날짜 + 상태 */}
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-sm text-muted-foreground">{formattedDate}</p>
-        <span
-          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${status.badgeClass}`}
-        >
-          {StatusIcon && <StatusIcon className="w-3 h-3" />}
-          {status.label}
-        </span>
-      </div>
+      {/* 아이콘 (bare, no background) */}
+      {(() => {
+        const Icon = getEventIcon(event.type);
+        return <Icon className="w-7 h-7 text-primary flex-shrink-0" />;
+      })()}
 
-      {/* 제목 */}
-      <div className="flex items-start gap-3">
-        {(() => {
-          const Icon = getEventIcon(event.type);
-          return (
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <Icon className="w-5 h-5 text-primary" />
-            </div>
-          );
-        })()}
-        <div className="flex-1 min-w-0">
+      {/* 콘텐츠 */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-0.5">
           <h3 className="text-base font-semibold text-foreground truncate">
             {event.title}
           </h3>
-          {event.rationale && (
-            <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">
-              {event.rationale}
-            </p>
+          <span
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${status.badgeClass}`}
+          >
+            {StatusIcon && <StatusIcon className="w-3 h-3" />}
+            {status.label}
+          </span>
+        </div>
+
+        {/* 요약 정보 */}
+        <div className="text-sm text-muted-foreground">
+          {event.data && isWorkoutData(event.data) && event.data.exercises.length > 0 && (
+            <span>
+              {event.data.exercises.length}개 운동 · {getTotalSets(event.data.exercises)}세트
+            </span>
+          )}
+          {event.data && isMealData(event.data) && event.data.meals.length > 0 && (
+            <span>
+              {event.data.meals.length}끼 · {event.data.estimatedTotalCalories || event.data.targetCalories || 0}kcal
+            </span>
+          )}
+          {!event.data && event.rationale && (
+            <span className="line-clamp-1">{event.rationale}</span>
           )}
         </div>
-        <CaretRightIcon size={20} weight="bold" className="text-muted-foreground flex-shrink-0" />
       </div>
 
-      {/* 이벤트 정보 요약 */}
-      {event.data && (
-        <div className="mt-4">
-          {isWorkoutData(event.data) && event.data.exercises.length > 0 && (
-            <p className="text-sm text-muted-foreground">
-              {event.data.exercises.length}개 운동 •{' '}
-              {getTotalSets(event.data.exercises)}세트
-            </p>
-          )}
-          {isMealData(event.data) && event.data.meals.length > 0 && (
-            <p className="text-sm text-muted-foreground">
-              {event.data.meals.length}끼 •{' '}
-              {event.data.estimatedTotalCalories || event.data.targetCalories || 0}kcal
-            </p>
-          )}
-        </div>
-      )}
+      <CaretRightIcon size={20} weight="bold" className="text-muted-foreground flex-shrink-0" />
     </AppLink>
   );
 }

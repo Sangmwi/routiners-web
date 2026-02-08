@@ -31,28 +31,30 @@ export default function ProfileInfoTags({ user }: ProfileInfoTagsProps) {
     <div className="space-y-3">
       <SectionHeader title="내 정보" />
 
-      <div className="flex flex-wrap gap-2">
-        <Tag icon={RulerIcon} inactive={!user.height}>
-          {user.height ? `${user.height}cm` : '미입력'}
-        </Tag>
+      <div className="bg-muted/20 rounded-2xl p-4 space-y-2">
+        <div className="flex flex-wrap gap-2">
+          <Tag icon={RulerIcon} inactive={!user.height}>
+            {user.height ? `${user.height}cm` : '미입력'}
+          </Tag>
 
-        <Tag icon={user.isSmoker ? CigaretteIcon : CigaretteSlashIcon} inactive={user.isSmoker === undefined}>
-          {getSmokeStatus(user.isSmoker)}
-        </Tag>
+          <Tag icon={user.isSmoker ? CigaretteIcon : CigaretteSlashIcon} inactive={user.isSmoker === undefined}>
+            {getSmokeStatus(user.isSmoker)}
+          </Tag>
 
-        <Tag icon={CalendarIcon} inactive>
-          {getDischargeDate(user.enlistmentMonth)}
-        </Tag>
-      </div>
+          <Tag icon={CalendarIcon} inactive>
+            {getDischargeDate(user.enlistmentMonth)}
+          </Tag>
+        </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Tag icon={ScalesIcon} inactive={!user.weight}>
-          {user.weight ? `${user.weight}kg` : '미입력'}
-        </Tag>
+        <div className="flex flex-wrap gap-2">
+          <Tag icon={ScalesIcon} inactive={!user.weight}>
+            {user.weight ? `${user.weight}kg` : '미입력'}
+          </Tag>
 
-        <Tag icon={ user.gender === 'male' ? GenderMaleIcon : GenderFemaleIcon }>
-          {user.gender === 'male' ? '남성' : '여성'}
-        </Tag>
+          <Tag icon={ user.gender === 'male' ? GenderMaleIcon : GenderFemaleIcon }>
+            {user.gender === 'male' ? '남성' : '여성'}
+          </Tag>
+        </div>
       </div>
     </div>
   );

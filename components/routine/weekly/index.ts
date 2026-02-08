@@ -5,4 +5,3 @@
  */
 
 export { WeeklyOverview, default as WeeklyOverviewDefault } from './WeeklyOverview';
-export { WeekDots } from './WeekDots';

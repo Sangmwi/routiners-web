@@ -87,7 +87,7 @@ export default function ExerciseCard({
   return (
     <div
       className={`rounded-xl overflow-hidden ${
-        isCompleted ? 'bg-primary/5' : 'bg-muted/30'
+        isCompleted ? 'bg-primary/5' : 'bg-muted/20'
       }`}
     >
       {/* 헤더 */}

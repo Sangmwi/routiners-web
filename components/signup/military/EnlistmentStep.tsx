@@ -59,7 +59,7 @@ export function EnlistmentStep({
 
           {/* Year/Month Picker */}
           <div className="py-4">
-            <div className="bg-muted/30 rounded-2xl border border-border p-6">
+            <div className="bg-muted/20 rounded-2xl border border-border p-6">
               <YearMonthPicker
                 year={year}
                 month={month}

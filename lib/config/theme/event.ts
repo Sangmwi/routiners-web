@@ -33,7 +33,7 @@ export const EVENT_TYPE = {
     description: '쉬는 날',
     weight: ICON_WEIGHT.inactive as IconWeight,
     color: 'text-muted-foreground',
-    bgColor: 'bg-muted/30',
+    bgColor: 'bg-muted/20',
     borderColor: 'border-border',
     badgeClass: 'bg-muted text-muted-foreground',
   },
@@ -92,7 +92,7 @@ export const MEAL_TIME = {
     label: '간식',
     weight: ICON_WEIGHT.inactive as IconWeight,
     color: 'text-muted-foreground',
-    bgColor: 'bg-muted/30',
+    bgColor: 'bg-muted/20',
   },
 } as const;
 

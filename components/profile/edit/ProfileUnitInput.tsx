@@ -17,7 +17,7 @@ export default function ProfileUnitInput({
   return (
     <FormSection
       title="부대명"
-      description={disabled ? "복무 정보에서 입력한 부대명입니다." : "소속 부대명을 입력하세요."}
+      description={disabled ? "복무 정보에서 입력한 부대명이에요." : "소속 부대명을 입력하세요."}
     >
       <FormInput
         type="text"

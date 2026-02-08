@@ -50,23 +50,23 @@ export const validateEnlistmentAndRank = (
 
   // Basic validation rules (simplified)
   if (monthsDiff < 0) {
-    return { valid: false, message: '입대 시기가 미래일 수 없습니다.' };
+    return { valid: false, message: '입대 시기가 미래일 수 없어요.' };
   }
 
   if (rank === '이병' && monthsDiff > 6) {
-    return { valid: false, message: '입대 시기와 계급이 맞지 않습니다.' };
+    return { valid: false, message: '입대 시기와 계급이 맞지 않아요.' };
   }
 
   if (rank === '일병' && (monthsDiff < 6 || monthsDiff > 12)) {
-    return { valid: false, message: '입대 시기와 계급이 맞지 않습니다.' };
+    return { valid: false, message: '입대 시기와 계급이 맞지 않아요.' };
   }
 
   if (rank === '상병' && (monthsDiff < 12 || monthsDiff > 18)) {
-    return { valid: false, message: '입대 시기와 계급이 맞지 않습니다.' };
+    return { valid: false, message: '입대 시기와 계급이 맞지 않아요.' };
   }
 
   if (rank === '병장' && monthsDiff < 18) {
-    return { valid: false, message: '입대 시기와 계급이 맞지 않습니다.' };
+    return { valid: false, message: '입대 시기와 계급이 맞지 않아요.' };
   }
 
   return { valid: true };

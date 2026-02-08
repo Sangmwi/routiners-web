@@ -76,7 +76,7 @@ export default function InBodyDetailModal({
       {
         onSuccess: () => handleClose(),
         onError: (err) => {
-          setError(err instanceof Error ? err.message : '수정에 실패했습니다.');
+          setError(err instanceof Error ? err.message : '수정에 실패했어요.');
           setState('edit');
         },
       }
@@ -95,7 +95,7 @@ export default function InBodyDetailModal({
     deleteInBody.mutate(record.id, {
       onSuccess: () => handleClose(),
       onError: (err) => {
-        setError(err instanceof Error ? err.message : '삭제에 실패했습니다.');
+        setError(err instanceof Error ? err.message : '삭제에 실패했어요.');
         setState('view');
       },
     });
@@ -139,7 +139,7 @@ export default function InBodyDetailModal({
                 정말 삭제하시겠습니까?
               </p>
               <p className="text-sm text-muted-foreground">
-                {formattedDate} 측정 기록이 영구적으로 삭제됩니다.
+                {formattedDate} 측정 기록이 영구적으로 삭제돼요.
               </p>
             </div>
           </div>

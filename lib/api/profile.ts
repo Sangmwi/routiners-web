@@ -36,10 +36,13 @@ export const profileApi = {
    * @throws {ApiError} 네트워크 오류 발생 시
    */
   async checkNickname(
-    nickname: string
+    nickname: string,
+    excludeUserId?: string
   ): Promise<{ available: boolean; message?: string }> {
+    const params = new URLSearchParams({ nickname });
+    if (excludeUserId) params.set('excludeUserId', excludeUserId);
     return api.getOrThrow<{ available: boolean; message?: string }>(
-      `/api/user/check-nickname?nickname=${encodeURIComponent(nickname)}`
+      `/api/user/check-nickname?${params.toString()}`
     );
   },
 

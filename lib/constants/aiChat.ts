@@ -83,6 +83,15 @@ export const AI_SYSTEM_MESSAGE = {
   START: '__START__',
 } as const;
 
+/**
+ * 액션 메시지: 유저 버블 없이 AI에게만 전달되는 메시지
+ * 키: 클라이언트에서 보내는 토큰, 값: AI에게 전달할 한국어 텍스트
+ */
+export const AI_ACTION_MESSAGE: Record<string, string> = {
+  '__ROUTINE_APPLIED__': '루틴을 적용했어요.',
+  '__ROUTINE_APPLIED_APPEND__': '기존 루틴 이후에 새 루틴을 추가했어요.',
+};
+
 // =============================================================================
 // 타이밍 상수 (밀리초)
 // =============================================================================
@@ -194,4 +203,19 @@ export function getCoachPersona(personaId: string = 'default'): CoachPersona {
  */
 export function isSystemMessage(message: string): boolean {
   return message === AI_SYSTEM_MESSAGE.START;
+}
+
+/**
+ * 액션 메시지인지 확인 (유저 버블 없이 AI에게만 전달)
+ */
+export function isActionMessage(message: string): boolean {
+  return message in AI_ACTION_MESSAGE;
+}
+
+/**
+ * 액션 메시지 토큰을 AI에게 전달할 텍스트로 변환
+ * @returns 변환된 텍스트 또는 null (액션 메시지가 아닌 경우)
+ */
+export function getActionContent(message: string): string | null {
+  return AI_ACTION_MESSAGE[message] ?? null;
 }

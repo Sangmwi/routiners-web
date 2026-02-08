@@ -149,7 +149,7 @@ export function validateImageFile(
   if (!isImageFile(file)) {
     return {
       valid: false,
-      error: '이미지 파일만 업로드할 수 있습니다. (JPG, PNG, WebP, GIF)',
+      error: '이미지 파일만 업로드할 수 있어요. (JPG, PNG, WebP, GIF)',
     };
   }
 
@@ -158,7 +158,7 @@ export function validateImageFile(
     return {
       valid: false,
       error:
-        'HEIC/HEIF 형식은 지원하지 않습니다. iPhone 설정 > 카메라 > 포맷에서 "높은 호환성"을 선택하거나, JPG/PNG로 변환 후 업로드해주세요.',
+        'HEIC/HEIF 형식은 지원하지 않아요. iPhone 설정 > 카메라 > 포맷에서 "높은 호환성"을 선택하거나, JPG/PNG로 변환 후 업로드해주세요.',
     };
   }
 
@@ -166,7 +166,7 @@ export function validateImageFile(
   if (!hasAllowedMimeType(file, allowedTypes)) {
     return {
       valid: false,
-      error: '지원하지 않는 이미지 형식입니다. JPG, PNG, WebP, GIF만 업로드할 수 있습니다.',
+      error: '지원하지 않는 이미지 형식이에요. JPG, PNG, WebP, GIF만 업로드할 수 있어요.',
     };
   }
 
@@ -174,7 +174,7 @@ export function validateImageFile(
   if (!hasAllowedExtension(file, allowedExtensions)) {
     return {
       valid: false,
-      error: '지원하지 않는 파일 확장자입니다. JPG, PNG, WebP, GIF만 업로드할 수 있습니다.',
+      error: '지원하지 않는 파일 확장자예요. JPG, PNG, WebP, GIF만 업로드할 수 있어요.',
     };
   }
 
@@ -182,7 +182,7 @@ export function validateImageFile(
   if (file.size > maxSizeBytes) {
     return {
       valid: false,
-      error: `파일 크기는 ${formatFileSize(maxSizeBytes)} 이하여야 합니다. 현재: ${formatFileSize(file.size)}`,
+      error: `파일 크기는 ${formatFileSize(maxSizeBytes)} 이하여야 해요. 현재: ${formatFileSize(file.size)}`,
     };
   }
 

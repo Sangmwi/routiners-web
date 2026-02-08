@@ -53,7 +53,7 @@ export default function ConfirmModal({
       onClose();
     } catch (error) {
       console.error('Confirm action failed:', error);
-      showError('작업 처리에 실패했습니다');
+      showError('작업 처리에 실패했어요');
     } finally {
       setIsLoading(false);
     }

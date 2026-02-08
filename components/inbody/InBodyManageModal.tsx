@@ -67,7 +67,7 @@ export default function InBodyManageModal({
         setRecordToDelete(null);
       },
       onError: () => {
-        showError('기록 삭제에 실패했습니다');
+        showError('기록 삭제에 실패했어요');
       },
     });
   };
@@ -115,7 +115,7 @@ export default function InBodyManageModal({
                   {records.map((record) => (
                     <div
                       key={record.id}
-                      className="flex items-center justify-between px-4 py-4 hover:bg-muted/30 transition-colors cursor-pointer"
+                      className="flex items-center justify-between px-4 py-4 hover:bg-muted/20 transition-colors cursor-pointer"
                       onClick={() => handleRecordClick(record)}
                     >
                       <div className="flex-1">
@@ -166,7 +166,7 @@ export default function InBodyManageModal({
                 {formatKoreanDate(recordToDelete.measuredAt)} 측정 기록
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                삭제된 기록은 복구할 수 없습니다
+                삭제된 기록은 복구할 수 없어요
               </p>
             </div>
           )}

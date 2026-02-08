@@ -220,7 +220,7 @@ export function validateImageSize(
   if (file.size > maxBytes) {
     return {
       valid: false,
-      error: `이미지 크기는 ${maxSizeMB}MB 이하여야 합니다.`,
+      error: `이미지 크기는 ${maxSizeMB}MB 이하여야 해요.`,
     };
   }
 
@@ -237,7 +237,7 @@ export function validateImageType(
   if (!allowedTypes.includes(file.type)) {
     return {
       valid: false,
-      error: 'JPG, PNG, WebP, GIF 형식만 지원됩니다.',
+      error: 'JPG, PNG, WebP, GIF 형식만 지원돼요.',
     };
   }
 

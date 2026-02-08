@@ -43,16 +43,16 @@ export default function MilitaryInfoStep({ onComplete, onBack }: MilitaryInfoSte
     if (!selectedUnit) newErrors.unit = '소속 부대를 선택해 주세요';
     if (!specialty) newErrors.specialty = '병과를 선택해 주세요';
     if (!nickname) newErrors.nickname = '닉네임을 입력해 주세요';
-    else if (nickname.length < 2) newErrors.nickname = '닉네임은 2자 이상이어야 합니다';
+    else if (nickname.length < 2) newErrors.nickname = '닉네임은 2자 이상이어야 해요';
     else if (nicknameCheck && !nicknameCheck.available)
-      newErrors.nickname = '이미 사용 중인 닉네임입니다';
+      newErrors.nickname = '이미 사용 중인 닉네임이에요';
 
     // Validate enlistment date and rank
     if (enlistmentYear && enlistmentMonth && rank) {
       const enlistmentDate = `${enlistmentYear}-${enlistmentMonth}`;
       const validation = validateEnlistmentAndRank(enlistmentDate, rank);
       if (!validation.valid) {
-        newErrors.rank = validation.message || '입대 시기와 계급이 맞지 않습니다';
+        newErrors.rank = validation.message || '입대 시기와 계급이 맞지 않아요';
       }
     }
 
@@ -151,8 +151,8 @@ export default function MilitaryInfoStep({ onComplete, onBack }: MilitaryInfoSte
             error={errors.nickname}
             helperText={
               nickname.length >= 2 && nicknameCheck?.available
-                ? '사용 가능한 닉네임입니다'
-                : '실명은 공개되지 않습니다'
+                ? '사용 가능한 닉네임이에요'
+                : '실명은 공개되지 않아요'
             }
           />
         </div>

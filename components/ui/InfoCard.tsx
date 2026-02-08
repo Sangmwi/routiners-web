@@ -16,7 +16,7 @@ interface InfoCardProps {
   /** 부가 정보 (서브 텍스트) */
   subValue?: string;
   /** 스타일 변형 */
-  variant?: 'default' | 'compact';
+  variant?: 'default' | 'compact' | 'flat';
   /** 추가 클래스 */
   className?: string;
 }
@@ -66,21 +66,26 @@ export default function InfoCard({
       'flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-border/50',
     compact:
       'flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border/50',
+    flat:
+      'flex items-center gap-3 px-4 py-3.5',
   };
 
   const iconContainerStyles = {
     default: 'w-4 h-4 text-muted-foreground flex-shrink-0 [&>svg]:w-full [&>svg]:h-full',
     compact: 'w-3.5 h-3.5 text-muted-foreground flex-shrink-0 [&>svg]:w-full [&>svg]:h-full',
+    flat: 'w-4 h-4 text-muted-foreground flex-shrink-0 [&>svg]:w-full [&>svg]:h-full',
   };
 
   const labelStyles = {
     default: 'text-xs text-muted-foreground mb-0.5',
     compact: 'text-xs text-muted-foreground',
+    flat: 'text-xs text-muted-foreground mb-0.5',
   };
 
   const valueStyles = {
     default: 'text-sm text-card-foreground font-medium',
     compact: 'text-sm text-card-foreground',
+    flat: 'text-sm text-foreground font-medium',
   };
 
   return (

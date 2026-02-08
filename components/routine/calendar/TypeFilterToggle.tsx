@@ -28,27 +28,21 @@ export default function TypeFilterToggle({
   onChange,
 }: TypeFilterToggleProps) {
   return (
-    <div className="flex gap-1 p-1 bg-muted rounded-lg">
-      {filterOptions.map((option) => {
-        const isActive = value === option.value;
-
-        return (
-          <button
-            key={option.value}
-            onClick={() => onChange(option.value)}
-            className={`
-              flex-1 py-1.5 px-3 rounded-md text-sm font-medium transition-all
-              ${
-                isActive
-                  ? 'bg-card text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }
-            `}
-          >
-            {option.label}
-          </button>
-        );
-      })}
+    <div className="flex gap-2">
+      {filterOptions.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          onClick={() => onChange(option.value)}
+          className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+            value === option.value
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+          }`}
+        >
+          {option.label}
+        </button>
+      ))}
     </div>
   );
 }

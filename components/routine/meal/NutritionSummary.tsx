@@ -94,7 +94,7 @@ export default function NutritionSummary({ data }: NutritionSummaryProps) {
   const estimatedCalories = data.estimatedTotalCalories || totals.calories;
 
   return (
-    <div className="bg-card border border-border rounded-xl p-4">
+    <div className="bg-muted/20 rounded-2xl p-4">
       <h3 className="text-sm font-semibold text-foreground mb-4">
         하루 영양소 요약
       </h3>
@@ -143,7 +143,7 @@ export default function NutritionSummary({ data }: NutritionSummaryProps) {
 
       {/* 수분 섭취 권장 */}
       {data.waterIntake && (
-        <div className="mt-4 pt-4 border-t border-border">
+        <div className="mt-4 pt-4 border-t border-border/50">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
               <DropIcon size={16} className="text-blue-500" weight="fill" />
@@ -156,7 +156,7 @@ export default function NutritionSummary({ data }: NutritionSummaryProps) {
 
       {/* AI 팁 */}
       {data.tips && data.tips.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-border">
+        <div className="mt-4 pt-4 border-t border-border/50">
           <div className="bg-primary/5 rounded-lg p-3">
             <p className="text-xs text-primary font-medium mb-1">AI 조언</p>
             <ul className="text-xs text-muted-foreground space-y-1">

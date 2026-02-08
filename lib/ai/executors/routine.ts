@@ -36,13 +36,15 @@ import type { ToolExecutorContext } from './types';
  * @param conversationId - 대화 ID (ai_session_id로 사용)
  * @param title - 루틴 제목
  * @param weekCount - 적용할 주차 수 (기본: 전체)
+ * @param startAfterDate - 이 날짜 이후부터 시작 (이어붙이기 모드, YYYY-MM-DD)
  */
 function convertAIRoutineToEvents(
   routineData: AIRoutineData,
   userId: string,
   conversationId: string,
   title: string,
-  weekCount?: number
+  weekCount?: number,
+  startAfterDate?: string
 ): Array<{
   user_id: string;
   type: EventType;
@@ -79,8 +81,9 @@ function convertAIRoutineToEvents(
   const firstWeekDays = weeksToApply[0].days || [];
   const targetDays = firstWeekDays.map(d => d.dayOfWeek);
 
-  // Phase 11: 오늘부터 첫 매칭 요일 찾기
-  const routineStartDate = getRoutineStartDate(targetDays);
+  // Phase 11: 기준일부터 첫 매칭 요일 찾기 (이어붙이기 시 startAfterDate 이후)
+  const startAfter = startAfterDate ? new Date(startAfterDate) : undefined;
+  const routineStartDate = getRoutineStartDate(targetDays, startAfter);
   // 시작일이 속한 주의 월요일
   const baseMonday = getMondayOfWeek(routineStartDate);
 
@@ -115,12 +118,14 @@ function convertAIRoutineToEvents(
         rir: ex.rir,
         technique: ex.technique,
         notes: ex.notes,
+        distance: ex.distance,
       }));
 
       // WorkoutData 구성
       const workoutData: WorkoutData = {
         exercises,
         estimatedDuration: day.estimatedDuration,
+        estimatedCaloriesBurned: day.estimatedCaloriesBurned,
         workoutType: day.workoutType,
         intensity: day.intensity,
         warmup: day.warmup,
@@ -165,8 +170,10 @@ export async function executeSaveRoutineDraft(
     description: string;
     duration_weeks: number;
     days_per_week: number;
-    routine_data: Record<string, unknown>; // object 타입으로 직접 전달
-    weekCount?: number; // Phase 11: 적용할 주차 수
+    routine_data: Record<string, unknown>;
+    weekCount?: number;
+    conflictStrategy?: 'error' | 'overwrite';
+    startAfterDate?: string;
   }
 ): Promise<AIToolResult<{ saved: boolean; eventsCreated: number; startDate: string }>> {
   try {
@@ -178,21 +185,21 @@ export async function executeSaveRoutineDraft(
     const validatedRoutineData = parseResult.data;
 
     // 1. AI routine_data를 routine_events INSERT 데이터로 변환
-    // Phase 11: weekCount 전달하여 선택한 주차만큼만 이벤트 생성
     const events = convertAIRoutineToEvents(
       validatedRoutineData,
       ctx.userId,
       ctx.conversationId,
       args.title,
-      args.weekCount
+      args.weekCount,
+      args.startAfterDate
     );
 
-    // 2. 팩토리로 충돌 체크 + 삽입 (workout은 충돌 시 에러)
+    // 2. 팩토리로 충돌 체크 + 삽입
     const insertResult = await insertEventsWithConflictCheck(
       ctx,
       events as EventInsertData[],
       'workout',
-      'error'
+      args.conflictStrategy || 'error'
     );
 
     if (!insertResult.success) {
@@ -395,7 +402,9 @@ export async function checkDateConflicts(
 export async function executeApplyRoutine(
   ctx: ToolExecutorContext,
   previewData: RoutinePreviewData,
-  weekCount?: number
+  weekCount?: number,
+  conflictStrategy?: 'error' | 'overwrite',
+  startAfterDate?: string
 ): Promise<AIToolResult<{ saved: boolean; eventsCreated: number; startDate: string }>> {
   try {
     if (!previewData.rawRoutineData) {
@@ -411,7 +420,6 @@ export async function executeApplyRoutine(
     };
 
     // 기존 executeSaveRoutineDraft 로직 재사용
-    // Phase 11: weekCount 전달
     return await executeSaveRoutineDraft(ctx, {
       title: rawData.title,
       description: rawData.description,
@@ -419,6 +427,8 @@ export async function executeApplyRoutine(
       days_per_week: rawData.days_per_week,
       routine_data: rawData.routine_data,
       weekCount,
+      conflictStrategy,
+      startAfterDate,
     });
   } catch (err) {
     console.error('[apply_routine] Unexpected error:', err);

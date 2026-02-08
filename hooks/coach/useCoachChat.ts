@@ -4,7 +4,8 @@ import { useState, useReducer, useRef, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { coachContextApi } from '@/lib/api/coach';
-import { shouldTriggerSummarization } from '@/lib/types/coach';
+import { shouldTriggerSummarization, CoachConversationsResponse } from '@/lib/types/coach';
+import { queryKeys } from '@/lib/constants/queryKeys';
 import type { ChatMessage } from '@/lib/types/chat';
 import type { AIToolStatus } from '@/lib/types/fitness';
 import type { RoutineAppliedEvent, RoutineProgressEvent } from '@/lib/api/conversation';
@@ -200,7 +201,7 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
       window.history.pushState({}, '', `/routine/coach?id=${newId}`);
       return newId;
     } catch {
-      dispatch({ type: 'SET_ERROR', error: '대화 생성에 실패했습니다.' });
+      dispatch({ type: 'SET_ERROR', error: '대화 생성에 실패했어요.' });
       return null;
     }
   };
@@ -256,13 +257,28 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
 
   // ── 새 채팅 생성 ──
   const handleNewChat = async () => {
+    // 캐시에서 빈 세션(messageCount === 0) 찾기 → 있으면 재사용
+    const cached = queryClient.getQueryData<CoachConversationsResponse>(
+      queryKeys.coach.conversations()
+    );
+    const emptySession = cached?.conversations.find(
+      (item) => (item.conversation.metadata?.messageCount ?? 0) === 0
+    );
+
+    if (emptySession) {
+      setConversationId(emptySession.conversation.id);
+      dispatch({ type: 'RESET_ALL' });
+      window.history.pushState({}, '', `/routine/coach?id=${emptySession.conversation.id}`);
+      return;
+    }
+
     try {
       const newConversation = await createConversation.mutateAsync(undefined);
       setConversationId(newConversation.id);
       dispatch({ type: 'RESET_ALL' });
       window.history.pushState({}, '', `/routine/coach?id=${newConversation.id}`);
     } catch {
-      dispatch({ type: 'SET_ERROR', error: '새 대화 생성에 실패했습니다.' });
+      dispatch({ type: 'SET_ERROR', error: '새 대화 생성에 실패했어요.' });
     }
   };
 

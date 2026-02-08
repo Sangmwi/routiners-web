@@ -64,6 +64,8 @@ export interface WorkoutExercise {
   technique?: string;
   /** 메모/주의사항 */
   notes?: string;
+  /** 유산소 운동 거리 (km) */
+  distance?: number;
   /** 운동 완료 여부 */
   completed?: boolean;
   /** 건너뛰기 여부 */
@@ -88,6 +90,8 @@ export interface WorkoutData {
   cooldown?: string;
   /** AI가 생성한 추가 조언 */
   tips?: string[];
+  /** 예상 소모 칼로리 (kcal) */
+  estimatedCaloriesBurned?: number;
   /** 전체 메모/설명 */
   notes?: string;
 }

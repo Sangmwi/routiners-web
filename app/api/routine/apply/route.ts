@@ -24,6 +24,8 @@ interface ApplyRoutineRequest {
   forceOverwrite?: boolean;
   /** Phase 11: 적용할 주차 수 */
   weekCount?: number;
+  /** 이어붙이기 모드: 기존 스케줄 유지, 마지막 이후부터 새 루틴 시작 */
+  appendMode?: boolean;
 }
 
 export const POST = withAuth(async (request: NextRequest, { supabase, authUser }) => {
@@ -36,7 +38,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
   try {
     // 1. 요청 파싱
     const body: ApplyRoutineRequest = await request.json();
-    const { conversationId, previewId, forceOverwrite = false, weekCount } = body;
+    const { conversationId, previewId, forceOverwrite = false, weekCount, appendMode = false } = body;
 
     if (!conversationId || !previewId) {
       return NextResponse.json(
@@ -59,13 +61,8 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
       );
     }
 
-    // 3. 이미 적용된 경우 체크
-    if (conversation.ai_result_applied) {
-      return NextResponse.json(
-        { success: false, error: '이미 루틴이 적용되었습니다.' },
-        { status: 400 }
-      );
-    }
+    // 3. 재적용 여부 확인 (이전에 적용한 적이 있으면 재적용 모드)
+    const isReapply = !!conversation.ai_result_applied;
 
     // 4. Phase 9: chat_messages에서 routine_preview 메시지 조회
     const { data: previewMessage, error: msgError } = await supabase
@@ -84,14 +81,8 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
       );
     }
 
-    // 5. 메시지 상태 확인 (이미 적용됨/취소됨 체크)
+    // 5. 메시지 상태 확인 (취소됨만 차단, applied는 재적용 허용)
     const msgMetadata = previewMessage.metadata as { status?: string } | null;
-    if (msgMetadata?.status === 'applied') {
-      return NextResponse.json(
-        { success: false, error: '이미 적용된 루틴입니다.' },
-        { status: 400 }
-      );
-    }
     if (msgMetadata?.status === 'cancelled') {
       return NextResponse.json(
         { success: false, error: '취소된 루틴입니다. 다시 루틴을 생성해주세요.' },
@@ -118,31 +109,48 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
       );
     }
 
-    // 8. forceOverwrite 시 기존 루틴 삭제
-    // Phase 11: weekCount 반영 + 새 시작일 로직
-    if (forceOverwrite && previewData.weeks && previewData.weeks.length > 0) {
-      // 적용할 주차만큼만 처리
+    // 8. appendMode: 마지막 scheduled 이벤트 날짜 조회 (이어붙이기)
+    let startAfterDate: string | undefined;
+
+    if (appendMode) {
+      const { data: lastEvent } = await supabase
+        .from('routine_events')
+        .select('date')
+        .eq('type', 'workout')
+        .eq('status', 'scheduled')
+        .order('date', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (lastEvent) {
+        startAfterDate = lastEvent.date;
+      }
+      // 이어붙이기 모드에서는 기존 이벤트 삭제를 건너뜀
+    }
+
+    // 9. 기존 scheduled 이벤트 삭제 (대체 모드에서만)
+    //    - 이어붙이기 모드(appendMode)에서는 건너뜀
+    //    - 새 루틴 날짜와 겹치는 scheduled 이벤트만 삭제 (세션 무관)
+    //    - completed/skipped 이벤트는 항상 보존
+    let eventsPreserved = 0;
+
+    if (!appendMode && (isReapply || forceOverwrite) && previewData.weeks && previewData.weeks.length > 0) {
       const weeksToApply = weekCount
         ? previewData.weeks.slice(0, weekCount)
         : previewData.weeks;
 
       if (weeksToApply.length > 0) {
-        // 루틴에 포함된 요일들 추출 (첫 주 기준)
         const targetDays = weeksToApply[0].days.map(d => d.dayOfWeek);
-
-        // Phase 11: 오늘부터 첫 매칭 요일 찾기
         const routineStartDate = getRoutineStartDate(targetDays);
         const baseMonday = getMondayOfWeek(routineStartDate);
 
         const datesToDelete: string[] = [];
         weeksToApply.forEach((week, weekIndex) => {
           for (const day of week.days) {
-            // 요일 오프셋 계산
             const dayOffset = (day.dayOfWeek - 1) + (weekIndex * 7);
             const targetDate = new Date(baseMonday);
             targetDate.setDate(baseMonday.getDate() + dayOffset);
 
-            // 오늘 이전 날짜는 건너뛰기
             if (targetDate >= routineStartDate) {
               datesToDelete.push(formatDate(targetDate));
             }
@@ -150,11 +158,22 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
         });
 
         if (datesToDelete.length > 0) {
-          // 해당 날짜의 기존 workout 이벤트 삭제 (RLS가 자동으로 권한 필터링)
+          // 보존될 이벤트 수 조회 (completed/skipped)
+          const { data: preservedEvents } = await supabase
+            .from('routine_events')
+            .select('id')
+            .eq('type', 'workout')
+            .in('status', ['completed', 'skipped'])
+            .in('date', datesToDelete);
+
+          eventsPreserved = preservedEvents?.length ?? 0;
+
+          // scheduled 이벤트만 삭제 (RLS가 user_id 필터링)
           const { error: deleteError } = await supabase
             .from('routine_events')
             .delete()
             .eq('type', 'workout')
+            .eq('status', 'scheduled')
             .in('date', datesToDelete);
 
           if (deleteError) {
@@ -168,14 +187,19 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
       }
     }
 
-    // 9. 루틴 적용 실행 (Phase 11: weekCount 전달)
+    // 10. 루틴 적용 실행
     const toolCtx: ToolExecutorContext = {
-      userId: conversation.created_by, // RLS 통과한 대화의 소유자 ID 사용
+      userId: conversation.created_by,
       supabase,
       conversationId,
     };
 
-    const applyResult = await executeApplyRoutine(toolCtx, previewData, weekCount);
+    // 이어붙이기: 충돌 무시(overwrite) + startAfterDate 전달
+    // 대체: 재적용/forceOverwrite면 overwrite, 아니면 error
+    const conflictStrategy = appendMode || isReapply || forceOverwrite ? 'overwrite' : 'error';
+    const applyResult = await executeApplyRoutine(
+      toolCtx, previewData, weekCount, conflictStrategy, startAfterDate
+    );
 
     if (!applyResult.success) {
       return NextResponse.json(
@@ -196,20 +220,37 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
       })
       .eq('id', previewMessage.id);
 
-    // 11. 대화 상태 업데이트 (대화는 active 유지 → 계속 대화 가능)
+    // 11. 대화 상태 업데이트 (재적용 시에도 항상 최신 정보로 갱신)
+    const existingMetadata = (conversation.metadata ?? {}) as Record<string, unknown>;
+    const applyHistory = Array.isArray(existingMetadata.apply_history)
+      ? existingMetadata.apply_history
+      : [];
+
     await supabase
       .from('conversations')
       .update({
         ai_result_applied: true,
         ai_result_applied_at: appliedAt,
         metadata: {
+          ...existingMetadata,
+          activePurpose: null, // 루틴 적용 완료 → 프로세스 종료
           applied_routine: {
             previewId,
             messageId: previewMessage.id,
             eventsCreated: applyResult.data?.eventsCreated,
+            eventsPreserved,
             startDate: applyResult.data?.startDate,
             appliedAt,
           },
+          apply_history: [
+            ...applyHistory,
+            {
+              previewId,
+              eventsCreated: applyResult.data?.eventsCreated,
+              eventsPreserved,
+              appliedAt,
+            },
+          ],
         },
       })
       .eq('id', conversationId);
@@ -220,7 +261,9 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
       data: {
         previewId,
         eventsCreated: applyResult.data?.eventsCreated,
+        eventsPreserved,
         startDate: applyResult.data?.startDate,
+        isReapply,
       },
     });
   } catch (error) {

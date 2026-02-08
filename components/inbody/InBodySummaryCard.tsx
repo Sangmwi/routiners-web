@@ -36,7 +36,7 @@ interface InBodySummaryCardProps {
 function EmptyState({ onClick }: { onClick?: () => void }) {
   return (
     <div
-      className={`bg-muted/30 rounded-xl p-4 ${
+      className={`bg-muted/20 rounded-xl p-4 ${
         onClick ? 'cursor-pointer hover:bg-muted/50 transition-colors' : ''
       }`}
       onClick={onClick}
@@ -92,7 +92,7 @@ export default function InBodySummaryCard({
 
   return (
     <div
-      className={`bg-muted/30 rounded-xl p-4 ${
+      className={`bg-muted/20 rounded-xl p-4 ${
         onClick ? 'cursor-pointer hover:bg-muted/50 transition-colors' : ''
       }`}
       onClick={onClick}

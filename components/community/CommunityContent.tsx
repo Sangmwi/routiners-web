@@ -39,7 +39,7 @@ export default function CommunityContent({
     <div className="space-y-4">
       {data.posts.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <p className="text-muted-foreground mb-2">아직 게시글이 없습니다</p>
+          <p className="text-muted-foreground mb-2">아직 게시글이 없어요</p>
           <button
             onClick={handleNewPost}
             className="text-sm text-primary hover:underline"

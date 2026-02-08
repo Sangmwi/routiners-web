@@ -127,7 +127,7 @@ export default function ChatInputRequest({
                   ${
                     isSelected
                       ? 'bg-primary/10 ring-1 ring-primary/30'
-                      : 'bg-muted/30 hover:bg-muted/50'
+                      : 'bg-muted/20 hover:bg-muted/50'
                   }
                 `}
               >
@@ -188,7 +188,7 @@ export default function ChatInputRequest({
                   ${
                     isSelected
                       ? 'bg-primary/10 ring-1 ring-primary/30'
-                      : 'bg-muted/30 hover:bg-muted/50'
+                      : 'bg-muted/20 hover:bg-muted/50'
                   }
                 `}
               >

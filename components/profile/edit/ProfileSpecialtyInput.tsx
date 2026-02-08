@@ -33,7 +33,7 @@ export default function ProfileSpecialtyInput({
   return (
     <FormSection
       title="병과"
-      description={disabled ? "복무 정보에서 입력한 병과입니다." : "소속 병과를 선택하세요."}
+      description={disabled ? "복무 정보에서 입력한 병과예요." : "소속 병과를 선택하세요."}
     >
       <FormSelect
         value={value}

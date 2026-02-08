@@ -31,7 +31,7 @@ function ProfileContent() {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-        <p>프로필 정보를 불러올 수 없습니다.</p>
+        <p>프로필 정보를 불러올 수 없어요.</p>
       </div>
     );
   }

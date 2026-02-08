@@ -105,7 +105,7 @@ export default function CalendarContent() {
 
       {/* 캘린더 (transition 중 opacity 변화) */}
       <div
-        className={`bg-card border border-border rounded-xl p-4 transition-opacity ${
+        className={`bg-muted/20 rounded-2xl p-4 transition-opacity ${
           isPending ? 'opacity-60' : ''
         }`}
       >

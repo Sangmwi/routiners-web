@@ -297,7 +297,7 @@ export default function ProfilePhotoGallery({
     }
 
     if (!result.success) {
-      setErrorMessage(result.error || "이미지 선택에 실패했습니다.");
+      setErrorMessage(result.error || "이미지 선택에 실패했어요.");
       setProcessingIndex(null);
       setPendingSlotIndex(null);
       return;
@@ -312,7 +312,7 @@ export default function ProfilePhotoGallery({
       // 파일 검증
       const validation = validateImageFile(file);
       if (!validation.valid) {
-        setErrorMessage(validation.error || "파일 검증에 실패했습니다.");
+        setErrorMessage(validation.error || "파일 검증에 실패했어요.");
         setProcessingIndex(null);
         setPendingSlotIndex(null);
         return;
@@ -350,7 +350,7 @@ export default function ProfilePhotoGallery({
   return (
     <FormSection
       title="프로필 사진"
-      description="최대 4장의 사진을 등록할 수 있습니다."
+      description="최대 4장의 사진을 등록할 수 있어요."
     >
       <div ref={gridRef} className="grid grid-cols-2 gap-3">
         {slots.map((image, index) => (
@@ -383,7 +383,7 @@ export default function ProfilePhotoGallery({
       </div>
 
       <p className="text-xs text-muted-foreground mt-4 text-center">
-        드래그하여 순서를 변경할 수 있습니다.
+        드래그하여 순서를 변경할 수 있어요.
       </p>
 
       {longPressIndex !== null && (

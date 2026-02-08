@@ -1,9 +1,19 @@
 'use client';
 
 import AppLink from '@/components/common/AppLink';
-import { SparkleIcon, CaretRightIcon } from '@phosphor-icons/react';
-import { WeekDots } from './WeekDots';
+import {
+  SparkleIcon,
+  CaretRightIcon,
+  BarbellIcon,
+  ForkKnifeIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  ClockIcon,
+  MinusIcon,
+} from '@phosphor-icons/react';
+import { formatDate } from '@/lib/utils/dateHelpers';
 import type { WeeklyStats } from '@/hooks/routine';
+import type { EventStatus } from '@/lib/types/routine';
 
 interface WeeklyOverviewProps {
   stats: WeeklyStats;
@@ -11,12 +21,9 @@ interface WeeklyOverviewProps {
 
 /**
  * 이번 주 현황 섹션
- * - 헤더와 콘텐츠 분리
- * - 연한 배경의 단일 컨테이너
- * - 인라인 프로그레스 바
+ * - 운동/식단 별도 카드 (7-column 상태 아이콘 그리드)
  */
 export function WeeklyOverview({ stats }: WeeklyOverviewProps) {
-  // 이벤트 수 계산
   const totalEvents =
     stats.workout.scheduled +
     stats.workout.completed +
@@ -30,7 +37,7 @@ export function WeeklyOverview({ stats }: WeeklyOverviewProps) {
     return (
       <section>
         <h2 className="text-xl font-bold text-foreground mb-4">이번 주</h2>
-        <div className="rounded-2xl bg-muted/30 p-4 text-center">
+        <div className="rounded-2xl bg-muted/20 p-4 text-center">
           <SparkleIcon size={24} weight="duotone" className="text-muted-foreground mx-auto mb-2" />
           <p className="text-sm text-muted-foreground">
             AI 코치로 루틴을 생성해보세요
@@ -40,49 +47,135 @@ export function WeeklyOverview({ stats }: WeeklyOverviewProps) {
     );
   }
 
-  // 완료된 일수 계산
-  const completedDays = stats.dailyStats.filter(d =>
-    d.workout === 'completed' || d.meal === 'completed'
-  ).length;
+  const today = formatDate(new Date());
 
-  // 전체 완료율 계산
-  const totalScheduled = stats.workout.scheduled + stats.meal.scheduled;
-  const totalCompleted = stats.workout.completed + stats.meal.completed;
-  const completionRate = totalScheduled > 0
-    ? Math.round((totalCompleted / (totalScheduled + totalCompleted)) * 100)
-    : 0;
+  const wCompleted = stats.dailyStats.filter(d => d.workout === 'completed').length;
+  const wTotal = stats.dailyStats.filter(d => d.workout !== null).length;
+
+  const mCompleted = stats.dailyStats.filter(d => d.meal === 'completed').length;
+  const mTotal = stats.dailyStats.filter(d => d.meal !== null).length;
 
   return (
     <section>
-      {/* 헤더 - 카드 밖 */}
+      {/* 헤더 */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-foreground">이번 주</h2>
         <AppLink href="/routine/stats" className="text-sm font-medium text-primary flex items-center gap-0.5">
-          통계 보기
+          통계
           <CaretRightIcon size={16} weight="bold" />
         </AppLink>
       </div>
 
-      {/* 콘텐츠 - 단일 컨테이너 */}
-      <div className="rounded-2xl bg-muted/30 p-4">
-        {/* 7일 도트 */}
-        <WeekDots dailyStats={stats.dailyStats} />
-
-        {/* 진행률 */}
-        <div className="mt-4 flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">{completedDays}/7일 완료</span>
-          <span className="text-sm font-semibold text-foreground">{completionRate}%</span>
+      {/* 운동/식단 섹션 */}
+      <div className="space-y-6 pt-4">
+        {/* 운동 */}
+        <div>
+          <div className="flex items-center justify-between mb-3 px-2">
+            <div className="flex items-center gap-1.5">
+              <BarbellIcon size={16} weight="fill" className="text-primary" />
+              <span className="text-sm font-medium text-foreground">운동</span>
+            </div>
+            {wTotal > 0 ? (
+              <span className="text-xs font-medium text-muted-foreground">{wCompleted}/{wTotal}</span>
+            ) : (
+              <span className="text-xs text-muted-foreground/60">예정 없음</span>
+            )}
+          </div>
+          <div className="rounded-xl bg-muted/20 px-2.5 py-4">
+            <div className="grid grid-cols-7 gap-1 text-center mb-2">
+              {stats.dailyStats.map((day) => (
+                <span
+                  key={day.date}
+                  className={`text-[10px] ${day.date === today ? 'text-primary font-semibold' : 'text-muted-foreground font-medium'}`}
+                >
+                  {day.dayOfWeek}
+                </span>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-1 items-center">
+              {stats.dailyStats.map((day) => (
+                <StatusIcon
+                  key={`w-${day.date}`}
+                  status={day.workout}
+                  isToday={day.date === today}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* 프로그레스 바 - 인라인 */}
-        <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
-          <div
-            className="h-full bg-primary rounded-full transition-all"
-            style={{ width: `${Math.min(100, Math.max(0, completionRate))}%` }}
-          />
+        {/* 식단 */}
+        <div>
+          <div className="flex items-center justify-between mb-3 px-2">
+            <div className="flex items-center gap-1.5">
+              <ForkKnifeIcon size={16} weight="fill" className="text-primary/70" />
+              <span className="text-sm font-medium text-foreground">식단</span>
+            </div>
+            {mTotal > 0 ? (
+              <span className="text-xs font-medium text-muted-foreground">{mCompleted}/{mTotal}</span>
+            ) : (
+              <span className="text-xs text-muted-foreground/60">예정 없음</span>
+            )}
+          </div>
+          <div className="rounded-xl bg-muted/20 px-2.5 py-4">
+            <div className="grid grid-cols-7 gap-1 text-center mb-2">
+              {stats.dailyStats.map((day) => (
+                <span
+                  key={day.date}
+                  className={`text-[10px] ${day.date === today ? 'text-primary font-semibold' : 'text-muted-foreground font-medium'}`}
+                >
+                  {day.dayOfWeek}
+                </span>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-1 items-center">
+              {stats.dailyStats.map((day) => (
+                <StatusIcon
+                  key={`m-${day.date}`}
+                  status={day.meal}
+                  isToday={day.date === today}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function StatusIcon({ status, isToday }: { status: EventStatus | null; isToday: boolean }) {
+  const size = 16;
+
+  if (status === 'completed') {
+    return (
+      <div className="flex justify-center">
+        <CheckCircleIcon size={size} weight="fill" className="text-primary" />
+      </div>
+    );
+  }
+  if (status === 'scheduled') {
+    return (
+      <div className="flex justify-center">
+        <ClockIcon
+          size={size}
+          weight="duotone"
+          className={isToday ? 'text-primary' : 'text-amber-500'}
+        />
+      </div>
+    );
+  }
+  if (status === 'skipped') {
+    return (
+      <div className="flex justify-center">
+        <XCircleIcon size={size} weight="fill" className="text-muted-foreground" />
+      </div>
+    );
+  }
+  return (
+    <div className="flex justify-center">
+      <MinusIcon size={size} className="text-muted-foreground/30" />
+    </div>
   );
 }
 

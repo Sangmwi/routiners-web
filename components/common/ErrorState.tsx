@@ -36,7 +36,7 @@ interface ErrorStateProps {
  * <ErrorState fullPage onRetry={refetch} />
  */
 export default function ErrorState({
-  title = '오류가 발생했습니다',
+  title = '오류가 발생했어요',
   message = '잠시 후 다시 시도해주세요',
   showRetry = true,
   onRetry,

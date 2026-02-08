@@ -34,7 +34,7 @@ export function ChatProfileConfirmation({
   const statusDisplay: Record<Exclude<ProfileConfirmationStatus, 'pending'>, { icon: React.ReactNode; text: string; className: string }> = {
     confirmed: {
       icon: <CheckIcon size={14} weight="bold" />,
-      text: '확인되었습니다',
+      text: '확인되었어요',
       className: 'text-green-600',
     },
     edited: {
@@ -88,7 +88,7 @@ export function ChatProfileConfirmation({
               disabled={!isActionable}
               className="h-11 px-5 rounded-full text-sm font-medium
                          border border-border/60 text-muted-foreground
-                         hover:bg-muted/30 hover:border-border
+                         hover:bg-muted/20 hover:border-border
                          transition-all active:scale-[0.97] disabled:opacity-50"
             >
               종료
@@ -100,7 +100,7 @@ export function ChatProfileConfirmation({
               disabled={!isActionable}
               className="h-11 px-5 rounded-full text-sm font-medium
                          border border-border/60 text-muted-foreground
-                         hover:bg-muted/30 hover:border-border
+                         hover:bg-muted/20 hover:border-border
                          transition-all active:scale-[0.97] disabled:opacity-50"
             >
               수정

@@ -61,7 +61,7 @@ export function TodayEventCard({ event, type }: TodayEventCardProps) {
   return (
     <AppLink
       href={href}
-      className="w-full flex items-center gap-4 px-2 py-5 active:bg-muted/30 transition-colors rounded-xl"
+      className="w-full flex items-center gap-4 px-2 py-5 active:bg-muted/20 transition-colors rounded-xl"
     >
       {/* 아이콘 - 배경 없음, 32px */}
       {isWorkout ? (

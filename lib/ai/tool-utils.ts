@@ -83,35 +83,50 @@ export function getNextMonday(): Date {
 
 /**
  * Phase 11: 루틴 시작일 계산
- * - 오늘부터 가장 가까운 targetDaysOfWeek 중 하나 반환
+ * - 기준일부터 가장 가까운 targetDaysOfWeek 중 하나 반환
  * - dayOfWeek: 1=월, 2=화, ..., 7=일 (루틴 데이터 형식)
  *
  * @param targetDaysOfWeek 루틴에 포함된 요일들 (1=월 ~ 7=일)
+ * @param startAfter 이 날짜 다음 날부터 탐색 (이어붙이기 모드). 생략 시 오늘부터.
  * @returns 첫 매칭 요일의 Date 객체
  *
  * @example
  * // 오늘이 화요일이고 루틴이 월/수/금일 때 → 수요일 반환
  * getRoutineStartDate([1, 3, 5])
+ * // 2월 14일(금) 이후 이어붙이기, 루틴이 월/수/금 → 2월 17일(월) 반환
+ * getRoutineStartDate([1, 3, 5], new Date('2025-02-14'))
  */
-export function getRoutineStartDate(targetDaysOfWeek: number[]): Date {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayDow = today.getDay(); // JS: 0=일, 1=월, ..., 6=토
+export function getRoutineStartDate(
+  targetDaysOfWeek: number[],
+  startAfter?: Date
+): Date {
+  let baseDate: Date;
+
+  if (startAfter) {
+    // startAfter 다음 날부터 탐색
+    baseDate = new Date(startAfter);
+    baseDate.setDate(baseDate.getDate() + 1);
+  } else {
+    baseDate = new Date();
+  }
+  baseDate.setHours(0, 0, 0, 0);
+
+  const baseDow = baseDate.getDay(); // JS: 0=일, 1=월, ..., 6=토
 
   // 루틴 dayOfWeek(1~7)를 JS dayOfWeek(0~6)로 변환
   const jsDays = targetDaysOfWeek.map(d => d % 7); // 7(일) → 0
 
-  // 오늘 포함해서 가장 가까운 매칭 요일 찾기
+  // baseDate 포함해서 가장 가까운 매칭 요일 찾기
   for (let offset = 0; offset <= 6; offset++) {
-    const checkDow = (todayDow + offset) % 7;
+    const checkDow = (baseDow + offset) % 7;
     if (jsDays.includes(checkDow)) {
-      const result = new Date(today);
-      result.setDate(today.getDate() + offset);
+      const result = new Date(baseDate);
+      result.setDate(baseDate.getDate() + offset);
       return result;
     }
   }
 
-  return today; // fallback (이론상 도달 불가)
+  return baseDate; // fallback (이론상 도달 불가)
 }
 
 /**

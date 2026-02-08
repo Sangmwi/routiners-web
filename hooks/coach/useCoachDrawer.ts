@@ -36,7 +36,7 @@ export function useCoachDrawer({ conversationId, onNewChat }: UseCoachDrawerOpti
   const deleteWithConfirm = (id: string) => {
     confirm({
       title: '대화 삭제',
-      message: '이 대화를 삭제하시겠습니까?\n삭제된 대화는 복구할 수 없습니다.',
+      message: '이 대화를 삭제할까요?\n삭제된 대화는 복구할 수 없어요.',
       confirmText: '삭제',
       cancelText: '취소',
       variant: 'danger',

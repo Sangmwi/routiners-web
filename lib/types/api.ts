@@ -235,7 +235,7 @@ export function isApiError(error: unknown): error is ApiError {
  */
 export function getErrorMessage(
   error: unknown,
-  fallback = '요청에 실패했습니다'
+  fallback = '요청에 실패했어요'
 ): string {
   if (isApiError(error)) {
     return getErrorMessageByCode(error.code);
@@ -248,28 +248,28 @@ export function getErrorMessage(
  */
 export function getErrorMessageByCode(code: ApiErrorCode): string {
   const messages: Record<ApiErrorCode, string> = {
-    UNAUTHORIZED: '로그인이 필요합니다.',
-    FORBIDDEN: '접근 권한이 없습니다.',
-    SESSION_EXPIRED: '세션이 만료되었습니다. 다시 로그인해 주세요.',
-    INVALID_TOKEN: '인증 정보가 유효하지 않습니다.',
+    UNAUTHORIZED: '로그인이 필요해요.',
+    FORBIDDEN: '접근 권한이 없어요.',
+    SESSION_EXPIRED: '세션이 만료됐어요. 다시 로그인해 주세요.',
+    INVALID_TOKEN: '인증 정보가 유효하지 않아요.',
     BAD_REQUEST: '잘못된 요청입니다.',
     VALIDATION_ERROR: '입력 값을 확인해 주세요.',
     MISSING_FIELD: '필수 항목을 입력해 주세요.',
-    INVALID_FORMAT: '형식이 올바르지 않습니다.',
-    NOT_FOUND: '요청한 정보를 찾을 수 없습니다.',
+    INVALID_FORMAT: '형식이 올바르지 않아요.',
+    NOT_FOUND: '요청한 정보를 찾을 수 없어요.',
     ALREADY_EXISTS: '이미 존재하는 정보입니다.',
-    CONFLICT: '충돌이 발생했습니다.',
-    INTERNAL_ERROR: '서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.',
-    SERVICE_UNAVAILABLE: '서비스를 일시적으로 이용할 수 없습니다.',
-    DATABASE_ERROR: '데이터 처리 중 오류가 발생했습니다.',
+    CONFLICT: '충돌이 발생했어요.',
+    INTERNAL_ERROR: '서버 오류가 발생했어요. 잠시 후 다시 시도해 주세요.',
+    SERVICE_UNAVAILABLE: '서비스를 일시적으로 이용할 수 없어요.',
+    DATABASE_ERROR: '데이터 처리 중 오류가 발생했어요.',
     NETWORK_ERROR: '네트워크 연결을 확인해 주세요.',
-    TIMEOUT: '요청 시간이 초과되었습니다.',
+    TIMEOUT: '요청 시간이 초과됐어요.',
     NICKNAME_TAKEN: '이미 사용 중인 닉네임입니다.',
     USER_ALREADY_EXISTS: '이미 가입된 사용자입니다.',
     INVALID_RANK: '올바른 계급을 선택해 주세요.',
-    IMAGE_UPLOAD_FAILED: '이미지 업로드에 실패했습니다.',
-    MAX_IMAGES_EXCEEDED: '최대 이미지 개수를 초과했습니다.',
+    IMAGE_UPLOAD_FAILED: '이미지 업로드에 실패했어요.',
+    MAX_IMAGES_EXCEEDED: '최대 이미지 개수를 초과했어요.',
   };
 
-  return messages[code] || '오류가 발생했습니다.';
+  return messages[code] || '오류가 발생했어요.';
 }

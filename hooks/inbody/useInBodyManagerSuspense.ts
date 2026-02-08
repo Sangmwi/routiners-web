@@ -106,7 +106,7 @@ export function useInBodyManagerSuspense(
     }
 
     if (!result.success || !result.base64) {
-      setScanError(result.error || '이미지 선택에 실패했습니다.');
+      setScanError(result.error || '이미지 선택에 실패했어요.');
       setScanState('error');
       return;
     }
@@ -127,7 +127,7 @@ export function useInBodyManagerSuspense(
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || '스캔에 실패했습니다.');
+        throw new Error(errorData.error || '스캔에 실패했어요.');
       }
 
       const scanResult = await response.json();
@@ -135,7 +135,7 @@ export function useInBodyManagerSuspense(
       setScanState('preview');
       setIsPreviewModalOpen(true);
     } catch (err) {
-      setScanError(err instanceof Error ? err.message : '스캔 중 오류가 발생했습니다.');
+      setScanError(err instanceof Error ? err.message : '스캔 중 오류가 발생했어요.');
       setScanState('error');
     }
   };
@@ -159,7 +159,7 @@ export function useInBodyManagerSuspense(
     createInBody.mutate(scanData, {
       onSuccess: () => resetScan(),
       onError: (err) => {
-        setScanError(err instanceof Error ? err.message : '저장에 실패했습니다.');
+        setScanError(err instanceof Error ? err.message : '저장에 실패했어요.');
         setScanState('error');
       },
     });

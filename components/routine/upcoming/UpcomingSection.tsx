@@ -39,7 +39,7 @@ export function UpcomingSection({
           href="/routine/calendar"
           className="text-sm font-medium text-primary flex items-center gap-0.5"
         >
-          전체 보기
+          캘린더
           <CaretRightIcon size={16} weight="bold" />
         </AppLink>
       </div>
@@ -52,10 +52,10 @@ export function UpcomingSection({
           ))}
         </div>
       ) : (
-        <div className="rounded-2xl bg-muted/30 p-4 text-center">
+        <div className="rounded-2xl bg-muted/20 p-4 text-center">
           <CalendarBlankIcon size={24} weight="duotone" className="text-muted-foreground mx-auto mb-2" />
           <p className="text-sm text-muted-foreground">
-            예정된 루틴이 없습니다
+            예정된 루틴이 없어요
           </p>
         </div>
       )}

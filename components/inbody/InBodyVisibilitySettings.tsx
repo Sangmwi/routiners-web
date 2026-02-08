@@ -67,7 +67,7 @@ export default function InBodyVisibilitySettings({
         onError: (error) => {
           // Rollback on error
           setIsPublic(!newValue);
-          onSaveError?.(error instanceof Error ? error : new Error('저장에 실패했습니다'));
+          onSaveError?.(error instanceof Error ? error : new Error('저장에 실패했어요'));
         },
       }
     );
@@ -87,7 +87,7 @@ export default function InBodyVisibilitySettings({
     <div className="relative">
       <FormToggle
         label="인바디 정보 공개"
-        description="다른 사용자에게 인바디 정보를 공개합니다"
+        description="다른 사용자에게 인바디 정보를 공개해요"
         checked={isPublic}
         onChange={handleToggle}
         disabled={isSaving}

@@ -164,7 +164,7 @@ export function UnitStep({
           <div className="space-y-2 p-4">
             {filteredUnits.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                검색 결과가 없습니다
+                검색 결과가 없어요
               </div>
             ) : (
               filteredUnits.slice(0, 50).map((unit) => (
@@ -177,7 +177,7 @@ export function UnitStep({
                     ${
                       unit.id === unitId
                         ? 'bg-primary/10 border-2 border-primary'
-                        : 'bg-muted/30 border-2 border-transparent hover:bg-muted/50'
+                        : 'bg-muted/20 border-2 border-transparent hover:bg-muted/50'
                     }
                   `}
                 >

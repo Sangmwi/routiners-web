@@ -33,13 +33,13 @@ export const GET = withAuth(
     if (convError) {
       if (convError.code === 'PGRST116') {
         return NextResponse.json(
-          { error: '대화를 찾을 수 없습니다.', code: 'NOT_FOUND' },
+          { error: '대화를 찾을 수 없어요.', code: 'NOT_FOUND' },
           { status: 404 }
         );
       }
       console.error('[Conversation GET] Error:', convError);
       return NextResponse.json(
-        { error: '대화를 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
+        { error: '대화를 불러오는데 실패했어요.', code: 'DATABASE_ERROR' },
         { status: 500 }
       );
     }
@@ -68,7 +68,7 @@ export const PATCH = withAuth(
       body = await request.json();
     } catch {
       return NextResponse.json(
-        { error: '잘못된 요청 형식입니다.', code: 'BAD_REQUEST' },
+        { error: '잘못된 요청 형식이에요.', code: 'BAD_REQUEST' },
         { status: 400 }
       );
     }
@@ -77,7 +77,7 @@ export const PATCH = withAuth(
     if (!validation.success) {
       return NextResponse.json(
         {
-          error: '입력값이 유효하지 않습니다.',
+          error: '입력값이 유효하지 않아요.',
           code: 'VALIDATION_ERROR',
           details: validation.error.flatten(),
         },
@@ -107,7 +107,7 @@ export const PATCH = withAuth(
     if (error) {
       console.error('[Conversation PATCH] Error:', error);
       return NextResponse.json(
-        { error: '업데이트에 실패했습니다.', code: 'DATABASE_ERROR' },
+        { error: '업데이트에 실패했어요.', code: 'DATABASE_ERROR' },
         { status: 500 }
       );
     }
@@ -136,7 +136,7 @@ export const DELETE = withAuth(
     if (error) {
       console.error('[Conversation DELETE] Error:', error);
       return NextResponse.json(
-        { error: '삭제에 실패했습니다.', code: 'DATABASE_ERROR' },
+        { error: '삭제에 실패했어요.', code: 'DATABASE_ERROR' },
         { status: 500 }
       );
     }

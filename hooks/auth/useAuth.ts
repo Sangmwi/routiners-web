@@ -9,10 +9,10 @@ import { authApi } from '@/lib/api';
 /**
  * Check if nickname is available
  */
-export function useCheckNickname(nickname: string, enabled: boolean = true) {
+export function useCheckNickname(nickname: string, enabled: boolean = true, excludeUserId?: string) {
   return useQuery({
     queryKey: queryKeys.user.checkNickname(nickname),
-    queryFn: () => authApi.checkNickname(nickname),
+    queryFn: () => authApi.checkNickname(nickname, excludeUserId),
     enabled: enabled && nickname.length >= 2,
   });
 }

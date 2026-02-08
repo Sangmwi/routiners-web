@@ -6,7 +6,27 @@
 
 import type { AIToolResult } from '@/lib/types';
 import { toInBodyRecord, DbInBodyRecord, InBodyRecord } from '@/lib/types/inbody';
+import { formatDate } from '@/lib/ai/tool-utils';
 import type { ToolExecutorContext } from './types';
+
+// ============================================================================
+// Types (get_current_routine 응답)
+// ============================================================================
+
+interface CurrentRoutineEvent {
+  date: string;
+  title: string;
+  status: string;
+  exercises: string[];
+}
+
+interface CurrentRoutineData {
+  scheduledCount: number;
+  completedCount: number;
+  skippedCount: number;
+  lastScheduledDate: string | null;
+  events: CurrentRoutineEvent[];
+}
 
 // ============================================================================
 // Executors
@@ -67,14 +87,73 @@ export async function executeGetInbodyHistory(
 
 /**
  * get_current_routine
+ *
+ * 유저의 현재 routine_events 조회 (세션 무관)
+ * - 향후 scheduled 이벤트 전체
+ * - 최근 2주 completed/skipped 이벤트
+ * - AI가 기존 루틴을 참고하여 수정/재생성 가능
  */
 export async function executeGetCurrentRoutine(
   ctx: ToolExecutorContext
-): Promise<AIToolResult<unknown | null>> {
-  // TODO: routines 테이블 구현 후 활성화
-  // 현재는 null 반환
+): Promise<AIToolResult<CurrentRoutineData | null>> {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const twoWeeksAgo = new Date(today);
+  twoWeeksAgo.setDate(today.getDate() - 14);
+
+  const { data: events, error } = await ctx.supabase
+    .from('routine_events')
+    .select('date, title, status, data')
+    .eq('user_id', ctx.userId)
+    .eq('type', 'workout')
+    .gte('date', formatDate(twoWeeksAgo))
+    .order('date', { ascending: true })
+    .limit(40);
+
+  if (error) {
+    return { success: false, error: '루틴 이벤트를 조회할 수 없습니다.' };
+  }
+
+  if (!events || events.length === 0) {
+    return { success: true, data: null };
+  }
+
+  // 상태별 카운트 및 마지막 스케줄 날짜 계산
+  let scheduledCount = 0;
+  let completedCount = 0;
+  let skippedCount = 0;
+  let lastScheduledDate: string | null = null;
+
+  const mappedEvents: CurrentRoutineEvent[] = events.map((e) => {
+    if (e.status === 'scheduled') {
+      scheduledCount++;
+      lastScheduledDate = e.date;
+    } else if (e.status === 'completed') {
+      completedCount++;
+    } else if (e.status === 'skipped') {
+      skippedCount++;
+    }
+
+    // data에서 운동 이름만 추출 (토큰 절약)
+    const workoutData = e.data as { exercises?: Array<{ name: string }> } | null;
+    const exercises = workoutData?.exercises?.map((ex) => ex.name) ?? [];
+
+    return {
+      date: e.date,
+      title: e.title,
+      status: e.status,
+      exercises,
+    };
+  });
+
   return {
     success: true,
-    data: null,
+    data: {
+      scheduledCount,
+      completedCount,
+      skippedCount,
+      lastScheduledDate,
+      events: mappedEvents,
+    },
   };
 }

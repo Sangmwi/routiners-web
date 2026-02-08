@@ -14,6 +14,7 @@
 import { useMutation, useQueryClient, InfiniteData } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/constants/queryKeys';
 import { aiChatApi, ChatStreamCallbacks } from '@/lib/api/conversation';
+import { isActionMessage } from '@/lib/constants/aiChat';
 import type { ChatMessage } from '@/lib/types/chat';
 import type { CoachMessagePage } from '@/lib/types/coach';
 
@@ -64,6 +65,11 @@ export function useSendCoachMessage() {
       const previousMessages = queryClient.getQueryData<InfiniteData<CoachMessagePage>>(
         queryKeys.coach.messages(conversationId)
       );
+
+      // Action messages: 유저 버블 없이 AI만 트리거
+      if (isActionMessage(content)) {
+        return { previousMessages, optimisticMessageId: '' };
+      }
 
       // 3. 낙관적 메시지 생성 (optimistic- prefix로 구분)
       const optimisticMessageId = `optimistic-${Date.now()}`;

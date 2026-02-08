@@ -55,7 +55,7 @@ export default function ChatPreviewSummary({
   const statusDisplay: Record<Exclude<RoutinePreviewStatus, 'pending'>, { icon: React.ReactNode; text: string; className: string }> = {
     applied: {
       icon: <CheckIcon size={14} weight="bold" />,
-      text: '루틴이 적용되었습니다',
+      text: '루틴이 적용되었어요',
       className: 'text-green-600',
     },
     edited: {
@@ -128,7 +128,7 @@ export default function ChatPreviewSummary({
         <div className="px-5 pb-4">
           <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/10 text-amber-600">
             <WarningIcon size={14} className="shrink-0" />
-            <span className="text-xs font-medium">기존 일정과 겹치는 날이 있습니다</span>
+            <span className="text-xs font-medium">기존 일정과 겹치는 날이 있어요</span>
           </div>
         </div>
       )}
@@ -143,7 +143,7 @@ export default function ChatPreviewSummary({
               disabled={!isActionable}
               className="h-11 px-5 rounded-full text-sm font-medium
                          border border-border/60 text-muted-foreground
-                         hover:bg-muted/30 hover:border-border
+                         hover:bg-muted/20 hover:border-border
                          transition-all active:scale-[0.97] disabled:opacity-50"
             >
               종료
@@ -155,7 +155,7 @@ export default function ChatPreviewSummary({
               disabled={!isActionable}
               className="h-11 px-5 rounded-full text-sm font-medium
                          border border-border/60 text-muted-foreground
-                         hover:bg-muted/30 hover:border-border
+                         hover:bg-muted/20 hover:border-border
                          transition-all active:scale-[0.97] disabled:opacity-50"
             >
               수정

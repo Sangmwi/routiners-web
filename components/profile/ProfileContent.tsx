@@ -28,13 +28,13 @@ export default function ProfileContent() {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-        <p>프로필 정보를 불러올 수 없습니다.</p>
+        <p>프로필 정보를 불러올 수 없어요.</p>
       </div>
     );
   }
 
   return (
-    <>
+    <div className="space-y-6">
       <ProfileHeroSection user={user} />
 
       <ProfileLocationCard
@@ -56,9 +56,7 @@ export default function ProfileContent() {
 
       <ProfileLocationsSection locations={user.interestedLocations} />
 
-      {/* AI 트레이너용: 인바디, 운동 프로필 - 그룹 간 간격 추가 */}
-      <div className="pt-4" />
-
+      {/* AI 트레이너용: 인바디, 운동 프로필 */}
       <ProfileInbodySection
         showInbodyPublic={user.showInbodyPublic}
         isOwnProfile={true}
@@ -67,11 +65,11 @@ export default function ProfileContent() {
       <ProfileFitnessSection />
 
       {/* Logout & Withdrawal Buttons */}
-      <div className="pt-2 space-y-2">
+      <div className="pt-4 space-y-2">
         <button
           onClick={logout}
           disabled={isLoggingOut || isWithdrawing}
-          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoggingOut ? (
             <>
@@ -89,7 +87,7 @@ export default function ProfileContent() {
         <button
           onClick={withdraw}
           disabled={isWithdrawing || isLoggingOut}
-          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm text-muted-foreground/50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isWithdrawing ? (
             <>
@@ -104,6 +102,6 @@ export default function ProfileContent() {
           )}
         </button>
       </div>
-    </>
+    </div>
   );
 }

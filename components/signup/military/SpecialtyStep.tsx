@@ -180,7 +180,7 @@ export function SpecialtyStep({
           <div className="space-y-2 p-4">
             {filteredSpecialties.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                검색 결과가 없습니다
+                검색 결과가 없어요
               </div>
             ) : (
               filteredSpecialties.map((item) => (
@@ -193,7 +193,7 @@ export function SpecialtyStep({
                     ${
                       item.value === specialty
                         ? 'bg-primary/10 border-2 border-primary'
-                        : 'bg-muted/30 border-2 border-transparent hover:bg-muted/50'
+                        : 'bg-muted/20 border-2 border-transparent hover:bg-muted/50'
                     }
                   `}
                 >

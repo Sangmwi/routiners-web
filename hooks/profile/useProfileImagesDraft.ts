@@ -184,7 +184,7 @@ export function useProfileImagesDraft(
     if (images.length >= maxImages && index >= images.length) {
       return {
         success: false,
-        error: `최대 ${maxImages}장까지 업로드할 수 있습니다.`,
+        error: `최대 ${maxImages}장까지 업로드할 수 있어요.`,
       };
     }
 

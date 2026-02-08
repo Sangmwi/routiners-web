@@ -56,7 +56,7 @@ export const useLoginCommands = (callbacks: LoginCommandCallbacks) => {
           "LOGIN_ERROR",
           (cmd) => {
             console.log("[Login] Native login error:", cmd.error);
-            callbacks.onError!(cmd.error || "로그인에 실패했습니다");
+            callbacks.onError!(cmd.error || "로그인에 실패했어요");
           }
         )
       );

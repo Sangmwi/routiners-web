@@ -82,13 +82,14 @@ export async function insertEventsWithConflictCheck(
       };
     }
 
-    // overwrite: 기존 이벤트 삭제
+    // overwrite: 기존 scheduled 이벤트만 삭제 (completed/skipped 보존)
     const { error: deleteError } = await ctx.supabase
       .from('routine_events')
       .delete()
       .eq('user_id', ctx.userId)
       .in('date', dates)
-      .eq('type', eventType);
+      .eq('type', eventType)
+      .eq('status', 'scheduled');
 
     if (deleteError) {
       console.error(`[insertEvents:${eventType}] Delete error:`, deleteError);

@@ -201,7 +201,7 @@ export const GET_CURRENT_ROUTINE: AIToolDefinition = {
   type: 'function',
   name: 'get_current_routine',
   description:
-    '사용자의 현재 적용 중인 운동 루틴을 조회합니다. 기존 루틴이 있다면 이를 기반으로 개선 제안을 할 수 있습니다.',
+    '사용자의 현재 운동 루틴 이벤트를 조회합니다. 향후 예정(scheduled)된 이벤트와 최근 2주간 완료(completed)/건너뛴(skipped) 이벤트를 포함합니다. 다른 대화 세션에서 생성된 루틴도 모두 조회됩니다. 루틴 수정 요청 시 반드시 먼저 호출하여 기존 루틴을 확인하세요.',
   parameters: {
     type: 'object',
     properties: {},
@@ -459,11 +459,14 @@ export const GENERATE_ROUTINE_PREVIEW: AIToolDefinition = {
                         reps: { type: 'string', description: '반복 횟수 (예: "8-12", "10")' },
                         rest: { type: 'string', description: '휴식 시간 (예: "90초", "2분")' },
                         weight: { type: 'number', description: '목표 중량 (kg). 맨몸 운동은 0, 웨이트 운동은 사용자 수준에 맞는 적절한 중량을 설정하세요.' },
+                        category: { type: 'string', description: '운동 카테고리: strength, cardio, compound, isolation, flexibility 중 하나' },
+                        distance: { type: 'number', description: '유산소 운동의 거리 (km). 러닝, 사이클링 등 유산소 운동에만 적용' },
                       },
                       required: ['name', 'sets', 'reps', 'rest'],
                     },
                   },
                   estimatedDuration: { type: 'integer', description: '예상 소요 시간 (분)' },
+                  estimatedCaloriesBurned: { type: 'integer', description: '예상 소모 칼로리 (kcal). 운동 강도, 시간, 종류를 고려하여 추정' },
                 },
                 required: ['dayOfWeek', 'title', 'exercises'],
               },

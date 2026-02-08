@@ -38,7 +38,7 @@ function DeleteConfirmView({
       </p>
       <p className="text-sm text-muted-foreground mt-2">{recordDate} 측정 기록</p>
       <p className="text-xs text-muted-foreground mt-1">
-        삭제된 기록은 복구할 수 없습니다
+        삭제된 기록은 복구할 수 없어요
       </p>
 
       <div className="flex gap-3 mt-6 w-full max-w-xs">
@@ -224,7 +224,7 @@ export default function InBodyContent() {
               <WarningCircleIcon size={48} className="text-destructive" />
               <div className="text-center space-y-1">
                 <p className="text-lg font-medium text-card-foreground">
-                  오류가 발생했습니다
+                  오류가 발생했어요
                 </p>
                 <p className="text-sm text-destructive">{scanError}</p>
               </div>

@@ -128,7 +128,7 @@ export const APPLY_RATE_LIMIT: RateLimitConfig = {
 export function rateLimitExceeded(result: RateLimitResult) {
   const retryAfterSec = Math.ceil(result.resetIn / 1000);
   return {
-    error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.',
+    error: '요청이 너무 많아요. 잠시 후 다시 시도해주세요.',
     code: 'RATE_LIMIT_EXCEEDED',
     retryAfter: retryAfterSec,
   };

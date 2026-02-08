@@ -57,7 +57,7 @@ export default function ProfileInbodySection({
         icon={LockIcon}
         message={
           isOwnProfile
-            ? '인바디 정보가 비공개 상태입니다'
+            ? '인바디 정보가 비공개 상태예요'
             : `아직 ${displayName}님이 인바디 정보를 공유하지 않았어요`
         }
         hint={isOwnProfile ? '상단의 관리 버튼에서 공개 설정을 변경할 수 있어요' : undefined}
@@ -73,7 +73,7 @@ export default function ProfileInbodySection({
       message={
         isOwnProfile
           ? '아직 등록된 인바디 기록이 없어요'
-          : '등록된 인바디 기록이 없습니다'
+          : '등록된 인바디 기록이 없어요'
       }
       hint={isOwnProfile ? '상단의 관리 버튼에서 인바디 기록을 추가해보세요' : undefined}
     />
@@ -119,8 +119,8 @@ export default function ProfileInbodySection({
         />
 
         <div
-          className={`rounded-[20px] bg-card p-4 shadow-sm border border-border/50 transition-colors ${
-            isClickable ? 'cursor-pointer hover:bg-card/80' : ''
+          className={`bg-muted/20 rounded-2xl p-4 transition-colors ${
+            isClickable ? 'cursor-pointer hover:bg-muted/20' : ''
           }`}
           onClick={isClickable ? handleCardClick : undefined}
         >

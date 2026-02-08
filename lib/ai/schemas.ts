@@ -40,6 +40,7 @@ export const AIExerciseSchema = z.object({
   rir: z.number().int().min(0).max(10).optional(), // Reps In Reserve
   technique: z.string().optional(),
   notes: z.string().optional(),
+  distance: z.number().min(0).max(200).optional(), // 유산소 거리 (km)
 });
 
 export type AIExercise = z.infer<typeof AIExerciseSchema>;
@@ -55,6 +56,7 @@ export const AIRoutineDaySchema = z.object({
   workoutType: z.string().optional(), // push, pull, legs, upper, lower, full, cardio, rest, active_recovery 등
   exercises: z.array(AIExerciseSchema).optional(),
   estimatedDuration: z.number().int().positive().optional(), // 분 단위
+  estimatedCaloriesBurned: z.number().int().min(0).max(5000).optional(), // kcal
   intensity: z.number().int().min(1).max(10).optional(), // 1-10 RPE
   warmup: z.string().optional(),
   cooldown: z.string().optional(),

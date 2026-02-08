@@ -111,7 +111,7 @@ export function badRequest(
  * 401 Unauthorized
  */
 export function unauthorized(
-  message: string = '인증이 필요합니다'
+  message: string = '인증이 필요해요'
 ): NextResponse<ApiErrorResponse> {
   return createErrorResponse(message, 'UNAUTHORIZED', 401);
 }
@@ -120,7 +120,7 @@ export function unauthorized(
  * 403 Forbidden
  */
 export function forbidden(
-  message: string = '접근 권한이 없습니다'
+  message: string = '접근 권한이 없어요'
 ): NextResponse<ApiErrorResponse> {
   return createErrorResponse(message, 'FORBIDDEN', 403);
 }
@@ -129,7 +129,7 @@ export function forbidden(
  * 404 Not Found
  */
 export function notFound(
-  message: string = '리소스를 찾을 수 없습니다'
+  message: string = '리소스를 찾을 수 없어요'
 ): NextResponse<ApiErrorResponse> {
   return createErrorResponse(message, 'NOT_FOUND', 404);
 }
@@ -138,7 +138,7 @@ export function notFound(
  * 409 Conflict
  */
 export function conflict(
-  message: string = '리소스 충돌이 발생했습니다'
+  message: string = '리소스 충돌이 발생했어요'
 ): NextResponse<ApiErrorResponse> {
   return createErrorResponse(message, 'CONFLICT', 409);
 }
@@ -147,7 +147,7 @@ export function conflict(
  * 500 Internal Server Error
  */
 export function internalError(
-  message: string = '서버 오류가 발생했습니다'
+  message: string = '서버 오류가 발생했어요'
 ): NextResponse<ApiErrorResponse> {
   return createErrorResponse(message, 'INTERNAL_ERROR', 500);
 }
@@ -179,7 +179,7 @@ export function validationError(
   zodError: ZodError
 ): NextResponse<ApiErrorResponse> {
   return createErrorResponse(
-    '입력값이 올바르지 않습니다',
+    '입력값이 올바르지 않아요',
     'VALIDATION_ERROR',
     400,
     formatZodErrors(zodError)
@@ -199,7 +199,7 @@ export function handleSupabaseError(error: {
 }): NextResponse<ApiErrorResponse> {
   // PGRST116: Row not found
   if (error.code === 'PGRST116') {
-    return notFound('데이터를 찾을 수 없습니다');
+    return notFound('데이터를 찾을 수 없어요');
   }
 
   // 23505: Unique constraint violation

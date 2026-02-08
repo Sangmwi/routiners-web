@@ -61,14 +61,14 @@ export default function InBodyScanModal({
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || '스캔에 실패했습니다.');
+        throw new Error(errorData.error || '스캔에 실패했어요.');
       }
 
       const result = await response.json();
       setCreateData(result.createData);
       setState('preview');
     } catch (err) {
-      setError(err instanceof Error ? err.message : '스캔 중 오류가 발생했습니다.');
+      setError(err instanceof Error ? err.message : '스캔 중 오류가 발생했어요.');
       setState('error');
     }
   };
@@ -84,7 +84,7 @@ export default function InBodyScanModal({
     }
 
     if (!result.success) {
-      setError(result.error || '이미지 선택에 실패했습니다.');
+      setError(result.error || '이미지 선택에 실패했어요.');
       setState('error');
       return;
     }
@@ -106,7 +106,7 @@ export default function InBodyScanModal({
         handleClose();
       },
       onError: (err) => {
-        setError(err instanceof Error ? err.message : '저장에 실패했습니다.');
+        setError(err instanceof Error ? err.message : '저장에 실패했어요.');
         setState('error');
       },
     });
@@ -148,7 +148,7 @@ export default function InBodyScanModal({
                 인바디 결과지 사진을 촬영하거나 선택해주세요
               </p>
               <p className="text-sm text-muted-foreground">
-                AI가 자동으로 데이터를 추출합니다
+                AI가 자동으로 데이터를 추출해요
               </p>
             </div>
 
@@ -166,7 +166,7 @@ export default function InBodyScanModal({
             <p className="text-xs text-muted-foreground text-center max-w-xs">
               InBody 결과지가 잘 보이도록 촬영해주세요.
               <br />
-              글자가 선명할수록 정확한 추출이 가능합니다.
+              글자가 선명할수록 정확한 추출이 가능해요.
             </p>
           </div>
         )}
@@ -180,7 +180,7 @@ export default function InBodyScanModal({
                 분석 중...
               </p>
               <p className="text-sm text-muted-foreground">
-                AI가 인바디 데이터를 추출하고 있습니다
+                AI가 인바디 데이터를 추출하고 있어요
               </p>
             </div>
 
@@ -222,7 +222,7 @@ export default function InBodyScanModal({
             <ErrorIcon size="2xl" className="text-destructive" />
             <div className="text-center space-y-1">
               <p className="text-lg font-medium text-card-foreground">
-                오류가 발생했습니다
+                오류가 발생했어요
               </p>
               <p className="text-sm text-destructive">{error}</p>
             </div>

@@ -19,7 +19,7 @@ export default function InfluencerCard({ author, title, imageUrl, votes, onClick
                  transition-all duration-200 active:scale-[0.98] cursor-pointer
                  hover:shadow-md"
     >
-      <div className="relative w-full aspect-video bg-muted/30">
+      <div className="relative w-full aspect-video bg-muted/20">
         <ImageWithFallback
           src={imageUrl}
           alt={title}
