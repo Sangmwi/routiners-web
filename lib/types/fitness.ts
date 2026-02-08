@@ -353,6 +353,7 @@ export interface RoutinePreviewExercise {
   sets: number;
   reps: string;
   rest: string;
+  weight?: number; // 목표 중량 (kg)
   notes?: string;
 }
 

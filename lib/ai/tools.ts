@@ -458,6 +458,7 @@ export const GENERATE_ROUTINE_PREVIEW: AIToolDefinition = {
                         sets: { type: 'integer', description: '세트 수' },
                         reps: { type: 'string', description: '반복 횟수 (예: "8-12", "10")' },
                         rest: { type: 'string', description: '휴식 시간 (예: "90초", "2분")' },
+                        weight: { type: 'number', description: '목표 중량 (kg). 맨몸 운동은 0, 웨이트 운동은 사용자 수준에 맞는 적절한 중량을 설정하세요.' },
                       },
                       required: ['name', 'sets', 'reps', 'rest'],
                     },

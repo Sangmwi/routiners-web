@@ -63,6 +63,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'lh3.googleusercontent.com', // Google 프로필 이미지
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com', // Unsplash 이미지
+      },
     ],
     formats: ['image/avif', 'image/webp'], // 최신 이미지 포맷 사용
   },

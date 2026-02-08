@@ -12,6 +12,7 @@ const ExerciseSchema = z.object({
   sets: z.number().int().min(1, 'sets는 1 이상이어야 합니다'),
   reps: z.string().min(1, 'reps는 필수입니다'),
   rest: z.string().min(1, 'rest는 필수입니다'),
+  weight: z.number().nonnegative().optional(), // 목표 중량 (kg), 맨몸 운동은 0 또는 미지정
   notes: z.string().optional(),
 });
 

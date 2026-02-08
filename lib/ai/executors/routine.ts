@@ -278,6 +278,7 @@ export function executeGenerateRoutinePreview(
           sets: number;
           reps: string;
           rest: string;
+          weight?: number;
           notes?: string;
         }>;
         estimatedDuration?: number;
@@ -299,6 +300,7 @@ export function executeGenerateRoutinePreview(
         sets: ex.sets,
         reps: ex.reps,
         rest: ex.rest,
+        weight: ex.weight,
         notes: ex.notes,
       })),
       estimatedDuration: day.estimatedDuration,
@@ -351,7 +353,7 @@ export function executeGenerateRoutinePreview(
               sets: Array.from({ length: ex.sets }, (_, i) => ({
                 setNumber: i + 1,
                 targetReps: parseInt(ex.reps.split('-')[0]) || 10,
-                targetWeight: 0,
+                targetWeight: ex.weight ?? undefined,
               })),
               restSeconds: parseInt(ex.rest) || 90,
               notes: ex.notes,

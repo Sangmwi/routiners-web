@@ -109,8 +109,8 @@ export default function ExerciseCard({
           <h3 className="font-semibold text-foreground">{exercise.name}</h3>
           <p className="text-sm text-muted-foreground">
             {exercise.sets.length}세트 •{' '}
-            {exercise.sets[0]?.targetReps ?? '-'}회 •{' '}
-            {exercise.sets[0]?.targetWeight ?? '-'}kg
+            {exercise.sets[0]?.targetReps ?? '-'}회
+            {exercise.sets[0]?.targetWeight ? ` • ${exercise.sets[0].targetWeight}kg` : ''}
           </p>
           {/* 실제 수행 요약 */}
           {actualSummary && (
@@ -162,7 +162,7 @@ export default function ExerciseCard({
                       {set.setNumber}세트
                     </span>
                     <span className="text-center text-muted-foreground text-xs">
-                      {set.targetReps}회/{set.targetWeight ?? '-'}kg
+                      {set.targetReps}회{set.targetWeight ? `/${set.targetWeight}kg` : ''}
                     </span>
                     <input
                       type="number"
@@ -238,7 +238,7 @@ export default function ExerciseCard({
                       {set.actualReps ?? '-'}회
                     </span>
                     <span className={`text-center ${set.actualWeight ? 'text-primary font-medium' : 'text-foreground'}`}>
-                      {set.actualWeight ?? set.targetWeight ?? '-'}kg
+                      {(set.actualWeight || set.targetWeight) ? `${set.actualWeight ?? set.targetWeight}kg` : '-'}
                     </span>
                     <span className="text-center text-muted-foreground">
                       {set.restSeconds ? `${set.restSeconds}초` : '-'}

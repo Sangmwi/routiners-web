@@ -230,6 +230,9 @@ function ExerciseItem({
       <p className="text-sm font-medium text-foreground">{exercise.name}</p>
       <p className="text-sm text-muted-foreground mt-1.5">
         {exercise.sets}세트 · {exercise.reps}회
+        {exercise.weight != null && exercise.weight > 0 && (
+          <span className="text-foreground font-medium"> · {exercise.weight}kg</span>
+        )}
         {exercise.rest && (
           <span className="text-primary"> · 휴식 {exercise.rest}</span>
         )}
