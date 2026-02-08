@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { DayEventCard } from '@/components/routine';
-import { useRoutineEventByDateSuspense } from '@/hooks/routine';
+import { useRoutineEventByDateSuspense, useDeleteRoutineEvent } from '@/hooks/routine';
+import { useConfirmDialog } from '@/lib/stores/modalStore';
 import type { EventType } from '@/lib/types/routine';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
-import { PlusIcon, BarbellIcon, ForkKnifeIcon } from '@phosphor-icons/react';
+import { PlusIcon, BarbellIcon, ForkKnifeIcon, TrashIcon } from '@phosphor-icons/react';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import AddWorkoutSheet from '@/components/routine/sheets/AddWorkoutSheet';
 import AddMealSheet from '@/components/routine/sheets/AddMealSheet';
@@ -28,6 +29,29 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
   // Suspense 쿼리: 선택된 날짜의 이벤트들
   const { data: workoutEvent } = useRoutineEventByDateSuspense(date, 'workout');
   const { data: mealEvent } = useRoutineEventByDateSuspense(date, 'meal');
+
+  // 삭제
+  const deleteEvent = useDeleteRoutineEvent();
+  const confirm = useConfirmDialog();
+
+  // 더보기 액션시트
+  const [moreTargetId, setMoreTargetId] = useState<string | null>(null);
+
+  const handleMore = (eventId: string) => {
+    setMoreTargetId(eventId);
+  };
+
+  const handleDelete = () => {
+    if (!moreTargetId) return;
+    const targetId = moreTargetId;
+    setMoreTargetId(null);
+    confirm({
+      title: '루틴을 삭제하시겠어요?',
+      message: '삭제하면 되돌릴 수 없어요.',
+      confirmText: '삭제',
+      onConfirm: async () => { await deleteEvent.mutateAsync(targetId); },
+    });
+  };
 
   // + 버튼 메뉴
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -60,12 +84,33 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
         <button
           type="button"
           onClick={() => setIsMenuOpen(true)}
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-primary/10 text-primary"
+          className="w-8 h-8 flex items-center justify-center rounded-full text-primary"
         >
           <PlusIcon size={18} weight="bold" />
         </button>
       </div>
-      <DayEventCard event={selectedEvent} date={date} />
+      <DayEventCard event={selectedEvent} date={date} onMore={handleMore} />
+
+      {/* 더보기 액션시트 */}
+      <Modal
+        isOpen={!!moreTargetId}
+        onClose={() => setMoreTargetId(null)}
+        position="bottom"
+        enableSwipe
+        height="auto"
+        showCloseButton={false}
+      >
+        <ModalBody className="p-4 pb-safe">
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="w-full flex items-center gap-3 rounded-xl px-2 py-3 active:bg-muted/50 text-foreground"
+          >
+            <TrashIcon size={20} weight="bold" />
+            <span className="text-sm font-medium">삭제</span>
+          </button>
+        </ModalBody>
+      </Modal>
 
       {/* 운동/식단 선택 메뉴 */}
       <Modal
@@ -77,14 +122,14 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
         height="auto"
         showCloseButton
       >
-        <ModalBody className="space-y-2 pb-safe">
+        <ModalBody className="p-4 space-y-6 pb-safe">
           <button
             type="button"
             onClick={() => handleSelectType('workout')}
-            className="w-full flex items-center gap-3 p-3 rounded-xl active:bg-muted/50"
+            className="w-full flex items-center gap-3 rounded-xl active:bg-muted/50"
           >
-            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-500/10">
-              <BarbellIcon size={20} className="text-blue-500" weight="duotone" />
+            <div className="w-10 h-10 flex items-center justify-center rounded-full">
+              <BarbellIcon size={24} className="text-primary" weight="duotone" />
             </div>
             <div className="text-left">
               <p className="text-sm font-medium">운동 추가</p>
@@ -94,10 +139,10 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
           <button
             type="button"
             onClick={() => handleSelectType('meal')}
-            className="w-full flex items-center gap-3 p-3 rounded-xl active:bg-muted/50"
+            className="w-full flex items-center gap-3 rounded-xl active:bg-muted/50"
           >
-            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-green-500/10">
-              <ForkKnifeIcon size={20} className="text-green-500" weight="duotone" />
+            <div className="w-10 h-10 flex items-center justify-center rounded-full">
+              <ForkKnifeIcon size={24} className="text-primary" weight="duotone" />
             </div>
             <div className="text-left">
               <p className="text-sm font-medium">식단 추가</p>

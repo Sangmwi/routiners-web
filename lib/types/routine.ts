@@ -94,6 +94,8 @@ export interface WorkoutData {
   estimatedCaloriesBurned?: number;
   /** 전체 메모/설명 */
   notes?: string;
+  /** 실제 운동 경과 시간 (초) - 스톱워치 측정 */
+  elapsedSeconds?: number;
 }
 
 /**

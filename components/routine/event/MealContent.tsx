@@ -13,12 +13,14 @@ import {
   useRoutineEventByDateSuspense,
   useCompleteRoutineEvent,
   useSkipRoutineEvent,
+  useDeleteRoutineEvent,
 } from '@/hooks/routine';
-import { CalendarIcon, PlusIcon, RobotIcon } from '@phosphor-icons/react';
+import { CalendarIcon, PlusIcon, RobotIcon, TrashIcon } from '@phosphor-icons/react';
 import { getEventConfig } from '@/lib/config/theme';
 import type { MealData } from '@/lib/types/meal';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
-import { useState } from 'react';
+import { useState, useEffect, useRef, type ReactNode } from 'react';
+import { useConfirmDialog } from '@/lib/stores/modalStore';
 import AddMealSheet from '@/components/routine/sheets/AddMealSheet';
 
 // ============================================================
@@ -40,6 +42,7 @@ function isMealData(data: unknown): data is MealData {
 
 interface MealContentProps {
   date: string;
+  onHeaderAction?: (action: ReactNode) => void;
 }
 
 /**
@@ -48,9 +51,10 @@ interface MealContentProps {
  * - useSuspenseQuery로 식단 이벤트 조회
  * - 상위 page.tsx의 DetailLayout에서 Header + Suspense 처리
  */
-export default function MealContent({ date }: MealContentProps) {
+export default function MealContent({ date, onHeaderAction }: MealContentProps) {
   const router = useRouter();
   const showError = useShowError();
+  const confirm = useConfirmDialog();
 
   // Suspense 버전 - { data } 구조분해 (null 가능)
   const { data: event } = useRoutineEventByDateSuspense(date, 'meal');
@@ -58,10 +62,44 @@ export default function MealContent({ date }: MealContentProps) {
   // 완료/건너뛰기 뮤테이션
   const completeEvent = useCompleteRoutineEvent();
   const skipEvent = useSkipRoutineEvent();
+  const deleteEvent = useDeleteRoutineEvent();
 
   // 날짜 포맷 & 이벤트 설정
   const formattedDate = formatKoreanDate(date, { weekday: true });
   const eventConfig = getEventConfig('meal');
+
+  // 삭제 핸들러 (ref로 최신 클로저 유지)
+  const handleDeleteRef = useRef(() => {});
+  handleDeleteRef.current = () => {
+    if (!event) return;
+    confirm({
+      title: '루틴을 삭제하시겠어요?',
+      message: '삭제하면 되돌릴 수 없어요.',
+      confirmText: '삭제',
+      onConfirm: async () => {
+        await deleteEvent.mutateAsync(event.id);
+        router.back();
+      },
+    });
+  };
+
+  // 헤더 삭제 아이콘
+  useEffect(() => {
+    if (!onHeaderAction) return;
+    if (event) {
+      onHeaderAction(
+        <button
+          onClick={() => handleDeleteRef.current()}
+          className="p-1 text-muted-foreground"
+          aria-label="삭제"
+        >
+          <TrashIcon size={20} />
+        </button>
+      );
+    } else {
+      onHeaderAction(null);
+    }
+  }, [event?.id, onHeaderAction]);
 
   // 완료 처리
   const handleComplete = () => {

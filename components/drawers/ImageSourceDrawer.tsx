@@ -46,7 +46,7 @@ export default function ImageSourceDrawer({
       closeOnBackdrop={!isLoading}
       size="lg"
     >
-      <ModalBody className="pb-8">
+      <ModalBody className="p-4 pb-8">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-8 gap-3">
             <LoadingSpinner size="xl" />

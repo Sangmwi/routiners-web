@@ -201,7 +201,7 @@ export default function InBodyContent() {
         size="lg"
         closeOnBackdrop={scanState !== 'saving'}
       >
-        <ModalBody className="min-h-[300px]">
+        <ModalBody className="p-6 min-h-[300px]">
           {scanState === 'preview' && scanData && (
             <InBodyPreview
               data={scanData}

@@ -1,7 +1,7 @@
 'use client';
 
 import { RoutineEvent, WorkoutExercise, WorkoutData } from '@/lib/types/routine';
-import { CaretRightIcon } from '@phosphor-icons/react';
+import { DotsThreeVerticalIcon } from '@phosphor-icons/react';
 import { getEventIcon, getStatusConfig } from '@/lib/config/eventTheme';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 import type { MealData } from '@/lib/types/meal';
@@ -34,12 +34,13 @@ function isMealData(data: unknown): data is MealData {
 interface DayEventCardProps {
   event: RoutineEvent | null;
   date: string;
+  onMore?: (eventId: string) => void;
 }
 
 /**
  * 선택된 날짜의 이벤트 카드
  */
-export default function DayEventCard({ event, date }: DayEventCardProps) {
+export default function DayEventCard({ event, date, onMore }: DayEventCardProps) {
   // 날짜 포맷
   const formattedDate = formatKoreanDate(date, { year: false, weekday: true });
 
@@ -57,50 +58,63 @@ export default function DayEventCard({ event, date }: DayEventCardProps) {
   const StatusIcon = status.icon;
 
   return (
-    <AppLink
-      href={`/routine/${event.type}/${date}`}
-      className="flex w-full items-center gap-4 px-2 py-5 text-left hover:bg-muted/20 transition-colors active:bg-muted/20 rounded-xl"
-    >
-      {/* 아이콘 (bare, no background) */}
-      {(() => {
-        const Icon = getEventIcon(event.type);
-        return <Icon className="w-7 h-7 text-primary flex-shrink-0" />;
-      })()}
+    <div className="flex items-center rounded-xl">
+      <AppLink
+        href={`/routine/${event.type}/${date}`}
+        className="flex flex-1 items-center gap-4 px-2 py-5 text-left hover:bg-muted/20 active:bg-muted/20 transition-colors rounded-xl min-w-0"
+      >
+        {/* 아이콘 */}
+        {(() => {
+          const Icon = getEventIcon(event.type);
+          return <Icon className="w-7 h-7 text-primary flex-shrink-0" />;
+        })()}
 
-      {/* 콘텐츠 */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <h3 className="text-base font-semibold text-foreground truncate">
-            {event.title}
-          </h3>
-          <span
-            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${status.badgeClass}`}
-          >
-            {StatusIcon && <StatusIcon className="w-3 h-3" />}
-            {status.label}
-          </span>
+        {/* 콘텐츠 */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <h3 className="text-base font-semibold text-foreground truncate">
+              {event.title}
+            </h3>
+            <span
+              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${status.badgeClass}`}
+            >
+              {StatusIcon && <StatusIcon className="w-3 h-3" />}
+              {status.label}
+            </span>
+          </div>
+
+          {/* 요약 정보 */}
+          <div className="text-sm text-muted-foreground">
+            {event.data && isWorkoutData(event.data) && event.data.exercises.length > 0 && (
+              <span>
+                {event.data.exercises.length}개 운동 · {getTotalSets(event.data.exercises)}세트
+              </span>
+            )}
+            {event.data && isMealData(event.data) && event.data.meals.length > 0 && (
+              <span>
+                {event.data.meals.length}끼 · {event.data.estimatedTotalCalories || event.data.targetCalories || 0}kcal
+              </span>
+            )}
+            {!event.data && event.rationale && (
+              <span className="line-clamp-1">{event.rationale}</span>
+            )}
+          </div>
         </div>
 
-        {/* 요약 정보 */}
-        <div className="text-sm text-muted-foreground">
-          {event.data && isWorkoutData(event.data) && event.data.exercises.length > 0 && (
-            <span>
-              {event.data.exercises.length}개 운동 · {getTotalSets(event.data.exercises)}세트
-            </span>
-          )}
-          {event.data && isMealData(event.data) && event.data.meals.length > 0 && (
-            <span>
-              {event.data.meals.length}끼 · {event.data.estimatedTotalCalories || event.data.targetCalories || 0}kcal
-            </span>
-          )}
-          {!event.data && event.rationale && (
-            <span className="line-clamp-1">{event.rationale}</span>
-          )}
-        </div>
-      </div>
+      </AppLink>
 
-      <CaretRightIcon size={20} weight="bold" className="text-muted-foreground flex-shrink-0" />
-    </AppLink>
+      {/* 더보기 메뉴 */}
+      {onMore && (
+        <button
+          type="button"
+          onClick={() => onMore(event.id)}
+          className="p-2.5 -mr-1 shrink-0 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+          aria-label="더보기"
+        >
+          <DotsThreeVerticalIcon size={20} weight="bold" />
+        </button>
+      )}
+    </div>
   );
 }
 

@@ -208,3 +208,16 @@ export function getDayOfWeek(date: Date | string): string {
   const days = ['일', '월', '화', '수', '목', '금', '토'];
   return days[d.getDay()];
 }
+
+/**
+ * 경과 시간(초)을 MM:SS 또는 H:MM:SS 포맷으로 변환
+ */
+export function formatElapsedTime(totalSeconds: number): string {
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  if (h > 0) {
+    return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}

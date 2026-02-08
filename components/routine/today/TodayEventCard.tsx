@@ -2,6 +2,7 @@
 
 import AppLink from '@/components/common/AppLink';
 import { BarbellIcon, ForkKnifeIcon, CaretRightIcon } from '@phosphor-icons/react';
+import { getStatusConfig } from '@/lib/config/eventTheme';
 import type { RoutineEvent, EventType, WorkoutData } from '@/lib/types/routine';
 import type { MealData } from '@/lib/types/meal';
 
@@ -72,10 +73,22 @@ export function TodayEventCard({ event, type }: TodayEventCardProps) {
 
       {/* 콘텐츠 */}
       <div className="flex-1 min-w-0 text-left">
-        <h3 className="text-base font-semibold text-foreground truncate">
-          {event.title}
-        </h3>
-        <p className="text-sm text-muted-foreground mt-1">
+        <div className="flex items-center gap-2 mb-0.5">
+          <h3 className="text-base font-semibold text-foreground truncate">
+            {event.title}
+          </h3>
+          {(() => {
+            const status = getStatusConfig(event.status);
+            const StatusIcon = status.icon;
+            return (
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${status.badgeClass}`}>
+                <StatusIcon className="w-3 h-3" />
+                {status.label}
+              </span>
+            );
+          })()}
+        </div>
+        <p className="text-sm text-muted-foreground">
           {subtitle}
         </p>
       </div>

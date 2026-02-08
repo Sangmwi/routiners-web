@@ -323,7 +323,7 @@ main {
 /* Pulse loader */
 @keyframes pulse-fade {
   0%, 100% { opacity: 0; }
-  40%, 60% { opacity: 0.6; }
+  40%, 60% { opacity: 0.3; }
 }
 
 .pulse-bar {

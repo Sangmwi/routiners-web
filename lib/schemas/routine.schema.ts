@@ -32,23 +32,9 @@ export const ChatRoleSchema = z.enum(['user', 'assistant', 'system'], {
   errorMap: () => ({ message: '유효하지 않은 채팅 역할입니다.' }),
 });
 
-export const ExerciseCategorySchema = z.enum([
-  'strength',
-  'cardio',
-  'flexibility',
-  'compound',
-  'isolation',
-]);
+export const ExerciseCategorySchema = z.string().max(20);
 
-export const WorkoutTypeSchema = z.enum([
-  'upper',
-  'lower',
-  'push',
-  'pull',
-  'full',
-  'cardio',
-  'rest',
-]);
+export const WorkoutTypeSchema = z.string().max(20);
 
 // ============================================================================
 // Workout Detail Schemas

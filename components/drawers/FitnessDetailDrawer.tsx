@@ -72,7 +72,7 @@ export default function FitnessDetailDrawer({
       position="bottom"
       enableSwipe
     >
-      <ModalBody className="space-y-1">
+      <ModalBody className="p-4 space-y-1">
         {/* 기본 정보 */}
         <div className="space-y-1">
           {renderInfoItem(

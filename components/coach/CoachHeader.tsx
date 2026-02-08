@@ -1,8 +1,9 @@
 'use client';
 
-import { ArrowLeftIcon, ListIcon, RobotIcon, BarbellIcon, HeartIcon, BrainIcon, LightningIcon } from '@phosphor-icons/react';
+import { ListIcon, RobotIcon, BarbellIcon, HeartIcon, BrainIcon, LightningIcon } from '@phosphor-icons/react';
 import { useRouter } from 'next/navigation';
 import { DEFAULT_COACH_PERSONA, type CoachPersona } from '@/lib/constants/aiChat';
+import HeaderShell, { HeaderBackButton } from '@/components/layouts/shared/HeaderShell';
 
 interface CoachHeaderProps {
   /** 메뉴 버튼 클릭 */
@@ -45,37 +46,28 @@ export default function CoachHeader({
 }: CoachHeaderProps) {
   const router = useRouter();
 
-  const handleBack = () => {
-    router.push('/routine');
-  };
-
   return (
-    <header className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-border bg-background">
+    <HeaderShell sticky={false} className="shrink-0">
       {/* 뒤로가기 */}
-      <button
-        onClick={handleBack}
-        className="p-2 -ml-2 rounded-full hover:bg-muted/50 active:bg-muted transition-colors"
-        aria-label="뒤로가기"
-      >
-        <ArrowLeftIcon size={24} className="text-foreground" />
-      </button>
+      <HeaderBackButton onClick={() => router.push('/routine')} />
 
       {/* 타이틀: 페르소나 아이콘 + 이름 */}
       <div className="flex items-center gap-2">
         <div className="w-7 h-7 rounded-full flex items-center justify-center bg-primary">
           <PersonaIcon iconType={persona.iconType} size={14} />
         </div>
-        <h1 className="text-lg font-semibold text-foreground">{persona.name}</h1>
+        <h1 className="text-lg font-bold text-foreground">{persona.name}</h1>
       </div>
 
       {/* 메뉴 버튼 */}
       <button
+        type="button"
         onClick={onMenuClick}
-        className="p-2 -mr-2 rounded-full hover:bg-muted/50 active:bg-muted transition-colors"
+        className="p-1 -mr-1 hover:bg-muted/50 rounded-lg transition-colors"
         aria-label="채팅 목록"
       >
         <ListIcon size={24} className="text-foreground" />
       </button>
-    </header>
+    </HeaderShell>
   );
 }

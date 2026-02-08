@@ -139,7 +139,7 @@ export default function InBodyScanModal({
       position={modalPosition}
       enableSwipe={state === 'idle'}
     >
-      <ModalBody className="min-h-[300px]">
+      <ModalBody className="p-6 min-h-[300px]">
         {/* 초기 상태: 이미지 선택 */}
         {state === 'idle' && (
           <div className="flex flex-col items-center justify-center py-8 space-y-6">

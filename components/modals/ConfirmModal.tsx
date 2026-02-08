@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { ErrorIcon, LoadingSpinner } from '@/components/ui/icons';
 import Modal, { ModalBody } from '@/components/ui/Modal';
-import Button from '@/components/ui/Button';
 import { useShowError } from '@/lib/stores/errorStore';
 import type { ModalDataMap } from '@/lib/stores/modalStore';
 
@@ -76,7 +75,7 @@ export default function ConfirmModal({
       closeOnEsc={false}
       size="sm"
     >
-      <ModalBody>
+      <ModalBody className="p-6">
         {showLoadingUI ? (
           // 로딩 UI
           <div className="text-center py-4">
@@ -87,40 +86,40 @@ export default function ConfirmModal({
           </div>
         ) : (
           // 기본 확인 UI
-          <div className="text-center">
+          <div className="space-y-4">
             {/* 아이콘 (위험 작업일 때만) */}
             {variant === 'danger' && (
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted">
                 <ErrorIcon size="lg" className="text-foreground" />
               </div>
             )}
 
             {/* 제목 */}
-            <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+            <h3 className="text-lg font-bold text-foreground">{title}</h3>
 
             {/* 메시지 */}
-            <p className="mt-2 text-sm text-muted-foreground">{message}</p>
+            <p className="text-sm text-muted-foreground">{message}</p>
 
             {/* 버튼 */}
-            <div className="mt-6 flex gap-3">
-              <Button
-                variant="outline"
-                size="lg"
+            <div className="flex gap-3">
+              <button
                 onClick={handleCancel}
                 disabled={isLoading}
-                className="flex-1"
+                className="flex-1 py-3 rounded-xl font-medium bg-muted/50 text-foreground disabled:opacity-50"
               >
                 {cancelText}
-              </Button>
-              <Button
-                variant="primary"
-                size="lg"
+              </button>
+              <button
                 onClick={handleConfirm}
                 disabled={isLoading}
-                className="flex-1"
+                className={`flex-1 py-3 rounded-xl font-medium disabled:opacity-50 ${
+                  variant === 'danger'
+                    ? 'bg-destructive text-destructive-foreground'
+                    : 'bg-primary text-primary-foreground'
+                }`}
               >
                 {isLoading ? '처리 중...' : confirmText}
-              </Button>
+              </button>
             </div>
           </div>
         )}

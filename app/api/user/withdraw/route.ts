@@ -75,7 +75,10 @@ export const DELETE = withAuth(async (_request, { authUser, supabase }) => {
       }
     }
 
-    return NextResponse.json({ success: true });
+    const response = NextResponse.json({ success: true });
+    // 미들웨어 유저 존재 캐시 쿠키 삭제 (httpOnly라 클라이언트에서 삭제 불가)
+    response.cookies.delete('routiners_user_verified');
+    return response;
   } catch (error) {
     console.error('[Withdraw] Unexpected error:', error);
     return NextResponse.json(

@@ -99,7 +99,7 @@ export function WheelPicker({
 
       {/* Center highlight */}
       <div
-        className="absolute left-0 right-0 z-0 bg-primary/10 rounded-lg border-y border-primary/20"
+        className="absolute left-0 right-0 z-0 pointer-events-none bg-primary/10 rounded-lg border-y border-primary/20"
         style={{
           top: itemHeight * paddingItems,
           height: itemHeight,

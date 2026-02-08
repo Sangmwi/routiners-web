@@ -10,6 +10,7 @@
  */
 
 import { useState } from 'react';
+import { createClient } from '@/utils/supabase/client';
 import { useModalStore } from '@/lib/stores/modalStore';
 import { useWebViewCore } from './useWebViewCore';
 import { useWebViewAuth } from './useWebViewAuth';
@@ -58,6 +59,9 @@ export function useWithdrawal(): UseWithdrawalResult {
           if (isInWebView) {
             sendLogout();
           } else {
+            // 로컬 세션 정리 후 리다이렉트 (useLogout 패턴 동일)
+            const supabase = createClient();
+            await supabase.auth.signOut({ scope: 'local' });
             window.location.replace('/login');
           }
         } catch (error) {

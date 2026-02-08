@@ -197,7 +197,7 @@ export default function AddMealSheet({ isOpen, onClose, date }: AddMealSheetProp
       height="full"
       showCloseButton
     >
-      <ModalBody className="space-y-5 pb-32">
+      <ModalBody className="p-4 space-y-5 pb-32">
         {/* 식사 시간 선택 */}
         <div className="space-y-2">
           <h3 className="text-sm font-semibold">식사 시간</h3>

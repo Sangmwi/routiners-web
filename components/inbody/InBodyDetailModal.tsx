@@ -129,7 +129,7 @@ export default function InBodyDetailModal({
         ) : undefined
       }
     >
-      <ModalBody>
+      <ModalBody className="p-6">
         {/* 삭제 확인 */}
         {state === 'confirmDelete' && (
           <div className="flex flex-col items-center justify-center py-8 space-y-4">

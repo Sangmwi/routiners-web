@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState, type ReactNode } from 'react';
 import { use } from 'react';
 import dynamic from 'next/dynamic';
 import { DetailLayout } from '@/components/layouts';
@@ -25,12 +25,13 @@ interface MealPageProps {
  */
 export default function MealPage({ params }: MealPageProps) {
   const { date } = use(params);
+  const [headerAction, setHeaderAction] = useState<ReactNode>(null);
 
   return (
-    <DetailLayout title="식단 관리">
+    <DetailLayout title="식단 관리" action={headerAction}>
       <QueryErrorBoundary>
         <Suspense fallback={<PulseLoader />}>
-          <MealContent date={date} />
+          <MealContent date={date} onHeaderAction={setHeaderAction} />
         </Suspense>
       </QueryErrorBoundary>
     </DetailLayout>

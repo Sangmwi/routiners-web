@@ -144,7 +144,7 @@ export function UnitStep({
         height="full"
         size="lg"
       >
-        <ModalBody className="p-0">
+        <ModalBody>
           {/* Search input */}
           <div className="sticky top-0 bg-card px-4 pb-4 pt-2 border-b border-border">
             <div className="relative">

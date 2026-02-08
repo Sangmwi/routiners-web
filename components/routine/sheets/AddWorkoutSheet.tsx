@@ -274,7 +274,7 @@ export default function AddWorkoutSheet({ isOpen, onClose, date }: AddWorkoutShe
       height="full"
       showCloseButton
     >
-      <ModalBody className="space-y-5 pb-32">
+      <ModalBody className="p-4 space-y-5 pb-32">
         {/* 운동 검색 */}
         <div className="space-y-3">
           <div className="relative">

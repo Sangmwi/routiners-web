@@ -29,7 +29,7 @@ export default function InBodyListModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="인바디 기록" size="lg">
-      <ModalBody className="min-h-[200px] p-0">
+      <ModalBody className="min-h-[200px]">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <LoadingSpinner size="xl" />

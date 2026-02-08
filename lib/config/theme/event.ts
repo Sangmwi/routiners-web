@@ -52,14 +52,14 @@ export const EVENT_STATUS = {
     label: '완료',
     icon: CheckCircleIcon,
     weight: ICON_WEIGHT.completed as IconWeight,    // fill
-    badgeClass: 'bg-primary text-primary-foreground',
+    badgeClass: 'bg-primary/10 text-primary',
     iconClass: 'text-primary',
   },
   skipped: {
     label: '건너뜀',
     icon: SkipForwardIcon,
     weight: ICON_WEIGHT.skipped as IconWeight,      // thin
-    badgeClass: 'bg-muted-foreground text-white',
+    badgeClass: 'bg-muted/50 text-muted-foreground',
     iconClass: 'text-muted-foreground',
   },
 } as const;

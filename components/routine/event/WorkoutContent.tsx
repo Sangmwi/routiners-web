@@ -13,12 +13,16 @@ import {
   useCompleteRoutineEvent,
   useSkipRoutineEvent,
   useUpdateWorkoutData,
+  useDeleteRoutineEvent,
 } from '@/hooks/routine';
+import { useWorkoutSession, clearPersistedTimer } from '@/hooks/routine/useWorkoutSession';
+import { ActiveWorkout, WorkoutComplete } from '@/components/routine/workout';
 import type { WorkoutSet, WorkoutData } from '@/lib/types/routine';
-import { CalendarIcon, PlusIcon, RobotIcon } from '@phosphor-icons/react';
+import { CalendarIcon, PlusIcon, RobotIcon, TrashIcon } from '@phosphor-icons/react';
 import { getEventConfig } from '@/lib/config/theme';
-import { formatKoreanDate } from '@/lib/utils/dateHelpers';
-import { useState } from 'react';
+import { formatKoreanDate, getToday } from '@/lib/utils/dateHelpers';
+import { useState, useEffect, useRef, type ReactNode } from 'react';
+import { useConfirmDialog } from '@/lib/stores/modalStore';
 import AddWorkoutSheet from '@/components/routine/sheets/AddWorkoutSheet';
 
 // ============================================================
@@ -40,34 +44,98 @@ function isWorkoutData(data: unknown): data is WorkoutData {
 
 interface WorkoutContentProps {
   date: string;
+  onTitleChange?: (title: string) => void;
+  onHeaderAction?: (action: ReactNode) => void;
 }
 
 /**
  * 운동 상세 콘텐츠 (Suspense 내부)
  *
- * - useSuspenseQuery로 운동 이벤트 조회
- * - 상위 page.tsx의 DetailLayout에서 Header + Suspense 처리
+ * Phase 기반 렌더링:
+ * - overview: 운동 목록 + 시작하기/건너뛰기 버튼
+ * - active: ActiveWorkout (full-screen overlay)
+ * - complete: WorkoutComplete (full-screen overlay)
  */
-export default function WorkoutContent({ date }: WorkoutContentProps) {
+export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: WorkoutContentProps) {
   const router = useRouter();
   const showError = useShowError();
+  const confirm = useConfirmDialog();
 
   // Suspense 버전 - { data } 구조분해 (null 가능)
   const { data: event } = useRoutineEventByDateSuspense(date, 'workout');
 
-  // 완료/건너뛰기 뮤테이션
+  // 뮤테이션
   const completeEvent = useCompleteRoutineEvent();
   const skipEvent = useSkipRoutineEvent();
   const updateWorkout = useUpdateWorkoutData();
+  const deleteEvent = useDeleteRoutineEvent();
 
   // 날짜 포맷 & 이벤트 설정
   const formattedDate = formatKoreanDate(date, { weekday: true });
   const eventConfig = getEventConfig('workout');
+  const isToday = date === getToday();
+
+  // 직접 추가 바텀시트
+  const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
+
+  // 운동 데이터 추출
+  const workoutData =
+    event && isWorkoutData(event.data) ? event.data : null;
+
+  // 워크아웃 세션 훅
+  const session = useWorkoutSession({
+    exercises: workoutData?.exercises ?? [],
+    eventId: event?.id ?? '',
+  });
+
+  // 삭제 핸들러 (ref로 최신 클로저 유지)
+  const handleDeleteRef = useRef(() => {});
+  handleDeleteRef.current = () => {
+    if (!event) return;
+    confirm({
+      title: '루틴을 삭제하시겠어요?',
+      message: '삭제하면 되돌릴 수 없어요.',
+      confirmText: '삭제',
+      onConfirm: async () => {
+        await deleteEvent.mutateAsync(event.id);
+        router.back();
+      },
+    });
+  };
+
+  // 헤더 타이틀 동적 업데이트
+  useEffect(() => {
+    if (event?.title && onTitleChange) {
+      onTitleChange(event.title);
+    }
+  }, [event?.title, onTitleChange]);
+
+  // 헤더 삭제 아이콘
+  useEffect(() => {
+    if (!onHeaderAction) return;
+    if (event) {
+      onHeaderAction(
+        <button
+          onClick={() => handleDeleteRef.current()}
+          className="p-1 text-muted-foreground"
+          aria-label="삭제"
+        >
+          <TrashIcon size={20} />
+        </button>
+      );
+    } else {
+      onHeaderAction(null);
+    }
+  }, [event?.id, onHeaderAction]);
 
   // 완료 처리
   const handleComplete = () => {
     if (!event) return;
     completeEvent.mutate(event.id, {
+      onSuccess: () => {
+        clearPersistedTimer();
+        router.back();
+      },
       onError: () => showError('운동 완료에 실패했어요'),
     });
   };
@@ -80,25 +148,19 @@ export default function WorkoutContent({ date }: WorkoutContentProps) {
     });
   };
 
-  // 세트 변경 처리
+  // 세트 변경 처리 (overview 모드에서 ExerciseCard 편집용)
   const handleSetsChange = (exerciseId: string, sets: WorkoutSet[]) => {
-    if (!event) return;
+    if (!event || !workoutData) return;
 
-    const currentData = isWorkoutData(event.data) ? event.data : null;
-    if (!currentData) return;
-
-    const updatedExercises = currentData.exercises.map((ex) =>
+    const updatedExercises = workoutData.exercises.map((ex) =>
       ex.id === exerciseId ? { ...ex, sets } : ex
     );
 
     updateWorkout.mutate(
-      { id: event.id, data: { ...currentData, exercises: updatedExercises } },
+      { id: event.id, data: { ...workoutData, exercises: updatedExercises } },
       { onError: () => showError('운동 기록 저장에 실패했어요') }
     );
   };
-
-  // 직접 추가 바텀시트
-  const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
 
   // 이벤트 없음 (예정된 운동 없음)
   if (!event) {
@@ -137,32 +199,41 @@ export default function WorkoutContent({ date }: WorkoutContentProps) {
     );
   }
 
-  // 운동 데이터 확인
-  const workoutData = isWorkoutData(event.data) ? event.data : null;
+  // ── Phase: Active ──
+  if (session.state.phase === 'active') {
+    return <ActiveWorkout session={session} />;
+  }
 
+  // ── Phase: Complete ──
+  if (session.state.phase === 'complete') {
+    return (
+      <WorkoutComplete
+        session={session}
+        onDone={handleComplete}
+        isLoading={completeEvent.isPending}
+      />
+    );
+  }
+
+  // ── Phase: Overview (기존 UI) ──
   return (
     <>
       <div className="space-y-8">
         {/* 헤더 섹션 */}
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-sm text-muted-foreground">{formattedDate}</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <eventConfig.icon size={18} className={eventConfig.color} weight="fill" />
+              <p className="text-sm text-muted-foreground">{formattedDate}</p>
+            </div>
             <EventStatusBadge status={event.status} />
           </div>
 
-          <div className="flex items-center gap-3">
-            <eventConfig.icon size={28} className={eventConfig.color} weight="fill" />
-            <div className="flex-1">
-              <h1 className="text-xl font-bold text-foreground">
-                {event.title}
-              </h1>
-              {event.rationale && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  {event.rationale}
-                </p>
-              )}
-            </div>
-          </div>
+          {event.rationale && (
+            <p className="text-sm text-muted-foreground mt-2">
+              {event.rationale}
+            </p>
+          )}
         </div>
 
         {/* 운동 목록 */}
@@ -207,9 +278,12 @@ export default function WorkoutContent({ date }: WorkoutContentProps) {
       <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 pb-safe bg-background border-t border-border">
         <EventActionButtons
           status={event.status}
-          onComplete={handleComplete}
+          mode="start"
+          onStart={session.startWorkout}
           onSkip={handleSkip}
-          isLoading={completeEvent.isPending || skipEvent.isPending}
+          isLoading={skipEvent.isPending}
+          startDisabled={!isToday}
+          hasActiveSession={session.hasActiveSession}
         />
       </div>
     </>

@@ -93,7 +93,7 @@ export default function InBodyManageModal({
         size="lg"
         closeOnBackdrop={state === 'list'}
       >
-        <ModalBody className="min-h-[300px] p-0">
+        <ModalBody className="min-h-[300px]">
           {state === 'list' && (
             <>
               {isLoading ? (
