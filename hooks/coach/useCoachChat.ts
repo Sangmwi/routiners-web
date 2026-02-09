@@ -259,12 +259,27 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
 
   // ── 새 채팅 생성 ──
   const handleNewChat = async () => {
-    // 캐시에서 빈 세션(messageCount === 0) 찾기 → 있으면 재사용
     const cached = queryClient.getQueryData<CoachConversationsResponse>(
       queryKeys.coach.conversations()
     );
+
+    // 현재 세션이 이미 비어있으면 리셋만 (불필요한 세션 생성 방지)
+    if (conversationId) {
+      const currentItem = cached?.conversations.find(
+        (item) => item.conversation.id === conversationId
+      );
+      if (currentItem && !currentItem.lastMessage && !currentItem.hasActivePurpose) {
+        dispatch({ type: 'RESET_ALL' });
+        return;
+      }
+    }
+
+    // 다른 빈 세션이 있으면 재사용
     const emptySession = cached?.conversations.find(
-      (item) => (item.conversation.metadata?.messageCount ?? 0) === 0
+      (item) =>
+        item.conversation.id !== conversationId &&
+        !item.lastMessage &&
+        !item.hasActivePurpose
     );
 
     if (emptySession) {

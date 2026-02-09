@@ -39,7 +39,7 @@ export function useCoachDrawer({ conversationId, onNewChat }: UseCoachDrawerOpti
       message: '이 대화를 삭제할까요?\n삭제된 대화는 복구할 수 없어요.',
       confirmText: '삭제',
       cancelText: '취소',
-      variant: 'danger',
+      variant: 'default',
       onConfirm: async () => {
         await deleteConversation.mutateAsync(id);
         // 현재 대화 삭제 시 새 채팅 화면으로 이동

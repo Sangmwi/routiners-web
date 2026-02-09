@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ErrorIcon, LoadingSpinner } from '@/components/ui/icons';
+import { LoadingSpinner } from '@/components/ui/icons';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import { useShowError } from '@/lib/stores/errorStore';
 import type { ModalDataMap } from '@/lib/stores/modalStore';
@@ -87,13 +87,6 @@ export default function ConfirmModal({
         ) : (
           // 기본 확인 UI
           <div className="space-y-4">
-            {/* 아이콘 (위험 작업일 때만) */}
-            {variant === 'danger' && (
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                <ErrorIcon size="lg" className="text-foreground" />
-              </div>
-            )}
-
             {/* 제목 */}
             <h3 className="text-lg font-bold text-foreground">{title}</h3>
 
