@@ -5,6 +5,7 @@ import { WorkoutExercise, WorkoutSet } from '@/lib/types/routine';
 import { CaretDownIcon, CaretUpIcon, PencilSimpleIcon, CheckIcon } from '@phosphor-icons/react';
 import { getEventIcon } from '@/lib/config/eventTheme';
 import SetValuePicker from '@/components/routine/workout/SetValuePicker';
+import { useSetValuePicker } from '@/hooks/routine/useSetValuePicker';
 
 interface ExerciseCardProps {
   exercise: WorkoutExercise;
@@ -30,7 +31,7 @@ export default function ExerciseCard({
   onSetsChange,
 }: ExerciseCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [pickerSetIndex, setPickerSetIndex] = useState<number | null>(null);
+  const { pickerSetIndex, pickerSet, openPicker, closePicker } = useSetValuePicker(exercise.sets);
 
   const handlePickerConfirm = (weight: number, reps: number) => {
     if (pickerSetIndex === null) return;
@@ -40,7 +41,7 @@ export default function ExerciseCard({
         : set
     );
     onSetsChange?.(exercise.id, newSets);
-    setPickerSetIndex(null);
+    closePicker();
   };
 
   const handleSetCompleted = (setIndex: number) => {
@@ -52,21 +53,25 @@ export default function ExerciseCard({
     onSetsChange?.(exercise.id, newSets);
   };
 
-  // 실제 수행 데이터 요약
-  const getActualSummary = () => {
-    const completedSets = exercise.sets.filter(s => s.completed || s.actualReps);
-    if (completedSets.length === 0) return null;
+  // 세트 요약 (actual > target 우선, 범위 표시)
+  const completedSetCount = exercise.sets.filter(s => s.completed).length;
 
-    const totalActualReps = completedSets.reduce((sum, s) => sum + (s.actualReps ?? 0), 0);
-    const avgWeight = completedSets.length > 0
-      ? Math.round(completedSets.reduce((sum, s) => sum + (s.actualWeight ?? s.targetWeight ?? 0), 0) / completedSets.length)
-      : 0;
+  const setsSummary = (() => {
+    const reps = exercise.sets.map(s => s.actualReps ?? s.targetReps);
+    const weights = exercise.sets.map(s => s.actualWeight ?? s.targetWeight ?? 0);
 
-    return `${completedSets.length}/${exercise.sets.length}세트 완료 • ${totalActualReps}회 • ${avgWeight}kg`;
-  };
+    const minReps = Math.min(...reps);
+    const maxReps = Math.max(...reps);
+    const minWeight = Math.min(...weights);
+    const maxWeight = Math.max(...weights);
 
-  const actualSummary = getActualSummary();
-  const pickerSet = pickerSetIndex !== null ? exercise.sets[pickerSetIndex] : null;
+    const repsStr = minReps === maxReps ? `${minReps}회` : `${minReps}~${maxReps}회`;
+    const weightStr = maxWeight > 0
+      ? (minWeight === maxWeight ? `${maxWeight}kg` : `${minWeight}~${maxWeight}kg`)
+      : '';
+
+    return `${exercise.sets.length}세트 • ${repsStr}${weightStr ? ` • ${weightStr}` : ''}`;
+  })();
 
   return (
     <div
@@ -92,12 +97,12 @@ export default function ExerciseCard({
         <div className="flex-1 text-left">
           <h3 className="font-semibold text-foreground">{exercise.name}</h3>
           <p className="text-sm text-muted-foreground">
-            {exercise.sets.length}세트 •{' '}
-            {exercise.sets[0]?.targetReps ?? '-'}회
-            {exercise.sets[0]?.targetWeight ? ` • ${exercise.sets[0].targetWeight}kg` : ''}
+            {setsSummary}
           </p>
-          <p className={`text-xs mt-0.5 ${actualSummary ? 'text-primary' : 'text-muted-foreground/50'}`}>
-            {actualSummary ? `✓ ${actualSummary}` : `0/${exercise.sets.length}세트 완료`}
+          <p className={`text-xs mt-0.5 ${completedSetCount > 0 ? 'text-primary' : 'text-muted-foreground/50'}`}>
+            {completedSetCount > 0
+              ? `✓ ${completedSetCount}/${exercise.sets.length}세트 완료`
+              : `0/${exercise.sets.length}세트 완료`}
           </p>
         </div>
 
@@ -119,7 +124,7 @@ export default function ExerciseCard({
                     key={set.setNumber}
                     set={set}
                     onToggleComplete={() => handleSetCompleted(setIndex)}
-                    onTapEdit={() => setPickerSetIndex(setIndex)}
+                    onTapEdit={() => openPicker(setIndex)}
                   />
                 ))
               : exercise.sets.map((set) => (
@@ -144,7 +149,7 @@ export default function ExerciseCard({
       {pickerSet && pickerSetIndex !== null && (
         <SetValuePicker
           isOpen={true}
-          onClose={() => setPickerSetIndex(null)}
+          onClose={closePicker}
           title={`${pickerSet.setNumber}세트`}
           weight={pickerSet.actualWeight ?? pickerSet.targetWeight ?? 0}
           reps={pickerSet.actualReps ?? pickerSet.targetReps ?? 10}

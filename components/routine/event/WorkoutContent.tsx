@@ -2,41 +2,19 @@
 
 import { useRouter } from 'next/navigation';
 import EmptyState from '@/components/common/EmptyState';
-import { useShowError } from '@/lib/stores/errorStore';
 import {
   ExerciseCard,
   EventStatusBadge,
   EventActionButtons,
 } from '@/components/routine';
-import {
-  useRoutineEventByDateSuspense,
-  useCompleteRoutineEvent,
-  useSkipRoutineEvent,
-  useUpdateWorkoutData,
-  useDeleteRoutineEvent,
-} from '@/hooks/routine';
-import { useWorkoutSession, clearPersistedTimer } from '@/hooks/routine/useWorkoutSession';
+import { useWorkoutSession } from '@/hooks/routine/useWorkoutSession';
+import { useWorkoutEvent } from '@/hooks/routine/useWorkoutEvent';
 import { ActiveWorkout, WorkoutComplete } from '@/components/routine/workout';
-import type { WorkoutSet, WorkoutData } from '@/lib/types/routine';
 import { CalendarIcon, PlusIcon, RobotIcon, TrashIcon } from '@phosphor-icons/react';
 import { getEventConfig } from '@/lib/config/theme';
 import { formatKoreanDate, getToday } from '@/lib/utils/dateHelpers';
 import { useState, useEffect, useRef, type ReactNode } from 'react';
-import { useConfirmDialog } from '@/lib/stores/modalStore';
 import AddWorkoutSheet from '@/components/routine/sheets/AddWorkoutSheet';
-
-// ============================================================
-// Type Guard
-// ============================================================
-
-function isWorkoutData(data: unknown): data is WorkoutData {
-  return (
-    data !== null &&
-    typeof data === 'object' &&
-    'exercises' in data &&
-    Array.isArray((data as WorkoutData).exercises)
-  );
-}
 
 // ============================================================
 // Content Component (Suspense 내부)
@@ -58,17 +36,18 @@ interface WorkoutContentProps {
  */
 export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: WorkoutContentProps) {
   const router = useRouter();
-  const showError = useShowError();
-  const confirm = useConfirmDialog();
 
-  // Suspense 버전 - { data } 구조분해 (null 가능)
-  const { data: event } = useRoutineEventByDateSuspense(date, 'workout');
-
-  // 뮤테이션
-  const completeEvent = useCompleteRoutineEvent();
-  const skipEvent = useSkipRoutineEvent();
-  const updateWorkout = useUpdateWorkoutData();
-  const deleteEvent = useDeleteRoutineEvent();
+  // 데이터 + 뮤테이션 로직
+  const {
+    event,
+    workoutData,
+    handleDelete,
+    handleComplete,
+    handleSkip,
+    handleSetsChange,
+    isCompleting,
+    isSkipping,
+  } = useWorkoutEvent(date);
 
   // 날짜 포맷 & 이벤트 설정
   const formattedDate = formatKoreanDate(date, { weekday: true });
@@ -78,30 +57,16 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
   // 직접 추가 바텀시트
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
 
-  // 운동 데이터 추출
-  const workoutData =
-    event && isWorkoutData(event.data) ? event.data : null;
-
   // 워크아웃 세션 훅
   const session = useWorkoutSession({
     exercises: workoutData?.exercises ?? [],
     eventId: event?.id ?? '',
+    date,
   });
 
   // 삭제 핸들러 (ref로 최신 클로저 유지)
-  const handleDeleteRef = useRef(() => {});
-  handleDeleteRef.current = () => {
-    if (!event) return;
-    confirm({
-      title: '루틴을 삭제하시겠어요?',
-      message: '삭제하면 되돌릴 수 없어요.',
-      confirmText: '삭제',
-      onConfirm: async () => {
-        await deleteEvent.mutateAsync(event.id);
-        router.back();
-      },
-    });
-  };
+  const handleDeleteRef = useRef(handleDelete);
+  handleDeleteRef.current = handleDelete;
 
   // 헤더 타이틀 동적 업데이트
   useEffect(() => {
@@ -128,40 +93,6 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
     }
   }, [event?.id, onHeaderAction]);
 
-  // 완료 처리
-  const handleComplete = () => {
-    if (!event) return;
-    completeEvent.mutate(event.id, {
-      onSuccess: () => {
-        clearPersistedTimer();
-        router.back();
-      },
-      onError: () => showError('운동 완료에 실패했어요'),
-    });
-  };
-
-  // 건너뛰기 처리
-  const handleSkip = () => {
-    if (!event) return;
-    skipEvent.mutate(event.id, {
-      onError: () => showError('운동 스킵에 실패했어요'),
-    });
-  };
-
-  // 세트 변경 처리 (overview 모드에서 ExerciseCard 편집용)
-  const handleSetsChange = (exerciseId: string, sets: WorkoutSet[]) => {
-    if (!event || !workoutData) return;
-
-    const updatedExercises = workoutData.exercises.map((ex) =>
-      ex.id === exerciseId ? { ...ex, sets } : ex
-    );
-
-    updateWorkout.mutate(
-      { id: event.id, data: { ...workoutData, exercises: updatedExercises } },
-      { onError: () => showError('운동 기록 저장에 실패했어요') }
-    );
-  };
-
   // 이벤트 없음 (예정된 운동 없음)
   if (!event) {
     return (
@@ -175,18 +106,18 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
           />
           <div className="flex flex-col gap-3 mt-6 px-4">
             <button
-              onClick={() => setIsAddSheetOpen(true)}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-primary text-primary-foreground"
-            >
-              <PlusIcon size={18} weight="bold" />
-              운동 직접 추가
-            </button>
-            <button
               onClick={() => router.push('/routine/coach')}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-muted/50 text-muted-foreground"
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-primary text-primary-foreground"
             >
               <RobotIcon size={18} />
               AI 코치에게 맡기기
+            </button>
+            <button
+              onClick={() => setIsAddSheetOpen(true)}
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-muted/50 text-muted-foreground"
+            >
+              <PlusIcon size={18} weight="bold" />
+              운동 직접 추가
             </button>
           </div>
         </div>
@@ -210,7 +141,7 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
       <WorkoutComplete
         session={session}
         onDone={handleComplete}
-        isLoading={completeEvent.isPending}
+        isLoading={isCompleting}
       />
     );
   }
@@ -281,7 +212,7 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
           mode="start"
           onStart={session.startWorkout}
           onSkip={handleSkip}
-          isLoading={skipEvent.isPending}
+          isLoading={isSkipping}
           startDisabled={!isToday}
           hasActiveSession={session.hasActiveSession}
         />

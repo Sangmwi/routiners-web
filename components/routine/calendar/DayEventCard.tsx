@@ -1,35 +1,11 @@
 'use client';
 
-import { RoutineEvent, WorkoutExercise, WorkoutData } from '@/lib/types/routine';
+import { RoutineEvent, WorkoutExercise } from '@/lib/types/routine';
 import { DotsThreeVerticalIcon } from '@phosphor-icons/react';
 import { getEventIcon, getStatusConfig } from '@/lib/config/eventTheme';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
-import type { MealData } from '@/lib/types/meal';
+import { isWorkoutData, isMealData } from '@/lib/types/guards';
 import AppLink from '@/components/common/AppLink';
-
-/**
- * 타입 가드: WorkoutData인지 확인
- */
-function isWorkoutData(data: unknown): data is WorkoutData {
-  return (
-    data !== null &&
-    typeof data === 'object' &&
-    'exercises' in data &&
-    Array.isArray((data as WorkoutData).exercises)
-  );
-}
-
-/**
- * 타입 가드: MealData인지 확인
- */
-function isMealData(data: unknown): data is MealData {
-  return (
-    data !== null &&
-    typeof data === 'object' &&
-    'meals' in data &&
-    Array.isArray((data as MealData).meals)
-  );
-}
 
 interface DayEventCardProps {
   event: RoutineEvent | null;

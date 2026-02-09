@@ -10,6 +10,9 @@ export * from './queries';
 // Mutation Hooks
 export * from './mutations';
 
+// Cache Utilities
+export { useSeedEventCache } from './useSeedEventCache';
+
 // Legacy re-export (deprecated - use queries.ts and mutations.ts directly)
 export * from './useRoutineEvents';
 export * from './useWeeklyStats';

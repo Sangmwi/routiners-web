@@ -3,35 +3,11 @@
 import AppLink from '@/components/common/AppLink';
 import { BarbellIcon, ForkKnifeIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { formatDate, getDayOfWeek } from '@/lib/utils/dateHelpers';
-import type { RoutineEvent, WorkoutData } from '@/lib/types/routine';
-import type { MealData } from '@/lib/types/meal';
+import type { RoutineEvent } from '@/lib/types/routine';
+import { isWorkoutData, isMealData } from '@/lib/types/guards';
 
 interface UpcomingEventItemProps {
   event: RoutineEvent;
-}
-
-/**
- * 타입 가드: WorkoutData인지 확인
- */
-function isWorkoutData(data: unknown): data is WorkoutData {
-  return (
-    data !== null &&
-    typeof data === 'object' &&
-    'exercises' in data &&
-    Array.isArray((data as WorkoutData).exercises)
-  );
-}
-
-/**
- * 타입 가드: MealData인지 확인
- */
-function isMealData(data: unknown): data is MealData {
-  return (
-    data !== null &&
-    typeof data === 'object' &&
-    'meals' in data &&
-    Array.isArray((data as MealData).meals)
-  );
 }
 
 /**

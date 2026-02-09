@@ -17,24 +17,11 @@ import {
 } from '@/hooks/routine';
 import { CalendarIcon, PlusIcon, RobotIcon, TrashIcon } from '@phosphor-icons/react';
 import { getEventConfig } from '@/lib/config/theme';
-import type { MealData } from '@/lib/types/meal';
+import { isMealData } from '@/lib/types/guards';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 import { useState, useEffect, useRef, type ReactNode } from 'react';
 import { useConfirmDialog } from '@/lib/stores/modalStore';
 import AddMealSheet from '@/components/routine/sheets/AddMealSheet';
-
-// ============================================================
-// Type Guard
-// ============================================================
-
-function isMealData(data: unknown): data is MealData {
-  return (
-    data !== null &&
-    typeof data === 'object' &&
-    'meals' in data &&
-    Array.isArray((data as MealData).meals)
-  );
-}
 
 // ============================================================
 // Content Component (Suspense 내부)

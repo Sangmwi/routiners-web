@@ -10,6 +10,8 @@ interface SwipeState {
   startY: number | null;
   deltaY: number;
   isDragging: boolean;
+  lastY: number | null;
+  lastTime: number | null;
 }
 
 interface UseSwipeGestureReturn {
@@ -52,6 +54,8 @@ export function useSwipeGesture(
     startY: null,
     deltaY: 0,
     isDragging: false,
+    lastY: null,
+    lastTime: null,
   });
   const [isSwipeClosing, setIsSwipeClosing] = useState(false);
   const [isSnappingBack, setIsSnappingBack] = useState(false);
@@ -59,7 +63,7 @@ export function useSwipeGesture(
   const handleDragStart = useCallback(
     (clientY: number) => {
       if (!enabled) return;
-      setState({ startY: clientY, deltaY: 0, isDragging: true });
+      setState({ startY: clientY, deltaY: 0, isDragging: true, lastY: clientY, lastTime: Date.now() });
     },
     [enabled]
   );
@@ -68,7 +72,7 @@ export function useSwipeGesture(
     setState((prev) => {
       if (!prev.isDragging || prev.startY === null) return prev;
       const delta = clientY - prev.startY;
-      return { ...prev, deltaY: delta > 0 ? delta : 0 };
+      return { ...prev, deltaY: delta > 0 ? delta : 0, lastY: clientY, lastTime: Date.now() };
     });
   }, []);
 
@@ -76,9 +80,13 @@ export function useSwipeGesture(
     setState((prev) => {
       if (!prev.isDragging) return prev;
 
-      if (prev.deltaY > threshold) {
-        // 스와이프 닫기: isSwipeClosing=true 유지한 채 onSwipeClose 호출
-        // isSwipeClosing은 모달 닫힌 후 reset()에서 리셋됨
+      // 스와이프 속도 계산 (px/ms)
+      const now = Date.now();
+      const timeDiff = prev.lastTime ? now - prev.lastTime : 100;
+      const velocity = timeDiff > 0 ? prev.deltaY / Math.max(timeDiff, 50) : 0;
+
+      if (prev.deltaY > threshold || (prev.deltaY > 30 && velocity > 0.5)) {
+        // 스와이프 닫기: 임계치 초과 또는 빠른 스와이프(30px 이상 + 속도 0.5px/ms 이상)
         setIsSwipeClosing(true);
         onSwipeClose();
       } else if (prev.deltaY > 0) {
@@ -87,12 +95,12 @@ export function useSwipeGesture(
         setTimeout(() => setIsSnappingBack(false), ANIMATION_DURATION);
       }
 
-      return { startY: null, deltaY: 0, isDragging: false };
+      return { startY: null, deltaY: 0, isDragging: false, lastY: null, lastTime: null };
     });
   }, [threshold, onSwipeClose]);
 
   const reset = useCallback(() => {
-    setState({ startY: null, deltaY: 0, isDragging: false });
+    setState({ startY: null, deltaY: 0, isDragging: false, lastY: null, lastTime: null });
     setIsSwipeClosing(false);
     setIsSnappingBack(false);
   }, []);
@@ -106,7 +114,7 @@ export function useSwipeGesture(
     onMouseUp: handleDragEnd,
     onMouseLeave: () => {
       if (state.isDragging) {
-        setState({ startY: null, deltaY: 0, isDragging: false });
+        setState({ startY: null, deltaY: 0, isDragging: false, lastY: null, lastTime: null });
       }
     },
   };

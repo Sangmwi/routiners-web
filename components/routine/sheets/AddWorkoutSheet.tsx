@@ -4,16 +4,19 @@ import { useState } from 'react';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import {
   MagnifyingGlassIcon,
-  PlusIcon,
-  MinusIcon,
   TrashIcon,
   SpinnerGapIcon,
   XIcon,
+  PencilSimpleIcon,
+  TimerIcon,
 } from '@phosphor-icons/react';
+import SetValuePicker from '@/components/routine/workout/SetValuePicker';
 import { useCreateRoutineEvent } from '@/hooks/routine';
+import { useSetValuePicker } from '@/hooks/routine/useSetValuePicker';
 import { useShowError } from '@/lib/stores/errorStore';
 import { useRouter } from 'next/navigation';
 import { searchExercises, generateWorkoutTitle, EXERCISE_CATEGORIES } from '@/lib/data/exercises';
+import { REST_OPTIONS, formatRestSeconds } from '@/lib/utils/workoutHelpers';
 import type { ExerciseCategory, ExerciseInfo } from '@/lib/data/exercises';
 import type { WorkoutExercise, WorkoutSet, RoutineEventCreateData } from '@/lib/types/routine';
 
@@ -42,6 +45,7 @@ function catalogToExercise(info: ExerciseInfo): WorkoutExercise {
     category: info.category,
     targetMuscle: info.targetMuscle,
     sets: [createWorkoutSet(1), createWorkoutSet(2), createWorkoutSet(3)],
+    restSeconds: 60,
   };
 }
 
@@ -49,61 +53,27 @@ function catalogToExercise(info: ExerciseInfo): WorkoutExercise {
 // Sub Components
 // ============================================================================
 
-interface NumberStepperProps {
-  value: number;
-  onChange: (v: number) => void;
-  min?: number;
-  step?: number;
-  suffix?: string;
-}
-
-function NumberStepper({ value, onChange, min = 0, step = 1, suffix }: NumberStepperProps) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <button
-        type="button"
-        onClick={() => onChange(Math.max(min, value - step))}
-        className="w-7 h-7 flex items-center justify-center rounded-full bg-muted/50 text-muted-foreground active:bg-muted"
-      >
-        <MinusIcon size={14} />
-      </button>
-      <span className="w-12 text-center text-sm font-medium tabular-nums">
-        {value}{suffix}
-      </span>
-      <button
-        type="button"
-        onClick={() => onChange(value + step)}
-        className="w-7 h-7 flex items-center justify-center rounded-full bg-muted/50 text-muted-foreground active:bg-muted"
-      >
-        <PlusIcon size={14} />
-      </button>
-    </div>
-  );
-}
-
 interface ExerciseSetRowProps {
   set: WorkoutSet;
-  onChange: (updated: WorkoutSet) => void;
+  onTapEdit: () => void;
   onRemove: () => void;
   canRemove: boolean;
 }
 
-function ExerciseSetRow({ set, onChange, onRemove, canRemove }: ExerciseSetRowProps) {
+function ExerciseSetRow({ set, onTapEdit, onRemove, canRemove }: ExerciseSetRowProps) {
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-xs text-muted-foreground w-8">S{set.setNumber}</span>
-      <NumberStepper
-        value={set.targetReps}
-        onChange={(v) => onChange({ ...set, targetReps: v })}
-        min={1}
-        suffix="회"
-      />
-      <NumberStepper
-        value={set.targetWeight ?? 0}
-        onChange={(v) => onChange({ ...set, targetWeight: v })}
-        step={2.5}
-        suffix="kg"
-      />
+    <div className="flex items-center gap-3 rounded-xl bg-muted/20 px-4 py-3">
+      <span className="text-xs text-muted-foreground shrink-0">{set.setNumber}세트</span>
+      <button
+        type="button"
+        onClick={onTapEdit}
+        className="flex-1 h-9 px-3 flex items-center justify-center gap-2 text-sm font-medium bg-background border border-border rounded-lg active:bg-muted/50 transition-colors"
+      >
+        <span className="tabular-nums">{set.targetWeight ?? 0}kg</span>
+        <span className="text-muted-foreground">×</span>
+        <span className="tabular-nums">{set.targetReps}회</span>
+        <PencilSimpleIcon size={14} className="text-muted-foreground ml-1" />
+      </button>
       {canRemove && (
         <button
           type="button"
@@ -124,10 +94,17 @@ interface SelectedExerciseCardProps {
 }
 
 function SelectedExerciseCard({ exercise, onUpdate, onRemove }: SelectedExerciseCardProps) {
-  const updateSet = (index: number, updated: WorkoutSet) => {
-    const sets = [...exercise.sets];
-    sets[index] = updated;
+  const { pickerSetIndex, pickerSet, openPicker, closePicker } = useSetValuePicker(exercise.sets);
+
+  const handlePickerConfirm = (weight: number, reps: number) => {
+    if (pickerSetIndex === null) return;
+    const sets = exercise.sets.map((set, idx) =>
+      idx === pickerSetIndex
+        ? { ...set, targetWeight: weight, targetReps: reps }
+        : set
+    );
     onUpdate({ ...exercise, sets });
+    closePicker();
   };
 
   const removeSet = (index: number) => {
@@ -144,7 +121,6 @@ function SelectedExerciseCard({ exercise, onUpdate, onRemove }: SelectedExercise
       sets: [
         ...exercise.sets,
         createWorkoutSet(exercise.sets.length + 1),
-        ...(lastSet ? [] : []),
       ].map((s, i) => ({
         ...s,
         setNumber: i + 1,
@@ -152,6 +128,13 @@ function SelectedExerciseCard({ exercise, onUpdate, onRemove }: SelectedExercise
         targetWeight: lastSet?.targetWeight ?? 20,
       })),
     });
+  };
+
+  const cycleRestSeconds = () => {
+    const current = exercise.restSeconds ?? 60;
+    const currentIndex = REST_OPTIONS.indexOf(current);
+    const nextIndex = (currentIndex + 1) % REST_OPTIONS.length;
+    onUpdate({ ...exercise, restSeconds: REST_OPTIONS[nextIndex] });
   };
 
   return (
@@ -171,20 +154,41 @@ function SelectedExerciseCard({ exercise, onUpdate, onRemove }: SelectedExercise
           <ExerciseSetRow
             key={set.setNumber}
             set={set}
-            onChange={(updated) => updateSet(i, updated)}
+            onTapEdit={() => openPicker(i)}
             onRemove={() => removeSet(i)}
             canRemove={exercise.sets.length > 1}
           />
         ))}
       </div>
 
-      <button
-        type="button"
-        onClick={addSet}
-        className="w-full py-1.5 text-xs text-primary font-medium"
-      >
-        + 세트 추가
-      </button>
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={addSet}
+          className="py-1.5 text-xs text-primary font-medium"
+        >
+          + 세트 추가
+        </button>
+        <button
+          type="button"
+          onClick={cycleRestSeconds}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-muted-foreground rounded-lg hover:bg-muted/30 transition-colors"
+        >
+          <TimerIcon size={14} />
+          <span>휴식 {formatRestSeconds(exercise.restSeconds ?? 60)}</span>
+        </button>
+      </div>
+
+      {pickerSet && pickerSetIndex !== null && (
+        <SetValuePicker
+          isOpen={true}
+          onClose={closePicker}
+          title={`${pickerSet.setNumber}세트`}
+          weight={pickerSet.targetWeight ?? 0}
+          reps={pickerSet.targetReps ?? 10}
+          onConfirm={handlePickerConfirm}
+        />
+      )}
     </div>
   );
 }

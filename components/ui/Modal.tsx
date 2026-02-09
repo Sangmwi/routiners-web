@@ -70,7 +70,7 @@ function getModalAnimationClass(
 
   if (isAnimating) {
     return isBottom
-      ? `${baseClass} animate-out slide-out-to-bottom duration-200`
+      ? baseClass // bottom sheet 닫기는 inline style transition으로 처리
       : `${baseClass} animate-out zoom-out-95 fade-out duration-200`;
   }
 
@@ -98,13 +98,23 @@ function getSwipeTransform(
   isDragging: boolean,
   deltaY: number,
   hasOpened: boolean,
-  hasEverDragged: boolean
+  hasEverDragged: boolean,
+  isAnimating: boolean
 ): React.CSSProperties | undefined {
   // 스와이프로 닫히는 중
   if (isSwipeClosing) {
     return {
       transform: 'translateY(100%)',
       transition: `transform ${ANIMATION_DURATION}ms ease-out`,
+    };
+  }
+
+  // backdrop 클릭/ESC 등으로 닫히는 중 (inline transition으로 처리)
+  if (isAnimating) {
+    return {
+      transform: 'translateY(100%)',
+      transition: `transform ${ANIMATION_DURATION}ms ease-out`,
+      animation: 'none',
     };
   }
 
@@ -227,7 +237,7 @@ export default function Modal({
   );
 
   const swipeStyle = isBottom
-    ? getSwipeTransform(swipe.isSwipeClosing, swipe.isSnappingBack, swipe.isDragging, swipe.deltaY, hasOpened, hasEverDragged)
+    ? getSwipeTransform(swipe.isSwipeClosing, swipe.isSnappingBack, swipe.isDragging, swipe.deltaY, hasOpened, hasEverDragged, isAnimating)
     : undefined;
 
   return (

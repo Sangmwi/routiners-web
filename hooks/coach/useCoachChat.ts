@@ -64,6 +64,8 @@ export interface UseCoachChatReturn {
   isFetchingNextPage: boolean;
   /** 메시지 초기 로딩 중 여부 */
   isMessagesLoading: boolean;
+  /** 활성 대화 탐색 중 (id 없이 진입 시) */
+  isInitializing: boolean;
   /** 메시지 refetch 중 여부 (스트리밍 완료 후 DB 동기화) */
   isRefetching: boolean;
 
@@ -125,7 +127,7 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
   const activePurpose = conversation?.metadata?.activePurpose;
 
   // 활성 대화 조회 (id 없이 진입 시 리다이렉트용)
-  const { data: activeConversationData } = useActiveCoachConversation();
+  const { data: activeConversationData, isPending: isActiveConvPending } = useActiveCoachConversation();
 
   // ── 활성 대화 리다이렉트 ──
   useEffect(() => {
@@ -335,6 +337,7 @@ export function useCoachChat(initialConversationId?: string): UseCoachChatReturn
     hasNextPage: messagesQuery.hasNextPage ?? false,
     isFetchingNextPage: messagesQuery.isFetchingNextPage,
     isMessagesLoading: messagesQuery.isLoading,
+    isInitializing: !initialConversationId && isActiveConvPending,
     isRefetching: messagesQuery.isFetching && !messagesQuery.isPending,
 
     handleSend,

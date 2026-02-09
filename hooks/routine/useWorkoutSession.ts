@@ -91,6 +91,7 @@ type WorkoutAction =
 interface UseWorkoutSessionOptions {
   exercises: WorkoutExercise[];
   eventId: string;
+  date: string;
 }
 
 export interface WorkoutSessionReturn {
@@ -322,6 +323,7 @@ function workoutReducer(
 export function useWorkoutSession({
   exercises,
   eventId,
+  date,
 }: UseWorkoutSessionOptions): WorkoutSessionReturn {
   // localStorage에서 타이머 복원
   const savedTimer = useRef(restoreTimer(eventId));
@@ -414,6 +416,8 @@ export function useWorkoutSession({
       updateWorkout.mutate({
         id: eventId,
         data: { exercises: exercisesRef.current },
+        date,
+        type: 'workout',
       });
     }, 500);
 
@@ -472,6 +476,8 @@ export function useWorkoutSession({
       updateWorkout.mutate({
         id: eventId,
         data: { exercises: exercisesRef.current, elapsedSeconds: elapsed },
+        date,
+        type: 'workout',
       });
     }, 60000);
 
@@ -489,6 +495,8 @@ export function useWorkoutSession({
     updateWorkout.mutate({
       id: eventId,
       data: { exercises: exercisesRef.current, elapsedSeconds: finalElapsed },
+      date,
+      type: 'workout',
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.phase, state.completedAt]);

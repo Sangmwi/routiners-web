@@ -5,8 +5,11 @@ import {
   RoutineEventCreateData,
   RoutineEventUpdateData,
   RoutineBatchCreateData,
+  RoutineEvent,
+  EventType,
   WorkoutData,
 } from '@/lib/types/routine';
+import { queryKeys } from '@/lib/constants/queryKeys';
 import { routineEventApi } from '@/lib/api/routineEvent';
 import {
   updateEventCacheAndInvalidate,
@@ -149,17 +152,44 @@ export function useSkipRoutineEvent() {
 export function useUpdateWorkoutData() {
   const queryClient = useQueryClient();
 
+  type Vars = { id: string; data: WorkoutData; date: string; type: EventType };
+
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: WorkoutData }) =>
+    mutationFn: ({ id, data }: Vars) =>
       routineEventApi.updateWorkoutData(id, data),
 
+    onMutate: async ({ id, data, date, type }: Vars) => {
+      const byDateKey = queryKeys.routineEvent.byDate(date, type);
+      const detailKey = queryKeys.routineEvent.detail(id);
+
+      // 진행 중인 refetch 취소 (낙관적 업데이트와 충돌 방지)
+      await queryClient.cancelQueries({ queryKey: byDateKey });
+      await queryClient.cancelQueries({ queryKey: detailKey });
+
+      // byDate 캐시에서 이벤트 조회 (상세 페이지가 이 키를 사용)
+      const previousEvent =
+        queryClient.getQueryData<RoutineEvent>(byDateKey) ??
+        queryClient.getQueryData<RoutineEvent>(detailKey);
+
+      // 캐시를 낙관적으로 업데이트
+      if (previousEvent) {
+        const optimistic = { ...previousEvent, data };
+        queryClient.setQueryData(byDateKey, optimistic);
+        queryClient.setQueryData(detailKey, optimistic);
+      }
+
+      return { previousEvent };
+    },
+
     onSuccess: (updatedEvent) => {
-      // 상세 + 날짜별 캐시 업데이트 (목록 무효화는 불필요 - workout_data만 변경)
       updateEventCache(queryClient, updatedEvent);
     },
 
-    onError: (error) => {
+    onError: (error, _vars, context) => {
       console.error('[RoutineEvent] Workout data update failed:', error);
+      if (context?.previousEvent) {
+        updateEventCache(queryClient, context.previousEvent);
+      }
     },
   });
 }

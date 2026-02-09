@@ -22,6 +22,7 @@ interface WorkoutPageProps {
  * - DetailLayout + Header: 즉시 렌더링 (동적 타이틀)
  * - QueryErrorBoundary: 에러 처리
  * - Suspense: 데이터 로딩 처리
+ * - WorkoutContent: ssr: false (authFetch 상대경로 SSR 호환 문제 방지)
  */
 export default function WorkoutPage({ params }: WorkoutPageProps) {
   const { date } = use(params);

@@ -8,6 +8,7 @@ import {
   useWeeklyStatsSuspense,
   useUpcomingEventsSuspense,
   useRoutineEventByDateSuspense,
+  useSeedEventCache,
 } from '@/hooks/routine';
 import { useActiveCoachConversation } from '@/hooks/coach';
 import { formatDate } from '@/lib/utils/dateHelpers';
@@ -34,6 +35,10 @@ export default function RoutineContent() {
   // 미래 이벤트 조회 (다가오는 루틴용)
   const { data: workoutEvents } = useUpcomingEventsSuspense('workout', 0, 14);
   const { data: mealEvents } = useUpcomingEventsSuspense('meal', 0, 14);
+
+  // 리스트 데이터 → 개별 byDate 캐시 시딩 (상세 페이지 즉시 전환용)
+  useSeedEventCache(workoutEvents);
+  useSeedEventCache(mealEvents);
 
   // 활성 코치 대화 확인 (non-blocking)
   const { data: activeConversation } = useActiveCoachConversation();

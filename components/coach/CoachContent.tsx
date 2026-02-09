@@ -62,6 +62,7 @@ export default function CoachContent({ isDrawerOpen, onDrawerClose }: CoachConte
     editProfile,
     cancelProfile,
     isMessagesLoading,
+    isInitializing,
     isRefetching,
     sendMessage,
     refetchMessages,
@@ -130,8 +131,8 @@ export default function CoachContent({ isDrawerOpen, onDrawerClose }: CoachConte
 
   // 표시 조건
   // 낙관적 메시지(isStreaming 중 pendingUserMessage)가 있으면 로딩 상태여도 채팅 표시
-  const showChatLoader = isMessagesLoading && !isStreaming && messages.length === 0;
-  const showWelcome = messages.length === 0 && !isStreaming && !isMessagesLoading;
+  const showChatLoader = (isMessagesLoading || isInitializing) && !isStreaming && messages.length === 0;
+  const showWelcome = messages.length === 0 && !isStreaming && !isMessagesLoading && !isInitializing;
   
   // Phase 9: 메시지에서 pending 상태의 트랜지언트 UI 체크
   const hasPendingInteraction = messages.some(m => {
@@ -165,7 +166,7 @@ export default function CoachContent({ isDrawerOpen, onDrawerClose }: CoachConte
         ) : (
           <ChatMessageList
             messages={messages}
-            isLoading={isStreaming || isRefetching}
+            isLoading={isStreaming}
             streamingContent={streamingContent}
             activeTools={activeTools}
             onMessageAction={handleMessageAction}

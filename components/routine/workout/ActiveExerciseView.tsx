@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { BarbellIcon } from '@phosphor-icons/react';
 import SetRow from './SetRow';
 import SetValuePicker from './SetValuePicker';
+import { useSetValuePicker } from '@/hooks/routine/useSetValuePicker';
 import type { WorkoutExercise } from '@/lib/types/routine';
 
 // AI가 영어로 생성하는 값 → 한국어 매핑
@@ -68,22 +68,14 @@ export default function ActiveExerciseView({
   onUpdateSetValue,
 }: ActiveExerciseViewProps) {
   const completedSets = exercise.sets.filter((s) => s.completed).length;
-
-  // SetValuePicker 상태
-  const [pickerSetIndex, setPickerSetIndex] = useState<number | null>(null);
-
-  const handleTapToEdit = (setIndex: number) => {
-    setPickerSetIndex(setIndex);
-  };
+  const { pickerSetIndex, pickerSet, openPicker, closePicker } = useSetValuePicker(exercise.sets);
 
   const handlePickerConfirm = (weight: number, reps: number) => {
     if (pickerSetIndex === null) return;
     onUpdateSetValue(pickerSetIndex, 'actualWeight', weight || undefined);
     onUpdateSetValue(pickerSetIndex, 'actualReps', reps || undefined);
-    setPickerSetIndex(null);
+    closePicker();
   };
-
-  const pickerSet = pickerSetIndex !== null ? exercise.sets[pickerSetIndex] : null;
 
   return (
     <div className="space-y-5">
@@ -126,7 +118,7 @@ export default function ActiveExerciseView({
             onUpdateValue={(field, value) =>
               onUpdateSetValue(setIndex, field, value)
             }
-            onTapToEdit={() => handleTapToEdit(setIndex)}
+            onTapToEdit={() => openPicker(setIndex)}
           />
         ))}
       </div>
@@ -163,7 +155,7 @@ export default function ActiveExerciseView({
       {pickerSet && pickerSetIndex !== null && (
         <SetValuePicker
           isOpen={true}
-          onClose={() => setPickerSetIndex(null)}
+          onClose={closePicker}
           title={`${pickerSetIndex + 1}세트`}
           weight={pickerSet.actualWeight ?? pickerSet.targetWeight ?? 0}
           reps={pickerSet.actualReps ?? pickerSet.targetReps ?? 10}

@@ -6,6 +6,7 @@
  */
 
 import type { MealData } from './meal';
+import { isWorkoutData } from './guards';
 
 // ============================================================================
 // Enums & Constants
@@ -264,13 +265,6 @@ export interface CalendarEventSummary {
   exerciseCount?: number;
   /** 예상 소요 시간 (분) */
   estimatedDuration?: number;
-}
-
-/**
- * 타입 가드: WorkoutData인지 확인
- */
-function isWorkoutData(data: EventData): data is WorkoutData {
-  return 'exercises' in data && Array.isArray((data as WorkoutData).exercises);
 }
 
 /**
