@@ -127,7 +127,7 @@ export const useWebViewCommands = ({ resetSessionCheck }: UseWebViewCommandsOpti
         const currentPath = pathnameRef.current;
         if (currentPath === "/login" && success) {
           await new Promise<void>((resolve) => queueMicrotask(resolve));
-          router.replace("/");
+          window.location.replace("/");
         }
       })
     );
