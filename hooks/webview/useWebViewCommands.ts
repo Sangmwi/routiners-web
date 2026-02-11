@@ -139,7 +139,7 @@ export const useWebViewCommands = ({ resetSessionCheck }: UseWebViewCommandsOpti
         // 세션 체크 상태 리셋하여 재로그인 시 다시 전송되도록 함
         resetSessionCheck();
         // window.location.replace로 히스토리 완전 교체 (뒤로가기 방지)
-        router.replace("/login");
+        window.location.replace("/login");
       })
     );
 
