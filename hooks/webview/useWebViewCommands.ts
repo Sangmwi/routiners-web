@@ -96,7 +96,6 @@ export const useWebViewCommands = ({ resetSessionCheck }: UseWebViewCommandsOpti
     const cleanups: (() => void)[] = [];
 
     // NAVIGATE_HOME
-    // window.location.replace 사용 (router.replace보다 확실함)
     cleanups.push(
       registerCommandHandler("NAVIGATE_HOME", () => {
         router.replace("/");
@@ -104,7 +103,6 @@ export const useWebViewCommands = ({ resetSessionCheck }: UseWebViewCommandsOpti
     );
 
     // NAVIGATE_TO
-    // window.location.replace 사용 (router.replace보다 확실함)
     cleanups.push(
       registerCommandHandler<NavigateToMessage>("NAVIGATE_TO", (cmd) => {
         router.replace(cmd.path);
@@ -129,7 +127,7 @@ export const useWebViewCommands = ({ resetSessionCheck }: UseWebViewCommandsOpti
         const currentPath = pathnameRef.current;
         if (currentPath === "/login" && success) {
           await new Promise<void>((resolve) => queueMicrotask(resolve));
-          window.location.replace("/");
+          router.replace("/");
         }
       })
     );
@@ -141,7 +139,7 @@ export const useWebViewCommands = ({ resetSessionCheck }: UseWebViewCommandsOpti
         // 세션 체크 상태 리셋하여 재로그인 시 다시 전송되도록 함
         resetSessionCheck();
         // window.location.replace로 히스토리 완전 교체 (뒤로가기 방지)
-        window.location.replace("/login");
+        router.replace("/login");
       })
     );
 
