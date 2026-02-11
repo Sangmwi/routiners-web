@@ -99,7 +99,7 @@ export const useWebViewCommands = ({ resetSessionCheck }: UseWebViewCommandsOpti
     // window.location.replace 사용 (router.replace보다 확실함)
     cleanups.push(
       registerCommandHandler("NAVIGATE_HOME", () => {
-        window.location.replace("/");
+        router.replace("/");
       })
     );
 
@@ -107,7 +107,7 @@ export const useWebViewCommands = ({ resetSessionCheck }: UseWebViewCommandsOpti
     // window.location.replace 사용 (router.replace보다 확실함)
     cleanups.push(
       registerCommandHandler<NavigateToMessage>("NAVIGATE_TO", (cmd) => {
-        window.location.replace(cmd.path);
+        router.replace(cmd.path);
       })
     );
 

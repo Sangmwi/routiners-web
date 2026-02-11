@@ -10,6 +10,7 @@ import {
   FOCUS_AREA_LABELS,
 } from '@/lib/types/fitness';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
+import { useRouter } from 'next/navigation';
 
 interface FitnessDetailDrawerProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export default function FitnessDetailDrawer({
   onClose,
   profile,
 }: FitnessDetailDrawerProps) {
+  const router = useRouter();
   // 정보 항목 렌더링 헬퍼
   const renderInfoItem = (label: string, value: string | undefined | null) => {
     if (!value) return null;
@@ -133,7 +135,7 @@ export default function FitnessDetailDrawer({
           variant="primary"
           onClick={() => {
             onClose();
-            window.location.href = '/profile/fitness';
+            router.push('/profile/fitness');
           }}
           className="flex-1"
         >
