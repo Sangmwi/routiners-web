@@ -24,6 +24,14 @@ export function composeCoachPrompt(
 ): string {
   let prompt = COACH_BASE_PROMPT;
 
+  // 현재 날짜 컨텍스트 (KST) — AI가 "오늘", "이번 주", "내일" 등을 정확히 이해
+  const kstNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+  const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+  const dayIndex = kstNow.getDay();
+  const dayOfWeekNumber = dayIndex === 0 ? 7 : dayIndex; // 1=월~7=일 (tool schema 형식)
+  const dateStr = `${kstNow.getFullYear()}년 ${kstNow.getMonth() + 1}월 ${kstNow.getDate()}일 ${dayNames[dayIndex]}요일`;
+  prompt += `\n\n## 현재 날짜\n오늘: ${dateStr} (dayOfWeek: ${dayOfWeekNumber})`;
+
   // Phase 16.5: 이전 대화 요약 포함 (토큰 50% 절감)
   if (contextSummary) {
     prompt += `\n\n---\n\n# 이전 대화 요약\n${contextSummary}`;

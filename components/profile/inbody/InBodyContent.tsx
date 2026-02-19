@@ -1,6 +1,7 @@
 'use client';
 
-import { PlusIcon, SpinnerGapIcon, WarningCircleIcon, CheckCircleIcon } from '@phosphor-icons/react';
+import { PlusIcon, WarningCircleIcon, CheckCircleIcon } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 import Button from '@/components/ui/Button';
 import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
 import {
@@ -58,7 +59,7 @@ function DeleteConfirmView({
         >
           {isDeleting ? (
             <>
-              <SpinnerGapIcon size={16} className="mr-2 animate-spin" />
+              <LoadingSpinner size="sm" variant="current" className="mr-2" />
               삭제 중...
             </>
           ) : (
@@ -180,7 +181,7 @@ export default function InBodyContent() {
           >
             {scanState === 'scanning' ? (
               <>
-                <SpinnerGapIcon size={16} className="mr-2 animate-spin" />
+                <LoadingSpinner size="sm" variant="current" className="mr-2" />
                 분석 중...
               </>
             ) : (
@@ -212,7 +213,7 @@ export default function InBodyContent() {
 
           {scanState === 'saving' && (
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
-              <SpinnerGapIcon size={48} className="text-primary animate-spin" />
+              <LoadingSpinner size="2xl" />
               <p className="text-lg font-medium text-card-foreground">
                 저장 중...
               </p>

@@ -143,7 +143,7 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
         height="auto"
         showCloseButton={false}
       >
-        <ModalBody className="p-4 pb-safe space-y-2">
+        <ModalBody className="p-4 pb-safe space-y-3">
           <button
             type="button"
             onClick={handleAI}

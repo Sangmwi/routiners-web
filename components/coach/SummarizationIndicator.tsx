@@ -1,6 +1,7 @@
 'use client';
 
-import { SpinnerGapIcon, CheckCircleIcon } from '@phosphor-icons/react';
+import { CheckCircleIcon } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 import type { SummarizationState } from '@/lib/types/coach';
 
 interface SummarizationIndicatorProps {
@@ -26,7 +27,7 @@ export default function SummarizationIndicator({
       {isComplete ? (
         <CheckCircleIcon size={16} weight="fill" className="text-success" />
       ) : (
-        <SpinnerGapIcon size={16} className="text-primary animate-spin" />
+        <LoadingSpinner size="sm" />
       )}
       <span className="text-sm text-muted-foreground">
         {state.message || '이전 대화를 정리하고 있어요...'}

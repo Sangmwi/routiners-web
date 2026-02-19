@@ -4,7 +4,7 @@ import { useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import PostCard from './PostCard';
 import { PulseLoader } from '@/components/ui/PulseLoader';
-import { SpinnerGapIcon } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 import { useInfiniteCommunityPosts } from '@/hooks/community/queries';
 import { useToggleLike } from '@/hooks/community/mutations';
 import type { PostCategory } from '@/lib/types/community';
@@ -110,7 +110,7 @@ export default function CommunityContent({
           {/* 추가 로딩 스피너 */}
           {isFetchingNextPage && (
             <div className="flex justify-center py-4">
-              <SpinnerGapIcon size={24} className="text-primary animate-spin" />
+              <LoadingSpinner size="lg" />
             </div>
           )}
 

@@ -11,7 +11,8 @@ import ProfileInbodySection from '@/components/profile/ProfileInbodySection';
 import ProfileFitnessSection from '@/components/profile/ProfileFitnessSection';
 import ProfileMilitarySection from '@/components/profile/ProfileMilitarySection';
 import ProfileLocationsSection from '@/components/profile/ProfileLocationsSection';
-import { SignOutIcon, UserMinusIcon, SpinnerGapIcon } from '@phosphor-icons/react';
+import { SignOutIcon, UserMinusIcon } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 
 /**
  * 프로필 페이지 콘텐츠 (Suspense 내부)
@@ -73,7 +74,7 @@ export default function ProfileContent() {
         >
           {isLoggingOut ? (
             <>
-              <SpinnerGapIcon size={16} className="animate-spin" />
+              <LoadingSpinner size="sm" variant="current" />
               <span>로그아웃 중...</span>
             </>
           ) : (
@@ -91,7 +92,7 @@ export default function ProfileContent() {
         >
           {isWithdrawing ? (
             <>
-              <SpinnerGapIcon size={16} className="animate-spin" />
+              <LoadingSpinner size="sm" variant="current" />
               <span>탈퇴 처리 중...</span>
             </>
           ) : (

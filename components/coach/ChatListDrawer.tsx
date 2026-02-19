@@ -64,7 +64,7 @@ export default function ChatListDrawer({
       size="lg"
       height="half"
     >
-      <ModalBody className="p-4 pb-8">
+      <ModalBody className="p-4 pb-safe">
         {/* 타이틀 */}
         <div className="text-center mb-4">
           <h2 className="text-lg font-bold text-foreground">대화 목록</h2>

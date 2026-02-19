@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { SpinnerGapIcon, CheckIcon } from '@phosphor-icons/react';
+import { CheckIcon } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 import Button from '@/components/ui/Button';
 import { useFitnessProfileSuspense, useUpdateFitnessProfile } from '@/hooks/fitnessProfile';
 import {
@@ -412,7 +413,7 @@ export default function FitnessContent() {
         >
           {updateProfile.isPending ? (
             <>
-              <SpinnerGapIcon size={16} className="mr-2 animate-spin" />
+              <LoadingSpinner size="sm" variant="current" className="mr-2" />
               저장 중...
             </>
           ) : (

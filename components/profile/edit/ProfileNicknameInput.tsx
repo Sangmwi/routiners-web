@@ -1,6 +1,7 @@
 'use client';
 
-import { WarningCircleIcon, CheckCircleIcon, SpinnerGapIcon } from '@phosphor-icons/react';
+import { WarningCircleIcon, CheckCircleIcon } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 import FormSection from '@/components/ui/FormSection';
 import FormInput from '@/components/ui/FormInput';
 import { useCheckNickname, useDebounce } from '@/hooks';
@@ -68,7 +69,7 @@ export default function ProfileNicknameInput({
     if (isChecking || !isCheckValid) {
       return (
         <div className="flex items-center gap-1 text-muted-foreground text-xs mt-1">
-          <SpinnerGapIcon size={14} className="animate-spin" />
+          <LoadingSpinner size="sm" variant="muted" />
           <span>확인 중...</span>
         </div>
       );

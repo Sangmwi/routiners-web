@@ -120,11 +120,10 @@ export function useRoutinePreview({
       // 2. 메시지 상태 업데이트 (pending → applied)
       await updateStatus(messageId, 'applied');
 
-      // 3. AI에게 액션 메시지 전송 (유저 버블 없이 AI만 트리거)
-      const actionToken = appendMode
-        ? '__ROUTINE_APPLIED_APPEND__'
-        : '__ROUTINE_APPLIED__';
-      sendMessage(conversationId, actionToken);
+      // 3. AI 액션 메시지 제거 — REST API가 이미 루틴 적용 완료.
+      //    action message 전송 시 AI streaming이 트리거되어
+      //    고스트 로딩 + 빈 AI 응답이 발생하므로 제거.
+      //    다음 사용자 메시지에서 AI가 대화 히스토리를 통해 적용 사실 인지 가능.
 
       close();
     } catch (error) {

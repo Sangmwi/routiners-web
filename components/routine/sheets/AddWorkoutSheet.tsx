@@ -5,11 +5,11 @@ import Modal, { ModalBody } from '@/components/ui/Modal';
 import {
   MagnifyingGlassIcon,
   TrashIcon,
-  SpinnerGapIcon,
   XIcon,
   PencilSimpleIcon,
   TimerIcon,
 } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 import SetValuePicker from '@/components/routine/workout/SetValuePicker';
 import { useCreateRoutineEvent } from '@/hooks/routine';
 import { useSetValuePicker } from '@/hooks/routine/useSetValuePicker';
@@ -402,7 +402,7 @@ export default function AddWorkoutSheet({ isOpen, onClose, date, onCreated }: Ad
           disabled={exercises.length === 0 || createEvent.isPending}
           className="w-full py-3.5 rounded-xl font-medium bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          {createEvent.isPending && <SpinnerGapIcon size={16} className="animate-spin" />}
+          {createEvent.isPending && <LoadingSpinner size="sm" variant="current" />}
           {createEvent.isPending ? '저장 중...' : '저장하기'}
         </button>
       </div>

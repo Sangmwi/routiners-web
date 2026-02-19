@@ -32,6 +32,9 @@ export const QUICK_ROUTINE_RULES = `
 
 ## "오늘만" 요청 처리
 - days_per_week: 1로 설정
+- **🚨 dayOfWeek는 반드시 시스템 프롬프트 "현재 날짜"의 dayOfWeek 번호를 사용!**
+  - 예: 오늘 금요일(dayOfWeek: 5) → days: [{ dayOfWeek: 5, ... }]
+- "내일 운동" → 현재 dayOfWeek + 1 (7 초과 시 1로)
 - 사용자가 특정 부위 언급 ("하체 운동 만들어줘") → 해당 부위 집중
 - 특정 부위 없으면 → 프로필의 focusAreas 또는 전신 운동
 

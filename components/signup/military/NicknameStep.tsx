@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { UserIcon, WarningCircleIcon, CheckCircleIcon, SpinnerGapIcon } from '@phosphor-icons/react';
+import { UserIcon, WarningCircleIcon, CheckCircleIcon } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 import Button from '@/components/ui/Button';
 import { useCheckNickname, useDebounce } from '@/hooks';
 import { generatePersonalizedNicknames } from '@/lib/utils/nickname';
@@ -141,7 +142,7 @@ export function NicknameStep({
     if (isFormatValid && (isChecking || !isCheckValid)) {
       return (
         <div className="flex items-center gap-1 text-muted-foreground text-sm">
-          <SpinnerGapIcon size={16} className="animate-spin" />
+          <LoadingSpinner size="sm" variant="muted" />
           <span>확인 중...</span>
         </div>
       );

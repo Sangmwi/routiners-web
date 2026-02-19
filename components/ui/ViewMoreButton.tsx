@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react';
 import { NextIcon } from '@/components/ui/icons';
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 
 // ============================================================
 // Types
@@ -77,9 +77,9 @@ export default function ViewMoreButton({
 
   if (href) {
     return (
-      <Link href={href} className={baseClassName}>
+      <AppLink href={href} className={baseClassName}>
         {content}
-      </Link>
+      </AppLink>
     );
   }
 

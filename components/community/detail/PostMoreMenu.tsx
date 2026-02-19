@@ -52,7 +52,7 @@ export default function PostMoreMenu({
       position="bottom"
       enableSwipe
     >
-      <ModalBody className="p-2 pb-6">
+      <ModalBody className="p-2 pb-safe">
         <div className="space-y-1">
           {isOwner ? (
             <>

@@ -1,6 +1,6 @@
 'use client';
 
-import { SpinnerGapIcon } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 import ProfilePhotoGallery from '@/components/profile/edit/ProfilePhotoGallery';
 import ProfileNicknameInput from '@/components/profile/edit/ProfileNicknameInput';
 import ProfileBioInput from '@/components/profile/edit/ProfileBioInput';
@@ -49,7 +49,7 @@ function SaveButton({ onClick, disabled, isSaving }: SaveButtonProps) {
         disabled={disabled}
         className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
-        {isSaving && <SpinnerGapIcon size={16} className="animate-spin" />}
+        {isSaving && <LoadingSpinner size="sm" variant="current" />}
         {isSaving ? '저장 중...' : '저장하기'}
       </button>
     </div>

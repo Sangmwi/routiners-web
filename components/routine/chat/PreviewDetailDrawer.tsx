@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckIcon, ClockIcon, ProhibitIcon, SpinnerGapIcon, ArrowsClockwiseIcon, PlusCircleIcon } from '@phosphor-icons/react';
+import { CheckIcon, ClockIcon, ProhibitIcon, ArrowsClockwiseIcon, PlusCircleIcon } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 import Modal from '@/components/ui/Modal';
 import type { RoutinePreviewData, RoutinePreviewDay, RoutinePreviewExercise } from '@/lib/types/fitness';
 import type { RoutinePreviewStatus } from '@/lib/types/chat';
@@ -41,7 +42,9 @@ export default function PreviewDetailDrawer({
   isApplying = false,
   hasExistingScheduled = false,
 }: PreviewDetailDrawerProps) {
-  const [selectedWeekCount, setSelectedWeekCount] = useState(2); // 적용할 주차 수
+  const [selectedWeekCount, setSelectedWeekCount] = useState(
+    preview.daysPerWeek <= 2 ? 1 : 2
+  ); // 빠른 루틴(1~2일) → 1주 기본, 본격 루틴(3일+) → 2주 기본
   const [applyMode, setApplyMode] = useState<ApplyMode>('replace'); // 대체 or 이어붙이기
 
   // Null guard - preview가 없으면 렌더링하지 않음
@@ -180,7 +183,7 @@ export default function PreviewDetailDrawer({
             >
               {isApplying ? (
                 <span className="flex items-center justify-center gap-2">
-                  <SpinnerGapIcon size={16} className="animate-spin" />
+                  <LoadingSpinner size="sm" variant="current" />
                   적용 중...
                 </span>
               ) : (

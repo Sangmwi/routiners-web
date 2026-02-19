@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
-import { SpinnerGapIcon } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 import { useCommunityPostQuery } from '@/hooks/community/queries';
 import {
   useCreatePost,
@@ -151,7 +151,7 @@ export default function PostWriteContent({ editPostId }: PostWriteContentProps) 
       >
         {isSubmitting ? (
           <span className="flex items-center gap-2">
-            <SpinnerGapIcon size={16} className="animate-spin" />
+            <LoadingSpinner size="sm" variant="current" />
             {uploadImages.isPending ? '이미지 업로드 중...' : '등록 중...'}
           </span>
         ) : isEdit ? (

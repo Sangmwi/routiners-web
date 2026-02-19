@@ -5,8 +5,8 @@ import Modal, { ModalBody } from '@/components/ui/Modal';
 import {
   MagnifyingGlassIcon,
   TrashIcon,
-  SpinnerGapIcon,
 } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 import { useCreateRoutineEvent } from '@/hooks/routine';
 import { useShowError } from '@/lib/stores/errorStore';
 import { useRouter } from 'next/navigation';
@@ -359,7 +359,7 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated }: AddMe
           disabled={foods.length === 0 || createEvent.isPending}
           className="w-full py-3.5 rounded-xl font-medium bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          {createEvent.isPending && <SpinnerGapIcon size={16} className="animate-spin" />}
+          {createEvent.isPending && <LoadingSpinner size="sm" variant="current" />}
           {createEvent.isPending ? '저장 중...' : '저장하기'}
         </button>
       </div>

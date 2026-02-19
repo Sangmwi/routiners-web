@@ -1,6 +1,6 @@
 'use client';
 
-import { SpinnerGapIcon } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 
 /**
  * 채팅 로딩 인디케이터
@@ -12,7 +12,7 @@ export function ChatLoadingDots() {
   return (
     <div className="flex gap-3 mt-2">
       <div className="shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-        <SpinnerGapIcon size={16} className="animate-spin" />
+        <LoadingSpinner size="sm" variant="current" />
       </div>
       <div className="bg-card rounded-2xl rounded-tl-none px-4 py-3 mt-2">
         <div className="flex gap-1">

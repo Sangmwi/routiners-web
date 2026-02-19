@@ -31,7 +31,8 @@ import { ImageWithFallback } from "@/components/ui/image";
 import { ImageSourceDrawer } from "@/components/drawers";
 import FormSection from "@/components/ui/FormSection";
 import ErrorToast from "@/components/ui/ErrorToast";
-import { PlusIcon, SpinnerGapIcon, XIcon, StarIcon } from "@phosphor-icons/react";
+import { PlusIcon, XIcon, StarIcon } from "@phosphor-icons/react";
+import { LoadingSpinner } from "@/components/ui/icons";
 
 // ============================================================
 // Constants
@@ -107,7 +108,7 @@ function DeleteOverlay({
 function ProcessingOverlay() {
   return (
     <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-      <SpinnerGapIcon size={32} className="text-white animate-spin" />
+      <LoadingSpinner size="xl" variant="current" className="text-white" />
     </div>
   );
 }

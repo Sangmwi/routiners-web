@@ -1,6 +1,7 @@
 'use client';
 
-import { CheckIcon, WarningIcon, SpinnerGapIcon, ProhibitIcon, PencilSimpleIcon, ArrowRightIcon } from '@phosphor-icons/react';
+import { CheckIcon, WarningIcon, ProhibitIcon, PencilSimpleIcon, ArrowRightIcon } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 import { getEventIcon } from '@/lib/config/eventTheme';
 import ViewMoreButton from '@/components/ui/ViewMoreButton';
 import type { RoutinePreviewStatus } from '@/lib/types/chat';
@@ -174,7 +175,7 @@ export default function ChatPreviewSummary({
                          }`}
             >
               {isApplying ? (
-                <SpinnerGapIcon size={16} className="animate-spin" />
+                <LoadingSpinner size="sm" variant="current" />
               ) : (
                 <>
                   적용

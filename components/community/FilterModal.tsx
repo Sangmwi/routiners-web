@@ -37,7 +37,7 @@ export default function FilterModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} position="bottom" enableSwipe>
-      <ModalBody className="p-4 pb-6">
+      <ModalBody className="p-4 pb-safe">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold text-foreground">필터</h3>

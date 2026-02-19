@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { SpinnerGapIcon } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 import { usePostComments } from '@/hooks/community/queries';
 import CommentItem from './CommentItem';
 import CommentInput from './CommentInput';
@@ -45,7 +45,7 @@ export default function CommentSection({
       {/* 댓글 목록 */}
       {isLoading ? (
         <div className="flex justify-center py-6">
-          <SpinnerGapIcon size={24} className="text-primary animate-spin" />
+          <LoadingSpinner size="lg" />
         </div>
       ) : data && data.comments.length > 0 ? (
         <div className="space-y-4">

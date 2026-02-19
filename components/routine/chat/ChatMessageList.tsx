@@ -8,7 +8,7 @@ import {
   RoutineProgressEvent,
 } from '@/lib/api/conversation';
 import { SessionPurpose } from '@/lib/types/routine';
-import { SpinnerGapIcon } from '@phosphor-icons/react';
+import { LoadingSpinner } from '@/components/ui/icons';
 
 // Hooks
 import {
@@ -147,10 +147,7 @@ export default function ChatMessageList({
         <div ref={topSentinelRef} className="shrink-0">
           {showLoadingSpinner && (
             <div className="flex justify-center py-2">
-              <SpinnerGapIcon
-                size={16}
-                className="animate-spin text-muted-foreground"
-              />
+              <LoadingSpinner size="sm" variant="muted" />
             </div>
           )}
         </div>
