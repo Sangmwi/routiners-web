@@ -24,6 +24,7 @@ export const GET = withAuth(async (request: NextRequest, { authUser, supabase })
   const category = searchParams.get('category');
   const authorId = searchParams.get('authorId');
   const search = searchParams.get('search');
+  const dateRange = searchParams.get('dateRange');
   const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10));
   const limit = Math.min(
     MAX_LIMIT,
@@ -54,6 +55,20 @@ export const GET = withAuth(async (request: NextRequest, { authUser, supabase })
   }
   if (search) {
     query = query.ilike('content', `%${search}%`);
+  }
+  if (dateRange) {
+    const now = new Date();
+    let sinceDate: Date | null = null;
+    if (dateRange === 'today') {
+      sinceDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    } else if (dateRange === 'week') {
+      sinceDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    } else if (dateRange === 'month') {
+      sinceDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+    if (sinceDate) {
+      query = query.gte('created_at', sinceDate.toISOString());
+    }
   }
 
   const { data: posts, error, count } = await query;

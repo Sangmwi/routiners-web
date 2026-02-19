@@ -1,33 +1,33 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { MainTabLayout, MainTabHeader } from '@/components/layouts';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
-import { PulseLoader } from '@/components/ui/PulseLoader';
 import CategoryTabs from '@/components/community/CategoryTabs';
+import SearchBar from '@/components/community/SearchBar';
+import FilterModal, { type DateRange } from '@/components/community/FilterModal';
 import Button from '@/components/ui/Button';
 import { PencilSimpleLineIcon, FunnelIcon } from '@phosphor-icons/react';
 import type { PostCategory } from '@/lib/types/community';
 
 const CommunityContent = dynamic(
   () => import('@/components/community/CommunityContent'),
-  { ssr: false, loading: () => <PulseLoader /> }
+  { ssr: false }
 );
 
 const VALID_CATEGORIES = ['general', 'workout', 'meal', 'qna'] as const;
 
 /**
  * 커뮤니티 페이지
- *
- * - Layout + Header + CategoryTabs: 즉시 렌더링 (Suspense 밖)
- * - 단일 Suspense: 번들 + 데이터 로딩 모두 처리
- * - 깜빡임 없는 로딩 UX
  */
 export default function CommunityPage() {
   const router = useRouter();
   const [category, setCategory] = useState<PostCategory | 'all'>('all');
+  const [search, setSearch] = useState('');
+  const [dateRange, setDateRange] = useState<DateRange>('all');
+  const [filterOpen, setFilterOpen] = useState(false);
 
   // URL에서 초기 카테고리 읽기 (클라이언트 사이드)
   useEffect(() => {
@@ -40,11 +40,6 @@ export default function CommunityPage() {
 
   const handleNewPost = () => {
     router.push('/community/write');
-  };
-
-  const handleFilter = () => {
-    // TODO: 필터 모달 열기
-    console.log('필터');
   };
 
   const handleCategoryChange = (categoryId: string) => {
@@ -62,14 +57,21 @@ export default function CommunityPage() {
     });
   };
 
+  const hasActiveFilter = dateRange !== 'all';
+
   return (
     <MainTabLayout>
       <MainTabHeader
         title="커뮤니티"
         action={
           <>
-            <Button variant="outline" size="xs" onClick={handleFilter}>
-              <FunnelIcon size={16} />
+            <Button
+              variant="outline"
+              size="xs"
+              onClick={() => setFilterOpen(true)}
+              className={hasActiveFilter ? 'border-primary text-primary' : ''}
+            >
+              <FunnelIcon size={16} weight={hasActiveFilter ? 'fill' : 'regular'} />
             </Button>
             <Button variant="primary" size="xs" onClick={handleNewPost}>
               <PencilSimpleLineIcon size={16} />
@@ -82,11 +84,21 @@ export default function CommunityPage() {
         selectedCategory={category}
         onCategoryChange={handleCategoryChange}
       />
+      <SearchBar onSearchChange={setSearch} />
       <QueryErrorBoundary>
-        <Suspense fallback={<PulseLoader />}>
-          <CommunityContent category={category} />
-        </Suspense>
+        <CommunityContent
+          category={category}
+          search={search}
+          dateRange={dateRange}
+        />
       </QueryErrorBoundary>
+
+      <FilterModal
+        isOpen={filterOpen}
+        onClose={() => setFilterOpen(false)}
+        dateRange={dateRange}
+        onApply={setDateRange}
+      />
     </MainTabLayout>
   );
 }

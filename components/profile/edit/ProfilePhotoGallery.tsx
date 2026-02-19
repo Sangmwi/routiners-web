@@ -1,7 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useProfileImagesDraft, useGridDragDrop } from "@/hooks";
+import {
+  DndContext,
+  closestCenter,
+  MouseSensor,
+  TouchSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  rectSortingStrategy,
+  sortableKeyboardCoordinates,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { useProfileImagesDraft } from "@/hooks";
 import { useNativeImagePicker } from "@/hooks/webview";
 import type {
   DraftImage,
@@ -13,7 +31,7 @@ import { ImageWithFallback } from "@/components/ui/image";
 import { ImageSourceDrawer } from "@/components/drawers";
 import FormSection from "@/components/ui/FormSection";
 import ErrorToast from "@/components/ui/ErrorToast";
-import { PlusIcon, SpinnerGapIcon, XIcon, StarIcon, ArrowsOutCardinalIcon } from "@phosphor-icons/react";
+import { PlusIcon, SpinnerGapIcon, XIcon, StarIcon } from "@phosphor-icons/react";
 
 // ============================================================
 // Constants
@@ -32,28 +50,14 @@ export interface ProfilePhotoGalleryProps {
 }
 
 interface PhotoSlotProps {
-  image: DraftImage | null;
+  image: DraftImage;
   index: number;
   isFirst: boolean;
   isProcessing: boolean;
   isDragging: boolean;
-  isDragOver: boolean;
-  isLongPressed: boolean;
-  isTouchDragging: boolean;
   isSelected: boolean;
-  isMobile: boolean;
-  onAddClick: () => void;
   onDelete: () => void;
   onSelect: () => void;
-  onDragStart: (e: React.DragEvent) => void;
-  onDragOver: (e: React.DragEvent) => void;
-  onDragLeave: () => void;
-  onDrop: (e: React.DragEvent) => void;
-  onDragEnd: () => void;
-  onTouchStart: (e: React.TouchEvent) => void;
-  onTouchMove: (e: React.TouchEvent) => void;
-  onTouchEnd: () => void;
-  onTouchCancel: () => void;
 }
 
 // ============================================================
@@ -108,14 +112,6 @@ function ProcessingOverlay() {
   );
 }
 
-function TouchDragIndicator() {
-  return (
-    <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-      <ArrowsOutCardinalIcon size={32} className="text-primary" />
-    </div>
-  );
-}
-
 function EmptySlot({
   onClick,
   disabled,
@@ -124,15 +120,17 @@ function EmptySlot({
   disabled: boolean;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="w-full h-full bg-muted/50 border-2 border-dashed border-border rounded-2xl hover:border-primary hover:bg-muted/80 transition-colors flex flex-col items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      <PlusIcon size={32} className="text-muted-foreground" />
-      <span className="text-sm text-muted-foreground">사진 추가</span>
-    </button>
+    <div className="aspect-[2/3]">
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        className="w-full h-full bg-muted/50 border-2 border-dashed border-border rounded-2xl hover:border-primary hover:bg-muted/80 transition-colors flex flex-col items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <PlusIcon size={32} className="text-muted-foreground" />
+        <span className="text-sm text-muted-foreground">사진 추가</span>
+      </button>
+    </div>
   );
 }
 
@@ -142,76 +140,81 @@ function PhotoSlot({
   isFirst,
   isProcessing,
   isDragging,
-  isDragOver,
-  isLongPressed,
-  isTouchDragging,
   isSelected,
-  isMobile,
-  onAddClick,
   onDelete,
   onSelect,
-  onDragStart,
-  onDragOver,
-  onDragLeave,
-  onDrop,
-  onDragEnd,
-  onTouchStart,
-  onTouchMove,
-  onTouchEnd,
-  onTouchCancel,
 }: PhotoSlotProps) {
-  const hasImage = !!image;
-
-  const slotClassName = `
-    group relative aspect-[2/3] rounded-2xl overflow-hidden
-    transition-[transform,opacity,box-shadow] duration-150 ease-out
-    ${isDragging ? "opacity-60 scale-[0.97] shadow-lg" : ""}
-    ${isDragOver ? "ring-2 ring-primary ring-offset-2 scale-[1.02] bg-primary/5" : ""}
-    ${isLongPressed && !isTouchDragging ? "ring-2 ring-primary/50 ring-offset-2" : ""}
-    ${isTouchDragging ? "opacity-70 scale-[0.97] shadow-xl z-10" : ""}
-  `;
-
   const handleClick = () => {
-    if (hasImage && !isProcessing && !isTouchDragging) {
+    if (!isProcessing) {
       onSelect();
     }
   };
 
   return (
     <div
-      className={slotClassName}
-      draggable={hasImage && !isProcessing && !isMobile}
+      className={`
+        group relative aspect-[2/3] rounded-2xl overflow-hidden
+        transition-[transform,opacity,box-shadow] duration-150 ease-out
+        ${isDragging ? "opacity-60 scale-[0.97] shadow-lg z-10" : ""}
+      `}
       onClick={handleClick}
-      onDragStart={onDragStart}
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      onDrop={onDrop}
-      onDragEnd={onDragEnd}
-      onTouchStart={hasImage ? onTouchStart : undefined}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-      onTouchCancel={onTouchCancel}
     >
-      {hasImage ? (
-        <>
-          <ImageWithFallback
-            src={image.displayUrl}
-            alt={`프로필 사진 ${index + 1}`}
-            fill
-            sizes="(max-width: 768px) 50vw, 200px"
-            className="object-cover"
-            optimizePreset="card"
-          />
-          {isFirst && <MainPhotoBadge />}
-          {!isProcessing && (
-            <DeleteOverlay isVisible={isSelected} onDelete={onDelete} />
-          )}
-          {isProcessing && <ProcessingOverlay />}
-          {isTouchDragging && <TouchDragIndicator />}
-        </>
-      ) : (
-        <EmptySlot onClick={onAddClick} disabled={isProcessing} />
+      <ImageWithFallback
+        src={image.displayUrl}
+        alt={`프로필 사진 ${index + 1}`}
+        fill
+        sizes="(max-width: 768px) 50vw, 200px"
+        className="object-cover"
+        optimizePreset="card"
+      />
+      {isFirst && <MainPhotoBadge />}
+      {!isProcessing && (
+        <DeleteOverlay isVisible={isSelected} onDelete={onDelete} />
       )}
+      {isProcessing && <ProcessingOverlay />}
+    </div>
+  );
+}
+
+// ============================================================
+// Sortable Wrapper
+// ============================================================
+
+function SortablePhotoSlot({
+  image,
+  index,
+  isFirst,
+  isProcessing,
+  isSelected,
+  onDelete,
+  onSelect,
+}: Omit<PhotoSlotProps, "isDragging">) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: image.id, disabled: isProcessing });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <PhotoSlot
+        image={image}
+        index={index}
+        isFirst={isFirst}
+        isProcessing={isProcessing}
+        isDragging={isDragging}
+        isSelected={isSelected}
+        onDelete={onDelete}
+        onSelect={onSelect}
+      />
     </div>
   );
 }
@@ -229,30 +232,29 @@ export default function ProfilePhotoGallery({
   const draft = useProfileImagesDraft(initialImages, { isSaving });
   const { images, addImage, removeImage, reorderImages } = draft;
 
-  // ========== Drag & Drop Hook ==========
-  const {
-    draggedIndex,
-    dragOverIndex,
-    longPressIndex,
-    touchDragIndex,
-    isMobile,
-    gridRef,
-    handleDragStart,
-    handleDragOver,
-    handleDragLeave,
-    handleDrop,
-    handleDragEnd,
-    handleTouchStart,
-    handleTouchMove,
-    handleTouchEnd,
-    handleTouchCancel,
-    resetLongPress,
-  } = useGridDragDrop({
-    items: images,
-    onReorder: reorderImages,
-    canDrag: (index) => !!images[index],
-    canDrop: (index) => !!images[index],
-  });
+  // ========== DnD Sensors ==========
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 500, tolerance: 5 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = images.findIndex((img) => img.id === active.id);
+    const newIndex = images.findIndex((img) => img.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    reorderImages(oldIndex, newIndex);
+  };
 
   // ========== Toast State ==========
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -345,50 +347,49 @@ export default function ProfilePhotoGallery({
 
   // ========== Render ==========
 
-  const slots = Array.from({ length: MAX_IMAGES }, (_, i) => images[i] || null);
+  const emptySlotCount = MAX_IMAGES - images.length;
 
   return (
     <FormSection
       title="프로필 사진"
       description="최대 4장의 사진을 등록할 수 있어요."
     >
-      <div ref={gridRef} className="grid grid-cols-2 gap-3">
-        {slots.map((image, index) => (
-          <PhotoSlot
-            key={image?.id || `empty-${index}`}
-            image={image}
-            index={index}
-            isFirst={index === 0 && !!image}
-            isProcessing={processingIndex === index}
-            isDragging={draggedIndex === index || touchDragIndex === index}
-            isDragOver={dragOverIndex === index}
-            isLongPressed={longPressIndex === index}
-            isTouchDragging={touchDragIndex === index}
-            isSelected={selectedIndex === index}
-            isMobile={isMobile}
-            onAddClick={() => handleAddClick(index)}
-            onDelete={() => handleDelete(index)}
-            onSelect={() => handleSelect(index)}
-            onDragStart={(e) => handleDragStart(e, index)}
-            onDragOver={(e) => handleDragOver(e, index)}
-            onDragLeave={handleDragLeave}
-            onDrop={(e) => handleDrop(e, index)}
-            onDragEnd={handleDragEnd}
-            onTouchStart={(e) => handleTouchStart(e, index)}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            onTouchCancel={handleTouchCancel}
-          />
-        ))}
-      </div>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={images.map((img) => img.id)}
+          strategy={rectSortingStrategy}
+        >
+          <div className="grid grid-cols-2 gap-3">
+            {images.map((image, index) => (
+              <SortablePhotoSlot
+                key={image.id}
+                image={image}
+                index={index}
+                isFirst={index === 0}
+                isProcessing={processingIndex === index}
+                isSelected={selectedIndex === index}
+                onDelete={() => handleDelete(index)}
+                onSelect={() => handleSelect(index)}
+              />
+            ))}
+            {Array.from({ length: emptySlotCount }, (_, i) => (
+              <EmptySlot
+                key={`empty-${i}`}
+                onClick={() => handleAddClick(images.length + i)}
+                disabled={processingIndex !== null}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
 
       <p className="text-xs text-muted-foreground mt-4 text-center">
         드래그하여 순서를 변경할 수 있어요.
       </p>
-
-      {longPressIndex !== null && (
-        <div className="fixed inset-0 z-40" onClick={resetLongPress} />
-      )}
 
       {selectedIndex !== null && (
         <div className="fixed inset-0 z-40" onClick={clearSelection} />

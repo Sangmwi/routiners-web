@@ -9,12 +9,17 @@ import {
 } from '@/components/routine';
 import { useWorkoutSession } from '@/hooks/routine/useWorkoutSession';
 import { useWorkoutEvent } from '@/hooks/routine/useWorkoutEvent';
+import { useUpdateWorkoutData } from '@/hooks/routine';
+import { useShowError } from '@/lib/stores/errorStore';
 import { ActiveWorkout, WorkoutComplete } from '@/components/routine/workout';
-import { CalendarIcon, PlusIcon, RobotIcon, TrashIcon } from '@phosphor-icons/react';
+import EditableExerciseList from './EditableExerciseList';
+import AddExerciseSheet from '@/components/routine/sheets/AddExerciseSheet';
+import { CalendarIcon, PencilSimpleIcon, PlusIcon, RobotIcon, TrashIcon } from '@phosphor-icons/react';
 import { getEventConfig } from '@/lib/config/theme';
 import { formatKoreanDate, getToday } from '@/lib/utils/dateHelpers';
 import { useState, useEffect, useRef, type ReactNode } from 'react';
 import AddWorkoutSheet from '@/components/routine/sheets/AddWorkoutSheet';
+import type { WorkoutExercise, WorkoutSet } from '@/lib/types/routine';
 
 // ============================================================
 // Content Component (Suspense 내부)
@@ -57,6 +62,41 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
   // 직접 추가 바텀시트
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
 
+  // 편집 모드
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingExercises, setEditingExercises] = useState<WorkoutExercise[]>([]);
+  const [isAddExerciseSheetOpen, setIsAddExerciseSheetOpen] = useState(false);
+  const updateWorkout = useUpdateWorkoutData();
+  const showError = useShowError();
+
+  const enterEditMode = () => {
+    if (!workoutData) return;
+    setEditingExercises([...workoutData.exercises]);
+    setIsEditMode(true);
+  };
+
+  const exitEditMode = (save: boolean) => {
+    if (save && event && workoutData) {
+      const updatedData = { ...workoutData, exercises: editingExercises };
+      updateWorkout.mutate(
+        { id: event.id, data: updatedData, date: event.date, type: event.type },
+        { onError: () => showError('운동 저장에 실패했어요') },
+      );
+    }
+    setIsEditMode(false);
+    setEditingExercises([]);
+  };
+
+  const handleEditSetsChange = (exerciseId: string, sets: WorkoutSet[]) => {
+    setEditingExercises((prev) =>
+      prev.map((e) => (e.id === exerciseId ? { ...e, sets } : e)),
+    );
+  };
+
+  const handleAddExercises = (newExercises: WorkoutExercise[]) => {
+    setEditingExercises((prev) => [...prev, ...newExercises]);
+  };
+
   // 워크아웃 세션 훅
   const session = useWorkoutSession({
     exercises: workoutData?.exercises ?? [],
@@ -75,10 +115,52 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
     }
   }, [event?.title, onTitleChange]);
 
-  // 헤더 삭제 아이콘
+  // 편집 모드 종료 핸들러 (ref로 최신 클로저 유지)
+  const exitEditModeRef = useRef(exitEditMode);
+  exitEditModeRef.current = exitEditMode;
+  const enterEditModeRef = useRef(enterEditMode);
+  enterEditModeRef.current = enterEditMode;
+
+  // 헤더 액션
   useEffect(() => {
     if (!onHeaderAction) return;
-    if (event) {
+    if (!event) {
+      onHeaderAction(null);
+      return;
+    }
+
+    if (isEditMode) {
+      // 편집 모드: "완료" 버튼
+      onHeaderAction(
+        <button
+          onClick={() => exitEditModeRef.current(true)}
+          className="px-3 py-1 text-sm font-medium text-primary"
+        >
+          완료
+        </button>
+      );
+    } else if (event.status === 'scheduled') {
+      // 일반 모드 (scheduled): 편집 + 삭제
+      onHeaderAction(
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => enterEditModeRef.current()}
+            className="p-1 text-muted-foreground"
+            aria-label="편집"
+          >
+            <PencilSimpleIcon size={20} />
+          </button>
+          <button
+            onClick={() => handleDeleteRef.current()}
+            className="p-1 text-muted-foreground"
+            aria-label="삭제"
+          >
+            <TrashIcon size={20} />
+          </button>
+        </div>
+      );
+    } else {
+      // completed/skipped: 삭제만
       onHeaderAction(
         <button
           onClick={() => handleDeleteRef.current()}
@@ -88,10 +170,8 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
           <TrashIcon size={20} />
         </button>
       );
-    } else {
-      onHeaderAction(null);
     }
-  }, [event?.id, onHeaderAction]);
+  }, [event?.id, event?.status, isEditMode, onHeaderAction]);
 
   // 이벤트 없음 (예정된 운동 없음)
   if (!event) {
@@ -168,7 +248,26 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
         </div>
 
         {/* 운동 목록 */}
-        {workoutData && workoutData.exercises.length > 0 ? (
+        {isEditMode ? (
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-foreground">
+              운동 목록 ({editingExercises.length}개)
+            </h2>
+            <EditableExerciseList
+              exercises={editingExercises}
+              onExercisesChange={setEditingExercises}
+              onSetsChange={handleEditSetsChange}
+            />
+            <button
+              type="button"
+              onClick={() => setIsAddExerciseSheetOpen(true)}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-border text-sm text-muted-foreground"
+            >
+              <PlusIcon size={16} weight="bold" />
+              운동 추가
+            </button>
+          </div>
+        ) : workoutData && workoutData.exercises.length > 0 ? (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-foreground">
               운동 목록 ({workoutData.exercises.length}개)
@@ -205,18 +304,28 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
         )}
       </div>
 
-      {/* 하단 액션 버튼 */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 pb-safe bg-background border-t border-border">
-        <EventActionButtons
-          status={event.status}
-          mode="start"
-          onStart={session.startWorkout}
-          onSkip={handleSkip}
-          isLoading={isSkipping}
-          startDisabled={!isToday}
-          hasActiveSession={session.hasActiveSession}
-        />
-      </div>
+      {/* 하단 액션 버튼 (편집 모드가 아닐 때만) */}
+      {!isEditMode && (
+        <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 pb-safe bg-background border-t border-border">
+          <EventActionButtons
+            status={event.status}
+            mode="start"
+            onStart={session.startWorkout}
+            onSkip={handleSkip}
+            isLoading={isSkipping}
+            startDisabled={!isToday}
+            hasActiveSession={session.hasActiveSession}
+          />
+        </div>
+      )}
+
+      {/* 편집 모드 운동 추가 시트 */}
+      <AddExerciseSheet
+        isOpen={isAddExerciseSheetOpen}
+        onClose={() => setIsAddExerciseSheetOpen(false)}
+        onAdd={handleAddExercises}
+        existingNames={new Set(editingExercises.map((e) => e.name))}
+      />
     </>
   );
 }

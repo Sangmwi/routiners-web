@@ -34,12 +34,29 @@ export function useCommunityPosts(filters: PostFilters = {}) {
  */
 export function useInfiniteCommunityPosts(
   category?: PostCategory | 'all',
-  limit: number = 20
+  limit: number = 20,
+  search?: string,
+  dateRange?: 'all' | 'today' | 'week' | 'month'
 ) {
+  const effectiveSearch = search || undefined;
+  const effectiveDateRange =
+    dateRange && dateRange !== 'all' ? dateRange : undefined;
+
   return useInfiniteQuery({
-    queryKey: queryKeys.post.list({ category, limit }),
+    queryKey: queryKeys.post.list({
+      category,
+      limit,
+      search: effectiveSearch,
+      dateRange: effectiveDateRange,
+    }),
     queryFn: ({ pageParam = 1 }) =>
-      fetchCommunityPosts({ category, limit, page: pageParam }),
+      fetchCommunityPosts({
+        category,
+        limit,
+        page: pageParam,
+        search: effectiveSearch,
+        dateRange: effectiveDateRange,
+      }),
     getNextPageParam: (lastPage) => {
       if (!lastPage.hasMore) return undefined;
       return lastPage.page + 1;

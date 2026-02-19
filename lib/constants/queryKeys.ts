@@ -231,6 +231,7 @@ export interface PostFilters {
   category?: string | 'all';
   authorId?: string;
   search?: string;
+  dateRange?: string;
   page?: number;
   limit?: number;
 }

@@ -19,7 +19,7 @@ import type { ChatMessage, Conversation, AppliedRoutineMetadata } from './chat';
  * 활성 목적 타입 (구조화된 프로세스)
  * 추후 확장 가능하도록 설계
  */
-export type ActivePurposeType = 'routine_generation';
+export type ActivePurposeType = 'routine_generation' | 'routine_modification' | 'quick_routine';
 
 /**
  * 루틴 생성 프로세스 단계
@@ -32,6 +32,16 @@ export type RoutineGenerationStage =
   | 'applying';
 
 /**
+ * 간단한 프로세스 단계 (routine_modification, quick_routine용)
+ */
+export type SimpleProcessStage = 'init' | 'generating' | 'reviewing';
+
+/**
+ * 모든 프로세스 단계 유니온
+ */
+export type ProcessStage = RoutineGenerationStage | SimpleProcessStage;
+
+/**
  * 활성 목적 정보
  * 구조화된 프로세스가 진행 중일 때만 설정됨
  */
@@ -39,7 +49,7 @@ export interface ActivePurpose {
   /** 목적 타입 */
   type: ActivePurposeType;
   /** 현재 단계 */
-  stage: RoutineGenerationStage;
+  stage: ProcessStage;
   /** 수집된 데이터 (단계별로 누적) */
   collectedData: Record<string, unknown>;
   /** 시작 시간 */

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type HTMLAttributes } from 'react';
 import { WorkoutExercise, WorkoutSet } from '@/lib/types/routine';
-import { CaretDownIcon, CaretUpIcon, PencilSimpleIcon, CheckIcon } from '@phosphor-icons/react';
+import { CaretDownIcon, CaretUpIcon, PencilSimpleIcon, CheckIcon, DotsSixVerticalIcon, TrashIcon } from '@phosphor-icons/react';
 import { getEventIcon } from '@/lib/config/eventTheme';
 import SetValuePicker from '@/components/routine/workout/SetValuePicker';
 import { useSetValuePicker } from '@/hooks/routine/useSetValuePicker';
@@ -15,6 +15,14 @@ interface ExerciseCardProps {
   editable?: boolean;
   /** 세트 변경 시 콜백 (즉시 저장) */
   onSetsChange?: (exerciseId: string, sets: WorkoutSet[]) => void;
+  /** 구조 편집 모드 (드래그/삭제 가능) */
+  editMode?: boolean;
+  /** 삭제 콜백 */
+  onDelete?: () => void;
+  /** 삭제 가능 여부 (운동 1개일 때 false) */
+  canDelete?: boolean;
+  /** @dnd-kit 드래그 핸들 props */
+  dragHandleProps?: HTMLAttributes<HTMLDivElement>;
 }
 
 /**
@@ -29,6 +37,10 @@ export default function ExerciseCard({
   isCompleted = false,
   editable = false,
   onSetsChange,
+  editMode = false,
+  onDelete,
+  canDelete = true,
+  dragHandleProps,
 }: ExerciseCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const { pickerSetIndex, pickerSet, openPicker, closePicker } = useSetValuePicker(exercise.sets);
@@ -80,38 +92,66 @@ export default function ExerciseCard({
       }`}
     >
       {/* 헤더 */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center gap-3 p-4"
-      >
-        <div
-          className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold ${
-            isCompleted
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted text-muted-foreground'
-          }`}
-        >
-          {index + 1}
-        </div>
-
-        <div className="flex-1 text-left">
-          <h3 className="font-semibold text-foreground">{exercise.name}</h3>
-          <p className="text-sm text-muted-foreground">
-            {setsSummary}
-          </p>
-          <p className={`text-xs mt-0.5 ${completedSetCount > 0 ? 'text-primary' : 'text-muted-foreground/50'}`}>
-            {completedSetCount > 0
-              ? `✓ ${completedSetCount}/${exercise.sets.length}세트 완료`
-              : `0/${exercise.sets.length}세트 완료`}
-          </p>
-        </div>
-
-        {isExpanded ? (
-          <CaretUpIcon size={20} weight="bold" className="text-muted-foreground" />
-        ) : (
-          <CaretDownIcon size={20} weight="bold" className="text-muted-foreground" />
+      <div className="flex items-center gap-1 p-4">
+        {/* 드래그 핸들 (편집 모드) */}
+        {editMode && dragHandleProps && (
+          <div
+            {...dragHandleProps}
+            className="w-10 h-10 flex items-center justify-center shrink-0 touch-none cursor-grab active:cursor-grabbing"
+          >
+            <DotsSixVerticalIcon size={20} weight="bold" className="text-muted-foreground" />
+          </div>
         )}
-      </button>
+
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex-1 flex items-center gap-3"
+        >
+          {/* 번호 (일반 모드에서만) */}
+          {!editMode && (
+            <div
+              className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold ${
+                isCompleted
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground'
+              }`}
+            >
+              {index + 1}
+            </div>
+          )}
+
+          <div className="flex-1 text-left">
+            <h3 className="font-semibold text-foreground">{exercise.name}</h3>
+            <p className="text-sm text-muted-foreground">
+              {setsSummary}
+            </p>
+            <p className={`text-xs mt-0.5 ${completedSetCount > 0 ? 'text-primary' : 'text-muted-foreground/50'}`}>
+              {completedSetCount > 0
+                ? `✓ ${completedSetCount}/${exercise.sets.length}세트 완료`
+                : `0/${exercise.sets.length}세트 완료`}
+            </p>
+          </div>
+
+          {isExpanded ? (
+            <CaretUpIcon size={20} weight="bold" className="text-muted-foreground" />
+          ) : (
+            <CaretDownIcon size={20} weight="bold" className="text-muted-foreground" />
+          )}
+        </button>
+
+        {/* 삭제 버튼 (편집 모드) */}
+        {editMode && onDelete && (
+          <button
+            type="button"
+            onClick={onDelete}
+            disabled={!canDelete}
+            className="w-10 h-10 flex items-center justify-center shrink-0 text-muted-foreground/50 hover:text-destructive disabled:opacity-30 transition-colors"
+            aria-label="운동 삭제"
+          >
+            <TrashIcon size={18} />
+          </button>
+        )}
+      </div>
 
       {/* 상세 정보 */}
       {isExpanded && (

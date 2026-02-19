@@ -42,6 +42,9 @@ function buildPostQueryString(filters: PostFilters): string {
   if (filters.page) {
     params.set('page', String(filters.page));
   }
+  if (filters.dateRange && filters.dateRange !== 'all') {
+    params.set('dateRange', filters.dateRange);
+  }
   if (filters.limit) {
     params.set('limit', String(filters.limit));
   }

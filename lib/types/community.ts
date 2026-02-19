@@ -178,6 +178,7 @@ export interface PostFilters {
   category?: PostCategory | 'all';
   authorId?: string;
   search?: string;
+  dateRange?: 'all' | 'today' | 'week' | 'month';
   page?: number;
   limit?: number;
 }
