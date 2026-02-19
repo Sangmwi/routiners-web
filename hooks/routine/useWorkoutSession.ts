@@ -86,7 +86,8 @@ type WorkoutAction =
   | { type: 'PREV_EXERCISE' }
   | { type: 'GO_TO_EXERCISE'; index: number }
   | { type: 'COMPLETE_WORKOUT' }
-  | { type: 'EXIT_WORKOUT' };
+  | { type: 'EXIT_WORKOUT' }
+  | { type: 'SYNC_EXERCISES'; exercises: WorkoutExercise[] };
 
 interface UseWorkoutSessionOptions {
   exercises: WorkoutExercise[];
@@ -311,6 +312,14 @@ function workoutReducer(
         pausedAt: Date.now(),
       };
 
+    case 'SYNC_EXERCISES':
+      // overview phase에서만 외부 exercises prop 동기화 (active/complete 상태 보호)
+      if (state.phase !== 'overview') return state;
+      return {
+        ...state,
+        exercises: action.exercises,
+      };
+
     default:
       return state;
   }
@@ -354,6 +363,13 @@ export function useWorkoutSession({
       pausedDuration: 0,
     };
   });
+
+  // props → reducer 동기화: 이벤트 생성 직후 exercises가 [] → 실제 데이터로 바뀔 때 반영
+  useEffect(() => {
+    if (exercises.length > 0 && state.exercises.length === 0 && state.phase === 'overview') {
+      dispatch({ type: 'SYNC_EXERCISES', exercises });
+    }
+  }, [exercises, state.exercises.length, state.phase]);
 
   const updateWorkout = useUpdateWorkoutData();
 

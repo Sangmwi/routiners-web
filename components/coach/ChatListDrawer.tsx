@@ -169,7 +169,7 @@ function ConversationItem({ item, isCurrent, onSelect, onDelete }: ConversationI
             </span>
           )}
           <span className="text-sm font-medium text-foreground truncate">
-            {conversation.title || 'AI 코치'}
+            {conversation.title || 'AI 상담'}
           </span>
         </div>
         <div className="flex items-center gap-2 mt-0.5">

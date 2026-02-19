@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { DayEventCard } from '@/components/routine';
 import { useRoutineEventByDateSuspense, useDeleteRoutineEvent } from '@/hooks/routine';
 import { useConfirmDialog } from '@/lib/stores/modalStore';
 import type { EventType } from '@/lib/types/routine';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
-import { PlusIcon, BarbellIcon, ForkKnifeIcon, TrashIcon } from '@phosphor-icons/react';
+import { BarbellIcon, ForkKnifeIcon, RobotIcon, PlusIcon } from '@phosphor-icons/react';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import AddWorkoutSheet from '@/components/routine/sheets/AddWorkoutSheet';
 import AddMealSheet from '@/components/routine/sheets/AddMealSheet';
@@ -21,11 +22,13 @@ interface DayEventSectionProps {
 /**
  * 선택된 날짜의 이벤트 섹션 (Suspense 내부)
  *
- * - 독립적인 Suspense 경계로 분리
+ * - 운동/식단 독립 섹션으로 표시
+ * - 없는 타입에만 AI/직접 추가 드로어 노출
  * - 날짜/필터 변경 시 이 영역만 로딩
- * - 캘린더 그리드는 영향받지 않음
  */
 export default function DayEventSection({ date, filterType }: DayEventSectionProps) {
+  const router = useRouter();
+
   // Suspense 쿼리: 선택된 날짜의 이벤트들
   const { data: workoutEvent } = useRoutineEventByDateSuspense(date, 'workout');
   const { data: mealEvent } = useRoutineEventByDateSuspense(date, 'meal');
@@ -34,120 +37,128 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
   const deleteEvent = useDeleteRoutineEvent();
   const confirm = useConfirmDialog();
 
-  // 더보기 액션시트
-  const [moreTargetId, setMoreTargetId] = useState<string | null>(null);
-
-  const handleMore = (eventId: string) => {
-    setMoreTargetId(eventId);
-  };
-
-  const handleDelete = () => {
-    if (!moreTargetId) return;
-    const targetId = moreTargetId;
-    setMoreTargetId(null);
+  const handleDelete = (eventId: string) => {
+    const targetEvent = workoutEvent?.id === eventId ? workoutEvent : mealEvent;
     confirm({
       title: '루틴을 삭제하시겠어요?',
       message: '삭제하면 되돌릴 수 없어요.',
       confirmText: '삭제',
-      onConfirm: async () => { await deleteEvent.mutateAsync(targetId); },
+      onConfirm: async () => {
+        await deleteEvent.mutateAsync({
+          id: eventId,
+          date: targetEvent?.date ?? date,
+          type: targetEvent?.type ?? 'workout',
+        });
+      },
     });
   };
 
-  // + 버튼 메뉴
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // AI/직접 추가 드로어
+  const [drawerType, setDrawerType] = useState<'workout' | 'meal' | null>(null);
+  // 직접 추가 시트
   const [activeSheet, setActiveSheet] = useState<'workout' | 'meal' | null>(null);
 
-  // 필터에 맞는 이벤트 선택
-  const selectedEvent =
-    filterType === 'workout'
-      ? (workoutEvent ?? null)
-      : filterType === 'meal'
-        ? (mealEvent ?? null)
-        : (workoutEvent ?? mealEvent ?? null);
+  const handleAI = () => {
+    setDrawerType(null);
+    router.push('/routine/coach');
+  };
 
-  const handleSelectType = (type: 'workout' | 'meal') => {
-    setIsMenuOpen(false);
+  const handleManual = (type: 'workout' | 'meal') => {
+    setDrawerType(null);
     setActiveSheet(type);
   };
 
+  const handleCreated = (type: 'workout' | 'meal') => {
+    router.push(`/routine/${type}/${date}`);
+  };
+
+  const showWorkout = filterType === 'all' || filterType === 'workout';
+  const showMeal = filterType === 'all' || filterType === 'meal';
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold text-foreground">
-          {formatKoreanDate(date, {
-            year: false,
-            weekday: true,
-            weekdayFormat: 'short',
-          })}{' '}
-          루틴
-        </h2>
-        <button
-          type="button"
-          onClick={() => setIsMenuOpen(true)}
-          className="w-8 h-8 flex items-center justify-center rounded-full text-primary"
-        >
-          <PlusIcon size={18} weight="bold" />
-        </button>
-      </div>
-      <DayEventCard event={selectedEvent} date={date} onMore={handleMore} />
+      <h2 className="text-lg font-semibold text-foreground mb-3">
+        {formatKoreanDate(date, {
+          year: false,
+          weekday: true,
+          weekdayFormat: 'short',
+        })}{' '}
+        루틴
+      </h2>
 
-      {/* 더보기 액션시트 */}
+      <div>
+        {showWorkout && (
+          workoutEvent ? (
+            <DayEventCard event={workoutEvent} date={date} onDelete={handleDelete} />
+          ) : (
+            <button
+              type="button"
+              onClick={() => setDrawerType('workout')}
+              className="w-full flex items-center gap-4 px-2 py-5 active:bg-muted/20 transition-colors rounded-xl"
+            >
+              <BarbellIcon size={28} weight="duotone" className="text-muted-foreground/50 shrink-0" />
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-sm font-medium text-muted-foreground">예정된 운동이 없어요</p>
+              </div>
+              <div className="flex items-center gap-1 text-primary shrink-0">
+                <PlusIcon size={16} weight="bold" />
+                <span className="text-sm font-medium">추가</span>
+              </div>
+            </button>
+          )
+        )}
+
+        {showWorkout && showMeal && (
+          <div className="mx-2 border-t border-border/40" />
+        )}
+
+        {showMeal && (
+          mealEvent ? (
+            <DayEventCard event={mealEvent} date={date} onDelete={handleDelete} />
+          ) : (
+            <button
+              type="button"
+              onClick={() => setDrawerType('meal')}
+              className="w-full flex items-center gap-4 px-2 py-5 active:bg-muted/20 transition-colors rounded-xl"
+            >
+              <ForkKnifeIcon size={28} weight="duotone" className="text-muted-foreground/50 shrink-0" />
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-sm font-medium text-muted-foreground">예정된 식단이 없어요</p>
+              </div>
+              <div className="flex items-center gap-1 text-primary shrink-0">
+                <PlusIcon size={16} weight="bold" />
+                <span className="text-sm font-medium">추가</span>
+              </div>
+            </button>
+          )
+        )}
+      </div>
+
+      {/* AI / 직접 추가 선택 드로어 */}
       <Modal
-        isOpen={!!moreTargetId}
-        onClose={() => setMoreTargetId(null)}
+        isOpen={!!drawerType}
+        onClose={() => setDrawerType(null)}
         position="bottom"
         enableSwipe
         height="auto"
         showCloseButton={false}
       >
-        <ModalBody className="p-4 pb-safe">
+        <ModalBody className="p-4 pb-safe space-y-2">
           <button
             type="button"
-            onClick={handleDelete}
-            className="w-full flex items-center gap-3 rounded-xl px-2 py-3 active:bg-muted/50 text-foreground"
+            onClick={handleAI}
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-primary text-primary-foreground"
           >
-            <TrashIcon size={20} weight="bold" />
-            <span className="text-sm font-medium">삭제</span>
-          </button>
-        </ModalBody>
-      </Modal>
-
-      {/* 운동/식단 선택 메뉴 */}
-      <Modal
-        isOpen={isMenuOpen}
-        onClose={() => setIsMenuOpen(false)}
-        title="추가하기"
-        position="bottom"
-        enableSwipe
-        height="auto"
-        showCloseButton
-      >
-        <ModalBody className="p-4 space-y-6 pb-safe">
-          <button
-            type="button"
-            onClick={() => handleSelectType('workout')}
-            className="w-full flex items-center gap-3 rounded-xl active:bg-muted/50"
-          >
-            <div className="w-10 h-10 flex items-center justify-center rounded-full">
-              <BarbellIcon size={24} className="text-primary" weight="duotone" />
-            </div>
-            <div className="text-left">
-              <p className="text-sm font-medium">운동 추가</p>
-              <p className="text-xs text-muted-foreground">운동 종목과 세트를 직접 입력</p>
-            </div>
+            <RobotIcon size={18} />
+            AI 상담에게 맡기기
           </button>
           <button
             type="button"
-            onClick={() => handleSelectType('meal')}
-            className="w-full flex items-center gap-3 rounded-xl active:bg-muted/50"
+            onClick={() => drawerType && handleManual(drawerType)}
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-muted/50 text-muted-foreground"
           >
-            <div className="w-10 h-10 flex items-center justify-center rounded-full">
-              <ForkKnifeIcon size={24} className="text-primary" weight="duotone" />
-            </div>
-            <div className="text-left">
-              <p className="text-sm font-medium">식단 추가</p>
-              <p className="text-xs text-muted-foreground">음식과 영양 정보를 직접 입력</p>
-            </div>
+            <PlusIcon size={18} weight="bold" />
+            {drawerType === 'meal' ? '식단 직접 입력' : '운동 직접 추가'}
           </button>
         </ModalBody>
       </Modal>
@@ -157,11 +168,13 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
         isOpen={activeSheet === 'workout'}
         onClose={() => setActiveSheet(null)}
         date={date}
+        onCreated={() => handleCreated('workout')}
       />
       <AddMealSheet
         isOpen={activeSheet === 'meal'}
         onClose={() => setActiveSheet(null)}
         date={date}
+        onCreated={() => handleCreated('meal')}
       />
     </div>
   );

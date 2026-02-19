@@ -25,6 +25,7 @@ interface AddMealSheetProps {
   isOpen: boolean;
   onClose: () => void;
   date: string;
+  onCreated?: () => void;
 }
 
 // ============================================================================
@@ -109,7 +110,7 @@ function FoodItemRow({ food, onRemove }: FoodItemRowProps) {
 // Main Component
 // ============================================================================
 
-export default function AddMealSheet({ isOpen, onClose, date }: AddMealSheetProps) {
+export default function AddMealSheet({ isOpen, onClose, date, onCreated }: AddMealSheetProps) {
   const router = useRouter();
   const showError = useShowError();
   const createEvent = useCreateRoutineEvent();
@@ -172,6 +173,7 @@ export default function AddMealSheet({ isOpen, onClose, date }: AddMealSheetProp
         setMealType('lunch');
         setCategoryFilter(null);
         router.refresh();
+        onCreated?.();
       },
       onError: () => showError('식단 저장에 실패했어요'),
     });

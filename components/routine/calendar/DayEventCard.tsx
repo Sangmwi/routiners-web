@@ -1,35 +1,22 @@
 'use client';
 
 import { RoutineEvent, WorkoutExercise } from '@/lib/types/routine';
-import { DotsThreeVerticalIcon } from '@phosphor-icons/react';
+import { TrashIcon } from '@phosphor-icons/react';
 import { getEventIcon, getStatusConfig } from '@/lib/config/eventTheme';
-import { formatKoreanDate } from '@/lib/utils/dateHelpers';
+
 import { isWorkoutData, isMealData } from '@/lib/types/guards';
 import AppLink from '@/components/common/AppLink';
 
 interface DayEventCardProps {
-  event: RoutineEvent | null;
+  event: RoutineEvent;
   date: string;
-  onMore?: (eventId: string) => void;
+  onDelete?: (eventId: string) => void;
 }
 
 /**
  * 선택된 날짜의 이벤트 카드
  */
-export default function DayEventCard({ event, date, onMore }: DayEventCardProps) {
-  // 날짜 포맷
-  const formattedDate = formatKoreanDate(date, { year: false, weekday: true });
-
-  // 이벤트 없음
-  if (!event) {
-    return (
-      <div className="bg-muted/20 rounded-xl p-5">
-        <p className="text-sm text-muted-foreground mb-1">{formattedDate}</p>
-        <p className="text-foreground">예정된 운동이 없어요.</p>
-      </div>
-    );
-  }
-
+export default function DayEventCard({ event, date, onDelete }: DayEventCardProps) {
   const status = getStatusConfig(event.status);
   const StatusIcon = status.icon;
 
@@ -79,15 +66,15 @@ export default function DayEventCard({ event, date, onMore }: DayEventCardProps)
 
       </AppLink>
 
-      {/* 더보기 메뉴 */}
-      {onMore && (
+      {/* 삭제 */}
+      {onDelete && (
         <button
           type="button"
-          onClick={() => onMore(event.id)}
+          onClick={() => onDelete(event.id)}
           className="p-2.5 -mr-1 shrink-0 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
-          aria-label="더보기"
+          aria-label="삭제"
         >
-          <DotsThreeVerticalIcon size={20} weight="bold" />
+          <TrashIcon size={18} />
         </button>
       )}
     </div>

@@ -171,7 +171,7 @@ export interface CoachPersona {
 export const COACH_PERSONAS: Record<string, CoachPersona> = {
   default: {
     id: 'default',
-    name: '코치',
+    name: '상담',
     description: '운동 루틴 생성을 도와드립니다',
     iconType: 'robot',
   },

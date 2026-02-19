@@ -181,6 +181,18 @@ export const queryKeys = {
   },
 
   /**
+   * Progress 관련 Query Keys (3대 운동 추이 등)
+   */
+  progress: {
+    /** 모든 progress 쿼리의 기본 키 */
+    all: ['progress'] as const,
+
+    /** 진행 현황 요약 */
+    summary: (months?: number) =>
+      [...queryKeys.progress.all, 'summary', months] as const,
+  },
+
+  /**
    * Routine Event 관련 Query Keys
    */
   routineEvent: {

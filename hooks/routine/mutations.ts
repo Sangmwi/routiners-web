@@ -204,11 +204,13 @@ export function useUpdateWorkoutData() {
 export function useDeleteRoutineEvent() {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: routineEventApi.deleteEvent,
+  type DeleteVars = { id: string; date: string; type: EventType };
 
-    onSuccess: (_, eventId) => {
-      removeEventCache(queryClient, eventId);
+  return useMutation({
+    mutationFn: ({ id }: DeleteVars) => routineEventApi.deleteEvent(id),
+
+    onSuccess: (_, { id, date, type }) => {
+      removeEventCache(queryClient, id, date, type);
     },
 
     onError: (error) => {

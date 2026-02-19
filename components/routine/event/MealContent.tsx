@@ -64,7 +64,7 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
       message: '삭제하면 되돌릴 수 없어요.',
       confirmText: '삭제',
       onConfirm: async () => {
-        await deleteEvent.mutateAsync(event.id);
+        await deleteEvent.mutateAsync({ id: event.id, date: event.date, type: event.type });
         router.back();
       },
     });

@@ -40,7 +40,7 @@ export function WeeklyOverview({ stats }: WeeklyOverviewProps) {
         <div className="rounded-2xl bg-muted/20 p-4 text-center">
           <SparkleIcon size={24} weight="duotone" className="text-muted-foreground mx-auto mb-2" />
           <p className="text-sm text-muted-foreground">
-            AI 코치로 루틴을 생성해보세요
+            AI 상담으로 루틴을 생성해보세요
           </p>
         </div>
       </section>

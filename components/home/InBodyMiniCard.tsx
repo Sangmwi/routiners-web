@@ -1,22 +1,13 @@
 'use client';
 
 import SectionHeader from '@/components/ui/SectionHeader';
-import type { InBodySummary } from '@/lib/types';
+import ChangeIndicator from '@/components/ui/ChangeIndicator';
+import MiniSparkline from '@/components/ui/MiniSparkline';
+import type { InBodySummary, InBodyRecord } from '@/lib/types';
 
 interface InBodyMiniCardProps {
   summary: InBodySummary;
-}
-
-function ChangeIndicator({ value, positiveIsGood }: { value: number; positiveIsGood: boolean }) {
-  if (value === 0) return null;
-  const isPositive = value > 0;
-  const isGood = positiveIsGood ? isPositive : !isPositive;
-
-  return (
-    <span className={`text-[10px] font-medium ${isGood ? 'text-emerald-500' : 'text-red-400'}`}>
-      {isPositive ? '+' : ''}{value.toFixed(1)}
-    </span>
-  );
+  history?: InBodyRecord[];
 }
 
 const METRICS_CONFIG = [
@@ -25,8 +16,9 @@ const METRICS_CONFIG = [
   { key: 'bodyFatPercentage', label: '체지방률', unit: '%', positiveIsGood: false },
 ] as const;
 
-export default function InBodyMiniCard({ summary }: InBodyMiniCardProps) {
+export default function InBodyMiniCard({ summary, history = [] }: InBodyMiniCardProps) {
   const hasData = !!summary.latest;
+  const hasHistory = history.length >= 2;
 
   return (
     <section>
@@ -43,6 +35,7 @@ export default function InBodyMiniCard({ summary }: InBodyMiniCardProps) {
           {METRICS_CONFIG.map(({ key, label, unit, positiveIsGood }) => {
             const value = summary.latest?.[key];
             const change = summary.changes?.[key];
+            const sparkData = hasHistory ? history.map((r) => r[key]) : [];
 
             return (
               <div key={key} className="text-center">
@@ -56,6 +49,11 @@ export default function InBodyMiniCard({ summary }: InBodyMiniCardProps) {
                 </p>
                 {change != null && change !== 0 && (
                   <ChangeIndicator value={change} positiveIsGood={positiveIsGood} />
+                )}
+                {hasHistory && (
+                  <div className="mt-1">
+                    <MiniSparkline data={sparkData} height={28} showEndDot={false} />
+                  </div>
                 )}
               </div>
             );

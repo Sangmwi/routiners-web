@@ -20,7 +20,9 @@ export function useSeedEventCache(events: RoutineEvent[] | undefined) {
 
     for (const event of events) {
       const key = queryKeys.routineEvent.byDate(event.date, event.type);
-      if (!queryClient.getQueryData(key)) {
+      // undefined: 캐시 없음 → 시딩 대상
+      // null: 삭제 등으로 명시적 비움 → 시딩하면 안 됨
+      if (queryClient.getQueryData(key) === undefined) {
         queryClient.setQueryData(key, event);
       }
     }

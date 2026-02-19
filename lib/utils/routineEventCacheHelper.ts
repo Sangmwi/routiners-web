@@ -73,6 +73,10 @@ export function updateEventCache(
 /**
  * 루틴 이벤트 목록/캘린더 캐시 무효화
  *
+ * list와 month 쿼리만 무효화.
+ * byDate, detail 캐시는 updateEventCache()에서 직접 세팅하므로 제외.
+ * (전체 무효화 시 byDate 캐시가 즉시 무효화되어 레이스 컨디션 발생)
+ *
  * @param queryClient - React Query 클라이언트
  *
  * @example
@@ -80,7 +84,10 @@ export function updateEventCache(
  */
 export function invalidateEventLists(queryClient: QueryClient): void {
   queryClient.invalidateQueries({
-    queryKey: queryKeys.routineEvent.all,
+    queryKey: [...queryKeys.routineEvent.all, 'list'],
+  });
+  queryClient.invalidateQueries({
+    queryKey: [...queryKeys.routineEvent.all, 'month'],
   });
 }
 
@@ -135,19 +142,32 @@ export function updateBatchEventCache(
 /**
  * 이벤트 삭제 시 캐시 정리
  *
+ * detail + byDate 캐시를 직접 제거하고 list/month를 무효화.
+ * (byDate 캐시를 제거하지 않으면 메인탭 등에서 삭제된 이벤트가 남아있음)
+ *
  * @param queryClient - React Query 클라이언트
  * @param eventId - 삭제된 이벤트 ID
+ * @param date - 이벤트 날짜 (YYYY-MM-DD)
+ * @param type - 이벤트 타입
  *
  * @example
- * removeEventCache(queryClient, 'event-id');
+ * removeEventCache(queryClient, 'event-id', '2026-02-20', 'workout');
  */
 export function removeEventCache(
   queryClient: QueryClient,
-  eventId: string
+  eventId: string,
+  date?: string,
+  type?: 'workout' | 'meal'
 ): void {
   queryClient.removeQueries({
     queryKey: queryKeys.routineEvent.detail(eventId),
   });
+  if (date) {
+    queryClient.setQueryData(
+      queryKeys.routineEvent.byDate(date, type),
+      null
+    );
+  }
   invalidateEventLists(queryClient);
 }
 

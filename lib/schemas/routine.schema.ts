@@ -47,6 +47,7 @@ export const WorkoutSetSchema = z.object({
   setNumber: z.number().int().min(1, '세트 번호는 1 이상이어야 합니다.'),
   targetReps: z.number().int().min(1, '목표 반복 횟수는 1 이상이어야 합니다.').max(100),
   targetWeight: z.number().min(0).max(500).optional(),
+  restSeconds: z.number().int().min(0).max(600).optional(),
   actualReps: z.number().int().min(0).max(100).optional(),
   actualWeight: z.number().min(0).max(500).optional(),
   completed: z.boolean().optional(),
@@ -78,7 +79,7 @@ export const WorkoutExerciseSchema = z.object({
  * 워크아웃 데이터 스키마 (routine_events.data)
  */
 export const WorkoutDataSchema = z.object({
-  exercises: z.array(WorkoutExerciseSchema),
+  exercises: z.array(WorkoutExerciseSchema).min(1, '최소 1개의 운동이 필요합니다.'),
   estimatedDuration: z.number().int().min(1).max(180).optional(),
   workoutType: WorkoutTypeSchema.optional(),
   intensity: z.number().int().min(1).max(10).optional(),

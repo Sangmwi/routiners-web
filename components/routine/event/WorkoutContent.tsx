@@ -110,7 +110,7 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
               className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-primary text-primary-foreground"
             >
               <RobotIcon size={18} />
-              AI 코치에게 맡기기
+              AI 상담에게 맡기기
             </button>
             <button
               onClick={() => setIsAddSheetOpen(true)}

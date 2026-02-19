@@ -14,7 +14,6 @@ import SetValuePicker from '@/components/routine/workout/SetValuePicker';
 import { useCreateRoutineEvent } from '@/hooks/routine';
 import { useSetValuePicker } from '@/hooks/routine/useSetValuePicker';
 import { useShowError } from '@/lib/stores/errorStore';
-import { useRouter } from 'next/navigation';
 import { searchExercises, generateWorkoutTitle, EXERCISE_CATEGORIES } from '@/lib/data/exercises';
 import { REST_OPTIONS, formatRestSeconds } from '@/lib/utils/workoutHelpers';
 import type { ExerciseCategory, ExerciseInfo } from '@/lib/data/exercises';
@@ -28,6 +27,7 @@ interface AddWorkoutSheetProps {
   isOpen: boolean;
   onClose: () => void;
   date: string;
+  onCreated?: () => void;
 }
 
 // ============================================================================
@@ -197,8 +197,7 @@ function SelectedExerciseCard({ exercise, onUpdate, onRemove }: SelectedExercise
 // Main Component
 // ============================================================================
 
-export default function AddWorkoutSheet({ isOpen, onClose, date }: AddWorkoutSheetProps) {
-  const router = useRouter();
+export default function AddWorkoutSheet({ isOpen, onClose, date, onCreated }: AddWorkoutSheetProps) {
   const showError = useShowError();
   const createEvent = useCreateRoutineEvent();
 
@@ -255,7 +254,7 @@ export default function AddWorkoutSheet({ isOpen, onClose, date }: AddWorkoutShe
         setExercises([]);
         setQuery('');
         setCategoryFilter(null);
-        router.refresh();
+        onCreated?.();
       },
       onError: () => showError('운동 저장에 실패했어요'),
     });

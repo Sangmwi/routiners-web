@@ -2,18 +2,16 @@
 
 import { useCurrentUserProfileSuspense } from '@/hooks/profile';
 import { useWeeklyStatsSuspense } from '@/hooks/routine';
-import { useInBodySummarySuspense } from '@/hooks/inbody/queries';
+import { useInBodySummarySuspense, useInBodyRecordsSuspense } from '@/hooks/inbody/queries';
+import { useProgressSummarySuspense } from '@/hooks/progress';
 import GreetingSection from '@/components/home/GreetingSection';
-import HealthScoreCard from '@/components/home/HealthScoreCard';
 import RoutineMiniCard from '@/components/home/RoutineMiniCard';
+import Big3LiftCard from '@/components/home/Big3LiftCard';
 import InBodyMiniCard from '@/components/home/InBodyMiniCard';
 import SectionHeader from '@/components/ui/SectionHeader';
 import ProductSlider from '@/components/home/ProductSlider';
 import InfluencerSlider from '@/components/home/InfluencerSlider';
 import { Product, Influencer } from '@/lib/types';
-
-// 더미 데이터
-const DUMMY_HEALTH_SCORE = 78;
 
 const DUMMY_PRODUCTS: Product[] = [
   { id: '1', brand: 'Dr. Elizabeth', name: '테아닌과 밀크씨슬 활력 솔루션', price: 25000, imageUrl: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=400&h=300&fit=crop' },
@@ -51,10 +49,8 @@ export default function HomeContent() {
   const { data: user } = useCurrentUserProfileSuspense();
   const weeklyStats = useWeeklyStatsSuspense();
   const { data: inbodySummary } = useInBodySummarySuspense();
-
-  const handleViewHealthDetails = () => {
-    console.log('건강 점수 상세 보기');
-  };
+  const { data: inbodyRecords } = useInBodyRecordsSuspense(12, 0);
+  const { data: progressSummary } = useProgressSummarySuspense();
 
   const handleViewMoreProducts = () => {
     console.log('PX 상품 더보기');
@@ -74,14 +70,12 @@ export default function HomeContent() {
 
   return (
     <div className="space-y-8">
-      <section>
-        <GreetingSection nickname={user?.nickname || '사용자'} />
-        <HealthScoreCard score={DUMMY_HEALTH_SCORE} onViewDetails={handleViewHealthDetails} />
-      </section>
+      <GreetingSection nickname={user?.nickname || '사용자'} />
 
       {/* 대시보드 미니카드 */}
       <RoutineMiniCard stats={weeklyStats} />
-      <InBodyMiniCard summary={inbodySummary} />
+      <InBodyMiniCard summary={inbodySummary} history={inbodyRecords} />
+      <Big3LiftCard summary={progressSummary.big3} />
 
       <section>
         <SectionHeader
