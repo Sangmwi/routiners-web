@@ -91,26 +91,20 @@ export default function ExerciseCard({
         isCompleted ? 'bg-primary/5' : 'bg-muted/20'
       }`}
     >
-      {/* 헤더 */}
-      <div className="flex items-center gap-1 p-4">
-        {/* 드래그 핸들 (편집 모드) */}
-        {editMode && dragHandleProps && (
+      {/* 헤더: 3칸 고정 레이아웃 [left w-10] [center flex-1] [right w-10] */}
+      <div className="flex items-center gap-2 p-4">
+        {/* Left: 드래그 핸들 (편집) / 번호 배지 (일반) */}
+        {editMode && dragHandleProps ? (
           <div
             {...dragHandleProps}
             className="w-10 h-10 flex items-center justify-center shrink-0 touch-none cursor-grab active:cursor-grabbing"
           >
             <DotsSixVerticalIcon size={20} weight="bold" className="text-muted-foreground" />
           </div>
-        )}
-
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="flex-1 flex items-center gap-3"
-        >
-          {/* 번호 (일반 모드에서만) */}
-          {!editMode && (
+        ) : (
+          <div className="w-10 h-10 flex items-center justify-center shrink-0">
             <div
-              className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold ${
+              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${
                 isCompleted
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted text-muted-foreground'
@@ -118,29 +112,27 @@ export default function ExerciseCard({
             >
               {index + 1}
             </div>
-          )}
-
-          <div className="flex-1 text-left">
-            <h3 className="font-semibold text-foreground">{exercise.name}</h3>
-            <p className="text-sm text-muted-foreground">
-              {setsSummary}
-            </p>
-            <p className={`text-xs mt-0.5 ${completedSetCount > 0 ? 'text-primary' : 'text-muted-foreground/50'}`}>
-              {completedSetCount > 0
-                ? `✓ ${completedSetCount}/${exercise.sets.length}세트 완료`
-                : `0/${exercise.sets.length}세트 완료`}
-            </p>
           </div>
+        )}
 
-          {isExpanded ? (
-            <CaretUpIcon size={20} weight="bold" className="text-muted-foreground" />
-          ) : (
-            <CaretDownIcon size={20} weight="bold" className="text-muted-foreground" />
-          )}
+        {/* Center: 운동 정보 (탭으로 확장/축소) */}
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex-1 text-left min-w-0"
+        >
+          <h3 className="font-semibold text-foreground truncate">{exercise.name}</h3>
+          <p className="text-sm text-muted-foreground">
+            {setsSummary}
+          </p>
+          <p className={`text-xs mt-0.5 ${completedSetCount > 0 ? 'text-primary' : 'text-muted-foreground/50'}`}>
+            {completedSetCount > 0
+              ? `✓ ${completedSetCount}/${exercise.sets.length}세트 완료`
+              : `0/${exercise.sets.length}세트 완료`}
+          </p>
         </button>
 
-        {/* 삭제 버튼 (편집 모드) */}
-        {editMode && onDelete && (
+        {/* Right: 삭제 (편집) / 펼침 표시 (일반) */}
+        {editMode && onDelete ? (
           <button
             type="button"
             onClick={onDelete}
@@ -150,6 +142,14 @@ export default function ExerciseCard({
           >
             <TrashIcon size={18} />
           </button>
+        ) : (
+          <div className="w-10 h-10 flex items-center justify-center shrink-0">
+            {isExpanded ? (
+              <CaretUpIcon size={20} weight="bold" className="text-muted-foreground" />
+            ) : (
+              <CaretDownIcon size={20} weight="bold" className="text-muted-foreground" />
+            )}
+          </div>
         )}
       </div>
 

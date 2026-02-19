@@ -141,6 +141,20 @@ async function handleSetActivePurpose(
 
 ✅ 다음 응답에서 request_user_input 도구를 호출하세요:
 {"message":"운동 목표를 선택해주세요","type":"radio","options":[{"value":"muscle_gain","label":"근육 증가 💪"},{"value":"fat_loss","label":"체지방 감소 🔥"},{"value":"endurance","label":"지구력 향상 🏃"},{"value":"general_fitness","label":"전반적 체력 🌟"}],"sliderConfig":null}`,
+
+    routine_modification: `🚨 즉시 실행: get_current_routine 호출하여 기존 루틴을 확인하세요.
+결과에서 이벤트 ID와 운동 ID를 파악하고, 사용자의 수정 요청에 따라:
+- 운동 추가: add_exercise_to_workout
+- 운동 삭제: remove_exercise_from_workout
+- 운동 순서 변경: reorder_workout_exercises
+- 세트 수정: update_exercise_sets
+- 전체 재구성이 필요하면: generate_routine_preview
+적절한 도구를 호출하세요.`,
+
+    quick_routine: `🚨 즉시 실행: get_fitness_profile 호출하여 프로필을 확인하세요.
+- 프로필 충분 → 바로 generate_routine_preview 호출 (days_per_week: 1)
+- 프로필 부족 → 최대 2개 핵심 질문만 한 후 생성
+"오늘만"이라고 했다면 days_per_week: 1로 생성하세요.`,
   };
 
   ctx.sendEvent('tool_done', {

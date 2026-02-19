@@ -30,7 +30,13 @@ export function composeCoachPrompt(
   }
 
   if (processType && PROCESS_RULES[processType]) {
-    prompt += `\n\n---\n\n# 루틴 생성 프로세스\n${PROCESS_RULES[processType]}`;
+    const PROCESS_HEADERS: Record<string, string> = {
+      routine_generation: '루틴 생성 프로세스',
+      routine_modification: '루틴 수정 프로세스',
+      quick_routine: '빠른 루틴 생성 프로세스',
+    };
+    const header = PROCESS_HEADERS[processType] ?? processType;
+    prompt += `\n\n---\n\n# ${header}\n${PROCESS_RULES[processType]}`;
   }
 
   return prompt;

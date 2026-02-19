@@ -22,7 +22,7 @@ import { z } from 'zod';
 
 const ActivePurposeSchema = z.object({
   activePurpose: z.object({
-    type: z.literal('routine_generation'),
+    type: z.enum(['routine_generation', 'routine_modification', 'quick_routine']),
     stage: z.enum(['init', 'collecting_info', 'generating', 'reviewing', 'applying']),
     collectedData: z.record(z.unknown()).default({}),
     startedAt: z.string().optional(),

@@ -217,6 +217,10 @@ function getPurposeLabel(type: ActivePurposeType): string {
   switch (type) {
     case 'routine_generation':
       return '운동 루틴 생성 중';
+    case 'routine_modification':
+      return '루틴 수정 중';
+    case 'quick_routine':
+      return '빠른 루틴 생성 중';
     default:
       return '진행 중';
   }

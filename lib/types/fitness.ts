@@ -226,6 +226,11 @@ export const AI_TOOL_NAMES = [
   'save_routine_draft',
   'generate_routine_preview', // 미리보기 생성 (DB 저장 X)
   'apply_routine', // 미리보기 적용 (DB 저장)
+  // 운동 편집 (기존 루틴 수정)
+  'add_exercise_to_workout',
+  'remove_exercise_from_workout',
+  'reorder_workout_exercises',
+  'update_exercise_sets',
   // 사용자 입력 요청
   'request_user_input',
   // 프로필 확인 요청
@@ -259,6 +264,11 @@ export const AI_TOOL_LABELS: Record<AIToolName, string> = {
   save_routine_draft: '루틴 초안 저장 중',
   generate_routine_preview: '루틴 미리보기 생성 중',
   apply_routine: '루틴 적용 중',
+  // 운동 편집
+  add_exercise_to_workout: '운동 추가 중',
+  remove_exercise_from_workout: '운동 삭제 중',
+  reorder_workout_exercises: '운동 순서 변경 중',
+  update_exercise_sets: '세트 수정 중',
   request_user_input: '입력 요청',
   confirm_profile_data: '프로필 확인 중',
   // 식단 도구 레이블

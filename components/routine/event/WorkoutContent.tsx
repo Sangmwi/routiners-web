@@ -284,6 +284,19 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
                 />
               ))}
             </div>
+            {event.status === 'scheduled' && (
+              <button
+                type="button"
+                onClick={() => {
+                  enterEditMode();
+                  setIsAddExerciseSheetOpen(true);
+                }}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-border text-sm text-muted-foreground"
+              >
+                <PlusIcon size={16} weight="bold" />
+                운동 추가
+              </button>
+            )}
           </div>
         ) : (
           <div className="bg-muted/50 rounded-xl p-6 text-center">

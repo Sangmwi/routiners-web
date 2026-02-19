@@ -1,6 +1,6 @@
 'use client';
 
-import { BarbellIcon, ChartBarIcon, ShoppingCartIcon, type Icon } from '@phosphor-icons/react';
+import { BarbellIcon, ChartBarIcon, LightningIcon, ShoppingCartIcon, type Icon } from '@phosphor-icons/react';
 import type { ActionChip } from '@/lib/types/coach';
 
 interface ActionChipsProps {
@@ -20,6 +20,13 @@ const DEFAULT_ACTION_CHIPS: ActionChip[] = [
     label: '운동 루틴 생성',
     description: '맞춤 운동 루틴을 만들어 드려요',
     triggersPurpose: 'routine_generation',
+  },
+  {
+    id: 'quick_routine',
+    icon: 'Lightning',
+    label: '오늘의 운동',
+    description: '빠르게 오늘 운동을 만들어요',
+    triggersPurpose: 'quick_routine',
   },
   // 추후 확장:
   // {
@@ -42,6 +49,7 @@ const DEFAULT_ACTION_CHIPS: ActionChip[] = [
  */
 const ICON_MAP: Record<string, Icon> = {
   Barbell: BarbellIcon,
+  Lightning: LightningIcon,
   ChartBar: ChartBarIcon,
   ShoppingCart: ShoppingCartIcon,
 };

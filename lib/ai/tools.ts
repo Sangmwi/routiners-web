@@ -201,10 +201,145 @@ export const GET_CURRENT_ROUTINE: AIToolDefinition = {
   type: 'function',
   name: 'get_current_routine',
   description:
-    '사용자의 현재 운동 루틴 이벤트를 조회합니다. 향후 예정(scheduled)된 이벤트와 최근 2주간 완료(completed)/건너뛴(skipped) 이벤트를 포함합니다. 다른 대화 세션에서 생성된 루틴도 모두 조회됩니다. 루틴 수정 요청 시 반드시 먼저 호출하여 기존 루틴을 확인하세요.',
+    '사용자의 현재 운동 루틴 이벤트를 조회합니다. 향후 예정(scheduled)된 이벤트와 최근 2주간 완료(completed)/건너뛴(skipped) 이벤트를 포함합니다. 각 이벤트에 id(편집 도구용)와 운동별 id, 이름, 세트 수가 포함됩니다. 루틴 수정/조회 시 반드시 먼저 호출하세요.',
   parameters: {
     type: 'object',
     properties: {},
+  },
+};
+
+// ============================================================================
+// Workout Editing Tools (기존 루틴 수정용)
+// workoutDataOperations.ts 순수 함수와 공유
+// ============================================================================
+
+/**
+ * 11-a. 운동 추가
+ */
+export const ADD_EXERCISE_TO_WORKOUT: AIToolDefinition = {
+  type: 'function',
+  name: 'add_exercise_to_workout',
+  description:
+    '기존 루틴 이벤트에 운동을 추가합니다. get_current_routine으로 조회한 이벤트 ID를 사용하세요.',
+  parameters: {
+    type: 'object',
+    properties: {
+      routine_event_id: {
+        type: 'string',
+        description: '대상 루틴 이벤트 ID (get_current_routine 결과의 id)',
+      },
+      exercise: {
+        type: 'object',
+        description: '추가할 운동 정보',
+        properties: {
+          name: { type: 'string', description: '운동명 (예: 벤치프레스)' },
+          category: { type: 'string', description: '카테고리 (예: 가슴)' },
+          targetMuscle: { type: 'string', description: '타겟 근육' },
+          sets: {
+            type: 'array',
+            description: '세트 정보',
+            items: {
+              type: 'object',
+              properties: {
+                setNumber: { type: 'number' },
+                targetReps: { type: 'number' },
+                targetWeight: { type: 'number' },
+                restSeconds: { type: 'number' },
+              },
+            },
+          },
+          restSeconds: { type: 'number', description: '세트 간 휴식 시간 (초)' },
+        },
+        required: ['name', 'sets'],
+      },
+    },
+    required: ['routine_event_id', 'exercise'],
+  },
+};
+
+/**
+ * 11-b. 운동 삭제
+ */
+export const REMOVE_EXERCISE_FROM_WORKOUT: AIToolDefinition = {
+  type: 'function',
+  name: 'remove_exercise_from_workout',
+  description:
+    '루틴 이벤트에서 특정 운동을 삭제합니다. 최소 1개 운동은 남아야 합니다.',
+  parameters: {
+    type: 'object',
+    properties: {
+      routine_event_id: {
+        type: 'string',
+        description: '대상 루틴 이벤트 ID',
+      },
+      exercise_id: {
+        type: 'string',
+        description: '삭제할 운동 ID (get_current_routine 결과의 exercises[].id)',
+      },
+    },
+    required: ['routine_event_id', 'exercise_id'],
+  },
+};
+
+/**
+ * 11-c. 운동 순서 변경
+ */
+export const REORDER_WORKOUT_EXERCISES: AIToolDefinition = {
+  type: 'function',
+  name: 'reorder_workout_exercises',
+  description:
+    '루틴 이벤트 내 운동 순서를 변경합니다. 모든 운동 ID를 새 순서대로 나열하세요.',
+  parameters: {
+    type: 'object',
+    properties: {
+      routine_event_id: {
+        type: 'string',
+        description: '대상 루틴 이벤트 ID',
+      },
+      ordered_exercise_ids: {
+        type: 'array',
+        items: { type: 'string' },
+        description: '새 순서의 운동 ID 배열 (모든 운동 ID 포함)',
+      },
+    },
+    required: ['routine_event_id', 'ordered_exercise_ids'],
+  },
+};
+
+/**
+ * 11-d. 세트 수정
+ */
+export const UPDATE_EXERCISE_SETS: AIToolDefinition = {
+  type: 'function',
+  name: 'update_exercise_sets',
+  description:
+    '특정 운동의 세트 정보를 교체합니다. 기존 세트를 새 세트로 완전히 대체합니다.',
+  parameters: {
+    type: 'object',
+    properties: {
+      routine_event_id: {
+        type: 'string',
+        description: '대상 루틴 이벤트 ID',
+      },
+      exercise_id: {
+        type: 'string',
+        description: '수정할 운동 ID',
+      },
+      sets: {
+        type: 'array',
+        description: '새 세트 정보 (기존 세트를 완전히 대체)',
+        items: {
+          type: 'object',
+          properties: {
+            setNumber: { type: 'number' },
+            targetReps: { type: 'number' },
+            targetWeight: { type: 'number' },
+            restSeconds: { type: 'number' },
+          },
+        },
+      },
+    },
+    required: ['routine_event_id', 'exercise_id', 'sets'],
   },
 };
 
@@ -518,13 +653,13 @@ export const SET_ACTIVE_PURPOSE: AIToolDefinition = {
   name: 'set_active_purpose',
   strict: true,
   description:
-    '구조화된 프로세스를 활성화합니다. 사용자가 "루틴 짜줘", "운동 계획 세워줘" 등 특정 프로세스를 요청할 때 호출하세요. 활성화 후 도구 결과에 포함된 시작 절차를 따르세요.',
+    '구조화된 프로세스를 활성화합니다. routine_generation: 새 루틴 생성 ("루틴 짜줘", "운동 계획 세워줘"). routine_modification: 기존 루틴 수정 ("수정해줘", "바꿔줘"). quick_routine: 빠른 생성 ("오늘만 만들어줘", "1회분만"). 활성화 후 도구 결과의 시작 절차를 따르세요.',
   parameters: {
     type: 'object',
     properties: {
       purposeType: {
         type: 'string',
-        enum: ['routine_generation'],
+        enum: ['routine_generation', 'routine_modification', 'quick_routine'],
         description: '활성화할 프로세스 타입',
       },
     },
@@ -566,6 +701,11 @@ export const AI_TRAINER_TOOLS: AIToolDefinition[] = [
   // 루틴 관련
   GET_CURRENT_ROUTINE,
   SAVE_ROUTINE_DRAFT,
+  // 운동 편집 (기존 루틴 수정)
+  ADD_EXERCISE_TO_WORKOUT,
+  REMOVE_EXERCISE_FROM_WORKOUT,
+  REORDER_WORKOUT_EXERCISES,
+  UPDATE_EXERCISE_SETS,
   // 사용자 입력 요청
   REQUEST_USER_INPUT,
   // 프로필 확인 요청

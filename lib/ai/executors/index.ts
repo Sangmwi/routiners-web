@@ -46,12 +46,21 @@ export {
   executeGetCurrentRoutine,
 } from './shared';
 
+// Workout Editing Executors
+export {
+  executeAddExercise,
+  executeRemoveExercise,
+  executeReorderExercises,
+  executeUpdateExerciseSets,
+} from './workout-editing';
+
 // Import for internal use in executeTool
 import type { ToolExecutorContext } from './types';
 import { executeGetUserBasicInfo, executeGetUserMilitaryInfo, executeGetUserBodyMetrics } from './user-info';
 import { executeGetFitnessProfile, executeUpdateFitnessProfile } from './fitness-profile';
 import { executeSaveRoutineDraft } from './routine';
 import { executeGetLatestInbody, executeGetInbodyHistory, executeGetCurrentRoutine } from './shared';
+import { executeAddExercise, executeRemoveExercise, executeReorderExercises, executeUpdateExerciseSets } from './workout-editing';
 
 // ============================================================================
 // Main Executor
@@ -89,6 +98,18 @@ export async function executeTool(
 
     case 'get_current_routine':
       return executeGetCurrentRoutine(ctx);
+
+    case 'add_exercise_to_workout':
+      return executeAddExercise(ctx, args as unknown as Parameters<typeof executeAddExercise>[1]);
+
+    case 'remove_exercise_from_workout':
+      return executeRemoveExercise(ctx, args as unknown as Parameters<typeof executeRemoveExercise>[1]);
+
+    case 'reorder_workout_exercises':
+      return executeReorderExercises(ctx, args as unknown as Parameters<typeof executeReorderExercises>[1]);
+
+    case 'update_exercise_sets':
+      return executeUpdateExerciseSets(ctx, args as unknown as Parameters<typeof executeUpdateExerciseSets>[1]);
 
     case 'save_routine_draft':
       return executeSaveRoutineDraft(ctx, args as Parameters<typeof executeSaveRoutineDraft>[1]);

@@ -13,11 +13,18 @@ import type { ToolExecutorContext } from './types';
 // Types (get_current_routine 응답)
 // ============================================================================
 
+interface CurrentRoutineExerciseSummary {
+  id: string;
+  name: string;
+  setsCount: number;
+}
+
 interface CurrentRoutineEvent {
+  id: string;
   date: string;
   title: string;
   status: string;
-  exercises: string[];
+  exercises: CurrentRoutineExerciseSummary[];
 }
 
 interface CurrentRoutineData {
@@ -103,7 +110,7 @@ export async function executeGetCurrentRoutine(
 
   const { data: events, error } = await ctx.supabase
     .from('routine_events')
-    .select('date, title, status, data')
+    .select('id, date, title, status, data')
     .eq('user_id', ctx.userId)
     .eq('type', 'workout')
     .gte('date', formatDate(twoWeeksAgo))
@@ -134,11 +141,16 @@ export async function executeGetCurrentRoutine(
       skippedCount++;
     }
 
-    // data에서 운동 이름만 추출 (토큰 절약)
-    const workoutData = e.data as { exercises?: Array<{ name: string }> } | null;
-    const exercises = workoutData?.exercises?.map((ex) => ex.name) ?? [];
+    // data에서 운동 ID, 이름, 세트 수 추출 (편집 도구에서 참조 가능)
+    const workoutData = e.data as { exercises?: Array<{ id: string; name: string; sets?: unknown[] }> } | null;
+    const exercises: CurrentRoutineExerciseSummary[] = workoutData?.exercises?.map((ex) => ({
+      id: ex.id,
+      name: ex.name,
+      setsCount: ex.sets?.length ?? 0,
+    })) ?? [];
 
     return {
+      id: e.id,
       date: e.date,
       title: e.title,
       status: e.status,
