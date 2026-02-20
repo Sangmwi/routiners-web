@@ -85,6 +85,66 @@ export const WorkoutDataSchema = z.object({
 });
 
 // ============================================================================
+// Meal Detail Schemas
+// ============================================================================
+
+/**
+ * 개별 음식 항목 스키마
+ */
+export const MealFoodItemSchema = z.object({
+  id: z.string().min(1, '음식 ID는 필수입니다.'),
+  name: z.string().min(1, '음식명은 필수입니다.').max(100),
+  category: z.enum(['main', 'side', 'soup', 'rice', 'protein', 'vegetable', 'snack', 'drink']).optional(),
+  portion: z.string().min(1, '분량은 필수입니다.').max(50),
+  calories: z.number().min(0).max(10000).optional(),
+  protein: z.number().min(0).max(1000).optional(),
+  carbs: z.number().min(0).max(1000).optional(),
+  fat: z.number().min(0).max(1000).optional(),
+  source: z.enum(['canteen', 'px', 'outside', 'homemade']).optional(),
+  alternatives: z.array(z.string().max(100)).max(5).optional(),
+  notes: z.string().max(500).optional(),
+});
+
+/**
+ * 단일 식사 스키마 (아침/점심/저녁/간식)
+ */
+export const MealSchema = z.object({
+  type: z.enum(['breakfast', 'lunch', 'dinner', 'snack'], {
+    errorMap: () => ({ message: '유효하지 않은 식사 타입입니다.' }),
+  }),
+  time: z.string().max(10).optional(),
+  foods: z.array(MealFoodItemSchema),
+  totalCalories: z.number().min(0).optional(),
+  totalProtein: z.number().min(0).optional(),
+  totalCarbs: z.number().min(0).optional(),
+  totalFat: z.number().min(0).optional(),
+  tips: z.array(z.string().max(200)).max(10).optional(),
+  notes: z.string().max(500).optional(),
+  completed: z.boolean().optional(),
+});
+
+/**
+ * 식단 데이터 스키마 (routine_events.data for type='meal')
+ */
+export const MealDataSchema = z.object({
+  meals: z.array(MealSchema).min(1, '최소 1개의 식사가 필요합니다.'),
+  targetCalories: z.number().min(0).optional(),
+  targetProtein: z.number().min(0).optional(),
+  targetCarbs: z.number().min(0).optional(),
+  targetFat: z.number().min(0).optional(),
+  estimatedTotalCalories: z.number().min(0).optional(),
+  waterIntake: z.number().min(0).optional(),
+  dietType: z.string().max(30).optional(),
+  tips: z.array(z.string().max(200)).max(10).optional(),
+  notes: z.string().max(1000).optional(),
+});
+
+/**
+ * 이벤트 데이터 스키마 (workout 또는 meal)
+ */
+export const EventDataSchema = z.union([WorkoutDataSchema, MealDataSchema]);
+
+// ============================================================================
 // Chat Message Schema
 // ============================================================================
 
@@ -109,7 +169,7 @@ export const RoutineEventSchema = z.object({
   type: EventTypeSchema,
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '날짜 형식은 YYYY-MM-DD여야 합니다.'),
   title: z.string().min(1, '제목은 필수입니다.').max(100),
-  data: WorkoutDataSchema,
+  data: EventDataSchema,
   rationale: z.string().max(1000).optional(),
   status: EventStatusSchema,
   completedAt: z.string().datetime().optional(),
@@ -125,7 +185,7 @@ export const RoutineEventCreateSchema = z.object({
   type: EventTypeSchema,
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '날짜 형식은 YYYY-MM-DD여야 합니다.'),
   title: z.string().min(1, '제목은 필수입니다.').max(100),
-  data: WorkoutDataSchema,
+  data: EventDataSchema,
   rationale: z.string().max(1000).optional(),
   source: EventSourceSchema,
   aiSessionId: z.string().uuid().optional(),
@@ -136,16 +196,23 @@ export const RoutineEventCreateSchema = z.object({
  */
 export const RoutineEventUpdateSchema = z.object({
   title: z.string().min(1).max(100).optional(),
-  data: WorkoutDataSchema.optional(),
+  data: EventDataSchema.optional(),
   status: EventStatusSchema.optional(),
 });
 
 /**
- * 4주치 루틴 일괄 생성 스키마
+ * 4주치 루틴 일괄 생성 스키마 (AI 전용)
  */
 export const RoutineBatchCreateSchema = z.object({
   events: z.array(RoutineEventCreateSchema).min(1, '최소 1개의 이벤트가 필요합니다.'),
   aiSessionId: z.string().uuid(),
+});
+
+/**
+ * 식단 배치 생성 스키마 (부대 식단 불러오기 등, aiSessionId 불필요)
+ */
+export const MealBatchCreateSchema = z.object({
+  events: z.array(RoutineEventCreateSchema).min(1, '최소 1개의 이벤트가 필요합니다.').max(14),
 });
 
 
@@ -175,8 +242,13 @@ export type EventStatusSchemaType = z.infer<typeof EventStatusSchema>;
 export type WorkoutSetSchemaType = z.infer<typeof WorkoutSetSchema>;
 export type WorkoutExerciseSchemaType = z.infer<typeof WorkoutExerciseSchema>;
 export type WorkoutDataSchemaType = z.infer<typeof WorkoutDataSchema>;
+export type MealFoodItemSchemaType = z.infer<typeof MealFoodItemSchema>;
+export type MealSchemaType = z.infer<typeof MealSchema>;
+export type MealDataSchemaType = z.infer<typeof MealDataSchema>;
+export type EventDataSchemaType = z.infer<typeof EventDataSchema>;
 export type ChatMessageSchemaType = z.infer<typeof ChatMessageSchema>;
 export type RoutineEventSchemaType = z.infer<typeof RoutineEventSchema>;
 export type RoutineEventCreateSchemaType = z.infer<typeof RoutineEventCreateSchema>;
 export type RoutineBatchCreateSchemaType = z.infer<typeof RoutineBatchCreateSchema>;
+export type MealBatchCreateSchemaType = z.infer<typeof MealBatchCreateSchema>;
 export type EventQueryParamsSchemaType = z.infer<typeof EventQueryParamsSchema>;

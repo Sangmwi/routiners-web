@@ -11,8 +11,17 @@ import { withAuth } from '@/utils/supabase/auth';
  * DELETE /api/community/posts/[id]/comments/[commentId]
  * 댓글 삭제 (soft delete)
  */
-export const DELETE = withAuth<NextResponse, { id: string; commentId: string }>(async (_request: NextRequest, { authUser, supabase, params }) => {
+export const DELETE = withAuth<NextResponse, { id: string; commentId: string }>(async (_request: NextRequest, { supabase, params }) => {
   const { id: postId, commentId } = await params;
+
+  // 현재 사용자의 public.users.id 조회
+  const { data: currentUserId } = await supabase.rpc('current_user_id');
+  if (!currentUserId) {
+    return NextResponse.json(
+      { error: '사용자를 찾을 수 없습니다.' },
+      { status: 404 }
+    );
+  }
 
   // 댓글 존재 및 소유자 확인
   const { data: comment } = await supabase
@@ -30,7 +39,7 @@ export const DELETE = withAuth<NextResponse, { id: string; commentId: string }>(
     );
   }
 
-  if (comment.author_id !== authUser.id) {
+  if (comment.author_id !== currentUserId) {
     return NextResponse.json(
       { error: '본인의 댓글만 삭제할 수 있습니다.' },
       { status: 403 }

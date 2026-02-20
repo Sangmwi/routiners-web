@@ -19,7 +19,7 @@ const MAX_LIMIT = 50;
  * GET /api/community/posts
  * 게시글 목록 조회
  */
-export const GET = withAuth(async (request: NextRequest, { authUser, supabase }) => {
+export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get('category');
   const authorId = searchParams.get('authorId');
@@ -90,13 +90,18 @@ export const GET = withAuth(async (request: NextRequest, { authUser, supabase })
     });
   }
 
+  // 현재 사용자의 public.users.id 조회
+  const { data: currentUserId } = await supabase.rpc('current_user_id');
+
   // 좋아요 여부 확인
   const postIds = posts.map((p) => p.id);
-  const { data: likes } = await supabase
-    .from('community_likes')
-    .select('post_id')
-    .eq('user_id', authUser.id)
-    .in('post_id', postIds);
+  const { data: likes } = currentUserId
+    ? await supabase
+        .from('community_likes')
+        .select('post_id')
+        .eq('user_id', currentUserId)
+        .in('post_id', postIds)
+    : { data: null };
 
   const likedPostIds = new Set(likes?.map((l) => l.post_id) ?? []);
 
@@ -123,7 +128,7 @@ export const GET = withAuth(async (request: NextRequest, { authUser, supabase })
  * POST /api/community/posts
  * 게시글 작성
  */
-export const POST = withAuth(async (request: NextRequest, { authUser, supabase }) => {
+export const POST = withAuth(async (request: NextRequest, { supabase }) => {
   const body = await request.json();
   const { category, content, imageUrls } = body;
 
@@ -150,11 +155,10 @@ export const POST = withAuth(async (request: NextRequest, { authUser, supabase }
     );
   }
 
-  // 게시글 생성
+  // 게시글 생성 (author_id는 DEFAULT current_user_id()가 자동 채움)
   const { data: post, error } = await supabase
     .from('community_posts')
     .insert({
-      author_id: authUser.id,
       category,
       content: content.trim(),
       image_urls: imageUrls ?? [],

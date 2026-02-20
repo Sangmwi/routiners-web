@@ -7,10 +7,11 @@ import { useRoutineEventByDateSuspense, useDeleteRoutineEvent } from '@/hooks/ro
 import { useConfirmDialog } from '@/lib/stores/modalStore';
 import type { EventType } from '@/lib/types/routine';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
-import { BarbellIcon, ForkKnifeIcon, RobotIcon, PlusIcon } from '@phosphor-icons/react';
+import { BarbellIcon, BuildingsIcon, ForkKnifeIcon, RobotIcon, PlusIcon } from '@phosphor-icons/react';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import AddWorkoutSheet from '@/components/routine/sheets/AddWorkoutSheet';
 import AddMealSheet from '@/components/routine/sheets/AddMealSheet';
+import ImportUnitMealSheet from '@/components/routine/sheets/ImportUnitMealSheet';
 
 type FilterType = EventType | 'all';
 
@@ -66,6 +67,12 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
   const handleManual = (type: 'workout' | 'meal') => {
     setDrawerType(null);
     setActiveSheet(type);
+  };
+
+  const [isImportSheetOpen, setIsImportSheetOpen] = useState(false);
+  const handleImportUnit = () => {
+    setDrawerType(null);
+    setIsImportSheetOpen(true);
   };
 
   const handleCreated = (type: 'workout' | 'meal') => {
@@ -144,22 +151,45 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
         showCloseButton={false}
       >
         <ModalBody className="p-4 pb-safe space-y-3">
-          <button
-            type="button"
-            onClick={handleAI}
-            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-primary text-primary-foreground"
-          >
-            <RobotIcon size={18} />
-            AI 상담에게 맡기기
-          </button>
-          <button
-            type="button"
-            onClick={() => drawerType && handleManual(drawerType)}
-            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-muted/50 text-muted-foreground"
-          >
-            <PlusIcon size={18} weight="bold" />
-            {drawerType === 'meal' ? '식단 직접 입력' : '운동 직접 추가'}
-          </button>
+          {drawerType === 'workout' ? (
+            <>
+              <button
+                type="button"
+                onClick={handleAI}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-primary text-primary-foreground"
+              >
+                <RobotIcon size={18} />
+                AI 상담에게 맡기기
+              </button>
+              <button
+                type="button"
+                onClick={() => handleManual('workout')}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-muted/50 text-muted-foreground"
+              >
+                <PlusIcon size={18} weight="bold" />
+                운동 직접 추가
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={handleImportUnit}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-primary text-primary-foreground"
+              >
+                <BuildingsIcon size={18} />
+                부대 식단 불러오기
+              </button>
+              <button
+                type="button"
+                onClick={() => handleManual('meal')}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-muted/50 text-muted-foreground"
+              >
+                <PlusIcon size={18} weight="bold" />
+                식단 직접 입력
+              </button>
+            </>
+          )}
         </ModalBody>
       </Modal>
 
@@ -173,6 +203,12 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
       <AddMealSheet
         isOpen={activeSheet === 'meal'}
         onClose={() => setActiveSheet(null)}
+        date={date}
+        onCreated={() => handleCreated('meal')}
+      />
+      <ImportUnitMealSheet
+        isOpen={isImportSheetOpen}
+        onClose={() => setIsImportSheetOpen(false)}
         date={date}
         onCreated={() => handleCreated('meal')}
       />

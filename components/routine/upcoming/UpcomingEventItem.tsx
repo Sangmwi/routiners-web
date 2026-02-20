@@ -58,7 +58,7 @@ export function UpcomingEventItem({ event }: UpcomingEventItemProps) {
       {isWorkout ? (
         <BarbellIcon size={20} weight="fill" className="text-primary shrink-0" />
       ) : (
-        <ForkKnifeIcon size={20} weight="fill" className="text-orange-500 shrink-0" />
+        <ForkKnifeIcon size={20} weight="fill" className="text-primary shrink-0" />
       )}
 
       {/* 제목 + 상세 - flex 구조로 분리 */}

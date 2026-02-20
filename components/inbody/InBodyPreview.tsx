@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PencilSimpleIcon } from '@phosphor-icons/react';
 import { ExpandIcon, CollapseIcon } from '@/components/ui/icons';
 import Button from '@/components/ui/Button';
@@ -26,6 +26,11 @@ export default function InBodyPreview({
 }: InBodyPreviewProps) {
   const [showDetails, setShowDetails] = useState(false);
   const [isEditing, setIsEditing] = useState(initialEditing);
+
+  // 부모가 initialEditing을 변경하면 동기화
+  useEffect(() => {
+    setIsEditing(initialEditing);
+  }, [initialEditing]);
 
   // readOnly 모드에서는 수정 불가
   const canEdit = !readOnly;
@@ -69,7 +74,7 @@ export default function InBodyPreview({
         <h3 className="text-base font-semibold text-card-foreground">
           {readOnly ? '인바디 데이터' : '추출된 데이터'}
         </h3>
-        {canEdit && (
+        {canEdit && !initialEditing && (
           <Button
             variant="ghost"
             size="xs"

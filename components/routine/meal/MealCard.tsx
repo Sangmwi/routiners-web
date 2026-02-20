@@ -1,6 +1,6 @@
 'use client';
 
-import { ClockIcon, FireIcon } from '@phosphor-icons/react';
+import { CheckCircleIcon, CircleIcon, ClockIcon, FireIcon } from '@phosphor-icons/react';
 import { getMealTimeConfig } from '@/lib/config/theme';
 import type { Meal, FoodItem } from '@/lib/types/meal';
 import { MEAL_TYPE_LABELS } from '@/lib/types/meal';
@@ -8,8 +8,12 @@ import { MEAL_TYPE_LABELS } from '@/lib/types/meal';
 interface MealCardProps {
   /** 식사 데이터 */
   meal: Meal;
-  /** 완료 상태 */
+  /** 이벤트 레벨 완료 상태 */
   isCompleted?: boolean;
+  /** 완료 토글 표시 여부 */
+  showCompletionToggle?: boolean;
+  /** 완료 토글 핸들러 */
+  onToggleComplete?: () => void;
 }
 
 /**
@@ -39,16 +43,34 @@ function FoodItemRow({ food }: { food: FoodItem }) {
  *
  * 아침/점심/저녁/간식 단위의 식사 정보를 표시
  */
-export default function MealCard({ meal, isCompleted = false }: MealCardProps) {
+export default function MealCard({
+  meal,
+  isCompleted = false,
+  showCompletionToggle = false,
+  onToggleComplete,
+}: MealCardProps) {
   const mealConfig = getMealTimeConfig(meal.type);
 
   return (
     <div className={`bg-muted/20 rounded-2xl overflow-hidden ${
-      isCompleted ? 'opacity-75' : ''
+      isCompleted || meal.completed ? 'opacity-60' : ''
     }`}>
       {/* 헤더 */}
       <div className="flex items-center justify-between px-4 pt-4 pb-3">
         <div className="flex items-center gap-2">
+          {showCompletionToggle && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onToggleComplete?.(); }}
+              className="p-0.5 -ml-1"
+              aria-label={meal.completed ? '완료 취소' : '완료'}
+            >
+              {meal.completed
+                ? <CheckCircleIcon size={22} weight="fill" className="text-primary" />
+                : <CircleIcon size={22} className="text-muted-foreground/40" />
+              }
+            </button>
+          )}
           <mealConfig.icon size={20} className="text-primary" weight="fill" />
           <span className="font-semibold text-foreground">
             {MEAL_TYPE_LABELS[meal.type]}

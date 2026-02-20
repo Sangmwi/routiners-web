@@ -110,7 +110,7 @@ export const GET = withAuth<NextResponse, { id: string }>(async (_request: NextR
  * POST /api/community/posts/[id]/comments
  * 댓글 작성
  */
-export const POST = withAuth<NextResponse, { id: string }>(async (request: NextRequest, { authUser, supabase, params }) => {
+export const POST = withAuth<NextResponse, { id: string }>(async (request: NextRequest, { supabase, params }) => {
   const { id: postId } = await params;
 
   // 게시글 존재 확인
@@ -164,12 +164,11 @@ export const POST = withAuth<NextResponse, { id: string }>(async (request: NextR
     }
   }
 
-  // 댓글 생성
+  // 댓글 생성 (author_id는 DEFAULT current_user_id()가 자동 채움)
   const { data: comment, error } = await supabase
     .from('community_comments')
     .insert({
       post_id: postId,
-      author_id: authUser.id,
       content: content.trim(),
       parent_id: parentId ?? null,
     })

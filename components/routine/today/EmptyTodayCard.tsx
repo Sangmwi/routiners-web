@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { BarbellIcon, ForkKnifeIcon, CaretRightIcon, RobotIcon, PlusIcon } from '@phosphor-icons/react';
+import { BarbellIcon, BuildingsIcon, ForkKnifeIcon, CaretRightIcon, PlusIcon, RobotIcon } from '@phosphor-icons/react';
 import { formatDate } from '@/lib/utils/dateHelpers';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import AddWorkoutSheet from '@/components/routine/sheets/AddWorkoutSheet';
 import AddMealSheet from '@/components/routine/sheets/AddMealSheet';
+import ImportUnitMealSheet from '@/components/routine/sheets/ImportUnitMealSheet';
 
 interface EmptyTodayCardProps {
   type: 'workout' | 'meal';
@@ -41,6 +42,7 @@ export function EmptyTodayCard({ type }: EmptyTodayCardProps) {
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isImportSheetOpen, setIsImportSheetOpen] = useState(false);
 
   const handleAI = () => {
     setIsDrawerOpen(false);
@@ -50,6 +52,11 @@ export function EmptyTodayCard({ type }: EmptyTodayCardProps) {
   const handleManual = () => {
     setIsDrawerOpen(false);
     setIsSheetOpen(true);
+  };
+
+  const handleImportUnit = () => {
+    setIsDrawerOpen(false);
+    setIsImportSheetOpen(true);
   };
 
   return (
@@ -77,22 +84,45 @@ export function EmptyTodayCard({ type }: EmptyTodayCardProps) {
         showCloseButton={false}
       >
         <ModalBody className="p-4 pb-safe space-y-3">
-          <button
-            type="button"
-            onClick={handleAI}
-            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-primary text-primary-foreground"
-          >
-            <RobotIcon size={18} />
-            {aiLabel}
-          </button>
-          <button
-            type="button"
-            onClick={handleManual}
-            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-muted/50 text-muted-foreground"
-          >
-            <PlusIcon size={18} weight="bold" />
-            {addLabel}
-          </button>
+          {type === 'workout' ? (
+            <>
+              <button
+                type="button"
+                onClick={handleAI}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-primary text-primary-foreground"
+              >
+                <RobotIcon size={18} />
+                {aiLabel}
+              </button>
+              <button
+                type="button"
+                onClick={handleManual}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-muted/50 text-muted-foreground"
+              >
+                <PlusIcon size={18} weight="bold" />
+                {addLabel}
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={handleImportUnit}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-primary text-primary-foreground"
+              >
+                <BuildingsIcon size={18} />
+                부대 식단 불러오기
+              </button>
+              <button
+                type="button"
+                onClick={handleManual}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-muted/50 text-muted-foreground"
+              >
+                <PlusIcon size={18} weight="bold" />
+                {addLabel}
+              </button>
+            </>
+          )}
         </ModalBody>
       </Modal>
 
@@ -105,12 +135,20 @@ export function EmptyTodayCard({ type }: EmptyTodayCardProps) {
           onCreated={() => router.push(`/routine/workout/${today}`)}
         />
       ) : (
-        <AddMealSheet
-          isOpen={isSheetOpen}
-          onClose={() => setIsSheetOpen(false)}
-          date={today}
-          onCreated={() => router.push(`/routine/meal/${today}`)}
-        />
+        <>
+          <AddMealSheet
+            isOpen={isSheetOpen}
+            onClose={() => setIsSheetOpen(false)}
+            date={today}
+            onCreated={() => router.push(`/routine/meal/${today}`)}
+          />
+          <ImportUnitMealSheet
+            isOpen={isImportSheetOpen}
+            onClose={() => setIsImportSheetOpen(false)}
+            date={today}
+            onCreated={() => router.push(`/routine/meal/${today}`)}
+          />
+        </>
       )}
     </>
   );

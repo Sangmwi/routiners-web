@@ -200,3 +200,127 @@ export function YearMonthPicker({
     </div>
   );
 }
+
+/**
+ * DatePicker
+ *
+ * 연/월/일 선택을 위한 트리플 휠 피커
+ * YYYY-MM-DD 문자열 입출력
+ */
+interface DatePickerProps {
+  /** YYYY-MM-DD 형식 날짜 */
+  value: string;
+  /** 날짜 변경 핸들러 (YYYY-MM-DD) */
+  onChange: (date: string) => void;
+  /** 선택 가능 최소 날짜 (YYYY-MM-DD) */
+  minDate?: string;
+  /** 선택 가능 최대 날짜 (YYYY-MM-DD) */
+  maxDate?: string;
+  /** 라벨 표시 여부 (기본: true) */
+  showLabels?: boolean;
+}
+
+/** 해당 연/월의 일수 */
+function getDaysInMonth(year: number, month: number): number {
+  return new Date(year, month, 0).getDate();
+}
+
+export function DatePicker({
+  value,
+  onChange,
+  minDate,
+  maxDate,
+  showLabels = true,
+}: DatePickerProps) {
+  const [y, m, d] = value.split('-');
+  const yearNum = parseInt(y, 10);
+  const monthNum = parseInt(m, 10);
+  const dayNum = parseInt(d, 10);
+
+  // 연도 범위: min~max 또는 현재년 ±1
+  const currentYear = new Date().getFullYear();
+  const minYear = minDate ? parseInt(minDate.split('-')[0], 10) : currentYear;
+  const maxYear = maxDate ? parseInt(maxDate.split('-')[0], 10) : currentYear + 1;
+
+  const years = Array.from({ length: maxYear - minYear + 1 }, (_, i) => ({
+    value: String(minYear + i),
+    label: `${minYear + i}년`,
+  }));
+
+  const months = Array.from({ length: 12 }, (_, i) => ({
+    value: String(i + 1).padStart(2, '0'),
+    label: `${i + 1}월`,
+  }));
+
+  const daysInMonth = getDaysInMonth(yearNum, monthNum);
+  const days = Array.from({ length: daysInMonth }, (_, i) => ({
+    value: String(i + 1).padStart(2, '0'),
+    label: `${i + 1}일`,
+  }));
+
+  const buildDate = (yr: string, mo: string, dy: string): string => {
+    // 일수가 해당 월의 최대일을 초과하면 보정
+    const maxDay = getDaysInMonth(parseInt(yr, 10), parseInt(mo, 10));
+    const clampedDay = Math.min(parseInt(dy, 10), maxDay);
+    return `${yr}-${mo}-${String(clampedDay).padStart(2, '0')}`;
+  };
+
+  const clampToRange = (date: string): string => {
+    if (minDate && date < minDate) return minDate;
+    if (maxDate && date > maxDate) return maxDate;
+    return date;
+  };
+
+  const handleYearChange = (yr: string) => {
+    onChange(clampToRange(buildDate(yr, m, d)));
+  };
+
+  const handleMonthChange = (mo: string) => {
+    onChange(clampToRange(buildDate(y, mo, d)));
+  };
+
+  const handleDayChange = (dy: string) => {
+    onChange(clampToRange(buildDate(y, m, dy)));
+  };
+
+  return (
+    <div className="flex gap-2">
+      <div className="flex-1">
+        {showLabels && (
+          <p className="text-xs text-muted-foreground text-center mb-1">연</p>
+        )}
+        <WheelPicker
+          options={years}
+          value={y}
+          onChange={handleYearChange}
+          itemHeight={40}
+          visibleItems={3}
+        />
+      </div>
+      <div className="w-20">
+        {showLabels && (
+          <p className="text-xs text-muted-foreground text-center mb-1">월</p>
+        )}
+        <WheelPicker
+          options={months}
+          value={m}
+          onChange={handleMonthChange}
+          itemHeight={40}
+          visibleItems={3}
+        />
+      </div>
+      <div className="w-20">
+        {showLabels && (
+          <p className="text-xs text-muted-foreground text-center mb-1">일</p>
+        )}
+        <WheelPicker
+          options={days}
+          value={String(Math.min(dayNum, daysInMonth)).padStart(2, '0')}
+          onChange={handleDayChange}
+          itemHeight={40}
+          visibleItems={3}
+        />
+      </div>
+    </div>
+  );
+}

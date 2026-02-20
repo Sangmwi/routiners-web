@@ -90,6 +90,8 @@ export interface Meal {
   tips?: string[];
   /** 메모 */
   notes?: string;
+  /** 식사 완료 여부 */
+  completed?: boolean;
 }
 
 /**

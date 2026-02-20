@@ -9,11 +9,14 @@ import {
   EventType,
   WorkoutData,
 } from '@/lib/types/routine';
+import type { MealBatchCreateData } from '@/lib/types/unitMeal';
 import { queryKeys } from '@/lib/constants/queryKeys';
 import { routineEventApi } from '@/lib/api/routineEvent';
+import { unitMealApi } from '@/lib/api/unitMeal';
 import {
   updateEventCacheAndInvalidate,
   updateBatchEventCacheWithAI,
+  updateBatchEventCache,
   removeEventCache,
   updateEventCache,
   invalidateEventLists,
@@ -239,6 +242,33 @@ export function useDeleteRoutineEventsBySession() {
 
     onError: (error) => {
       console.error('[RoutineEvent] Delete by session failed:', error);
+    },
+  });
+}
+
+/**
+ * 식단 이벤트 배치 생성 Mutation (부대 식단 불러오기용)
+ *
+ * AI 배치와 달리 aiSessionId 불필요. 충돌 날짜는 서버에서 스킵 처리.
+ *
+ * @example
+ * const createBatch = useCreateMealEventsBatch();
+ * createBatch.mutate({ events });
+ */
+export function useCreateMealEventsBatch() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: MealBatchCreateData) =>
+      unitMealApi.createMealBatch(data.events),
+
+    onSuccess: (result) => {
+      updateBatchEventCache(queryClient, result.created);
+      invalidateEventLists(queryClient);
+    },
+
+    onError: (error) => {
+      console.error('[RoutineEvent] Meal batch create failed:', error);
     },
   });
 }

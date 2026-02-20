@@ -14,7 +14,7 @@ import { toCommunityPost, type DbCommunityPost } from '@/lib/types/community';
  * GET /api/community/posts/[id]
  * 게시글 상세 조회
  */
-export const GET = withAuth<NextResponse, { id: string }>(async (request: NextRequest, { authUser, supabase, params }) => {
+export const GET = withAuth<NextResponse, { id: string }>(async (_request: NextRequest, { supabase, params }) => {
   const { id } = await params;
 
   const { data: post, error } = await supabase
@@ -36,13 +36,18 @@ export const GET = withAuth<NextResponse, { id: string }>(async (request: NextRe
     );
   }
 
+  // 현재 사용자의 public.users.id 조회
+  const { data: currentUserId } = await supabase.rpc('current_user_id');
+
   // 좋아요 여부 확인
-  const { data: like } = await supabase
-    .from('community_likes')
-    .select('post_id')
-    .eq('user_id', authUser.id)
-    .eq('post_id', id)
-    .maybeSingle();
+  const { data: like } = currentUserId
+    ? await supabase
+        .from('community_likes')
+        .select('post_id')
+        .eq('user_id', currentUserId)
+        .eq('post_id', id)
+        .maybeSingle()
+    : { data: null };
 
   return NextResponse.json(
     toCommunityPost(post as DbCommunityPost, post.author, !!like)
@@ -53,8 +58,17 @@ export const GET = withAuth<NextResponse, { id: string }>(async (request: NextRe
  * PATCH /api/community/posts/[id]
  * 게시글 수정
  */
-export const PATCH = withAuth<NextResponse, { id: string }>(async (request: NextRequest, { authUser, supabase, params }) => {
+export const PATCH = withAuth<NextResponse, { id: string }>(async (request: NextRequest, { supabase, params }) => {
   const { id } = await params;
+
+  // 현재 사용자의 public.users.id 조회
+  const { data: currentUserId } = await supabase.rpc('current_user_id');
+  if (!currentUserId) {
+    return NextResponse.json(
+      { error: '사용자를 찾을 수 없습니다.' },
+      { status: 404 }
+    );
+  }
 
   // 게시글 소유자 확인
   const { data: existing } = await supabase
@@ -71,7 +85,7 @@ export const PATCH = withAuth<NextResponse, { id: string }>(async (request: Next
     );
   }
 
-  if (existing.author_id !== authUser.id) {
+  if (existing.author_id !== currentUserId) {
     return NextResponse.json(
       { error: '본인의 게시글만 수정할 수 있습니다.' },
       { status: 403 }
@@ -133,7 +147,7 @@ export const PATCH = withAuth<NextResponse, { id: string }>(async (request: Next
   const { data: like } = await supabase
     .from('community_likes')
     .select('post_id')
-    .eq('user_id', authUser.id)
+    .eq('user_id', currentUserId)
     .eq('post_id', id)
     .maybeSingle();
 
@@ -146,8 +160,17 @@ export const PATCH = withAuth<NextResponse, { id: string }>(async (request: Next
  * DELETE /api/community/posts/[id]
  * 게시글 삭제 (soft delete)
  */
-export const DELETE = withAuth<NextResponse, { id: string }>(async (request: NextRequest, { authUser, supabase, params }) => {
+export const DELETE = withAuth<NextResponse, { id: string }>(async (_request: NextRequest, { supabase, params }) => {
   const { id } = await params;
+
+  // 현재 사용자의 public.users.id 조회
+  const { data: currentUserId } = await supabase.rpc('current_user_id');
+  if (!currentUserId) {
+    return NextResponse.json(
+      { error: '사용자를 찾을 수 없습니다.' },
+      { status: 404 }
+    );
+  }
 
   // 게시글 소유자 확인
   const { data: existing } = await supabase
@@ -164,7 +187,7 @@ export const DELETE = withAuth<NextResponse, { id: string }>(async (request: Nex
     );
   }
 
-  if (existing.author_id !== authUser.id) {
+  if (existing.author_id !== currentUserId) {
     return NextResponse.json(
       { error: '본인의 게시글만 삭제할 수 있습니다.' },
       { status: 403 }
