@@ -220,6 +220,7 @@ export const POST = withAuth<Response>(
             supabase,
             conversationId,
             userId,
+            activePurposeType: processType,
           });
 
           // =================================================================

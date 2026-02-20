@@ -12,7 +12,7 @@ import { useShowError } from '@/lib/stores/errorStore';
 import { useRouter } from 'next/navigation';
 import { searchFoods, FOOD_CATEGORY_LABELS } from '@/lib/data/foods';
 import type { FoodInfo } from '@/lib/data/foods';
-import type { FoodItem, MealType, MealData } from '@/lib/types/meal';
+import type { FoodItem, Meal, MealType, MealData } from '@/lib/types/meal';
 import { MEAL_TYPE_LABELS } from '@/lib/types/meal';
 import type { RoutineEvent, RoutineEventCreateData } from '@/lib/types/routine';
 import type { FoodCategory } from '@/lib/types/meal';
@@ -165,10 +165,28 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated, existin
       totalFat: totals.fat,
     };
 
-    // ── Update 모드: 기존 이벤트에 끼니 append ────────────────────────────
+    // ── Update 모드: 기존 이벤트에 끼니 append (같은 type이면 foods 병합) ──
     if (existingEvent) {
       const prevMealData = existingEvent.data as MealData;
-      const updatedMeals = [...(prevMealData.meals ?? []), newMeal];
+      const prevMeals = prevMealData.meals ?? [];
+      const existingIndex = prevMeals.findIndex((m) => m.type === mealType);
+
+      let updatedMeals: Meal[];
+      if (existingIndex !== -1) {
+        const existing = prevMeals[existingIndex];
+        const merged: Meal = {
+          ...existing,
+          foods: [...(existing.foods ?? []), ...foods],
+          totalCalories: (existing.totalCalories ?? 0) + totals.calories,
+          totalProtein: (existing.totalProtein ?? 0) + totals.protein,
+          totalCarbs: (existing.totalCarbs ?? 0) + totals.carbs,
+          totalFat: (existing.totalFat ?? 0) + totals.fat,
+        };
+        updatedMeals = prevMeals.map((m, i) => (i === existingIndex ? merged : m));
+      } else {
+        updatedMeals = [...prevMeals, newMeal];
+      }
+
       const updatedCalories = updatedMeals.reduce((sum, m) => sum + (m.totalCalories ?? 0), 0);
       const nextMealData: MealData = {
         ...prevMealData,

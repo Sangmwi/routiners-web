@@ -229,25 +229,15 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
 
             <div className="space-y-3">
               {mealData.meals.map((meal, index) => (
-                <div key={`${meal.type}-${index}`} className="relative">
-                  <MealCard
-                    meal={meal}
-                    isCompleted={event.status === 'completed'}
-                    showCompletionToggle={!isEditMode && event.status === 'scheduled'}
-                    onToggleComplete={() => handleMealToggle(index)}
-                  />
-                  {/* 편집 모드: 삭제 버튼 */}
-                  {isEditMode && mealData.meals.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveMealWithConfirm(index)}
-                      className="absolute top-3 right-3 p-1.5 rounded-lg bg-destructive/10 text-destructive"
-                      aria-label="끼니 삭제"
-                    >
-                      <TrashIcon size={16} />
-                    </button>
-                  )}
-                </div>
+                <MealCard
+                  key={`${meal.type}-${index}`}
+                  meal={meal}
+                  isCompleted={event.status === 'completed'}
+                  showCompletionToggle={!isEditMode && event.status === 'scheduled'}
+                  onToggleComplete={() => handleMealToggle(index)}
+                  showDeleteButton={isEditMode && mealData.meals.length > 1}
+                  onDelete={() => handleRemoveMealWithConfirm(index)}
+                />
               ))}
             </div>
 

@@ -136,7 +136,7 @@ function NutrientRow({ icon: Icon, label, current, target, unit }: NutrientRowPr
 // ============================================================================
 
 /**
- * 하루 영양소 요약 컴포넌트
+ * 하루 총 영양소 컴포넌트
  *
  * - 목표 미설정: 총량 요약 (히어로 칼로리 + 3열 매크로 그리드)
  * - 목표 설정: 목표 대비 프로그레스 바
@@ -167,7 +167,7 @@ export default function NutritionSummary({ data }: NutritionSummaryProps) {
   return (
     <div className="bg-muted/20 rounded-2xl p-4">
       <h3 className="text-sm font-semibold text-foreground mb-4">
-        하루 영양소 요약
+        하루 총 영양소
       </h3>
 
       {hasTargets ? (

@@ -8,7 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
 import { DbChatMessage } from '@/lib/types/chat';
-import { CounselorConversationMetadata } from '@/lib/types/counselor';
+import { AI_MODEL } from '@/lib/constants/aiChat';
 import OpenAI from 'openai';
 
 const SUMMARIZATION_THRESHOLD = 15;
@@ -44,12 +44,12 @@ export const POST = withAuth(
       );
     }
 
-    // 요약 대상 메시지 조회 (summarized_until 이후 메시지)
+    // 요약 대상 메시지 조회 (summarized_until 이후, text + tool_result 포함)
     let messageQuery = supabase
       .from('chat_messages')
       .select('*')
       .eq('conversation_id', id)
-      .eq('content_type', 'text')
+      .in('content_type', ['text', 'tool_result'])
       .is('deleted_at', null)
       .order('created_at', { ascending: true });
 
@@ -76,12 +76,13 @@ export const POST = withAuth(
       );
     }
 
-    // 요약 대상 메시지가 threshold 미만이면 스킵
-    if (!messages || messages.length < SUMMARIZATION_THRESHOLD) {
+    // text 메시지만 기준으로 threshold 체크
+    const textMessages = (messages || []).filter((m: DbChatMessage) => m.content_type === 'text');
+    if (textMessages.length < SUMMARIZATION_THRESHOLD) {
       return NextResponse.json({
         success: false,
         message: `요약 대상 메시지가 ${SUMMARIZATION_THRESHOLD}개 미만입니다.`,
-        messageCount: messages?.length ?? 0,
+        messageCount: textMessages.length,
       });
     }
 
@@ -94,29 +95,42 @@ export const POST = withAuth(
       : '';
 
     const messagesToSummarize = (messages as DbChatMessage[])
-      .map((m) => `${m.role === 'user' ? '사용자' : 'AI'}: ${m.content}`)
+      .map((m) => {
+        if (m.content_type === 'tool_result') {
+          const toolName = (m.metadata as Record<string, unknown>)?.tool_name as string | undefined;
+          return `[도구 결과: ${toolName || '알 수 없음'}] ${m.content}`;
+        }
+        return `${m.role === 'user' ? '사용자' : 'AI'}: ${m.content}`;
+      })
       .join('\n');
 
     try {
       const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: AI_MODEL.DEFAULT,
         messages: [
           {
             role: 'system',
-            content: `당신은 대화 요약 전문가입니다. 피트니스 상담사와 사용자 간의 대화를 요약합니다.
-요약 규칙:
-1. 핵심 정보만 추출 (운동 목표, 경험, 제약사항, 선호도 등)
-2. 사용자 결정사항 명시
-3. 진행 중인 프로세스 상태 포함
-4. 한국어로 작성
-5. 500자 이내로 간결하게`,
+            content: `당신은 피트니스 상담 대화 요약 전문가입니다. AI 상담사와 사용자 간의 대화를 요약합니다.
+
+요약 시 반드시 포함할 정보:
+1. 사용자 운동 프로필 — 목표, 경험 수준, 주간 빈도, 1회 시간, 장비 환경, 집중 부위, 부상/제한
+2. 사용자가 내린 모든 선택과 결정 (도구 결과에서 확인 가능)
+3. 프로세스 진행 상태 — 어떤 프로세스가 활성화되었고, 어디까지 진행했는지
+4. 생성/적용/수정된 루틴 정보 (있는 경우)
+5. 사용자가 의견을 바꾼 경우 최종 결정만 기록
+
+요약 형식:
+- 한국어로 작성
+- 800자 이내
+- 핵심 데이터는 "키: 값" 형태로 명확하게
+- 도구 결과([도구 결과: ...])에 포함된 프로필 데이터나 루틴 정보는 반드시 요약에 반영`,
           },
           {
             role: 'user',
             content: `${existingSummary}${messagesToSummarize}\n\n위 대화를 요약해주세요.`,
           },
         ],
-        max_tokens: 800,
+        max_tokens: 1200,
         temperature: 0.3,
       });
 

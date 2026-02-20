@@ -14,5 +14,4 @@ export * from './mutations';
 export * from './useInBody';
 
 // Page-level State Management
-export { useInBodyManager } from './useInBodyManager';
 export { useInBodyManagerSuspense } from './useInBodyManagerSuspense';

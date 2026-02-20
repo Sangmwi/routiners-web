@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { LoadingSpinner, ErrorIcon, SuccessIcon } from '@/components/ui/icons';
 import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
@@ -21,6 +21,9 @@ interface InBodyScanModalProps {
   onClose: () => void;
   /** 저장 성공 시 콜백 */
   onSuccess?: () => void;
+  /** 미리 선택된 이미지 (제공 시 idle 건너뛰고 바로 스캔 시작) */
+  initialFile?: File;
+  initialPreview?: string;
 }
 
 type ScanState = 'idle' | 'scanning' | 'preview' | 'error';
@@ -33,6 +36,8 @@ export default function InBodyScanModal({
   isOpen,
   onClose,
   onSuccess,
+  initialFile,
+  initialPreview,
 }: InBodyScanModalProps) {
   const [state, setState] = useState<ScanState>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +53,19 @@ export default function InBodyScanModal({
   const { pickImage, base64ToFile, isPickerOpen } = useNativeImagePicker();
 
   const isSaving = createInBody.isPending;
+  const autoStartedRef = useRef(false);
+
+  // initialFile 제공 시 모달 열릴 때 바로 스캔 시작
+  useEffect(() => {
+    if (!isOpen) {
+      autoStartedRef.current = false;
+      return;
+    }
+    if (initialFile && initialPreview && !autoStartedRef.current) {
+      autoStartedRef.current = true;
+      handleScanImage(initialFile, initialPreview);
+    }
+  }, [isOpen, initialFile, initialPreview]);
 
   // 모달 닫기 시 상태 초기화
   const handleClose = () => {
@@ -185,7 +203,7 @@ export default function InBodyScanModal({
     setCreateData(newData);
   };
 
-  // 다시 스캔
+  // 다시 스캔 (바로 이미지 소스 선택 열기)
   const handleRetry = () => {
     abortRef.current?.abort();
     abortRef.current = null;
@@ -195,6 +213,7 @@ export default function InBodyScanModal({
     setImagePreview(null);
     setScanProgress(0);
     setScanMessage('');
+    setIsImageSourceOpen(true);
   };
 
   return (

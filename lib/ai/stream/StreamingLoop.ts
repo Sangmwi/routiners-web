@@ -36,6 +36,8 @@ export interface StreamingLoopParams {
   supabase: SupabaseClient;
   conversationId: string;
   userId: string;
+  /** 현재 활성 프로세스 타입 (옵션 텍스트 패턴 감지용) */
+  activePurposeType?: string;
 }
 
 export interface StreamingLoopResult {
@@ -67,12 +69,14 @@ interface FunctionCallAccumulator {
 export async function runStreamingLoop(
   params: StreamingLoopParams
 ): Promise<StreamingLoopResult> {
-  const { openai, systemPrompt, input, tools, writer, supabase, conversationId, userId } = params;
+  const { openai, systemPrompt, input, tools, writer, supabase, conversationId, userId, activePurposeType } = params;
 
   let continueLoop = true;
   let fullContent = '';
   let totalToolCalls = 0;
   let savedTextLength = 0;
+  let retryCount = 0;
+  const MAX_OPTION_RETRIES = 1;
   const progressTracker = new ProgressTracker();
 
   while (continueLoop && totalToolCalls < AI_CHAT_LIMITS.MAX_TOOL_CALLS_PER_RESPONSE) {
@@ -215,9 +219,68 @@ export async function runStreamingLoop(
 
       continueLoop = !anyShouldStop;
     } else {
+      // 옵션 텍스트 패턴 감지: 프로세스 활성 중 도구 호출 없이 옵션을 텍스트로 나열한 경우
+      if (
+        activePurposeType &&
+        retryCount < MAX_OPTION_RETRIES &&
+        contentBuffer.trim() &&
+        containsOptionPattern(contentBuffer)
+      ) {
+        retryCount++;
+        console.warn(
+          `[StreamingLoop] 옵션 텍스트 패턴 감지 (retry ${retryCount}/${MAX_OPTION_RETRIES}):`,
+          contentBuffer.slice(0, 100)
+        );
+
+        // AI 응답을 input에 추가 후 보정 메시지 주입
+        input.push({
+          type: 'message',
+          role: 'assistant',
+          content: contentBuffer,
+        });
+        input.push({
+          type: 'message',
+          role: 'user',
+          content: '[시스템] 위 응답에서 옵션을 텍스트로 나열했습니다. 텍스트의 옵션 부분을 제거하고 request_user_input 도구를 호출하여 선택지를 UI로 표시해주세요.',
+        });
+
+        // 텍스트 버퍼 저장 (이미 전송됨)
+        if (contentBuffer.trim()) {
+          await saveAiTextMessage(supabase, conversationId, contentBuffer);
+          savedTextLength += contentBuffer.length;
+        }
+
+        continue; // 루프 재시도
+      }
+
       continueLoop = false;
     }
   }
 
   return { fullContent, savedTextLength };
+}
+
+// =============================================================================
+// Option Text Pattern Detection
+// =============================================================================
+
+/**
+ * AI 응답에서 옵션을 텍스트로 나열한 패턴 감지
+ *
+ * 감지 대상:
+ * - 번호 리스트 (1. xxx 2. xxx)
+ * - 불릿 리스트 (- xxx, • xxx)
+ * - 볼드 옵션 나열 (**초보자**, **중급자**)
+ */
+function containsOptionPattern(text: string): boolean {
+  // 연속된 번호 리스트 (최소 2개): "1. xxx 2. xxx" 또는 "1) xxx 2) xxx"
+  const numberedList = /(?:^|\n)\s*[1-9][.)]\s*.+(?:\n\s*[2-9][.)]\s*.+)/m;
+
+  // 연속된 불릿 리스트 (최소 2개): "- xxx\n- xxx" 또는 "• xxx\n• xxx"
+  const bulletList = /(?:^|\n)\s*[-•]\s*.+(?:\n\s*[-•]\s*.+)/m;
+
+  // 볼드 옵션 나열 (최소 2개): **A**, **B**
+  const boldOptions = /\*\*[^*]+\*\*.*\*\*[^*]+\*\*/;
+
+  return numberedList.test(text) || bulletList.test(text) || boldOptions.test(text);
 }
