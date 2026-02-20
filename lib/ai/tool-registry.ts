@@ -8,7 +8,7 @@
  */
 
 import type { AIToolName, AIToolResult } from '@/lib/types/fitness';
-import type { ActivePurpose } from '@/lib/types/coach';
+import type { ActivePurpose } from '@/lib/types/counselor';
 import { AI_TRAINER_TOOLS, type AIToolDefinition } from './tools';
 
 // ============================================================================

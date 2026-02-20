@@ -2,7 +2,7 @@
  * Routine Modification Process Rules
  *
  * 기존 루틴 수정 프로세스 규칙
- * composeCoachPrompt('routine_modification') 호출 시 시스템 프롬프트에 추가됨
+ * composeCounselorPrompt('routine_modification') 호출 시 시스템 프롬프트에 추가됨
  */
 
 export const ROUTINE_MODIFICATION_RULES = `

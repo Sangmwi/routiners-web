@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { PencilSimpleIcon } from '@phosphor-icons/react';
-import { DeleteIcon, LoadingSpinner, ErrorIcon } from '@/components/ui/icons';
+import { DeleteIcon, ErrorIcon } from '@/components/ui/icons';
 import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { InBodyRecord, InBodyUpdateData } from '@/lib/types/inbody';
 import { useUpdateInBody, useDeleteInBody } from '@/hooks/inbody';
 import InBodyPreview from './InBodyPreview';
@@ -16,7 +17,7 @@ interface InBodyDetailModalProps {
   record: InBodyRecord;
 }
 
-type ModalState = 'view' | 'edit' | 'deleting' | 'saving' | 'confirmDelete';
+type ModalState = 'view' | 'edit' | 'confirmDelete';
 
 export default function InBodyDetailModal({
   isOpen,
@@ -30,8 +31,14 @@ export default function InBodyDetailModal({
   const updateInBody = useUpdateInBody();
   const deleteInBody = useDeleteInBody();
 
+  // mutation 상태로 오버레이 판단
+  const isSaving = updateInBody.isPending;
+  const isDeleting = deleteInBody.isPending;
+  const isProcessing = isSaving || isDeleting;
+
   // 모달 닫기 시 상태 초기화
   const handleClose = () => {
+    if (isProcessing) return;
     setState('view');
     setEditData(null);
     setError(null);
@@ -69,7 +76,6 @@ export default function InBodyDetailModal({
   const handleSave = () => {
     if (!editData) return;
 
-    setState('saving');
     setError(null);
     updateInBody.mutate(
       { id: record.id, data: editData },
@@ -77,7 +83,6 @@ export default function InBodyDetailModal({
         onSuccess: () => handleClose(),
         onError: (err) => {
           setError(err instanceof Error ? err.message : '수정에 실패했어요.');
-          setState('edit');
         },
       }
     );
@@ -90,7 +95,6 @@ export default function InBodyDetailModal({
 
   // 삭제 실행
   const handleDelete = () => {
-    setState('deleting');
     setError(null);
     deleteInBody.mutate(record.id, {
       onSuccess: () => handleClose(),
@@ -116,7 +120,9 @@ export default function InBodyDetailModal({
       onClose={handleClose}
       title={`${formattedDate} 측정 기록`}
       size="lg"
-      closeOnBackdrop={state === 'view'}
+      closeOnBackdrop={state === 'view' && !isProcessing}
+      position="bottom"
+      enableSwipe={state === 'view' && !isProcessing}
       headerAction={
         state === 'view' ? (
           <button
@@ -129,7 +135,15 @@ export default function InBodyDetailModal({
         ) : undefined
       }
     >
-      <ModalBody className="p-6">
+      <ModalBody className="relative p-6">
+        {/* 저장/삭제 중 오버레이 */}
+        {isProcessing && (
+          <LoadingOverlay
+            message={isDeleting ? '삭제 중...' : '저장 중...'}
+            variant={isDeleting ? 'destructive' : 'default'}
+          />
+        )}
+
         {/* 삭제 확인 */}
         {state === 'confirmDelete' && (
           <div className="flex flex-col items-center justify-center py-8 space-y-4">
@@ -142,26 +156,6 @@ export default function InBodyDetailModal({
                 {formattedDate} 측정 기록이 영구적으로 삭제돼요.
               </p>
             </div>
-          </div>
-        )}
-
-        {/* 삭제 중 */}
-        {state === 'deleting' && (
-          <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <LoadingSpinner size="2xl" variant="destructive" />
-            <p className="text-lg font-medium text-card-foreground">
-              삭제 중...
-            </p>
-          </div>
-        )}
-
-        {/* 저장 중 */}
-        {state === 'saving' && (
-          <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <LoadingSpinner size="2xl" />
-            <p className="text-lg font-medium text-card-foreground">
-              저장 중...
-            </p>
           </div>
         )}
 
@@ -220,6 +214,7 @@ export default function InBodyDetailModal({
               }
               onChange={(newData) => setEditData(newData)}
               readOnly={state === 'view'}
+              initialEditing={state === 'edit'}
             />
 
             {error && (
@@ -248,10 +243,10 @@ export default function InBodyDetailModal({
 
         {state === 'edit' && (
           <>
-            <Button variant="outline" onClick={handleCancelEdit} className="flex-1">
+            <Button variant="outline" onClick={handleCancelEdit} className="flex-1" disabled={isProcessing}>
               취소
             </Button>
-            <Button onClick={handleSave} className="flex-1">
+            <Button onClick={handleSave} className="flex-1" isLoading={isSaving}>
               저장
             </Button>
           </>
@@ -263,13 +258,15 @@ export default function InBodyDetailModal({
               variant="outline"
               onClick={() => setState('view')}
               className="flex-1"
+              disabled={isProcessing}
             >
               취소
             </Button>
             <Button
-              variant="primary"
+              variant="destructive"
               onClick={handleDelete}
-              className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground shadow-destructive/20"
+              className="flex-1"
+              isLoading={isDeleting}
             >
               삭제
             </Button>

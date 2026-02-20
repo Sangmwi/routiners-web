@@ -12,7 +12,6 @@ import { isWorkoutData } from './guards';
 // Enums & Constants
 // ============================================================================
 
-export type SessionPurpose = 'workout' | 'coach';
 export type EventType = 'workout' | 'meal';
 export type EventStatus = 'scheduled' | 'completed' | 'skipped';
 export type EventSource = 'user' | 'ai';

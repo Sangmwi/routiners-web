@@ -7,7 +7,6 @@ import {
   RoutineAppliedEvent,
   RoutineProgressEvent,
 } from '@/lib/api/conversation';
-import { SessionPurpose } from '@/lib/types/routine';
 import { LoadingSpinner } from '@/components/ui/icons';
 
 // Hooks
@@ -71,8 +70,6 @@ interface ChatMessageListProps {
   pendingStart?: boolean;
   /** 대화 시작 핸들러 */
   onStartConversation?: () => void;
-  /** 세션 목적 (workout | coach) */
-  sessionPurpose?: SessionPurpose;
   /** 무한스크롤 - 다음 페이지 존재 */
   hasNextPage?: boolean;
   /** 무한스크롤 - 다음 페이지 로딩 중 */
@@ -106,7 +103,6 @@ export default function ChatMessageList({
   routineProgress,
   pendingStart,
   onStartConversation,
-  sessionPurpose,
   hasNextPage,
   isFetchingNextPage,
   onLoadMore,
@@ -202,10 +198,7 @@ export default function ChatMessageList({
 
         {/* 대화 시작 버튼 */}
         {pendingStart && onStartConversation && (
-          <ChatStartButton
-            sessionPurpose={sessionPurpose}
-            onStart={onStartConversation}
-          />
+          <ChatStartButton onStart={onStartConversation} />
         )}
 
         {/* 완료 배너를 위한 하단 여백 */}

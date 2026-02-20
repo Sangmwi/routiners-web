@@ -21,7 +21,7 @@ import {
   GenerateRoutinePreviewArgsSchema,
 } from './schemas';
 import type { AIToolName } from '@/lib/types/fitness';
-import type { ActivePurposeType } from '@/lib/types/coach';
+import type { ActivePurposeType } from '@/lib/types/counselor';
 import {
   setActivePurpose as setActivePurposeFn,
   clearActivePurpose as clearActivePurposeFn,
@@ -220,7 +220,7 @@ async function handleClearActivePurpose(
 }
 
 /**
- * 일반 도구 처리 (코치 AI 도구)
+ * 일반 도구 처리 (상담 AI 도구)
  */
 async function handleGeneralTool(
   fc: FunctionCallInfo,

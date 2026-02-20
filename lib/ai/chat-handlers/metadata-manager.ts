@@ -14,7 +14,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import type { ConversationMetadata } from './types';
-import type { ActivePurpose, ActivePurposeType, RoutineGenerationStage } from '@/lib/types/coach';
+import type { ActivePurpose, ActivePurposeType, RoutineGenerationStage } from '@/lib/types/counselor';
 import type { RoutinePreviewData } from '@/lib/types/fitness';
 
 /**

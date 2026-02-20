@@ -1,12 +1,10 @@
 'use client';
 
 import { CheckIcon } from '@phosphor-icons/react';
-import type { AppliedRoutineMetadata, SessionPurpose } from '@/lib/types/chat';
+import type { AppliedRoutineMetadata } from '@/lib/types/chat';
 import type { RoutineAppliedEvent } from '@/lib/api/conversation';
 
 interface ChatCompletedBannerProps {
-  /** 세션 목적 (workout | coach) */
-  purpose?: SessionPurpose;
   /** 적용된 루틴 정보 (SSE 이벤트 또는 DB 메타데이터) */
   appliedRoutine?: RoutineAppliedEvent | AppliedRoutineMetadata | null;
   /** 캘린더로 이동 콜백 */

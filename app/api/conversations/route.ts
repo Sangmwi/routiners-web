@@ -8,7 +8,7 @@ import { z } from 'zod';
 // ============================================================================
 
 /**
- * Phase 18: aiPurpose 제거 (AI 대화는 항상 coach)
+ * Phase 18: aiPurpose 제거 (AI 대화는 항상 상담)
  */
 const ConversationCreateSchema = z.object({
   type: z.enum(['ai', 'direct', 'group']),

@@ -54,7 +54,7 @@ export default function ToolStatusIndicator({ tools }: ToolStatusIndicatorProps)
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground/70">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground/70">
       {tools.map((tool) => (
         <span key={tool.toolCallId} className="inline-flex items-center gap-1">
           {/* 상태 아이콘 */}

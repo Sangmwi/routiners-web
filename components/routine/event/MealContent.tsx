@@ -120,7 +120,7 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
           />
           <div className="flex flex-col gap-3 mt-6 px-4">
             <button
-              onClick={() => router.push('/routine/coach')}
+              onClick={() => router.push('/routine/counselor')}
               className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-primary text-primary-foreground"
             >
               <RobotIcon size={18} />

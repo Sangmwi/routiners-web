@@ -16,7 +16,7 @@ import type { RoutineEvent } from '@/lib/types/routine';
 /**
  * 루틴 적용 후 관련 캐시 전체 무효화
  *
- * 코치 채팅에서 루틴 적용 시 사용 (coach + routineEvent + aiSession 3개 도메인)
+ * 상담 채팅에서 루틴 적용 시 사용 (counselor + routineEvent + aiSession 3개 도메인)
  *
  * @param queryClient - React Query 클라이언트
  * @param conversationId - 대화 ID
@@ -30,12 +30,12 @@ export function invalidateAfterRoutineApply(
   queryClient: QueryClient,
   conversationId: string
 ): void {
-  // 코치 대화 캐시
+  // 상담 대화 캐시
   queryClient.invalidateQueries({
-    queryKey: queryKeys.coach.conversation(conversationId),
+    queryKey: queryKeys.counselor.conversation(conversationId),
   });
   queryClient.invalidateQueries({
-    queryKey: queryKeys.coach.conversations(),
+    queryKey: queryKeys.counselor.conversations(),
   });
   // 루틴 이벤트 캐시
   invalidateEventLists(queryClient);

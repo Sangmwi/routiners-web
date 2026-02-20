@@ -29,9 +29,6 @@ export type ContentType =
   | 'routine_preview'       // 루틴 미리보기 카드
   | 'input_request';        // 선택형 입력 UI
 
-// SessionPurpose는 routine.ts에서 가져오기 (호환성)
-export type { SessionPurpose } from './routine';
-
 // ============================================================================
 // Database Types (snake_case - DB 직접 사용용)
 // ============================================================================
@@ -112,7 +109,7 @@ export interface DbMessageReaction {
  * 클라이언트용 대화방 타입
  *
  * Phase 18: ai_purpose, ai_status 레거시 필드 제거
- * - AI 대화는 항상 coach 용도 (ai_purpose 불필요)
+ * - AI 대화는 항상 상담 용도 (ai_purpose 불필요)
  * - 범용 대화로 완료 개념 없음 (ai_status 불필요)
  */
 export interface Conversation {
@@ -199,7 +196,7 @@ export interface MessageReaction {
 /**
  * 대화방 생성용 데이터
  *
- * Phase 18: aiPurpose 제거 (AI 대화는 항상 coach)
+ * Phase 18: aiPurpose 제거 (AI 대화는 항상 상담)
  */
 export interface ConversationCreateData {
   type: ConversationType;

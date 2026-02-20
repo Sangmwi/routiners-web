@@ -3,7 +3,7 @@
  * POST /api/conversations/[id]/messages/ai
  * =============================================================================
  *
- * AI 코치 채팅 API - SSE 스트리밍 + OpenAI Function Calling
+ * AI 상담 채팅 API - SSE 스트리밍 + OpenAI Function Calling
  *
  * ## 전체 흐름 요약
  * ```
@@ -40,8 +40,8 @@ import { DbConversation } from '@/lib/types/chat';
 import { AI_TRAINER_TOOLS } from '@/lib/ai/tools';
 import { clearMetadataKeys } from '@/lib/ai/chat-handlers';
 import { AI_CHAT_LIMITS, isSystemMessage, getActionContent } from '@/lib/constants/aiChat';
-import { composeCoachPrompt } from '@/lib/ai/system-prompts';
-import type { CoachConversationMetadata } from '@/lib/types/coach';
+import { composeCounselorPrompt } from '@/lib/ai/system-prompts';
+import type { CounselorConversationMetadata } from '@/lib/types/counselor';
 import { z } from 'zod';
 import {
   checkRateLimit,
@@ -163,9 +163,9 @@ export const POST = withAuth<Response>(
       summarizedUntil: conv.summarized_until,
     });
 
-    const metadata = conv.metadata as CoachConversationMetadata | null;
+    const metadata = conv.metadata as CounselorConversationMetadata | null;
     const processType = metadata?.activePurpose?.type;
-    const systemPrompt = composeCoachPrompt(processType, conv.context_summary);
+    const systemPrompt = composeCounselorPrompt(processType, conv.context_summary);
 
     // =========================================================================
     // STEP 3: 유저 메시지 저장

@@ -106,7 +106,7 @@ export const conversationApi = {
     content: string,
     metadata?: Record<string, unknown>
   ): Promise<void> {
-    const response = await authFetch(`/api/coach/conversations/${conversationId}/messages/system`, {
+    const response = await authFetch(`/api/counselor/conversations/${conversationId}/messages/system`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content, metadata }),

@@ -27,6 +27,8 @@ interface InBodySummaryCardProps {
   onClick?: () => void;
   /** 간소화 모드 (프로필 페이지용) */
   compact?: boolean;
+  /** 카드 스타일 변형 */
+  variant?: 'flat' | 'card';
 }
 
 // ============================================================
@@ -44,10 +46,10 @@ function EmptyState({ onClick }: { onClick?: () => void }) {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-card-foreground">
-            아직 등록된 기록이 없어요
+            아직 인바디 기록이 없어요
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            탭하여 인바디 기록을 추가하세요
+            탭하여 기록을 추가하세요
           </p>
         </div>
         {onClick && <NextIcon size="md" className="text-muted-foreground" />}
@@ -83,6 +85,7 @@ export default function InBodySummaryCard({
   changes,
   onClick,
   compact = false,
+  variant = 'flat',
 }: InBodySummaryCardProps) {
   if (!latest) {
     return <EmptyState onClick={onClick} />;
@@ -90,9 +93,13 @@ export default function InBodySummaryCard({
 
   const formattedDate = formatKoreanDate(latest.measuredAt, { monthFormat: 'short' });
 
+  const baseClass = variant === 'card'
+    ? 'bg-card rounded-xl p-4 border border-border/50'
+    : 'bg-muted/20 rounded-xl p-4';
+
   return (
     <div
-      className={`bg-muted/20 rounded-xl p-4 ${
+      className={`${baseClass} ${
         onClick ? 'cursor-pointer hover:bg-muted/50 transition-colors' : ''
       }`}
       onClick={onClick}
@@ -103,7 +110,7 @@ export default function InBodySummaryCard({
       {/* 점수 뱃지 (있는 경우) */}
       {latest.inbodyScore && !compact && (
         <div className="flex justify-center mt-3">
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
             인바디 점수 {latest.inbodyScore}점
           </span>
         </div>
@@ -111,17 +118,8 @@ export default function InBodySummaryCard({
 
       {/* 하단 정보 */}
       <div className="flex items-center justify-center gap-1 mt-3 text-xs text-muted-foreground">
-        {compact ? (
-          <>
-            <span>{formattedDate} 측정</span>
-            {onClick && <NextIcon size="xs" />}
-          </>
-        ) : (
-          <>
-            <span>총 {totalRecords}개의 기록</span>
-            {onClick && <NextIcon size="xs" />}
-          </>
-        )}
+        <span>{formattedDate} 측정</span>
+        {onClick && <NextIcon size="xs" />}
       </div>
     </div>
   );

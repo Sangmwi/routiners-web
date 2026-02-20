@@ -5,5 +5,5 @@ export * from './api';
 export * from './inbody';
 export * from './fitness';
 export * from './chat';
-export * from './coach';
+export * from './counselor';
 export * from './progress';

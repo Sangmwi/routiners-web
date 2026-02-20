@@ -26,7 +26,7 @@ export default function Big3LiftCard({ summary }: Big3LiftCardProps) {
       <section>
         <SectionHeader
           title="3대 운동"
-          action={{ label: '루틴 만들기', href: '/routine/coach' }}
+          action={{ label: '루틴 만들기', href: '/routine/counselor' }}
         />
         <div className="bg-muted/20 rounded-2xl p-6 mt-3 flex flex-col items-center gap-2">
           <Barbell className="w-8 h-8 text-muted-foreground/40" />

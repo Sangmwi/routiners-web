@@ -44,7 +44,7 @@ export function EmptyTodayCard({ type }: EmptyTodayCardProps) {
 
   const handleAI = () => {
     setIsDrawerOpen(false);
-    router.push('/routine/coach');
+    router.push('/routine/counselor');
   };
 
   const handleManual = () => {

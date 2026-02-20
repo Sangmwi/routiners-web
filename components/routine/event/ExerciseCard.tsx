@@ -91,14 +91,17 @@ export default function ExerciseCard({
         isCompleted ? 'bg-primary/5' : 'bg-muted/20'
       }`}
     >
-      {/* 헤더: 3칸 고정 레이아웃 [left w-10] [center flex-1] [right w-10] */}
-      <div className="flex items-center gap-2 p-4">
-        {/* Left: 드래그 핸들 (편집) / 번호 배지 (일반) */}
-        {editMode && dragHandleProps ? (
-          <div
-            {...dragHandleProps}
-            className="w-10 h-10 flex items-center justify-center shrink-0 touch-none cursor-grab active:cursor-grabbing"
-          >
+      {/* 헤더: 전체 영역 탭으로 확장/축소, 편집 모드에서는 드래그도 가능 */}
+      <div
+        className={`flex items-center gap-2 p-4 cursor-pointer ${
+          dragHandleProps ? 'touch-none' : ''
+        }`}
+        onClick={() => setIsExpanded(!isExpanded)}
+        {...(dragHandleProps || {})}
+      >
+        {/* Left: 드래그 표시 (편집) / 번호 배지 (일반) */}
+        {editMode ? (
+          <div className="w-10 h-10 flex items-center justify-center shrink-0">
             <DotsSixVerticalIcon size={20} weight="bold" className="text-muted-foreground" />
           </div>
         ) : (
@@ -115,11 +118,8 @@ export default function ExerciseCard({
           </div>
         )}
 
-        {/* Center: 운동 정보 (탭으로 확장/축소) */}
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="flex-1 text-left min-w-0"
-        >
+        {/* Center: 운동 정보 */}
+        <div className="flex-1 text-left min-w-0">
           <h3 className="font-semibold text-foreground truncate">{exercise.name}</h3>
           <p className="text-sm text-muted-foreground">
             {setsSummary}
@@ -129,13 +129,13 @@ export default function ExerciseCard({
               ? `✓ ${completedSetCount}/${exercise.sets.length}세트 완료`
               : `0/${exercise.sets.length}세트 완료`}
           </p>
-        </button>
+        </div>
 
         {/* Right: 삭제 (편집) / 펼침 표시 (일반) */}
         {editMode && onDelete ? (
           <button
             type="button"
-            onClick={onDelete}
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
             disabled={!canDelete}
             className="w-10 h-10 flex items-center justify-center shrink-0 text-muted-foreground/50 hover:text-destructive disabled:opacity-30 transition-colors"
             aria-label="운동 삭제"

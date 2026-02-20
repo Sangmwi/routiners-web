@@ -2,15 +2,15 @@
  * System Prompts — Dynamic Composition
  *
  * 프로세스 타입에 따라 시스템 프롬프트를 동적으로 구성
- * - 기본: COACH_BASE_PROMPT (범용 코치)
- * - 프로세스 활성화 시: COACH_BASE_PROMPT + PROCESS_RULES[processType]
+ * - 기본: COUNSELOR_BASE_PROMPT (범용 상담)
+ * - 프로세스 활성화 시: COUNSELOR_BASE_PROMPT + PROCESS_RULES[processType]
  */
 
-import { COACH_BASE_PROMPT } from './coach-base';
+import { COUNSELOR_BASE_PROMPT } from './counselor-base';
 import { PROCESS_RULES } from './processes';
 
 /**
- * 코치 시스템 프롬프트 동적 구성
+ * 상담 시스템 프롬프트 동적 구성
  *
  * Phase 16.5: contextSummary 파라미터 추가 (OCP: 기존 호출 영향 없음)
  *
@@ -18,11 +18,11 @@ import { PROCESS_RULES } from './processes';
  * @param contextSummary - 이전 대화 요약 (토큰 절감용)
  * @returns 구성된 시스템 프롬프트
  */
-export function composeCoachPrompt(
+export function composeCounselorPrompt(
   processType?: string,
   contextSummary?: string | null
 ): string {
-  let prompt = COACH_BASE_PROMPT;
+  let prompt = COUNSELOR_BASE_PROMPT;
 
   // 현재 날짜 컨텍스트 (KST) — AI가 "오늘", "이번 주", "내일" 등을 정확히 이해
   const kstNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
@@ -50,5 +50,5 @@ export function composeCoachPrompt(
   return prompt;
 }
 
-export { COACH_BASE_PROMPT } from './coach-base';
+export { COUNSELOR_BASE_PROMPT } from './counselor-base';
 export { PROCESS_RULES } from './processes';

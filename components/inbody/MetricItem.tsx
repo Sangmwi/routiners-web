@@ -58,10 +58,10 @@ export function MetricItem({
 
   return (
     <div className="text-center">
-      <Icon className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
+      <Icon className="w-5 h-5 text-primary/50 mx-auto mb-1" />
       <p className="text-xs text-muted-foreground">{label}</p>
       <p
-        className={`text-sm font-semibold ${
+        className={`text-base font-bold ${
           hasValue ? 'text-card-foreground' : 'text-muted-foreground'
         }`}
       >

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { PencilSimpleIcon } from '@phosphor-icons/react';
 import { ExpandIcon, CollapseIcon } from '@/components/ui/icons';
+import Button from '@/components/ui/Button';
 import { InBodyCreateData } from '@/lib/types/inbody';
 import FormInput from '@/components/ui/FormInput';
 
@@ -12,6 +13,8 @@ interface InBodyPreviewProps {
   onChange: (data: InBodyCreateData) => void;
   /** 읽기 전용 모드 (수정 버튼 숨김) */
   readOnly?: boolean;
+  /** 초기 편집 모드 시작 여부 */
+  initialEditing?: boolean;
 }
 
 export default function InBodyPreview({
@@ -19,9 +22,10 @@ export default function InBodyPreview({
   imagePreview,
   onChange,
   readOnly = false,
+  initialEditing = false,
 }: InBodyPreviewProps) {
   const [showDetails, setShowDetails] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(initialEditing);
 
   // readOnly 모드에서는 수정 불가
   const canEdit = !readOnly;
@@ -66,13 +70,14 @@ export default function InBodyPreview({
           {readOnly ? '인바디 데이터' : '추출된 데이터'}
         </h3>
         {canEdit && (
-          <button
+          <Button
+            variant="ghost"
+            size="xs"
             onClick={() => setIsEditing(!isEditing)}
-            className="flex items-center gap-1 text-sm text-primary"
           >
             <PencilSimpleIcon size={16} />
             {isEditing ? '완료' : '수정'}
-          </button>
+          </Button>
         )}
       </div>
 

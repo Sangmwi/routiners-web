@@ -91,7 +91,7 @@ export default function Tag({
   return (
     <div
       className={`
-        inline-flex items-center rounded-[14px]
+        inline-flex items-center rounded-full
         ${variantStyles[variant]}
         ${sizeStyles[size]}
         ${inactive ? 'text-muted-foreground' : 'text-card-foreground'}

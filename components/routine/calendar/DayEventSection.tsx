@@ -60,7 +60,7 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
 
   const handleAI = () => {
     setDrawerType(null);
-    router.push('/routine/coach');
+    router.push('/routine/counselor');
   };
 
   const handleManual = (type: 'workout' | 'meal') => {

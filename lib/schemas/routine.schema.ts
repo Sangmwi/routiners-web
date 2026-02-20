@@ -11,11 +11,6 @@ import { z } from 'zod';
 // Enums
 // ============================================================================
 
-export const SessionPurposeSchema = z.enum(['workout', 'meal'], {
-  errorMap: () => ({ message: '유효하지 않은 세션 목적입니다.' }),
-});
-
-
 export const EventTypeSchema = z.enum(['workout', 'meal'], {
   errorMap: () => ({ message: '유효하지 않은 이벤트 타입입니다.' }),
 });
@@ -175,7 +170,6 @@ export const EventQueryParamsSchema = z.object({
 // Type Exports
 // ============================================================================
 
-export type SessionPurposeSchemaType = z.infer<typeof SessionPurposeSchema>;
 export type EventTypeSchemaType = z.infer<typeof EventTypeSchema>;
 export type EventStatusSchemaType = z.infer<typeof EventStatusSchema>;
 export type WorkoutSetSchemaType = z.infer<typeof WorkoutSetSchema>;

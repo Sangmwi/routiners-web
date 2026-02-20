@@ -8,7 +8,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import type { RoutinePreviewData, InputRequest } from '@/lib/types/fitness';
 import type { ProfileConfirmationRequest } from '@/lib/types/chat';
-import type { ActivePurpose } from '@/lib/types/coach';
+import type { ActivePurpose } from '@/lib/types/counselor';
 
 // =============================================================================
 // Re-export Schemas (하위 호환성)

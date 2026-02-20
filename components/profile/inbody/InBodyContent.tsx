@@ -3,6 +3,7 @@
 import { PlusIcon, WarningCircleIcon, CheckCircleIcon } from '@phosphor-icons/react';
 import { LoadingSpinner } from '@/components/ui/icons';
 import Button from '@/components/ui/Button';
+import SectionHeader from '@/components/ui/SectionHeader';
 import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
 import {
   InBodyRecordList,
@@ -12,64 +13,6 @@ import {
   InBodyPreview,
 } from '@/components/inbody';
 import { useInBodyManagerSuspense } from '@/hooks/inbody';
-import { formatKoreanDate } from '@/lib/utils/dateHelpers';
-
-// ============================================================
-// Sub Components
-// ============================================================
-
-interface DeleteConfirmViewProps {
-  recordDate: string;
-  isDeleting: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-}
-
-function DeleteConfirmView({
-  recordDate,
-  isDeleting,
-  onConfirm,
-  onCancel,
-}: DeleteConfirmViewProps) {
-  return (
-    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-      <WarningCircleIcon size={48} className="text-destructive mb-4" />
-      <p className="text-lg font-medium text-card-foreground">
-        이 기록을 삭제할까요?
-      </p>
-      <p className="text-sm text-muted-foreground mt-2">{recordDate} 측정 기록</p>
-      <p className="text-xs text-muted-foreground mt-1">
-        삭제된 기록은 복구할 수 없어요
-      </p>
-
-      <div className="flex gap-3 mt-6 w-full max-w-xs">
-        <Button
-          variant="outline"
-          onClick={onCancel}
-          className="flex-1"
-          disabled={isDeleting}
-        >
-          취소
-        </Button>
-        <Button
-          variant="destructive"
-          onClick={onConfirm}
-          className="flex-1"
-          disabled={isDeleting}
-        >
-          {isDeleting ? (
-            <>
-              <LoadingSpinner size="sm" variant="current" className="mr-2" />
-              삭제 중...
-            </>
-          ) : (
-            '삭제'
-          )}
-        </Button>
-      </div>
-    </div>
-  );
-}
 
 // ============================================================
 // Main Content Component
@@ -87,12 +30,8 @@ export default function InBodyContent() {
     records,
     summary,
 
-    // View State
-    currentView,
-
     // Selected Record State
     selectedRecord,
-    recordToDelete,
 
     // Scan State
     scanState,
@@ -111,12 +50,6 @@ export default function InBodyContent() {
     closePreviewModal,
     openDetailModal,
     closeDetailModal,
-    requestDelete,
-    confirmDelete,
-    cancelDelete,
-
-    // Delete State
-    isDeleting,
   } = useInBodyManagerSuspense();
 
   // 버튼 비활성화 조건: 스캔 중이거나 저장 중
@@ -126,73 +59,57 @@ export default function InBodyContent() {
     <>
       <div className="space-y-6">
         {/* Summary Card */}
-        <section>
-          <h2 className="text-sm font-medium text-muted-foreground mb-3">
-            최근 측정
-          </h2>
+        <section className="space-y-3">
+          <SectionHeader title="최근 측정" size="sm" />
           <InBodySummaryCard
             latest={summary?.latest}
             totalRecords={summary?.totalRecords}
+            variant="card"
           />
         </section>
 
         {/* Visibility Settings */}
-        <section>
-          <InBodyVisibilitySettings variant="card" />
+        <section className="space-y-3">
+          <SectionHeader title="공개 설정" size="sm" />
+          <InBodyVisibilitySettings variant="card" showHeader={false} />
         </section>
 
-        {/* Record List or Delete Confirm */}
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-medium text-muted-foreground">
-              측정 기록
-            </h2>
-            <span className="text-xs text-muted-foreground">
-              {records.length}개
-            </span>
-          </div>
-
+        {/* Record List */}
+        <section className="space-y-3">
+          <SectionHeader
+            title="측정 기록"
+            size="sm"
+            badge={records.length}
+          />
           <div className="bg-card rounded-xl border border-border/50 overflow-hidden">
-            {currentView === 'list' ? (
-              <InBodyRecordList
-                records={records}
-                onRecordClick={openDetailModal}
-                onDeleteClick={requestDelete}
-              />
-            ) : currentView === 'confirm-delete' && recordToDelete ? (
-              <DeleteConfirmView
-                recordDate={formatKoreanDate(recordToDelete.measuredAt)}
-                isDeleting={isDeleting}
-                onConfirm={confirmDelete}
-                onCancel={cancelDelete}
-              />
-            ) : null}
+            <InBodyRecordList
+              records={records}
+              onRecordClick={openDetailModal}
+            />
           </div>
         </section>
       </div>
 
       {/* Fixed Bottom Button */}
-      {currentView === 'list' && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 pb-safe bg-background border-t border-border/50">
-          <Button
-            onClick={startScan}
-            className="w-full"
-            disabled={isButtonDisabled}
-          >
-            {scanState === 'scanning' ? (
-              <>
-                <LoadingSpinner size="sm" variant="current" className="mr-2" />
-                분석 중...
-              </>
-            ) : (
-              <>
-                <PlusIcon size={16} className="mr-2" />
-                새 기록 추가
-              </>
-            )}
-          </Button>
-        </div>
-      )}
+      <div className="fixed bottom-0 left-0 right-0 p-4 pb-safe bg-background border-t border-border/50">
+        <Button
+          onClick={startScan}
+          className="w-full"
+          disabled={isButtonDisabled}
+        >
+          {scanState === 'scanning' ? (
+            <>
+              <LoadingSpinner size="sm" variant="current" className="mr-2" />
+              분석 중...
+            </>
+          ) : (
+            <>
+              <PlusIcon size={16} className="mr-2" />
+              새 기록 추가
+            </>
+          )}
+        </Button>
+      </div>
 
       {/* 스캔 결과 미리보기 모달 */}
       <Modal
@@ -200,6 +117,7 @@ export default function InBodyContent() {
         onClose={closePreviewModal}
         title="스캔 결과"
         size="lg"
+        position="bottom"
         closeOnBackdrop={scanState !== 'saving'}
       >
         <ModalBody className="p-6 min-h-[300px]">

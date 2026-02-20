@@ -19,7 +19,7 @@ interface ChatContentProps {
  *
  * - 전체 화면 높이 (h-screen)
  * - flex column 레이아웃
- * - 자체 헤더 사용 (CoachHeader 등)
+ * - 자체 헤더 사용 (CounselorHeader 등)
  *
  * Suspense/ErrorBoundary는 각 page.tsx에서 명시적으로 관리합니다.
  * 이는 SOLID의 SRP(단일 책임 원칙)를 따릅니다.
@@ -27,10 +27,10 @@ interface ChatContentProps {
  * @example
  * // page.tsx에서 사용
  * <ChatLayout>
- *   <CoachHeader />
+ *   <CounselorHeader />
  *   <ChatLayout.Content>
  *     <Suspense fallback={<PulseLoader variant="chat" />}>
- *       <CoachChatContent />
+ *       <CounselorChatContent />
  *     </Suspense>
  *   </ChatLayout.Content>
  * </ChatLayout>

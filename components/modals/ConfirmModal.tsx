@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { LoadingSpinner } from '@/components/ui/icons';
 import Modal, { ModalBody } from '@/components/ui/Modal';
+import Button from '@/components/ui/Button';
 import { useShowError } from '@/lib/stores/errorStore';
 import type { ModalDataMap } from '@/lib/stores/modalStore';
 
@@ -95,24 +96,22 @@ export default function ConfirmModal({
 
             {/* 버튼 */}
             <div className="flex gap-3">
-              <button
+              <Button
+                variant="ghost"
                 onClick={handleCancel}
                 disabled={isLoading}
-                className="flex-1 py-3 rounded-xl font-medium bg-muted/50 text-foreground disabled:opacity-50"
+                className="flex-1 bg-muted/50"
               >
                 {cancelText}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant={variant === 'danger' ? 'destructive' : 'primary'}
                 onClick={handleConfirm}
-                disabled={isLoading}
-                className={`flex-1 py-3 rounded-xl font-medium disabled:opacity-50 ${
-                  variant === 'danger'
-                    ? 'bg-destructive text-destructive-foreground'
-                    : 'bg-primary text-primary-foreground'
-                }`}
+                isLoading={isLoading}
+                className="flex-1"
               >
-                {isLoading ? '처리 중...' : confirmText}
-              </button>
+                {confirmText}
+              </Button>
             </div>
           </div>
         )}

@@ -45,14 +45,14 @@ export default function RoutineMiniCard({ stats }: RoutineMiniCardProps) {
       <SectionHeader
         title="이번 주 루틴"
         action={totalEvents === 0
-          ? { label: '루틴 생성', href: '/routine/coach' }
+          ? { label: '루틴 생성', href: '/routine/counselor' }
           : { label: '통계', href: '/routine/stats' }
         }
       />
 
       <div className="grid grid-cols-2 gap-3 mt-3">
         {/* 운동 카드 */}
-        <div className="bg-muted/20 rounded-2xl p-4">
+        <div className="bg-muted/20 rounded-xl p-4">
           <div className="flex items-center gap-1.5 mb-3">
             <BarbellIcon size={16} weight="fill" className="text-primary" />
             <span className="text-xs font-medium text-muted-foreground">운동</span>
@@ -70,17 +70,17 @@ export default function RoutineMiniCard({ stats }: RoutineMiniCardProps) {
           </div>
 
           {workoutSubs.length > 0 && (
-            <p className="text-[11px] text-muted-foreground mt-3 leading-relaxed">
+            <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
               {workoutSubs.join(' · ')}
             </p>
           )}
           {workoutTotal === 0 && (
-            <p className="text-[11px] text-muted-foreground/60 mt-3">예정 없음</p>
+            <p className="text-xs text-muted-foreground/60 mt-3">예정 없음</p>
           )}
         </div>
 
         {/* 식단 카드 */}
-        <div className="bg-muted/20 rounded-2xl p-4">
+        <div className="bg-muted/20 rounded-xl p-4">
           <div className="flex items-center gap-1.5 mb-3">
             <ForkKnifeIcon size={16} weight="fill" className="text-primary/70" />
             <span className="text-xs font-medium text-muted-foreground">식단</span>
@@ -92,18 +92,18 @@ export default function RoutineMiniCard({ stats }: RoutineMiniCardProps) {
 
           <div className="h-1.5 bg-muted rounded-full overflow-hidden">
             <div
-              className="h-full bg-primary/50 rounded-full transition-all duration-300"
+              className="h-full bg-primary rounded-full transition-all duration-300"
               style={{ width: `${Math.min(100, Math.max(0, stats.meal.completionRate))}%` }}
             />
           </div>
 
           {mealSubs.length > 0 && (
-            <p className="text-[11px] text-muted-foreground mt-3 leading-relaxed">
+            <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
               {mealSubs.join(' · ')}
             </p>
           )}
           {mealTotal === 0 && (
-            <p className="text-[11px] text-muted-foreground/60 mt-3">예정 없음</p>
+            <p className="text-xs text-muted-foreground/60 mt-3">예정 없음</p>
           )}
         </div>
       </div>

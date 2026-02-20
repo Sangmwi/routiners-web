@@ -98,7 +98,7 @@ export default function PostCard({ post, onClick, onLike }: PostCardProps) {
         <button
           onClick={handleLikeClick}
           className={`flex items-center gap-1.5 transition-colors ${
-            isLiked ? 'text-red-500' : 'text-muted-foreground hover:text-primary'
+            isLiked ? 'text-destructive' : 'text-muted-foreground hover:text-primary'
           }`}
         >
           <HeartIcon size={16} weight={isLiked ? 'fill' : 'regular'} />

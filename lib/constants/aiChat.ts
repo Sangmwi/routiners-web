@@ -63,10 +63,10 @@ export const ROUTINE_PROGRESS_STAGES: ProgressStage[] = [
 ];
 
 /**
- * 세션 진행률 단계 (코치 AI 기본)
+ * 세션 진행률 단계 (상담 AI 기본)
  */
 export const PROGRESS_STAGES = {
-  coach: ROUTINE_PROGRESS_STAGES,
+  counselor: ROUTINE_PROGRESS_STAGES,
 } as const;
 
 // =============================================================================
@@ -134,14 +134,14 @@ export const AI_CHAT_LIMITS = {
 } as const;
 
 // =============================================================================
-// 코치 페르소나 메타데이터
+// 상담 페르소나 메타데이터
 // =============================================================================
 
 /**
- * 코치 페르소나 타입 정의
+ * 상담 페르소나 타입 정의
  * 향후 다양한 AI 페르소나 확장을 위한 구조
  */
-export interface CoachPersona {
+export interface CounselorPersona {
   /** 고유 식별자 */
   id: string;
   /** 표시 이름 */
@@ -155,12 +155,12 @@ export interface CoachPersona {
 }
 
 /**
- * 기본 코치 페르소나
- * 현재는 단일 코치만 사용, 향후 다양한 페르소나 추가 가능
+ * 기본 상담 페르소나
+ * 현재는 단일 상담사만 사용, 향후 다양한 페르소나 추가 가능
  *
  * @example 향후 확장 예시
  * ```ts
- * const trainer: CoachPersona = {
+ * const trainer: CounselorPersona = {
  *   id: 'trainer',
  *   name: '트레이너',
  *   description: '체계적인 운동 지도',
@@ -168,7 +168,7 @@ export interface CoachPersona {
  * };
  * ```
  */
-export const COACH_PERSONAS: Record<string, CoachPersona> = {
+export const COUNSELOR_PERSONAS: Record<string, CounselorPersona> = {
   default: {
     id: 'default',
     name: '상담',
@@ -181,15 +181,15 @@ export const COACH_PERSONAS: Record<string, CoachPersona> = {
 } as const;
 
 /** 현재 활성화된 기본 페르소나 */
-export const DEFAULT_COACH_PERSONA = COACH_PERSONAS.default;
+export const DEFAULT_COUNSELOR_PERSONA = COUNSELOR_PERSONAS.default;
 
 /**
  * 페르소나 ID로 페르소나 정보 조회
  * @param personaId - 페르소나 ID (기본값: 'default')
- * @returns 코치 페르소나 정보
+ * @returns 상담 페르소나 정보
  */
-export function getCoachPersona(personaId: string = 'default'): CoachPersona {
-  return COACH_PERSONAS[personaId] ?? DEFAULT_COACH_PERSONA;
+export function getCounselorPersona(personaId: string = 'default'): CounselorPersona {
+  return COUNSELOR_PERSONAS[personaId] ?? DEFAULT_COUNSELOR_PERSONA;
 }
 
 // =============================================================================

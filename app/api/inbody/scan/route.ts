@@ -11,6 +11,7 @@ import {
   rateLimitExceeded,
 } from '@/lib/utils/rateLimiter';
 import { AI_MODEL } from '@/lib/constants/aiChat';
+import { SSEWriter } from '@/lib/ai/stream/SSEWriter';
 
 // OpenAI 클라이언트 초기화
 const openai = new OpenAI({
@@ -183,16 +184,23 @@ is_valid_inbody: true로 설정하고, rejection_reason: null로 설정한 후 �
 - 측정일이 없으면 오늘 날짜를 사용하세요.
 - 읽을 수 없거나 불분명한 값은 null로 설정하세요.`;
 
+// JSON 출력 예상 문자 수 (진행률 계산용)
+const EXPECTED_OUTPUT_LENGTH = 600;
+
 /**
  * POST /api/inbody/scan
- * InBody 결과지 이미지에서 데이터 추출 (AI Vision)
+ * InBody 결과지 이미지에서 데이터 추출 (AI Vision + SSE 스트리밍)
  */
-export const POST = withAuth(async (request: NextRequest, { authUser }) => {
+export const POST = withAuth<Response>(async (request: NextRequest, { authUser }) => {
   // Rate Limiting (분당 5회)
   const rateLimitResult = checkRateLimit(`inbody-scan:${authUser.id}`, INBODY_SCAN_RATE_LIMIT);
   if (!rateLimitResult.allowed) {
     return NextResponse.json(rateLimitExceeded(rateLimitResult), { status: 429 });
   }
+
+  // FormData 파싱 및 이미지 검증 (스트림 시작 전 동기 검증)
+  let base64: string;
+  let mimeType: string;
 
   try {
     const formData = await request.formData();
@@ -205,7 +213,6 @@ export const POST = withAuth(async (request: NextRequest, { authUser }) => {
       );
     }
 
-    // 이미지 타입 검증
     if (!image.type.startsWith('image/')) {
       return NextResponse.json(
         { error: '유효한 이미지 파일이 아닙니다.', code: 'INVALID_FORMAT' },
@@ -213,7 +220,6 @@ export const POST = withAuth(async (request: NextRequest, { authUser }) => {
       );
     }
 
-    // 이미지 크기 제한 (10MB)
     if (image.size > 10 * 1024 * 1024) {
       return NextResponse.json(
         { error: '이미지 크기는 10MB 이하여야 합니다.', code: 'VALIDATION_ERROR' },
@@ -221,115 +227,159 @@ export const POST = withAuth(async (request: NextRequest, { authUser }) => {
       );
     }
 
-    // 이미지 → base64 변환
     const bytes = await image.arrayBuffer();
-    const base64 = Buffer.from(bytes).toString('base64');
-    const mimeType = image.type;
-
-    // OpenAI Responses API 호출 (최신 모델 지원)
-    const response = await openai.responses.create({
-      model: AI_MODEL.DEFAULT,
-      instructions: SYSTEM_INSTRUCTIONS,
-      input: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'input_text',
-              text: '이 InBody 결과지에서 측정 데이터를 추출해주세요.',
-            },
-            {
-              type: 'input_image',
-              image_url: `data:${mimeType};base64,${base64}`,
-              detail: 'high',
-            },
-          ],
-        },
-      ],
-      text: {
-        format: {
-          type: 'json_schema',
-          name: 'inbody_data',
-          strict: true,
-          schema: INBODY_JSON_SCHEMA,
-        },
-      },
-    });
-
-    // Responses API는 output_text로 응답
-    const content = response.output_text;
-    if (!content) {
-      return NextResponse.json(
-        { error: 'AI 응답이 없습니다.', code: 'INTERNAL_ERROR' },
-        { status: 500 }
-      );
-    }
-
-    // JSON 파싱
-    let parsedData;
-    try {
-      parsedData = JSON.parse(content);
-    } catch {
-      return NextResponse.json(
-        { error: 'AI 응답을 파싱할 수 없습니다.', code: 'INTERNAL_ERROR' },
-        { status: 500 }
-      );
-    }
-
-    // 1단계: InBody 결과지 유효성 검사
-    if (parsedData.is_valid_inbody === false) {
-      return NextResponse.json(
-        {
-          error: parsedData.rejection_reason || '인바디 결과지를 인식할 수 없습니다.',
-          code: 'INVALID_IMAGE',
-        },
-        { status: 422 }
-      );
-    }
-
-    // is_valid_inbody와 rejection_reason 필드 제거 후 Zod 검증
-    const { is_valid_inbody, rejection_reason, ...extractedData } = parsedData;
-
-    // Zod 검증 (nullable 필드는 null 허용)
-    const validationResult = InBodyExtractedDataSchema.safeParse(extractedData);
-    if (!validationResult.success) {
-      return NextResponse.json(
-        {
-          error: '추출된 데이터가 유효하지 않습니다. 다른 이미지를 시도해주세요.',
-          code: 'VALIDATION_ERROR',
-          details: validationResult.error.flatten(),
-        },
-        { status: 422 }
-      );
-    }
-
-    // 클라이언트용 형식으로 변환
-    const createData = transformExtractedToCreateData(validationResult.data);
-
-    return NextResponse.json({
-      data: validationResult.data,
-      createData,
-    });
-  } catch (error: unknown) {
-    console.error('[InBody Scan] Error:', error);
-
-    // OpenAI API 에러 처리
-    if (error instanceof OpenAI.APIError) {
-      if (error.status === 429) {
-        return NextResponse.json(
-          { error: 'API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.', code: 'SERVICE_UNAVAILABLE' },
-          { status: 429 }
-        );
-      }
-      return NextResponse.json(
-        { error: 'AI 서비스 오류가 발생했습니다.', code: 'INTERNAL_ERROR' },
-        { status: 500 }
-      );
-    }
-
+    base64 = Buffer.from(bytes).toString('base64');
+    mimeType = image.type;
+  } catch {
     return NextResponse.json(
-      { error: '스캔 중 오류가 발생했습니다.', code: 'INTERNAL_ERROR' },
-      { status: 500 }
+      { error: '이미지 처리 중 오류가 발생했어요.', code: 'INTERNAL_ERROR' },
+      { status: 400 }
     );
   }
+
+  // SSE 스트림 시작
+  const stream = new ReadableStream({
+    async start(controller) {
+      const writer = new SSEWriter(controller);
+
+      try {
+        writer.send('progress', {
+          progress: 10,
+          message: '이미지 업로드 완료',
+        });
+
+        // OpenAI Responses API 스트리밍 호출
+        const response = await openai.responses.create({
+          model: AI_MODEL.DEFAULT,
+          instructions: SYSTEM_INSTRUCTIONS,
+          input: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'input_text',
+                  text: '이 InBody 결과지에서 측정 데이터를 추출해주세요.',
+                },
+                {
+                  type: 'input_image',
+                  image_url: `data:${mimeType};base64,${base64}`,
+                  detail: 'high',
+                },
+              ],
+            },
+          ],
+          text: {
+            format: {
+              type: 'json_schema',
+              name: 'inbody_data',
+              strict: true,
+              schema: INBODY_JSON_SCHEMA,
+            },
+          },
+          stream: true,
+        });
+
+        writer.send('progress', {
+          progress: 20,
+          message: 'AI 분석 시작...',
+        });
+
+        // 스트리밍 토큰 수집 + 진행률 전송
+        let fullText = '';
+
+        for await (const event of response) {
+          if (event.type === 'response.output_text.delta') {
+            fullText += event.delta;
+
+            // 토큰 기반 실시간 진행률 (20% ~ 85%)
+            const tokenProgress = Math.min(
+              85,
+              20 + Math.floor((fullText.length / EXPECTED_OUTPUT_LENGTH) * 65)
+            );
+
+            writer.send('progress', {
+              progress: tokenProgress,
+              message: '인바디 데이터 추출 중...',
+            });
+          }
+        }
+
+        writer.send('progress', {
+          progress: 90,
+          message: '데이터 검증 중...',
+        });
+
+        // JSON 파싱
+        if (!fullText) {
+          writer.send('error', { error: 'AI 응답이 없습니다.' });
+          writer.close();
+          return;
+        }
+
+        let parsedData;
+        try {
+          parsedData = JSON.parse(fullText);
+        } catch {
+          writer.send('error', { error: 'AI 응답을 파싱할 수 없습니다.' });
+          writer.close();
+          return;
+        }
+
+        // InBody 결과지 유효성 검사
+        if (parsedData.is_valid_inbody === false) {
+          writer.send('error', {
+            error: parsedData.rejection_reason || '인바디 결과지를 인식할 수 없습니다.',
+          });
+          writer.close();
+          return;
+        }
+
+        // Zod 검증
+        const { is_valid_inbody, rejection_reason, ...extractedData } = parsedData;
+        // is_valid_inbody, rejection_reason 사용하지 않음 (위에서 이미 처리)
+        void is_valid_inbody;
+        void rejection_reason;
+
+        const validationResult = InBodyExtractedDataSchema.safeParse(extractedData);
+
+        if (!validationResult.success) {
+          writer.send('error', {
+            error: '추출된 데이터가 유효하지 않습니다. 다른 이미지를 시도해주세요.',
+          });
+          writer.close();
+          return;
+        }
+
+        // 성공
+        const createData = transformExtractedToCreateData(validationResult.data);
+
+        writer.send('complete', {
+          data: validationResult.data,
+          createData,
+        });
+        writer.close();
+      } catch (error: unknown) {
+        console.error('[InBody Scan] Error:', error);
+
+        if (error instanceof OpenAI.APIError && error.status === 429) {
+          writer.send('error', {
+            error: 'API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.',
+          });
+        } else {
+          writer.send('error', {
+            error: '스캔 중 오류가 발생했어요.',
+          });
+        }
+        writer.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    },
+  });
 });

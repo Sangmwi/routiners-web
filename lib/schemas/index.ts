@@ -51,7 +51,6 @@ export type { ApiErrorResponseSchemaType } from './api.schema';
 // Routine Schemas
 export {
   // Enums
-  SessionPurposeSchema,
   EventTypeSchema,
   EventStatusSchema,
   EventSourceSchema,
@@ -74,7 +73,6 @@ export {
 } from './routine.schema';
 
 export type {
-  SessionPurposeSchemaType,
   EventTypeSchemaType,
   EventStatusSchemaType,
   WorkoutSetSchemaType,

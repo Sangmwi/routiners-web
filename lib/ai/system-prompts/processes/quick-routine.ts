@@ -2,7 +2,7 @@
  * Quick Routine Process Rules
  *
  * 빠른 루틴 생성 프로세스 규칙
- * composeCoachPrompt('quick_routine') 호출 시 시스템 프롬프트에 추가됨
+ * composeCounselorPrompt('quick_routine') 호출 시 시스템 프롬프트에 추가됨
  */
 
 export const QUICK_ROUTINE_RULES = `

@@ -28,7 +28,7 @@ export default function InBodyListModal({
   });
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="인바디 기록" size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title="인바디 기록" size="lg" position="bottom" enableSwipe>
       <ModalBody className="min-h-[200px]">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
@@ -38,10 +38,10 @@ export default function InBodyListModal({
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <CalendarIcon size={48} className="text-muted-foreground mb-4" />
             <p className="text-lg font-medium text-card-foreground">
-              기록이 없어요
+              아직 인바디 기록이 없어요
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              인바디 스캔으로 첫 기록을 추가해보세요
+              인바디 결과지를 스캔해서 기록을 추가해보세요
             </p>
           </div>
         ) : (
@@ -92,9 +92,9 @@ function InBodyListItem({
         <p className="font-medium text-card-foreground">{formattedDate}</p>
         <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
           <span>체중 {record.weight}kg</span>
-          <span>-</span>
+          <span className="text-border">·</span>
           <span>골격근 {record.skeletalMuscleMass}kg</span>
-          <span>-</span>
+          <span className="text-border">·</span>
           <span>체지방률 {record.bodyFatPercentage}%</span>
         </div>
         {record.inbodyScore && (

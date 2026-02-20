@@ -12,6 +12,8 @@ import { useCurrentUserProfile, useUpdateProfile } from '@/hooks/profile/useProf
 interface InBodyVisibilitySettingsProps {
   /** 컴포넌트 스타일 변형 */
   variant?: 'default' | 'card';
+  /** card variant에서 내부 헤더 표시 여부 */
+  showHeader?: boolean;
   /** 저장 성공 시 콜백 */
   onSaveSuccess?: () => void;
   /** 저장 실패 시 콜백 */
@@ -40,6 +42,7 @@ interface InBodyVisibilitySettingsProps {
  */
 export default function InBodyVisibilitySettings({
   variant = 'default',
+  showHeader = true,
   onSaveSuccess,
   onSaveError,
 }: InBodyVisibilitySettingsProps) {
@@ -103,7 +106,9 @@ export default function InBodyVisibilitySettings({
   if (variant === 'card') {
     return (
       <div className="bg-card rounded-xl p-4 border border-border/50">
-        <h3 className="text-sm font-medium text-card-foreground mb-3">공개 설정</h3>
+        {showHeader && (
+          <h3 className="text-sm font-medium text-card-foreground mb-3">공개 설정</h3>
+        )}
         {content}
       </div>
     );

@@ -3,14 +3,14 @@
 import { TodaySection } from './today';
 import { WeeklyOverview } from './weekly';
 import { UpcomingSection } from './upcoming';
-import { CoachButton } from '@/components/coach';
+import { CounselorButton } from '@/components/counselor';
 import {
   useWeeklyStatsSuspense,
   useUpcomingEventsSuspense,
   useRoutineEventByDateSuspense,
   useSeedEventCache,
 } from '@/hooks/routine';
-import { useActiveCoachConversation } from '@/hooks/coach';
+import { useActiveCounselorConversation } from '@/hooks/counselor';
 import { formatDate } from '@/lib/utils/dateHelpers';
 
 /**
@@ -20,7 +20,7 @@ import { formatDate } from '@/lib/utils/dateHelpers';
  * 1. 오늘 섹션 (Hero) - 즉시 행동 가능
  * 2. 이번 주 현황 - 진행 상태 한눈에
  * 3. 다가오는 루틴 - 컴팩트 리스트
- * 4. AI 코치 버튼 - 플로팅
+ * 4. AI 상담 버튼 - 플로팅
  */
 export default function RoutineContent() {
   const today = formatDate(new Date());
@@ -40,8 +40,8 @@ export default function RoutineContent() {
   useSeedEventCache(workoutEvents);
   useSeedEventCache(mealEvents);
 
-  // 활성 코치 대화 확인 (non-blocking)
-  const { data: activeConversation } = useActiveCoachConversation();
+  // 활성 상담 대화 확인 (non-blocking)
+  const { data: activeConversation } = useActiveCounselorConversation();
 
   // 운동 + 식단 이벤트 합치기
   const allUpcomingEvents = [...(workoutEvents || []), ...(mealEvents || [])];
@@ -60,8 +60,8 @@ export default function RoutineContent() {
       {/* 3. 다가오는 루틴 */}
       <UpcomingSection events={allUpcomingEvents} maxItems={5} />
 
-      {/* 4. AI 코치 플로팅 버튼 */}
-      <CoachButton activeConversation={activeConversation} />
+      {/* 4. AI 상담 플로팅 버튼 */}
+      <CounselorButton activeConversation={activeConversation} />
     </div>
   );
 }

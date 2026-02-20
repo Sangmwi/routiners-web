@@ -72,8 +72,8 @@ export default function ProfileInbodySection({
       icon={ScalesIcon}
       message={
         isOwnProfile
-          ? '아직 등록된 인바디 기록이 없어요'
-          : '등록된 인바디 기록이 없어요'
+          ? '아직 인바디 기록이 없어요'
+          : '인바디 기록이 없어요'
       }
       hint={isOwnProfile ? '상단의 관리 버튼에서 인바디 기록을 추가해보세요' : undefined}
     />

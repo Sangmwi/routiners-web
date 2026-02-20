@@ -2,7 +2,7 @@
  * Routine Generation Process Rules
  *
  * 루틴 생성 프로세스에 필요한 전체 규칙
- * composeCoachPrompt('routine_generation') 호출 시 시스템 프롬프트에 추가됨
+ * composeCounselorPrompt('routine_generation') 호출 시 시스템 프롬프트에 추가됨
  */
 
 export const ROUTINE_PROCESS_RULES = `
