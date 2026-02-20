@@ -6,6 +6,7 @@ import { ExpandIcon, CollapseIcon } from '@/components/ui/icons';
 import Button from '@/components/ui/Button';
 import { InBodyCreateData } from '@/lib/types/inbody';
 import FormInput from '@/components/ui/FormInput';
+import { DatePicker } from '@/components/ui/WheelPicker';
 
 interface InBodyPreviewProps {
   data: InBodyCreateData;
@@ -89,12 +90,16 @@ export default function InBodyPreview({
       {/* 측정일 */}
       <div className="bg-muted/20 rounded-xl p-4">
         {isEditing ? (
-          <FormInput
-            type="date"
-            label="측정일"
-            value={data.measuredAt}
-            onChange={(e) => handleDateChange(e.target.value)}
-          />
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">측정일</p>
+            <DatePicker
+              value={data.measuredAt}
+              onChange={handleDateChange}
+              minDate="2020-01-01"
+              maxDate={new Date().toISOString().split('T')[0]}
+              showLabels={false}
+            />
+          </div>
         ) : (
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">측정일</span>

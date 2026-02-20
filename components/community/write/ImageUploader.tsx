@@ -1,8 +1,13 @@
 'use client';
 
-import { useRef } from 'react';
+import { useState } from 'react';
 import { CameraIcon, XCircleIcon } from '@phosphor-icons/react';
 import { ImageWithFallback } from '@/components/ui/image';
+import { ImageSourceDrawer } from '@/components/drawers';
+import { useNativeImagePicker } from '@/hooks/webview';
+import { validateImageFile } from '@/lib/utils/imageValidation';
+import type { ImagePickerSource } from '@/lib/webview';
+import ErrorToast from '@/components/ui/ErrorToast';
 
 interface ImageUploaderProps {
   existingUrls: string[];
@@ -13,9 +18,6 @@ interface ImageUploaderProps {
   onRemoveNew: (index: number) => void;
 }
 
-const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-
 export default function ImageUploader({
   existingUrls,
   newFiles,
@@ -24,28 +26,49 @@ export default function ImageUploader({
   onRemoveExisting,
   onRemoveNew,
 }: ImageUploaderProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const { pickImage, base64ToFile } = useNativeImagePicker();
+
   const totalCount = existingUrls.length + newFiles.length;
   const canAddMore = totalCount < maxCount;
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
+  const handleSelectSource = async (source: ImagePickerSource) => {
+    setIsDrawerOpen(false);
+    setIsProcessing(true);
 
-    // 파일 유효성 검사
-    const validFiles = files.filter((file) => {
-      if (!ACCEPTED_TYPES.includes(file.type)) return false;
-      if (file.size > MAX_FILE_SIZE) return false;
-      return true;
-    });
+    const result = await pickImage(source);
 
-    if (validFiles.length > 0) {
-      onAddFiles(validFiles);
+    if (result.cancelled) {
+      setIsProcessing(false);
+      return;
     }
 
-    // input 초기화 (같은 파일 재선택 가능)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    if (!result.success) {
+      setErrorMessage(result.error || '이미지 선택에 실패했어요.');
+      setIsProcessing(false);
+      return;
     }
+
+    if (result.base64) {
+      const file = base64ToFile(
+        result.base64,
+        result.fileName || 'community.jpg',
+      );
+
+      const validation = validateImageFile(file);
+      if (!validation.valid) {
+        setErrorMessage(validation.error || '파일 검증에 실패했어요.');
+        setIsProcessing(false);
+        return;
+      }
+
+      onAddFiles([file]);
+    }
+
+    setIsProcessing(false);
   };
 
   // 새 파일의 미리보기 URL 생성
@@ -105,8 +128,9 @@ export default function ImageUploader({
         {canAddMore && (
           <button
             type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="aspect-square rounded-xl border-2 border-dashed border-border/50 flex flex-col items-center justify-center gap-1 hover:bg-muted/20 transition-colors"
+            onClick={() => setIsDrawerOpen(true)}
+            disabled={isProcessing}
+            className="aspect-square rounded-xl border-2 border-dashed border-border/50 flex flex-col items-center justify-center gap-1 hover:bg-muted/20 transition-colors disabled:opacity-50"
           >
             <CameraIcon size={24} className="text-muted-foreground" />
             <span className="text-xs text-muted-foreground">추가</span>
@@ -114,15 +138,21 @@ export default function ImageUploader({
         )}
       </div>
 
-      {/* 숨겨진 파일 input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept={ACCEPTED_TYPES.join(',')}
-        multiple
-        onChange={handleFileSelect}
-        className="hidden"
+      {/* 이미지 소스 선택 드로어 */}
+      <ImageSourceDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSelectCamera={() => handleSelectSource('camera')}
+        onSelectGallery={() => handleSelectSource('gallery')}
+        isLoading={isProcessing}
       />
+
+      {errorMessage && (
+        <ErrorToast
+          message={errorMessage}
+          onClose={() => setErrorMessage(null)}
+        />
+      )}
     </div>
   );
 }

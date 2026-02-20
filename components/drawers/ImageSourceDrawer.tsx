@@ -15,9 +15,10 @@ interface ImageSourceDrawerProps {
 /**
  * 이미지 소스 선택 드로어
  *
- * 카메라/앨범 선택을 위한 바텀시트
- * - 정사각형 버튼 가로 배치
- * - 취소 버튼 없음 (스와이프/배경 클릭으로 닫기)
+ * 네이티브 ActionSheet 스타일 바텀시트
+ * - 제목 + 설명 헤더
+ * - 세로 리스트 (아이콘 + 텍스트)
+ * - 스와이프/배경 클릭으로 닫기
  */
 export default function ImageSourceDrawer({
   isOpen,
@@ -53,26 +54,35 @@ export default function ImageSourceDrawer({
             <p className="text-sm text-muted-foreground">이미지 처리 중...</p>
           </div>
         ) : (
-          <div className="flex gap-3 p-2">
-            {/* 카메라 버튼 */}
-            <button
-              type="button"
-              onClick={handleSelectCamera}
-              className="flex-1 aspect-square rounded-2xl border-2 border-border bg-muted/50 hover:bg-muted/80 hover:border-primary/50 transition-all flex flex-col items-center justify-center gap-3 active:scale-[0.98]"
-            >
-              <CameraIcon size={40} className="text-muted-foreground" />
-              <span className="text-sm font-medium text-foreground">카메라</span>
-            </button>
+          <div className="space-y-3">
+            {/* 헤더 */}
+            <div className="text-center py-1">
+              <h3 className="text-base font-semibold text-foreground">사진 선택</h3>
+              <p className="text-sm text-muted-foreground mt-1">사진을 어떻게 가져올까요?</p>
+            </div>
 
-            {/* 앨범 버튼 */}
-            <button
-              type="button"
-              onClick={handleSelectGallery}
-              className="flex-1 aspect-square rounded-2xl border-2 border-border bg-muted/50 hover:bg-muted/80 hover:border-primary/50 transition-all flex flex-col items-center justify-center gap-3 active:scale-[0.98]"
-            >
-              <ImageSquareIcon size={40} className="text-muted-foreground" />
-              <span className="text-sm font-medium text-foreground">앨범</span>
-            </button>
+            {/* 옵션 목록 */}
+            <div className="bg-muted/30 rounded-2xl overflow-hidden">
+              <button
+                type="button"
+                onClick={handleSelectCamera}
+                className="w-full flex items-center justify-center gap-3 py-4 px-5 hover:bg-muted/50 active:bg-muted/70 transition-colors"
+              >
+                <CameraIcon size={22} className="text-muted-foreground" />
+                <span className="text-base font-medium text-foreground">카메라로 촬영</span>
+              </button>
+
+              <div className="mx-5 border-t border-border/50" />
+
+              <button
+                type="button"
+                onClick={handleSelectGallery}
+                className="w-full flex items-center justify-center gap-3 py-4 px-5 hover:bg-muted/50 active:bg-muted/70 transition-colors"
+              >
+                <ImageSquareIcon size={22} className="text-muted-foreground" />
+                <span className="text-base font-medium text-foreground">앨범에서 선택</span>
+              </button>
+            </div>
           </div>
         )}
       </ModalBody>
