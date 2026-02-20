@@ -64,7 +64,7 @@ export default function MealCard({
       {/* Row 1: 제목 + 액션 */}
       <div className="flex items-center justify-between px-4 pt-4 pb-1">
         <div className="flex items-center gap-2">
-          <mealConfig.icon size={18} className="text-primary" weight="fill" />
+          <mealConfig.icon size={18} className={mealConfig.color} weight={mealConfig.weight} />
           <span className="font-semibold text-foreground">
             {MEAL_TYPE_LABELS[meal.type]}
           </span>

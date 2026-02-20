@@ -9,7 +9,7 @@ import {
 } from '@/components/routine';
 import { useWorkoutSession } from '@/hooks/routine/useWorkoutSession';
 import { useWorkoutEvent } from '@/hooks/routine/useWorkoutEvent';
-import { useUpdateWorkoutData } from '@/hooks/routine';
+import { useUpdateWorkoutData, useUpdateRoutineEvent } from '@/hooks/routine';
 import { useShowError } from '@/lib/stores/errorStore';
 import { ActiveWorkout, WorkoutComplete } from '@/components/routine/workout';
 import EditableExerciseList from './EditableExerciseList';
@@ -65,13 +65,16 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
   // 편집 모드
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingExercises, setEditingExercises] = useState<WorkoutExercise[]>([]);
+  const [editingTitle, setEditingTitle] = useState('');
   const [isAddExerciseSheetOpen, setIsAddExerciseSheetOpen] = useState(false);
   const updateWorkout = useUpdateWorkoutData();
+  const updateEvent = useUpdateRoutineEvent();
   const showError = useShowError();
 
   const enterEditMode = () => {
-    if (!workoutData) return;
+    if (!workoutData || !event) return;
     setEditingExercises([...workoutData.exercises]);
+    setEditingTitle(event.title);
     setIsEditMode(true);
   };
 
@@ -82,9 +85,15 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
         { id: event.id, data: updatedData, date: event.date, type: event.type },
         { onError: () => showError('운동 저장에 실패했어요') },
       );
+      // 타이틀 변경 시 별도 저장
+      const trimmed = editingTitle.trim();
+      if (trimmed && trimmed !== event.title) {
+        updateEvent.mutate({ id: event.id, data: { title: trimmed } });
+      }
     }
     setIsEditMode(false);
     setEditingExercises([]);
+    setEditingTitle('');
   };
 
   const handleEditSetsChange = (exerciseId: string, sets: WorkoutSet[]) => {
@@ -229,7 +238,7 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
   // ── Phase: Overview (기존 UI) ──
   return (
     <>
-      <div className="space-y-8">
+      <div className="space-y-10">
         {/* 헤더 섹션 */}
         <div>
           <div className="flex items-center justify-between">
@@ -240,7 +249,17 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
             <EventStatusBadge status={event.status} />
           </div>
 
-          {event.rationale && (
+          {isEditMode && (
+            <input
+              type="text"
+              value={editingTitle}
+              onChange={(e) => setEditingTitle(e.target.value)}
+              className="w-full mt-3 text-lg font-semibold text-foreground bg-transparent border-b border-border focus:border-primary focus:outline-none pb-1"
+              placeholder="루틴 제목"
+            />
+          )}
+
+          {!isEditMode && event.rationale && (
             <p className="text-sm text-muted-foreground mt-2">
               {event.rationale}
             </p>

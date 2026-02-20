@@ -1,6 +1,7 @@
 'use client';
 
-import { RoutineEvent, WorkoutExercise } from '@/lib/types/routine';
+import type { RoutineEvent, WorkoutExercise } from '@/lib/types/routine';
+import type { MealData } from '@/lib/types/meal';
 import { TrashIcon } from '@phosphor-icons/react';
 import { getEventIcon, getStatusConfig } from '@/lib/config/eventTheme';
 
@@ -51,11 +52,14 @@ export default function DayEventCard({ event, date, onDelete }: DayEventCardProp
             {event.data && isWorkoutData(event.data) && event.data.exercises.length > 0 && (
               <span>
                 {event.data.exercises.length}개 운동 · {getTotalSets(event.data.exercises)}세트
+                {event.data.estimatedDuration ? ` · 약 ${event.data.estimatedDuration}분` : ''}
+                {event.data.estimatedCaloriesBurned ? ` · ${event.data.estimatedCaloriesBurned}kcal` : ''}
               </span>
             )}
             {event.data && isMealData(event.data) && event.data.meals.length > 0 && (
               <span>
                 {event.data.meals.length}끼 · {event.data.estimatedTotalCalories || event.data.targetCalories || 0}kcal
+                {getMealProtein(event.data) > 0 ? ` · 단백질 ${getMealProtein(event.data)}g` : ''}
               </span>
             )}
             {!event.data && event.rationale && (
@@ -83,4 +87,8 @@ export default function DayEventCard({ event, date, onDelete }: DayEventCardProp
 
 function getTotalSets(exercises: WorkoutExercise[]): number {
   return exercises.reduce((sum, ex) => sum + ex.sets.length, 0);
+}
+
+function getMealProtein(data: MealData): number {
+  return Math.round(data.meals.reduce((sum, m) => sum + (m.totalProtein ?? 0), 0));
 }

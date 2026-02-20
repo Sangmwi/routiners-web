@@ -26,7 +26,7 @@ export default function WeeklyStatsContent({ dateStr }: WeeklyStatsContentProps)
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* 운동/식단 달성률 */}
       <WeeklyStatsSummary stats={stats} />
 

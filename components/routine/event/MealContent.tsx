@@ -8,7 +8,7 @@ import {
   EventStatusBadge,
   EventActionButtons,
 } from '@/components/routine';
-import { useMealEvent } from '@/hooks/routine';
+import { useMealEvent, useUpdateRoutineEvent } from '@/hooks/routine';
 import { CalendarIcon, PencilSimpleIcon, PlusIcon, TrashIcon } from '@phosphor-icons/react';
 import { getEventConfig } from '@/lib/config/theme';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
@@ -56,9 +56,25 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
 
   // ── 편집 모드 ─────────────────────────────────────────────────────────────
   const [isEditMode, setIsEditMode] = useState(false);
+  const [editingTitle, setEditingTitle] = useState('');
+  const updateEvent = useUpdateRoutineEvent();
 
-  const enterEditMode = () => setIsEditMode(true);
-  const exitEditMode = () => setIsEditMode(false);
+  const enterEditMode = () => {
+    if (event) setEditingTitle(event.title);
+    setIsEditMode(true);
+  };
+
+  const exitEditMode = () => {
+    // 타이틀 변경 시 저장
+    if (event) {
+      const trimmed = editingTitle.trim();
+      if (trimmed && trimmed !== event.title) {
+        updateEvent.mutate({ id: event.id, data: { title: trimmed } });
+      }
+    }
+    setIsEditMode(false);
+    setEditingTitle('');
+  };
 
   // ── 추가 드로어 ───────────────────────────────────────────────────────────
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
@@ -192,7 +208,7 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
   // ── 이벤트 존재 ───────────────────────────────────────────────────────────
   return (
     <>
-      <div className="space-y-8">
+      <div className="space-y-10">
         {/* 헤더 섹션 */}
         <div>
           <div className="flex items-center justify-between">
@@ -203,7 +219,17 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
             <EventStatusBadge status={event.status} />
           </div>
 
-          {event.rationale && (
+          {isEditMode && (
+            <input
+              type="text"
+              value={editingTitle}
+              onChange={(e) => setEditingTitle(e.target.value)}
+              className="w-full mt-3 text-lg font-semibold text-foreground bg-transparent border-b border-border focus:border-primary focus:outline-none pb-1"
+              placeholder="식단 제목"
+            />
+          )}
+
+          {!isEditMode && event.rationale && (
             <p className="text-sm text-muted-foreground mt-2">
               {event.rationale}
             </p>

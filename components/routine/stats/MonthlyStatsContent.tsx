@@ -28,7 +28,7 @@ export default function MonthlyStatsContent({ year, month }: MonthlyStatsContent
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* 운동/식단 달성률 */}
       <MonthlyStatsSummary stats={stats} />
 

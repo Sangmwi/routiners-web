@@ -201,6 +201,14 @@ export interface WeeklyStats {
     dayOfWeek: string;
     workout: EventStatus | null;
     meal: EventStatus | null;
+    /** 운동 이벤트 제목 (예: "가슴 + 삼두") */
+    workoutTitle?: string;
+    /** 운동 예상 시간 (분) */
+    workoutDuration?: number;
+    /** 운동 예상 소모 칼로리 */
+    workoutCalories?: number;
+    /** 식단 총 칼로리 */
+    mealCalories?: number;
   }>;
   completedDays: number;
   weekLabel: string;
@@ -230,11 +238,32 @@ export function computeWeeklyStats(
       (e) => e.type === 'meal' && e.date === dateStr,
     );
 
+    let workoutTitle: string | undefined;
+    let workoutDuration: number | undefined;
+    let workoutCalories: number | undefined;
+    if (workoutEvent) {
+      workoutTitle = workoutEvent.title;
+      if (isWorkoutData(workoutEvent.data)) {
+        workoutDuration = workoutEvent.data.estimatedDuration ?? undefined;
+        workoutCalories = workoutEvent.data.estimatedCaloriesBurned ?? undefined;
+      }
+    }
+
+    let mealCalories: number | undefined;
+    if (mealEvent && isMealData(mealEvent.data)) {
+      const nutrients = calculateMealNutrients(mealEvent.data);
+      if (nutrients.calories > 0) mealCalories = nutrients.calories;
+    }
+
     dailyStats.push({
       date: dateStr,
       dayOfWeek: getDayOfWeek(currentDate),
       workout: workoutEvent?.status ?? null,
       meal: mealEvent?.status ?? null,
+      workoutTitle,
+      workoutDuration,
+      workoutCalories,
+      mealCalories,
     });
   }
 

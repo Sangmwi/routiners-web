@@ -1,8 +1,8 @@
 'use client';
 
-import { TodaySection } from './today';
 import { WeeklyOverview } from './weekly';
 import { UpcomingSection } from './upcoming';
+import TodayRoutineCard from '@/components/home/TodayRoutineCard';
 import { CounselorButton } from '@/components/counselor';
 import {
   useWeeklyStatsSuspense,
@@ -17,9 +17,9 @@ import { formatDate } from '@/lib/utils/dateHelpers';
  * 루틴 페이지 메인 콘텐츠
  *
  * 구조:
- * 1. 오늘 섹션 (Hero) - 즉시 행동 가능
- * 2. 이번 주 현황 - 진행 상태 한눈에
- * 3. 다가오는 루틴 - 컴팩트 리스트
+ * 1. 이번 주 현황 - 주간 관점 (최상단)
+ * 2. 오늘 섹션 - 2열 카드 (홈과 동일한 레이아웃)
+ * 3. 다가오는 루틴 - 필터 칩 + 컴팩트 리스트
  * 4. AI 상담 버튼 - 플로팅
  */
 export default function RoutineContent() {
@@ -47,20 +47,20 @@ export default function RoutineContent() {
   const allUpcomingEvents = [...(workoutEvents || []), ...(mealEvents || [])];
 
   return (
-    <div className="space-y-8">
-      {/* 1. 오늘 섹션 */}
-      <TodaySection
+    <div className="space-y-10">
+      {/* 2. 이번 주 현황 (최상단) */}
+      <WeeklyOverview stats={weeklyStats} />
+
+      {/* 1. 오늘 섹션 (2열 카드, 홈과 동일) */}
+      <TodayRoutineCard
         workoutEvent={todayWorkout || null}
         mealEvent={todayMeal || null}
       />
 
-      {/* 2. 이번 주 현황 */}
-      <WeeklyOverview stats={weeklyStats} />
-
-      {/* 3. 다가오는 루틴 */}
+      {/* 3. 다가오는 루틴 (필터 칩 포함) */}
       <UpcomingSection events={allUpcomingEvents} maxItems={5} />
 
-      {/* 4. AI 상담 플로팅 버튼 */}
+      {/* 4. AI 상담 버튼 */}
       <CounselorButton activeConversation={activeConversation} />
     </div>
   );

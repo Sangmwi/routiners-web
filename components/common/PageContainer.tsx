@@ -24,6 +24,7 @@ const SPACING_MAP = {
   tight: 'space-y-4',
   normal: 'space-y-6',
   loose: 'space-y-8',
+  extraLoose: 'space-y-10',
 } as const;
 
 /**

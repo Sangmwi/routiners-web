@@ -1,13 +1,14 @@
 'use client';
 
 import { useCurrentUserProfileSuspense } from '@/hooks/profile';
-import { useWeeklyStatsSuspense } from '@/hooks/routine';
+import { useRoutineEventByDateSuspense } from '@/hooks/routine';
 import { useInBodySummarySuspense, useInBodyRecordsSuspense } from '@/hooks/inbody/queries';
 import { useProgressSummarySuspense } from '@/hooks/progress';
+import { formatDate } from '@/lib/utils/dateHelpers';
 import GreetingSection from '@/components/home/GreetingSection';
-import RoutineMiniCard from '@/components/home/RoutineMiniCard';
-import Big3LiftCard from '@/components/home/Big3LiftCard';
-import InBodyMiniCard from '@/components/home/InBodyMiniCard';
+import TodayRoutineCard from '@/components/home/TodayRoutineCard';
+import InBodySection from '@/components/home/InBodySection';
+import Big3Section from '@/components/home/Big3Section';
 import SectionHeader from '@/components/ui/SectionHeader';
 import ProductSlider from '@/components/home/ProductSlider';
 import InfluencerSlider from '@/components/home/InfluencerSlider';
@@ -47,7 +48,9 @@ const DUMMY_INFLUENCERS: Influencer[] = [
  */
 export default function HomeContent() {
   const { data: user } = useCurrentUserProfileSuspense();
-  const weeklyStats = useWeeklyStatsSuspense();
+  const today = formatDate(new Date());
+  const { data: todayWorkout } = useRoutineEventByDateSuspense(today, 'workout');
+  const { data: todayMeal } = useRoutineEventByDateSuspense(today, 'meal');
   const { data: inbodySummary } = useInBodySummarySuspense();
   const { data: inbodyRecords } = useInBodyRecordsSuspense(12, 0);
   const { data: progressSummary } = useProgressSummarySuspense();
@@ -69,13 +72,20 @@ export default function HomeContent() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <GreetingSection nickname={user?.nickname || '사용자'} />
 
-      {/* 대시보드 미니카드 */}
-      <RoutineMiniCard stats={weeklyStats} />
-      <InBodyMiniCard summary={inbodySummary} history={inbodyRecords} />
-      <Big3LiftCard summary={progressSummary.big3} />
+      {/* 오늘의 루틴 (2열 카드) */}
+      <TodayRoutineCard
+        workoutEvent={todayWorkout || null}
+        mealEvent={todayMeal || null}
+      />
+
+      {/* 인바디 */}
+      <InBodySection summary={inbodySummary} history={inbodyRecords} />
+
+      {/* 3대 운동 */}
+      <Big3Section summary={progressSummary.big3} />
 
       <section>
         <SectionHeader

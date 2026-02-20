@@ -31,7 +31,7 @@ export function MainTabHeader({
   return (
     <div className={`flex items-center justify-between mb-4 ${className}`.trim()}>
       <div>
-        <h1 className="text-xl font-bold text-foreground">{title}</h1>
+        <h1 className="text-md font-bold text-muted-foreground">{title}</h1>
         {subtitle && (
           <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
         )}

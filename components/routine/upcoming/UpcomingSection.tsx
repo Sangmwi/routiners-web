@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import AppLink from '@/components/common/AppLink';
 import { CaretRightIcon, CalendarBlankIcon } from '@phosphor-icons/react';
+import TypeFilterToggle, { type FilterValue } from '@/components/ui/TypeFilterToggle';
 import { UpcomingEventItem } from './UpcomingEventItem';
 import { formatDate } from '@/lib/utils/dateHelpers';
 import type { RoutineEvent } from '@/lib/types/routine';
@@ -13,18 +15,20 @@ interface UpcomingSectionProps {
 
 /**
  * 다가오는 루틴 섹션
+ * - [전체/운동/식단] 필터 칩
  * - 구분선으로 아이템 분리
- * - 간결한 헤더
  */
 export function UpcomingSection({
   events,
   maxItems = 5
 }: UpcomingSectionProps) {
   const today = formatDate(new Date());
+  const [filter, setFilter] = useState<FilterValue>('all');
 
   // 오늘 이후의 이벤트만 필터링하고 날짜순 정렬
   const upcomingEvents = events
     .filter(e => e.date > today)
+    .filter(e => filter === 'all' || e.type === filter)
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(0, maxItems);
 
@@ -42,6 +46,11 @@ export function UpcomingSection({
           캘린더
           <CaretRightIcon size={16} weight="bold" />
         </AppLink>
+      </div>
+
+      {/* 필터 */}
+      <div className="mb-4">
+        <TypeFilterToggle value={filter} onChange={setFilter} />
       </div>
 
       {/* 이벤트 리스트 */}

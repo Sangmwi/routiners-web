@@ -1,48 +1,5 @@
-'use client';
-
-import type { EventType } from '@/lib/types/routine';
-
-type FilterValue = EventType | 'all';
-
-interface TypeFilterToggleProps {
-  /** 현재 선택된 필터 */
-  value: FilterValue;
-  /** 필터 변경 핸들러 */
-  onChange: (type: FilterValue) => void;
-}
-
-const filterOptions: { value: FilterValue; label: string }[] = [
-  { value: 'all', label: '전체' },
-  { value: 'workout', label: '운동' },
-  { value: 'meal', label: '식단' },
-];
-
 /**
- * 캘린더 타입 필터 토글
- *
- * - 전체 / 운동 / 식단 필터
- * - URL 파라미터와 연동
+ * @deprecated '@/components/ui/TypeFilterToggle'에서 직접 import하세요.
+ * 하위 호환성을 위해 re-export합니다.
  */
-export default function TypeFilterToggle({
-  value,
-  onChange,
-}: TypeFilterToggleProps) {
-  return (
-    <div className="flex gap-2">
-      {filterOptions.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          onClick={() => onChange(option.value)}
-          className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
-            value === option.value
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-          }`}
-        >
-          {option.label}
-        </button>
-      ))}
-    </div>
-  );
-}
+export { default, type FilterValue } from '@/components/ui/TypeFilterToggle';

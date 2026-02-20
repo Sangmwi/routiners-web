@@ -116,7 +116,7 @@ function EventDot({
 }) {
   const statusConfig = getStatusConfig(status);
   const Icon = getEventIcon(type);
-  return <Icon className={`w-2.5 h-2.5 ${statusConfig.iconClass}`} />;
+  return <Icon className={`w-3.5 h-3.5 ${statusConfig.iconClass}`} />;
 }
 
 // 캘린더 날짜 데이터 생성
