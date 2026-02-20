@@ -9,6 +9,7 @@ import {
   EventType,
   WorkoutData,
 } from '@/lib/types/routine';
+import type { MealData } from '@/lib/types/meal';
 import type { MealBatchCreateData } from '@/lib/types/unitMeal';
 import { queryKeys } from '@/lib/constants/queryKeys';
 import { routineEventApi } from '@/lib/api/routineEvent';
@@ -190,6 +191,57 @@ export function useUpdateWorkoutData() {
 
     onError: (error, _vars, context) => {
       console.error('[RoutineEvent] Workout data update failed:', error);
+      if (context?.previousEvent) {
+        updateEventCache(queryClient, context.previousEvent);
+      }
+    },
+  });
+}
+
+/**
+ * 식단 데이터 업데이트 Mutation
+ *
+ * useUpdateWorkoutData와 동일한 낙관적 업데이트 패턴
+ *
+ * @example
+ * const updateMeal = useUpdateMealData();
+ * updateMeal.mutate({ id: 'event-id', data: mealData, date: '2026-02-21', type: 'meal' });
+ */
+export function useUpdateMealData() {
+  const queryClient = useQueryClient();
+
+  type Vars = { id: string; data: MealData; date: string; type: EventType };
+
+  return useMutation({
+    mutationFn: ({ id, data }: Vars) =>
+      routineEventApi.updateEvent(id, { data }),
+
+    onMutate: async ({ id, data, date, type }: Vars) => {
+      const byDateKey = queryKeys.routineEvent.byDate(date, type);
+      const detailKey = queryKeys.routineEvent.detail(id);
+
+      await queryClient.cancelQueries({ queryKey: byDateKey });
+      await queryClient.cancelQueries({ queryKey: detailKey });
+
+      const previousEvent =
+        queryClient.getQueryData<RoutineEvent>(byDateKey) ??
+        queryClient.getQueryData<RoutineEvent>(detailKey);
+
+      if (previousEvent) {
+        const optimistic = { ...previousEvent, data };
+        queryClient.setQueryData(byDateKey, optimistic);
+        queryClient.setQueryData(detailKey, optimistic);
+      }
+
+      return { previousEvent };
+    },
+
+    onSuccess: (updatedEvent) => {
+      updateEventCache(queryClient, updatedEvent);
+    },
+
+    onError: (error, _vars, context) => {
+      console.error('[RoutineEvent] Meal data update failed:', error);
       if (context?.previousEvent) {
         updateEventCache(queryClient, context.previousEvent);
       }

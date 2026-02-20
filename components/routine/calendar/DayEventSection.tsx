@@ -7,11 +7,12 @@ import { useRoutineEventByDateSuspense, useDeleteRoutineEvent } from '@/hooks/ro
 import { useConfirmDialog } from '@/lib/stores/modalStore';
 import type { EventType } from '@/lib/types/routine';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
-import { BarbellIcon, BuildingsIcon, ForkKnifeIcon, RobotIcon, PlusIcon } from '@phosphor-icons/react';
-import Modal, { ModalBody } from '@/components/ui/Modal';
+import { BarbellIcon, ForkKnifeIcon, PlusIcon } from '@phosphor-icons/react';
 import AddWorkoutSheet from '@/components/routine/sheets/AddWorkoutSheet';
 import AddMealSheet from '@/components/routine/sheets/AddMealSheet';
 import ImportUnitMealSheet from '@/components/routine/sheets/ImportUnitMealSheet';
+import MealAddDrawer, { type MealAddOption } from '@/components/routine/meal/MealAddDrawer';
+import WorkoutAddDrawer, { type WorkoutAddOption } from '@/components/routine/workout/WorkoutAddDrawer';
 
 type FilterType = EventType | 'all';
 
@@ -24,17 +25,15 @@ interface DayEventSectionProps {
  * 선택된 날짜의 이벤트 섹션 (Suspense 내부)
  *
  * - 운동/식단 독립 섹션으로 표시
- * - 없는 타입에만 AI/직접 추가 드로어 노출
- * - 날짜/필터 변경 시 이 영역만 로딩
+ * - 운동 빈 상태: AI 상담 / 직접 추가
+ * - 식단 빈 상태: 부대 식단 불러오기 / AI 추천 / 직접 입력 (MealAddDrawer)
  */
 export default function DayEventSection({ date, filterType }: DayEventSectionProps) {
   const router = useRouter();
 
-  // Suspense 쿼리: 선택된 날짜의 이벤트들
   const { data: workoutEvent } = useRoutineEventByDateSuspense(date, 'workout');
   const { data: mealEvent } = useRoutineEventByDateSuspense(date, 'meal');
 
-  // 삭제
   const deleteEvent = useDeleteRoutineEvent();
   const confirm = useConfirmDialog();
 
@@ -54,25 +53,33 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
     });
   };
 
-  // AI/직접 추가 드로어
-  const [drawerType, setDrawerType] = useState<'workout' | 'meal' | null>(null);
-  // 직접 추가 시트
-  const [activeSheet, setActiveSheet] = useState<'workout' | 'meal' | null>(null);
+  // 운동 드로어 (WorkoutAddDrawer)
+  const [isWorkoutDrawerOpen, setIsWorkoutDrawerOpen] = useState(false);
+  const [activeWorkoutSheet, setActiveWorkoutSheet] = useState(false);
 
-  const handleAI = () => {
-    setDrawerType(null);
-    router.push('/routine/counselor');
+  const handleWorkoutOption = (option: WorkoutAddOption) => {
+    setIsWorkoutDrawerOpen(false);
+    if (option === 'ai') {
+      router.push('/routine/counselor');
+    } else {
+      setActiveWorkoutSheet(true);
+    }
   };
 
-  const handleManual = (type: 'workout' | 'meal') => {
-    setDrawerType(null);
-    setActiveSheet(type);
-  };
-
+  // 식단 드로어 (MealAddDrawer)
+  const [isMealDrawerOpen, setIsMealDrawerOpen] = useState(false);
+  const [isMealSheetOpen, setIsMealSheetOpen] = useState(false);
   const [isImportSheetOpen, setIsImportSheetOpen] = useState(false);
-  const handleImportUnit = () => {
-    setDrawerType(null);
-    setIsImportSheetOpen(true);
+
+  const handleMealOption = (option: MealAddOption) => {
+    setIsMealDrawerOpen(false);
+    if (option === 'ai') {
+      router.push('/routine/counselor');
+    } else if (option === 'direct') {
+      setIsMealSheetOpen(true);
+    } else {
+      setIsImportSheetOpen(true);
+    }
   };
 
   const handleCreated = (type: 'workout' | 'meal') => {
@@ -100,7 +107,7 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
           ) : (
             <button
               type="button"
-              onClick={() => setDrawerType('workout')}
+              onClick={() => setIsWorkoutDrawerOpen(true)}
               className="w-full flex items-center gap-4 px-2 py-5 active:bg-muted/20 transition-colors rounded-xl"
             >
               <BarbellIcon size={28} weight="duotone" className="text-muted-foreground/50 shrink-0" />
@@ -125,7 +132,7 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
           ) : (
             <button
               type="button"
-              onClick={() => setDrawerType('meal')}
+              onClick={() => setIsMealDrawerOpen(true)}
               className="w-full flex items-center gap-4 px-2 py-5 active:bg-muted/20 transition-colors rounded-xl"
             >
               <ForkKnifeIcon size={28} weight="duotone" className="text-muted-foreground/50 shrink-0" />
@@ -141,68 +148,30 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
         )}
       </div>
 
-      {/* AI / 직접 추가 선택 드로어 */}
-      <Modal
-        isOpen={!!drawerType}
-        onClose={() => setDrawerType(null)}
-        position="bottom"
-        enableSwipe
-        height="auto"
-        showCloseButton={false}
-      >
-        <ModalBody className="p-4 pb-safe space-y-3">
-          {drawerType === 'workout' ? (
-            <>
-              <button
-                type="button"
-                onClick={handleAI}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-primary text-primary-foreground"
-              >
-                <RobotIcon size={18} />
-                AI 상담에게 맡기기
-              </button>
-              <button
-                type="button"
-                onClick={() => handleManual('workout')}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-muted/50 text-muted-foreground"
-              >
-                <PlusIcon size={18} weight="bold" />
-                운동 직접 추가
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={handleImportUnit}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-primary text-primary-foreground"
-              >
-                <BuildingsIcon size={18} />
-                부대 식단 불러오기
-              </button>
-              <button
-                type="button"
-                onClick={() => handleManual('meal')}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-muted/50 text-muted-foreground"
-              >
-                <PlusIcon size={18} weight="bold" />
-                식단 직접 입력
-              </button>
-            </>
-          )}
-        </ModalBody>
-      </Modal>
+      {/* 운동: AI / 직접 추가 드로어 */}
+      <WorkoutAddDrawer
+        isOpen={isWorkoutDrawerOpen}
+        onClose={() => setIsWorkoutDrawerOpen(false)}
+        onSelect={handleWorkoutOption}
+      />
 
-      {/* 등록 바텀시트 */}
+      {/* 식단: 부대 식단 / AI / 직접 입력 드로어 */}
+      <MealAddDrawer
+        isOpen={isMealDrawerOpen}
+        onClose={() => setIsMealDrawerOpen(false)}
+        onSelect={handleMealOption}
+      />
+
+      {/* 시트 */}
       <AddWorkoutSheet
-        isOpen={activeSheet === 'workout'}
-        onClose={() => setActiveSheet(null)}
+        isOpen={activeWorkoutSheet}
+        onClose={() => setActiveWorkoutSheet(false)}
         date={date}
         onCreated={() => handleCreated('workout')}
       />
       <AddMealSheet
-        isOpen={activeSheet === 'meal'}
-        onClose={() => setActiveSheet(null)}
+        isOpen={isMealSheetOpen}
+        onClose={() => setIsMealSheetOpen(false)}
         date={date}
         onCreated={() => handleCreated('meal')}
       />

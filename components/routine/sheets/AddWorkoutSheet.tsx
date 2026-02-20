@@ -352,15 +352,18 @@ export default function AddWorkoutSheet({ isOpen, onClose, date, onCreated }: Ad
             </div>
           )}
 
-          {/* 카테고리별 빠른 선택 (검색어 없을 때) */}
-          {!query && exercises.length === 0 && (
-            <div className="max-h-60 overflow-y-auto rounded-xl border border-border/50 divide-y divide-border/30">
-              {searchResults.slice(0, 15).map((item) => (
+          {/* 카테고리별 빠른 선택 (검색어 없을 때 항상 표시, 추가된 항목 있으면 높이 축소) */}
+          {!query && (
+            <div className={`overflow-y-auto rounded-xl border border-border/50 divide-y divide-border/30 ${
+              exercises.length === 0 ? 'max-h-72' : 'max-h-44'
+            }`}>
+              {searchResults.slice(0, 20).map((item) => (
                 <button
                   key={item.id}
                   type="button"
+                  disabled={selectedNames.has(item.name)}
                   onClick={() => handleAddExercise(item)}
-                  className="w-full flex items-center justify-between px-3 py-2.5 text-left"
+                  className="w-full flex items-center justify-between px-3 py-2.5 text-left disabled:opacity-40"
                 >
                   <div>
                     <span className="text-sm font-medium">{item.name}</span>

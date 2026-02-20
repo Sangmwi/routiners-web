@@ -250,10 +250,16 @@ export default function ImportUnitMealSheet({
   const selectedUnit = UNITS.find((u) => u.id === selectedUnitId);
 
   // 날짜 관련 계산
-  const allDates = getDateRange(startDate, endDate);
+  // endDate를 렌더 시점에 클램핑 → startDate 변경 직후 useEffect 보정 전 깜빡임 방지
+  const maxEnd = formatDate(addDays(parseDate(startDate), maxDays - 1));
+  const effectiveEndDate =
+    endDate < startDate ? startDate :
+    endDate > maxEnd    ? maxEnd    :
+    endDate;
+  const allDates = getDateRange(startDate, effectiveEndDate);
   const newDates = allDates.filter((d) => !existingMealDates.has(d));
   const isRangeValid =
-    startDate <= endDate &&
+    startDate <= effectiveEndDate &&
     startDate >= today &&
     allDates.length <= maxDays;
 
@@ -609,11 +615,6 @@ export default function ImportUnitMealSheet({
                 )}
               </div>
 
-              {allDates.length > maxDays && (
-                <p className="text-xs text-red-500">
-                  최대 {maxDays}일까지 선택할 수 있어요
-                </p>
-              )}
             </div>
 
             {/* 날짜 목록 */}

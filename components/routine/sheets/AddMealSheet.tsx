@@ -7,14 +7,14 @@ import {
   TrashIcon,
 } from '@phosphor-icons/react';
 import { LoadingSpinner } from '@/components/ui/icons';
-import { useCreateRoutineEvent } from '@/hooks/routine';
+import { useCreateRoutineEvent, useUpdateMealData } from '@/hooks/routine';
 import { useShowError } from '@/lib/stores/errorStore';
 import { useRouter } from 'next/navigation';
 import { searchFoods, FOOD_CATEGORY_LABELS } from '@/lib/data/foods';
 import type { FoodInfo } from '@/lib/data/foods';
 import type { FoodItem, MealType, MealData } from '@/lib/types/meal';
 import { MEAL_TYPE_LABELS } from '@/lib/types/meal';
-import type { RoutineEventCreateData } from '@/lib/types/routine';
+import type { RoutineEvent, RoutineEventCreateData } from '@/lib/types/routine';
 import type { FoodCategory } from '@/lib/types/meal';
 
 // ============================================================================
@@ -26,6 +26,11 @@ interface AddMealSheetProps {
   onClose: () => void;
   date: string;
   onCreated?: () => void;
+  /**
+   * 전달 시 → 기존 이벤트에 끼니를 append (PATCH)
+   * 미전달 시 → 새 이벤트 생성 (POST)
+   */
+  existingEvent?: RoutineEvent;
 }
 
 // ============================================================================
@@ -110,10 +115,11 @@ function FoodItemRow({ food, onRemove }: FoodItemRowProps) {
 // Main Component
 // ============================================================================
 
-export default function AddMealSheet({ isOpen, onClose, date, onCreated }: AddMealSheetProps) {
+export default function AddMealSheet({ isOpen, onClose, date, onCreated, existingEvent }: AddMealSheetProps) {
   const router = useRouter();
   const showError = useShowError();
   const createEvent = useCreateRoutineEvent();
+  const updateMeal = useUpdateMealData();
 
   // 식사 시간 선택
   const [mealType, setMealType] = useState<MealType>('lunch');
@@ -140,20 +146,53 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated }: AddMe
     setFoods((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const resetState = () => {
+    setFoods([]);
+    setQuery('');
+    setMealType('lunch');
+    setCategoryFilter(null);
+  };
+
   const handleSave = () => {
     if (foods.length === 0) return;
 
-    const mealData: MealData = {
-      meals: [
+    const newMeal = {
+      type: mealType,
+      foods,
+      totalCalories: totals.calories,
+      totalProtein: totals.protein,
+      totalCarbs: totals.carbs,
+      totalFat: totals.fat,
+    };
+
+    // ── Update 모드: 기존 이벤트에 끼니 append ────────────────────────────
+    if (existingEvent) {
+      const prevMealData = existingEvent.data as MealData;
+      const updatedMeals = [...(prevMealData.meals ?? []), newMeal];
+      const updatedCalories = updatedMeals.reduce((sum, m) => sum + (m.totalCalories ?? 0), 0);
+      const nextMealData: MealData = {
+        ...prevMealData,
+        meals: updatedMeals,
+        estimatedTotalCalories: updatedCalories,
+      };
+
+      updateMeal.mutate(
+        { id: existingEvent.id, data: nextMealData, date: existingEvent.date, type: existingEvent.type },
         {
-          type: mealType,
-          foods,
-          totalCalories: totals.calories,
-          totalProtein: totals.protein,
-          totalCarbs: totals.carbs,
-          totalFat: totals.fat,
-        },
-      ],
+          onSuccess: () => {
+            onClose();
+            resetState();
+            onCreated?.();
+          },
+          onError: () => showError('식사 추가에 실패했어요'),
+        }
+      );
+      return;
+    }
+
+    // ── Create 모드: 새 이벤트 생성 ──────────────────────────────────────
+    const mealData: MealData = {
+      meals: [newMeal],
       estimatedTotalCalories: totals.calories,
     };
 
@@ -168,10 +207,7 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated }: AddMe
     createEvent.mutate(eventData, {
       onSuccess: () => {
         onClose();
-        setFoods([]);
-        setQuery('');
-        setMealType('lunch');
-        setCategoryFilter(null);
+        resetState();
         router.refresh();
         onCreated?.();
       },
@@ -181,19 +217,17 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated }: AddMe
 
   const handleClose = () => {
     onClose();
-    setFoods([]);
-    setQuery('');
-    setMealType('lunch');
-    setCategoryFilter(null);
+    resetState();
   };
 
+  const isPending = existingEvent ? updateMeal.isPending : createEvent.isPending;
   const foodCategories = Object.entries(FOOD_CATEGORY_LABELS) as [FoodCategory, string][];
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="식단 추가"
+      title={existingEvent ? '식사 추가' : '식단 추가'}
       position="bottom"
       enableSwipe
       height="full"
@@ -296,10 +330,12 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated }: AddMe
             </div>
           )}
 
-          {/* 빠른 선택 (검색어 없을 때, 음식 미선택) */}
-          {!query && foods.length === 0 && (
-            <div className="max-h-60 overflow-y-auto rounded-xl border border-border/50 divide-y divide-border/30">
-              {searchResults.slice(0, 15).map((item) => (
+          {/* 빠른 선택 (검색어 없을 때 항상 표시, 추가된 항목 있으면 높이 축소) */}
+          {!query && (
+            <div className={`overflow-y-auto rounded-xl border border-border/50 divide-y divide-border/30 ${
+              foods.length === 0 ? 'max-h-80' : 'max-h-32'
+            }`}>
+              {searchResults.slice(0, 20).map((item) => (
                 <button
                   key={item.id}
                   type="button"
@@ -327,9 +363,9 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated }: AddMe
             {/* 영양소 요약 */}
             <div className="bg-muted/20 rounded-xl p-4 flex justify-around">
               <NutritionChip label="칼로리" value={totals.calories} unit="kcal" color="text-orange-500" />
-              <NutritionChip label="단백질" value={totals.protein} unit="g" color="text-blue-500" />
-              <NutritionChip label="탄수화물" value={totals.carbs} unit="g" color="text-green-500" />
-              <NutritionChip label="지방" value={totals.fat} unit="g" color="text-yellow-500" />
+              <NutritionChip label="단백질" value={totals.protein} unit="g" color="text-foreground" />
+              <NutritionChip label="탄수화물" value={totals.carbs} unit="g" color="text-foreground" />
+              <NutritionChip label="지방" value={totals.fat} unit="g" color="text-foreground" />
             </div>
 
             {/* 음식 리스트 */}
@@ -356,11 +392,11 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated }: AddMe
         <button
           type="button"
           onClick={handleSave}
-          disabled={foods.length === 0 || createEvent.isPending}
+          disabled={foods.length === 0 || isPending}
           className="w-full py-3.5 rounded-xl font-medium bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          {createEvent.isPending && <LoadingSpinner size="sm" variant="current" />}
-          {createEvent.isPending ? '저장 중...' : '저장하기'}
+          {isPending && <LoadingSpinner size="sm" variant="current" />}
+          {isPending ? '저장 중...' : '저장하기'}
         </button>
       </div>
     </Modal>

@@ -2,29 +2,21 @@
 
 import { useRouter } from 'next/navigation';
 import EmptyState from '@/components/common/EmptyState';
-import { useShowError } from '@/lib/stores/errorStore';
 import {
   MealCard,
   NutritionSummary,
   EventStatusBadge,
   EventActionButtons,
 } from '@/components/routine';
-import {
-  useRoutineEventByDateSuspense,
-  useCompleteRoutineEvent,
-  useSkipRoutineEvent,
-  useDeleteRoutineEvent,
-  useUpdateRoutineEvent,
-} from '@/hooks/routine';
-import type { MealData } from '@/lib/types/meal';
-import { BuildingsIcon, CalendarIcon, PlusIcon, RobotIcon, TrashIcon } from '@phosphor-icons/react';
+import { useMealEvent } from '@/hooks/routine';
+import { CalendarIcon, PencilSimpleIcon, PlusIcon, TrashIcon } from '@phosphor-icons/react';
 import { getEventConfig } from '@/lib/config/theme';
-import { isMealData } from '@/lib/types/guards';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 import { useState, useEffect, useRef, type ReactNode } from 'react';
 import { useConfirmDialog } from '@/lib/stores/modalStore';
 import AddMealSheet from '@/components/routine/sheets/AddMealSheet';
 import ImportUnitMealSheet from '@/components/routine/sheets/ImportUnitMealSheet';
+import MealAddDrawer, { type MealAddOption } from '@/components/routine/meal/MealAddDrawer';
 
 // ============================================================
 // Content Component (Suspense 내부)
@@ -38,49 +30,112 @@ interface MealContentProps {
 /**
  * 식단 상세 콘텐츠 (Suspense 내부)
  *
- * - useSuspenseQuery로 식단 이벤트 조회
- * - 상위 page.tsx의 DetailLayout에서 Header + Suspense 처리
+ * - useMealEvent 훅으로 비즈니스 로직 분리
+ * - 편집 모드: 개별 끼니 삭제
+ * - 단일 "식사 추가" 진입점 → MealAddDrawer (부대 식단 / AI / 직접 입력)
  */
 export default function MealContent({ date, onHeaderAction }: MealContentProps) {
   const router = useRouter();
-  const showError = useShowError();
   const confirm = useConfirmDialog();
 
-  // Suspense 버전 - { data } 구조분해 (null 가능)
-  const { data: event } = useRoutineEventByDateSuspense(date, 'meal');
+  const {
+    event,
+    mealData,
+    handleDelete,
+    handleComplete,
+    handleSkip,
+    handleMealToggle,
+    handleRemoveMeal,
+    isUpdating,
+    isCompleting,
+    isSkipping,
+  } = useMealEvent(date);
 
-  // 완료/건너뛰기/업데이트 뮤테이션
-  const completeEvent = useCompleteRoutineEvent();
-  const skipEvent = useSkipRoutineEvent();
-  const deleteEvent = useDeleteRoutineEvent();
-  const updateEvent = useUpdateRoutineEvent();
-
-  // 날짜 포맷 & 이벤트 설정
   const formattedDate = formatKoreanDate(date, { weekday: true });
   const eventConfig = getEventConfig('meal');
 
-  // 식단 데이터 (이벤트 존재 시)
-  const mealData = event && isMealData(event.data) ? event.data : null;
+  // ── 편집 모드 ─────────────────────────────────────────────────────────────
+  const [isEditMode, setIsEditMode] = useState(false);
 
-  // 삭제 핸들러 (ref로 최신 클로저 유지)
-  const handleDeleteRef = useRef(() => {});
-  handleDeleteRef.current = () => {
-    if (!event) return;
+  const enterEditMode = () => setIsEditMode(true);
+  const exitEditMode = () => setIsEditMode(false);
+
+  // ── 추가 드로어 ───────────────────────────────────────────────────────────
+  const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
+  const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
+  const [isImportSheetOpen, setIsImportSheetOpen] = useState(false);
+
+  const handleAddOption = (option: MealAddOption) => {
+    setIsAddDrawerOpen(false);
+    if (option === 'ai') {
+      router.push('/routine/counselor');
+    } else if (option === 'direct') {
+      setIsAddSheetOpen(true);
+    } else {
+      setIsImportSheetOpen(true);
+    }
+  };
+
+  // ── 편집 모드의 끼니 삭제 (confirm) ──────────────────────────────────────
+  const handleRemoveMealWithConfirm = (mealIndex: number) => {
+    const mealLabel = mealData?.meals[mealIndex]
+      ? (['아침', '점심', '저녁', '간식'] as const)[
+          ['breakfast', 'lunch', 'dinner', 'snack'].indexOf(mealData.meals[mealIndex].type)
+        ] ?? '식사'
+      : '식사';
+
     confirm({
-      title: '루틴을 삭제하시겠어요?',
-      message: '삭제하면 되돌릴 수 없어요.',
+      title: `${mealLabel}을(를) 삭제할까요?`,
+      message: '삭제된 식사는 되돌릴 수 없어요.',
       confirmText: '삭제',
-      onConfirm: async () => {
-        await deleteEvent.mutateAsync({ id: event.id, date: event.date, type: event.type });
-        router.back();
-      },
+      onConfirm: () => handleRemoveMeal(mealIndex),
     });
   };
 
-  // 헤더 삭제 아이콘
+  // ── 헤더 액션 (ref로 최신 클로저 유지) ────────────────────────────────────
+  const enterEditModeRef = useRef(enterEditMode);
+  enterEditModeRef.current = enterEditMode;
+  const exitEditModeRef = useRef(exitEditMode);
+  exitEditModeRef.current = exitEditMode;
+  const handleDeleteRef = useRef(handleDelete);
+  handleDeleteRef.current = handleDelete;
+
   useEffect(() => {
     if (!onHeaderAction) return;
-    if (event) {
+    if (!event) {
+      onHeaderAction(null);
+      return;
+    }
+
+    if (isEditMode) {
+      onHeaderAction(
+        <button
+          onClick={() => exitEditModeRef.current()}
+          className="px-3 py-1 text-sm font-medium text-primary"
+        >
+          완료
+        </button>
+      );
+    } else if (event.status === 'scheduled') {
+      onHeaderAction(
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => enterEditModeRef.current()}
+            className="p-1 text-muted-foreground"
+            aria-label="편집"
+          >
+            <PencilSimpleIcon size={20} />
+          </button>
+          <button
+            onClick={() => handleDeleteRef.current()}
+            className="p-1 text-muted-foreground"
+            aria-label="삭제"
+          >
+            <TrashIcon size={20} />
+          </button>
+        </div>
+      );
+    } else {
       onHeaderAction(
         <button
           onClick={() => handleDeleteRef.current()}
@@ -90,69 +145,10 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
           <TrashIcon size={20} />
         </button>
       );
-    } else {
-      onHeaderAction(null);
     }
-  }, [event?.id, onHeaderAction]);
+  }, [event?.id, event?.status, isEditMode, onHeaderAction]);
 
-  // 개별 식사 완료 토글
-  const handleMealToggle = (mealIndex: number) => {
-    if (!event || !mealData || event.status !== 'scheduled') return;
-
-    const updatedMeals = mealData.meals.map((meal, i) =>
-      i === mealIndex ? { ...meal, completed: !meal.completed } : meal
-    );
-    const updatedMealData: MealData = { ...mealData, meals: updatedMeals };
-    const allCompleted = updatedMeals.every((m) => m.completed);
-
-    updateEvent.mutate(
-      { id: event.id, data: { data: updatedMealData } },
-      {
-        onSuccess: () => {
-          if (allCompleted) {
-            completeEvent.mutate(event.id, {
-              onError: () => showError('식단 완료 처리에 실패했어요'),
-            });
-          }
-        },
-        onError: () => showError('식사 완료 처리에 실패했어요'),
-      },
-    );
-  };
-
-  // 전체 완료 처리 (모든 식사 completed 후 day-level 완료)
-  const handleComplete = () => {
-    if (!event || !mealData) return;
-
-    const updatedMeals = mealData.meals.map((m) => ({ ...m, completed: true }));
-    const updatedMealData: MealData = { ...mealData, meals: updatedMeals };
-
-    updateEvent.mutate(
-      { id: event.id, data: { data: updatedMealData } },
-      {
-        onSuccess: () => {
-          completeEvent.mutate(event.id, {
-            onError: () => showError('식단 완료에 실패했어요'),
-          });
-        },
-        onError: () => showError('식단 완료에 실패했어요'),
-      },
-    );
-  };
-
-  // 건너뛰기 처리
-  const handleSkip = () => {
-    if (!event) return;
-    skipEvent.mutate(event.id, {
-      onError: () => showError('식단 스킵에 실패했어요'),
-    });
-  };
-
-  // 바텀시트 상태
-  const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
-  const [isImportSheetOpen, setIsImportSheetOpen] = useState(false);
-
-  // 이벤트 없음 (예정된 식단 없음)
+  // ── 이벤트 없음 ───────────────────────────────────────────────────────────
   if (!event) {
     return (
       <>
@@ -163,23 +159,22 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
             showIconBackground
             size="lg"
           />
-          <div className="flex flex-col gap-3 mt-6 px-4">
+          <div className="mt-6 px-4">
             <button
-              onClick={() => setIsImportSheetOpen(true)}
+              onClick={() => setIsAddDrawerOpen(true)}
               className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-primary text-primary-foreground"
             >
-              <BuildingsIcon size={18} />
-              부대 식단 불러오기
-            </button>
-            <button
-              onClick={() => setIsAddSheetOpen(true)}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-muted/50 text-muted-foreground"
-            >
               <PlusIcon size={18} weight="bold" />
-              식단 직접 입력
+              식단 추가하기
             </button>
           </div>
         </div>
+
+        <MealAddDrawer
+          isOpen={isAddDrawerOpen}
+          onClose={() => setIsAddDrawerOpen(false)}
+          onSelect={handleAddOption}
+        />
         <AddMealSheet
           isOpen={isAddSheetOpen}
           onClose={() => setIsAddSheetOpen(false)}
@@ -194,27 +189,25 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
     );
   }
 
+  // ── 이벤트 존재 ───────────────────────────────────────────────────────────
   return (
     <>
       <div className="space-y-8">
         {/* 헤더 섹션 */}
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-sm text-muted-foreground">{formattedDate}</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <eventConfig.icon size={18} className={eventConfig.color} weight="fill" />
+              <p className="text-sm text-muted-foreground">{formattedDate}</p>
+            </div>
             <EventStatusBadge status={event.status} />
           </div>
 
-          <div className="flex items-center gap-3">
-            <eventConfig.icon size={28} className={eventConfig.color} weight="fill" />
-            <div className="flex-1">
-              <h1 className="text-xl font-bold text-foreground">{event.title}</h1>
-              {event.rationale && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  {event.rationale}
-                </p>
-              )}
-            </div>
-          </div>
+          {event.rationale && (
+            <p className="text-sm text-muted-foreground mt-2">
+              {event.rationale}
+            </p>
+          )}
         </div>
 
         {/* 영양소 요약 */}
@@ -227,54 +220,68 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
               <h2 className="text-lg font-semibold text-foreground">
                 식사 목록 ({mealData.meals.length}끼)
               </h2>
-              {event.status === 'scheduled' && mealData.meals.some((m) => m.completed) && (
+              {!isEditMode && event.status === 'scheduled' && mealData.meals.some((m) => m.completed) && (
                 <p className="text-xs text-muted-foreground">
                   {mealData.meals.filter((m) => m.completed).length}/{mealData.meals.length}끼 완료
                 </p>
               )}
             </div>
+
             <div className="space-y-3">
               {mealData.meals.map((meal, index) => (
-                <MealCard
-                  key={`${meal.type}-${index}`}
-                  meal={meal}
-                  isCompleted={event.status === 'completed'}
-                  showCompletionToggle={event.status === 'scheduled'}
-                  onToggleComplete={() => handleMealToggle(index)}
-                />
+                <div key={`${meal.type}-${index}`} className="relative">
+                  <MealCard
+                    meal={meal}
+                    isCompleted={event.status === 'completed'}
+                    showCompletionToggle={!isEditMode && event.status === 'scheduled'}
+                    onToggleComplete={() => handleMealToggle(index)}
+                  />
+                  {/* 편집 모드: 삭제 버튼 */}
+                  {isEditMode && mealData.meals.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveMealWithConfirm(index)}
+                      className="absolute top-3 right-3 p-1.5 rounded-lg bg-destructive/10 text-destructive"
+                      aria-label="끼니 삭제"
+                    >
+                      <TrashIcon size={16} />
+                    </button>
+                  )}
+                </div>
               ))}
             </div>
-          </div>
-        ) : (
-          <div className="bg-muted/50 rounded-xl p-6 text-center">
-            <p className="text-muted-foreground">상세 식단 정보가 없어요.</p>
-          </div>
-        )}
 
-        {/* 식단 보충 */}
-        {event.status === 'scheduled' && (
-          <div className="space-y-3">
-            <h2 className="text-lg font-semibold text-foreground">식단 보충하기</h2>
-            <div className="flex gap-2">
+            {/* 식사 추가 버튼 (scheduled & 편집 모드 아닐 때) */}
+            {event.status === 'scheduled' && !isEditMode && (
               <button
-                onClick={() => router.push('/routine/counselor')}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-medium bg-primary text-primary-foreground text-sm"
-              >
-                <RobotIcon size={16} />
-                AI 보충 추천
-              </button>
-              <button
-                onClick={() => setIsAddSheetOpen(true)}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-medium bg-muted/50 text-muted-foreground text-sm"
+                type="button"
+                onClick={() => setIsAddDrawerOpen(true)}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-border text-sm text-muted-foreground"
               >
                 <PlusIcon size={16} weight="bold" />
-                직접 추가
+                식사 추가
               </button>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="bg-muted/50 rounded-xl p-6 text-center">
+              <p className="text-muted-foreground">상세 식단 정보가 없어요.</p>
             </div>
+            {event.status === 'scheduled' && (
+              <button
+                type="button"
+                onClick={() => setIsAddDrawerOpen(true)}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-border text-sm text-muted-foreground"
+              >
+                <PlusIcon size={16} weight="bold" />
+                식사 추가
+              </button>
+            )}
           </div>
         )}
 
-        {/* 추가 정보 */}
+        {/* 메모 */}
         {mealData?.notes && (
           <div className="bg-muted/20 rounded-2xl p-4">
             <h3 className="text-sm font-medium text-muted-foreground mb-2">
@@ -285,20 +292,38 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
         )}
       </div>
 
-      {/* 하단 액션 버튼 */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 pb-safe bg-background border-t border-border">
-        <EventActionButtons
-          status={event.status}
-          onComplete={handleComplete}
-          onSkip={handleSkip}
-          isLoading={completeEvent.isPending || skipEvent.isPending || updateEvent.isPending}
-        />
-      </div>
+      {/* 하단 액션 버튼 (편집 모드 아닐 때만) */}
+      {!isEditMode && (
+        <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 pb-safe bg-background border-t border-border">
+          <EventActionButtons
+            status={event.status}
+            onComplete={handleComplete}
+            onSkip={handleSkip}
+            isLoading={isCompleting || isSkipping || isUpdating}
+          />
+        </div>
+      )}
 
-      {/* 직접 추가 시트 (식단 보충용) */}
+      {/* 식사 추가 드로어 (이벤트 있을 때 = 식사 append 모드) */}
+      <MealAddDrawer
+        isOpen={isAddDrawerOpen}
+        onClose={() => setIsAddDrawerOpen(false)}
+        onSelect={handleAddOption}
+        isAppending
+      />
+
+      {/* 직접 입력 시트 (update 모드: existingEvent 전달) */}
       <AddMealSheet
         isOpen={isAddSheetOpen}
         onClose={() => setIsAddSheetOpen(false)}
+        date={date}
+        existingEvent={event}
+      />
+
+      {/* 부대 식단 불러오기 */}
+      <ImportUnitMealSheet
+        isOpen={isImportSheetOpen}
+        onClose={() => setIsImportSheetOpen(false)}
         date={date}
       />
     </>

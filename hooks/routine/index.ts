@@ -13,6 +13,9 @@ export * from './mutations';
 // Cache Utilities
 export { useSeedEventCache } from './useSeedEventCache';
 
+// Event-specific Hooks
+export { useMealEvent } from './useMealEvent';
+
 // Legacy re-export (deprecated - use queries.ts and mutations.ts directly)
 export * from './useRoutineEvents';
 export * from './useWeeklyStats';
