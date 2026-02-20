@@ -22,6 +22,15 @@ import type { CounselorMessagePage } from '@/lib/types/counselor';
 import { queryKeys } from '@/lib/constants/queryKeys';
 import { removeOptimisticMessages } from '../useSendCounselorMessage';
 import { updateCacheWithCompleteData } from './updateMessagesCache';
+import { invalidateEventLists, invalidateAfterRoutineApply } from '@/lib/utils/routineEventCacheHelper';
+
+// AI 도구 중 운동 데이터를 변경하는 도구 목록
+const WORKOUT_MUTATING_TOOLS = new Set([
+  'add_exercise_to_workout',
+  'remove_exercise_from_workout',
+  'reorder_workout_exercises',
+  'update_exercise_sets',
+]);
 
 // =============================================================================
 // Types
@@ -119,6 +128,12 @@ export function createCounselorCallbacks(ctx: CounselorCallbackContext): ChatStr
       if (event.name === 'generate_routine_preview') {
         dispatch({ type: 'CLEAR_ROUTINE_PROGRESS' });
       }
+
+      // 운동 편집 도구 성공 시 routineEvent 캐시 무효화
+      // (AI tool call은 서버에서 직접 DB를 수정하므로 프론트 캐시를 갱신해야 함)
+      if (event.success !== false && WORKOUT_MUTATING_TOOLS.has(event.name)) {
+        invalidateEventLists(queryClient);
+      }
     },
 
     // Phase 13: 이벤트별 refetch 제거
@@ -140,6 +155,8 @@ export function createCounselorCallbacks(ctx: CounselorCallbackContext): ChatStr
 
     onRoutineApplied: (event) => {
       dispatch({ type: 'SET_APPLIED_ROUTINE', event });
+      // AI tool call로 루틴 적용 시 캘린더 + 루틴 목록 + 대화 캐시 무효화
+      invalidateAfterRoutineApply(queryClient, conversationId);
     },
 
     onRoutineProgress: (event) => {
