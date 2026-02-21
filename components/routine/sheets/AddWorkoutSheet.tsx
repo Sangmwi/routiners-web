@@ -11,7 +11,7 @@ import {
 } from '@phosphor-icons/react';
 import { LoadingSpinner } from '@/components/ui/icons';
 import SetValuePicker from '@/components/routine/workout/SetValuePicker';
-import { useCreateRoutineEvent } from '@/hooks/routine';
+import { useCatalogSelection, useCreateRoutineEvent } from '@/hooks/routine';
 import { useSetValuePicker } from '@/hooks/routine/useSetValuePicker';
 import { useShowError } from '@/lib/stores/errorStore';
 import { searchExercises, generateWorkoutTitle, EXERCISE_CATEGORIES } from '@/lib/data/exercises';
@@ -202,14 +202,21 @@ export default function AddWorkoutSheet({ isOpen, onClose, date, onCreated }: Ad
   const createEvent = useCreateRoutineEvent();
 
   // 검색 상태
-  const [query, setQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<ExerciseCategory | null>(null);
 
   // 선택된 운동 목록
   const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
 
   // 검색 결과
-  const searchResults = searchExercises(query, categoryFilter ?? undefined);
+  const {
+    query,
+    setQuery,
+    categoryFilter,
+    setCategoryFilter,
+    searchResults,
+    resetSelection,
+  } = useCatalogSelection<ExerciseCategory, ExerciseInfo>({
+    search: searchExercises,
+  });
 
   // 이미 선택된 운동 이름 Set (중복 추가 방지)
   const selectedNames = new Set(exercises.map((e) => e.name));
@@ -252,8 +259,7 @@ export default function AddWorkoutSheet({ isOpen, onClose, date, onCreated }: Ad
       onSuccess: () => {
         onClose();
         setExercises([]);
-        setQuery('');
-        setCategoryFilter(null);
+        resetSelection();
         onCreated?.();
       },
       onError: () => showError('운동 저장에 실패했어요'),
@@ -263,8 +269,7 @@ export default function AddWorkoutSheet({ isOpen, onClose, date, onCreated }: Ad
   const handleClose = () => {
     onClose();
     setExercises([]);
-    setQuery('');
-    setCategoryFilter(null);
+    resetSelection();
   };
 
   return (

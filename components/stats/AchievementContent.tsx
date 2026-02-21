@@ -1,63 +1,43 @@
 'use client';
 
-import { Suspense, useState, useCallback } from 'react';
-import { BarbellIcon, ForkKnifeIcon, CalendarCheckIcon, FireIcon } from '@phosphor-icons/react';
-import { PulseLoader } from '@/components/ui/PulseLoader';
+import { Suspense } from 'react';
+import {
+  BarbellIcon,
+  CalendarCheckIcon,
+  FireIcon,
+  ForkKnifeIcon,
+} from '@phosphor-icons/react';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
-import PeriodTabs, { type StatsPeriod } from './PeriodTabs';
-import WeeklyProgressChart from './WeeklyProgressChart';
+import { PulseLoader } from '@/components/ui/PulseLoader';
+import {
+  useMonthlyStatsSuspense,
+  useStatsPeriodNavigator,
+  useWeeklyStatsSuspense,
+} from '@/hooks/routine';
+import type { MonthlyStats, WeeklyStats } from '@/hooks/routine';
+import { addDays, formatDate } from '@/lib/utils/dateHelpers';
 import MonthlyProgressChart from './MonthlyProgressChart';
-import { useWeeklyStatsSuspense, useMonthlyStatsSuspense } from '@/hooks/routine';
-import type { WeeklyStats, MonthlyStats } from '@/hooks/routine';
-import { getWeekRange, getMonthRange, addDays, formatDate } from '@/lib/utils/dateHelpers';
+import PeriodTabs from './PeriodTabs';
+import WeeklyProgressChart from './WeeklyProgressChart';
 
-/**
- * 달성 탭 콘텐츠
- *
- * - 완료일 배너
- * - 달성률 카드 2열 (운동/식단)
- * - 일별 현황 (주간) / 주차별 현황 (월간)
- */
+interface ComparisonData {
+  workoutDiff: number;
+  mealDiff: number;
+  label: string;
+}
+
 export default function AchievementContent() {
-  const [period, setPeriod] = useState<StatsPeriod>('weekly');
-  const [weekBaseDate, setWeekBaseDate] = useState(() => new Date());
-  const [monthYear, setMonthYear] = useState(() => ({
-    year: new Date().getFullYear(),
-    month: new Date().getMonth() + 1,
-  }));
-
-  const weekRange = getWeekRange(weekBaseDate);
-  const monthRange = getMonthRange(monthYear.year, monthYear.month);
-  const label = period === 'weekly' ? weekRange.weekLabel : monthRange.monthLabel;
-
-  const today = new Date();
-  const canGoNext = period === 'weekly'
-    ? new Date(weekRange.endDate) < today
-    : (monthYear.year < today.getFullYear() ||
-       (monthYear.year === today.getFullYear() && monthYear.month < today.getMonth() + 1));
-
-  const handlePrev = useCallback(() => {
-    if (period === 'weekly') {
-      setWeekBaseDate((prev) => addDays(prev, -7));
-    } else {
-      setMonthYear((prev) => {
-        if (prev.month === 1) return { year: prev.year - 1, month: 12 };
-        return { ...prev, month: prev.month - 1 };
-      });
-    }
-  }, [period]);
-
-  const handleNext = useCallback(() => {
-    if (!canGoNext) return;
-    if (period === 'weekly') {
-      setWeekBaseDate((prev) => addDays(prev, 7));
-    } else {
-      setMonthYear((prev) => {
-        if (prev.month === 12) return { year: prev.year + 1, month: 1 };
-        return { ...prev, month: prev.month + 1 };
-      });
-    }
-  }, [period, canGoNext]);
+  const {
+    period,
+    setPeriod,
+    monthYear,
+    label,
+    yearLabel,
+    canGoNext,
+    handlePrev,
+    handleNext,
+    weekDateStr,
+  } = useStatsPeriodNavigator('weekly');
 
   return (
     <div>
@@ -65,7 +45,7 @@ export default function AchievementContent() {
         period={period}
         onPeriodChange={setPeriod}
         label={label}
-        yearLabel={period === 'weekly' ? `${weekBaseDate.getFullYear()}년` : undefined}
+        yearLabel={yearLabel}
         onPrev={handlePrev}
         onNext={handleNext}
         canGoNext={canGoNext}
@@ -75,7 +55,7 @@ export default function AchievementContent() {
         <QueryErrorBoundary>
           <Suspense fallback={<PulseLoader />}>
             {period === 'weekly' ? (
-              <WeeklyAchievement dateStr={formatDate(weekBaseDate)} />
+              <WeeklyAchievement dateStr={weekDateStr} />
             ) : (
               <MonthlyAchievement year={monthYear.year} month={monthYear.month} />
             )}
@@ -86,32 +66,27 @@ export default function AchievementContent() {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Weekly Achievement
-// ---------------------------------------------------------------------------
-
 function WeeklyAchievement({ dateStr }: { dateStr: string }) {
   const stats = useWeeklyStatsSuspense(dateStr);
-
-  // 이전 주 데이터 (비교용)
   const prevDateStr = formatDate(addDays(new Date(dateStr), -7));
   const prevStats = useWeeklyStatsSuspense(prevDateStr);
 
   if (!stats || (stats.workout.scheduled === 0 && stats.meal.scheduled === 0)) {
     return (
       <p className="text-muted-foreground text-center py-8">
-        예정된 루틴이 없어요.
+        예정된 루틴이 없습니다.
       </p>
     );
   }
 
-  const comparison = prevStats ? {
-    workoutDiff: stats.workout.completionRate - prevStats.workout.completionRate,
-    mealDiff: stats.meal.completionRate - prevStats.meal.completionRate,
-    label: '지난주',
-  } : undefined;
+  const comparison = prevStats
+    ? {
+        workoutDiff: stats.workout.completionRate - prevStats.workout.completionRate,
+        mealDiff: stats.meal.completionRate - prevStats.meal.completionRate,
+        label: '지난주',
+      }
+    : undefined;
 
-  // Streak: 연속 운동 완료일 (이전 주 + 이번 주 합산, 최대 14일 윈도우)
   const streak = computeWorkoutStreak(
     prevStats ? [...prevStats.dailyStats, ...stats.dailyStats] : stats.dailyStats,
   );
@@ -129,14 +104,8 @@ function WeeklyAchievement({ dateStr }: { dateStr: string }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Monthly Achievement
-// ---------------------------------------------------------------------------
-
 function MonthlyAchievement({ year, month }: { year: number; month: number }) {
   const stats = useMonthlyStatsSuspense(year, month);
-
-  // 이전 월 데이터 (비교용)
   const prevYear = month === 1 ? year - 1 : year;
   const prevMonth = month === 1 ? 12 : month - 1;
   const prevStats = useMonthlyStatsSuspense(prevYear, prevMonth);
@@ -144,16 +113,18 @@ function MonthlyAchievement({ year, month }: { year: number; month: number }) {
   if (!stats || (stats.workout.scheduled === 0 && stats.meal.scheduled === 0)) {
     return (
       <p className="text-muted-foreground text-center py-8">
-        예정된 루틴이 없어요.
+        예정된 루틴이 없습니다.
       </p>
     );
   }
 
-  const comparison = prevStats ? {
-    workoutDiff: stats.workout.completionRate - prevStats.workout.completionRate,
-    mealDiff: stats.meal.completionRate - prevStats.meal.completionRate,
-    label: '지난달',
-  } : undefined;
+  const comparison = prevStats
+    ? {
+        workoutDiff: stats.workout.completionRate - prevStats.workout.completionRate,
+        mealDiff: stats.meal.completionRate - prevStats.meal.completionRate,
+        label: '지난달',
+      }
+    : undefined;
 
   return (
     <div className="space-y-10">
@@ -161,16 +132,6 @@ function MonthlyAchievement({ year, month }: { year: number; month: number }) {
       <MonthlyProgressChart stats={stats} />
     </div>
   );
-}
-
-// ---------------------------------------------------------------------------
-// Achievement Cards (shared between weekly/monthly)
-// ---------------------------------------------------------------------------
-
-interface ComparisonData {
-  workoutDiff: number;
-  mealDiff: number;
-  label: string;
 }
 
 function AchievementCards({
@@ -188,7 +149,6 @@ function AchievementCards({
 
   return (
     <div className="space-y-6">
-      {/* 완료일 배너 */}
       {stats.completedDays > 0 && (
         <div className="flex items-center gap-2 bg-primary/10 rounded-xl px-4 py-3">
           <CalendarCheckIcon size={20} weight="fill" className="text-primary" />
@@ -198,17 +158,13 @@ function AchievementCards({
         </div>
       )}
 
-      {/* 달성률 카드 2열 */}
       <div className="grid grid-cols-2 gap-3">
-        {/* 운동 */}
         <div className="bg-muted/20 rounded-2xl p-4">
           <div className="flex items-center gap-1.5 mb-3">
             <BarbellIcon size={16} weight="fill" className="text-primary" />
             <span className="text-xs font-medium text-muted-foreground">운동</span>
           </div>
-          <p className="text-2xl font-bold text-foreground mb-2">
-            {workout.completionRate}%
-          </p>
+          <p className="text-2xl font-bold text-foreground mb-2">{workout.completionRate}%</p>
           <div className="h-1.5 bg-muted rounded-full overflow-hidden">
             <div
               className="h-full bg-primary rounded-full transition-all duration-300"
@@ -217,7 +173,7 @@ function AchievementCards({
           </div>
           <div className="mt-3 space-y-1">
             <p className="text-[11px] text-muted-foreground">
-              {workoutTotal > 0 ? `${workout.completed}/${workoutTotal}일 완료` : '예정 없음'}
+              {workoutTotal > 0 ? `${workout.completed}/${workoutTotal}개 완료` : '일정 없음'}
             </p>
             {comparison && comparison.workoutDiff !== 0 && (
               <ComparisonBadge diff={comparison.workoutDiff} label={comparison.label} />
@@ -225,15 +181,12 @@ function AchievementCards({
           </div>
         </div>
 
-        {/* 식단 */}
         <div className="bg-muted/20 rounded-2xl p-4">
           <div className="flex items-center gap-1.5 mb-3">
             <ForkKnifeIcon size={16} weight="fill" className="text-primary" />
             <span className="text-xs font-medium text-muted-foreground">식단</span>
           </div>
-          <p className="text-2xl font-bold text-foreground mb-2">
-            {meal.completionRate}%
-          </p>
+          <p className="text-2xl font-bold text-foreground mb-2">{meal.completionRate}%</p>
           <div className="h-1.5 bg-muted rounded-full overflow-hidden">
             <div
               className="h-full bg-primary rounded-full transition-all duration-300"
@@ -242,7 +195,7 @@ function AchievementCards({
           </div>
           <div className="mt-3 space-y-1">
             <p className="text-[11px] text-muted-foreground">
-              {mealTotal > 0 ? `${meal.completed}/${mealTotal}일 완료` : '예정 없음'}
+              {mealTotal > 0 ? `${meal.completed}/${mealTotal}개 완료` : '일정 없음'}
             </p>
             {comparison && comparison.mealDiff !== 0 && (
               <ComparisonBadge diff={comparison.mealDiff} label={comparison.label} />
@@ -259,26 +212,15 @@ function ComparisonBadge({ diff, label }: { diff: number; label: string }) {
   return (
     <span className="text-[10px] font-medium">
       <span className={isPositive ? 'text-positive' : 'text-negative'}>
-        {isPositive ? '▲' : '▼'}{Math.abs(diff)}%
+        {isPositive ? '▲' : '▼'}
+        {Math.abs(diff)}%
       </span>
       <span className="text-muted-foreground"> {label} 대비</span>
     </span>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Streak
-// ---------------------------------------------------------------------------
-
-/**
- * 오늘(또는 가장 최근 과거일)부터 역순으로 연속 운동 완료일 계산
- * - 운동 완료 → streak++
- * - 운동 예정/건너뜀 → break
- * - 운동 없는 날 → skip (휴식일은 streak을 끊지 않음)
- */
-function computeWorkoutStreak(
-  dailyStats: WeeklyStats['dailyStats'],
-): number {
+function computeWorkoutStreak(dailyStats: WeeklyStats['dailyStats']): number {
   const today = formatDate(new Date());
   const days = [...dailyStats].sort((a, b) => b.date.localeCompare(a.date));
 

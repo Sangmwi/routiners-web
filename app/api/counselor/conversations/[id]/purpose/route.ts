@@ -1,218 +1,140 @@
-/**
- * Counselor Active Purpose API
- *
- * GET    /api/counselor/conversations/[id]/purpose - 활성 목적 조회
- * POST   /api/counselor/conversations/[id]/purpose - 활성 목적 설정
- * DELETE /api/counselor/conversations/[id]/purpose - 활성 목적 해제
- */
-
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { withAuth } from '@/utils/supabase/auth';
 import {
+  CounselorConversationMetadata,
   DbCounselorConversation,
   transformDbCounselorConversation,
-  ActivePurpose,
-  CounselorConversationMetadata,
 } from '@/lib/types/counselor';
-import { z } from 'zod';
-
-// ============================================================================
-// Validation
-// ============================================================================
+import { ensureAICounselorConversation } from '@/app/api/_shared/conversation-repo';
+import { jsonError, parseJsonBody, validateBody } from '@/app/api/_shared/route-helpers';
 
 const ActivePurposeSchema = z.object({
-  activePurpose: z.object({
-    type: z.enum(['routine_generation', 'routine_modification', 'quick_routine']),
-    stage: z.enum(['init', 'collecting_info', 'generating', 'reviewing', 'applying']),
-    collectedData: z.record(z.unknown()).default({}),
-    startedAt: z.string().optional(),
-  }).nullable(),
+  activePurpose: z
+    .object({
+      type: z.enum(['routine_generation', 'routine_modification', 'quick_routine']),
+      stage: z.enum(['init', 'collecting_info', 'generating', 'reviewing', 'applying']),
+      collectedData: z.record(z.unknown()).default({}),
+      startedAt: z.string().optional(),
+    })
+    .nullable(),
 });
 
-// ============================================================================
-// GET /api/counselor/conversations/[id]/purpose
-// ============================================================================
+export const GET = withAuth(async (_request: NextRequest, { supabase, params }) => {
+  const { id } = await params;
 
-export const GET = withAuth(
-  async (request: NextRequest, { supabase, params }) => {
-    const { id } = await params;
+  const found = await ensureAICounselorConversation<{ metadata: CounselorConversationMetadata | null }>(
+    supabase,
+    id,
+    'metadata',
+  );
+  if (!found.ok) {
+    return found.response;
+  }
 
-    const { data: conversation, error } = await supabase
-      .from('conversations')
-      .select('metadata')
-      .eq('id', id)
-      .eq('type', 'ai')
-            .is('deleted_at', null)
-      .single();
+  return NextResponse.json({
+    activePurpose: found.conversation.metadata?.activePurpose ?? null,
+  });
+});
 
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return NextResponse.json(
-          { error: '대화를 찾을 수 없습니다.', code: 'NOT_FOUND' },
-          { status: 404 }
-        );
-      }
-      console.error('[Counselor Purpose GET] Error:', error);
-      return NextResponse.json(
-        { error: '조회에 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 }
-      );
-    }
+export const POST = withAuth(async (request: NextRequest, { supabase, params }) => {
+  const { id } = await params;
 
-    const metadata = conversation.metadata as CounselorConversationMetadata | null;
-    return NextResponse.json({
-      activePurpose: metadata?.activePurpose ?? null,
+  const parsed = await parseJsonBody(request);
+  if (!parsed.ok) {
+    return parsed.response;
+  }
+
+  const validated = validateBody(ActivePurposeSchema, parsed.data);
+  if (!validated.ok) {
+    return validated.response;
+  }
+
+  const current = await ensureAICounselorConversation<{ metadata: CounselorConversationMetadata | null }>(
+    supabase,
+    id,
+    'metadata',
+  );
+  if (!current.ok) {
+    return current.response;
+  }
+
+  const { activePurpose } = validated.data;
+  const currentMetadata = current.conversation.metadata || {};
+  const newMetadata: CounselorConversationMetadata = {
+    ...currentMetadata,
+    activePurpose: activePurpose
+      ? {
+          ...activePurpose,
+          startedAt: activePurpose.startedAt || new Date().toISOString(),
+        }
+      : null,
+  };
+
+  const { data: updated, error: updateError } = await supabase
+    .from('conversations')
+    .update({
+      metadata: newMetadata,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (updateError) {
+    console.error('[Counselor Purpose POST] Update Error:', updateError);
+    return jsonError({
+      status: 500,
+      code: 'DATABASE_ERROR',
+      error: '목적 업데이트에 실패했습니다.',
     });
   }
-);
 
-// ============================================================================
-// POST /api/counselor/conversations/[id]/purpose
-// ============================================================================
+  return NextResponse.json(
+    transformDbCounselorConversation(updated as DbCounselorConversation),
+  );
+});
 
-export const POST = withAuth(
-  async (request: NextRequest, { supabase, params }) => {
-    const { id } = await params;
+export const DELETE = withAuth(async (_request: NextRequest, { supabase, params }) => {
+  const { id } = await params;
 
-    let body;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        { error: '잘못된 요청 형식입니다.', code: 'BAD_REQUEST' },
-        { status: 400 }
-      );
-    }
-
-    const validation = ActivePurposeSchema.safeParse(body);
-    if (!validation.success) {
-      return NextResponse.json(
-        {
-          error: '입력값이 유효하지 않습니다.',
-          code: 'VALIDATION_ERROR',
-          details: validation.error.flatten(),
-        },
-        { status: 400 }
-      );
-    }
-
-    const { activePurpose } = validation.data;
-
-    // 현재 메타데이터 조회
-    const { data: current, error: fetchError } = await supabase
-      .from('conversations')
-      .select('metadata')
-      .eq('id', id)
-      .eq('type', 'ai')
-            .is('deleted_at', null)
-      .single();
-
-    if (fetchError) {
-      if (fetchError.code === 'PGRST116') {
-        return NextResponse.json(
-          { error: '대화를 찾을 수 없습니다.', code: 'NOT_FOUND' },
-          { status: 404 }
-        );
-      }
-      console.error('[Counselor Purpose POST] Fetch Error:', fetchError);
-      return NextResponse.json(
-        { error: '조회에 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 }
-      );
-    }
-
-    // 메타데이터 업데이트
-    const currentMetadata = (current.metadata as CounselorConversationMetadata) || {};
-    const newMetadata: CounselorConversationMetadata = {
-      ...currentMetadata,
-      activePurpose: activePurpose
-        ? {
-            ...activePurpose,
-            startedAt: activePurpose.startedAt || new Date().toISOString(),
-          }
-        : null,
-    };
-
-    const { data: updated, error: updateError } = await supabase
-      .from('conversations')
-      .update({
-        metadata: newMetadata,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (updateError) {
-      console.error('[Counselor Purpose POST] Update Error:', updateError);
-      return NextResponse.json(
-        { error: '업데이트에 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json(
-      transformDbCounselorConversation(updated as DbCounselorConversation)
-    );
+  const current = await ensureAICounselorConversation<{ metadata: CounselorConversationMetadata | null }>(
+    supabase,
+    id,
+    'metadata',
+  );
+  if (!current.ok) {
+    return current.response;
   }
-);
 
-// ============================================================================
-// DELETE /api/counselor/conversations/[id]/purpose
-// ============================================================================
+  const currentMetadata =
+    (current.conversation.metadata as CounselorConversationMetadata & {
+      pending_preview?: unknown;
+    }) || {};
+  const restMetadata = { ...currentMetadata };
+  delete restMetadata.activePurpose;
+  delete restMetadata.pending_preview;
 
-export const DELETE = withAuth(
-  async (request: NextRequest, { supabase, params }) => {
-    const { id } = await params;
+  const { data: updated, error: updateError } = await supabase
+    .from('conversations')
+    .update({
+      metadata: { ...restMetadata, activePurpose: null, pending_preview: null },
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .select()
+    .single();
 
-    // 현재 메타데이터 조회
-    const { data: current, error: fetchError } = await supabase
-      .from('conversations')
-      .select('metadata')
-      .eq('id', id)
-      .eq('type', 'ai')
-            .is('deleted_at', null)
-      .single();
-
-    if (fetchError) {
-      if (fetchError.code === 'PGRST116') {
-        return NextResponse.json(
-          { error: '대화를 찾을 수 없습니다.', code: 'NOT_FOUND' },
-          { status: 404 }
-        );
-      }
-      console.error('[Counselor Purpose DELETE] Fetch Error:', fetchError);
-      return NextResponse.json(
-        { error: '조회에 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 }
-      );
-    }
-
-    // activePurpose + pending_preview 제거 (루틴 생성 프로세스 전체 취소)
-    const currentMetadata = (current.metadata as CounselorConversationMetadata) || {};
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { activePurpose: _, pending_preview: __, ...restMetadata } = currentMetadata as CounselorConversationMetadata & { pending_preview?: unknown };
-
-    const { data: updated, error: updateError } = await supabase
-      .from('conversations')
-      .update({
-        metadata: { ...restMetadata, activePurpose: null, pending_preview: null },
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (updateError) {
-      console.error('[Counselor Purpose DELETE] Update Error:', updateError);
-      return NextResponse.json(
-        { error: '업데이트에 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json(
-      transformDbCounselorConversation(updated as DbCounselorConversation)
-    );
+  if (updateError) {
+    console.error('[Counselor Purpose DELETE] Update Error:', updateError);
+    return jsonError({
+      status: 500,
+      code: 'DATABASE_ERROR',
+      error: '목적 삭제에 실패했습니다.',
+    });
   }
-);
+
+  return NextResponse.json(
+    transformDbCounselorConversation(updated as DbCounselorConversation),
+  );
+});

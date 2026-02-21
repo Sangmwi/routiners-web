@@ -1,0 +1,2758 @@
+{
+  "summary": {
+    "files_scanned": 500,
+    "duplicate_groups": 1201,
+    "large_files": 13,
+    "files_with_long_lines": 64
+  },
+  "thresholds": {
+    "window": 6,
+    "large_file_lines": 400,
+    "long_line_length": 140
+  },
+  "large_files": [
+    {
+      "path": "C:/routiners/routiners-web/lib/constants/units.ts",
+      "line_count": 1293
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/routine/sheets/ImportUnitMealSheet.tsx",
+      "line_count": 823
+    },
+    {
+      "path": "C:/routiners/routiners-web/lib/ai/tools.ts",
+      "line_count": 726
+    },
+    {
+      "path": "C:/routiners/routiners-web/hooks/routine/useWorkoutSession.ts",
+      "line_count": 611
+    },
+    {
+      "path": "C:/routiners/routiners-web/lib/ai/executors/routine.ts",
+      "line_count": 434
+    },
+    {
+      "path": "C:/routiners/routiners-web/lib/types/meal.ts",
+      "line_count": 428
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/profile/fitness/FitnessContent.tsx",
+      "line_count": 426
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/routine/sheets/AddMealSheet.tsx",
+      "line_count": 422
+    },
+    {
+      "path": "C:/routiners/routiners-web/lib/types/chat.ts",
+      "line_count": 422
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/profile/edit/ProfilePhotoGallery.tsx",
+      "line_count": 419
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/routine/sheets/AddWorkoutSheet.tsx",
+      "line_count": 414
+    },
+    {
+      "path": "C:/routiners/routiners-web/lib/types/fitness.ts",
+      "line_count": 410
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx",
+      "line_count": 407
+    }
+  ],
+  "long_line_files": [
+    {
+      "path": "C:/routiners/routiners-web/components/home/HomeContent.tsx",
+      "long_line_count": 20,
+      "sample_lines": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/lib/ai/tools.ts",
+      "long_line_count": 8,
+      "sample_lines": [
+        43,
+        75,
+        126,
+        204,
+        451,
+        509,
+        552,
+        656
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/profile/ProfileHeroSection.tsx",
+      "long_line_count": 3,
+      "sample_lines": [
+        122,
+        129,
+        174
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/signup/PassVerificationStep.tsx",
+      "long_line_count": 3,
+      "sample_lines": [
+        53,
+        62,
+        71
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/routine/event/EventActionButtons.tsx",
+      "long_line_count": 3,
+      "sample_lines": [
+        49,
+        59,
+        79
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/routine/event/MealContent.tsx",
+      "long_line_count": 3,
+      "sample_lines": [
+        227,
+        275,
+        291
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/routine/event/WorkoutContent.tsx",
+      "long_line_count": 3,
+      "sample_lines": [
+        257,
+        283,
+        313
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/routine/sheets/AddWorkoutSheet.tsx",
+      "long_line_count": 3,
+      "sample_lines": [
+        70,
+        293,
+        406
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/routine/sheets/ImportUnitMealSheet.tsx",
+      "long_line_count": 3,
+      "sample_lines": [
+        479,
+        792,
+        814
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/app/login/page.tsx",
+      "long_line_count": 2,
+      "sample_lines": [
+        105,
+        130
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/common/BottomNav.tsx",
+      "long_line_count": 2,
+      "sample_lines": [
+        22,
+        32
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/counselor/ChatListDrawer.tsx",
+      "long_line_count": 2,
+      "sample_lines": [
+        100,
+        200
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/home/TodayRoutineCard.tsx",
+      "long_line_count": 2,
+      "sample_lines": [
+        177,
+        308
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/profile/ProfileClient.tsx",
+      "long_line_count": 2,
+      "sample_lines": [
+        78,
+        96
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/profile/ProfileContent.tsx",
+      "long_line_count": 2,
+      "sample_lines": [
+        73,
+        91
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/ui/Button.tsx",
+      "long_line_count": 2,
+      "sample_lines": [
+        26,
+        37
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/profile/edit/ProfilePhotoGallery.tsx",
+      "long_line_count": 2,
+      "sample_lines": [
+        70,
+        129
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/routine/chat/ChatInputRequest.tsx",
+      "long_line_count": 2,
+      "sample_lines": [
+        273,
+        293
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/routine/event/ExerciseCard.tsx",
+      "long_line_count": 2,
+      "sample_lines": [
+        140,
+        262
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/routine/sheets/AddExerciseSheet.tsx",
+      "long_line_count": 2,
+      "sample_lines": [
+        106,
+        204
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/routine/sheets/AddMealSheet.tsx",
+      "long_line_count": 2,
+      "sample_lines": [
+        288,
+        414
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/routine/workout/SetRow.tsx",
+      "long_line_count": 2,
+      "sample_lines": [
+        84,
+        95
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/route.ts",
+      "long_line_count": 1,
+      "sample_lines": [
+        80
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+      "long_line_count": 1,
+      "sample_lines": [
+        194
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/community/SearchBar.tsx",
+      "long_line_count": 1,
+      "sample_lines": [
+        40
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/counselor/ActionChips.tsx",
+      "long_line_count": 1,
+      "sample_lines": [
+        77
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/counselor/CounselorButton.tsx",
+      "long_line_count": 1,
+      "sample_lines": [
+        33
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/inbody/InBodyManageModal.tsx",
+      "long_line_count": 1,
+      "sample_lines": [
+        134
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/inbody/InBodyPreview.tsx",
+      "long_line_count": 1,
+      "sample_lines": [
+        171
+      ]
+    },
+    {
+      "path": "C:/routiners/routiners-web/components/profile/FloatingChatButton.tsx",
+      "long_line_count": 1,
+      "sample_lines": [
+        13
+      ]
+    }
+  ],
+  "duplicate_groups": [
+    {
+      "fingerprint": "c44d62325cbcd9605e394dd8846bc06bcf48a280",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/route.ts",
+          "line": 77
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/route.ts",
+          "line": 81
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/route.ts",
+          "line": 105
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+          "line": 130
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/route.ts",
+          "line": 122
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+          "line": 92
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+          "line": 38
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+          "line": 56
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/route.ts",
+          "line": 77
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+          "line": 31
+        }
+      ],
+      "occurrence_count": 10,
+      "file_count": 10,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/route.ts",
+        "C:/routiners/routiners-web/app/api/conversations/[id]/route.ts",
+        "C:/routiners/routiners-web/app/api/conversations/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "764ca9dcf4d9e5135515bb1fbe85db36cab3bb7b",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/route.ts",
+          "line": 90
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+          "line": 115
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+          "line": 77
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+          "line": 23
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+          "line": 41
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/route.ts",
+          "line": 61
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+          "line": 15
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch-meal/route.ts",
+          "line": 19
+        }
+      ],
+      "occurrence_count": 8,
+      "file_count": 8,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/batch-meal/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "69f248e06d0bb0b24f41df766109749306ea1a45",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/route.ts",
+          "line": 101
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+          "line": 126
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+          "line": 88
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+          "line": 34
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+          "line": 52
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/route.ts",
+          "line": 73
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+          "line": 27
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch-meal/route.ts",
+          "line": 30
+        }
+      ],
+      "occurrence_count": 8,
+      "file_count": 8,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/batch-meal/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "494cd1461f5a161d9dd096b19b2e5f47b235afca",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/route.ts",
+          "line": 102
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+          "line": 127
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+          "line": 89
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+          "line": 35
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+          "line": 53
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/route.ts",
+          "line": 74
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+          "line": 28
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch-meal/route.ts",
+          "line": 31
+        }
+      ],
+      "occurrence_count": 8,
+      "file_count": 8,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/batch-meal/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "7b65f15959459cbcc40eb8d29a28de1a03487064",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/counselor/ChatListDrawer.tsx",
+          "line": 57
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/drawers/ImageSourceDrawer.tsx",
+          "line": 40
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/community/detail/PostMoreMenu.tsx",
+          "line": 48
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/routine/chat/PreviewDetailDrawer.tsx",
+          "line": 70
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/routine/meal/MealAddDrawer.tsx",
+          "line": 40
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/routine/workout/SetValuePicker.tsx",
+          "line": 77
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/routine/workout/WorkoutAddDrawer.tsx",
+          "line": 37
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/routine/workout/WorkoutAISheet.tsx",
+          "line": 39
+        }
+      ],
+      "occurrence_count": 8,
+      "file_count": 8,
+      "files": [
+        "C:/routiners/routiners-web/components/community/detail/PostMoreMenu.tsx",
+        "C:/routiners/routiners-web/components/counselor/ChatListDrawer.tsx",
+        "C:/routiners/routiners-web/components/drawers/ImageSourceDrawer.tsx",
+        "C:/routiners/routiners-web/components/routine/chat/PreviewDetailDrawer.tsx",
+        "C:/routiners/routiners-web/components/routine/meal/MealAddDrawer.tsx",
+        "C:/routiners/routiners-web/components/routine/workout/SetValuePicker.tsx",
+        "C:/routiners/routiners-web/components/routine/workout/WorkoutAISheet.tsx",
+        "C:/routiners/routiners-web/components/routine/workout/WorkoutAddDrawer.tsx"
+      ]
+    },
+    {
+      "fingerprint": "7b21394759015a3f5e2951f337286e6b1621cbae",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/route.ts",
+          "line": 91
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+          "line": 116
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+          "line": 78
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+          "line": 24
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+          "line": 42
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/route.ts",
+          "line": 62
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+          "line": 16
+        }
+      ],
+      "occurrence_count": 7,
+      "file_count": 7,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "16d9f2ba3cd1358297eb82f6990085fb8938dcde",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/route.ts",
+          "line": 92
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+          "line": 117
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+          "line": 79
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+          "line": 25
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+          "line": 43
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/route.ts",
+          "line": 63
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+          "line": 17
+        }
+      ],
+      "occurrence_count": 7,
+      "file_count": 7,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "0b1c271cdf0cbf912b19091cf3b1ae237af6d1c6",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/route.ts",
+          "line": 93
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+          "line": 118
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+          "line": 80
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+          "line": 26
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+          "line": 44
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/route.ts",
+          "line": 64
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+          "line": 18
+        }
+      ],
+      "occurrence_count": 7,
+      "file_count": 7,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "d4c2d4807719f8c9a1bf2fcfec553ce3c9d224a3",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/route.ts",
+          "line": 103
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+          "line": 128
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+          "line": 90
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+          "line": 36
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+          "line": 54
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/route.ts",
+          "line": 75
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+          "line": 29
+        }
+      ],
+      "occurrence_count": 7,
+      "file_count": 7,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "4337b543569fead075770bc4215e05adf8325a88",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/route.ts",
+          "line": 104
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+          "line": 129
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+          "line": 91
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+          "line": 37
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+          "line": 55
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/route.ts",
+          "line": 76
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+          "line": 30
+        }
+      ],
+      "occurrence_count": 7,
+      "file_count": 7,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "71ec3f815e5c413289214e3b8f5b10c2a7469c95",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/stats/BodyStatsTab.tsx",
+          "line": 114
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/WeeklyProgressChart.tsx",
+          "line": 94
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/ui/StepIndicator.tsx",
+          "line": 68
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/community/write/CategorySelector.tsx",
+          "line": 37
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/routine/calendar/CalendarGrid.tsx",
+          "line": 102
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/routine/weekly/WeeklyOverview.tsx",
+          "line": 157
+        }
+      ],
+      "occurrence_count": 6,
+      "file_count": 6,
+      "files": [
+        "C:/routiners/routiners-web/components/community/write/CategorySelector.tsx",
+        "C:/routiners/routiners-web/components/routine/calendar/CalendarGrid.tsx",
+        "C:/routiners/routiners-web/components/routine/weekly/WeeklyOverview.tsx",
+        "C:/routiners/routiners-web/components/stats/BodyStatsTab.tsx",
+        "C:/routiners/routiners-web/components/stats/WeeklyProgressChart.tsx",
+        "C:/routiners/routiners-web/components/ui/StepIndicator.tsx"
+      ]
+    },
+    {
+      "fingerprint": "543a4269b7abc4c25b41ace5e8003c97c65ee553",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/signup/page.tsx",
+          "line": 85
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/profile/ProfileBioSection.tsx",
+          "line": 23
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/profile/ProfileInterestsTags.tsx",
+          "line": 29
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/profile/ProfileLocationsSection.tsx",
+          "line": 30
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/MilitaryFlowContainer.tsx",
+          "line": 175
+        }
+      ],
+      "occurrence_count": 5,
+      "file_count": 5,
+      "files": [
+        "C:/routiners/routiners-web/app/signup/page.tsx",
+        "C:/routiners/routiners-web/components/profile/ProfileBioSection.tsx",
+        "C:/routiners/routiners-web/components/profile/ProfileInterestsTags.tsx",
+        "C:/routiners/routiners-web/components/profile/ProfileLocationsSection.tsx",
+        "C:/routiners/routiners-web/components/signup/military/MilitaryFlowContainer.tsx"
+      ]
+    },
+    {
+      "fingerprint": "e5899c430683e61d6faab8ceec6f5be0bfaa3ddc",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/route.ts",
+          "line": 6
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/active/route.ts",
+          "line": 5
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/route.ts",
+          "line": 6
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/route.ts",
+          "line": 5
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+          "line": 7
+        }
+      ],
+      "occurrence_count": 5,
+      "file_count": 5,
+      "files": [
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/active/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "1673a3b3352ec9fc64c9a995db83d276c458e187",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/stats/MonthlyStatsSummary.tsx",
+          "line": 194
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/NutritionStatsTab.tsx",
+          "line": 213
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/WeeklyStatsSummary.tsx",
+          "line": 193
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/ui/MiniSparkline.tsx",
+          "line": 266
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/routine/meal/NutritionSummary.tsx",
+          "line": 238
+        }
+      ],
+      "occurrence_count": 5,
+      "file_count": 5,
+      "files": [
+        "C:/routiners/routiners-web/components/routine/meal/NutritionSummary.tsx",
+        "C:/routiners/routiners-web/components/stats/MonthlyStatsSummary.tsx",
+        "C:/routiners/routiners-web/components/stats/NutritionStatsTab.tsx",
+        "C:/routiners/routiners-web/components/stats/WeeklyStatsSummary.tsx",
+        "C:/routiners/routiners-web/components/ui/MiniSparkline.tsx"
+      ]
+    },
+    {
+      "fingerprint": "08be0ace56e4172085bbf6811a3905ad938929f6",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+          "line": 38
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+          "line": 177
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+          "line": 59
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+          "line": 70
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx",
+          "line": 57
+        }
+      ],
+      "occurrence_count": 5,
+      "file_count": 5,
+      "files": [
+        "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx"
+      ]
+    },
+    {
+      "fingerprint": "7c3c8a79a0f5b3060e47e9d2e5c16ebd82653f85",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+          "line": 40
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+          "line": 179
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+          "line": 61
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+          "line": 72
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx",
+          "line": 59
+        }
+      ],
+      "occurrence_count": 5,
+      "file_count": 5,
+      "files": [
+        "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx"
+      ]
+    },
+    {
+      "fingerprint": "ef7ba5f11ab74de53367a080e25d25f9aabacaf7",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+          "line": 41
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+          "line": 180
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+          "line": 62
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+          "line": 73
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx",
+          "line": 60
+        }
+      ],
+      "occurrence_count": 5,
+      "file_count": 5,
+      "files": [
+        "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx"
+      ]
+    },
+    {
+      "fingerprint": "8139f3faf38f6ed3cf96a4fe93b1ae3b3ee6d603",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+          "line": 42
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+          "line": 181
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+          "line": 63
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+          "line": 74
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx",
+          "line": 61
+        }
+      ],
+      "occurrence_count": 5,
+      "file_count": 5,
+      "files": [
+        "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx"
+      ]
+    },
+    {
+      "fingerprint": "81271fecfb2ec5f7e092febbb26f00501f7226dd",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+          "line": 43
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+          "line": 182
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+          "line": 64
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+          "line": 75
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx",
+          "line": 62
+        }
+      ],
+      "occurrence_count": 5,
+      "file_count": 5,
+      "files": [
+        "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx"
+      ]
+    },
+    {
+      "fingerprint": "49352215d68f7ba535136737f5407a423a5fef5f",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+          "line": 78
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+          "line": 256
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+          "line": 109
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+          "line": 133
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx",
+          "line": 117
+        }
+      ],
+      "occurrence_count": 5,
+      "file_count": 5,
+      "files": [
+        "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx"
+      ]
+    },
+    {
+      "fingerprint": "9b644f7ed9e784b3b7664d42d7b0987b66fb1be8",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+          "line": 79
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+          "line": 257
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+          "line": 110
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+          "line": 134
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx",
+          "line": 118
+        }
+      ],
+      "occurrence_count": 5,
+      "file_count": 5,
+      "files": [
+        "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx"
+      ]
+    },
+    {
+      "fingerprint": "72aa8f7d9cbe59b08c6e162671512203b35a3660",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+          "line": 80
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+          "line": 258
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+          "line": 111
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+          "line": 135
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx",
+          "line": 119
+        }
+      ],
+      "occurrence_count": 5,
+      "file_count": 5,
+      "files": [
+        "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx"
+      ]
+    },
+    {
+      "fingerprint": "23008be6503a73a2c45ce68edf1df390d634cedc",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+          "line": 82
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+          "line": 260
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+          "line": 113
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+          "line": 137
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx",
+          "line": 121
+        }
+      ],
+      "occurrence_count": 5,
+      "file_count": 5,
+      "files": [
+        "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx"
+      ]
+    },
+    {
+      "fingerprint": "135748737c71e390e99c7d3455093828c66d8481",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+          "line": 83
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+          "line": 261
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+          "line": 114
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+          "line": 138
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx",
+          "line": 122
+        }
+      ],
+      "occurrence_count": 5,
+      "file_count": 5,
+      "files": [
+        "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/NicknameStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx"
+      ]
+    },
+    {
+      "fingerprint": "1a34f24299b25de136261149620eeea9f7459a5a",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/route.ts",
+          "line": 61
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/route.ts",
+          "line": 60
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+          "line": 14
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch-meal/route.ts",
+          "line": 18
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 4,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/batch-meal/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "6c369640cfd57d67668d2603b375458fb1e31066",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/metadata/route.ts",
+          "line": 23
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+          "line": 145
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+          "line": 55
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+          "line": 72
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 4,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+        "C:/routiners/routiners-web/app/api/conversations/[id]/metadata/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "7d7df07815233a7d38688775f1f146ff5b8e4f34",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/metadata/route.ts",
+          "line": 25
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+          "line": 147
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+          "line": 57
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+          "line": 74
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 4,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+        "C:/routiners/routiners-web/app/api/conversations/[id]/metadata/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "feb4c23c2bf4ae65f123462d5faf1395de01da34",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/profile/edit/page.tsx",
+          "line": 1
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/profile/fitness/page.tsx",
+          "line": 1
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/profile/inbody/page.tsx",
+          "line": 1
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/routine/calendar/page.tsx",
+          "line": 1
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 4,
+      "files": [
+        "C:/routiners/routiners-web/app/profile/edit/page.tsx",
+        "C:/routiners/routiners-web/app/profile/fitness/page.tsx",
+        "C:/routiners/routiners-web/app/profile/inbody/page.tsx",
+        "C:/routiners/routiners-web/app/routine/calendar/page.tsx"
+      ]
+    },
+    {
+      "fingerprint": "d3fe999359b2fb9fde6f60a141fb4785a22d0624",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/community/SearchBar.tsx",
+          "line": 30
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/routine/sheets/AddExerciseSheet.tsx",
+          "line": 96
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/routine/sheets/AddMealSheet.tsx",
+          "line": 278
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/routine/sheets/AddWorkoutSheet.tsx",
+          "line": 283
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 4,
+      "files": [
+        "C:/routiners/routiners-web/components/community/SearchBar.tsx",
+        "C:/routiners/routiners-web/components/routine/sheets/AddExerciseSheet.tsx",
+        "C:/routiners/routiners-web/components/routine/sheets/AddMealSheet.tsx",
+        "C:/routiners/routiners-web/components/routine/sheets/AddWorkoutSheet.tsx"
+      ]
+    },
+    {
+      "fingerprint": "21859e9e137475dfb930bfbc76b8f4f658bb8883",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/community/SearchBar.tsx",
+          "line": 31
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/routine/sheets/AddExerciseSheet.tsx",
+          "line": 97
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/routine/sheets/AddMealSheet.tsx",
+          "line": 279
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/routine/sheets/AddWorkoutSheet.tsx",
+          "line": 284
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 4,
+      "files": [
+        "C:/routiners/routiners-web/components/community/SearchBar.tsx",
+        "C:/routiners/routiners-web/components/routine/sheets/AddExerciseSheet.tsx",
+        "C:/routiners/routiners-web/components/routine/sheets/AddMealSheet.tsx",
+        "C:/routiners/routiners-web/components/routine/sheets/AddWorkoutSheet.tsx"
+      ]
+    },
+    {
+      "fingerprint": "e5061519a2d504fed466c83308f500abdd5ddf1b",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/counselor/ChatListDrawer.tsx",
+          "line": 55
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/drawers/ImageSourceDrawer.tsx",
+          "line": 38
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/community/detail/PostMoreMenu.tsx",
+          "line": 46
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/routine/workout/SetValuePicker.tsx",
+          "line": 75
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 4,
+      "files": [
+        "C:/routiners/routiners-web/components/community/detail/PostMoreMenu.tsx",
+        "C:/routiners/routiners-web/components/counselor/ChatListDrawer.tsx",
+        "C:/routiners/routiners-web/components/drawers/ImageSourceDrawer.tsx",
+        "C:/routiners/routiners-web/components/routine/workout/SetValuePicker.tsx"
+      ]
+    },
+    {
+      "fingerprint": "68216b8642cd1e1a76867b9ceb964c8844e767c7",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+          "line": 81
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+          "line": 76
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/home/InBodySection.tsx",
+          "line": 60
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx",
+          "line": 392
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 4,
+      "files": [
+        "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+        "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+        "C:/routiners/routiners-web/components/home/InBodySection.tsx",
+        "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx"
+      ]
+    },
+    {
+      "fingerprint": "42c91ba6443c602b6df9f3d40afd250c29210bc3",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/home/InBodyMiniCard.tsx",
+          "line": 57
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/BodyStatsTab.tsx",
+          "line": 112
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx",
+          "line": 399
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/ui/StepIndicator.tsx",
+          "line": 66
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 4,
+      "files": [
+        "C:/routiners/routiners-web/components/home/InBodyMiniCard.tsx",
+        "C:/routiners/routiners-web/components/stats/BodyStatsTab.tsx",
+        "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx",
+        "C:/routiners/routiners-web/components/ui/StepIndicator.tsx"
+      ]
+    },
+    {
+      "fingerprint": "59364520ed9e9d42d3c3d78cc11a04558d985616",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/stats/BodyStatsTab.tsx",
+          "line": 113
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/WeeklyProgressChart.tsx",
+          "line": 93
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/ui/StepIndicator.tsx",
+          "line": 67
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/routine/weekly/WeeklyOverview.tsx",
+          "line": 156
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 4,
+      "files": [
+        "C:/routiners/routiners-web/components/routine/weekly/WeeklyOverview.tsx",
+        "C:/routiners/routiners-web/components/stats/BodyStatsTab.tsx",
+        "C:/routiners/routiners-web/components/stats/WeeklyProgressChart.tsx",
+        "C:/routiners/routiners-web/components/ui/StepIndicator.tsx"
+      ]
+    },
+    {
+      "fingerprint": "a5c1702bba2bd08027ebbf9c7921eaf45105f155",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+          "line": 37
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+          "line": 58
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+          "line": 69
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx",
+          "line": 56
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 4,
+      "files": [
+        "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx"
+      ]
+    },
+    {
+      "fingerprint": "65b52ae3991a45d6bfc07e561d425f53c36517b1",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+          "line": 84
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+          "line": 115
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+          "line": 139
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx",
+          "line": 123
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 4,
+      "files": [
+        "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx"
+      ]
+    },
+    {
+      "fingerprint": "b4d3f46f04e2ebbf58deff00d09ab914f29c57aa",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+          "line": 85
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+          "line": 116
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+          "line": 140
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx",
+          "line": 124
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 4,
+      "files": [
+        "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx"
+      ]
+    },
+    {
+      "fingerprint": "17a02a7788ce56dff5b67e418f5c1c8fe8786d4d",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+          "line": 86
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+          "line": 117
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+          "line": 141
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx",
+          "line": 125
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 4,
+      "files": [
+        "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx"
+      ]
+    },
+    {
+      "fingerprint": "623f7f37b82e1b18d3fad316de970f076e636b4d",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+          "line": 87
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+          "line": 118
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+          "line": 142
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx",
+          "line": 126
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 4,
+      "files": [
+        "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx"
+      ]
+    },
+    {
+      "fingerprint": "a254bdb771f3f67638d7cf3d91694806620effc8",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+          "line": 88
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+          "line": 119
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+          "line": 143
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx",
+          "line": 127
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 4,
+      "files": [
+        "C:/routiners/routiners-web/components/signup/military/EnlistmentStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/RankStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/SpecialtyStep.tsx",
+        "C:/routiners/routiners-web/components/signup/military/UnitStep.tsx"
+      ]
+    },
+    {
+      "fingerprint": "6d68f42f62d5ee98e542ffc210a1a2e070302e60",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/community/posts/route.ts",
+          "line": 166
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/community/posts/[id]/route.ts",
+          "line": 22
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/community/posts/[id]/route.ts",
+          "line": 130
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/community/posts/[id]/comments/route.ts",
+          "line": 72
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/community/posts/[id]/comments/route.ts",
+          "line": 175
+        }
+      ],
+      "occurrence_count": 5,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/community/posts/[id]/comments/route.ts",
+        "C:/routiners/routiners-web/app/api/community/posts/[id]/route.ts",
+        "C:/routiners/routiners-web/app/api/community/posts/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "9108762b038155420056e50f4801aa71f102803a",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/stats/MonthlyStatsSummary.tsx",
+          "line": 151
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/MonthlyStatsSummary.tsx",
+          "line": 173
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/NutritionStatsTab.tsx",
+          "line": 157
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/WeeklyStatsSummary.tsx",
+          "line": 150
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/WeeklyStatsSummary.tsx",
+          "line": 172
+        }
+      ],
+      "occurrence_count": 5,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/components/stats/MonthlyStatsSummary.tsx",
+        "C:/routiners/routiners-web/components/stats/NutritionStatsTab.tsx",
+        "C:/routiners/routiners-web/components/stats/WeeklyStatsSummary.tsx"
+      ]
+    },
+    {
+      "fingerprint": "04d6da7107032cf280b24ab6d914a7d6afeb64d1",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/community/posts/[id]/route.ts",
+          "line": 65
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/community/posts/[id]/route.ts",
+          "line": 167
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/community/posts/[id]/like/route.ts",
+          "line": 18
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/community/posts/[id]/comments/[commentId]/route.ts",
+          "line": 18
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/community/posts/[id]/comments/[commentId]/route.ts",
+        "C:/routiners/routiners-web/app/api/community/posts/[id]/like/route.ts",
+        "C:/routiners/routiners-web/app/api/community/posts/[id]/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "ec842fda64926135816d8567835425d34688db34",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/community/posts/[id]/route.ts",
+          "line": 66
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/community/posts/[id]/route.ts",
+          "line": 168
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/community/posts/[id]/like/route.ts",
+          "line": 19
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/community/posts/[id]/comments/[commentId]/route.ts",
+          "line": 19
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/community/posts/[id]/comments/[commentId]/route.ts",
+        "C:/routiners/routiners-web/app/api/community/posts/[id]/like/route.ts",
+        "C:/routiners/routiners-web/app/api/community/posts/[id]/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "da3cad7fe96285e7253746ac2a5a8cc18d0023f5",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/[id]/route.ts",
+          "line": 31
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/[id]/route.ts",
+          "line": 77
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/[id]/complete/route.ts",
+          "line": 30
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/[id]/workout/route.ts",
+          "line": 49
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/routine/events/[id]/complete/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/[id]/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/[id]/workout/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "86a67d0c4eff61cce16f5d48aea9bb46ab08f09c",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/community/PostCard.tsx",
+          "line": 79
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/community/detail/PostImageGallery.tsx",
+          "line": 45
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/community/detail/PostImageGallery.tsx",
+          "line": 66
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/community/write/ImageUploader.tsx",
+          "line": 89
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/components/community/PostCard.tsx",
+        "C:/routiners/routiners-web/components/community/detail/PostImageGallery.tsx",
+        "C:/routiners/routiners-web/components/community/write/ImageUploader.tsx"
+      ]
+    },
+    {
+      "fingerprint": "1473d5523da66db51216d52149abaf6edfa2f97f",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/community/PostCard.tsx",
+          "line": 80
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/community/detail/PostImageGallery.tsx",
+          "line": 46
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/community/detail/PostImageGallery.tsx",
+          "line": 67
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/community/write/ImageUploader.tsx",
+          "line": 90
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/components/community/PostCard.tsx",
+        "C:/routiners/routiners-web/components/community/detail/PostImageGallery.tsx",
+        "C:/routiners/routiners-web/components/community/write/ImageUploader.tsx"
+      ]
+    },
+    {
+      "fingerprint": "44a0cabbf5cb9507b9a19f9b9f28192dfc2b8d66",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/stats/AchievementContent.tsx",
+          "line": 100
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/AchievementContent.tsx",
+          "line": 144
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/MonthlyStatsContent.tsx",
+          "line": 22
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/StatsContent.tsx",
+          "line": 21
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/components/stats/AchievementContent.tsx",
+        "C:/routiners/routiners-web/components/stats/MonthlyStatsContent.tsx",
+        "C:/routiners/routiners-web/components/stats/StatsContent.tsx"
+      ]
+    },
+    {
+      "fingerprint": "6e8e3384409755852c42afe7d5a8943b87c3ae13",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/stats/AchievementContent.tsx",
+          "line": 101
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/AchievementContent.tsx",
+          "line": 145
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/MonthlyStatsContent.tsx",
+          "line": 23
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/StatsContent.tsx",
+          "line": 22
+        }
+      ],
+      "occurrence_count": 4,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/components/stats/AchievementContent.tsx",
+        "C:/routiners/routiners-web/components/stats/MonthlyStatsContent.tsx",
+        "C:/routiners/routiners-web/components/stats/StatsContent.tsx"
+      ]
+    },
+    {
+      "fingerprint": "e0a0d1a87912d56eff6a15db9bd4074a04f887dc",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/route.ts",
+          "line": 65
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/route.ts",
+          "line": 69
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/route.ts",
+          "line": 110
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/route.ts",
+        "C:/routiners/routiners-web/app/api/conversations/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "c7a595a9430c2d02701b7017786395d444afd05f",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/route.ts",
+          "line": 73
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/route.ts",
+          "line": 77
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/route.ts",
+          "line": 118
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/route.ts",
+        "C:/routiners/routiners-web/app/api/conversations/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "45d95f17551537999a5d5e31dfe8928e3512cdf7",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/route.ts",
+          "line": 74
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/route.ts",
+          "line": 78
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/route.ts",
+          "line": 119
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/route.ts",
+        "C:/routiners/routiners-web/app/api/conversations/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "2e6e4a295f7dd28b88cdfa01622ab8144fa13f96",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/route.ts",
+          "line": 75
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/route.ts",
+          "line": 79
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/route.ts",
+          "line": 120
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/route.ts",
+        "C:/routiners/routiners-web/app/api/conversations/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "7e7af96417c711581d0c05b0f47592ff73837447",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/route.ts",
+          "line": 76
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/route.ts",
+          "line": 80
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/route.ts",
+          "line": 121
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/route.ts",
+        "C:/routiners/routiners-web/app/api/conversations/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "9c9a7469cdc3ed6e35beded1c8a9481ad499c9f1",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/fitness-profile/route.ts",
+          "line": 26
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/profile/fitness/FitnessContent.tsx",
+          "line": 172
+        },
+        {
+          "path": "C:/routiners/routiners-web/lib/ai/executors/fitness-profile.ts",
+          "line": 45
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/fitness-profile/route.ts",
+        "C:/routiners/routiners-web/components/profile/fitness/FitnessContent.tsx",
+        "C:/routiners/routiners-web/lib/ai/executors/fitness-profile.ts"
+      ]
+    },
+    {
+      "fingerprint": "c3d4d46dca7d72f68850043d5155e3e357e1af39",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/community/posts/route.ts",
+          "line": 167
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/community/posts/[id]/route.ts",
+          "line": 131
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/community/posts/[id]/comments/route.ts",
+          "line": 176
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/community/posts/[id]/comments/route.ts",
+        "C:/routiners/routiners-web/app/api/community/posts/[id]/route.ts",
+        "C:/routiners/routiners-web/app/api/community/posts/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "94e17e6c10982842c7cf0218ab164f987f58521b",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/community/posts/route.ts",
+          "line": 168
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/community/posts/[id]/route.ts",
+          "line": 132
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/community/posts/[id]/comments/route.ts",
+          "line": 177
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/community/posts/[id]/comments/route.ts",
+        "C:/routiners/routiners-web/app/api/community/posts/[id]/route.ts",
+        "C:/routiners/routiners-web/app/api/community/posts/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "f64226418a419ab8d5afd7fffad8e8664d60a6f0",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/route.ts",
+          "line": 140
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/route.ts",
+          "line": 71
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+          "line": 79
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "55e94cead1f31bfcb0d8c036818c0dfbb1ae755c",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+          "line": 142
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+          "line": 52
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+          "line": 69
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "ba27670e25018fc6f2f17a102f2c7b917ccee7f7",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+          "line": 143
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+          "line": 53
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+          "line": 70
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "751fbe40bcc046603aefcb1e91a65cdd6d90057c",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+          "line": 144
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts",
+          "line": 54
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+          "line": 71
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/conversations/[id]/messages/ai/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/[messageId]/status/route.ts",
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/messages/system/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "cf08597e6022c209de727cd80094c4a0db76b9dd",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+          "line": 74
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/[id]/route.ts",
+          "line": 44
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/[id]/workout/route.ts",
+          "line": 17
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/counselor/conversations/[id]/purpose/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/[id]/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/[id]/workout/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "36b5a53fd49cdc7bdbaca11d5a437965c36d9c91",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/route.ts",
+          "line": 1
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+          "line": 1
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch-meal/route.ts",
+          "line": 1
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/routine/events/batch-meal/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "9f2a3b2ed7509d144d89cb63a2850472bcf0026e",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/route.ts",
+          "line": 2
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+          "line": 2
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch-meal/route.ts",
+          "line": 2
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/routine/events/batch-meal/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "8dd65ae19c596f75fd3869ee5f6e9347202ddd51",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/route.ts",
+          "line": 59
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+          "line": 13
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/batch-meal/route.ts",
+          "line": 17
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/routine/events/batch-meal/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/batch/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "2cf84227b97bbd2849e06ae8828b6b1f6a63a1db",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/[id]/route.ts",
+          "line": 47
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/routine/events/[id]/workout/route.ts",
+          "line": 20
+        },
+        {
+          "path": "C:/routiners/routiners-web/app/api/user/profile/image/route.ts",
+          "line": 31
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/app/api/routine/events/[id]/route.ts",
+        "C:/routiners/routiners-web/app/api/routine/events/[id]/workout/route.ts",
+        "C:/routiners/routiners-web/app/api/user/profile/image/route.ts"
+      ]
+    },
+    {
+      "fingerprint": "52dee40d66a6b8e40719700da263040aa6c1f2e0",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/community/PostCard.tsx",
+          "line": 42
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/community/comments/CommentItem.tsx",
+          "line": 60
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/community/detail/PostDetailContent.tsx",
+          "line": 50
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/components/community/PostCard.tsx",
+        "C:/routiners/routiners-web/components/community/comments/CommentItem.tsx",
+        "C:/routiners/routiners-web/components/community/detail/PostDetailContent.tsx"
+      ]
+    },
+    {
+      "fingerprint": "5765ee7283be1d479b52f082bfe9e69740530180",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/community/PostCard.tsx",
+          "line": 43
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/community/comments/CommentItem.tsx",
+          "line": 61
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/community/detail/PostDetailContent.tsx",
+          "line": 51
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/components/community/PostCard.tsx",
+        "C:/routiners/routiners-web/components/community/comments/CommentItem.tsx",
+        "C:/routiners/routiners-web/components/community/detail/PostDetailContent.tsx"
+      ]
+    },
+    {
+      "fingerprint": "d8550233bb79a830bf2c64f6301c8f2bdc75a18c",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/community/PostCard.tsx",
+          "line": 44
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/community/comments/CommentItem.tsx",
+          "line": 62
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/community/detail/PostDetailContent.tsx",
+          "line": 52
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/components/community/PostCard.tsx",
+        "C:/routiners/routiners-web/components/community/comments/CommentItem.tsx",
+        "C:/routiners/routiners-web/components/community/detail/PostDetailContent.tsx"
+      ]
+    },
+    {
+      "fingerprint": "923f4846b16e9cf3e1e44c5bdad82b27521aa266",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/community/PostCard.tsx",
+          "line": 45
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/community/comments/CommentItem.tsx",
+          "line": 63
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/community/detail/PostDetailContent.tsx",
+          "line": 53
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/components/community/PostCard.tsx",
+        "C:/routiners/routiners-web/components/community/comments/CommentItem.tsx",
+        "C:/routiners/routiners-web/components/community/detail/PostDetailContent.tsx"
+      ]
+    },
+    {
+      "fingerprint": "5d1d68a8fe1ed5db6d35ac3a6623a07d94703dd3",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+          "line": 11
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+          "line": 11
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx",
+          "line": 297
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+        "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+        "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx"
+      ]
+    },
+    {
+      "fingerprint": "5aa8b65734a6225d98d2543b0cde3415af213804",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+          "line": 77
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+          "line": 72
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx",
+          "line": 388
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+        "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+        "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx"
+      ]
+    },
+    {
+      "fingerprint": "ef219702cf2da47a4b16f409640c3c532a90e188",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+          "line": 78
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+          "line": 73
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx",
+          "line": 389
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+        "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+        "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx"
+      ]
+    },
+    {
+      "fingerprint": "56f3cf34af0ca9ba9d80a430a6f7b3184d7a63f5",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+          "line": 79
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+          "line": 74
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx",
+          "line": 390
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+        "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+        "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx"
+      ]
+    },
+    {
+      "fingerprint": "88dad128e12920c48340af62d133d573edeaa3ea",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+          "line": 80
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+          "line": 75
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx",
+          "line": 391
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+        "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+        "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx"
+      ]
+    },
+    {
+      "fingerprint": "6c55e942f98816e293fd5d970a0746f61bb14703",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+          "line": 82
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+          "line": 77
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx",
+          "line": 393
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+        "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+        "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx"
+      ]
+    },
+    {
+      "fingerprint": "f68670093184ab9ec1286c840b4ab6ec04613a09",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+          "line": 83
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+          "line": 78
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx",
+          "line": 394
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+        "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+        "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx"
+      ]
+    },
+    {
+      "fingerprint": "17d678310fe2ee1ffd6d55c21f900034ca53aeee",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+          "line": 84
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+          "line": 79
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx",
+          "line": 395
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+        "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+        "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx"
+      ]
+    },
+    {
+      "fingerprint": "5de1516bbfbc4bd0a58fa38fc8eaba4a51cbdefe",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+          "line": 85
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+          "line": 80
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx",
+          "line": 396
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+        "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+        "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx"
+      ]
+    },
+    {
+      "fingerprint": "e7a0f6f1294873bf05f9cf03ac891da67b792e43",
+      "occurrences": [
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+          "line": 86
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+          "line": 81
+        },
+        {
+          "path": "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx",
+          "line": 397
+        }
+      ],
+      "occurrence_count": 3,
+      "file_count": 3,
+      "files": [
+        "C:/routiners/routiners-web/components/home/Big3LiftCard.tsx",
+        "C:/routiners/routiners-web/components/home/Big3Section.tsx",
+        "C:/routiners/routiners-web/components/stats/WorkoutStatsTab.tsx"
+      ]
+    }
+  ]
+}

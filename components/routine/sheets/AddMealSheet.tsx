@@ -7,7 +7,11 @@ import {
   TrashIcon,
 } from '@phosphor-icons/react';
 import { LoadingSpinner } from '@/components/ui/icons';
-import { useCreateRoutineEvent, useUpdateMealData } from '@/hooks/routine';
+import {
+  useCatalogSelection,
+  useCreateRoutineEvent,
+  useUpdateMealData,
+} from '@/hooks/routine';
 import { useShowError } from '@/lib/stores/errorStore';
 import { useRouter } from 'next/navigation';
 import { searchFoods, FOOD_CATEGORY_LABELS } from '@/lib/data/foods';
@@ -124,15 +128,19 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated, existin
   // 식사 시간 선택
   const [mealType, setMealType] = useState<MealType>('lunch');
 
-  // 검색 상태
-  const [query, setQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<FoodCategory | null>(null);
-
   // 선택된 음식 목록
   const [foods, setFoods] = useState<FoodItem[]>([]);
 
-  // 검색 결과
-  const searchResults = searchFoods(query, categoryFilter ?? undefined);
+  const {
+    query,
+    setQuery,
+    categoryFilter,
+    setCategoryFilter,
+    searchResults,
+    resetSelection,
+  } = useCatalogSelection<FoodCategory, FoodInfo>({
+    search: searchFoods,
+  });
 
   // 영양소 합계
   const totals = sumNutrition(foods);
@@ -148,9 +156,8 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated, existin
 
   const resetState = () => {
     setFoods([]);
-    setQuery('');
     setMealType('lunch');
-    setCategoryFilter(null);
+    resetSelection();
   };
 
   const handleSave = () => {
