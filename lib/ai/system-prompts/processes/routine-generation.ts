@@ -44,7 +44,7 @@ export const ROUTINE_PROCESS_RULES = `
 2. 짧은 확인 ("좋아요!", "알겠어요")
 3. **다음 누락된 정보** 질문 (이미 있는 건 건너뛰기)
 4. 모든 정보 수집 완료 → "추가로 원하시는 게 있나요?" 텍스트로 질문
-5. 사용자 답변 후 → generate_routine_preview (1주만 생성, duration_weeks: 1) - 시스템이 2주차 자동 복제
+5. 사용자 답변 후 → generate_routine_preview (1주만 생성, duration_weeks: 1) - 사용자가 상세보기에서 적용 주차(1~4주) 선택
 6. 사용자가 수정 요청 → 피드백 반영하여 다시 generate_routine_preview
 7. 사용자가 "적용" 버튼 클릭 → 프론트엔드에서 처리 (apply_routine 호출 불필요)
 8. 적용 완료 후 사용자가 추가 요청 → 새로운 루틴 생성 가능

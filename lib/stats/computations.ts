@@ -49,7 +49,6 @@ export function calculateMealNutrients(mealData: MealData): {
 interface WorkoutMetrics {
   scheduled: number;
   completed: number;
-  skipped: number;
   totalVolume: number;
   totalDuration: number;
   totalCaloriesBurned: number;
@@ -64,7 +63,6 @@ interface WorkoutMetrics {
 interface MealMetrics {
   scheduled: number;
   completed: number;
-  skipped: number;
   avgCalories: number;
   avgProtein: number;
   totalCalories: number;
@@ -88,7 +86,6 @@ function aggregateEventMetrics(events: RoutineEvent[]): {
 
   const workoutCompleted = workoutEvents.filter((e) => e.status === 'completed');
   const workoutScheduled = workoutEvents.filter((e) => e.status === 'scheduled');
-  const workoutSkipped = workoutEvents.filter((e) => e.status === 'skipped');
 
   // 완료 운동 실제 메트릭
   let totalVolume = 0;
@@ -110,7 +107,7 @@ function aggregateEventMetrics(events: RoutineEvent[]): {
   let plannedVolume = 0;
   let plannedDistance = 0;
   for (const event of workoutEvents) {
-    if (event.status !== 'skipped' && isWorkoutData(event.data)) {
+    if (isWorkoutData(event.data)) {
       plannedDuration += event.data.estimatedDuration ?? 0;
       plannedCaloriesBurned += event.data.estimatedCaloriesBurned ?? 0;
       plannedVolume += calculateWorkoutVolume(event.data);
@@ -123,7 +120,6 @@ function aggregateEventMetrics(events: RoutineEvent[]): {
   // 식단 메트릭
   const mealCompleted = mealEvents.filter((e) => e.status === 'completed');
   const mealScheduled = mealEvents.filter((e) => e.status === 'scheduled');
-  const mealSkipped = mealEvents.filter((e) => e.status === 'skipped');
 
   let mTotalCalories = 0;
   let mTotalProtein = 0;
@@ -144,7 +140,7 @@ function aggregateEventMetrics(events: RoutineEvent[]): {
   let plannedMealCalories = 0;
   let plannedMealProtein = 0;
   for (const event of mealEvents) {
-    if (event.status !== 'skipped' && isMealData(event.data)) {
+    if (isMealData(event.data)) {
       const nutrients = calculateMealNutrients(event.data);
       plannedMealCalories += nutrients.calories;
       plannedMealProtein += nutrients.protein;
@@ -157,7 +153,6 @@ function aggregateEventMetrics(events: RoutineEvent[]): {
     workout: {
       scheduled: workoutScheduled.length,
       completed: workoutCompleted.length,
-      skipped: workoutSkipped.length,
       totalVolume,
       totalDuration,
       totalCaloriesBurned,
@@ -173,7 +168,6 @@ function aggregateEventMetrics(events: RoutineEvent[]): {
     meal: {
       scheduled: mealScheduled.length,
       completed: mealCompleted.length,
-      skipped: mealSkipped.length,
       avgCalories: mealCount > 0 ? Math.round(mTotalCalories / mealCount) : 0,
       avgProtein: mealCount > 0 ? Math.round(mTotalProtein / mealCount) : 0,
       totalCalories: Math.round(mTotalCalories),

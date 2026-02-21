@@ -2,7 +2,7 @@
 
 import { useRef } from 'react';
 import { ChatMessage as ChatMessageType } from '@/lib/types/chat';
-import { AIToolStatus } from '@/lib/types/fitness';
+import type { AIToolStatus } from '@/lib/types/fitness';
 import {
   RoutineAppliedEvent,
   RoutineProgressEvent,

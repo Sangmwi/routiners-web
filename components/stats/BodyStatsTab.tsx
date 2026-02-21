@@ -12,6 +12,12 @@ const METRICS_CONFIG = [
   { key: 'bodyFatPercentage', label: '체지방률', unit: '%', positiveIsGood: false },
 ] as const;
 
+/** "2024-03-15" → "3/15" */
+function formatShortDate(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00');
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+
 /**
  * 신체 탭 콘텐츠
  *
@@ -25,6 +31,15 @@ export default function BodyStatsTab() {
 
   const hasData = !!summary.latest;
   const hasHistory = history.length >= 2;
+
+  // history는 최신순 → reverse로 시간순 정렬
+  const chronological = hasHistory ? [...history].reverse() : [];
+  const dateRange: [string, string] | undefined = hasHistory
+    ? [
+        formatShortDate(chronological[0].measuredAt),
+        formatShortDate(chronological[chronological.length - 1].measuredAt),
+      ]
+    : undefined;
 
   if (!hasData) {
     return (
@@ -66,7 +81,7 @@ export default function BodyStatsTab() {
         {METRICS_CONFIG.map(({ key, label, unit, positiveIsGood }) => {
           const value = summary.latest?.[key];
           const change = summary.changes?.[key];
-          const sparkData = hasHistory ? history.map((r) => r[key]) : [];
+          const sparkData = chronological.map((r) => r[key]);
 
           return (
             <div key={key} className="bg-muted/20 rounded-2xl p-4">
@@ -87,7 +102,13 @@ export default function BodyStatsTab() {
                 )}
               </p>
               {hasHistory && (
-                <MiniSparkline data={sparkData} height={48} />
+                <MiniSparkline
+                  data={sparkData}
+                  height={48}
+                  showMinMax
+                  showAllDots
+                  dateRange={dateRange}
+                />
               )}
             </div>
           );

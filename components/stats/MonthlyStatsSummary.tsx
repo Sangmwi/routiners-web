@@ -1,25 +1,26 @@
 'use client';
 
 import { BarbellIcon, ForkKnifeIcon, CalendarCheckIcon } from '@phosphor-icons/react';
-import type { WeeklyStats } from '@/hooks/routine';
+import type { MonthlyStats } from '@/hooks/routine';
 
-interface WeeklyStatsSummaryProps {
-  stats: WeeklyStats;
+interface MonthlyStatsSummaryProps {
+  stats: MonthlyStats;
 }
 
 /**
- * 주간 통계 요약
+ * 월간 통계 요약
  *
- * - 완료일 배너 / 예정 배너
- * - 달성률 카드 2장
- * - 운동 요약 (실제 or 예정)
- * - 영양 섭취 (실제 or 예정)
+ * - 완료일 배너
+ * - 달성률 카드 2장 (grid-cols-2)
+ * - 운동 요약 메트릭
+ * - 영양 섭취 요약 (총량 + 일평균 + 매크로)
  */
-export default function WeeklyStatsSummary({ stats }: WeeklyStatsSummaryProps) {
+export default function MonthlyStatsSummary({ stats }: MonthlyStatsSummaryProps) {
   const { workout, meal } = stats;
 
-  const workoutTotal = workout.completed + workout.scheduled + workout.skipped;
-  const mealTotal = meal.completed + meal.scheduled + meal.skipped;
+  const workoutTotal = workout.completed + workout.scheduled;
+  const mealTotal = meal.completed + meal.scheduled;
+
   const hasCompleted = workout.completed > 0 || meal.completed > 0;
 
   // 운동 메트릭: 완료 실적 → 예정 메트릭 fallback
@@ -61,7 +62,7 @@ export default function WeeklyStatsSummary({ stats }: WeeklyStatsSummaryProps) {
     nutritionMetrics.push({ label: '일평균', value: `${meal.avgCalories.toLocaleString()}kcal` });
   }
 
-  // 매크로 (완료 데이터만)
+  // 매크로 (탄수화물/지방)
   const macroMetrics: { label: string; value: string }[] = [];
   if (meal.totalCarbs > 0) {
     macroMetrics.push({ label: '탄수화물', value: `${meal.totalCarbs}g` });
@@ -87,7 +88,7 @@ export default function WeeklyStatsSummary({ stats }: WeeklyStatsSummaryProps) {
         <div className="flex items-center gap-2 bg-primary/10 rounded-xl px-4 py-3">
           <CalendarCheckIcon size={20} weight="fill" className="text-primary" />
           <span className="text-sm font-medium text-foreground">
-            7일 중 <span className="text-primary">{stats.completedDays}일</span> 완료
+            {stats.totalDays}일 중 <span className="text-primary">{stats.completedDays}일</span> 완료
           </span>
         </div>
       )}
@@ -110,14 +111,14 @@ export default function WeeklyStatsSummary({ stats }: WeeklyStatsSummaryProps) {
             />
           </div>
           <p className="text-[11px] text-muted-foreground mt-3">
-            {workoutTotal > 0 ? `${workout.completed}/${workoutTotal}일 완료` : '예정 없음'}
+            {workoutTotal > 0 ? `${workout.completed}/${workoutTotal}회 완료` : '예정 없음'}
           </p>
         </div>
 
         {/* 식단 */}
         <div className="bg-muted/20 rounded-2xl p-4">
           <div className="flex items-center gap-1.5 mb-3">
-            <ForkKnifeIcon size={16} weight="fill" className="text-primary/70" />
+            <ForkKnifeIcon size={16} weight="fill" className="text-primary" />
             <span className="text-xs font-medium text-muted-foreground">식단</span>
           </div>
           <p className="text-2xl font-bold text-foreground mb-2">
@@ -125,12 +126,12 @@ export default function WeeklyStatsSummary({ stats }: WeeklyStatsSummaryProps) {
           </p>
           <div className="h-1.5 bg-muted rounded-full overflow-hidden">
             <div
-              className="h-full bg-primary/50 rounded-full transition-all duration-300"
+              className="h-full bg-primary rounded-full transition-all duration-300"
               style={{ width: `${Math.min(100, Math.max(0, meal.completionRate))}%` }}
             />
           </div>
           <p className="text-[11px] text-muted-foreground mt-3">
-            {mealTotal > 0 ? `${meal.completed}/${mealTotal}일 완료` : '예정 없음'}
+            {mealTotal > 0 ? `${meal.completed}/${mealTotal}회 완료` : '예정 없음'}
           </p>
         </div>
       </div>
@@ -141,7 +142,7 @@ export default function WeeklyStatsSummary({ stats }: WeeklyStatsSummaryProps) {
           <div className="flex items-center gap-1.5 mb-3">
             <h3 className="text-sm font-medium text-foreground">운동 요약</h3>
             {isPlannedOnly && (
-              <span className="text-[10px] text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-md">예정</span>
+              <span className="text-[10px] text-scheduled bg-scheduled/10 px-1.5 py-0.5 rounded-md">예정</span>
             )}
           </div>
           <div className="bg-muted/20 rounded-2xl p-4">
@@ -163,7 +164,7 @@ export default function WeeklyStatsSummary({ stats }: WeeklyStatsSummaryProps) {
           <div className="flex items-center gap-1.5 mb-3">
             <h3 className="text-sm font-medium text-foreground">영양 섭취</h3>
             {meal.completed === 0 && meal.plannedCalories > 0 && (
-              <span className="text-[10px] text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-md">예정</span>
+              <span className="text-[10px] text-scheduled bg-scheduled/10 px-1.5 py-0.5 rounded-md">예정</span>
             )}
           </div>
           <div className="bg-muted/20 rounded-2xl p-4 space-y-4">

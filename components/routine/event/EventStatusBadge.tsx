@@ -1,11 +1,11 @@
 'use client';
 
-import { CheckIcon, ClockIcon, SkipForwardIcon } from '@phosphor-icons/react';
-import { EVENT_STATUS } from '@/lib/config/theme';
+import { EVENT_STATUS, getDisplayStatus } from '@/lib/config/theme';
 import type { EventStatus } from '@/lib/types/routine';
 
 interface EventStatusBadgeProps {
   status: EventStatus;
+  date: string;
   size?: 'sm' | 'md';
 }
 
@@ -14,9 +14,11 @@ interface EventStatusBadgeProps {
  */
 export default function EventStatusBadge({
   status,
+  date,
   size = 'md',
 }: EventStatusBadgeProps) {
-  const config = EVENT_STATUS[status];
+  const displayStatus = getDisplayStatus(status, date);
+  const config = EVENT_STATUS[displayStatus];
   const Icon = config.icon;
 
   const sizeClass = size === 'sm' ? 'text-xs px-2 py-0.5' : 'text-xs px-2 py-0.5';

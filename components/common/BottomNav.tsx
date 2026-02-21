@@ -20,7 +20,7 @@ export default function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-md border-t border-border bg-background pb-[env(safe-area-inset-bottom)]">
-      <div className="flex h-16 items-center justify-around px-4">
+      <div className="flex h-16 items-center">
         {items.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -29,7 +29,7 @@ export default function BottomNav() {
             <AppLink
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center gap-1 rounded-2xl px-4 py-2 transition-all duration-200 active:scale-95 active:bg-foreground/5 ${
+              className={`flex flex-1 flex-col items-center justify-center gap-1 rounded-2xl py-2 transition-all duration-200 active:scale-95 active:bg-foreground/5 ${
                 isActive
                   ? style.activeColor
                   : `${style.inactiveColor} hover:text-foreground`

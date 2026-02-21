@@ -1,7 +1,7 @@
 'use client';
 
-import { CalendarEventSummary, EventType } from '@/lib/types/routine';
-import { getStatusConfig, getEventIcon } from '@/lib/config/eventTheme';
+import { CalendarEventSummary, EventType, EventStatus } from '@/lib/types/routine';
+import { getStatusConfig, getEventIcon, getDisplayStatus } from '@/lib/config/eventTheme';
 import { formatDate } from '@/lib/utils/dateHelpers';
 
 interface CalendarGridProps {
@@ -26,7 +26,7 @@ const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
  * 캘린더 그리드 컴포넌트
  *
  * - 날짜별 이벤트 인디케이터 표시
- * - 상태별 색상: 완료(primary), 예정(primary/60), 건너뜀(muted)
+ * - 상태별 색상: 완료(primary), 예정(primary/60), 미완료(muted)
  */
 export default function CalendarGrid({
   year,
@@ -93,6 +93,7 @@ export default function CalendarGrid({
                       key={event.id}
                       type={event.type}
                       status={event.status}
+                      date={dayInfo.date}
                     />
                   ))}
                 </div>
@@ -106,15 +107,17 @@ export default function CalendarGrid({
 }
 
 // 이벤트 타입/상태 표시 미니 아이콘
-// 운동: ⚡ (Zap), 식단: 🍴 (Utensils)
 function EventDot({
   type,
   status,
+  date,
 }: {
   type: EventType;
-  status: 'scheduled' | 'completed' | 'skipped';
+  status: EventStatus;
+  date: string;
 }) {
-  const statusConfig = getStatusConfig(status);
+  const displayStatus = getDisplayStatus(status, date);
+  const statusConfig = getStatusConfig(displayStatus);
   const Icon = getEventIcon(type);
   return <Icon className={`w-3.5 h-3.5 ${statusConfig.iconClass}`} />;
 }

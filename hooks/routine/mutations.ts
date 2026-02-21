@@ -124,29 +124,6 @@ export function useCompleteRoutineEvent() {
 }
 
 /**
- * 이벤트 건너뛰기 Mutation
- *
- * @example
- * const skip = useSkipRoutineEvent();
- * skip.mutate('event-id');
- */
-export function useSkipRoutineEvent() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: routineEventApi.skipEvent,
-
-    onSuccess: (updatedEvent) => {
-      updateEventCacheAndInvalidate(queryClient, updatedEvent);
-    },
-
-    onError: (error) => {
-      console.error('[RoutineEvent] Skip failed:', error);
-    },
-  });
-}
-
-/**
  * 워크아웃 데이터 업데이트 Mutation
  *
  * @example

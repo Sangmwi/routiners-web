@@ -7,21 +7,20 @@ export type StatsPeriod = 'weekly' | 'monthly';
 interface PeriodTabsProps {
   period: StatsPeriod;
   onPeriodChange: (period: StatsPeriod) => void;
+  /** 주간: "12월 29일 ~ 1월 4일", 월간: "2026년 2월" */
   label: string;
+  /** 주간일 때 날짜 텍스트 위에 표시할 연도 (e.g. "2026년") */
+  yearLabel?: string;
   onPrev: () => void;
   onNext: () => void;
   canGoNext: boolean;
 }
 
-/**
- * 기간 선택 + 날짜 네비게이션 (1행 통합)
- *
- * 좌: < 날짜 라벨 >    우: [주간|월간] 세그먼트 토글
- */
 export default function PeriodTabs({
   period,
   onPeriodChange,
   label,
+  yearLabel,
   onPrev,
   onNext,
   canGoNext,
@@ -38,7 +37,14 @@ export default function PeriodTabs({
           <CaretLeftIcon size={16} weight="bold" />
         </button>
 
-        <span className="text-sm text-muted-foreground font-medium">{label}</span>
+        <span className="relative text-sm text-muted-foreground font-medium">
+          {yearLabel && (
+            <span className="absolute -top-3.5 left-0 text-[10px] text-muted-foreground/60">
+              {yearLabel}
+            </span>
+          )}
+          {label}
+        </span>
 
         <button
           type="button"

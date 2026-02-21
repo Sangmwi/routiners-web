@@ -9,7 +9,7 @@ import { isMealData } from '@/lib/types/guards';
 import { useRoutineEventByDateSuspense } from './queries';
 import {
   useCompleteRoutineEvent,
-  useSkipRoutineEvent,
+  useUpdateRoutineEvent,
   useDeleteRoutineEvent,
   useUpdateMealData,
 } from './mutations';
@@ -33,7 +33,7 @@ export function useMealEvent(date: string) {
 
   // 뮤테이션
   const completeEvent = useCompleteRoutineEvent();
-  const skipEvent = useSkipRoutineEvent();
+  const updateEvent = useUpdateRoutineEvent();
   const updateMeal = useUpdateMealData();
   const deleteEvent = useDeleteRoutineEvent();
 
@@ -101,14 +101,6 @@ export function useMealEvent(date: string) {
     );
   };
 
-  // ── 건너뛰기 ─────────────────────────────────────────────────────────────
-  const handleSkip = () => {
-    if (!event) return;
-    skipEvent.mutate(event.id, {
-      onError: () => showError('식단 스킵에 실패했어요'),
-    });
-  };
-
   // ── 개별 끼니 완료 토글 ───────────────────────────────────────────────────
   const handleMealToggle = (mealIndex: number) => {
     if (!event || !mealData || event.status !== 'scheduled') return;
@@ -164,17 +156,33 @@ export function useMealEvent(date: string) {
     });
   };
 
+  // ── 완료 되돌리기 ─────────────────────────────────────────────────────────
+  const handleUncomplete = () => {
+    if (!event || event.status !== 'completed') return;
+    confirm({
+      title: '완료를 되돌리시겠어요?',
+      message: '루틴이 미완료 상태로 돌아가요.',
+      confirmText: '되돌리기',
+      onConfirm: () => {
+        updateEvent.mutate(
+          { id: event.id, data: { status: 'scheduled' } },
+          { onError: () => showError('되돌리기에 실패했어요') }
+        );
+      },
+    });
+  };
+
   return {
     event,
     mealData,
     handleDelete,
     handleComplete,
-    handleSkip,
+    handleUncomplete,
     handleMealToggle,
     handleRemoveMeal,
     handleAddMeal,
     isUpdating: updateMeal.isPending,
     isCompleting: completeEvent.isPending,
-    isSkipping: skipEvent.isPending,
+    isUncompleting: updateEvent.isPending,
   };
 }

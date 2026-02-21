@@ -201,7 +201,7 @@ export const GET_CURRENT_ROUTINE: AIToolDefinition = {
   type: 'function',
   name: 'get_current_routine',
   description:
-    '사용자의 현재 운동 루틴 이벤트를 조회합니다. 향후 예정(scheduled)된 이벤트와 최근 2주간 완료(completed)/건너뛴(skipped) 이벤트를 포함합니다. 각 이벤트에 id(편집 도구용)와 운동별 id, 이름, 세트 수가 포함됩니다. 루틴 수정/조회 시 반드시 먼저 호출하세요.',
+    '사용자의 현재 운동 루틴 이벤트를 조회합니다. 향후 예정(scheduled)된 이벤트와 최근 2주간 완료(completed) 이벤트를 포함합니다. 각 이벤트에 id(편집 도구용)와 운동별 id, 이름, 세트 수가 포함됩니다. 루틴 수정/조회 시 반드시 먼저 호출하세요.',
   parameters: {
     type: 'object',
     properties: {},
@@ -549,7 +549,7 @@ export const GENERATE_ROUTINE_PREVIEW: AIToolDefinition = {
   type: 'function',
   name: 'generate_routine_preview',
   description:
-    '1주 운동 루틴 미리보기를 생성합니다. 시스템이 1주차 데이터를 4주로 자동 확장합니다.\n\n⚠️ 필수 조건:\n- duration_weeks는 반드시 1로 설정 (시스템이 4주로 확장)\n- weeks 배열은 정확히 1개만 포함\n- 각 week의 days 배열 길이는 days_per_week와 일치해야 함\n- 각 day는 최소 1개 이상의 exercise 포함 필수\n- exercise는 name(문자열), sets(숫자), reps(문자열 "8-12"), rest(문자열 "90초") 모두 필수\n\n수정 요청이 오면 피드백을 반영하여 다시 이 도구를 호출하세요.',
+    '1주 운동 루틴 미리보기를 생성합니다. 사용자가 적용 시 1~4주 중 선택합니다.\n\n⚠️ 필수 조건:\n- duration_weeks는 반드시 1로 설정\n- weeks 배열은 정확히 1개만 포함\n- 각 week의 days 배열 길이는 days_per_week와 일치해야 함\n- 각 day는 최소 1개 이상의 exercise 포함 필수\n- exercise는 name(문자열), sets(숫자), reps(문자열 "8-12"), rest(문자열 "90초") 모두 필수\n\n수정 요청이 오면 피드백을 반영하여 다시 이 도구를 호출하세요.',
   parameters: {
     type: 'object',
     properties: {
@@ -563,7 +563,7 @@ export const GENERATE_ROUTINE_PREVIEW: AIToolDefinition = {
       },
       duration_weeks: {
         type: 'integer',
-        description: '루틴 기간 (항상 1로 설정). 시스템이 2주로 자동 확장합니다.',
+        description: '루틴 기간 (항상 1로 설정).',
       },
       days_per_week: {
         type: 'integer',

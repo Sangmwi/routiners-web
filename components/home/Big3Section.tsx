@@ -29,7 +29,7 @@ export default function Big3Section({ summary }: Big3SectionProps) {
     <section>
       <SectionHeader
         title="3대 운동"
-        action={{ label: '통계', href: '/routine/stats?tab=workout' }}
+        action={{ label: '통계', href: '/stats?tab=workout' }}
       />
 
       <div className="bg-muted/20 rounded-2xl p-4 mt-3">
@@ -54,7 +54,7 @@ export default function Big3Section({ summary }: Big3SectionProps) {
               </div>
               {hasHistory && (
                 <div className="flex-1 min-w-0">
-                  <MiniSparkline data={summary.history.map((p) => p.total)} height={36} />
+                  <MiniSparkline data={summary.history.map((p) => p.total)} height={36} showAllDots />
                 </div>
               )}
             </div>

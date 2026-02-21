@@ -68,10 +68,21 @@ function convertAIRoutineToEvents(
     ai_session_id: string;
   }> = [];
 
-  // 적용할 주차 제한
-  const weeksToApply = weekCount
-    ? routineData.weeks.slice(0, weekCount)
-    : routineData.weeks;
+  // 적용할 주차 결정: 1주 데이터면 weekCount번 복제, 다주 데이터면 기존 slice
+  let weeksToApply;
+  if (routineData.weeks.length === 1) {
+    const baseWeek = routineData.weeks[0];
+    const count = weekCount || 1;
+    weeksToApply = Array.from({ length: count }, (_, i) => ({
+      ...baseWeek,
+      weekNumber: i + 1,
+      days: baseWeek.days.map(day => ({ ...day })),
+    }));
+  } else {
+    weeksToApply = weekCount
+      ? routineData.weeks.slice(0, weekCount)
+      : routineData.weeks;
+  }
 
   if (weeksToApply.length === 0) {
     return events;
@@ -314,38 +325,24 @@ export function executeGenerateRoutinePreview(
     }));
   };
 
-  // weeks 데이터 처리: 1주면 4주로 복제 (Phase 11.5)
-  let weeks: RoutinePreviewWeek[];
-
-  if (args.weeks.length === 1) {
-    // 1주 데이터를 4주로 복제
-    const week1Days = convertDays(args.weeks[0].days);
-    weeks = [
-      { weekNumber: 1, days: week1Days },
-      { weekNumber: 2, days: week1Days.map(day => ({ ...day })) },
-      { weekNumber: 3, days: week1Days.map(day => ({ ...day })) },
-      { weekNumber: 4, days: week1Days.map(day => ({ ...day })) },
-    ];
-  } else {
-    // 2주 이상인 경우 그대로 사용
-    weeks = args.weeks.map((week) => ({
-      weekNumber: week.weekNumber,
-      days: convertDays(week.days),
-    }));
-  }
+  // weeks 데이터 처리: AI가 보낸 그대로 사용 (사용자가 적용 시 주차 선택)
+  const weeks: RoutinePreviewWeek[] = args.weeks.map((week) => ({
+    weekNumber: week.weekNumber,
+    days: convertDays(week.days),
+  }));
 
   const previewData: RoutinePreviewData = {
     id: previewId,
     title: args.title,
     description: args.description,
-    durationWeeks: 4,  // 최대 4주 (Phase 11.5)
+    durationWeeks: 1,  // 1주 생성, 사용자가 적용 시 주차 선택
     daysPerWeek: args.days_per_week,
     weeks,
     // 원본 데이터 저장 (apply_routine에서 사용)
     rawRoutineData: {
       title: args.title,
       description: args.description,
-      duration_weeks: 4,  // 최대 4주 (Phase 11.5)
+      duration_weeks: 1,  // 1주 생성, 사용자가 적용 시 주차 선택
       days_per_week: args.days_per_week,
       routine_data: {
         weeks: weeks.map((week) => ({

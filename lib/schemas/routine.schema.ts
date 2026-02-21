@@ -15,7 +15,7 @@ export const EventTypeSchema = z.enum(['workout', 'meal'], {
   errorMap: () => ({ message: '유효하지 않은 이벤트 타입입니다.' }),
 });
 
-export const EventStatusSchema = z.enum(['scheduled', 'completed', 'skipped'], {
+export const EventStatusSchema = z.enum(['scheduled', 'completed'], {
   errorMap: () => ({ message: '유효하지 않은 이벤트 상태입니다.' }),
 });
 

@@ -57,13 +57,12 @@ export default function PreviewDetailDrawer({
   const hasConflicts = (preview.conflicts?.length ?? 0) > 0;
   const isActionable = status === 'pending' && !isApplying;
 
-  // 선택한 주차까지의 총 일수 계산
-  const totalDays = weeks
-    .slice(0, selectedWeekCount)
-    .reduce((sum, w) => sum + w.days.length, 0);
+  // 선택한 주차까지의 총 일수 계산 (1주 데이터 × 선택 주차)
+  const daysPerWeek = firstWeek.days.length;
+  const totalDays = selectedWeekCount * daysPerWeek;
 
-  // 주차 선택 옵션 (최대 4주)
-  const weekOptions = Array.from({ length: Math.min(weeks.length, 4) }, (_, i) => ({
+  // 주차 선택 옵션 (항상 1~4주)
+  const weekOptions = Array.from({ length: 4 }, (_, i) => ({
     value: i + 1,
     label: `${i + 1}주`,
   }));

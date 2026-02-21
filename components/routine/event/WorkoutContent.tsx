@@ -35,7 +35,7 @@ interface WorkoutContentProps {
  * 운동 상세 콘텐츠 (Suspense 내부)
  *
  * Phase 기반 렌더링:
- * - overview: 운동 목록 + 시작하기/건너뛰기 버튼
+ * - overview: 운동 목록 + 시작하기 버튼
  * - active: ActiveWorkout (full-screen overlay)
  * - complete: WorkoutComplete (full-screen overlay)
  */
@@ -48,10 +48,10 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
     workoutData,
     handleDelete,
     handleComplete,
-    handleSkip,
+    handleUncomplete,
     handleSetsChange,
     isCompleting,
-    isSkipping,
+    isUncompleting,
   } = useWorkoutEvent(date);
 
   // 날짜 포맷 & 이벤트 설정
@@ -169,7 +169,7 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
         </div>
       );
     } else {
-      // completed/skipped: 삭제만
+      // completed: 삭제만
       onHeaderAction(
         <button
           onClick={() => handleDeleteRef.current()}
@@ -246,7 +246,7 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
               <eventConfig.icon size={18} className={eventConfig.color} weight="fill" />
               <p className="text-sm text-muted-foreground">{formattedDate}</p>
             </div>
-            <EventStatusBadge status={event.status} />
+            <EventStatusBadge status={event.status} date={event.date} />
           </div>
 
           {isEditMode && (
@@ -341,10 +341,12 @@ export default function WorkoutContent({ date, onTitleChange, onHeaderAction }: 
         <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 pb-safe bg-background border-t border-border">
           <EventActionButtons
             status={event.status}
+            date={event.date}
             mode="start"
+            onComplete={handleComplete}
+            onUncomplete={handleUncomplete}
             onStart={session.startWorkout}
-            onSkip={handleSkip}
-            isLoading={isSkipping}
+            isLoading={isCompleting || isUncompleting}
             startDisabled={!isToday}
             hasActiveSession={session.hasActiveSession}
           />

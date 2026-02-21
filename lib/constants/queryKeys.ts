@@ -266,7 +266,7 @@ export interface RoutineEventFilters {
   startDate?: string;
   endDate?: string;
   type?: 'workout' | 'meal';
-  status?: 'scheduled' | 'completed' | 'skipped';
+  status?: 'scheduled' | 'completed';
   limit?: number;
   offset?: number;
 }

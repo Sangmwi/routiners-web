@@ -162,26 +162,17 @@ export default function ChatPreviewSummary({
               수정
             </button>
 
-            {/* 적용 - Solid CTA (나머지 공간) */}
+            {/* 자세히 보기 - Solid CTA (나머지 공간) → DetailDrawer에서 주차 선택 후 적용 */}
             <button
-              onClick={() => onApply(hasConflicts)}
+              onClick={onViewDetails}
               disabled={!isActionable}
-              className={`flex-1 h-11 rounded-full text-sm font-semibold
+              className="flex-1 h-11 rounded-full text-sm font-semibold
                          shadow-sm transition-all active:scale-[0.98] disabled:opacity-50
                          flex items-center justify-center gap-2
-                         ${hasConflicts
-                           ? 'bg-amber-500 text-white hover:bg-amber-600'
-                           : 'bg-primary text-primary-foreground hover:bg-primary/90'
-                         }`}
+                         bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              {isApplying ? (
-                <LoadingSpinner size="sm" variant="current" />
-              ) : (
-                <>
-                  적용
-                  <ArrowRightIcon size={16} weight="bold" />
-                </>
-              )}
+              자세히 보기
+              <ArrowRightIcon size={16} weight="bold" />
             </button>
           </div>
         ) : (

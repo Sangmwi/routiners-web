@@ -33,7 +33,6 @@ export {
   useCreateRoutineEventsBatch,
   useUpdateRoutineEvent,
   useCompleteRoutineEvent,
-  useSkipRoutineEvent,
   useUpdateWorkoutData,
   useDeleteRoutineEvent,
   useDeleteRoutineEventsBySession,

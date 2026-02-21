@@ -45,10 +45,10 @@ export default function MonthlyProgressChart({ stats }: MonthlyProgressChartProp
 
               {/* 식단 */}
               <div className="flex items-center gap-1.5">
-                <ForkKnifeIcon size={12} weight="fill" className="text-primary/50 shrink-0" />
+                <ForkKnifeIcon size={12} weight="fill" className="text-primary shrink-0" />
                 <div className="h-2 bg-muted rounded-full overflow-hidden flex-1">
                   <div
-                    className="h-full bg-primary/50 rounded-full transition-all duration-300"
+                    className="h-full bg-primary rounded-full transition-all duration-300"
                     style={{ width: `${Math.min(100, Math.max(0, week.mealRate))}%` }}
                   />
                 </div>

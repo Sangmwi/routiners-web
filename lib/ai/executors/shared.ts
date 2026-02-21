@@ -30,7 +30,6 @@ interface CurrentRoutineEvent {
 interface CurrentRoutineData {
   scheduledCount: number;
   completedCount: number;
-  skippedCount: number;
   lastScheduledDate: string | null;
   events: CurrentRoutineEvent[];
 }
@@ -97,7 +96,7 @@ export async function executeGetInbodyHistory(
  *
  * 유저의 현재 routine_events 조회 (세션 무관)
  * - 향후 scheduled 이벤트 전체
- * - 최근 2주 completed/skipped 이벤트
+ * - 최근 2주 completed 이벤트
  * - AI가 기존 루틴을 참고하여 수정/재생성 가능
  */
 export async function executeGetCurrentRoutine(
@@ -128,7 +127,6 @@ export async function executeGetCurrentRoutine(
   // 상태별 카운트 및 마지막 스케줄 날짜 계산
   let scheduledCount = 0;
   let completedCount = 0;
-  let skippedCount = 0;
   let lastScheduledDate: string | null = null;
 
   const mappedEvents: CurrentRoutineEvent[] = events.map((e) => {
@@ -137,8 +135,6 @@ export async function executeGetCurrentRoutine(
       lastScheduledDate = e.date;
     } else if (e.status === 'completed') {
       completedCount++;
-    } else if (e.status === 'skipped') {
-      skippedCount++;
     }
 
     // data에서 운동 ID, 이름, 세트 수 추출 (편집 도구에서 참조 가능)
@@ -163,7 +159,6 @@ export async function executeGetCurrentRoutine(
     data: {
       scheduledCount,
       completedCount,
-      skippedCount,
       lastScheduledDate,
       events: mappedEvents,
     },

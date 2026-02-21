@@ -62,6 +62,7 @@ export default function NutritionStatsTab() {
         period={period}
         onPeriodChange={setPeriod}
         label={label}
+        yearLabel={period === 'weekly' ? `${weekBaseDate.getFullYear()}년` : undefined}
         onPrev={handlePrev}
         onNext={handleNext}
         canGoNext={canGoNext}
@@ -130,9 +131,9 @@ function NutritionMetrics({ meal }: { meal: WeeklyStats['meal'] | MonthlyStats['
     <div className="space-y-6">
       {/* 완료 현황 */}
       <div className="flex items-center gap-2 bg-muted/20 rounded-xl px-4 py-3">
-        <ForkKnifeIcon size={18} weight="fill" className="text-primary/70" />
+        <ForkKnifeIcon size={18} weight="fill" className="text-primary" />
         <span className="text-sm font-medium text-foreground">
-          {meal.completed + meal.scheduled + meal.skipped}일 중{' '}
+          {meal.completed + meal.scheduled}일 중{' '}
           <span className="text-primary">{meal.completed}일</span> 완료
         </span>
         <span className="ml-auto text-sm font-bold text-primary">
@@ -145,7 +146,7 @@ function NutritionMetrics({ meal }: { meal: WeeklyStats['meal'] | MonthlyStats['
         <div className="flex items-center gap-1.5 mb-3">
           <h3 className="text-sm font-medium text-foreground">영양 섭취</h3>
           {isPlannedOnly && meal.plannedCalories > 0 && (
-            <span className="text-[10px] text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-md">
+            <span className="text-[10px] text-scheduled bg-scheduled/10 px-1.5 py-0.5 rounded-md">
               예정
             </span>
           )}

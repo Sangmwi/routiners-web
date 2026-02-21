@@ -1,7 +1,7 @@
 'use client';
 
 import { useCurrentUserProfileSuspense } from '@/hooks/profile';
-import { useRoutineEventByDateSuspense } from '@/hooks/routine';
+import { useRoutineEventByDateSuspense, useNextScheduledWorkoutSuspense } from '@/hooks/routine';
 import { useInBodySummarySuspense, useInBodyRecordsSuspense } from '@/hooks/inbody/queries';
 import { useProgressSummarySuspense } from '@/hooks/progress';
 import { formatDate } from '@/lib/utils/dateHelpers';
@@ -51,6 +51,7 @@ export default function HomeContent() {
   const today = formatDate(new Date());
   const { data: todayWorkout } = useRoutineEventByDateSuspense(today, 'workout');
   const { data: todayMeal } = useRoutineEventByDateSuspense(today, 'meal');
+  const { data: nextScheduledWorkout } = useNextScheduledWorkoutSuspense();
   const { data: inbodySummary } = useInBodySummarySuspense();
   const { data: inbodyRecords } = useInBodyRecordsSuspense(12, 0);
   const { data: progressSummary } = useProgressSummarySuspense();
@@ -73,12 +74,13 @@ export default function HomeContent() {
 
   return (
     <div className="space-y-10">
-      <GreetingSection nickname={user?.nickname || '사용자'} />
+      {/* <GreetingSection nickname={user?.nickname || '사용자'} /> */}
 
       {/* 오늘의 루틴 (2열 카드) */}
       <TodayRoutineCard
         workoutEvent={todayWorkout || null}
         mealEvent={todayMeal || null}
+        nextScheduledWorkout={!todayWorkout ? nextScheduledWorkout : null}
       />
 
       {/* 인바디 */}

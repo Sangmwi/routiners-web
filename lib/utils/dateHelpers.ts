@@ -147,7 +147,7 @@ export function getToday(): string {
  * @returns { startDate, endDate, weekLabel } 주간 범위 정보
  *
  * @example
- * getWeekRange() // { startDate: '2025-01-13', endDate: '2025-01-19', weekLabel: '1월 13일 ~ 1월 19일' }
+ * getWeekRange() // { startDate: '2025-01-13', endDate: '2025-01-19', weekLabel: '2025년 1월 13일 ~ 1월 19일' }
  */
 export function getWeekRange(date: Date = new Date()): {
   startDate: string;
@@ -207,6 +207,30 @@ export function getDayOfWeek(date: Date | string): string {
   const d = typeof date === 'string' ? parseDate(date) : date;
   const days = ['일', '월', '화', '수', '목', '금', '토'];
   return days[d.getDay()];
+}
+
+/**
+ * 미래 날짜까지 남은 일수를 한국어 텍스트로 변환
+ *
+ * @param targetDate - YYYY-MM-DD 형식 문자열
+ * @returns "오늘", "내일", "모레", "3일 후" 등
+ *
+ * @example
+ * getCountdownText('2026-02-22') // '내일' (오늘이 2/21일 때)
+ * getCountdownText('2026-02-26') // '5일 후'
+ */
+export function getCountdownText(targetDate: string): string {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = parseDate(targetDate);
+  const diffDays = Math.round(
+    (target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  if (diffDays <= 0) return '오늘';
+  if (diffDays === 1) return '내일';
+  if (diffDays === 2) return '모레';
+  return `${diffDays}일 후`;
 }
 
 /**

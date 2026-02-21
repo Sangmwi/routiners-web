@@ -43,12 +43,12 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
     mealData,
     handleDelete,
     handleComplete,
-    handleSkip,
+    handleUncomplete,
     handleMealToggle,
     handleRemoveMeal,
     isUpdating,
     isCompleting,
-    isSkipping,
+    isUncompleting,
   } = useMealEvent(date);
 
   const formattedDate = formatKoreanDate(date, { weekday: true });
@@ -216,7 +216,7 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
               <eventConfig.icon size={18} className={eventConfig.color} weight="fill" />
               <p className="text-sm text-muted-foreground">{formattedDate}</p>
             </div>
-            <EventStatusBadge status={event.status} />
+            <EventStatusBadge status={event.status} date={event.date} />
           </div>
 
           {isEditMode && (
@@ -313,9 +313,10 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
         <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 pb-safe bg-background border-t border-border">
           <EventActionButtons
             status={event.status}
+            date={event.date}
             onComplete={handleComplete}
-            onSkip={handleSkip}
-            isLoading={isCompleting || isSkipping || isUpdating}
+            onUncomplete={handleUncomplete}
+            isLoading={isCompleting || isUncompleting || isUpdating}
           />
         </div>
       )}

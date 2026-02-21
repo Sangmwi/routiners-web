@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AppLink from '@/components/common/AppLink';
-import { BarbellIcon, ForkKnifeIcon, PlusIcon, CheckCircleIcon } from '@phosphor-icons/react';
+import { BarbellIcon, ForkKnifeIcon, PlusIcon, CheckCircleIcon, BedIcon } from '@phosphor-icons/react';
 import { formatKoreanDate, formatDate } from '@/lib/utils/dateHelpers';
 import { isWorkoutData, isMealData } from '@/lib/types/guards';
 import type { RoutineEvent } from '@/lib/types/routine';
@@ -17,6 +17,7 @@ import ImportUnitMealSheet from '@/components/routine/sheets/ImportUnitMealSheet
 interface TodayRoutineCardProps {
   workoutEvent: RoutineEvent | null;
   mealEvent: RoutineEvent | null;
+  nextScheduledWorkout?: RoutineEvent | null;
 }
 
 /**
@@ -27,7 +28,7 @@ interface TodayRoutineCardProps {
  * - 데이터 카드: 타이틀 + 겹치는 아이콘 + 정보 + 진행률 바
  * - 빈 상태 탭 → 드로어 열림
  */
-export default function TodayRoutineCard({ workoutEvent, mealEvent }: TodayRoutineCardProps) {
+export default function TodayRoutineCard({ workoutEvent, mealEvent, nextScheduledWorkout }: TodayRoutineCardProps) {
   return (
     <section>
       <div className="flex items-baseline justify-between mb-6">
@@ -38,7 +39,7 @@ export default function TodayRoutineCard({ workoutEvent, mealEvent }: TodayRouti
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <WorkoutColumn event={workoutEvent} />
+        <WorkoutColumn event={workoutEvent} nextScheduledWorkout={nextScheduledWorkout} />
         <MealColumn event={mealEvent} />
       </div>
     </section>
@@ -49,7 +50,7 @@ export default function TodayRoutineCard({ workoutEvent, mealEvent }: TodayRouti
 // 운동 열
 // ---------------------------------------------------------------------------
 
-function WorkoutColumn({ event }: { event: RoutineEvent | null }) {
+function WorkoutColumn({ event, nextScheduledWorkout }: { event: RoutineEvent | null; nextScheduledWorkout?: RoutineEvent | null }) {
   const router = useRouter();
   const today = formatDate(new Date());
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -76,26 +77,20 @@ function WorkoutColumn({ event }: { event: RoutineEvent | null }) {
   const visibleExercises = exercises.slice(0, MAX_EXERCISE_ICONS);
   const extraCount = exercises.length - MAX_EXERCISE_ICONS;
 
-  // Info: duration + total sets (not redundant with title/count in label row)
+  // 게이지 옆 요약: X종목 X세트
   const totalSets = exercises.reduce((sum, e) => sum + e.sets.length, 0);
-  const estimatedMin = data?.estimatedDuration;
-  const estimatedCal = data?.estimatedCaloriesBurned;
-  const infoParts: string[] = [];
-  if (estimatedMin) infoParts.push(`${estimatedMin}분`);
-  if (totalSets > 0) infoParts.push(`총 ${totalSets}세트`);
-  if (!estimatedMin && estimatedCal) infoParts.push(`총 ${estimatedCal}kcal`);
+  const summaryParts: string[] = [];
+  if (totalCount > 0) summaryParts.push(`${totalCount}종목`);
+  if (totalSets > 0) summaryParts.push(`${totalSets}세트`);
 
   return (
     <div>
       {/* 라벨 행 (카드 밖) */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center mb-3">
         <div className="flex items-center gap-1.5">
           <BarbellIcon size={14} weight="fill" className="text-primary" />
           <span className="text-xs font-medium text-muted-foreground">운동</span>
         </div>
-        {event && totalCount > 0 && (
-          <span className="text-xs text-muted-foreground">{completedCount}/{totalCount}개</span>
-        )}
       </div>
 
       {/* 카드 */}
@@ -110,14 +105,14 @@ function WorkoutColumn({ event }: { event: RoutineEvent | null }) {
               {visibleExercises.map((ex, i, arr) => (
                 <div
                   key={ex.id}
-                  className="relative size-9 rounded-full bg-background ring-1 ring-muted/20 flex items-center justify-center"
+                  className="relative size-10 rounded-full bg-background ring-1 ring-muted/20 flex items-center justify-center"
                   style={{
                     marginLeft: i > 0 ? -10 : undefined,
                     zIndex: arr.length - i,
                   }}
                 >
                   {/* TODO: 종목별 고유 아이콘으로 교체 */}
-                  <BarbellIcon size={16} weight="fill" className="text-primary" />
+                  <BarbellIcon size={20} weight="fill" className="text-primary" />
                 </div>
               ))}
               {extraCount > 0 && (
@@ -128,35 +123,52 @@ function WorkoutColumn({ event }: { event: RoutineEvent | null }) {
             </div>
           )}
 
-          {/* 타이틀 + 정보 (중앙) */}
-          <div className="flex-1 flex flex-col justify-center gap-1.5">
-            <h3 className="text-base font-semibold text-foreground leading-snug line-clamp-2">
+          {/* 타이틀 (중앙) */}
+          <div className="flex-1 flex flex-col justify-center">
+            <h3 className="text-base font-semibold text-foreground leading-snug line-clamp-2 text-left">
               {event.title}
             </h3>
-            {infoParts.length > 0 && (
-              <p className="text-sm text-muted-foreground">
-                {infoParts.join(' · ')}
-              </p>
-            )}
           </div>
 
-          {/* 진행률 바 */}
+          {/* 요약 + 진행률 바 */}
           {totalCount > 0 && (
-            <div className="h-1.5 bg-muted/50 rounded-full overflow-hidden mt-3">
-              <div
-                className="h-full bg-primary rounded-full transition-all duration-300"
-                style={{ width: `${progressPercent}%` }}
-              />
+            <div className="flex flex-col gap-1.5 mt-3">
+              {summaryParts.length > 0 && (
+                <p className="text-xs text-muted-foreground text-left">
+                  {summaryParts.join(' · ')}
+                </p>
+              )}
+              <div className="h-1.5 bg-muted/50 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all duration-300"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
             </div>
           )}
 
           {/* 완료 오버레이 */}
           {event.status === 'completed' && (
-            <div className="absolute inset-0 z-10 rounded-xl bg-background/60 flex items-center justify-center">
+            <div className="absolute inset-0 z-10 rounded-xl bg-background/70 flex items-center justify-center">
               <CheckCircleIcon size={40} weight="fill" className="text-primary" />
             </div>
           )}
         </AppLink>
+      ) : nextScheduledWorkout ? (
+        <div className="w-full bg-muted/20 rounded-xl p-4 flex flex-col min-h-[200px]">
+          <BedIcon size={40} weight="duotone" className="text-muted-foreground/60" />
+
+          <div className="flex-1 flex flex-col justify-center">
+            <h3 className="text-base font-semibold text-foreground leading-snug">쉬는날</h3>
+          </div>
+
+          <div className="flex flex-col gap-0.5">
+            <p className="text-xs text-muted-foreground">다음 운동</p>
+            <p className="text-xs text-muted-foreground/60">
+              {formatKoreanDate(nextScheduledWorkout.date, { year: false, weekday: true, weekdayFormat: 'short' })}
+            </p>
+          </div>
+        </div>
       ) : (
         <>
           <button
@@ -164,13 +176,13 @@ function WorkoutColumn({ event }: { event: RoutineEvent | null }) {
             onClick={() => setIsDrawerOpen(true)}
             className="w-full bg-muted/20 rounded-xl p-4 flex flex-col items-center justify-center gap-2 min-h-[200px] active:bg-muted/30 transition-colors"
           >
-            <BarbellIcon size={28} weight="duotone" className="text-muted-foreground/60" />
+            <BarbellIcon size={40} weight="duotone" className="text-muted-foreground/60" />
             <p className="text-sm font-medium text-muted-foreground">오늘 운동 없음</p>
             <span className="inline-flex items-center gap-1 text-sm text-primary">
               <PlusIcon size={14} weight="bold" />
               기록 추가
             </span>
-          </button> 
+          </button>
 
           <WorkoutAddDrawer
             isOpen={isDrawerOpen}
@@ -224,14 +236,11 @@ function MealColumn({ event }: { event: RoutineEvent | null }) {
   return (
     <div>
       {/* 라벨 행 (카드 밖) */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center mb-3">
         <div className="flex items-center gap-1.5">
           <ForkKnifeIcon size={14} weight="fill" className="text-primary/70" />
           <span className="text-xs font-medium text-muted-foreground">식단</span>
         </div>
-        {event && totalCount > 0 && (
-          <span className="text-xs text-muted-foreground">{completedCount}/{totalCount}끼</span>
-        )}
       </div>
 
       {/* 카드 */}
@@ -249,44 +258,44 @@ function MealColumn({ event }: { event: RoutineEvent | null }) {
                 return (
                   <div
                     key={type}
-                    className="relative size-9 rounded-full bg-background ring-1 ring-muted/20 flex items-center justify-center"
+                    className="relative size-10 rounded-full bg-background ring-1 ring-muted/20 flex items-center justify-center"
                     style={{
                       marginLeft: i > 0 ? -10 : undefined,
                       zIndex: arr.length - i,
                     }}
                   >
-                    <Icon size={18} weight={config.weight} className={config.color} />
+                    <Icon size={20} weight={config.weight} className={config.color} />
                   </div>
                 );
               })}
             </div>
           )}
 
-          {/* 타이틀 + 칼로리 (중앙) */}
-          <div className="flex-1 flex flex-col justify-center gap-1.5">
-            <h3 className="text-base font-semibold text-foreground leading-snug line-clamp-2">
+          {/* 타이틀 (중앙) */}
+          <div className="flex-1 flex flex-col justify-center">
+            <h3 className="text-base font-semibold text-foreground leading-snug line-clamp-2 text-left">
               {event.title}
             </h3>
-            {totalCalories ? (
-              <p className="text-sm text-muted-foreground">
-                총 {totalCalories.toLocaleString()}kcal
-              </p>
-            ) : null}
           </div>
 
-          {/* 진행률 바 */}
+          {/* 요약 + 진행률 바 */}
           {totalCount > 0 && (
-            <div className="h-1.5 bg-muted/50 rounded-full overflow-hidden mt-3">
-              <div
-                className="h-full bg-primary/70 rounded-full transition-all duration-300"
-                style={{ width: `${progressPercent}%` }}
-              />
+            <div className="flex flex-col gap-1.5 mt-3">
+              <p className="text-xs text-muted-foreground text-left">
+                {totalCount}끼{totalCalories ? ` · ${totalCalories.toLocaleString()}kcal` : ''}
+              </p>
+              <div className="h-1.5 bg-muted/50 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary/70 rounded-full transition-all duration-300"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
             </div>
           )}
 
           {/* 완료 오버레이 */}
           {event.status === 'completed' && (
-            <div className="absolute inset-0 z-10 rounded-xl bg-background/60 flex items-center justify-center">
+            <div className="absolute inset-0 z-10 rounded-xl bg-background/70 flex items-center justify-center">
               <CheckCircleIcon size={40} weight="fill" className="text-primary" />
             </div>
           )}
@@ -298,7 +307,7 @@ function MealColumn({ event }: { event: RoutineEvent | null }) {
             onClick={() => setIsDrawerOpen(true)}
             className="w-full bg-muted/20 rounded-xl p-4 flex flex-col items-center justify-center gap-2 min-h-[200px] active:bg-muted/30 transition-colors"
           >
-            <ForkKnifeIcon size={28} weight="duotone" className="text-muted-foreground/60" />
+            <ForkKnifeIcon size={40} weight="duotone" className="text-muted-foreground/60" />
             <p className="text-sm font-medium text-muted-foreground">오늘 식단 없음</p>
             <span className="inline-flex items-center gap-1 text-sm text-primary">
               <PlusIcon size={14} weight="bold" />

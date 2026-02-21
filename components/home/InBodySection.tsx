@@ -45,7 +45,7 @@ export default function InBodySection({ summary, history }: InBodySectionProps) 
             {INBODY_METRICS.map(({ key, label, unit, positiveIsGood }) => {
               const value = summary.latest?.[key];
               const change = summary.changes?.[key];
-              const sparkData = hasHistory ? history.map((r) => r[key]) : [];
+              const sparkData = hasHistory ? [...history].reverse().map((r) => r[key]) : [];
 
               return (
                 <div key={key} className="text-center">
@@ -67,7 +67,7 @@ export default function InBodySection({ summary, history }: InBodySectionProps) 
                   )}
                   {hasHistory && (
                     <div className="mt-1">
-                      <MiniSparkline data={sparkData} height={28} showEndDot={false} />
+                      <MiniSparkline data={sparkData} height={28} showAllDots />
                     </div>
                   )}
                 </div>

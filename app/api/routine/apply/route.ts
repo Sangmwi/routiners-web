@@ -131,13 +131,25 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
     // 9. 기존 scheduled 이벤트 삭제 (대체 모드에서만)
     //    - 이어붙이기 모드(appendMode)에서는 건너뜀
     //    - 새 루틴 날짜와 겹치는 scheduled 이벤트만 삭제 (세션 무관)
-    //    - completed/skipped 이벤트는 항상 보존
+    //    - completed 이벤트는 항상 보존
     let eventsPreserved = 0;
 
     if (!appendMode && (isReapply || forceOverwrite) && previewData.weeks && previewData.weeks.length > 0) {
-      const weeksToApply = weekCount
-        ? previewData.weeks.slice(0, weekCount)
-        : previewData.weeks;
+      // 1주 데이터면 weekCount번 복제, 다주 데이터면 기존 slice
+      let weeksToApply;
+      if (previewData.weeks.length === 1) {
+        const baseWeek = previewData.weeks[0];
+        const count = weekCount || 1;
+        weeksToApply = Array.from({ length: count }, (_, i) => ({
+          ...baseWeek,
+          weekNumber: i + 1,
+          days: baseWeek.days.map((d: { dayOfWeek: number }) => ({ ...d })),
+        }));
+      } else {
+        weeksToApply = weekCount
+          ? previewData.weeks.slice(0, weekCount)
+          : previewData.weeks;
+      }
 
       if (weeksToApply.length > 0) {
         const targetDays = weeksToApply[0].days.map(d => d.dayOfWeek);
@@ -158,12 +170,12 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
         });
 
         if (datesToDelete.length > 0) {
-          // 보존될 이벤트 수 조회 (completed/skipped)
+          // 보존될 이벤트 수 조회 (completed)
           const { data: preservedEvents } = await supabase
             .from('routine_events')
             .select('id')
             .eq('type', 'workout')
-            .in('status', ['completed', 'skipped'])
+            .eq('status', 'completed')
             .in('date', datesToDelete);
 
           eventsPreserved = preservedEvents?.length ?? 0;

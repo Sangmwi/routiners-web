@@ -12,6 +12,7 @@ import {
   MinusIcon,
 } from '@phosphor-icons/react';
 import { formatDate } from '@/lib/utils/dateHelpers';
+import { getDisplayStatus } from '@/lib/config/theme';
 import type { WeeklyStats } from '@/hooks/routine';
 import type { EventStatus } from '@/lib/types/routine';
 
@@ -27,10 +28,8 @@ export function WeeklyOverview({ stats }: WeeklyOverviewProps) {
   const totalEvents =
     stats.workout.scheduled +
     stats.workout.completed +
-    stats.workout.skipped +
     stats.meal.scheduled +
-    stats.meal.completed +
-    stats.meal.skipped;
+    stats.meal.completed;
 
   // 이벤트 없음 - 루틴 생성 안내
   if (totalEvents === 0) {
@@ -60,7 +59,7 @@ export function WeeklyOverview({ stats }: WeeklyOverviewProps) {
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-foreground">이번 주</h2>
-        <AppLink href="/routine/stats" className="text-sm font-medium text-primary flex items-center gap-0.5">
+        <AppLink href="/stats" className="text-sm font-medium text-primary flex items-center gap-0.5">
           통계
           <CaretRightIcon size={16} weight="bold" />
         </AppLink>
@@ -81,27 +80,11 @@ export function WeeklyOverview({ stats }: WeeklyOverviewProps) {
               <span className="text-xs text-muted-foreground/60">예정 없음</span>
             )}
           </div>
-          <div className="rounded-xl bg-muted/20 px-2.5 py-4">
-            <div className="grid grid-cols-7 gap-1 text-center mb-2">
-              {stats.dailyStats.map((day) => (
-                <span
-                  key={day.date}
-                  className={`text-[10px] ${day.date === today ? 'text-primary font-semibold' : 'text-muted-foreground font-medium'}`}
-                >
-                  {day.dayOfWeek}
-                </span>
-              ))}
-            </div>
-            <div className="grid grid-cols-7 gap-1 items-center">
-              {stats.dailyStats.map((day) => (
-                <StatusIcon
-                  key={`w-${day.date}`}
-                  status={day.workout}
-                  isToday={day.date === today}
-                />
-              ))}
-            </div>
-          </div>
+          <DayGrid
+            dailyStats={stats.dailyStats}
+            today={today}
+            statusKey="workout"
+          />
         </div>
 
         {/* 식단 */}
@@ -117,64 +100,100 @@ export function WeeklyOverview({ stats }: WeeklyOverviewProps) {
               <span className="text-xs text-muted-foreground/60">예정 없음</span>
             )}
           </div>
-          <div className="rounded-xl bg-muted/20 px-2.5 py-4">
-            <div className="grid grid-cols-7 gap-1 text-center mb-2">
-              {stats.dailyStats.map((day) => (
-                <span
-                  key={day.date}
-                  className={`text-[10px] ${day.date === today ? 'text-primary font-semibold' : 'text-muted-foreground font-medium'}`}
-                >
-                  {day.dayOfWeek}
-                </span>
-              ))}
-            </div>
-            <div className="grid grid-cols-7 gap-1 items-center">
-              {stats.dailyStats.map((day) => (
-                <StatusIcon
-                  key={`m-${day.date}`}
-                  status={day.meal}
-                  isToday={day.date === today}
-                />
-              ))}
-            </div>
-          </div>
+          <DayGrid
+            dailyStats={stats.dailyStats}
+            today={today}
+            statusKey="meal"
+          />
         </div>
       </div>
     </section>
   );
 }
 
-function StatusIcon({ status, isToday }: { status: EventStatus | null; isToday: boolean }) {
-  const size = 16;
+interface DayGridProps {
+  dailyStats: WeeklyStats['dailyStats'];
+  today: string;
+  statusKey: 'workout' | 'meal';
+}
 
-  if (status === 'completed') {
+function DayGrid({ dailyStats, today, statusKey }: DayGridProps) {
+  return (
+    <div className="rounded-xl bg-muted/20 px-2.5 py-2">
+      <div className="grid grid-cols-7 gap-1">
+        {dailyStats.map((day) => {
+          const isToday = day.date === today;
+          const hasEvent = day[statusKey] !== null;
+          const content = (
+            <>
+              <span
+                className={`text-[10px] ${
+                  isToday
+                    ? 'text-primary font-semibold'
+                    : 'text-muted-foreground font-medium'
+                }`}
+              >
+                {day.dayOfWeek}
+              </span>
+              <StatusIcon status={day[statusKey]} date={day.date} isToday={isToday} />
+            </>
+          );
+          const className = `flex flex-col items-center gap-2 py-2.5 rounded-lg ${
+            isToday ? 'bg-primary/10' : ''
+          }`;
+
+          return hasEvent ? (
+            <AppLink
+              key={day.date}
+              href={`/routine/${statusKey}/${day.date}`}
+              className={className}
+            >
+              {content}
+            </AppLink>
+          ) : (
+            <div key={day.date} className={className}>
+              {content}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function StatusIcon({ status, date, isToday }: { status: EventStatus | null; date: string; isToday: boolean }) {
+  if (!status) {
     return (
       <div className="flex justify-center">
-        <CheckCircleIcon size={size} weight="fill" className="text-primary" />
+        <MinusIcon size={12} className="text-muted-foreground/30 h-4!" />
       </div>
     );
   }
-  if (status === 'scheduled') {
+
+  const displayStatus = getDisplayStatus(status, date);
+
+  if (displayStatus === 'completed') {
     return (
       <div className="flex justify-center">
-        <ClockIcon
-          size={size}
-          weight="duotone"
-          className={isToday ? 'text-primary' : 'text-amber-500'}
-        />
+        <CheckCircleIcon size={16} weight="fill" className="text-primary" />
       </div>
     );
   }
-  if (status === 'skipped') {
+  if (displayStatus === 'incomplete') {
     return (
       <div className="flex justify-center">
-        <XCircleIcon size={size} weight="fill" className="text-muted-foreground" />
+        <XCircleIcon size={16} weight="fill" className="text-muted-foreground" />
       </div>
     );
   }
+  // scheduled
   return (
     <div className="flex justify-center">
-      <MinusIcon size={size} className="text-muted-foreground/30" />
+      <ClockIcon
+        size={16}
+        weight="duotone"
+        className={isToday ? 'text-primary' : 'text-amber-500'}
+      />
     </div>
   );
 }

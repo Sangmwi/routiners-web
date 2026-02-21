@@ -12,6 +12,7 @@ export {
   getEventIcon,
   getEventLabel,
   getStatusConfig,
+  getDisplayStatus,
 } from './theme/event';
 
-export type { EventType, EventStatus } from './theme/event';
+export type { EventType, DisplayStatus } from './theme/event';

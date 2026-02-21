@@ -36,6 +36,11 @@ export default function RoutineContent() {
   const { data: workoutEvents } = useUpcomingEventsSuspense('workout', 0, 14);
   const { data: mealEvents } = useUpcomingEventsSuspense('meal', 0, 14);
 
+  // 다음 예정 운동 파생 (쉬는날 vs 미등록 구분용, 추가 API 호출 없음)
+  const nextScheduledWorkout = !todayWorkout
+    ? workoutEvents?.find((e) => e.date > today && e.status === 'scheduled') ?? null
+    : null;
+
   // 리스트 데이터 → 개별 byDate 캐시 시딩 (상세 페이지 즉시 전환용)
   useSeedEventCache(workoutEvents);
   useSeedEventCache(mealEvents);
@@ -55,6 +60,7 @@ export default function RoutineContent() {
       <TodayRoutineCard
         workoutEvent={todayWorkout || null}
         mealEvent={todayMeal || null}
+        nextScheduledWorkout={nextScheduledWorkout}
       />
 
       {/* 3. 다가오는 루틴 (필터 칩 포함) */}

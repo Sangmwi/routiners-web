@@ -46,7 +46,7 @@ export default function Big3LiftCard({ summary }: Big3LiftCardProps) {
     <section>
       <SectionHeader
         title="3대 운동"
-        action={{ label: '기록 보기', href: '/routine/stats' }}
+        action={{ label: '기록 보기', href: '/stats' }}
       />
 
       <div className="bg-muted/20 rounded-2xl p-4 mt-3">

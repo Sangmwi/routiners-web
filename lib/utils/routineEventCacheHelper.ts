@@ -37,8 +37,12 @@ export function invalidateAfterRoutineApply(
   queryClient.invalidateQueries({
     queryKey: queryKeys.counselor.conversations(),
   });
-  // 루틴 이벤트 캐시
+  // 루틴 이벤트 캐시 (list + month)
   invalidateEventLists(queryClient);
+  // 루틴 적용은 배치 생성이므로 byDate 캐시도 무효화 (홈 화면 등)
+  queryClient.invalidateQueries({
+    queryKey: [...queryKeys.routineEvent.all, 'date'],
+  });
   // AI 세션 캐시
   invalidateAISessions(queryClient);
 }

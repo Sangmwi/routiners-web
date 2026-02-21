@@ -9,7 +9,7 @@ import { isWorkoutData } from '@/lib/types/guards';
 import {
   useRoutineEventByDateSuspense,
   useCompleteRoutineEvent,
-  useSkipRoutineEvent,
+  useUpdateRoutineEvent,
   useUpdateWorkoutData,
   useDeleteRoutineEvent,
 } from '@/hooks/routine';
@@ -33,7 +33,7 @@ export function useWorkoutEvent(date: string) {
 
   // 뮤테이션
   const completeEvent = useCompleteRoutineEvent();
-  const skipEvent = useSkipRoutineEvent();
+  const updateEvent = useUpdateRoutineEvent();
   const updateWorkout = useUpdateWorkoutData();
   const deleteEvent = useDeleteRoutineEvent();
 
@@ -67,14 +67,6 @@ export function useWorkoutEvent(date: string) {
     });
   };
 
-  // 건너뛰기
-  const handleSkip = () => {
-    if (!event) return;
-    skipEvent.mutate(event.id, {
-      onError: () => showError('운동 스킵에 실패했어요'),
-    });
-  };
-
   // 세트 변경 (overview 모드 ExerciseCard 편집용)
   const handleSetsChange = (exerciseId: string, sets: WorkoutSet[]) => {
     if (!event || !workoutData) return;
@@ -100,14 +92,30 @@ export function useWorkoutEvent(date: string) {
     );
   };
 
+  // 완료 되돌리기
+  const handleUncomplete = () => {
+    if (!event || event.status !== 'completed') return;
+    confirm({
+      title: '완료를 되돌리시겠어요?',
+      message: '루틴이 미완료 상태로 돌아가요.',
+      confirmText: '되돌리기',
+      onConfirm: () => {
+        updateEvent.mutate(
+          { id: event.id, data: { status: 'scheduled' } },
+          { onError: () => showError('되돌리기에 실패했어요') }
+        );
+      },
+    });
+  };
+
   return {
     event,
     workoutData,
     handleDelete,
     handleComplete,
-    handleSkip,
+    handleUncomplete,
     handleSetsChange,
     isCompleting: completeEvent.isPending,
-    isSkipping: skipEvent.isPending,
+    isUncompleting: updateEvent.isPending,
   };
 }

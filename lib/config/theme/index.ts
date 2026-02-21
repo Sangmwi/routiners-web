@@ -10,8 +10,8 @@ export * as common from './common';
 
 // 편의 re-export
 export { BOTTOM_NAV, HEADER_NAV } from './navigation';
-export { EVENT_TYPE, EVENT_STATUS, MEAL_TIME, CALENDAR_ICON, EventIcons, getEventIcon, getEventLabel, getEventConfig, getStatusConfig, getMealTimeConfig } from './event';
-export type { EventType, EventStatus, MealTimeType } from './event';
+export { EVENT_TYPE, EVENT_STATUS, MEAL_TIME, CALENDAR_ICON, EventIcons, getEventIcon, getEventLabel, getEventConfig, getStatusConfig, getDisplayStatus, getMealTimeConfig } from './event';
+export type { EventType, DisplayStatus, MealTimeType } from './event';
 export { MILITARY, BODY_INFO, INBODY, PROFILE_ACTION } from './profile';
 export { AI, MEDIA, CHAT_STATUS, CHAT_ICON } from './ai';
 export { STATUS, ACTION, CONTROL, SOCIAL, BUTTON_ICON } from './common';

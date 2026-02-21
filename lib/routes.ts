@@ -3,7 +3,7 @@
 // ============================================================================
 
 /** 메인 탭 경로 */
-export const TAB_ROUTES = ['/', '/routine', '/community', '/profile'] as const;
+export const TAB_ROUTES = ['/', '/routine', '/stats', '/community', '/profile'] as const;
 
 /** 하단 탭을 숨길 경로 패턴 (정확히 일치하거나 prefix로 시작) */
 export const ROUTES_WITHOUT_TAB = [

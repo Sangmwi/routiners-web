@@ -110,10 +110,8 @@ export default function CounselorContent({ isDrawerOpen, onDrawerClose }: Counse
         preview.edit(messageId);
         break;
       case 'apply':
-        if (message?.contentType === 'routine_preview') {
-          const previewData = JSON.parse(message.content) as RoutinePreviewData;
-          preview.apply(messageId, previewData, value === 'force');
-        }
+        // DetailDrawer를 열어서 주차 선택 후 적용
+        preview.open(messageId);
         break;
       case 'cancel':
         preview.cancel(messageId);

@@ -13,7 +13,7 @@ import { isWorkoutData } from './guards';
 // ============================================================================
 
 export type EventType = 'workout' | 'meal';
-export type EventStatus = 'scheduled' | 'completed' | 'skipped';
+export type EventStatus = 'scheduled' | 'completed';
 export type EventSource = 'user' | 'ai';
 
 // ============================================================================

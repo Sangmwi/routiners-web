@@ -128,6 +128,31 @@ export function useUpcomingEventsSuspense(
   return useRoutineEventsSuspense({ type, startDate, endDate });
 }
 
+/**
+ * 다음 예정된 운동 조회 (Suspense)
+ *
+ * 쉬는날 vs 미등록 상태 구분용
+ * 내일~30일 후 범위에서 scheduled 운동 1건만 조회
+ */
+export function useNextScheduledWorkoutSuspense() {
+  const tomorrow = formatDate(addDays(new Date(), 1));
+  const futureLimit = formatDate(addDays(new Date(), 30));
+  const params: EventListParams = {
+    startDate: tomorrow,
+    endDate: futureLimit,
+    type: 'workout',
+    status: 'scheduled',
+    limit: 1,
+  };
+
+  const { data: events, ...rest } = useSuspenseBaseQuery(
+    queryKeys.routineEvent.list(params),
+    () => routineEventApi.getEvents(params)
+  );
+
+  return { data: events[0] ?? null, ...rest };
+}
+
 // ============================================================================
 // Derived Stats Hooks
 // ============================================================================

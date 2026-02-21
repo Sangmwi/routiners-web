@@ -83,16 +83,6 @@ export default function CalendarContent() {
     });
   };
 
-  // 오늘로 이동
-  const handleToday = () => {
-    startTransition(() => {
-      const today = new Date();
-      setYear(today.getFullYear());
-      setMonth(today.getMonth() + 1);
-      setSelectedDate(formatDateISO(today));
-    });
-  };
-
   // 날짜 선택
   const handleSelectDate = (date: string) => {
     setSelectedDate(date);
@@ -114,7 +104,6 @@ export default function CalendarContent() {
           month={month}
           onPrevMonth={handlePrevMonth}
           onNextMonth={handleNextMonth}
-          onToday={handleToday}
         />
 
         <CalendarGrid

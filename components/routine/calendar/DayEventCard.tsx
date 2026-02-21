@@ -3,7 +3,7 @@
 import type { RoutineEvent, WorkoutExercise } from '@/lib/types/routine';
 import type { MealData } from '@/lib/types/meal';
 import { TrashIcon } from '@phosphor-icons/react';
-import { getEventIcon, getStatusConfig } from '@/lib/config/eventTheme';
+import { getEventIcon, getStatusConfig, getDisplayStatus } from '@/lib/config/eventTheme';
 
 import { isWorkoutData, isMealData } from '@/lib/types/guards';
 import AppLink from '@/components/common/AppLink';
@@ -18,7 +18,8 @@ interface DayEventCardProps {
  * 선택된 날짜의 이벤트 카드
  */
 export default function DayEventCard({ event, date, onDelete }: DayEventCardProps) {
-  const status = getStatusConfig(event.status);
+  const displayStatus = getDisplayStatus(event.status, event.date);
+  const status = getStatusConfig(displayStatus);
   const StatusIcon = status.icon;
 
   return (

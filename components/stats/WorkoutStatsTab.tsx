@@ -13,6 +13,12 @@ import type { WeeklyStats, MonthlyStats } from '@/hooks/routine';
 import type { Big3Summary } from '@/lib/types/progress';
 import { getWeekRange, getMonthRange, addDays, formatDate } from '@/lib/utils/dateHelpers';
 
+/** "2024-03-15" → "3/15" */
+function formatShortDate(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00');
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+
 /**
  * 운동 탭 콘텐츠
  *
@@ -66,6 +72,7 @@ export default function WorkoutStatsTab() {
         period={period}
         onPeriodChange={setPeriod}
         label={label}
+        yearLabel={period === 'weekly' ? `${weekBaseDate.getFullYear()}년` : undefined}
         onPrev={handlePrev}
         onNext={handleNext}
         canGoNext={canGoNext}
@@ -189,7 +196,7 @@ function WorkoutMetricsGrid({ metrics }: { metrics: WorkoutMetricItem[] }) {
       {allPlanned && (
         <div className="flex items-center gap-1.5 mb-3">
           <h3 className="text-sm font-medium text-foreground">운동 요약</h3>
-          <span className="text-[10px] text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-md">
+          <span className="text-[10px] text-scheduled bg-scheduled/10 px-1.5 py-0.5 rounded-md">
             예정
           </span>
         </div>
@@ -239,7 +246,7 @@ function WeeklyWorkoutMetrics({ dateStr }: { dateStr: string }) {
       <div className="flex items-center gap-2 bg-muted/20 rounded-xl px-4 py-3">
         <BarbellIcon size={18} weight="fill" className="text-primary" />
         <span className="text-sm font-medium text-foreground">
-          {stats.workout.completed + stats.workout.scheduled + stats.workout.skipped}회 중{' '}
+          {stats.workout.completed + stats.workout.scheduled}회 중{' '}
           <span className="text-primary">{stats.workout.completed}회</span> 완료
         </span>
         <span className="ml-auto text-sm font-bold text-primary">
@@ -276,7 +283,7 @@ function MonthlyWorkoutMetrics({ year, month }: { year: number; month: number })
       <div className="flex items-center gap-2 bg-muted/20 rounded-xl px-4 py-3">
         <BarbellIcon size={18} weight="fill" className="text-primary" />
         <span className="text-sm font-medium text-foreground">
-          {stats.workout.completed + stats.workout.scheduled + stats.workout.skipped}회 중{' '}
+          {stats.workout.completed + stats.workout.scheduled}회 중{' '}
           <span className="text-primary">{stats.workout.completed}회</span> 완료
         </span>
         <span className="ml-auto text-sm font-bold text-primary">
@@ -319,6 +326,11 @@ function Big3Section() {
   const hasHistory = history.length >= 2;
   const sparklineData = history.map((p) => p.total);
 
+  // 날짜 범위 (history는 이미 시간순)
+  const dateRange: [string, string] | undefined = hasHistory
+    ? [formatShortDate(history[0].date), formatShortDate(history[history.length - 1].date)]
+    : undefined;
+
   // PR 감지: changes가 양수인 종목
   const prLifts = changes
     ? LIFT_CONFIG.filter(({ key }) => (changes[key] ?? 0) > 0)
@@ -358,7 +370,7 @@ function Big3Section() {
           </div>
           {hasHistory && (
             <div className="flex-1 min-w-0">
-              <MiniSparkline data={sparklineData} height={48} />
+              <MiniSparkline data={sparklineData} height={48} showMinMax showAllDots dateRange={dateRange} />
             </div>
           )}
         </div>

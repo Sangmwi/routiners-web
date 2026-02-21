@@ -8,7 +8,6 @@ interface CalendarHeaderProps {
   month: number;
   onPrevMonth: () => void;
   onNextMonth: () => void;
-  onToday: () => void;
 }
 
 /**
@@ -19,7 +18,6 @@ export default function CalendarHeader({
   month,
   onPrevMonth,
   onNextMonth,
-  onToday,
 }: CalendarHeaderProps) {
   const monthName = formatKoreanDate(new Date(year, month - 1), { day: false });
 
@@ -27,13 +25,6 @@ export default function CalendarHeader({
     <div className="flex items-center justify-between py-4">
       <h2 className="text-xl font-bold text-foreground">{monthName}</h2>
       <div className="flex items-center gap-1">
-        <button
-          onClick={onToday}
-          className="px-2.5 py-1 rounded-lg text-xs font-medium text-primary hover:bg-primary/10 transition-colors"
-          aria-label="오늘"
-        >
-          오늘
-        </button>
         <button
           onClick={onPrevMonth}
           className="p-2 rounded-lg hover:bg-muted transition-colors"

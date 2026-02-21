@@ -1,6 +1,7 @@
 'use client';
 
-import { WeeklyStatsSummary, WeeklyProgressChart } from '@/components/routine';
+import WeeklyStatsSummary from './WeeklyStatsSummary';
+import WeeklyProgressChart from './WeeklyProgressChart';
 import { useWeeklyStatsSuspense } from '@/hooks/routine';
 
 interface WeeklyStatsContentProps {

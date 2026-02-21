@@ -1,8 +1,9 @@
-import { BarbellIcon, ForkKnifeIcon, CheckCircleIcon, SkipForwardIcon, ClockIcon, MoonIcon, SunIcon, CloudSunIcon, CoffeeIcon } from '@phosphor-icons/react';
+import { BarbellIcon, ForkKnifeIcon, CheckCircleIcon, XCircleIcon, ClockIcon, MoonIcon, SunIcon, CloudSunIcon, CoffeeIcon } from '@phosphor-icons/react';
 import { ICON_SIZE, ICON_WEIGHT, type IconWeight } from './base';
+import type { EventStatus } from '@/lib/types/routine';
 
 export type EventType = 'workout' | 'meal' | 'rest';
-export type EventStatus = 'scheduled' | 'completed' | 'skipped';
+export type DisplayStatus = 'scheduled' | 'completed' | 'incomplete';
 export type MealTimeType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
 // 이벤트 타입 (EVENT_STATUS 패턴 적용 - 라벨/스타일 통합)
@@ -39,7 +40,7 @@ export const EVENT_TYPE = {
   },
 } as const;
 
-// 이벤트 상태
+// 이벤트 표시 상태 (DisplayStatus 기반)
 export const EVENT_STATUS = {
   scheduled: {
     label: '예정',
@@ -55,10 +56,10 @@ export const EVENT_STATUS = {
     badgeClass: 'bg-primary/10 text-primary',
     iconClass: 'text-primary',
   },
-  skipped: {
-    label: '건너뜀',
-    icon: SkipForwardIcon,
-    weight: ICON_WEIGHT.skipped as IconWeight,      // thin
+  incomplete: {
+    label: '미완료',
+    icon: XCircleIcon,
+    weight: ICON_WEIGHT.inactive as IconWeight,     // regular
     badgeClass: 'bg-muted/50 text-muted-foreground',
     iconClass: 'text-muted-foreground',
   },
@@ -110,6 +111,22 @@ export const EventIcons = {
   Rest: EVENT_TYPE.rest.icon,
 } as const;
 
+/**
+ * DB EventStatus + date → UI DisplayStatus 변환
+ *
+ * - completed → completed
+ * - scheduled + 과거 날짜 → incomplete (미완료)
+ * - scheduled + 오늘/미래 → scheduled (예정)
+ */
+export function getDisplayStatus(status: EventStatus, eventDate: string): DisplayStatus {
+  if (status === 'completed') return 'completed';
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const date = new Date(eventDate + 'T00:00:00');
+  if (date < today) return 'incomplete';
+  return 'scheduled';
+}
+
 // 헬퍼 함수
 export function getEventIcon(type: EventType) {
   return EVENT_TYPE[type]?.icon ?? EVENT_TYPE.workout.icon;
@@ -119,7 +136,7 @@ export function getEventLabel(type: EventType): string {
   return EVENT_TYPE[type]?.label ?? EVENT_TYPE.workout.label;
 }
 
-export function getStatusConfig(status: EventStatus) {
+export function getStatusConfig(status: DisplayStatus) {
   return EVENT_STATUS[status];
 }
 

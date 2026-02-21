@@ -19,7 +19,6 @@ export const ICON_WEIGHT = {
   active: 'fill',        // 활성
   scheduled: 'duotone',  // 예정
   completed: 'fill',     // 완료
-  skipped: 'thin',       // 건너뜀
   emphasis: 'bold',      // 강조
 } as const;
 

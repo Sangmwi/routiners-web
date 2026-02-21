@@ -16,8 +16,16 @@ interface MiniSparklineProps {
   height?: number;
   /** 마지막 데이터 포인트에 점 표시 (기본: true) */
   showEndDot?: boolean;
+  /** 모든 데이터 포인트에 점 표시 */
+  showAllDots?: boolean;
   /** 라인 아래 그라데이션 채우기 (기본: true) */
   gradientFill?: boolean;
+  /** 차트 양쪽에 최소/최대값 레이블 표시 */
+  showMinMax?: boolean;
+  /** 시작/끝 날짜 레이블 [시작, 끝] */
+  dateRange?: [string, string];
+  /** 값 포맷 함수 (기본: 소수 1자리) */
+  formatValue?: (v: number) => string;
   /** 추가 className */
   className?: string;
 }
@@ -89,19 +97,28 @@ function buildPath(points: [number, number][]): string {
   return d.join(' ');
 }
 
+const defaultFormat = (v: number) =>
+  Number.isInteger(v) ? String(v) : v.toFixed(1);
+
 export default function MiniSparkline({
   data,
   color = 'var(--primary)',
   height = 48,
   showEndDot = true,
+  showAllDots = false,
   gradientFill = true,
+  showMinMax = false,
+  dateRange,
+  formatValue = defaultFormat,
   className = '',
 }: MiniSparklineProps) {
   const gradientId = useId();
 
+  const hasLabelsBelow = showMinMax || !!dateRange;
+
   // 빈 데이터: 높이만 유지
   if (data.length === 0) {
-    return <div style={{ height }} className={className} />;
+    return <div style={{ height: hasLabelsBelow ? height + 16 : height }} className={className} />;
   }
 
   const viewWidth = 200;
@@ -113,7 +130,7 @@ export default function MiniSparkline({
 
   const minVal = Math.min(...data);
   const maxVal = Math.max(...data);
-  const range = maxVal - minVal || 1; // 모든 값이 같으면 1로 처리
+  const range = maxVal - minVal || 1;
 
   // 데이터 → SVG 좌표
   const points: [number, number][] = data.map((val, i) => [
@@ -121,19 +138,28 @@ export default function MiniSparkline({
     padY + chartH - ((val - minVal) / range) * chartH,
   ]);
 
+  // SVG 좌표 → 퍼센트 (HTML 오버레이용)
+  const toPercent = (x: number, y: number) => ({
+    left: `${(x / viewWidth) * 100}%`,
+    top: `${(y / viewHeight) * 100}%`,
+  });
+
   // 단일 데이터 포인트: 점만 표시
   if (data.length === 1) {
+    const pos = toPercent(points[0][0], points[0][1]);
     return (
-      <svg
-        viewBox={`0 0 ${viewWidth} ${viewHeight}`}
-        className={`w-full ${className}`}
-        style={{ height }}
-        preserveAspectRatio="none"
-        role="img"
-        aria-label="데이터 추이"
-      >
-        <circle cx={points[0][0]} cy={points[0][1]} r={4} fill={color} />
-      </svg>
+      <div className={`relative w-full ${className}`} style={{ height }}>
+        <span
+          className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full"
+          style={{
+            left: pos.left,
+            top: pos.top,
+            width: 8,
+            height: 8,
+            backgroundColor: color,
+          }}
+        />
+      </div>
     );
   }
 
@@ -143,54 +169,103 @@ export default function MiniSparkline({
   // 채우기 경로: 라인 경로 + 하단으로 닫기
   const fillPath = `${linePath} L ${points[points.length - 1][0]},${viewHeight} L ${points[0][0]},${viewHeight} Z`;
 
+  const lastPos = toPercent(lastPoint[0], lastPoint[1]);
+
   return (
-    <svg
-      viewBox={`0 0 ${viewWidth} ${viewHeight}`}
-      className={`w-full ${className}`}
-      style={{ height }}
-      preserveAspectRatio="none"
-      role="img"
-      aria-label="데이터 추이"
-    >
-      {gradientFill && (
-        <defs>
-          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={color} stopOpacity={0.2} />
-            <stop offset="100%" stopColor={color} stopOpacity={0} />
-          </linearGradient>
-        </defs>
-      )}
+    <div className={className} role="img" aria-label="데이터 추이">
+      {/* 차트 영역 */}
+      <div className="relative w-full" style={{ height }}>
+        <svg
+          viewBox={`0 0 ${viewWidth} ${viewHeight}`}
+          className="absolute inset-0 w-full h-full"
+          preserveAspectRatio="none"
+        >
+          {gradientFill && (
+            <defs>
+              <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={color} stopOpacity={0.2} />
+                <stop offset="100%" stopColor={color} stopOpacity={0} />
+              </linearGradient>
+            </defs>
+          )}
 
-      {/* 그라데이션 채우기 */}
-      {gradientFill && (
-        <path d={fillPath} fill={`url(#${CSS.escape(gradientId)})`} />
-      )}
+          {/* 그라데이션 채우기 */}
+          {gradientFill && (
+            <path d={fillPath} fill={`url(#${CSS.escape(gradientId)})`} />
+          )}
 
-      {/* 라인 */}
-      <path
-        d={linePath}
-        fill="none"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        vectorEffect="non-scaling-stroke"
-      />
-
-      {/* 끝점 */}
-      {showEndDot && (
-        <>
-          <circle cx={lastPoint[0]} cy={lastPoint[1]} r={4} fill={color} />
-          <circle
-            cx={lastPoint[0]}
-            cy={lastPoint[1]}
-            r={3}
-            fill={color}
-            stroke="var(--card)"
-            strokeWidth={1.5}
+          {/* 라인 */}
+          <path
+            d={linePath}
+            fill="none"
+            stroke={color}
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
           />
-        </>
+        </svg>
+
+        {/* 모든 점 표시 - HTML 오버레이 */}
+        {showAllDots && points.map((pt, i) => {
+          const pos = toPercent(pt[0], pt[1]);
+          const isLast = i === points.length - 1;
+          return (
+            <span
+              key={i}
+              className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full"
+              style={{
+                left: pos.left,
+                top: pos.top,
+                width: isLast ? 7 : 5,
+                height: isLast ? 7 : 5,
+                backgroundColor: color,
+                ...(isLast ? { boxShadow: '0 0 0 1.5px var(--card)' } : { opacity: 0.6 }),
+              }}
+            />
+          );
+        })}
+
+        {/* 끝점 dot만 (showAllDots가 아닐 때) */}
+        {showEndDot && !showAllDots && (
+          <span
+            className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full ring-[1.5px] ring-card"
+            style={{
+              left: lastPos.left,
+              top: lastPos.top,
+              width: 7,
+              height: 7,
+              backgroundColor: color,
+            }}
+          />
+        )}
+      </div>
+
+      {/* 차트 하단 레이블 영역 */}
+      {hasLabelsBelow && (
+        <div className="flex items-center justify-between mt-1 gap-2">
+          <div className="text-[9px] leading-none text-muted-foreground/70">
+            {showMinMax && minVal !== maxVal && (
+              <span>최소 {formatValue(minVal)}</span>
+            )}
+            {dateRange && (
+              <span className={showMinMax && minVal !== maxVal ? ' ml-1 text-muted-foreground/40' : ''}>
+                {dateRange[0]}
+              </span>
+            )}
+          </div>
+          <div className="text-[9px] leading-none text-muted-foreground/70 text-right">
+            {showMinMax && minVal !== maxVal && (
+              <span>최대 {formatValue(maxVal)}</span>
+            )}
+            {dateRange && (
+              <span className={showMinMax && minVal !== maxVal ? ' ml-1 text-muted-foreground/40' : ''}>
+                {dateRange[1]}
+              </span>
+            )}
+          </div>
+        </div>
       )}
-    </svg>
+    </div>
   );
 }

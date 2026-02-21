@@ -14,8 +14,8 @@ export * from './event';
 // Meal Detail Components
 export * from './meal';
 
-// Stats Components
-export * from './stats';
+// Stats Components (moved to @/components/stats)
+export * from '@/components/stats';
 
 // Today Section Components
 export * from './today';

@@ -139,16 +139,6 @@ export const routineEventApi = {
   },
 
   /**
-   * 이벤트 건너뛰기 처리
-   *
-   * @param id - 이벤트 ID
-   * @returns 업데이트된 이벤트
-   */
-  async skipEvent(id: string): Promise<RoutineEvent> {
-    return api.post<RoutineEvent>(`${BASE_URL}/${id}/skip`);
-  },
-
-  /**
    * 이벤트 워크아웃 데이터 업데이트 (실제 수행 기록)
    *
    * @param id - 이벤트 ID

@@ -20,7 +20,7 @@ export default function ChangeIndicator({ value, positiveIsGood }: ChangeIndicat
   const isGood = positiveIsGood ? isPositive : !isPositive;
 
   return (
-    <span className={`text-[10px] font-medium ${isGood ? 'text-emerald-500' : 'text-red-400'}`}>
+    <span className={`text-[10px] font-medium ${isGood ? 'text-positive' : 'text-negative'}`}>
       {isPositive ? '+' : ''}{Number.isInteger(value) ? value : value.toFixed(1)}
     </span>
   );

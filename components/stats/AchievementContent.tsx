@@ -65,6 +65,7 @@ export default function AchievementContent() {
         period={period}
         onPeriodChange={setPeriod}
         label={label}
+        yearLabel={period === 'weekly' ? `${weekBaseDate.getFullYear()}년` : undefined}
         onPrev={handlePrev}
         onNext={handleNext}
         canGoNext={canGoNext}
@@ -116,10 +117,14 @@ function WeeklyAchievement({ dateStr }: { dateStr: string }) {
   );
 
   return (
-    <div className="space-y-10">
-      {streak >= 2 && <StreakBanner count={streak} />}
-      <AchievementCards stats={stats} totalLabel="7일" comparison={comparison} />
-      <WeeklyProgressChart stats={stats} />
+    <div>
+      <div className="space-y-2">
+        {streak >= 2 && <StreakBanner count={streak} />}
+        <AchievementCards stats={stats} totalLabel="7일" comparison={comparison} />
+      </div>
+      <div className="mt-10">
+        <WeeklyProgressChart stats={stats} />
+      </div>
     </div>
   );
 }
@@ -178,8 +183,8 @@ function AchievementCards({
   comparison?: ComparisonData;
 }) {
   const { workout, meal } = stats;
-  const workoutTotal = workout.completed + workout.scheduled + workout.skipped;
-  const mealTotal = meal.completed + meal.scheduled + meal.skipped;
+  const workoutTotal = workout.completed + workout.scheduled;
+  const mealTotal = meal.completed + meal.scheduled;
 
   return (
     <div className="space-y-6">
@@ -210,7 +215,7 @@ function AchievementCards({
               style={{ width: `${Math.min(100, Math.max(0, workout.completionRate))}%` }}
             />
           </div>
-          <div className="flex items-center justify-between mt-3">
+          <div className="mt-3 space-y-1">
             <p className="text-[11px] text-muted-foreground">
               {workoutTotal > 0 ? `${workout.completed}/${workoutTotal}일 완료` : '예정 없음'}
             </p>
@@ -223,7 +228,7 @@ function AchievementCards({
         {/* 식단 */}
         <div className="bg-muted/20 rounded-2xl p-4">
           <div className="flex items-center gap-1.5 mb-3">
-            <ForkKnifeIcon size={16} weight="fill" className="text-primary/70" />
+            <ForkKnifeIcon size={16} weight="fill" className="text-primary" />
             <span className="text-xs font-medium text-muted-foreground">식단</span>
           </div>
           <p className="text-2xl font-bold text-foreground mb-2">
@@ -231,11 +236,11 @@ function AchievementCards({
           </p>
           <div className="h-1.5 bg-muted rounded-full overflow-hidden">
             <div
-              className="h-full bg-primary/50 rounded-full transition-all duration-300"
+              className="h-full bg-primary rounded-full transition-all duration-300"
               style={{ width: `${Math.min(100, Math.max(0, meal.completionRate))}%` }}
             />
           </div>
-          <div className="flex items-center justify-between mt-3">
+          <div className="mt-3 space-y-1">
             <p className="text-[11px] text-muted-foreground">
               {mealTotal > 0 ? `${meal.completed}/${mealTotal}일 완료` : '예정 없음'}
             </p>
@@ -252,8 +257,11 @@ function AchievementCards({
 function ComparisonBadge({ diff, label }: { diff: number; label: string }) {
   const isPositive = diff > 0;
   return (
-    <span className={`text-[10px] font-medium ${isPositive ? 'text-emerald-500' : 'text-red-400'}`}>
-      {isPositive ? '▲' : '▼'}{Math.abs(diff)}% vs {label}
+    <span className="text-[10px] font-medium">
+      <span className={isPositive ? 'text-positive' : 'text-negative'}>
+        {isPositive ? '▲' : '▼'}{Math.abs(diff)}%
+      </span>
+      <span className="text-muted-foreground"> {label} 대비</span>
     </span>
   );
 }
@@ -279,7 +287,7 @@ function computeWorkoutStreak(
     if (day.date > today) continue;
     if (day.workout === 'completed') {
       streak++;
-    } else if (day.workout === 'scheduled' || day.workout === 'skipped') {
+    } else if (day.workout === 'scheduled') {
       break;
     }
   }
