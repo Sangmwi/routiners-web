@@ -27,3 +27,4 @@ export * from './navigation';
 
 // Utilities
 export { useDebounce } from './useDebounce';
+export { useTheme } from './useTheme';

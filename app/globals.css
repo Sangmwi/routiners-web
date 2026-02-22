@@ -21,6 +21,73 @@
   /* Navigation Clearance */
   --nav-height: 4rem;            /* 64px - BottomNav 높이 */
   --nav-clearance: 6rem;         /* 96px - BottomNav + 여유 공간 */
+
+  /* Light Theme (기본값 — data-theme 속성 없어도 적용) */
+  --background: #f3f6f3;
+  --foreground: #0a2610;
+  --primary: #50A76C;
+  --primary-foreground: #ffffff;
+  --primary-muted: var(--primary);
+  --secondary: #dbf5e2;
+  --secondary-foreground: #17451c;
+  --muted: #e2e8f0;
+  --muted-foreground: #64748b;
+  --card: #ffffff;
+  --card-foreground: #0a2610;
+  --border: #cbd5e1;
+  --input: #dbf5e2;
+  --destructive: #d97373;
+  --destructive-foreground: #ffffff;
+  --success: #22c55e;
+  --success-foreground: #ffffff;
+  --warning: #d97706;
+  --warning-foreground: #ffffff;
+  --warning-muted: #fef3c7;
+  --scheduled: #f59e0b;
+  --scheduled-foreground: #ffffff;
+  --positive: #10b981;
+  --negative: #f87171;
+}
+
+/* System 다크 모드 — data-theme 속성 없을 때 OS 설정 따름 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f172a;
+    --foreground: #f1f5f9;
+    --primary: #5fc07f;
+    --primary-foreground: #0a2610;
+    --primary-muted: rgba(80, 167, 108, 0.5);
+    --secondary: #1e293b;
+    --secondary-foreground: #e2e8f0;
+    --muted: #334155;
+    --muted-foreground: #94a3b8;
+    --card: #1e293b;
+    --card-foreground: #f1f5f9;
+    --border: #334155;
+    --input: #1e293b;
+    --destructive: #e8a0a0;
+    --destructive-foreground: #1e1e1e;
+    --success: #4ade80;
+    --success-foreground: #0f172a;
+    --warning: #fbbf24;
+    --warning-foreground: #1e1e1e;
+    --warning-muted: #78350f;
+    --scheduled: #fbbf24;
+    --scheduled-foreground: #1e1e1e;
+    --positive: #34d399;
+    --negative: #fca5a5;
+    --color-green-50: #0a2610;
+    --color-green-100: #17451c;
+    --color-green-200: #1a5421;
+    --color-green-300: #1B6523;
+    --color-green-400: #328a4d;
+    --color-green-500: #50A76C;
+    --color-green-600: #5fc07f;
+    --color-green-700: #88d9a2;
+    --color-green-800: #b9eac8;
+    --color-green-900: #dbf5e2;
+    --color-green-950: #f0faf3;
+  }
 }
 
 @theme inline {
@@ -66,49 +133,13 @@
   --font-mono: var(--font-geist-mono);
 }
 
-[data-theme="dark"] {
-  --background: #0f172a;
-  --foreground: #f1f5f9;
-  --primary: #5fc07f;
-  --primary-foreground: #0a2610;
-  --secondary: #1e293b;
-  --secondary-foreground: #e2e8f0;
-  --card: #1e293b;
-  --card-foreground: #f1f5f9;
-  --muted: #334155;
-  --muted-foreground: #94a3b8;
-  --border: #334155;
-  --input: #1e293b;
-  --destructive: #e8a0a0;
-  --destructive-foreground: #1e1e1e;
-  --success: #4ade80;
-  --success-foreground: #0f172a;
-  --warning: #fbbf24;
-  --warning-foreground: #1e1e1e;
-  --warning-muted: #78350f;
-  --scheduled: #fbbf24;
-  --scheduled-foreground: #1e1e1e;
-  --positive: #34d399;
-  --negative: #fca5a5;
-  --primary-muted: rgba(80, 167, 108, 0.5);
-  --color-green-50: #0a2610;
-  --color-green-100: #17451c;
-  --color-green-200: #1a5421;
-  --color-green-300: #1B6523;
-  --color-green-400: #328a4d;
-  --color-green-500: #50A76C;
-  --color-green-600: #5fc07f;
-  --color-green-700: #88d9a2;
-  --color-green-800: #b9eac8;
-  --color-green-900: #dbf5e2;
-  --color-green-950: #f0faf3;
-}
-
+/* 명시적 라이트 모드 — OS가 다크여도 라이트 강제 */
 [data-theme="light"] {
   --background: #f3f6f3;
   --foreground: #0a2610;
   --primary: #50A76C;
   --primary-foreground: #ffffff;
+  --primary-muted: var(--primary);
   --secondary: #dbf5e2;
   --secondary-foreground: #17451c;
   --muted: #e2e8f0;
@@ -128,7 +159,56 @@
   --scheduled-foreground: #ffffff;
   --positive: #10b981;
   --negative: #f87171;
-  --primary-muted: var(--primary);
+  --color-green-50: #f0faf3;
+  --color-green-100: #dbf5e2;
+  --color-green-200: #b9eac8;
+  --color-green-300: #88d9a2;
+  --color-green-400: #5fc07f;
+  --color-green-500: #50A76C;
+  --color-green-600: #328a4d;
+  --color-green-700: #1B6523;
+  --color-green-800: #1a5421;
+  --color-green-900: #17451c;
+  --color-green-950: #0a2610;
+}
+
+/* 명시적 다크 모드 — system 다크 + 사용자가 직접 dark 선택 */
+[data-theme="dark"] {
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --primary: #5fc07f;
+  --primary-foreground: #0a2610;
+  --primary-muted: rgba(80, 167, 108, 0.5);
+  --secondary: #1e293b;
+  --secondary-foreground: #e2e8f0;
+  --muted: #334155;
+  --muted-foreground: #94a3b8;
+  --card: #1e293b;
+  --card-foreground: #f1f5f9;
+  --border: #334155;
+  --input: #1e293b;
+  --destructive: #e8a0a0;
+  --destructive-foreground: #1e1e1e;
+  --success: #4ade80;
+  --success-foreground: #0f172a;
+  --warning: #fbbf24;
+  --warning-foreground: #1e1e1e;
+  --warning-muted: #78350f;
+  --scheduled: #fbbf24;
+  --scheduled-foreground: #1e1e1e;
+  --positive: #34d399;
+  --negative: #fca5a5;
+  --color-green-50: #0a2610;
+  --color-green-100: #17451c;
+  --color-green-200: #1a5421;
+  --color-green-300: #1B6523;
+  --color-green-400: #328a4d;
+  --color-green-500: #50A76C;
+  --color-green-600: #5fc07f;
+  --color-green-700: #88d9a2;
+  --color-green-800: #b9eac8;
+  --color-green-900: #dbf5e2;
+  --color-green-950: #f0faf3;
 }
 
 body {

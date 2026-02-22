@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import Script from "next/script";
 import "./globals.css";
 import BottomNav from "@/components/common/BottomNav";
 import WebViewBridge from "@/components/WebViewBridge";
@@ -37,7 +38,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning>
+      <head>
+        {/* FOUC 방지: hydration 전에 테마 적용 */}
+        <Script src="/theme-init.js" strategy="beforeInteractive" />
+      </head>
       <body
         className={`${pretendardVariable.variable} antialiased bg-background`}
       >

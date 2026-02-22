@@ -3,55 +3,39 @@
 /**
  * Theme Hook
  *
- * themeStore의 mode 설정에 따라 <html> 요소에 data-theme 속성을 적용합니다.
- * - 'light' / 'dark' → data-theme="light" / "dark"
- * - 'system' → OS 테마를 resolve하여 data-theme="light" / "dark" 적용
- *
- * 항상 data-theme을 설정하므로 CSS에서 @media (prefers-color-scheme) 중복 불필요
+ * - 'light'  → data-theme="light" (OS 다크여도 라이트 강제)
+ * - 'dark'   → data-theme="dark"  (OS 라이트여도 다크 강제)
+ * - 'system' → OS 감지 후 data-theme="light"|"dark" 설정 + 변경 실시간 반영
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useThemeStore, type ThemeMode } from '@/lib/stores/themeStore';
 
 function getSystemTheme(): 'light' | 'dark' {
-  if (typeof window === 'undefined') return 'light';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
-function getResolvedTheme(mode: ThemeMode): 'light' | 'dark' {
-  return mode === 'system' ? getSystemTheme() : mode;
+function applyTheme(mode: ThemeMode) {
+  const resolved = mode === 'system' ? getSystemTheme() : mode;
+  document.documentElement.setAttribute('data-theme', resolved);
 }
 
 export function useTheme() {
   const mode = useThemeStore((s) => s.mode);
   const setMode = useThemeStore((s) => s.setMode);
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() =>
-    getResolvedTheme(mode),
-  );
 
-  // 항상 data-theme을 설정 (system 모드 포함)
   useEffect(() => {
-    const resolved = getResolvedTheme(mode);
-    setResolvedTheme(resolved);
-    document.documentElement.setAttribute('data-theme', resolved);
+    applyTheme(mode);
   }, [mode]);
 
-  // system 모드일 때 OS 설정 변경 실시간 반영
+  // system 모드일 때 OS 변경 실시간 반영
   useEffect(() => {
     if (mode !== 'system') return;
-
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const handler = () => {
-      const resolved = getSystemTheme();
-      setResolvedTheme(resolved);
-      document.documentElement.setAttribute('data-theme', resolved);
-    };
-
+    const handler = () => applyTheme('system');
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
   }, [mode]);
 
-  return { mode, setMode, resolvedTheme };
+  return { mode, setMode };
 }
