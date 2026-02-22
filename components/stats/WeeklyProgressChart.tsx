@@ -6,7 +6,7 @@ import {
   XCircleIcon,
   ClockIcon,
   BarbellIcon,
-  ForkKnifeIcon,
+  BowlFoodIcon,
 } from '@phosphor-icons/react';
 import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
 import AppLink from '@/components/common/AppLink';
@@ -96,7 +96,7 @@ export default function WeeklyProgressChart({ stats }: WeeklyProgressChartProps)
                     )}
                     {showMeal && (
                       <ActivityRow
-                        icon={ForkKnifeIcon}
+                        icon={BowlFoodIcon}
                         label="식단"
                         meta={
                           day.mealCalories

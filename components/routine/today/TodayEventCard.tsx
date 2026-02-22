@@ -1,7 +1,7 @@
 'use client';
 
 import AppLink from '@/components/common/AppLink';
-import { BarbellIcon, ForkKnifeIcon, CaretRightIcon } from '@phosphor-icons/react';
+import { BarbellIcon, BowlFoodIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { getStatusConfig, getDisplayStatus } from '@/lib/config/eventTheme';
 import type { RoutineEvent, EventType } from '@/lib/types/routine';
 import { isWorkoutData, isMealData } from '@/lib/types/guards';
@@ -44,7 +44,7 @@ export function TodayEventCard({ event, type }: TodayEventCardProps) {
       {isWorkout ? (
         <BarbellIcon size={32} weight="fill" className="text-primary shrink-0" />
       ) : (
-        <ForkKnifeIcon size={32} weight="fill" className="text-primary shrink-0" />
+        <BowlFoodIcon size={32} weight="fill" className="text-primary shrink-0" />
       )}
 
       {/* 콘텐츠 */}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CaretRightIcon } from '@phosphor-icons/react';
 import ProfilePhotoEdit from '@/components/profile/edit/ProfilePhotoEdit';
@@ -95,8 +95,21 @@ function ToggleRow({
 // Main Content Component
 // ============================================================
 
+const EDIT_TABS: EditTab[] = ['basic', 'details', 'military'];
+
 export default function ProfileEditContent() {
   const [activeTab, setActiveTab] = useState<EditTab>('basic');
+  const [direction, setDirection] = useState<'left' | 'right'>('right');
+  const prevTab = useRef<EditTab>('basic');
+
+  useEffect(() => {
+    if (prevTab.current !== activeTab) {
+      const prevIdx = EDIT_TABS.indexOf(prevTab.current);
+      const nextIdx = EDIT_TABS.indexOf(activeTab);
+      setDirection(nextIdx > prevIdx ? 'right' : 'left');
+      prevTab.current = activeTab;
+    }
+  }, [activeTab]);
 
   const {
     user,
@@ -142,109 +155,119 @@ export default function ProfileEditContent() {
         <ProfileEditTabBar activeTab={activeTab} onTabChange={setActiveTab} />
 
         {/* 탭 콘텐츠 */}
-        {/* === 기본 탭 === */}
-        {activeTab === 'basic' && (
-          <div className="space-y-6">
-            <ProfileNicknameInput
-              value={formData.nickname}
-              originalNickname={user.nickname}
-              userId={user.id}
-              onChange={(value) => updateFormField('nickname', value)}
-            />
-            <ProfileBioInput
-              value={formData.bio}
-              onChange={(value) => updateFormField('bio', value)}
-            />
+        <div className="overflow-hidden">
+          <div
+            key={activeTab}
+            className="animate-tab-slide"
+            style={{
+              '--slide-from': direction === 'right' ? '30px' : '-30px',
+            } as React.CSSProperties}
+          >
+            {/* === 기본 탭 === */}
+            {activeTab === 'basic' && (
+              <div className="space-y-6">
+                <ProfileNicknameInput
+                  value={formData.nickname}
+                  originalNickname={user.nickname}
+                  userId={user.id}
+                  onChange={(value) => updateFormField('nickname', value)}
+                />
+                <ProfileBioInput
+                  value={formData.bio}
+                  onChange={(value) => updateFormField('bio', value)}
+                />
 
-            {/* 공개 설정 */}
-            <div className="space-y-3 pt-4 border-t border-border/30">
-              <ToggleRow
-                label="활동 공개"
-                description="게시글과 활동 기록을 다른 사용자에게 공개해요"
-                value={formData.showActivityPublic}
-                onChange={(v) => updateFormField('showActivityPublic', v)}
-              />
-              <ToggleRow
-                label="정보 공개"
-                description="신체 정보, 운동/식단 프로필 등을 다른 사용자에게 공개해요"
-                value={formData.showInfoPublic}
-                onChange={(v) => updateFormField('showInfoPublic', v)}
-              />
-            </div>
+                {/* 공개 설정 */}
+                <div className="space-y-3 pt-4 border-t border-border/30">
+                  <ToggleRow
+                    label="활동 공개"
+                    description="게시글과 활동 기록을 다른 사용자에게 공개해요"
+                    value={formData.showActivityPublic}
+                    onChange={(v) => updateFormField('showActivityPublic', v)}
+                  />
+                  <ToggleRow
+                    label="정보 공개"
+                    description="신체 정보, 운동/식단 프로필 등을 다른 사용자에게 공개해요"
+                    value={formData.showInfoPublic}
+                    onChange={(v) => updateFormField('showInfoPublic', v)}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* === 상세 탭 === */}
+            {activeTab === 'details' && (
+              <div className="space-y-6">
+                {/* 신체 정보 */}
+                <div className="space-y-2">
+                  <ProfileBodyInfoInput
+                    height={formData.height}
+                    weight={formData.weight}
+                    isSmoker={formData.isSmoker}
+                    onHeightChange={(value: string) => updateFormField('height', value)}
+                    onWeightChange={(value: string) => updateFormField('weight', value)}
+                    onSmokerChange={(value: boolean) => updateFormField('isSmoker', value)}
+                  />
+                </div>
+
+                {/* 관심 종목 */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground block">관심 종목</label>
+                  <ProfileInterestsInput
+                    value={formData.interestedExercises}
+                    onChange={(value: string[]) => updateFormField('interestedExercises', value)}
+                  />
+                </div>
+
+                {/* 자주 가는 장소 */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground block">자주 가는 장소</label>
+                  <ProfileLocationsInput
+                    value={formData.interestedLocations}
+                    onChange={(value: string[]) => updateFormField('interestedLocations', value)}
+                  />
+                </div>
+
+                {/* 운동 프로필 (링크) */}
+                <LinkedSectionCard
+                  title="운동 프로필"
+                  summary={fitnessSummary}
+                  emptyText="운동 목표와 경험을 설정해 보세요"
+                  href="/profile/fitness"
+                />
+
+                {/* 식단 프로필 (링크) */}
+                <LinkedSectionCard
+                  title="식단 프로필"
+                  summary={dietarySummary}
+                  emptyText="식단 목표와 유형을 설정해 보세요"
+                  href="/profile/dietary"
+                />
+
+                {/* 인바디 정보 (요약 + 관리) */}
+                <ProfileInbodyInput />
+              </div>
+            )}
+
+            {/* === 군 정보 탭 === */}
+            {activeTab === 'military' && (
+              <div className="space-y-6">
+                <ProfileRankInput
+                  value={formData.rank}
+                  onChange={(value: Rank) => updateFormField('rank', value)}
+                />
+                <ProfileUnitInput
+                  value={formData.unitName}
+                  onChange={(value: string) => updateFormField('unitName', value)}
+                />
+                <ProfileSpecialtyInput
+                  value={formData.specialty}
+                  onChange={(value: Specialty) => updateFormField('specialty', value)}
+                />
+              </div>
+            )}
           </div>
-        )}
-
-        {/* === 상세 탭 === */}
-        {activeTab === 'details' && (
-          <div className="space-y-6">
-            {/* 신체 정보 */}
-            <div className="space-y-2">
-              <ProfileBodyInfoInput
-                height={formData.height}
-                weight={formData.weight}
-                isSmoker={formData.isSmoker}
-                onHeightChange={(value: string) => updateFormField('height', value)}
-                onWeightChange={(value: string) => updateFormField('weight', value)}
-                onSmokerChange={(value: boolean) => updateFormField('isSmoker', value)}
-              />
-            </div>
-
-            {/* 관심 종목 */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground block">관심 종목</label>
-              <ProfileInterestsInput
-                value={formData.interestedExercises}
-                onChange={(value: string[]) => updateFormField('interestedExercises', value)}
-              />
-            </div>
-
-            {/* 자주 가는 장소 */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground block">자주 가는 장소</label>
-              <ProfileLocationsInput
-                value={formData.interestedLocations}
-                onChange={(value: string[]) => updateFormField('interestedLocations', value)}
-              />
-            </div>
-
-            {/* 운동 프로필 (링크) */}
-            <LinkedSectionCard
-              title="운동 프로필"
-              summary={fitnessSummary}
-              emptyText="운동 목표와 경험을 설정해 보세요"
-              href="/profile/fitness"
-            />
-
-            {/* 식단 프로필 (링크) */}
-            <LinkedSectionCard
-              title="식단 프로필"
-              summary={dietarySummary}
-              emptyText="식단 목표와 유형을 설정해 보세요"
-              href="/profile/dietary"
-            />
-
-            {/* 인바디 정보 (요약 + 관리) */}
-            <ProfileInbodyInput />
-          </div>
-        )}
-
-        {/* === 군 정보 탭 === */}
-        {activeTab === 'military' && (
-          <div className="space-y-6">
-            <ProfileRankInput
-              value={formData.rank}
-              onChange={(value: Rank) => updateFormField('rank', value)}
-            />
-            <ProfileUnitInput
-              value={formData.unitName}
-              onChange={(value: string) => updateFormField('unitName', value)}
-            />
-            <ProfileSpecialtyInput
-              value={formData.specialty}
-              onChange={(value: Specialty) => updateFormField('specialty', value)}
-            />
-          </div>
-        )}
+        </div>
       </div>
 
       <FloatingSaveButton

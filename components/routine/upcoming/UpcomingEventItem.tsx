@@ -1,7 +1,7 @@
 'use client';
 
 import AppLink from '@/components/common/AppLink';
-import { BarbellIcon, ForkKnifeIcon, CaretRightIcon } from '@phosphor-icons/react';
+import { BarbellIcon, BowlFoodIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { formatDate, getDayOfWeek } from '@/lib/utils/dateHelpers';
 import type { RoutineEvent } from '@/lib/types/routine';
 import { isWorkoutData, isMealData } from '@/lib/types/guards';
@@ -58,7 +58,7 @@ export function UpcomingEventItem({ event }: UpcomingEventItemProps) {
       {isWorkout ? (
         <BarbellIcon size={20} weight="fill" className="text-primary shrink-0" />
       ) : (
-        <ForkKnifeIcon size={20} weight="fill" className="text-primary shrink-0" />
+        <BowlFoodIcon size={20} weight="fill" className="text-primary shrink-0" />
       )}
 
       {/* 제목 + 상세 - flex 구조로 분리 */}

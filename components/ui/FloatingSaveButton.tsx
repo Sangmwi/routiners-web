@@ -54,16 +54,18 @@ export default function FloatingSaveButton({
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-6 left-4 right-4 z-20 max-w-md mx-auto animate-float-up">
-      <Button
-        onClick={onSave}
-        className={`w-full shadow-lg ${
-          showSuccess
-            ? 'bg-emerald-500 hover:bg-emerald-500'
-            : 'shadow-primary/30'
-        }`}
-        disabled={isPending || showSuccess || disabled}
-      >
+    <div className="fixed bottom-0 left-0 right-0 z-20 max-w-md mx-auto animate-float-up">
+      {/* 뒤 콘텐츠와 구분을 위한 그라디언트 페이드 */}
+      <div className="bg-gradient-to-t from-background via-background/90 to-transparent pt-8 pb-6 px-4">
+        <Button
+          onClick={onSave}
+          className={`w-full shadow-xl ${
+            showSuccess
+              ? 'bg-emerald-500 hover:bg-emerald-500 shadow-emerald-500/30'
+              : 'shadow-primary/40'
+          }`}
+          disabled={isPending || showSuccess || disabled}
+        >
         {showSuccess ? (
           <>
             <CheckCircleIcon size={18} weight="fill" className="mr-2" />
@@ -80,7 +82,8 @@ export default function FloatingSaveButton({
             {label}
           </>
         )}
-      </Button>
+        </Button>
+      </div>
     </div>
   );
 }

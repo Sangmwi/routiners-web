@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckCircleIcon, ClockIcon, FireIcon, ForkKnifeIcon, XCircleIcon } from '@phosphor-icons/react';
+import { BowlFoodIcon, CheckCircleIcon, ClockIcon, FireIcon, XCircleIcon } from '@phosphor-icons/react';
 import EmptyState from '@/components/common/EmptyState';
 import ComparisonBadge from '@/components/ui/ComparisonBadge';
 import SegmentedControl from '@/components/ui/SegmentedControl';
@@ -553,7 +553,7 @@ function NutritionMetrics({
   dailyStats?: WeeklyStats['dailyStats'];
 }) {
   if (meal.totalCalories === 0 && meal.plannedCalories === 0 && meal.totalProtein === 0 && meal.plannedProtein === 0) {
-    return <EmptyState icon={ForkKnifeIcon} message="식단 데이터가 없습니다." className="rounded-2xl bg-muted/20" />;
+    return <EmptyState icon={BowlFoodIcon} message="식단 데이터가 없습니다." className="rounded-2xl bg-muted/20" />;
   }
 
   // DonutChart 폴백용 매크로 데이터
@@ -609,7 +609,7 @@ function WeeklyNutrition({ dateStr }: { dateStr: string }) {
   const { data: profile } = useDietaryProfileSuspense();
 
   if (!stats || (stats.meal.scheduled === 0 && stats.meal.completed === 0)) {
-    return <EmptyState icon={ForkKnifeIcon} message="식단 기록이 없습니다." className="rounded-2xl bg-muted/20" />;
+    return <EmptyState icon={BowlFoodIcon} message="식단 기록이 없습니다." className="rounded-2xl bg-muted/20" />;
   }
 
   const targets = resolveNutritionTargets(stats.meal, profile, 7);
@@ -641,7 +641,7 @@ function MonthlyNutrition({ year, month }: { year: number; month: number }) {
   const { data: profile } = useDietaryProfileSuspense();
 
   if (!stats || (stats.meal.scheduled === 0 && stats.meal.completed === 0)) {
-    return <EmptyState icon={ForkKnifeIcon} message="식단 기록이 없습니다." className="rounded-2xl bg-muted/20" />;
+    return <EmptyState icon={BowlFoodIcon} message="식단 기록이 없습니다." className="rounded-2xl bg-muted/20" />;
   }
 
   const daysInMonth = new Date(year, month, 0).getDate();

@@ -2,9 +2,9 @@
 
 import {
   BarbellIcon,
+  BowlFoodIcon,
   CalendarCheckIcon,
   FireIcon,
-  ForkKnifeIcon,
 } from '@phosphor-icons/react';
 import EmptyState from '@/components/common/EmptyState';
 import ComparisonBadge from '@/components/ui/ComparisonBadge';
@@ -140,7 +140,7 @@ function AchievementCards({
 
         <div className="bg-muted/20 rounded-2xl p-4">
           <div className="flex items-center gap-1.5 mb-3">
-            <ForkKnifeIcon size={16} weight="fill" className="text-primary" />
+            <BowlFoodIcon size={16} weight="fill" className="text-primary" />
             <span className="text-xs font-medium text-muted-foreground">식단</span>
           </div>
           <p className="text-2xl font-bold text-foreground mb-2">{meal.completionRate}%</p>

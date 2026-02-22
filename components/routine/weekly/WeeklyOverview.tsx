@@ -5,7 +5,7 @@ import {
   SparkleIcon,
   CaretRightIcon,
   BarbellIcon,
-  ForkKnifeIcon,
+  BowlFoodIcon,
   CheckCircleIcon,
   XCircleIcon,
   ClockIcon,
@@ -91,7 +91,7 @@ export function WeeklyOverview({ stats }: WeeklyOverviewProps) {
         <div>
           <div className="flex items-center justify-between mb-3 px-2">
             <div className="flex items-center gap-1.5">
-              <ForkKnifeIcon size={16} weight="fill" className="text-primary/70" />
+              <BowlFoodIcon size={16} weight="fill" className="text-primary" />
               <span className="text-sm font-medium text-foreground">식단</span>
             </div>
             {mTotal > 0 ? (

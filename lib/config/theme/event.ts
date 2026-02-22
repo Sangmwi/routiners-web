@@ -1,4 +1,4 @@
-import { BarbellIcon, ForkKnifeIcon, CheckCircleIcon, XCircleIcon, ClockIcon, MoonIcon, SunIcon, CloudSunIcon, CoffeeIcon } from '@phosphor-icons/react';
+import { BarbellIcon, BowlFoodIcon, CheckCircleIcon, XCircleIcon, ClockIcon, MoonIcon, SunIcon, CloudSunIcon, CoffeeIcon } from '@phosphor-icons/react';
 import { ICON_SIZE, ICON_WEIGHT, type IconWeight } from './base';
 import type { EventStatus } from '@/lib/types/routine';
 
@@ -19,7 +19,7 @@ export const EVENT_TYPE = {
     badgeClass: 'bg-primary/15 text-primary',
   },
   meal: {
-    icon: ForkKnifeIcon,
+    icon: BowlFoodIcon,
     label: '식단',
     description: '식단 관리',
     weight: ICON_WEIGHT.active as IconWeight,

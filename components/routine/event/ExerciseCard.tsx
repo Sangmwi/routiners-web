@@ -2,7 +2,7 @@
 
 import { useState, type HTMLAttributes } from 'react';
 import { WorkoutExercise, WorkoutSet } from '@/lib/types/routine';
-import { CaretDownIcon, CaretUpIcon, PencilSimpleIcon, CheckIcon, DotsSixVerticalIcon, TrashIcon } from '@phosphor-icons/react';
+import { CaretDownIcon, PencilSimpleIcon, CheckIcon, DotsSixVerticalIcon, TrashIcon } from '@phosphor-icons/react';
 import { getEventIcon } from '@/lib/config/eventTheme';
 import SetValuePicker from '@/components/routine/workout/SetValuePicker';
 import { useSetValuePicker } from '@/hooks/routine/useSetValuePicker';
@@ -144,46 +144,54 @@ export default function ExerciseCard({
           </button>
         ) : (
           <div className="w-10 h-10 flex items-center justify-center shrink-0">
-            {isExpanded ? (
-              <CaretUpIcon size={20} weight="bold" className="text-muted-foreground" />
-            ) : (
-              <CaretDownIcon size={20} weight="bold" className="text-muted-foreground" />
-            )}
+            <CaretDownIcon
+              size={20}
+              weight="bold"
+              className={`text-muted-foreground transition-transform duration-300 ease-out ${
+                isExpanded ? 'rotate-180' : 'rotate-0'
+              }`}
+            />
           </div>
         )}
       </div>
 
-      {/* 상세 정보 */}
-      {isExpanded && (
-        <div className="px-4 pb-4 space-y-3">
-          {/* 세트 목록 */}
-          <div className="space-y-2">
-            {editable
-              ? exercise.sets.map((set, setIndex) => (
-                  <EditSetRow
-                    key={set.setNumber}
-                    set={set}
-                    onToggleComplete={() => handleSetCompleted(setIndex)}
-                    onTapEdit={() => openPicker(setIndex)}
-                  />
-                ))
-              : exercise.sets.map((set) => (
-                  <ReadSetRow key={set.setNumber} set={set} />
-                ))}
-          </div>
-
-          {/* 메모 */}
-          {exercise.notes && (
-            <div className="flex items-start gap-2 text-sm">
-              {(() => {
-                const Icon = getEventIcon('workout');
-                return <Icon className="w-4 h-4 text-primary shrink-0 mt-0.5" />;
-              })()}
-              <p className="text-muted-foreground">{exercise.notes}</p>
+      {/* 상세 정보 - grid 트릭으로 height: 0 → auto 애니메이션 */}
+      <div
+        className={`grid transition-[grid-template-rows] duration-300 ease-out ${
+          isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="px-4 pb-4 space-y-3">
+            {/* 세트 목록 */}
+            <div className="space-y-2">
+              {editable
+                ? exercise.sets.map((set, setIndex) => (
+                    <EditSetRow
+                      key={set.setNumber}
+                      set={set}
+                      onToggleComplete={() => handleSetCompleted(setIndex)}
+                      onTapEdit={() => openPicker(setIndex)}
+                    />
+                  ))
+                : exercise.sets.map((set) => (
+                    <ReadSetRow key={set.setNumber} set={set} />
+                  ))}
             </div>
-          )}
+
+            {/* 메모 */}
+            {exercise.notes && (
+              <div className="flex items-start gap-2 text-sm">
+                {(() => {
+                  const Icon = getEventIcon('workout');
+                  return <Icon className="w-4 h-4 text-primary shrink-0 mt-0.5" />;
+                })()}
+                <p className="text-muted-foreground">{exercise.notes}</p>
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      </div>
 
       {/* SetValuePicker */}
       {pickerSet && pickerSetIndex !== null && (

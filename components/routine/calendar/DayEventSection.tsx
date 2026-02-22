@@ -7,7 +7,7 @@ import { useRoutineEventByDateSuspense, useDeleteRoutineEvent } from '@/hooks/ro
 import { useConfirmDialog } from '@/lib/stores/modalStore';
 import type { EventType } from '@/lib/types/routine';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
-import { BarbellIcon, ForkKnifeIcon, PlusIcon } from '@phosphor-icons/react';
+import { BarbellIcon, BowlFoodIcon, PlusIcon } from '@phosphor-icons/react';
 import AddWorkoutSheet from '@/components/routine/sheets/AddWorkoutSheet';
 import AddMealSheet from '@/components/routine/sheets/AddMealSheet';
 import ImportUnitMealSheet from '@/components/routine/sheets/ImportUnitMealSheet';
@@ -135,7 +135,7 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
               onClick={() => setIsMealDrawerOpen(true)}
               className="w-full flex items-center gap-4 px-2 py-5 active:bg-muted/20 transition-colors rounded-xl"
             >
-              <ForkKnifeIcon size={28} weight="duotone" className="text-muted-foreground/50 shrink-0" />
+              <BowlFoodIcon size={28} weight="duotone" className="text-muted-foreground/50 shrink-0" />
               <div className="flex-1 min-w-0 text-left">
                 <p className="text-sm font-medium text-muted-foreground">예정된 식단이 없어요</p>
               </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ForkKnifeIcon, CaretRightIcon } from '@phosphor-icons/react';
+import { BowlFoodIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { useDietaryProfile, hasDietaryProfileData } from '@/hooks/dietaryProfile';
 import {
   DIETARY_GOAL_LABELS,
@@ -74,7 +74,7 @@ export default function ProfileDietarySection({
         {/* Hero: 아이콘 + 목표/유형 + chevron */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-            <ForkKnifeIcon size={20} className="text-primary" weight="duotone" />
+            <BowlFoodIcon size={20} className="text-primary" weight="duotone" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-foreground truncate">

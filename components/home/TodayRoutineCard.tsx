@@ -5,8 +5,8 @@ import { useState, type ReactNode } from 'react';
 import {
   BarbellIcon,
   BedIcon,
+  BowlFoodIcon,
   CheckCircleIcon,
-  ForkKnifeIcon,
   PlusIcon,
 } from '@phosphor-icons/react';
 import AppLink from '@/components/common/AppLink';
@@ -323,7 +323,7 @@ function MealColumn({ event }: { event: RoutineEvent | null }) {
     <div>
       <div className="flex items-center mb-3">
         <div className="flex items-center gap-1.5">
-          <ForkKnifeIcon size={14} weight="fill" className="text-primary/70" />
+          <BowlFoodIcon size={14} weight="fill" className="text-primary" />
           <span className="text-xs font-medium text-muted-foreground">식단</span>
         </div>
       </div>
@@ -337,7 +337,7 @@ function MealColumn({ event }: { event: RoutineEvent | null }) {
             emptyAction={{
               label: '오늘 식단 없음',
               subLabel: '기록 추가',
-              icon: <ForkKnifeIcon size={40} weight="duotone" className="text-muted-foreground/60" />,
+              icon: <BowlFoodIcon size={40} weight="duotone" className="text-muted-foreground/60" />,
               onClick: () => setIsDrawerOpen(true),
             }}
           />

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { BarbellIcon, ForkKnifeIcon, CaretRightIcon } from '@phosphor-icons/react';
+import { BarbellIcon, BowlFoodIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { formatDate } from '@/lib/utils/dateHelpers';
 import AddWorkoutSheet from '@/components/routine/sheets/AddWorkoutSheet';
 import AddMealSheet from '@/components/routine/sheets/AddMealSheet';
@@ -23,7 +23,7 @@ const CONFIG = {
     addLabel: '운동 직접 추가',
   },
   meal: {
-    icon: ForkKnifeIcon,
+    icon: BowlFoodIcon,
     title: '오늘 식단 없음',
     subtitle: '식단을 기록해보세요',
   },

@@ -90,32 +90,37 @@ export default function ProfilePhotoEdit({
           type="button"
           onClick={() => setIsSourceOpen(true)}
           disabled={isProcessing}
-          className="relative w-[100px] h-[100px] rounded-full overflow-hidden group"
+          className="relative w-[100px] h-[100px] group"
         >
-          {/* 사진 또는 기본 배경 */}
-          {currentImage ? (
-            <ImageWithFallback
-              src={currentImage}
-              alt="프로필 사진"
-              fill
-              sizes="100px"
-              className="object-cover"
-              optimizePreset="avatarLarge"
-            />
-          ) : (
-            <div className="w-full h-full bg-muted/50 border-2 border-dashed border-border" />
-          )}
+          {/* 원형 이미지 영역 (overflow-hidden을 여기에만 적용) */}
+          <div className="w-full h-full rounded-full overflow-hidden">
+            {currentImage ? (
+              <ImageWithFallback
+                src={currentImage}
+                alt="프로필 사진"
+                fill
+                sizes="100px"
+                className="object-cover"
+                optimizePreset="avatarLarge"
+              />
+            ) : (
+              <div className="w-full h-full bg-muted/50 border-2 border-dashed border-border rounded-full" />
+            )}
 
-          {/* 카메라 아이콘 오버레이 */}
-          {isProcessing ? (
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-              <LoadingSpinner size="lg" variant="current" className="text-white" />
-            </div>
-          ) : (
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-              <div className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center border-2 border-background shadow-sm">
-                <CameraIcon size={16} weight="fill" className="text-primary-foreground" />
+            {/* hover 오버레이 */}
+            {isProcessing ? (
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-full">
+                <LoadingSpinner size="lg" variant="current" className="text-white" />
               </div>
+            ) : (
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-full" />
+            )}
+          </div>
+
+          {/* 카메라 아이콘 버튼 (원 바깥으로 나올 수 있게 overflow-hidden 밖에 배치) */}
+          {!isProcessing && (
+            <div className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center border-2 border-background shadow-md">
+              <CameraIcon size={16} weight="fill" className="text-primary-foreground" />
             </div>
           )}
         </button>

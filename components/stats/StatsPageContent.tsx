@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import { PulseLoader } from '@/components/ui/PulseLoader';
@@ -17,22 +17,41 @@ export default function StatsPageContent() {
   const tabParam = searchParams.get('tab') as StatsDomain | null;
   const initialTab = tabParam && VALID_TABS.includes(tabParam) ? tabParam : 'status';
   const [domain, setDomain] = useState<StatsDomain>(initialTab);
+  const [direction, setDirection] = useState<'left' | 'right'>('right');
+  const prevDomain = useRef(domain);
+
+  useEffect(() => {
+    if (prevDomain.current !== domain) {
+      const prevIdx = VALID_TABS.indexOf(prevDomain.current);
+      const nextIdx = VALID_TABS.indexOf(domain);
+      setDirection(nextIdx > prevIdx ? 'right' : 'left');
+      prevDomain.current = domain;
+    }
+  }, [domain]);
 
   return (
     <>
       <DomainTabs domain={domain} onDomainChange={setDomain} />
 
-      <div className="mt-2">
-        {domain === 'status' && <AchievementContent />}
-        {domain === 'workout' && <WorkoutStatsTab />}
-        {domain === 'meal' && <NutritionStatsTab />}
-        {domain === 'inbody' && (
-          <QueryErrorBoundary>
-            <Suspense fallback={<PulseLoader />}>
-              <BodyStatsTab />
-            </Suspense>
-          </QueryErrorBoundary>
-        )}
+      <div className="mt-2 overflow-hidden">
+        <div
+          key={domain}
+          className="animate-tab-slide"
+          style={{
+            '--slide-from': direction === 'right' ? '30px' : '-30px',
+          } as React.CSSProperties}
+        >
+          {domain === 'status' && <AchievementContent />}
+          {domain === 'workout' && <WorkoutStatsTab />}
+          {domain === 'meal' && <NutritionStatsTab />}
+          {domain === 'inbody' && (
+            <QueryErrorBoundary>
+              <Suspense fallback={<PulseLoader />}>
+                <BodyStatsTab />
+              </Suspense>
+            </QueryErrorBoundary>
+          )}
+        </div>
       </div>
     </>
   );

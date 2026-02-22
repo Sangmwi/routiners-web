@@ -2,7 +2,7 @@
 
 import type { RoutineEvent, WorkoutExercise } from '@/lib/types/routine';
 import type { MealData } from '@/lib/types/meal';
-import { BarbellIcon, ForkKnifeIcon, TrashIcon } from '@phosphor-icons/react';
+import { BarbellIcon, BowlFoodIcon, TrashIcon } from '@phosphor-icons/react';
 import { getDisplayStatus, getStatusConfig } from '@/lib/config/eventTheme';
 import { isMealData, isWorkoutData } from '@/lib/types/guards';
 import AppLink from '@/components/common/AppLink';
@@ -15,7 +15,7 @@ interface DayEventCardProps {
 
 function EventTypeIcon({ type }: { type: RoutineEvent['type'] }) {
   if (type === 'meal') {
-    return <ForkKnifeIcon className="w-7 h-7 text-primary flex-shrink-0" />;
+    return <BowlFoodIcon className="w-7 h-7 text-primary flex-shrink-0" />;
   }
 
   return <BarbellIcon className="w-7 h-7 text-primary flex-shrink-0" />;

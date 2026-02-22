@@ -45,44 +45,46 @@ export default function ProfileContent() {
   }
 
   return (
-    <div>
-      <div className="space-y-4 px-2">
-        <ProfileCompactHeader user={user} />
-        <ProfileActionRow userId={user.id} />
-      </div>
+    <>
+      <div>
+        <div className="space-y-4 px-2">
+          <ProfileCompactHeader user={user} />
+          <ProfileActionRow userId={user.id} />
+        </div>
 
-      <ProfileTabBar activeTab={activeTab} onTabChange={setActiveTab} privateTabs={privateTabs} />
+        <ProfileTabBar activeTab={activeTab} onTabChange={setActiveTab} privateTabs={privateTabs} />
 
-      <div className="overflow-hidden">
-        <div
-          key={activeTab}
-          className="animate-tab-slide"
-          style={{
-            '--slide-from': direction === 'right' ? '30px' : '-30px',
-          } as React.CSSProperties}
-        >
-          {isCurrentTabPrivate && (
-            <div className="flex items-center gap-1.5 px-4 py-2 mx-1 mt-3 rounded-lg bg-muted/40 text-xs text-muted-foreground">
-              <LockSimpleIcon size={12} weight="bold" className="flex-shrink-0" />
-              <span>다른 사용자에게 공개되지 않는 탭이에요</span>
-            </div>
-          )}
+        <div className="overflow-hidden">
+          <div
+            key={activeTab}
+            className="animate-tab-slide"
+            style={{
+              '--slide-from': direction === 'right' ? '30px' : '-30px',
+            } as React.CSSProperties}
+          >
+            {isCurrentTabPrivate && (
+              <div className="flex items-center gap-1.5 px-4 py-2 mx-1 mt-3 rounded-lg bg-muted/40 text-xs text-muted-foreground">
+                <LockSimpleIcon size={12} weight="bold" className="flex-shrink-0" />
+                <span>다른 사용자에게 공개되지 않는 탭이에요</span>
+              </div>
+            )}
 
-          {activeTab === 'activity' && (
-            <>
-              <ProfileActivityGrid userId={user.id} />
-              <AppLink
-                href="/community/write"
-                className="fixed bottom-24 right-4 z-20 w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/30"
-              >
-                <PencilSimpleIcon size={24} weight="bold" className="text-primary-foreground" />
-              </AppLink>
-            </>
-          )}
+            {activeTab === 'activity' && <ProfileActivityGrid userId={user.id} />}
 
-          {activeTab === 'info' && <ProfileInfoTab user={user} />}
+            {activeTab === 'info' && <ProfileInfoTab user={user} />}
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* transform 영향 밖에 배치해야 fixed 위치가 뷰포트 기준으로 적용됨 */}
+      {activeTab === 'activity' && (
+        <AppLink
+          href="/community/write"
+          className="fixed bottom-24 right-4 z-20 w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/30"
+        >
+          <PencilSimpleIcon size={24} weight="bold" className="text-primary-foreground" />
+        </AppLink>
+      )}
+    </>
   );
 }
