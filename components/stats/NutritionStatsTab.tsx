@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useState } from 'react';
-import { ForkKnifeIcon } from '@phosphor-icons/react';
+import { CheckCircleIcon, ClockIcon, ForkKnifeIcon, XCircleIcon } from '@phosphor-icons/react';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import DateJumpSheet from '@/components/ui/DateJumpSheet';
 import { PulseLoader } from '@/components/ui/PulseLoader';
@@ -26,6 +26,8 @@ import {
   DIET_TYPE_LABELS,
   DIETARY_GOAL_LABELS,
 } from '@/lib/types/meal';
+import { MACRO_RATIOS, DEFAULT_MACRO_RATIO } from '@/lib/utils/tdee';
+import { getDisplayStatus } from '@/lib/config/theme';
 import PeriodTabs from './PeriodTabs';
 
 const MACRO_COLORS: Record<string, { bg: string; stroke: string }> = {
@@ -44,6 +46,26 @@ function getAdherenceTextColor(percent: number): string {
   if (percent >= 80 && percent <= 120) return 'text-primary';
   if (percent >= 60 && percent <= 140) return 'text-warning';
   return 'text-destructive';
+}
+
+// ─── Insight Generator ────────────────────────────────────────────────
+
+function generateNutritionInsight(meal: MealMetrics, targets: NutritionTargets): string | null {
+  if (!targets.hasTargets || targets.period.calories === 0) return null;
+
+  const macros = [
+    { name: '단백질', pct: targets.period.protein > 0 ? (meal.totalProtein / targets.period.protein) * 100 : 100 },
+    { name: '탄수화물', pct: targets.period.carbs > 0 ? (meal.totalCarbs / targets.period.carbs) * 100 : 100 },
+    { name: '지방', pct: targets.period.fat > 0 ? (meal.totalFat / targets.period.fat) * 100 : 100 },
+  ];
+
+  const worst = macros.reduce((a, b) => Math.abs(a.pct - 100) > Math.abs(b.pct - 100) ? a : b);
+  const deviation = Math.abs(worst.pct - 100);
+  if (deviation < 15) return null;
+
+  return worst.pct > 100
+    ? `${worst.name} 섭취가 목표보다 ${Math.round(worst.pct - 100)}% 높아요`
+    : `${worst.name}이 목표보다 ${Math.round(100 - worst.pct)}% 부족해요`;
 }
 
 export default function NutritionStatsTab() {
@@ -136,6 +158,10 @@ export default function NutritionStatsTab() {
 // ─── Diet Profile Banner ────────────────────────────────────────────────
 
 function DietProfileBanner({ targets }: { targets: NutritionTargets }) {
+  const ratio = targets.dietType
+    ? (MACRO_RATIOS[targets.dietType] ?? DEFAULT_MACRO_RATIO)
+    : DEFAULT_MACRO_RATIO;
+
   return (
     <div className="bg-primary/5 border-l-2 border-primary rounded-r-xl px-4 py-3">
       <div className="flex items-center gap-2 mb-1.5">
@@ -151,15 +177,15 @@ function DietProfileBanner({ targets }: { targets: NutritionTargets }) {
         )}
       </div>
       <p className="text-xs text-muted-foreground">
-        일일 목표: {targets.daily.calories.toLocaleString()}kcal · 단백질 {targets.daily.protein}g
+        일일 목표: {targets.daily.calories.toLocaleString()}kcal · 단백질 {targets.daily.protein}g · 탄:단:지 {Math.round(ratio.carbs * 100)}:{Math.round(ratio.protein * 100)}:{Math.round(ratio.fat * 100)}
       </p>
     </div>
   );
 }
 
-// ─── Hero Calorie Card ──────────────────────────────────────────────────
+// ─── Calorie Summary Card (hero = 일 평균) ──────────────────────────────
 
-function HeroCalorieCard({
+function CalorieSummaryCard({
   meal,
   targets,
   comparison,
@@ -169,45 +195,48 @@ function HeroCalorieCard({
   comparison?: { diff: number; label: string };
 }) {
   const isPlannedOnly = meal.completed === 0;
-  const calories = isPlannedOnly ? meal.plannedCalories : meal.totalCalories;
-  const protein = isPlannedOnly ? meal.plannedProtein : meal.totalProtein;
   const total = meal.completed + meal.scheduled;
 
-  if (calories === 0 && protein === 0 && total === 0) return null;
+  // hero = 일 평균 (예정만이면 총합)
+  const heroCalories = isPlannedOnly ? meal.plannedCalories : meal.avgCalories;
+  const totalCalories = isPlannedOnly ? meal.plannedCalories : meal.totalCalories;
 
-  const caloriePercent = targets.hasTargets && targets.period.calories > 0
-    ? Math.round((calories / targets.period.calories) * 100)
+  if (heroCalories === 0 && totalCalories === 0 && total === 0) return null;
+
+  // 프로그레스바: 일 평균 vs 일일 목표
+  const caloriePercent = targets.hasTargets && targets.daily.calories > 0 && !isPlannedOnly
+    ? Math.round((heroCalories / targets.daily.calories) * 100)
     : null;
 
   return (
-    <div className="bg-card border border-border/30 rounded-2xl p-5">
+    <div className="bg-muted/20 rounded-2xl p-4">
+      {/* 상단: 예정 배지 + 비교 */}
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-medium text-foreground">영양 요약</h3>
         <div className="flex items-center gap-2">
           {isPlannedOnly && (
             <span className="text-[10px] text-scheduled bg-scheduled/10 px-1.5 py-0.5 rounded-md">
               예정
             </span>
           )}
-          {comparison && comparison.diff !== 0 && (
-            <span className="text-[10px] font-medium">
-              <span className={comparison.diff > 0 ? 'text-positive' : 'text-negative'}>
-                {comparison.diff > 0 ? '▲' : '▼'}
-                {Math.abs(comparison.diff)}%
-              </span>
-              <span className="text-muted-foreground"> {comparison.label} 대비</span>
-            </span>
-          )}
         </div>
+        {comparison && comparison.diff !== 0 && (
+          <span className="text-[10px] font-medium">
+            <span className={comparison.diff > 0 ? 'text-positive' : 'text-negative'}>
+              {comparison.diff > 0 ? '▲' : '▼'}
+              {Math.abs(comparison.diff)}%
+            </span>
+            <span className="text-muted-foreground"> {comparison.label} 대비</span>
+          </span>
+        )}
       </div>
 
-      {/* 칼로리 메인 수치 */}
+      {/* hero: 일 평균 칼로리 */}
       <div className="flex items-baseline gap-1 mb-1">
-        <span className="text-3xl font-bold text-foreground">{calories.toLocaleString()}</span>
+        <span className="text-3xl font-bold text-foreground">{heroCalories.toLocaleString()}</span>
         <span className="text-sm text-muted-foreground">kcal</span>
       </div>
 
-      {/* 칼로리 목표 대비 프로그레스바 */}
+      {/* 프로그레스바: 일 평균 vs 일일 목표 */}
       {caloriePercent !== null && (
         <div className="mt-2 mb-3">
           <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -217,31 +246,27 @@ function HeroCalorieCard({
             />
           </div>
           <p className="text-[11px] text-muted-foreground mt-1">
-            목표 {targets.period.calories.toLocaleString()}kcal 중{' '}
+            목표 {targets.daily.calories.toLocaleString()}kcal의{' '}
             <span className="font-medium text-foreground">{caloriePercent}%</span>
           </p>
         </div>
       )}
 
-      {/* 보조 메트릭 */}
+      {/* 보조: 총 섭취 + 달성 */}
       <div className="flex gap-4 mt-3 pt-3 border-t border-border/20">
-        {protein > 0 && (
+        {totalCalories > 0 && (
           <div>
-            <p className="text-[11px] text-muted-foreground">단백질</p>
-            <p className="text-sm font-bold text-foreground">{protein}g</p>
-          </div>
-        )}
-        {meal.avgCalories > 0 && (
-          <div>
-            <p className="text-[11px] text-muted-foreground">일 평균</p>
-            <p className="text-sm font-bold text-foreground">{meal.avgCalories.toLocaleString()}kcal</p>
+            <p className="text-[11px] text-muted-foreground">총 섭취</p>
+            <p className="text-sm font-bold text-foreground">
+              {totalCalories.toLocaleString()}kcal
+            </p>
           </div>
         )}
         {total > 0 && (
           <div>
             <p className="text-[11px] text-muted-foreground">달성</p>
             <p className="text-sm font-bold text-foreground">
-              {meal.completed}/{total}끼
+              {meal.completed}/{total}일
               <span className="text-[10px] text-muted-foreground font-normal ml-1">
                 ({meal.completionRate}%)
               </span>
@@ -253,53 +278,64 @@ function HeroCalorieCard({
   );
 }
 
-// ─── Macro Goal Bars ────────────────────────────────────────────────────
+// ─── Nutrition Balance Section (매크로 바 + 점수 + 인사이트 통합) ────────
 
-function MacroGoalBars({
+function NutritionBalanceSection({
   meal,
   targets,
+  prevMeal,
 }: {
   meal: MealMetrics;
   targets: NutritionTargets;
+  prevMeal?: MealMetrics;
 }) {
-  const macroData = [
-    {
-      label: '탄수화물',
-      actual: meal.totalCarbs,
-      target: targets.period.carbs,
-      color: MACRO_COLORS['탄수화물'],
-    },
-    {
-      label: '단백질',
-      actual: meal.totalProtein,
-      target: targets.period.protein,
-      color: MACRO_COLORS['단백질'],
-    },
-    {
-      label: '지방',
-      actual: meal.totalFat,
-      target: targets.period.fat,
-      color: MACRO_COLORS['지방'],
-    },
-  ];
-
-  const balanceScore = calculateBalanceScore(
+  const score = calculateBalanceScore(
     { calories: meal.totalCalories, protein: meal.totalProtein, carbs: meal.totalCarbs, fat: meal.totalFat },
     targets.period,
   );
-  const { text: balanceText, colorClass } = getBalanceLabel(balanceScore);
+  const { text: balanceText, colorClass } = getBalanceLabel(score);
+  const insight = generateNutritionInsight(meal, targets);
+
+  const completed = meal.completed || 1;
+
+  const macroData = [
+    {
+      label: '단백질',
+      avgActual: Math.round(meal.totalProtein / completed),
+      dailyTarget: targets.daily.protein,
+      prevAvg: prevMeal ? Math.round(prevMeal.totalProtein / (prevMeal.completed || 1)) : undefined,
+      percent: targets.period.protein > 0 ? Math.round((meal.totalProtein / targets.period.protein) * 100) : 0,
+      color: MACRO_COLORS['단백질'],
+    },
+    {
+      label: '탄수화물',
+      avgActual: Math.round(meal.totalCarbs / completed),
+      dailyTarget: targets.daily.carbs,
+      prevAvg: prevMeal ? Math.round(prevMeal.totalCarbs / (prevMeal.completed || 1)) : undefined,
+      percent: targets.period.carbs > 0 ? Math.round((meal.totalCarbs / targets.period.carbs) * 100) : 0,
+      color: MACRO_COLORS['탄수화물'],
+    },
+    {
+      label: '지방',
+      avgActual: Math.round(meal.totalFat / completed),
+      dailyTarget: targets.daily.fat,
+      prevAvg: prevMeal ? Math.round(prevMeal.totalFat / (prevMeal.completed || 1)) : undefined,
+      percent: targets.period.fat > 0 ? Math.round((meal.totalFat / targets.period.fat) * 100) : 0,
+      color: MACRO_COLORS['지방'],
+    },
+  ];
 
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-medium text-foreground">영양소 균형</h3>
         <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full bg-muted/50 ${colorClass}`}>
-          {balanceText} {balanceScore}점
+          {balanceText} {score}점
         </span>
       </div>
       <div className="bg-muted/20 rounded-2xl p-4 space-y-4">
-        {macroData.map(({ label, actual, target, color }) => {
-          const percent = target > 0 ? Math.round((actual / target) * 100) : 0;
+        {macroData.map(({ label, avgActual, dailyTarget, prevAvg, percent, color }) => {
+          const change = prevAvg != null ? avgActual - prevAvg : undefined;
           return (
             <div key={label}>
               <div className="flex items-center justify-between mb-1.5">
@@ -308,8 +344,14 @@ function MacroGoalBars({
                   <span className="text-xs text-muted-foreground">{label}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-bold text-foreground">{actual}g</span>
-                  <span className="text-[10px] text-muted-foreground">/ {target}g</span>
+                  <span className="text-[11px] text-muted-foreground">일 평균</span>
+                  <span className="text-xs font-bold text-foreground">{avgActual}g</span>
+                  <span className="text-[10px] text-muted-foreground">/ {dailyTarget}g</span>
+                  {change != null && change !== 0 && (
+                    <span className={`text-[10px] font-medium ${change > 0 ? 'text-positive' : 'text-negative'}`}>
+                      {change > 0 ? '+' : ''}{change}g
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
@@ -326,12 +368,20 @@ function MacroGoalBars({
             </div>
           );
         })}
+        {/* 인사이트 */}
+        {insight && (
+          <div className="pt-3 border-t border-border/20">
+            <p className="text-xs text-muted-foreground">
+              <span className="text-foreground font-medium">💡</span> {insight}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-// ─── Donut Chart (fallback) ─────────────────────────────────────────────
+// ─── Donut Chart (fallback, 프로필 없을 때) ─────────────────────────────
 
 function DonutChart({
   macros,
@@ -364,7 +414,6 @@ function DonutChart({
           {/* SVG Donut */}
           <div className="shrink-0">
             <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-              {/* Background circle */}
               <circle
                 cx={size / 2}
                 cy={size / 2}
@@ -404,62 +453,125 @@ function DonutChart({
             ))}
           </div>
         </div>
+        <p className="text-[10px] text-muted-foreground/40 mt-3 text-center">
+          일반 권장 비율: 탄 50 · 단 30 · 지 20
+        </p>
       </div>
     </div>
   );
 }
 
-// ─── Daily Calorie Log ──────────────────────────────────────────────────
+// ─── Daily Nutrition Log (메트릭 필터 토글) ─────────────────────────────
 
-function DailyCalorieLog({
+type DailyMetric = 'calories' | 'protein' | 'carbs' | 'fat';
+
+const DAILY_METRIC_OPTIONS: { key: DailyMetric; label: string; unit: string; barColor: string; barColorMuted: string }[] = [
+  { key: 'calories', label: '칼로리', unit: 'kcal', barColor: 'bg-primary', barColorMuted: 'bg-primary/60' },
+  { key: 'protein', label: '단백질', unit: 'g', barColor: 'bg-primary', barColorMuted: 'bg-primary/60' },
+  { key: 'carbs', label: '탄수화물', unit: 'g', barColor: 'bg-amber-400', barColorMuted: 'bg-amber-400/60' },
+  { key: 'fat', label: '지방', unit: 'g', barColor: 'bg-rose-400', barColorMuted: 'bg-rose-400/60' },
+];
+
+function getDailyValue(day: WeeklyStats['dailyStats'][number], metric: DailyMetric): number {
+  switch (metric) {
+    case 'calories': return day.mealCalories ?? 0;
+    case 'protein': return day.mealProtein ?? 0;
+    case 'carbs': return day.mealCarbs ?? 0;
+    case 'fat': return day.mealFat ?? 0;
+  }
+}
+
+function DailyNutritionLog({
   dailyStats,
-  dailyTarget,
+  dailyTargets,
 }: {
   dailyStats: WeeklyStats['dailyStats'];
-  dailyTarget?: number;
+  dailyTargets?: { calories: number; protein: number; carbs: number; fat: number };
 }) {
+  const [metric, setMetric] = useState<DailyMetric>('calories');
   const today = formatDate(new Date());
-  const calorieValues = dailyStats
-    .map((d) => d.mealCalories ?? 0)
-    .filter((v) => v > 0);
-  const maxCal = Math.max(
-    calorieValues.length > 0 ? Math.max(...calorieValues) : 0,
-    dailyTarget ?? 0,
+
+  const metricOption = DAILY_METRIC_OPTIONS.find((o) => o.key === metric)!;
+  const dailyTarget = dailyTargets?.[metric] ?? 0;
+
+  const values = dailyStats.map((d) => getDailyValue(d, metric)).filter((v) => v > 0);
+  const maxVal = Math.max(
+    values.length > 0 ? Math.max(...values) : 0,
+    dailyTarget,
   );
 
-  if (maxCal === 0) return null;
+  if (maxVal === 0) return null;
 
-  const targetPct = dailyTarget && maxCal > 0 ? (dailyTarget / maxCal) * 100 : null;
+  const targetPct = dailyTarget > 0 && maxVal > 0 ? (dailyTarget / maxVal) * 100 : null;
 
   return (
     <div>
-      <h3 className="text-sm font-medium text-foreground mb-3">일별 칼로리</h3>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-medium text-foreground">일별 기록</h3>
+        {/* 메트릭 필터 */}
+        <div className="flex items-center bg-muted/50 rounded-lg p-0.5">
+          {DAILY_METRIC_OPTIONS.map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setMetric(key)}
+              className={`px-2 py-0.5 text-[10px] font-medium rounded-md transition-all ${
+                metric === key
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="bg-muted/20 rounded-2xl p-4 space-y-2.5">
         {dailyStats.map((day) => {
           const isToday = day.date === today;
-          const cal = day.mealCalories ?? 0;
-          const pct = maxCal > 0 ? (cal / maxCal) * 100 : 0;
-          const adherencePercent = dailyTarget && dailyTarget > 0
-            ? Math.round((cal / dailyTarget) * 100)
+          const val = getDailyValue(day, metric);
+          const pct = maxVal > 0 ? (val / maxVal) * 100 : 0;
+
+          const formatted = val > 0
+            ? metric === 'calories' ? `${val.toLocaleString()}kcal` : `${val}g`
+            : '-';
+
+          // 상태: completed / scheduled / incomplete / null
+          const displayStatus = day.meal
+            ? getDisplayStatus(day.meal, day.date)
             : null;
 
           return (
-            <div key={day.date} className="flex items-center gap-2.5">
+            <div key={day.date} className="flex items-center gap-2">
+              {/* 상태 도트 (왼쪽) */}
+              <span className="w-3 shrink-0 flex justify-center">
+                {displayStatus === 'completed' && (
+                  <CheckCircleIcon size={10} weight="fill" className="text-primary" />
+                )}
+                {displayStatus === 'scheduled' && (
+                  <ClockIcon size={10} weight="duotone" className="text-scheduled" />
+                )}
+                {displayStatus === 'incomplete' && (
+                  <XCircleIcon size={10} weight="fill" className="text-muted-foreground/30" />
+                )}
+                {displayStatus === null && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/10" />
+                )}
+              </span>
+              {/* 요일 */}
               <span className={`text-xs font-semibold w-5 shrink-0 ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
                 {day.dayOfWeek}
               </span>
+              {/* 바 (메트릭 색상) */}
               <div className="flex-1 h-5 bg-muted/30 rounded-md overflow-hidden relative">
-                {cal > 0 && (
+                {val > 0 && (
                   <div
                     className={`h-full rounded-md transition-all duration-300 ${
-                      adherencePercent !== null
-                        ? getAdherenceColor(adherencePercent)
-                        : isToday ? 'bg-primary' : 'bg-primary/60'
+                      isToday ? metricOption.barColor : metricOption.barColorMuted
                     }`}
                     style={{ width: `${Math.max(pct, 3)}%` }}
                   />
                 )}
-                {/* 목표 마커선 */}
                 {targetPct !== null && (
                   <div
                     className="absolute top-0 h-full w-0.5 bg-foreground/30"
@@ -467,18 +579,19 @@ function DailyCalorieLog({
                   />
                 )}
               </div>
-              <span className={`text-[11px] font-medium w-14 text-right ${cal > 0 ? 'text-foreground' : 'text-muted-foreground/40'}`}>
-                {cal > 0 ? `${cal.toLocaleString()}` : '-'}
+              {/* 수치 + 단위 */}
+              <span className={`text-[11px] font-medium text-right shrink-0 ${val > 0 ? 'text-foreground' : 'text-muted-foreground/40'}`} style={{ minWidth: metric === 'calories' ? '4.5rem' : '2.5rem' }}>
+                {formatted}
               </span>
             </div>
           );
         })}
         {/* 목표선 범례 */}
-        {targetPct !== null && dailyTarget && (
+        {targetPct !== null && dailyTarget > 0 && (
           <div className="flex items-center gap-1.5 pt-1.5">
             <div className="w-3 h-0.5 bg-foreground/30" />
             <span className="text-[10px] text-muted-foreground">
-              일일 목표 {dailyTarget.toLocaleString()}kcal
+              일일 목표 {dailyTarget.toLocaleString()}{metricOption.unit}
             </span>
           </div>
         )}
@@ -493,11 +606,13 @@ function NutritionMetrics({
   meal,
   targets,
   comparison,
+  prevMeal,
   dailyStats,
 }: {
   meal: MealMetrics;
   targets: NutritionTargets;
   comparison?: { diff: number; label: string };
+  prevMeal?: MealMetrics;
   dailyStats?: WeeklyStats['dailyStats'];
 }) {
   if (meal.totalCalories === 0 && meal.plannedCalories === 0 && meal.totalProtein === 0 && meal.plannedProtein === 0) {
@@ -524,27 +639,33 @@ function NutritionMetrics({
 
   return (
     <div className="space-y-6">
-      {/* 식단 프로필 배너 — 프로필 존재 시만 */}
+      {/* 0. 프로필 배너 */}
       {targets.hasTargets && (targets.dietType || targets.dietaryGoal) && (
         <DietProfileBanner targets={targets} />
       )}
 
-      {/* 영양 요약 카드 (elevated) */}
-      <HeroCalorieCard meal={meal} targets={targets} comparison={comparison} />
+      {/* 1. 일일 평균 칼로리 */}
+      <div>
+        <h3 className="text-sm font-medium text-foreground mb-3">일일 평균</h3>
+        <CalorieSummaryCard meal={meal} targets={targets} comparison={comparison} />
+      </div>
 
-      {/* 영양소 균형: 목표 대비 바 or 비율 도넛 */}
-      {targets.hasTargets && macroTotal > 0 ? (
-        <MacroGoalBars meal={meal} targets={targets} />
-      ) : (
-        macros.length >= 2 && <DonutChart macros={macros} />
+      {/* 2. 영양소 균형 (목표 있을 때) — 매크로 바 + 점수 + 인사이트 통합 */}
+      {targets.hasTargets && macroTotal > 0 && (
+        <NutritionBalanceSection meal={meal} targets={targets} prevMeal={prevMeal} />
       )}
 
-      {/* 일별 칼로리 (주간만) */}
+      {/* 3. 일별 기록 (주간만) — 메트릭 필터로 칼로리/단백질/탄수/지방 전환 */}
       {dailyStats && (
-        <DailyCalorieLog
+        <DailyNutritionLog
           dailyStats={dailyStats}
-          dailyTarget={targets.hasTargets ? targets.daily.calories : undefined}
+          dailyTargets={targets.hasTargets ? targets.daily : undefined}
         />
+      )}
+
+      {/* 4. 3대 영양소 비율 (목표 없을 때 폴백) */}
+      {!targets.hasTargets && macros.length >= 2 && (
+        <DonutChart macros={macros} />
       )}
     </div>
   );
@@ -568,11 +689,29 @@ function WeeklyNutrition({ dateStr }: { dateStr: string }) {
   }
 
   const targets = resolveNutritionTargets(stats.meal, profile, 7);
-  const comparison = prevStats
-    ? { diff: stats.meal.completionRate - prevStats.meal.completionRate, label: '지난주' }
+
+  // 비교: 일 평균 칼로리 변화율
+  const comparison = (() => {
+    if (!prevStats) return undefined;
+    const prevAvg = prevStats.meal.avgCalories;
+    if (prevAvg === 0) return undefined;
+    const diff = Math.round(((stats.meal.avgCalories - prevAvg) / prevAvg) * 100);
+    return { diff, label: '지난주' };
+  })();
+
+  const prevMeal = prevStats && prevStats.meal.totalCalories > 0
+    ? prevStats.meal
     : undefined;
 
-  return <NutritionMetrics meal={stats.meal} targets={targets} comparison={comparison} dailyStats={stats.dailyStats} />;
+  return (
+    <NutritionMetrics
+      meal={stats.meal}
+      targets={targets}
+      comparison={comparison}
+      prevMeal={prevMeal}
+      dailyStats={stats.dailyStats}
+    />
+  );
 }
 
 function MonthlyNutrition({ year, month }: { year: number; month: number }) {
@@ -593,9 +732,26 @@ function MonthlyNutrition({ year, month }: { year: number; month: number }) {
 
   const daysInMonth = new Date(year, month, 0).getDate();
   const targets = resolveNutritionTargets(stats.meal, profile, daysInMonth);
-  const comparison = prevStats
-    ? { diff: stats.meal.completionRate - prevStats.meal.completionRate, label: '지난달' }
+
+  // 비교: 일 평균 칼로리 변화율
+  const comparison = (() => {
+    if (!prevStats) return undefined;
+    const prevAvg = prevStats.meal.avgCalories;
+    if (prevAvg === 0) return undefined;
+    const diff = Math.round(((stats.meal.avgCalories - prevAvg) / prevAvg) * 100);
+    return { diff, label: '지난달' };
+  })();
+
+  const prevMeal = prevStats && prevStats.meal.totalCalories > 0
+    ? prevStats.meal
     : undefined;
 
-  return <NutritionMetrics meal={stats.meal} targets={targets} comparison={comparison} />;
+  return (
+    <NutritionMetrics
+      meal={stats.meal}
+      targets={targets}
+      comparison={comparison}
+      prevMeal={prevMeal}
+    />
+  );
 }

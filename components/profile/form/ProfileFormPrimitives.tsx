@@ -1,17 +1,26 @@
 'use client';
 
-import { useState } from 'react';
-import { CheckIcon } from '@phosphor-icons/react';
+import { useState, type ReactNode } from 'react';
+import type { Icon } from '@phosphor-icons/react';
+import { CheckIcon, XIcon, PlusIcon } from '@phosphor-icons/react';
+
+// ============================================================================
+// ProfileFormSelectOption
+// ============================================================================
 
 interface ProfileFormSelectOptionProps<T extends string | number> {
   value?: T;
   label: string;
+  description?: string;
+  icon?: Icon;
   selected: boolean;
   onClick: () => void;
 }
 
 export function ProfileFormSelectOption<T extends string | number>({
   label,
+  description,
+  icon: IconComponent,
   selected,
   onClick,
 }: ProfileFormSelectOptionProps<T>) {
@@ -19,16 +28,73 @@ export function ProfileFormSelectOption<T extends string | number>({
     <button
       type="button"
       onClick={onClick}
-      className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+      aria-pressed={selected}
+      className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-left transition-all active:scale-[0.97] ${
         selected
-          ? 'bg-primary text-primary-foreground shadow-sm'
-          : 'bg-muted text-muted-foreground hover:bg-muted/80'
+          ? 'bg-primary/10 ring-1.5 ring-primary/50'
+          : 'bg-muted/50 text-muted-foreground hover:bg-muted/70'
+      }`}
+    >
+      {IconComponent && (
+        <IconComponent
+          size={18}
+          className={selected ? 'text-primary' : 'text-muted-foreground'}
+          weight={selected ? 'fill' : 'regular'}
+        />
+      )}
+      <div className="min-w-0">
+        <span className={`text-sm font-medium ${selected ? 'text-primary' : 'text-foreground'}`}>
+          {label}
+        </span>
+        {description && (
+          <span className="block text-xs text-muted-foreground mt-0.5">{description}</span>
+        )}
+      </div>
+    </button>
+  );
+}
+
+// ============================================================================
+// ProfileFormNumberOption (원형 숫자 버튼)
+// ============================================================================
+
+interface ProfileFormNumberOptionProps {
+  value: number;
+  label: string;
+  selected: boolean;
+  onClick: () => void;
+  variant?: 'circle' | 'pill';
+}
+
+export function ProfileFormNumberOption({
+  label,
+  selected,
+  onClick,
+  variant = 'circle',
+}: ProfileFormNumberOptionProps) {
+  const baseClass = variant === 'circle'
+    ? 'shrink-0 w-11 h-11 rounded-full'
+    : 'shrink-0 px-4 h-11 rounded-full';
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={selected}
+      className={`${baseClass} text-sm font-semibold transition-all active:scale-95 ${
+        selected
+          ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25'
+          : 'bg-muted/50 text-muted-foreground hover:bg-muted/70'
       }`}
     >
       {label}
     </button>
   );
 }
+
+// ============================================================================
+// ProfileFormChipOption
+// ============================================================================
 
 interface ProfileFormChipOptionProps {
   label: string;
@@ -45,39 +111,67 @@ export function ProfileFormChipOption({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm transition-all ${
+      aria-pressed={selected}
+      className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium transition-all active:scale-95 ${
         selected
-          ? 'bg-primary text-primary-foreground'
-          : 'bg-muted text-muted-foreground hover:bg-muted/80'
+          ? 'bg-primary/15 text-primary ring-1 ring-primary/40'
+          : 'bg-muted/50 text-muted-foreground hover:bg-muted/70'
       }`}
     >
-      {selected && <CheckIcon size={12} />}
+      <span
+        className={`inline-flex items-center justify-center w-4 h-4 rounded-full transition-all ${
+          selected
+            ? 'bg-primary text-primary-foreground'
+            : 'ring-1.5 ring-muted-foreground/30'
+        }`}
+      >
+        {selected && <CheckIcon size={10} weight="bold" />}
+      </span>
       {label}
     </button>
   );
 }
 
+// ============================================================================
+// ProfileFormSection
+// ============================================================================
+
 interface ProfileFormSectionProps {
   title: string;
   description?: string;
-  children: React.ReactNode;
+  optional?: boolean;
+  children: ReactNode;
 }
 
 export function ProfileFormSection({
   title,
   description,
+  optional = false,
   children,
 }: ProfileFormSectionProps) {
   return (
     <div className="space-y-3">
       <div>
-        <h3 className="text-sm font-medium text-foreground">{title}</h3>
-        {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
+        <div className="flex items-center gap-2">
+          <h3 className="text-base font-semibold text-foreground">{title}</h3>
+          {optional && (
+            <span className="text-[10px] text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">
+              선택
+            </span>
+          )}
+        </div>
+        {description && (
+          <p className="text-sm text-muted-foreground mt-1">{description}</p>
+        )}
       </div>
       {children}
     </div>
   );
 }
+
+// ============================================================================
+// ProfileFormTagInput
+// ============================================================================
 
 interface ProfileFormTagInputProps {
   value: string[];
@@ -92,15 +186,19 @@ export function ProfileFormTagInput({
 }: ProfileFormTagInputProps) {
   const [inputValue, setInputValue] = useState('');
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key !== 'Enter' || !inputValue.trim()) return;
-
-    event.preventDefault();
-    const nextValue = inputValue.trim();
-    if (!value.includes(nextValue)) {
-      onChange([...value, nextValue]);
+  const addTag = () => {
+    const trimmed = inputValue.trim();
+    if (!trimmed) return;
+    if (!value.includes(trimmed)) {
+      onChange([...value, trimmed]);
     }
     setInputValue('');
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter' || !inputValue.trim()) return;
+    event.preventDefault();
+    addTag();
   };
 
   const removeTag = (tagToRemove: string) => {
@@ -108,29 +206,40 @@ export function ProfileFormTagInput({
   };
 
   return (
-    <div className="space-y-2">
-      <input
-        type="text"
-        value={inputValue}
-        onChange={(event) => setInputValue(event.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        className="w-full px-4 py-2.5 rounded-xl bg-muted border-none text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/50 outline-none"
-      />
+    <div className="space-y-3">
+      <div className="relative">
+        <input
+          type="text"
+          value={inputValue}
+          onChange={(event) => setInputValue(event.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className="w-full pl-4 pr-10 py-3 rounded-xl bg-muted/50 border border-border/30 text-sm text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/40 focus:border-primary/30 outline-none transition-all"
+        />
+        {inputValue.trim() && (
+          <button
+            type="button"
+            onClick={addTag}
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center transition-colors hover:bg-primary/20"
+          >
+            <PlusIcon size={14} className="text-primary" weight="bold" />
+          </button>
+        )}
+      </div>
       {value.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {value.map((tag, index) => (
+          {value.map((tag) => (
             <span
-              key={index}
-              className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-muted text-sm text-foreground"
+              key={tag}
+              className="inline-flex items-center gap-1.5 pl-3 pr-2 py-1.5 rounded-full bg-muted/60 text-sm text-foreground animate-tag-in"
             >
               {tag}
               <button
                 type="button"
                 onClick={() => removeTag(tag)}
-                className="ml-1 text-muted-foreground hover:text-foreground"
+                className="w-5 h-5 rounded-full bg-muted-foreground/15 flex items-center justify-center hover:bg-destructive/20 transition-colors"
               >
-                x
+                <XIcon size={10} className="text-muted-foreground" weight="bold" />
               </button>
             </span>
           ))}
@@ -139,4 +248,3 @@ export function ProfileFormTagInput({
     </div>
   );
 }
-

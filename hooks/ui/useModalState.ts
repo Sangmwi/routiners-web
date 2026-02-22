@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 // ============================================================================
 // Constants
@@ -27,6 +27,8 @@ interface UseModalStateReturn {
 /**
  * Shared modal visibility/animation state.
  * Handles open/close transitions and external close requests.
+ *
+ * onClose는 ref로 안정화하여 effect 재실행을 방지합니다.
  */
 export function useModalState(
   isOpen: boolean,
@@ -36,7 +38,11 @@ export function useModalState(
   const [isAnimating, setIsAnimating] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
 
-  const executeClose = () => {
+  // onClose를 ref로 안정화 — effect 재실행 방지
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  const executeClose = useCallback(() => {
     if (isAnimating) return;
 
     setIsAnimating(true);
@@ -44,9 +50,9 @@ export function useModalState(
       setIsAnimating(false);
       setIsVisible(false);
       setHasOpened(false);
-      onClose();
+      onCloseRef.current();
     }, ANIMATION_DURATION);
-  };
+  }, [isAnimating]);
 
   useEffect(() => {
     if (isOpen && !isVisible) {
@@ -64,11 +70,11 @@ export function useModalState(
         setIsAnimating(false);
         setIsVisible(false);
         setHasOpened(false);
-        onClose();
+        onCloseRef.current();
       }, ANIMATION_DURATION);
       return () => clearTimeout(timer);
     }
-  }, [isAnimating, isOpen, isVisible, onClose]);
+  }, [isAnimating, isOpen, isVisible]);
 
   return {
     isVisible,

@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
-import { CalendarIcon, PlusIcon, RobotIcon } from '@phosphor-icons/react';
+import { CalendarIcon, PlusIcon } from '@phosphor-icons/react';
 import EmptyState from '@/components/common/EmptyState';
 import {
   EventActionButtons,
@@ -11,6 +11,7 @@ import {
 } from '@/components/routine';
 import AddExerciseSheet from '@/components/routine/sheets/AddExerciseSheet';
 import AddWorkoutSheet from '@/components/routine/sheets/AddWorkoutSheet';
+import WorkoutAddDrawer, { type WorkoutAddOption } from '@/components/routine/workout/WorkoutAddDrawer';
 import { ActiveWorkout, WorkoutComplete } from '@/components/routine/workout';
 import EditableExerciseList from '@/components/routine/event/EditableExerciseList';
 import { getEventConfig } from '@/lib/config/theme';
@@ -51,6 +52,7 @@ export default function WorkoutContent({
   const eventConfig = getEventConfig('workout');
   const isToday = date === getToday();
 
+  const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingExercises, setEditingExercises] = useState<WorkoutExercise[]>([]);
@@ -121,6 +123,16 @@ export default function WorkoutContent({
     onDelete: handleDelete,
   });
 
+  const handleAddOption = (option: WorkoutAddOption) => {
+    setIsAddDrawerOpen(false);
+    if (option === 'ai') {
+      router.push('/routine/counselor');
+      return;
+    }
+    // drawer close 애니메이션 완료 후 sheet 열기
+    setTimeout(() => setIsAddSheetOpen(true), 250);
+  };
+
   if (!event) {
     return (
       <>
@@ -131,25 +143,23 @@ export default function WorkoutContent({
             showIconBackground
             size="lg"
           />
-          <div className="flex flex-col gap-3 mt-6 px-4">
+          <div className="mt-6 px-4">
             <button
               type="button"
-              onClick={() => router.push('/routine/counselor')}
+              onClick={() => setIsAddDrawerOpen(true)}
               className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-primary text-primary-foreground"
             >
-              <RobotIcon size={18} />
-              AI 상담사에게 맡기기
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsAddSheetOpen(true)}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-muted/50 text-muted-foreground"
-            >
               <PlusIcon size={18} weight="bold" />
-              운동 직접 추가
+              운동 추가하기
             </button>
           </div>
         </div>
+
+        <WorkoutAddDrawer
+          isOpen={isAddDrawerOpen}
+          onClose={() => setIsAddDrawerOpen(false)}
+          onSelect={handleAddOption}
+        />
         <AddWorkoutSheet
           isOpen={isAddSheetOpen}
           onClose={() => setIsAddSheetOpen(false)}

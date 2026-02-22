@@ -113,9 +113,7 @@ export default function CalendarContent() {
 
       {/* 캘린더 (transition 중 opacity 변화) */}
       <div
-        className={`bg-muted/20 rounded-2xl p-4 transition-opacity ${
-          isPending ? 'opacity-60' : ''
-        }`}
+        className={`transition-opacity ${isPending ? 'opacity-60' : ''}`}
       >
         <CalendarHeader
           year={year}
@@ -136,6 +134,8 @@ export default function CalendarContent() {
           onSelectDate={handleSelectDate}
         />
       </div>
+
+      <hr className="border-border/50" />
 
       {/* 선택된 날짜의 이벤트 (독립 Suspense) */}
       <Suspense fallback={<PulseLoader className="py-8" />}>

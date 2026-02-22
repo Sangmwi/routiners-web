@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { CalendarIcon, PlusIcon } from '@phosphor-icons/react';
 import EmptyState from '@/components/common/EmptyState';
 import {
@@ -21,13 +21,14 @@ import { useMealEvent, useUpdateRoutineEvent } from '@/hooks/routine';
 
 interface MealContentProps {
   date: string;
+  onTitleChange?: (title: string) => void;
   onHeaderAction?: (action: ReactNode) => void;
 }
 
 const MEAL_LABELS = ['아침', '점심', '저녁', '간식'] as const;
 const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack'] as const;
 
-export default function MealContent({ date, onHeaderAction }: MealContentProps) {
+export default function MealContent({ date, onTitleChange, onHeaderAction }: MealContentProps) {
   const router = useRouter();
   const confirm = useConfirmDialog();
 
@@ -86,15 +87,27 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
     onDelete: handleDelete,
   });
 
+  useEffect(() => {
+    if (event?.title && onTitleChange) {
+      onTitleChange(event.title);
+    }
+  }, [event?.title, onTitleChange]);
+
   const handleAddOption = (option: MealAddOption) => {
       setIsAddDrawerOpen(false);
       if (option === 'ai') {
         router.push('/routine/counselor');
-      } else if (option === 'direct') {
-        setIsAddSheetOpen(true);
-      } else {
-        setIsImportSheetOpen(true);
+        return;
       }
+      // drawer close 애니메이션(200ms) 완료 후 sheet 열기 — 레이스 컨디션 방지
+      const CLOSE_DELAY = 250;
+      setTimeout(() => {
+        if (option === 'direct') {
+          setIsAddSheetOpen(true);
+        } else {
+          setIsImportSheetOpen(true);
+        }
+      }, CLOSE_DELAY);
     };
 
   const handleRemoveMealWithConfirm = (mealIndex: number) => {

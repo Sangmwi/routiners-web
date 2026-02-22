@@ -1,8 +1,7 @@
 'use client';
 
-import { BarbellIcon, ForkKnifeIcon } from '@phosphor-icons/react';
 import type { CalendarEventSummary, EventStatus, EventType } from '@/lib/types/routine';
-import { getDisplayStatus, getStatusConfig } from '@/lib/config/eventTheme';
+import { getDisplayStatus } from '@/lib/config/eventTheme';
 import { formatDate } from '@/lib/utils/dateHelpers';
 
 interface CalendarGridProps {
@@ -23,22 +22,13 @@ interface DayInfo {
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
-function EventTypeIcon({
-  type,
-  className,
-}: {
-  type: EventType;
-  className: string;
-}) {
-  if (type === 'meal') {
-    return <ForkKnifeIcon className={className} />;
-  }
-
-  return <BarbellIcon className={className} />;
-}
+const DOT_CLASS: Record<string, string> = {
+  scheduled: 'bg-scheduled',
+  completed: 'bg-primary',
+  incomplete: 'bg-muted-foreground',
+};
 
 function EventDot({
-  type,
   status,
   date,
 }: {
@@ -47,8 +37,7 @@ function EventDot({
   date: string;
 }) {
   const displayStatus = getDisplayStatus(status, date);
-  const statusConfig = getStatusConfig(displayStatus);
-  return <EventTypeIcon type={type} className={`w-3.5 h-3.5 ${statusConfig.iconClass}`} />;
+  return <span className={`w-1.5 h-1.5 rounded-full ${DOT_CLASS[displayStatus]}`} />;
 }
 
 function indexEventsByDate(
@@ -100,7 +89,8 @@ function generateCalendarDays(
     });
   }
 
-  const remainingDays = 42 - result.length;
+  const totalCells = result.length <= 35 ? 35 : 42;
+  const remainingDays = totalCells - result.length;
   for (let d = 1; d <= remainingDays; d++) {
     const date = new Date(year, month, d);
     result.push({
@@ -151,14 +141,14 @@ export default function CalendarGrid({
               type="button"
               onClick={() => onSelectDate(dayInfo.date)}
               className={`
-                relative aspect-square flex flex-col items-center justify-center rounded-lg transition-all
+                relative aspect-[5/7] flex flex-col items-center rounded-lg transition-all
                 ${dayInfo.isCurrentMonth ? '' : 'opacity-30'}
                 ${isSelected ? 'bg-foreground/10' : 'hover:bg-muted/50'}
                 ${dayInfo.isToday && !isSelected ? 'ring-2 ring-foreground/30 ring-inset' : ''}
               `}
             >
               <span
-                className={`text-sm font-medium ${
+                className={`text-xs font-semibold leading-none mt-2 ${
                   !isSelected && dayInfo.isCurrentMonth
                     ? dayOfWeek === 0
                       ? 'text-destructive'
@@ -169,18 +159,20 @@ export default function CalendarGrid({
                 {dayInfo.day}
               </span>
 
-              {dayInfo.events.length > 0 && (
-                <div className="absolute bottom-1 flex gap-0.5">
-                  {dayInfo.events.map((event) => (
-                    <EventDot
-                      key={event.id}
-                      type={event.type}
-                      status={event.status}
-                      date={dayInfo.date}
-                    />
-                  ))}
-                </div>
-              )}
+              <div className="flex-1 flex items-center">
+                {dayInfo.events.length > 0 && (
+                  <div className="flex items-center gap-1">
+                    {dayInfo.events.map((event) => (
+                      <EventDot
+                        key={event.id}
+                        type={event.type}
+                        status={event.status}
+                        date={dayInfo.date}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             </button>
           );
         })}

@@ -26,13 +26,18 @@ interface MealPageProps {
  */
 export default function MealPage({ params }: MealPageProps) {
   const { date } = use(params);
+  const [title, setTitle] = useState('식단 관리');
   const [headerAction, setHeaderAction] = useState<ReactNode>(null);
 
   return (
-    <DetailLayout title="식단 관리" action={headerAction}>
+    <DetailLayout title={title} centered action={headerAction}>
       <QueryErrorBoundary>
         <Suspense fallback={<PulseLoader />}>
-          <MealContent date={date} onHeaderAction={setHeaderAction} />
+          <MealContent
+            date={date}
+            onTitleChange={setTitle}
+            onHeaderAction={setHeaderAction}
+          />
         </Suspense>
       </QueryErrorBoundary>
     </DetailLayout>

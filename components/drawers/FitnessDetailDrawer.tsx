@@ -11,6 +11,7 @@ import {
 } from '@/lib/types/fitness';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 import { useRouter } from 'next/navigation';
+import { BarbellIcon } from '@phosphor-icons/react';
 
 interface FitnessDetailDrawerProps {
   isOpen: boolean;
@@ -21,7 +22,7 @@ interface FitnessDetailDrawerProps {
 /**
  * 피트니스 프로필 상세 드로어
  *
- * 모든 피트니스 프로필 정보를 상세하게 표시
+ * 그룹화된 정보 표시 + 틴트 태그 스타일
  */
 export default function FitnessDetailDrawer({
   isOpen,
@@ -29,41 +30,20 @@ export default function FitnessDetailDrawer({
   profile,
 }: FitnessDetailDrawerProps) {
   const router = useRouter();
-  // 정보 항목 렌더링 헬퍼
-  const renderInfoItem = (label: string, value: string | undefined | null) => {
-    if (!value) return null;
-    return (
-      <div className="flex justify-between py-2 border-b border-border/30 last:border-b-0">
-        <span className="text-sm text-muted-foreground">{label}</span>
-        <span className="text-sm font-medium text-foreground">{value}</span>
-      </div>
-    );
-  };
 
-  // 태그 목록 렌더링 헬퍼
-  const renderTagList = (
-    label: string,
-    items: string[] | undefined,
-    labelMap?: Record<string, string>
-  ) => {
-    if (!items || items.length === 0) return null;
+  // 기본 정보 아이템
+  const infoItems = [
+    { label: '운동 목표', value: profile.fitnessGoal ? FITNESS_GOAL_LABELS[profile.fitnessGoal] : null },
+    { label: '운동 경험', value: profile.experienceLevel ? EXPERIENCE_LEVEL_LABELS[profile.experienceLevel] : null },
+    { label: '주 운동 횟수', value: profile.preferredDaysPerWeek ? `${profile.preferredDaysPerWeek}회` : null },
+    { label: '1회 운동 시간', value: profile.sessionDurationMinutes ? `${profile.sessionDurationMinutes}분` : null },
+    { label: '장비 접근성', value: profile.equipmentAccess ? EQUIPMENT_ACCESS_LABELS[profile.equipmentAccess] : null },
+  ].filter(item => item.value);
 
-    return (
-      <div className="py-3 border-b border-border/30 last:border-b-0">
-        <span className="text-sm text-muted-foreground block mb-2">{label}</span>
-        <div className="flex flex-wrap gap-2">
-          {items.map((item, index) => (
-            <span
-              key={index}
-              className="px-2.5 py-1 text-xs rounded-full bg-muted text-foreground"
-            >
-              {labelMap ? labelMap[item] || item : item}
-            </span>
-          ))}
-        </div>
-      </div>
-    );
-  };
+  const focusAreas = profile.focusAreas?.length ? profile.focusAreas : null;
+  const injuries = profile.injuries?.length ? profile.injuries : null;
+  const preferences = profile.preferences?.length ? profile.preferences : null;
+  const restrictions = profile.restrictions?.length ? profile.restrictions : null;
 
   return (
     <Modal
@@ -73,64 +53,99 @@ export default function FitnessDetailDrawer({
       size="lg"
       position="bottom"
       enableSwipe
+      headerAction={
+        profile.updatedAt ? (
+          <span className="text-[10px] text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">
+            {formatKoreanDate(profile.updatedAt)}
+          </span>
+        ) : undefined
+      }
     >
-      <ModalBody className="p-4 space-y-1">
-        {/* 기본 정보 */}
-        <div className="space-y-1">
-          {renderInfoItem(
-            '운동 목표',
-            profile.fitnessGoal ? FITNESS_GOAL_LABELS[profile.fitnessGoal] : undefined
-          )}
-          {renderInfoItem(
-            '운동 경험',
-            profile.experienceLevel
-              ? EXPERIENCE_LEVEL_LABELS[profile.experienceLevel]
-              : undefined
-          )}
-          {renderInfoItem(
-            '주 운동 횟수',
-            profile.preferredDaysPerWeek
-              ? `${profile.preferredDaysPerWeek}회`
-              : undefined
-          )}
-          {renderInfoItem(
-            '1회 운동 시간',
-            profile.sessionDurationMinutes
-              ? `${profile.sessionDurationMinutes}분`
-              : undefined
-          )}
-          {renderInfoItem(
-            '장비 접근성',
-            profile.equipmentAccess
-              ? EQUIPMENT_ACCESS_LABELS[profile.equipmentAccess]
-              : undefined
-          )}
-        </div>
+      <ModalBody className="p-4 space-y-3">
+        {/* 기본 정보 그룹 */}
+        {infoItems.length > 0 && (
+          <div className="bg-muted/30 rounded-xl p-3">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+              {infoItems.map((item) => (
+                <div key={item.label}>
+                  <p className="text-[11px] text-muted-foreground">{item.label}</p>
+                  <p className="text-sm font-medium text-foreground">{item.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
-        {/* 집중 부위 */}
-        {renderTagList('집중 부위', profile.focusAreas, FOCUS_AREA_LABELS)}
+        {/* 집중 부위 - primary 틴트 */}
+        {focusAreas && (
+          <div className="bg-muted/30 rounded-xl p-3">
+            <p className="text-xs font-medium text-muted-foreground mb-2">집중 부위</p>
+            <div className="flex flex-wrap gap-1.5">
+              {focusAreas.map((area) => (
+                <span
+                  key={area}
+                  className="px-2.5 py-1 text-xs rounded-full bg-primary/10 text-primary font-medium"
+                >
+                  {FOCUS_AREA_LABELS[area] || area}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
-        {/* 부상/제한사항 */}
-        {renderTagList('부상/제한사항', profile.injuries)}
+        {/* 부상/제한사항 - warning 틴트 */}
+        {injuries && (
+          <div className="bg-muted/30 rounded-xl p-3">
+            <p className="text-xs font-medium text-muted-foreground mb-2">부상/제한사항</p>
+            <div className="flex flex-wrap gap-1.5">
+              {injuries.map((injury) => (
+                <span
+                  key={injury}
+                  className="px-2.5 py-1 text-xs rounded-full bg-amber-500/10 text-amber-400 font-medium"
+                >
+                  {injury}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 선호 운동 */}
-        {renderTagList('선호 운동', profile.preferences)}
+        {preferences && (
+          <div className="bg-muted/30 rounded-xl p-3">
+            <p className="text-xs font-medium text-muted-foreground mb-2">선호 운동</p>
+            <div className="flex flex-wrap gap-1.5">
+              {preferences.map((pref) => (
+                <span
+                  key={pref}
+                  className="px-2.5 py-1 text-xs rounded-full bg-muted text-foreground"
+                >
+                  {pref}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 운동 제한 */}
-        {renderTagList('운동 제한', profile.restrictions)}
-
-        {/* 마지막 업데이트 */}
-        {profile.updatedAt && (
-          <p className="text-xs text-muted-foreground text-center pt-4">
-            마지막 업데이트: {formatKoreanDate(profile.updatedAt)}
-          </p>
+        {restrictions && (
+          <div className="bg-muted/30 rounded-xl p-3">
+            <p className="text-xs font-medium text-muted-foreground mb-2">피하고 싶은 운동</p>
+            <div className="flex flex-wrap gap-1.5">
+              {restrictions.map((rest) => (
+                <span
+                  key={rest}
+                  className="px-2.5 py-1 text-xs rounded-full bg-muted text-foreground"
+                >
+                  {rest}
+                </span>
+              ))}
+            </div>
+          </div>
         )}
       </ModalBody>
 
       <ModalFooter>
-        <Button variant="outline" onClick={onClose} className="flex-1">
-          닫기
-        </Button>
         <Button
           variant="primary"
           onClick={() => {

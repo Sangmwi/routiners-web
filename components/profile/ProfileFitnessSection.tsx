@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BarbellIcon } from '@phosphor-icons/react';
-import { ExpandIcon } from '@/components/ui/icons';
+import { BarbellIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { useFitnessProfile, hasFitnessProfileData } from '@/hooks/fitnessProfile';
 import {
   FITNESS_GOAL_LABELS,
@@ -18,8 +17,7 @@ import { FitnessDetailDrawer } from '@/components/drawers';
 /**
  * 프로필 피트니스 섹션
  *
- * 인바디 섹션 바로 아래에 위치
- * 태그 형태로 요약 정보 표시 + "자세히 보기" 버튼으로 상세 모달
+ * Hero(목표+경험) + 요약 텍스트 라인 + 집중 부위 태그
  */
 export default function ProfileFitnessSection() {
   const { data: profile, isPending: isLoading } = useFitnessProfile();
@@ -27,56 +25,12 @@ export default function ProfileFitnessSection() {
 
   const hasData = hasFitnessProfileData(profile);
 
-  // 요약 태그 생성
-  const getSummaryTags = (profile: FitnessProfile) => {
-    const tags: { label: string; value: string }[] = [];
-
-    if (profile.fitnessGoal) {
-      tags.push({
-        label: '목표',
-        value: FITNESS_GOAL_LABELS[profile.fitnessGoal],
-      });
-    }
-
-    if (profile.experienceLevel) {
-      tags.push({
-        label: '경험',
-        value: EXPERIENCE_LEVEL_LABELS[profile.experienceLevel],
-      });
-    }
-
-    if (profile.preferredDaysPerWeek) {
-      tags.push({
-        label: '빈도',
-        value: `${profile.preferredDaysPerWeek}회/주`,
-      });
-    }
-
-    if (profile.sessionDurationMinutes) {
-      tags.push({
-        label: '시간',
-        value: `${profile.sessionDurationMinutes}분`,
-      });
-    }
-
-    if (profile.equipmentAccess) {
-      tags.push({
-        label: '장비',
-        value: EQUIPMENT_ACCESS_LABELS[profile.equipmentAccess],
-      });
-    }
-
-    return tags;
-  };
-
-  // 로딩 상태
   const renderLoading = () => (
     <div className="flex items-center justify-center py-6">
       <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
-  // 빈 상태
   const renderEmpty = () => (
     <EmptyState
       icon={BarbellIcon}
@@ -85,56 +39,75 @@ export default function ProfileFitnessSection() {
     />
   );
 
-  // 데이터 상태
+  // 스케줄 요약 텍스트 생성 (주 3회 · 90분/회)
+  const getScheduleText = (profile: FitnessProfile) => {
+    const parts: string[] = [];
+    if (profile.preferredDaysPerWeek) parts.push(`주 ${profile.preferredDaysPerWeek}회`);
+    if (profile.sessionDurationMinutes) parts.push(`${profile.sessionDurationMinutes}분/회`);
+    return parts.join(' · ');
+  };
+
   const renderData = () => {
     if (!profile) return null;
 
-    const tags = getSummaryTags(profile);
-    const focusAreasCount = profile.focusAreas?.length || 0;
-    const injuriesCount = profile.injuries?.length || 0;
+    const scheduleText = getScheduleText(profile);
+    const equipmentText = profile.equipmentAccess
+      ? EQUIPMENT_ACCESS_LABELS[profile.equipmentAccess]
+      : null;
+    const focusAreas = profile.focusAreas ?? [];
 
     return (
-      <>
-        {/* 태그 목록 */}
-        <div className="flex flex-wrap gap-2">
-          {tags.map((tag, index) => (
-            <span
-              key={index}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-muted text-sm"
-            >
-              <span className="text-muted-foreground">{tag.label}:</span>
-              <span className="font-medium text-foreground">{tag.value}</span>
-            </span>
-          ))}
+      <button
+        type="button"
+        onClick={() => setIsModalOpen(true)}
+        className="w-full text-left active:scale-[0.99] transition-transform duration-150"
+      >
+        {/* Hero: 아이콘 + 목표/경험 + chevron */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <BarbellIcon size={20} className="text-primary" weight="duotone" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground truncate">
+              {profile.fitnessGoal
+                ? FITNESS_GOAL_LABELS[profile.fitnessGoal]
+                : '목표 미설정'}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {profile.experienceLevel
+                ? EXPERIENCE_LEVEL_LABELS[profile.experienceLevel]
+                : '경험 미설정'}
+            </p>
+          </div>
+          <CaretRightIcon size={16} className="text-muted-foreground shrink-0" />
         </div>
 
-        {/* 추가 정보 요약 */}
-        {(focusAreasCount > 0 || injuriesCount > 0) && (
-          <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
-            {focusAreasCount > 0 && (
-              <span>
-                집중 부위: {profile.focusAreas!.slice(0, 2).map(a => FOCUS_AREA_LABELS[a]).join(', ')}
-                {focusAreasCount > 2 && ` 외 ${focusAreasCount - 2}개`}
-              </span>
+        {/* 구분선 */}
+        {(scheduleText || equipmentText || focusAreas.length > 0) && (
+          <div className="border-t border-border/30 mt-3 pt-3 space-y-2">
+            {/* 스케줄 + 장비 (한 줄 텍스트) */}
+            {(scheduleText || equipmentText) && (
+              <p className="text-xs text-muted-foreground">
+                {[scheduleText, equipmentText].filter(Boolean).join(' · ')}
+              </p>
             )}
-            {injuriesCount > 0 && (
-              <span>
-                부상/제한: {injuriesCount}개
-              </span>
+
+            {/* 집중 부위 태그 */}
+            {focusAreas.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {focusAreas.map((area) => (
+                  <span
+                    key={area}
+                    className="px-2 py-0.5 text-[11px] rounded-md bg-muted/50 text-muted-foreground"
+                  >
+                    {FOCUS_AREA_LABELS[area]}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
         )}
-
-        {/* 자세히 보기 버튼 */}
-        <button
-          type="button"
-          onClick={() => setIsModalOpen(true)}
-          className="mt-4 w-full flex items-center justify-center gap-1 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          자세히 보기
-          <ExpandIcon size="sm" />
-        </button>
-      </>
+      </button>
     );
   };
 
@@ -151,7 +124,6 @@ export default function ProfileFitnessSection() {
         </div>
       </div>
 
-      {/* 상세 드로어 */}
       {profile && hasData && (
         <FitnessDetailDrawer
           isOpen={isModalOpen}

@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BowlFoodIcon } from '@phosphor-icons/react';
-import { ExpandIcon } from '@/components/ui/icons';
+import { BowlFoodIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { useDietaryProfile, hasDietaryProfileData } from '@/hooks/dietaryProfile';
 import {
   DIETARY_GOAL_LABELS,
@@ -18,48 +17,13 @@ import { DietaryDetailDrawer } from '@/components/drawers';
 /**
  * 프로필 식단 섹션
  *
- * 운동 프로필 섹션(ProfileFitnessSection) 아래에 위치
- * 태그 형태로 요약 정보 표시
+ * Hero(목표+유형) + 요약 텍스트 라인 + 제한사항 태그
  */
 export default function ProfileDietarySection() {
   const { data: profile, isPending: isLoading } = useDietaryProfile();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const hasData = hasDietaryProfileData(profile);
-
-  const getSummaryTags = (profile: DietaryProfile) => {
-    const tags: { label: string; value: string }[] = [];
-
-    if (profile.dietaryGoal) {
-      tags.push({
-        label: '목표',
-        value: DIETARY_GOAL_LABELS[profile.dietaryGoal],
-      });
-    }
-
-    if (profile.dietType) {
-      tags.push({
-        label: '유형',
-        value: DIET_TYPE_LABELS[profile.dietType],
-      });
-    }
-
-    if (profile.mealsPerDay) {
-      tags.push({
-        label: '식사',
-        value: `${profile.mealsPerDay}끼/일`,
-      });
-    }
-
-    if (profile.targetCalories) {
-      tags.push({
-        label: '목표 칼로리',
-        value: `${profile.targetCalories}kcal`,
-      });
-    }
-
-    return tags;
-  };
 
   const renderLoading = () => (
     <div className="flex items-center justify-center py-6">
@@ -75,56 +39,86 @@ export default function ProfileDietarySection() {
     />
   );
 
+  // 수치 요약 텍스트 (3끼/일 · 2,500kcal)
+  const getSummaryText = (profile: DietaryProfile) => {
+    const parts: string[] = [];
+    if (profile.mealsPerDay) parts.push(`${profile.mealsPerDay}끼/일`);
+    if (profile.targetCalories) parts.push(`${profile.targetCalories.toLocaleString()}kcal`);
+    if (profile.budgetPerMonth) parts.push(`월 ${profile.budgetPerMonth.toLocaleString()}원`);
+    return parts.join(' · ');
+  };
+
   const renderData = () => {
     if (!profile) return null;
 
-    const tags = getSummaryTags(profile);
-    const restrictionsCount = profile.foodRestrictions?.length || 0;
-    const sourcesCount = profile.availableSources?.length || 0;
+    const summaryText = getSummaryText(profile);
+    const restrictions = profile.foodRestrictions?.filter(r => r !== 'none') ?? [];
+    const sources = profile.availableSources ?? [];
 
     return (
-      <>
-        {/* 태그 목록 */}
-        <div className="flex flex-wrap gap-2">
-          {tags.map((tag, index) => (
-            <span
-              key={index}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-muted text-sm"
-            >
-              <span className="text-muted-foreground">{tag.label}:</span>
-              <span className="font-medium text-foreground">{tag.value}</span>
-            </span>
-          ))}
+      <button
+        type="button"
+        onClick={() => setIsModalOpen(true)}
+        className="w-full text-left active:scale-[0.99] transition-transform duration-150"
+      >
+        {/* Hero: 아이콘 + 목표/유형 + chevron */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <BowlFoodIcon size={20} className="text-primary" weight="duotone" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground truncate">
+              {profile.dietaryGoal
+                ? DIETARY_GOAL_LABELS[profile.dietaryGoal]
+                : '목표 미설정'}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {profile.dietType
+                ? DIET_TYPE_LABELS[profile.dietType]
+                : '유형 미설정'}
+            </p>
+          </div>
+          <CaretRightIcon size={16} className="text-muted-foreground shrink-0" />
         </div>
 
-        {/* 추가 정보 요약 */}
-        {(restrictionsCount > 0 || sourcesCount > 0) && (
-          <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
-            {restrictionsCount > 0 && (
-              <span>
-                제한사항: {profile.foodRestrictions!.slice(0, 2).map(r => FOOD_RESTRICTION_LABELS[r]).join(', ')}
-                {restrictionsCount > 2 && ` 외 ${restrictionsCount - 2}개`}
-              </span>
+        {/* 구분선 아래 요약 정보 */}
+        {(summaryText || restrictions.length > 0 || sources.length > 0) && (
+          <div className="border-t border-border/30 mt-3 pt-3 space-y-2">
+            {/* 수치 요약 */}
+            {summaryText && (
+              <p className="text-xs text-muted-foreground">{summaryText}</p>
             )}
-            {sourcesCount > 0 && (
-              <span>
-                식단 출처: {profile.availableSources!.slice(0, 2).map(s => AVAILABLE_SOURCE_LABELS[s]).join(', ')}
-                {sourcesCount > 2 && ` 외 ${sourcesCount - 2}개`}
-              </span>
+
+            {/* 제한사항 태그 (warning 톤) */}
+            {restrictions.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {restrictions.map((r) => (
+                  <span
+                    key={r}
+                    className="px-2 py-0.5 text-[11px] rounded-md bg-amber-500/10 text-amber-400"
+                  >
+                    {FOOD_RESTRICTION_LABELS[r]}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* 식단 출처 태그 */}
+            {sources.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {sources.map((s) => (
+                  <span
+                    key={s}
+                    className="px-2 py-0.5 text-[11px] rounded-md bg-muted/50 text-muted-foreground"
+                  >
+                    {AVAILABLE_SOURCE_LABELS[s]}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
         )}
-
-        {/* 자세히 보기 버튼 */}
-        <button
-          type="button"
-          onClick={() => setIsModalOpen(true)}
-          className="mt-4 w-full flex items-center justify-center gap-1 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          자세히 보기
-          <ExpandIcon size="sm" />
-        </button>
-      </>
+      </button>
     );
   };
 
@@ -141,7 +135,6 @@ export default function ProfileDietarySection() {
         </div>
       </div>
 
-      {/* 상세 드로어 */}
       {profile && hasData && (
         <DietaryDetailDrawer
           isOpen={isModalOpen}
