@@ -42,7 +42,7 @@ export default function ProfileDietarySection({
 
   const renderEmpty = () => (
     <EmptyState
-      icon={ForkKnifeIcon}
+      icon={BowlFoodIcon}
       size={compact ? 'sm' : 'md'}
       message="식단 프로필이 없어요"
       hint="AI 상담사와 대화하거나 직접 등록해보세요"
