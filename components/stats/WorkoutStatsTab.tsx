@@ -24,7 +24,7 @@ import {
 } from '@/hooks/routine';
 import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
 import type { MonthlyStats, WeeklyStats } from '@/hooks/routine';
-import { addDays, formatDate, parseDate } from '@/lib/utils/dateHelpers';
+import { formatDate, parseDate } from '@/lib/utils/dateHelpers';
 import { getDisplayStatus } from '@/lib/config/theme';
 import type { EventStatus } from '@/lib/types/routine';
 import PeriodTabs from './PeriodTabs';
@@ -241,52 +241,6 @@ export default function WorkoutStatsTab() {
   );
 }
 
-function ComparisonBadge({ diff, label }: { diff: number; label: string }) {
-  const isPositive = diff > 0;
-  return (
-    <span className="text-[10px] font-medium">
-      <span className={isPositive ? 'text-positive' : 'text-negative'}>
-        {isPositive ? '▲' : '▼'}
-        {Math.abs(diff)}%
-      </span>
-      <span className="text-muted-foreground"> {label} 대비</span>
-    </span>
-  );
-}
-
-function WorkoutCompletionCard({
-  workout,
-  comparison,
-}: {
-  workout: WeeklyStats['workout'] | MonthlyStats['workout'];
-  comparison?: { diff: number; label: string };
-}) {
-  const total = workout.completed + workout.scheduled;
-  return (
-    <div className="bg-muted/20 rounded-2xl p-4">
-      <div className="flex items-center gap-1.5 mb-3">
-        <BarbellIcon size={16} weight="fill" className="text-primary" />
-        <span className="text-xs font-medium text-muted-foreground">달성률</span>
-      </div>
-      <p className="text-2xl font-bold text-foreground mb-2">{workout.completionRate}%</p>
-      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-        <div
-          className="h-full bg-primary rounded-full transition-all duration-300"
-          style={{ width: `${Math.min(100, Math.max(0, workout.completionRate))}%` }}
-        />
-      </div>
-      <div className="mt-3 space-y-1">
-        <p className="text-[11px] text-muted-foreground">
-          {total > 0 ? `${workout.completed}/${total}개 완료` : '일정 없음'}
-        </p>
-        {comparison && comparison.diff !== 0 && (
-          <ComparisonBadge diff={comparison.diff} label={comparison.label} />
-        )}
-      </div>
-    </div>
-  );
-}
-
 function DailyWorkoutLog({ dailyStats }: { dailyStats: WeeklyStats['dailyStats'] }) {
   const today = formatDate(new Date());
 
@@ -363,8 +317,6 @@ function WorkoutStatusPill({ status, date }: { status: EventStatus; date: string
 
 function WeeklyWorkoutMetrics({ dateStr }: { dateStr: string }) {
   const stats = useWeeklyStatsSuspense(dateStr);
-  const prevDateStr = formatDate(addDays(new Date(dateStr), -7));
-  const prevStats = useWeeklyStatsSuspense(prevDateStr);
 
   const workoutTotal = stats.workout.completed + stats.workout.scheduled;
 
@@ -378,13 +330,9 @@ function WeeklyWorkoutMetrics({ dateStr }: { dateStr: string }) {
   }
 
   const metrics = buildWorkoutMetrics(stats.workout);
-  const comparison = prevStats
-    ? { diff: stats.workout.completionRate - prevStats.workout.completionRate, label: '지난주' }
-    : undefined;
 
   return (
     <div className="space-y-6">
-      <WorkoutCompletionCard workout={stats.workout} comparison={comparison} />
       <WorkoutMetricsGrid metrics={metrics} />
       <DailyWorkoutLog dailyStats={stats.dailyStats} />
     </div>
@@ -393,9 +341,6 @@ function WeeklyWorkoutMetrics({ dateStr }: { dateStr: string }) {
 
 function MonthlyWorkoutMetrics({ year, month }: { year: number; month: number }) {
   const stats = useMonthlyStatsSuspense(year, month);
-  const prevYear = month === 1 ? year - 1 : year;
-  const prevMonth = month === 1 ? 12 : month - 1;
-  const prevStats = useMonthlyStatsSuspense(prevYear, prevMonth);
 
   const workoutTotal = stats.workout.completed + stats.workout.scheduled;
 
@@ -409,13 +354,9 @@ function MonthlyWorkoutMetrics({ year, month }: { year: number; month: number })
   }
 
   const metrics = buildWorkoutMetrics(stats.workout);
-  const comparison = prevStats
-    ? { diff: stats.workout.completionRate - prevStats.workout.completionRate, label: '지난달' }
-    : undefined;
 
   return (
     <div className="space-y-6">
-      <WorkoutCompletionCard workout={stats.workout} comparison={comparison} />
       <WorkoutMetricsGrid metrics={metrics} />
     </div>
   );

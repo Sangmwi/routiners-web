@@ -16,7 +16,6 @@ export { default as NutritionStatsTab } from './NutritionStatsTab';
 
 // Shared
 export { default as WeeklyProgressChart } from './WeeklyProgressChart';
-export { default as MonthlyProgressChart } from './MonthlyProgressChart';
 export { default as ProgressBar } from './ProgressBar';
 export { default as PeriodTabs } from './PeriodTabs';
 export type { StatsPeriod } from './PeriodTabs';

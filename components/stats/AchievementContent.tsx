@@ -17,7 +17,6 @@ import {
 } from '@/hooks/routine';
 import type { MonthlyStats, WeeklyStats } from '@/hooks/routine';
 import { addDays, formatDate, parseDate } from '@/lib/utils/dateHelpers';
-import MonthlyProgressChart from './MonthlyProgressChart';
 import PeriodTabs from './PeriodTabs';
 import WeeklyProgressChart from './WeeklyProgressChart';
 
@@ -179,7 +178,6 @@ function MonthlyAchievement({ year, month }: { year: number; month: number }) {
   return (
     <div className="space-y-10">
       <AchievementCards stats={stats} totalLabel={`${stats.totalDays}일`} comparison={comparison} />
-      <MonthlyProgressChart stats={stats} />
     </div>
   );
 }

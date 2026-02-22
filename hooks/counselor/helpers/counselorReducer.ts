@@ -9,7 +9,7 @@
  * - useSendCounselorMessage의 onMutate 패턴 사용
  */
 
-import type { AIToolStatus, AIToolName } from '@/lib/types/fitness';
+import type { AIToolStatus, AIToolName, AIToolErrorType } from '@/lib/types/fitness';
 import type { RoutineAppliedEvent, RoutineProgressEvent } from '@/lib/api/conversation';
 import type { SummarizationState } from '@/lib/types/counselor';
 
@@ -63,7 +63,7 @@ export type CounselorChatAction =
 
   // 도구
   | { type: 'TOOL_START'; toolCallId: string; name: AIToolName }
-  | { type: 'TOOL_DONE'; toolCallId: string; success: boolean }
+  | { type: 'TOOL_DONE'; toolCallId: string; success: boolean; errorType?: AIToolErrorType }
   | { type: 'RESET_TOOLS' }
 
   // 대기 상태
@@ -142,7 +142,11 @@ export function counselorReducer(state: CounselorChatState, action: CounselorCha
         ...state,
         activeTools: state.activeTools.map((t) =>
           t.toolCallId === action.toolCallId
-            ? { ...t, status: action.success ? 'completed' : 'error' }
+            ? {
+                ...t,
+                status: action.success ? 'completed' : 'error',
+                ...(action.errorType ? { errorType: action.errorType } : {}),
+              }
             : t
         ),
       };

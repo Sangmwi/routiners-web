@@ -130,7 +130,7 @@ export const POST = withAuth(
             content: `${existingSummary}${messagesToSummarize}\n\n위 대화를 요약해주세요.`,
           },
         ],
-        max_tokens: 1200,
+        max_completion_tokens: 1200,
         temperature: 0.3,
       });
 

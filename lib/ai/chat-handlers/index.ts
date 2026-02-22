@@ -211,6 +211,19 @@ async function handleClearActivePurpose(
   };
 }
 
+/**
+ * 에러 메시지 패턴으로 에러 유형 분류
+ *
+ * - missing_data: 프로필 데이터 미입력 (TDEE 계산 등)
+ * - not_found: 조회 대상 없음 (인바디, 루틴 등)
+ * - system: DB/네트워크 오류 등 시스템 장애
+ */
+function classifyErrorType(error: string): 'missing_data' | 'not_found' | 'system' {
+  if (/필요한 정보가 없|정보를 먼저/.test(error)) return 'missing_data';
+  if (/찾을 수 없|없는 이벤트|기록이 없/.test(error)) return 'not_found';
+  return 'system';
+}
+
 async function handleGeneralTool(
   fc: FunctionCallInfo,
   toolName: AIToolName,
@@ -230,6 +243,7 @@ async function handleGeneralTool(
     success: result.success,
     data: result.data,
     error: result.error,
+    ...(!result.success && result.error ? { errorType: classifyErrorType(result.error) } : {}),
   });
 
   return {

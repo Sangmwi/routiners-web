@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useState } from 'react';
-import { CheckCircleIcon, ClockIcon, ForkKnifeIcon, XCircleIcon } from '@phosphor-icons/react';
+import { CheckCircleIcon, ClockIcon, FireIcon, ForkKnifeIcon, XCircleIcon } from '@phosphor-icons/react';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import DateJumpSheet from '@/components/ui/DateJumpSheet';
 import { PulseLoader } from '@/components/ui/PulseLoader';
@@ -32,7 +32,7 @@ import PeriodTabs from './PeriodTabs';
 
 const MACRO_COLORS: Record<string, { bg: string; stroke: string }> = {
   탄수화물: { bg: 'bg-amber-400', stroke: '#fbbf24' },
-  단백질: { bg: 'bg-primary', stroke: 'var(--color-primary)' },
+  단백질: { bg: 'bg-sky-400', stroke: '#38bdf8' },
   지방: { bg: 'bg-rose-400', stroke: '#fb7185' },
 };
 
@@ -231,9 +231,12 @@ function CalorieSummaryCard({
       </div>
 
       {/* hero: 일 평균 칼로리 */}
-      <div className="flex items-baseline gap-1 mb-1">
-        <span className="text-3xl font-bold text-foreground">{heroCalories.toLocaleString()}</span>
-        <span className="text-sm text-muted-foreground">kcal</span>
+      <div className="flex items-center gap-2 mb-1">
+        <FireIcon size={28} weight="fill" className="text-orange-400" />
+        <div className="flex items-baseline gap-1">
+          <span className="text-3xl font-bold text-foreground">{heroCalories.toLocaleString()}</span>
+          <span className="text-sm text-muted-foreground">kcal</span>
+        </div>
       </div>
 
       {/* 프로그레스바: 일 평균 vs 일일 목표 */}
@@ -442,7 +445,7 @@ function DonutChart({
           </div>
 
           {/* Legend */}
-          <div className="flex-1 space-y-2.5">
+          <div className="flex-1 space-y-3.5">
             {macros.map(({ label, value, pct }) => (
               <div key={label} className="flex items-center gap-2">
                 <div className={`w-2.5 h-2.5 rounded-full ${MACRO_COLORS[label]?.bg ?? 'bg-muted'}`} />
@@ -453,7 +456,7 @@ function DonutChart({
             ))}
           </div>
         </div>
-        <p className="text-[10px] text-muted-foreground/40 mt-3 text-center">
+        <p className="text-[10px] text-muted-foreground/40 mt-6 text-center">
           일반 권장 비율: 탄 50 · 단 30 · 지 20
         </p>
       </div>
@@ -466,10 +469,10 @@ function DonutChart({
 type DailyMetric = 'calories' | 'protein' | 'carbs' | 'fat';
 
 const DAILY_METRIC_OPTIONS: { key: DailyMetric; label: string; unit: string; barColor: string; barColorMuted: string }[] = [
-  { key: 'calories', label: '칼로리', unit: 'kcal', barColor: 'bg-primary', barColorMuted: 'bg-primary/60' },
-  { key: 'protein', label: '단백질', unit: 'g', barColor: 'bg-primary', barColorMuted: 'bg-primary/60' },
-  { key: 'carbs', label: '탄수화물', unit: 'g', barColor: 'bg-amber-400', barColorMuted: 'bg-amber-400/60' },
-  { key: 'fat', label: '지방', unit: 'g', barColor: 'bg-rose-400', barColorMuted: 'bg-rose-400/60' },
+  { key: 'calories', label: '칼로리', unit: 'kcal', barColor: 'bg-orange-400', barColorMuted: 'bg-orange-400/40' },
+  { key: 'protein', label: '단백질', unit: 'g', barColor: 'bg-sky-400', barColorMuted: 'bg-sky-400/40' },
+  { key: 'carbs', label: '탄수화물', unit: 'g', barColor: 'bg-amber-400', barColorMuted: 'bg-amber-400/40' },
+  { key: 'fat', label: '지방', unit: 'g', barColor: 'bg-rose-400', barColorMuted: 'bg-rose-400/40' },
 ];
 
 function getDailyValue(day: WeeklyStats['dailyStats'][number], metric: DailyMetric): number {
@@ -541,34 +544,37 @@ function DailyNutritionLog({
             ? getDisplayStatus(day.meal, day.date)
             : null;
 
+          // 완료된 날 = 진한 색, 나머지 = 연한 색
+          const barColorClass = displayStatus === 'completed'
+            ? metricOption.barColor
+            : metricOption.barColorMuted;
+
           return (
-            <div key={day.date} className="flex items-center gap-2">
-              {/* 상태 도트 (왼쪽) */}
-              <span className="w-3 shrink-0 flex justify-center">
+            <div key={day.date} className="flex items-center gap-1.5">
+              {/* 상태 아이콘 (왼쪽) */}
+              <span className="w-4 shrink-0 flex justify-center">
                 {displayStatus === 'completed' && (
-                  <CheckCircleIcon size={10} weight="fill" className="text-primary" />
+                  <CheckCircleIcon size={13} weight="fill" className="text-primary" />
                 )}
                 {displayStatus === 'scheduled' && (
-                  <ClockIcon size={10} weight="duotone" className="text-scheduled" />
+                  <ClockIcon size={13} weight="duotone" className="text-scheduled" />
                 )}
                 {displayStatus === 'incomplete' && (
-                  <XCircleIcon size={10} weight="fill" className="text-muted-foreground/30" />
+                  <XCircleIcon size={13} weight="fill" className="text-muted-foreground/30" />
                 )}
                 {displayStatus === null && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/10" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/15" />
                 )}
               </span>
               {/* 요일 */}
               <span className={`text-xs font-semibold w-5 shrink-0 ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
                 {day.dayOfWeek}
               </span>
-              {/* 바 (메트릭 색상) */}
-              <div className="flex-1 h-5 bg-muted/30 rounded-md overflow-hidden relative">
+              {/* 바 (메트릭 색상, 완료=진한, 나머지=연한) */}
+              <div className="flex-1 min-w-0 h-5 bg-muted/30 rounded-md overflow-hidden relative">
                 {val > 0 && (
                   <div
-                    className={`h-full rounded-md transition-all duration-300 ${
-                      isToday ? metricOption.barColor : metricOption.barColorMuted
-                    }`}
+                    className={`h-full rounded-md transition-all duration-300 ${barColorClass}`}
                     style={{ width: `${Math.max(pct, 3)}%` }}
                   />
                 )}
@@ -580,7 +586,10 @@ function DailyNutritionLog({
                 )}
               </div>
               {/* 수치 + 단위 */}
-              <span className={`text-[11px] font-medium text-right shrink-0 ${val > 0 ? 'text-foreground' : 'text-muted-foreground/40'}`} style={{ minWidth: metric === 'calories' ? '4.5rem' : '2.5rem' }}>
+              <span
+                className={`text-[11px] font-medium text-right shrink-0 ${val > 0 ? 'text-foreground' : 'text-muted-foreground/40'}`}
+                style={{ minWidth: metric === 'calories' ? '4.5rem' : '2.5rem' }}
+              >
                 {formatted}
               </span>
             </div>
@@ -655,7 +664,7 @@ function NutritionMetrics({
         <NutritionBalanceSection meal={meal} targets={targets} prevMeal={prevMeal} />
       )}
 
-      {/* 3. 일별 기록 (주간만) — 메트릭 필터로 칼로리/단백질/탄수/지방 전환 */}
+      {/* 3a. 일별 기록 (주간) — 메트릭 필터로 칼로리/단백질/탄수/지방 전환 */}
       {dailyStats && (
         <DailyNutritionLog
           dailyStats={dailyStats}
@@ -663,7 +672,7 @@ function NutritionMetrics({
         />
       )}
 
-      {/* 4. 3대 영양소 비율 (목표 없을 때 폴백) */}
+      {/* 3b. 3대 영양소 비율 (목표 없을 때 폴백) */}
       {!targets.hasTargets && macros.length >= 2 && (
         <DonutChart macros={macros} />
       )}

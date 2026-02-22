@@ -179,6 +179,7 @@ export interface ToolEvent {
   success?: boolean;
   data?: unknown;
   error?: string;
+  errorType?: 'missing_data' | 'not_found' | 'system';
 }
 
 export interface RoutineAppliedEvent {

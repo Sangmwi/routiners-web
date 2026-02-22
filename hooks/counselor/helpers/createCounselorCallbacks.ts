@@ -121,6 +121,7 @@ export function createCounselorCallbacks(ctx: CounselorCallbackContext): ChatStr
         type: 'TOOL_DONE',
         toolCallId: event.toolCallId,
         success: event.success ?? true,
+        errorType: event.errorType,
       });
 
       // generate_routine_preview / generate_meal_plan_preview 완료 시 progress bar 클리어

@@ -301,6 +301,14 @@ export interface AIToolCall {
 }
 
 /**
+ * 도구 에러 유형
+ * - missing_data: 사용자 프로필 데이터 미입력 (키, 몸무게 등)
+ * - not_found: 조회 대상 없음 (인바디 미등록, 루틴 없음 등)
+ * - system: DB 오류, 네트워크 오류 등 시스템 장애
+ */
+export type AIToolErrorType = 'missing_data' | 'not_found' | 'system';
+
+/**
  * AI 도구 실행 상태 (UI용)
  */
 export interface AIToolStatus {
@@ -309,6 +317,7 @@ export interface AIToolStatus {
   status: 'running' | 'completed' | 'error';
   result?: unknown;
   error?: string;
+  errorType?: AIToolErrorType;
 }
 
 // ============================================================================

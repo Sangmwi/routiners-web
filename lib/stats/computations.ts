@@ -103,7 +103,11 @@ function aggregateEventMetrics(events: RoutineEvent[]): {
   for (const event of workoutCompleted) {
     if (isWorkoutData(event.data)) {
       totalVolume += calculateWorkoutVolume(event.data);
-      totalDuration += event.data.estimatedDuration ?? 0;
+      // 실측 시간(elapsedSeconds) 우선, 없으면 예상 시간
+      const durationMin = event.data.elapsedSeconds
+        ? Math.round(event.data.elapsedSeconds / 60)
+        : (event.data.estimatedDuration ?? 0);
+      totalDuration += durationMin;
       totalCaloriesBurned += event.data.estimatedCaloriesBurned ?? 0;
       totalDistance += calculateTotalDistance(event.data.exercises);
     }
@@ -268,7 +272,10 @@ export function computeWeeklyStats(
     if (workoutEvent) {
       workoutTitle = workoutEvent.title;
       if (isWorkoutData(workoutEvent.data)) {
-        workoutDuration = workoutEvent.data.estimatedDuration ?? undefined;
+        // 실측 시간(elapsedSeconds) 우선, 없으면 예상 시간
+        workoutDuration = workoutEvent.data.elapsedSeconds
+          ? Math.round(workoutEvent.data.elapsedSeconds / 60)
+          : (workoutEvent.data.estimatedDuration ?? undefined);
         workoutCalories = workoutEvent.data.estimatedCaloriesBurned ?? undefined;
       }
     }
@@ -326,6 +333,32 @@ export interface MonthlyStats {
     weekLabel: string;
     workoutRate: number;
     mealRate: number;
+    // ── 운동 기록 ──
+    /** 주간 운동 완료 수 */
+    workoutCompleted: number;
+    /** 주간 운동 전체 수 */
+    workoutTotal: number;
+    /** 주간 총 운동 시간 (분) */
+    workoutDuration: number;
+    /** 주간 총 볼륨 (kg) */
+    workoutVolume: number;
+    /** 주간 총 종목 수 */
+    workoutExercises: number;
+    /** 주간 총 세트 수 */
+    workoutSets: number;
+    // ── 식단 기록 ──
+    /** 주간 식단 완료 수 */
+    mealCompleted: number;
+    /** 주간 식단 전체 수 */
+    mealTotal: number;
+    /** 주간 평균 칼로리 (완료일 기준) */
+    avgCalories: number;
+    /** 주간 평균 단백질 */
+    avgProtein: number;
+    /** 주간 평균 탄수화물 */
+    avgCarbs: number;
+    /** 주간 평균 지방 */
+    avgFat: number;
   }>;
   completedDays: number;
   monthLabel: string;
@@ -363,12 +396,46 @@ export function computeMonthlyStats(
       (e) => e.date >= weekStartStr && e.date <= weekEndStr,
     );
 
-    const weekWorkoutCompleted = weekWorkouts.filter(
+    const weekWorkoutCompletedEvents = weekWorkouts.filter(
       (e) => e.status === 'completed',
-    ).length;
-    const weekMealCompleted = weekMeals.filter(
+    );
+    const weekWorkoutCompleted = weekWorkoutCompletedEvents.length;
+    const weekMealCompletedEvents = weekMeals.filter(
       (e) => e.status === 'completed',
-    ).length;
+    );
+    const weekMealCompleted = weekMealCompletedEvents.length;
+
+    // 주간 완료 운동 메트릭 합산
+    let wkDuration = 0;
+    let wkVolume = 0;
+    let wkExercises = 0;
+    let wkSets = 0;
+    for (const event of weekWorkoutCompletedEvents) {
+      if (isWorkoutData(event.data)) {
+        const dMin = event.data.elapsedSeconds
+          ? Math.round(event.data.elapsedSeconds / 60)
+          : (event.data.estimatedDuration ?? 0);
+        wkDuration += dMin;
+        wkVolume += calculateWorkoutVolume(event.data);
+        wkExercises += event.data.exercises.length;
+        wkSets += event.data.exercises.reduce((s, ex) => s + ex.sets.length, 0);
+      }
+    }
+
+    // 주간 완료 식단의 영양소 합산
+    let wkCalories = 0;
+    let wkProtein = 0;
+    let wkCarbs = 0;
+    let wkFat = 0;
+    for (const event of weekMealCompletedEvents) {
+      if (isMealData(event.data)) {
+        const nutrients = calculateMealNutrients(event.data);
+        wkCalories += nutrients.calories;
+        wkProtein += nutrients.protein;
+        wkCarbs += nutrients.carbs;
+        wkFat += nutrients.fat;
+      }
+    }
 
     const startDay = weekStart.getDate();
     const endDay = actualEnd.getDate();
@@ -383,6 +450,18 @@ export function computeMonthlyStats(
         weekMeals.length > 0
           ? Math.round((weekMealCompleted / weekMeals.length) * 100)
           : 0,
+      workoutCompleted: weekWorkoutCompleted,
+      workoutTotal: weekWorkouts.length,
+      workoutDuration: wkDuration,
+      workoutVolume: wkVolume,
+      workoutExercises: wkExercises,
+      workoutSets: wkSets,
+      mealCompleted: weekMealCompleted,
+      mealTotal: weekMeals.length,
+      avgCalories: weekMealCompleted > 0 ? Math.round(wkCalories / weekMealCompleted) : 0,
+      avgProtein: weekMealCompleted > 0 ? Math.round(wkProtein / weekMealCompleted) : 0,
+      avgCarbs: weekMealCompleted > 0 ? Math.round(wkCarbs / weekMealCompleted) : 0,
+      avgFat: weekMealCompleted > 0 ? Math.round(wkFat / weekMealCompleted) : 0,
     });
 
     weekStart = addDays(weekStart, 7);

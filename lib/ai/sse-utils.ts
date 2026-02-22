@@ -27,7 +27,7 @@ export type SSEEventType =
 export interface SSEEventDataMap {
   content: { content: string };
   tool_start: { toolCallId: string; name: string };
-  tool_done: { toolCallId: string; name: string; success: boolean; data?: unknown; error?: string };
+  tool_done: { toolCallId: string; name: string; success: boolean; data?: unknown; error?: string; errorType?: 'missing_data' | 'not_found' | 'system' };
   input_request: { requestId: string; type: string; message?: string; options?: unknown[]; sliderConfig?: unknown };
   profile_confirmation: { requestId: string; title: string; description?: string; fields: unknown[] };
   routine_preview: { previewId: string; title: string; description: string; preview: unknown };

@@ -42,21 +42,28 @@ export function useModalState(
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
+  // 닫기 진행 중 여부를 ref로 추적 — effect/callback 양쪽에서 중복 닫기 방지
+  const isClosingRef = useRef(false);
+
   const executeClose = useCallback(() => {
-    if (isAnimating) return;
+    if (isClosingRef.current) return;
+    isClosingRef.current = true;
 
     setIsAnimating(true);
     setTimeout(() => {
       setIsAnimating(false);
       setIsVisible(false);
       setHasOpened(false);
+      isClosingRef.current = false;
       onCloseRef.current();
     }, ANIMATION_DURATION);
-  }, [isAnimating]);
+  }, []);
 
+  // isOpen 변화에 반응 — isAnimating은 deps에서 제외하여
+  // setIsAnimating이 effect cleanup을 trigger하지 않도록 함
   useEffect(() => {
     if (isOpen && !isVisible) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+      isClosingRef.current = false;
       setIsVisible(true);
       setIsAnimating(false);
       setHasOpened(false);
@@ -64,17 +71,19 @@ export function useModalState(
       return () => clearTimeout(timer);
     }
 
-    if (!isOpen && isVisible && !isAnimating) {
+    if (!isOpen && isVisible && !isClosingRef.current) {
+      isClosingRef.current = true;
       setIsAnimating(true);
       const timer = setTimeout(() => {
         setIsAnimating(false);
         setIsVisible(false);
         setHasOpened(false);
+        isClosingRef.current = false;
         onCloseRef.current();
       }, ANIMATION_DURATION);
       return () => clearTimeout(timer);
     }
-  }, [isAnimating, isOpen, isVisible]);
+  }, [isOpen, isVisible]);
 
   return {
     isVisible,
