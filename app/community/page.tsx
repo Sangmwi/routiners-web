@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { MainTabLayout, MainTabHeader } from '@/components/layouts';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
+import { PulseLoader } from '@/components/ui/PulseLoader';
 import CategoryTabs from '@/components/community/CategoryTabs';
 import SearchBar from '@/components/community/SearchBar';
 import FilterModal, { type DateRange } from '@/components/community/FilterModal';
@@ -14,7 +15,7 @@ import type { PostCategory } from '@/lib/types/community';
 
 const CommunityContent = dynamic(
   () => import('@/components/community/CommunityContent'),
-  { ssr: false }
+  { ssr: false, loading: () => <PulseLoader /> }
 );
 
 const VALID_CATEGORIES = ['general', 'workout', 'meal', 'qna'] as const;
@@ -86,11 +87,13 @@ export default function CommunityPage() {
       />
       <SearchBar onSearchChange={setSearch} />
       <QueryErrorBoundary>
-        <CommunityContent
-          category={category}
-          search={search}
-          dateRange={dateRange}
-        />
+        <Suspense fallback={<PulseLoader />}>
+          <CommunityContent
+            category={category}
+            search={search}
+            dateRange={dateRange}
+          />
+        </Suspense>
       </QueryErrorBoundary>
 
       <FilterModal

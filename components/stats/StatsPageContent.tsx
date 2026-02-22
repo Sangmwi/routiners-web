@@ -33,7 +33,7 @@ export default function StatsPageContent() {
     <>
       <DomainTabs domain={domain} onDomainChange={setDomain} />
 
-      <div className="mt-2 overflow-hidden">
+      <div className="mt-2 [overflow-x:clip]">
         <div
           key={domain}
           className="animate-tab-slide"

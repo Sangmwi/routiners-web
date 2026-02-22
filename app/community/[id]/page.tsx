@@ -8,7 +8,7 @@ import { PulseLoader } from '@/components/ui/PulseLoader';
 
 const PostDetailContent = dynamic(
   () => import('@/components/community/detail/PostDetailContent'),
-  { ssr: false }
+  { ssr: false, loading: () => <PulseLoader /> }
 );
 
 export default function PostDetailPage({

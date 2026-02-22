@@ -9,7 +9,7 @@ import { PulseLoader } from '@/components/ui/PulseLoader';
 
 const PostWriteContent = dynamic(
   () => import('@/components/community/write/PostWriteContent'),
-  { ssr: false }
+  { ssr: false, loading: () => <PulseLoader /> }
 );
 
 function PostWriteInner() {
@@ -20,7 +20,9 @@ function PostWriteInner() {
   return (
     <DetailLayout title={isEdit ? '글 수정' : '글쓰기'} centered>
       <QueryErrorBoundary>
-        <PostWriteContent editPostId={postId} />
+        <Suspense fallback={<PulseLoader />}>
+          <PostWriteContent editPostId={postId} />
+        </Suspense>
       </QueryErrorBoundary>
     </DetailLayout>
   );

@@ -92,8 +92,8 @@ export default function ProfilePhotoEdit({
           disabled={isProcessing}
           className="relative w-[100px] h-[100px] group"
         >
-          {/* 원형 이미지 영역 (overflow-hidden을 여기에만 적용) */}
-          <div className="w-full h-full rounded-full overflow-hidden">
+          {/* 원형 이미지 영역 (overflow-hidden + relative를 여기에 적용) */}
+          <div className="relative w-full h-full rounded-full overflow-hidden ring-2 ring-border">
             {currentImage ? (
               <ImageWithFallback
                 src={currentImage}
@@ -104,23 +104,25 @@ export default function ProfilePhotoEdit({
                 optimizePreset="avatarLarge"
               />
             ) : (
-              <div className="w-full h-full bg-muted/50 border-2 border-dashed border-border rounded-full" />
+              <div className="w-full h-full bg-muted/40 flex items-center justify-center">
+                <CameraIcon size={28} weight="duotone" className="text-muted-foreground/50" />
+              </div>
             )}
 
             {/* hover 오버레이 */}
             {isProcessing ? (
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-full">
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                 <LoadingSpinner size="lg" variant="current" className="text-white" />
               </div>
             ) : (
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-full" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
             )}
           </div>
 
           {/* 카메라 아이콘 버튼 (원 바깥으로 나올 수 있게 overflow-hidden 밖에 배치) */}
           {!isProcessing && (
-            <div className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center border-2 border-background shadow-md">
-              <CameraIcon size={16} weight="fill" className="text-primary-foreground" />
+            <div className="absolute bottom-0.5 right-0.5 w-7 h-7 bg-primary rounded-full flex items-center justify-center border-2 border-background shadow-lg">
+              <CameraIcon size={14} weight="fill" className="text-primary-foreground" />
             </div>
           )}
         </button>
