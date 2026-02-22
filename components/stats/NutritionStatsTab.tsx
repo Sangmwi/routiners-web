@@ -588,7 +588,7 @@ function DailyNutritionLog({
               {/* 수치 + 단위 */}
               <span
                 className={`text-[11px] font-medium text-right shrink-0 ${val > 0 ? 'text-foreground' : 'text-muted-foreground/40'}`}
-                style={{ minWidth: metric === 'calories' ? '4.5rem' : '2.5rem' }}
+                style={{ minWidth: '4.5rem' }}
               >
                 {formatted}
               </span>

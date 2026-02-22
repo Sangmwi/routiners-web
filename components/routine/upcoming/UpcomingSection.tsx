@@ -55,9 +55,14 @@ export function UpcomingSection({
 
       {/* 이벤트 리스트 */}
       {upcomingEvents.length > 0 ? (
-        <div className="divide-y divide-border/50">
-          {upcomingEvents.map((event) => (
-            <UpcomingEventItem key={event.id} event={event} />
+        <div className="flex flex-col items-center">
+          {upcomingEvents.map((event, index) => (
+            <div key={event.id} className="w-full">
+              <UpcomingEventItem event={event} />
+              {index < upcomingEvents.length - 1 && (
+                <div className="w-8 h-px bg-border/50 mx-auto" />
+              )}
+            </div>
           ))}
         </div>
       ) : (
