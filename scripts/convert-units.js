@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require('fs');
 const path = require('path');
 
@@ -102,4 +103,3 @@ fs.writeFileSync(outputPath, tsContent, 'utf8');
 console.log(`✅ ${units.length}개의 부대 정보를 ${outputPath}에 생성했습니다.`);
 console.log(`   - REGIMENT: ${units.filter((u) => u.type === 'REGIMENT').length}개`);
 console.log(`   - BRIGADE: ${units.filter((u) => u.type === 'BRIGADE').length}개`);
-

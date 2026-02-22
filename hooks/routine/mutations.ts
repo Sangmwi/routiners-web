@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -29,7 +29,7 @@ import {
 // ============================================================================
 
 /**
- * 猷⑦떞 ?대깽???앹꽦 Mutation (?⑥씪)
+ * Routine event create mutation (single)
  *
  * @example
  * const createEvent = useCreateRoutineEvent();
@@ -53,7 +53,7 @@ export function useCreateRoutineEvent() {
 }
 
 /**
- * 猷⑦떞 ?대깽???쇨큵 ?앹꽦 Mutation (AI ?앹꽦 4二쇱튂)
+ * Routine event batch create mutation (AI 4-week plan)
  *
  * @example
  * const createBatch = useCreateRoutineEventsBatch();
@@ -77,11 +77,11 @@ export function useCreateRoutineEventsBatch() {
 }
 
 /**
- * 猷⑦떞 ?대깽???섏젙 Mutation
+ * Routine event update mutation
  *
  * @example
  * const updateEvent = useUpdateRoutineEvent();
- * updateEvent.mutate({ id: 'event-id', data: { title: '???쒕ぉ' } });
+ * updateEvent.mutate({ id: 'event-id', data: { title: 'Updated title' } });
  */
 export function useUpdateRoutineEvent() {
   const queryClient = useQueryClient();
@@ -101,7 +101,7 @@ export function useUpdateRoutineEvent() {
 }
 
 /**
- * ?대깽???꾨즺 Mutation
+ * Routine event complete mutation
  *
  * @example
  * const complete = useCompleteRoutineEvent();
@@ -187,7 +187,7 @@ export function useOptimisticEventDataMutation<TData>(
 }
 
 /**
- * ?뚰겕?꾩썐 ?곗씠???낅뜲?댄듃 Mutation
+ * Workout data update mutation
  *
  * @example
  * const updateWorkout = useUpdateWorkoutData();
@@ -201,9 +201,9 @@ export function useUpdateWorkoutData() {
 }
 
 /**
- * ?앸떒 ?곗씠???낅뜲?댄듃 Mutation
+ * Meal data update mutation
  *
- * useUpdateWorkoutData? ?숈씪???숆????낅뜲?댄듃 ?⑦꽩
+ * Uses the same optimistic update pattern as useUpdateWorkoutData.
  *
  * @example
  * const updateMeal = useUpdateMealData();
@@ -217,7 +217,7 @@ export function useUpdateMealData() {
 }
 
 /**
- * 猷⑦떞 ?대깽????젣 Mutation
+ * Routine event delete mutation
  *
  * @example
  * const deleteEvent = useDeleteRoutineEvent();
@@ -242,7 +242,7 @@ export function useDeleteRoutineEvent() {
 }
 
 /**
- * AI ?몄뀡怨??곌껐???대깽?몃뱾 ??젣 Mutation
+ * Delete events linked to an AI session mutation
  *
  * @example
  * const deleteBySession = useDeleteRoutineEventsBySession();
@@ -266,9 +266,9 @@ export function useDeleteRoutineEventsBySession() {
 }
 
 /**
- * ?앸떒 ?대깽??諛곗튂 ?앹꽦 Mutation (遺? ?앸떒 遺덈윭?ㅺ린??
+ * Meal event batch create mutation (import preset meal plans)
  *
- * AI 諛곗튂? ?щ━ aiSessionId 遺덊븘?? 異⑸룎 ?좎쭨???쒕쾭?먯꽌 ?ㅽ궢 泥섎━.
+ * For meal batches, aiSessionId is optional and conflict handling is done server-side.
  *
  * @example
  * const createBatch = useCreateMealEventsBatch();

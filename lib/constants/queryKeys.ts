@@ -158,6 +158,17 @@ export const queryKeys = {
   },
 
   /**
+   * Dietary Profile 관련 Query Keys
+   */
+  dietaryProfile: {
+    /** 모든 dietaryProfile 쿼리의 기본 키 */
+    all: ['dietaryProfile'] as const,
+
+    /** 현재 사용자의 식단 프로필 */
+    me: () => [...queryKeys.dietaryProfile.all, 'me'] as const,
+  },
+
+  /**
    * Counselor (범용 AI 상담) 관련 Query Keys
    */
   counselor: {

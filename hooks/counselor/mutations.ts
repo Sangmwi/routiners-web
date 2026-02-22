@@ -6,7 +6,6 @@ import { counselorApi, counselorPurposeApi, counselorContextApi } from '@/lib/ap
 import { api } from '@/lib/api/client';
 import { invalidateAfterRoutineApply } from '@/lib/utils/routineEventCacheHelper';
 import type {
-  CounselorConversation,
   CounselorConversationsResponse,
   CounselorConversationListItem,
   CreateCounselorConversationData,
@@ -154,6 +153,51 @@ export function useApplyRoutine() {
       invalidateAfterRoutineApply(queryClient, conversationId);
 
       // 대화 목록에서 activePurpose 즉시 제거 (서버 refetch 전 UI 반영)
+      queryClient.setQueryData<CounselorConversationsResponse>(
+        queryKeys.counselor.conversations(),
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            conversations: old.conversations.map((item) =>
+              item.conversation.id === conversationId
+                ? { ...item, hasActivePurpose: false }
+                : item
+            ),
+          };
+        }
+      );
+    },
+  });
+}
+
+// ============================================================================
+// Meal Plan Apply Mutation
+// ============================================================================
+
+/**
+ * 식단 적용 (AI 미경유, REST API 직접 호출)
+ */
+export function useApplyMealPlan() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (params: {
+      conversationId: string;
+      previewId: string;
+    }) =>
+      api.post<{
+        previewId: string;
+        eventsCreated: number;
+        startDate: string;
+      }>(
+        '/api/routine/apply-meal',
+        params
+      ),
+
+    onSuccess: (_, { conversationId }) => {
+      invalidateAfterRoutineApply(queryClient, conversationId);
+
       queryClient.setQueryData<CounselorConversationsResponse>(
         queryKeys.counselor.conversations(),
         (old) => {

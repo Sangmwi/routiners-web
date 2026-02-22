@@ -20,7 +20,6 @@ import type {
   UpdatePostRequest,
   CreateCommentRequest,
   CommunityPost,
-  PostListResponse,
 } from '@/lib/types/community';
 
 /**

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { useEffect, useReducer } from 'react';
 import type { WorkoutData } from '@/lib/types/routine';
 import { useUpdateWorkoutData } from './mutations';
 import {
@@ -38,10 +38,7 @@ export function useWorkoutSession({
   eventId,
   date,
 }: UseWorkoutSessionOptions): WorkoutSessionReturn {
-  const restoredTimer = useMemo(
-    () => restorePersistedWorkoutTimer(eventId),
-    [eventId],
-  );
+  const restoredTimer = restorePersistedWorkoutTimer(eventId);
 
   const [state, dispatch] = useReducer(workoutSessionReducer, undefined, () =>
     createInitialWorkoutSessionState(exercises, restoredTimer),
@@ -58,111 +55,73 @@ export function useWorkoutSession({
   }, [exercises, state.exercises.length, state.phase]);
 
   const updateWorkout = useUpdateWorkoutData();
-  const saveWorkoutData = useCallback(
-    (data: WorkoutAutosaveData) => {
-      if (!eventId) return;
-      updateWorkout.mutate({
-        id: eventId,
-        data,
-        date,
-        type: 'workout',
-      });
-    },
-    [date, eventId, updateWorkout],
-  );
+  const saveWorkoutData = (data: WorkoutAutosaveData) => {
+    if (!eventId) return;
+    updateWorkout.mutate({
+      id: eventId,
+      data,
+      date,
+      type: 'workout',
+    });
+  };
 
   useWorkoutSessionPersistence({ state, eventId });
   useWorkoutSessionAutosave({ state, eventId, date, saveWorkoutData });
   useWorkoutRestTimer(state.restTimer.active, dispatch);
   const elapsedSeconds = useWorkoutElapsedSeconds(state);
 
-  const startWorkout = useCallback(
-    () => dispatch({ type: 'START_WORKOUT' }),
-    [],
-  );
+  const startWorkout = () => dispatch({ type: 'START_WORKOUT' });
 
-  const completeSet = useCallback(
-    (exerciseIdx: number, setIdx: number) =>
-      dispatch({
-        type: 'COMPLETE_SET',
-        exerciseIndex: exerciseIdx,
-        setIndex: setIdx,
-      }),
-    [],
-  );
+  const completeSet = (exerciseIdx: number, setIdx: number) =>
+    dispatch({
+      type: 'COMPLETE_SET',
+      exerciseIndex: exerciseIdx,
+      setIndex: setIdx,
+    });
 
-  const undoSet = useCallback(
-    (exerciseIdx: number, setIdx: number) =>
-      dispatch({
-        type: 'UNDO_SET',
-        exerciseIndex: exerciseIdx,
-        setIndex: setIdx,
-      }),
-    [],
-  );
+  const undoSet = (exerciseIdx: number, setIdx: number) =>
+    dispatch({
+      type: 'UNDO_SET',
+      exerciseIndex: exerciseIdx,
+      setIndex: setIdx,
+    });
 
-  const updateSetValue = useCallback(
-    (
-      exerciseIdx: number,
-      setIdx: number,
-      field: 'actualReps' | 'actualWeight',
-      value: number | undefined,
-    ) =>
-      dispatch({
-        type: 'UPDATE_SET_VALUE',
-        exerciseIndex: exerciseIdx,
-        setIndex: setIdx,
-        field,
-        value,
-      }),
-    [],
-  );
+  const updateSetValue = (
+    exerciseIdx: number,
+    setIdx: number,
+    field: 'actualReps' | 'actualWeight',
+    value: number | undefined,
+  ) =>
+    dispatch({
+      type: 'UPDATE_SET_VALUE',
+      exerciseIndex: exerciseIdx,
+      setIndex: setIdx,
+      field,
+      value,
+    });
 
-  const goToNextExercise = useCallback(
-    () => dispatch({ type: 'NEXT_EXERCISE' }),
-    [],
-  );
+  const goToNextExercise = () => dispatch({ type: 'NEXT_EXERCISE' });
 
-  const goToPrevExercise = useCallback(
-    () => dispatch({ type: 'PREV_EXERCISE' }),
-    [],
-  );
+  const goToPrevExercise = () => dispatch({ type: 'PREV_EXERCISE' });
 
-  const goToExercise = useCallback(
-    (index: number) => dispatch({ type: 'GO_TO_EXERCISE', index }),
-    [],
-  );
+  const goToExercise = (index: number) => dispatch({ type: 'GO_TO_EXERCISE', index });
 
-  const completeWorkout = useCallback(
-    () => dispatch({ type: 'COMPLETE_WORKOUT' }),
-    [],
-  );
+  const completeWorkout = () => dispatch({ type: 'COMPLETE_WORKOUT' });
 
-  const exitWorkout = useCallback(
-    () => dispatch({ type: 'EXIT_WORKOUT' }),
-    [],
-  );
+  const exitWorkout = () => dispatch({ type: 'EXIT_WORKOUT' });
 
-  const skipRest = useCallback(
-    () => dispatch({ type: 'SKIP_REST' }),
-    [],
-  );
+  const skipRest = () => dispatch({ type: 'SKIP_REST' });
 
   const currentExercise = state.exercises[state.currentExerciseIndex] ?? null;
 
-  const { totalSetsCompleted, totalSets } = useMemo(() => {
-    let completed = 0;
-    let total = 0;
-
-    for (const exercise of state.exercises) {
-      for (const set of exercise.sets) {
-        total += 1;
-        if (set.completed) completed += 1;
-      }
+  let totalSetsCompleted = 0;
+  let totalSets = 0;
+  for (const exercise of state.exercises) {
+    for (const set of exercise.sets) {
+      totalSets += 1;
+      if (set.completed) totalSetsCompleted += 1;
     }
-
-    return { totalSetsCompleted: completed, totalSets: total };
-  }, [state.exercises]);
+  }
 
   const isCurrentExerciseCompleted = currentExercise
     ? currentExercise.sets.every((set) => set.completed)

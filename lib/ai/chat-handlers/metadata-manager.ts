@@ -105,8 +105,8 @@ export async function transitionToApplied(
   }
 ): Promise<{ error: Error | null }> {
   const existing = await getMetadata(supabase, conversationId);
-
-  const { [pendingKey]: _removed, ...rest } = existing;
+  const rest = { ...existing };
+  delete rest[pendingKey];
 
   const { error } = await supabase
     .from('conversations')
@@ -233,7 +233,8 @@ export async function clearPendingPreview(
   conversationId: string
 ): Promise<{ error: Error | null }> {
   const existing = await getMetadata(supabase, conversationId);
-  const { pending_preview: _, ...rest } = existing;
+  const rest = { ...existing };
+  delete rest.pending_preview;
 
   const { error } = await supabase
     .from('conversations')

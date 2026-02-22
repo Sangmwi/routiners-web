@@ -27,9 +27,11 @@ const SILENT_TOOLS: Set<AIToolName> = new Set([
  */
 export function useToolDisplayState(
   activeTools: AIToolStatus[],
-  _streamingContent: string | undefined,
-  _messages: ChatMessage[]
+  streamingContent: string | undefined,
+  messages: ChatMessage[]
 ): ToolDisplayState {
+  void streamingContent;
+  void messages;
   const displayedTools = activeTools.filter((t) => !SILENT_TOOLS.has(t.name));
   return { displayedTools };
 }

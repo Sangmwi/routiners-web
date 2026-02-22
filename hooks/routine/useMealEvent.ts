@@ -1,12 +1,12 @@
 'use client';
 
-import { useConfirmDialog } from '@/lib/stores/modalStore';
 import { useShowError } from '@/lib/stores/errorStore';
 import { isMealData } from '@/lib/types/guards';
 import { useRoutineEventByDateSuspense } from './queries';
 import { useCompleteRoutineEvent, useUpdateMealData } from './mutations';
-import { useRoutineEventActions } from './useRoutineEventActions';
 import type { Meal, MealData } from '@/lib/types/meal';
+import { useRoutineEventConfirmActions } from './useRoutineEventConfirmActions';
+import { useRoutineEventDataMutation } from './useRoutineEventDataMutation';
 
 interface MealDataUpdateOptions {
   errorMessage: string;
@@ -16,7 +16,6 @@ interface MealDataUpdateOptions {
 
 export function useMealEvent(date: string) {
   const showError = useShowError();
-  const confirm = useConfirmDialog();
 
   const { data: event } = useRoutineEventByDateSuspense(date, 'meal');
   const mealData: MealData | null =
@@ -24,7 +23,9 @@ export function useMealEvent(date: string) {
 
   const completeEvent = useCompleteRoutineEvent();
   const updateMeal = useUpdateMealData();
-  const { deleteEventAndGoBack, uncompleteEvent, isUncompleting } = useRoutineEventActions();
+  const { mutateData, isUpdating } = useRoutineEventDataMutation(event, updateMeal);
+  const { confirmDelete, confirmUncomplete, isUncompleting } =
+    useRoutineEventConfirmActions();
 
   const mutateMealData = (
     nextMealData: MealData,
@@ -32,34 +33,18 @@ export function useMealEvent(date: string) {
   ) => {
     if (!event) return;
 
-    updateMeal.mutate(
-      {
-        id: event.id,
-        data: nextMealData,
-        date: event.date,
-        type: event.type,
-      },
-      {
-        onSuccess,
-        onError: () => {
-          showError(errorMessage);
-          onError?.();
-        },
-      },
-    );
+    mutateData(nextMealData, {
+      errorMessage,
+      onSuccess,
+      onError,
+    });
   };
 
   const handleDelete = () => {
     if (!event) return;
 
-    confirm({
-      title: '루틴을 삭제하시겠어요?',
-      message: '삭제하면 되돌릴 수 없어요.',
-      confirmText: '삭제',
-      onConfirm: () =>
-        deleteEventAndGoBack(event, {
-          errorMessage: '식단 삭제에 실패했어요.',
-        }),
+    confirmDelete(event, {
+      errorMessage: '식단 삭제에 실패했어요.',
     });
   };
 
@@ -142,14 +127,8 @@ export function useMealEvent(date: string) {
   const handleUncomplete = () => {
     if (!event || event.status !== 'completed') return;
 
-    confirm({
-      title: '완료를 되돌리시겠어요?',
-      message: '루틴이 미완료 상태로 돌아가요.',
-      confirmText: '되돌리기',
-      onConfirm: () =>
-        uncompleteEvent(event, {
-          errorMessage: '되돌리기에 실패했어요.',
-        }),
+    confirmUncomplete(event, {
+      errorMessage: '되돌리기에 실패했어요.',
     });
   };
 
@@ -162,7 +141,7 @@ export function useMealEvent(date: string) {
     handleMealToggle,
     handleRemoveMeal,
     handleAddMeal,
-    isUpdating: updateMeal.isPending,
+    isUpdating,
     isCompleting: completeEvent.isPending,
     isUncompleting,
   };

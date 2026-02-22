@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, ReactNode } from 'react';
+import { useEffect, useRef, ReactNode } from 'react';
 import { CloseIcon } from '@/components/ui/icons';
 import {
   useModalState,
@@ -59,8 +59,7 @@ function getModalAnimationClass(
   isSwipeClosing: boolean,
   isSnappingBack: boolean,
   hasOpened: boolean,
-  isDragging: boolean,
-  hasEverDragged: boolean
+  isDragging: boolean
 ): string {
   const baseClass = isBottom
     ? 'rounded-t-3xl sm:rounded-2xl'
@@ -75,7 +74,7 @@ function getModalAnimationClass(
   }
 
   // 한 번이라도 드래그했으면 애니메이션 재실행 방지
-  if (hasOpened || isDragging || isSnappingBack || hasEverDragged) return baseClass;
+  if (hasOpened || isDragging || isSnappingBack) return baseClass;
 
   return isBottom
     ? `${baseClass} animate-in slide-in-from-bottom duration-300`
@@ -98,7 +97,6 @@ function getSwipeTransform(
   isDragging: boolean,
   deltaY: number,
   hasOpened: boolean,
-  hasEverDragged: boolean,
   isAnimating: boolean
 ): React.CSSProperties | undefined {
   // 스와이프로 닫히는 중
@@ -137,7 +135,7 @@ function getSwipeTransform(
   }
 
   // 이미 열린 상태 또는 드래그 경험 있으면 위치 고정 + 애니메이션 명시적 비활성화
-  if (hasOpened || hasEverDragged) {
+  if (hasOpened) {
     return {
       transform: 'translateY(0)',
       animation: 'none',
@@ -185,19 +183,12 @@ export default function Modal({
   );
 
   // 드래그 상호작용 추적 (한 번 드래그하면 애니메이션 재실행 방지)
-  const [hasEverDragged, setHasEverDragged] = useState(false);
-
-  useEffect(() => {
-    if (swipe.isDragging && !hasEverDragged) {
-      setHasEverDragged(true);
-    }
-  }, [swipe.isDragging, hasEverDragged]);
+  
 
   // 모달 닫힐 때 스와이프 상태 초기화
   useEffect(() => {
     if (!isVisible) {
       swipe.reset();
-      setHasEverDragged(false);
     }
   }, [isVisible, swipe]);
 
@@ -226,8 +217,7 @@ export default function Modal({
     swipe.isSwipeClosing,
     swipe.isSnappingBack,
     hasOpened,
-    swipe.isDragging,
-    hasEverDragged
+    swipe.isDragging
   );
 
   const backdropAnimationClass = getBackdropAnimationClass(
@@ -237,7 +227,7 @@ export default function Modal({
   );
 
   const swipeStyle = isBottom
-    ? getSwipeTransform(swipe.isSwipeClosing, swipe.isSnappingBack, swipe.isDragging, swipe.deltaY, hasOpened, hasEverDragged, isAnimating)
+    ? getSwipeTransform(swipe.isSwipeClosing, swipe.isSnappingBack, swipe.isDragging, swipe.deltaY, hasOpened, isAnimating)
     : undefined;
 
   return (

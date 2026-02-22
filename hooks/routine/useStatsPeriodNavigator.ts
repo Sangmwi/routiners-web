@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useState, type Dispatch, type SetStateAction } from 'react';
 import {
   addDays,
   formatDate,
@@ -19,7 +19,9 @@ interface UseStatsPeriodNavigatorReturn {
   period: StatsPeriod;
   setPeriod: (period: StatsPeriod) => void;
   weekBaseDate: Date;
+  setWeekBaseDate: Dispatch<SetStateAction<Date>>;
   monthYear: MonthYear;
+  setMonthYear: Dispatch<SetStateAction<MonthYear>>;
   label: string;
   yearLabel?: string;
   canGoNext: boolean;
@@ -39,29 +41,21 @@ export function useStatsPeriodNavigator(
     month: new Date().getMonth() + 1,
   }));
 
-  const weekRange = useMemo(() => getWeekRange(weekBaseDate), [weekBaseDate]);
-  const monthRange = useMemo(
-    () => getMonthRange(monthYear.year, monthYear.month),
-    [monthYear],
-  );
+  const weekRange = getWeekRange(weekBaseDate);
+  const monthRange = getMonthRange(monthYear.year, monthYear.month);
 
   const label = period === 'weekly' ? weekRange.weekLabel : monthRange.monthLabel;
   const yearLabel = period === 'weekly' ? `${weekBaseDate.getFullYear()}년` : undefined;
 
-  const canGoNext = useMemo(() => {
-    const today = new Date();
-    if (period === 'weekly') {
-      return new Date(weekRange.endDate) < today;
-    }
+  const today = new Date();
+  const canGoNext =
+    period === 'weekly'
+      ? new Date(weekRange.endDate) < today
+      : monthYear.year < today.getFullYear() ||
+        (monthYear.year === today.getFullYear() &&
+          monthYear.month < today.getMonth() + 1);
 
-    return (
-      monthYear.year < today.getFullYear() ||
-      (monthYear.year === today.getFullYear() &&
-        monthYear.month < today.getMonth() + 1)
-    );
-  }, [period, weekRange.endDate, monthYear]);
-
-  const handlePrev = useCallback(() => {
+  const handlePrev = () => {
     if (period === 'weekly') {
       setWeekBaseDate((prev) => addDays(prev, -7));
       return;
@@ -73,9 +67,9 @@ export function useStatsPeriodNavigator(
       }
       return { ...prev, month: prev.month - 1 };
     });
-  }, [period]);
+  };
 
-  const handleNext = useCallback(() => {
+  const handleNext = () => {
     if (!canGoNext) return;
 
     if (period === 'weekly') {
@@ -89,22 +83,24 @@ export function useStatsPeriodNavigator(
       }
       return { ...prev, month: prev.month + 1 };
     });
-  }, [period, canGoNext]);
+  };
 
-  const handleToday = useCallback(() => {
+  const handleToday = () => {
     const now = new Date();
     setWeekBaseDate(now);
     setMonthYear({
       year: now.getFullYear(),
       month: now.getMonth() + 1,
     });
-  }, []);
+  };
 
   return {
     period,
     setPeriod,
     weekBaseDate,
+    setWeekBaseDate,
     monthYear,
+    setMonthYear,
     label,
     yearLabel,
     canGoNext,

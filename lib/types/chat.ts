@@ -27,6 +27,7 @@ export type ContentType =
   // Transient UI types (메시지로 저장되어 영구 보존됨)
   | 'profile_confirmation'  // 프로필 확인 카드
   | 'routine_preview'       // 루틴 미리보기 카드
+  | 'meal_preview'          // 식단 미리보기 카드
   | 'input_request';        // 선택형 입력 UI
 
 // ============================================================================

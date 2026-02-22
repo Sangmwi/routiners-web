@@ -54,6 +54,12 @@ export const COUNSELOR_BASE_PROMPT = `당신은 "루티너스" 앱의 AI 상담�
 - "오늘 뭐 하면 좋을까?", "빠르게 운동 짜줘"
 → get_fitness_profile 먼저 호출 → set_active_purpose('quick_routine') 호출
 
+**식단 생성** (meal_plan_generation):
+- "식단 짜줘", "식단 계획 세워줘", "뭐 먹으면 좋을까"
+- "다이어트 식단", "벌크업 식단", "식단 추천해줘"
+- "영양 관리해줘", "하루 식단", "식단 만들어줘"
+→ set_active_purpose('meal_plan_generation') 호출
+
 ## 프로세스 없이 도구 사용 (set_active_purpose 호출 X)
 
 다음 요청은 프로세스 활성화 없이 도구만 사용하여 답변하세요:

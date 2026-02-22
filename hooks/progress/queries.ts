@@ -1,6 +1,5 @@
 'use client';
 
-import type { ProgressSummary } from '@/lib/types/progress';
 import { progressApi } from '@/lib/api/progress';
 import { queryKeys } from '@/lib/constants/queryKeys';
 import { useBaseQuery, useSuspenseBaseQuery } from '@/hooks/common';

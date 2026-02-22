@@ -8,6 +8,7 @@ interface CalendarHeaderProps {
   month: number;
   onPrevMonth: () => void;
   onNextMonth: () => void;
+  onMonthLabelClick?: () => void;
 }
 
 /**
@@ -18,12 +19,26 @@ export default function CalendarHeader({
   month,
   onPrevMonth,
   onNextMonth,
+  onMonthLabelClick,
 }: CalendarHeaderProps) {
   const monthName = formatKoreanDate(new Date(year, month - 1), { day: false });
 
   return (
     <div className="flex items-center justify-between py-4">
-      <h2 className="text-xl font-bold text-foreground">{monthName}</h2>
+      <h2 className="text-xl font-bold text-foreground">
+        {onMonthLabelClick ? (
+          <button
+            type="button"
+            onClick={onMonthLabelClick}
+            className="hover:text-primary transition-colors rounded-md px-1 py-0.5"
+            aria-label="월 선택"
+          >
+            {monthName}
+          </button>
+        ) : (
+          monthName
+        )}
+      </h2>
       <div className="flex items-center gap-1">
         <button
           onClick={onPrevMonth}

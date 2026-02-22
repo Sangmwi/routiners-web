@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { MainTabLayout, MainTabHeader } from '@/components/layouts';
@@ -24,20 +24,20 @@ const VALID_CATEGORIES = ['general', 'workout', 'meal', 'qna'] as const;
  */
 export default function CommunityPage() {
   const router = useRouter();
-  const [category, setCategory] = useState<PostCategory | 'all'>('all');
+  const [category, setCategory] = useState<PostCategory | 'all'>(() => {
+    if (typeof window === 'undefined') return 'all';
+    const params = new URLSearchParams(window.location.search);
+    const urlCategory = params.get('category');
+    if (urlCategory && (VALID_CATEGORIES as readonly string[]).includes(urlCategory)) {
+      return urlCategory as PostCategory;
+    }
+    return 'all';
+  });
   const [search, setSearch] = useState('');
   const [dateRange, setDateRange] = useState<DateRange>('all');
   const [filterOpen, setFilterOpen] = useState(false);
 
   // URL에서 초기 카테고리 읽기 (클라이언트 사이드)
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const urlCategory = params.get('category');
-    if (urlCategory && (VALID_CATEGORIES as readonly string[]).includes(urlCategory)) {
-      setCategory(urlCategory as PostCategory);
-    }
-  }, []);
-
   const handleNewPost = () => {
     router.push('/community/write');
   };

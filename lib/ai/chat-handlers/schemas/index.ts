@@ -28,3 +28,13 @@ export {
   GenerateRoutinePreviewArgsSchema,
   type GenerateRoutinePreviewArgs,
 } from './generate-routine-preview.schema';
+
+export {
+  GenerateMealPlanPreviewArgsSchema,
+  type GenerateMealPlanPreviewArgs,
+} from './generate-meal-plan-preview.schema';
+
+export {
+  ApplyMealPlanArgsSchema,
+  type ApplyMealPlanArgs,
+} from './apply-meal-plan.schema';

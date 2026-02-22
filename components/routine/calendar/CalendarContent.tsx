@@ -9,9 +9,10 @@ import {
 } from '@/components/routine';
 import DayEventSection from './DayEventSection';
 import { useCalendarEventsSuspense } from '@/hooks/routine';
+import DateJumpSheet from '@/components/ui/DateJumpSheet';
 import { PulseLoader } from '@/components/ui/PulseLoader';
 import type { EventType } from '@/lib/types/routine';
-import { formatDate as formatDateISO } from '@/lib/utils/dateHelpers';
+import { formatDate as formatDateISO, parseDate } from '@/lib/utils/dateHelpers';
 
 type FilterType = EventType | 'all';
 
@@ -40,6 +41,13 @@ export default function CalendarContent() {
 
   // 선택된 날짜
   const [selectedDate, setSelectedDate] = useState<string>(formatDateISO(today));
+  const [isDateJumpOpen, setIsDateJumpOpen] = useState(false);
+  const [dateJumpSession, setDateJumpSession] = useState(0);
+
+  const calendarMinDate = `${today.getFullYear() - 5}-01-01`;
+  const calendarMaxDate = formatDateISO(
+    new Date(today.getFullYear() + 2, today.getMonth(), today.getDate()),
+  );
 
   // Suspense 쿼리: 캘린더 이벤트
   const { data: calendarEvents } = useCalendarEventsSuspense(year, month);
@@ -88,6 +96,16 @@ export default function CalendarContent() {
     setSelectedDate(date);
   };
 
+  const handleDateJumpConfirm = ({ date }: { date: string }) => {
+    const nextDate = parseDate(date);
+
+    startTransition(() => {
+      setYear(nextDate.getFullYear());
+      setMonth(nextDate.getMonth() + 1);
+      setSelectedDate(date);
+    });
+  };
+
   return (
     <div className="space-y-4">
       {/* 타입 필터 토글 */}
@@ -104,6 +122,10 @@ export default function CalendarContent() {
           month={month}
           onPrevMonth={handlePrevMonth}
           onNextMonth={handleNextMonth}
+          onMonthLabelClick={() => {
+            setDateJumpSession((prev) => prev + 1);
+            setIsDateJumpOpen(true);
+          }}
         />
 
         <CalendarGrid
@@ -119,6 +141,18 @@ export default function CalendarContent() {
       <Suspense fallback={<PulseLoader className="py-8" />}>
         <DayEventSection date={selectedDate} filterType={filterType} />
       </Suspense>
+
+      <DateJumpSheet
+        key={`calendar-date-${dateJumpSession}`}
+        mode="date"
+        isOpen={isDateJumpOpen}
+        onClose={() => setIsDateJumpOpen(false)}
+        title="날짜 선택"
+        value={selectedDate}
+        minDate={calendarMinDate}
+        maxDate={calendarMaxDate}
+        onConfirm={handleDateJumpConfirm}
+      />
     </div>
   );
 }

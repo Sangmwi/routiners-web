@@ -12,8 +12,8 @@
  * - 모든 app-command 이벤트를 단일 지점에서 관리
  */
 
-import { useEffect, useRef } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import type { AppToWebMessage } from "@/lib/webview";
 import { useWebViewAuth } from "./useWebViewAuth";
 import { useWebViewNavigation } from "./useWebViewNavigation";
@@ -78,9 +78,6 @@ interface UseWebViewCommandsOptions {
 
 export const useWebViewCommands = ({ resetSessionCheck }: UseWebViewCommandsOptions) => {
   const router = useRouter();
-  const pathname = usePathname();
-  const pathnameRef = useRef(pathname);
-  pathnameRef.current = pathname;
 
   const { setSession, clearSession, notifySessionSet } = useWebViewAuth();
   const { sendRouteInfo } = useWebViewNavigation();
@@ -124,7 +121,7 @@ export const useWebViewCommands = ({ resetSessionCheck }: UseWebViewCommandsOpti
         notifySessionSet(success);
 
         // /login에서 로그인 성공 시에만 홈으로 리다이렉트
-        const currentPath = pathnameRef.current;
+        const currentPath = window.location.pathname;
         if (currentPath === "/login" && success) {
           await new Promise<void>((resolve) => queueMicrotask(resolve));
           window.location.replace("/");

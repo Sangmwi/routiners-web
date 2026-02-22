@@ -42,6 +42,7 @@ export function composeCounselorPrompt(
       routine_generation: '루틴 생성 프로세스',
       routine_modification: '루틴 수정 프로세스',
       quick_routine: '빠른 루틴 생성 프로세스',
+      meal_plan_generation: '식단 생성 프로세스',
     };
     const header = PROCESS_HEADERS[processType] ?? processType;
     prompt += `\n\n---\n\n# ${header}\n${PROCESS_RULES[processType]}`;

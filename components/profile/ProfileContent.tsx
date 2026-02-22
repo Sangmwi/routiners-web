@@ -9,6 +9,7 @@ import ProfileInfoTags from '@/components/profile/ProfileInfoTags';
 import ProfileInterestsTags from '@/components/profile/ProfileInterestsTags';
 import ProfileInbodySection from '@/components/profile/ProfileInbodySection';
 import ProfileFitnessSection from '@/components/profile/ProfileFitnessSection';
+import ProfileDietarySection from '@/components/profile/ProfileDietarySection';
 import ProfileMilitarySection from '@/components/profile/ProfileMilitarySection';
 import ProfileLocationsSection from '@/components/profile/ProfileLocationsSection';
 import { SignOutIcon, UserMinusIcon } from '@phosphor-icons/react';
@@ -64,6 +65,8 @@ export default function ProfileContent() {
       />
 
       <ProfileFitnessSection />
+
+      <ProfileDietarySection />
 
       {/* Logout & Withdrawal Buttons */}
       <div className="pt-4 space-y-2">

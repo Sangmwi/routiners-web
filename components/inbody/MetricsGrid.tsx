@@ -1,6 +1,5 @@
 'use client';
 
-import { ScalesIcon, BarbellIcon, PercentIcon } from '@phosphor-icons/react';
 import { MetricItem } from './MetricItem';
 
 export interface InBodyMetricsData {
@@ -39,7 +38,6 @@ export function MetricsGrid({ data, changes }: MetricsGridProps) {
   return (
     <div className="grid grid-cols-3 gap-4">
       <MetricItem
-        icon={ScalesIcon}
         label="체중"
         value={data?.weight}
         unit="kg"
@@ -47,7 +45,6 @@ export function MetricsGrid({ data, changes }: MetricsGridProps) {
         positiveIsGood={false}
       />
       <MetricItem
-        icon={BarbellIcon}
         label="골격근량"
         value={data?.skeletalMuscleMass}
         unit="kg"
@@ -55,7 +52,6 @@ export function MetricsGrid({ data, changes }: MetricsGridProps) {
         positiveIsGood={true}
       />
       <MetricItem
-        icon={PercentIcon}
         label="체지방률"
         value={data?.bodyFatPercentage}
         unit="%"

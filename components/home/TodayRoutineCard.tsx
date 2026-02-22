@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   BarbellIcon,
   BedIcon,
@@ -236,19 +236,16 @@ function WorkoutColumn({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  const model = useMemo(() => getWorkoutModel(event), [event]);
+  const model = getWorkoutModel(event);
 
-  const handleOption = useCallback(
-    (option: WorkoutAddOption) => {
-      setIsDrawerOpen(false);
-      if (option === 'ai') {
-        router.push('/routine/counselor');
-      } else {
-        setIsSheetOpen(true);
-      }
-    },
-    [router],
-  );
+  const handleOption = (option: WorkoutAddOption) => {
+    setIsDrawerOpen(false);
+    if (option === 'ai') {
+      router.push('/routine/counselor');
+    } else {
+      setIsSheetOpen(true);
+    }
+  };
 
   return (
     <div>
@@ -309,21 +306,18 @@ function MealColumn({ event }: { event: RoutineEvent | null }) {
   const [isMealSheetOpen, setIsMealSheetOpen] = useState(false);
   const [isImportSheetOpen, setIsImportSheetOpen] = useState(false);
 
-  const model = useMemo(() => getMealModel(event), [event]);
+  const model = getMealModel(event);
 
-  const handleOption = useCallback(
-    (option: MealAddOption) => {
-      setIsDrawerOpen(false);
-      if (option === 'ai') {
-        router.push('/routine/counselor');
-      } else if (option === 'direct') {
-        setIsMealSheetOpen(true);
-      } else {
-        setIsImportSheetOpen(true);
-      }
-    },
-    [router],
-  );
+  const handleOption = (option: MealAddOption) => {
+    setIsDrawerOpen(false);
+    if (option === 'ai') {
+      router.push('/routine/counselor');
+    } else if (option === 'direct') {
+      setIsMealSheetOpen(true);
+    } else {
+      setIsImportSheetOpen(true);
+    }
+  };
 
   return (
     <div>

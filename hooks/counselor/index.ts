@@ -31,3 +31,4 @@ export type { UseCounselorChatReturn } from './useCounselorChat';
 // UI State Hooks (SRP)
 export { useCounselorDrawer } from './useCounselorDrawer';
 export { useRoutinePreview } from './useRoutinePreview';
+export { useMealPreview } from './useMealPreview';

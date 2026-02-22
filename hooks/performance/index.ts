@@ -10,5 +10,4 @@ export {
   useIntersectionObserver,
   useVisibilityChange,
   useStableCallback,
-  usePrevious,
 } from './useOptimizedRender';

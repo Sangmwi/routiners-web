@@ -1,6 +1,5 @@
 'use client';
 
-import { InBodyRecord, InBodySummary } from '@/lib/types';
 import { inbodyApi } from '@/lib/api/inbody';
 import { queryKeys } from '@/lib/constants/queryKeys';
 import { useBaseQuery, useConditionalQuery, useSuspenseBaseQuery } from '@/hooks/common';

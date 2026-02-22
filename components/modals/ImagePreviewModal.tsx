@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { BackIcon, NextIcon, CloseIcon } from '@/components/ui/icons';
 import type { ModalDataMap } from '@/lib/stores/modalStore';
+import { ImageWithFallback } from '@/components/ui/image';
 
 // ============================================================================
 // Types
@@ -86,12 +87,15 @@ export default function ImagePreviewModal({
       )}
 
       {/* 이미지 */}
-      <img
-        src={images[currentIndex]}
-        alt={`이미지 ${currentIndex + 1}`}
-        className="max-h-full max-w-full object-contain"
-        draggable={false}
-      />
+      <div className="relative h-full w-full">
+        <ImageWithFallback
+          src={images[currentIndex]}
+          alt={`이미지 ${currentIndex + 1}`}
+          fill
+          className="object-contain"
+          draggable={false}
+        />
+      </div>
 
       {/* 다음 버튼 */}
       {images.length > 1 && (

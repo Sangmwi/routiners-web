@@ -7,7 +7,7 @@
  * - 타입 안전한 도구 핸들러 맵핑
  */
 
-import type { AIToolName, AIToolResult } from '@/lib/types/fitness';
+import type { AIToolName } from '@/lib/types/fitness';
 import type { ActivePurpose } from '@/lib/types/counselor';
 import { AI_TRAINER_TOOLS, type AIToolDefinition } from './tools';
 

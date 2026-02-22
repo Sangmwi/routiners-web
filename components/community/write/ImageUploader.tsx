@@ -109,10 +109,11 @@ export default function ImageUploader({
             key={`new-${index}`}
             className="relative aspect-square rounded-xl overflow-hidden"
           >
-            <img
+            <ImageWithFallback
               src={url}
               alt={`새 이미지 ${index + 1}`}
-              className="h-full w-full object-cover"
+              fill
+              className="object-cover"
             />
             <button
               type="button"

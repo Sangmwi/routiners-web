@@ -1,7 +1,6 @@
 'use client';
 
 import Modal, { ModalBody } from '@/components/ui/Modal';
-import Button from '@/components/ui/Button';
 
 export type DateRange = 'all' | 'today' | 'week' | 'month';
 

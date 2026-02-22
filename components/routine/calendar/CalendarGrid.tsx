@@ -1,7 +1,6 @@
 'use client';
 
 import { BarbellIcon, ForkKnifeIcon } from '@phosphor-icons/react';
-import { useMemo } from 'react';
 import type { CalendarEventSummary, EventStatus, EventType } from '@/lib/types/routine';
 import { getDisplayStatus, getStatusConfig } from '@/lib/config/eventTheme';
 import { formatDate } from '@/lib/utils/dateHelpers';
@@ -123,11 +122,8 @@ export default function CalendarGrid({
   selectedDate,
   onSelectDate,
 }: CalendarGridProps) {
-  const eventsByDate = useMemo(() => indexEventsByDate(events), [events]);
-  const days = useMemo(
-    () => generateCalendarDays(year, month, eventsByDate),
-    [eventsByDate, month, year],
-  );
+  const eventsByDate = indexEventsByDate(events);
+  const days = generateCalendarDays(year, month, eventsByDate);
 
   return (
     <div>

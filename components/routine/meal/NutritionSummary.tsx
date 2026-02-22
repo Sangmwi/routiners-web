@@ -26,7 +26,7 @@ interface NutritionOverviewProps {
 }
 
 /**
- * 총량 요약 (히어로 칼로리 + 3열 매크로 그리드)
+ * 총량 요약 (히어로 칼로리 + 3열 3대 영양소 그리드)
  * Big3LiftCard, InBodyMiniCard 패턴 적용
  */
 function NutritionOverview({ calories, protein, carbs, fat }: NutritionOverviewProps) {
@@ -45,14 +45,14 @@ function NutritionOverview({ calories, protein, carbs, fat }: NutritionOverviewP
         </div>
       </div>
 
-      {/* 매크로 3열 그리드 */}
+      {/* 3대 영양소 3열 그리드 */}
       <div className="grid grid-cols-3 gap-3">
         {MACRO_CONFIG.map(({ key, label, unit }) => (
           <div key={key} className="text-center">
             <p className="text-[11px] text-muted-foreground mb-1">{label}</p>
             <p className="text-base font-bold text-foreground tabular-nums">
               {macros[key]}
-              <span className="text-xs font-normal text-muted-foreground ml-0.5">{unit}</span>
+              <span className="text-xs font-normal text-muted-foreground ml-1">{unit}</span>
             </p>
           </div>
         ))}
@@ -138,7 +138,7 @@ function NutrientRow({ icon: Icon, label, current, target, unit }: NutrientRowPr
 /**
  * 하루 총 영양소 컴포넌트
  *
- * - 목표 미설정: 총량 요약 (히어로 칼로리 + 3열 매크로 그리드)
+ * - 목표 미설정: 총량 요약 (히어로 칼로리 + 3열 3대 영양소 그리드)
  * - 목표 설정: 목표 대비 프로그레스 바
  */
 export default function NutritionSummary({ data }: NutritionSummaryProps) {

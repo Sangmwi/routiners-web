@@ -13,7 +13,6 @@ interface ConfirmationStepProps {
 }
 
 export default function ConfirmationStep({
-  passData,
   militaryData,
   onConfirm,
   onBack,

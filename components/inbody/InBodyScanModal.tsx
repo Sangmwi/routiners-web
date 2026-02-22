@@ -11,6 +11,7 @@ import { useCreateInBody } from '@/hooks/inbody';
 import { useNativeImagePicker } from '@/hooks/webview';
 import type { ImagePickerSource } from '@/lib/webview';
 import InBodyPreview from './InBodyPreview';
+import { ImageWithFallback } from '@/components/ui/image';
 
 // ============================================================
 // Types & Constants
@@ -267,11 +268,12 @@ export default function InBodyScanModal({
           <div className="flex flex-col items-center justify-center py-8 space-y-6">
             {/* 이미지 미리보기 (소형) */}
             {imagePreview && (
-              <div className="w-20 h-20 rounded-lg overflow-hidden border border-border">
-                <img
+              <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-border">
+                <ImageWithFallback
                   src={imagePreview}
                   alt="Selected"
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
                 />
               </div>
             )}

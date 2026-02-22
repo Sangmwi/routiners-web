@@ -25,6 +25,7 @@ export function useMinimumLoadingTime(
     if (isFetching) {
       // 로딩 시작: 즉시 표시
       startTimeRef.current = Date.now();
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowLoading(true);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);

@@ -14,6 +14,8 @@ interface PeriodTabsProps {
   onPrev: () => void;
   onNext: () => void;
   canGoNext: boolean;
+  onDateLabelClick?: () => void;
+  dateLabelAriaLabel?: string;
 }
 
 export default function PeriodTabs({
@@ -24,7 +26,34 @@ export default function PeriodTabs({
   onPrev,
   onNext,
   canGoNext,
+  onDateLabelClick,
+  dateLabelAriaLabel,
 }: PeriodTabsProps) {
+  const dateLabelNode = onDateLabelClick ? (
+    <button
+      type="button"
+      onClick={onDateLabelClick}
+      aria-label={dateLabelAriaLabel ?? '날짜 선택'}
+      className="relative w-40 text-center text-sm text-muted-foreground font-medium hover:text-foreground transition-colors rounded-md px-1 py-0.5"
+    >
+      {yearLabel && (
+        <span className="absolute -top-3.5 inset-x-0 text-[10px] text-muted-foreground/60">
+          {yearLabel}
+        </span>
+      )}
+      {label}
+    </button>
+  ) : (
+    <span className="relative w-40 text-center text-sm text-muted-foreground font-medium">
+      {yearLabel && (
+        <span className="absolute -top-3.5 inset-x-0 text-[10px] text-muted-foreground/60">
+          {yearLabel}
+        </span>
+      )}
+      {label}
+    </span>
+  );
+
   return (
     <div className="flex items-center justify-between">
       {/* 날짜 네비게이션 */}
@@ -37,14 +66,7 @@ export default function PeriodTabs({
           <CaretLeftIcon size={16} weight="bold" />
         </button>
 
-        <span className="relative text-sm text-muted-foreground font-medium">
-          {yearLabel && (
-            <span className="absolute -top-3.5 left-0 text-[10px] text-muted-foreground/60">
-              {yearLabel}
-            </span>
-          )}
-          {label}
-        </span>
+        {dateLabelNode}
 
         <button
           type="button"

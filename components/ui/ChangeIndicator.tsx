@@ -6,22 +6,32 @@
  * - positiveIsGood=false: 양수 → 빨강, 음수 → 초록 (예: 체중, 체지방률)
  */
 
+/** 변화량 방향에 따른 CSS 변수 색상 반환 (스파크라인 등에서 재사용) */
+export function getTrendColor(change: number | undefined | null, positiveIsGood: boolean): string {
+  if (change == null || change === 0) return 'var(--primary)';
+  const isGood = positiveIsGood ? change > 0 : change < 0;
+  return isGood ? 'var(--positive)' : 'var(--negative)';
+}
+
 interface ChangeIndicatorProps {
   /** 변화량 수치 */
   value: number;
   /** 양수가 긍정적인지 여부 */
   positiveIsGood: boolean;
+  /** 단위 (예: "kg", "%") */
+  unit?: string;
 }
 
-export default function ChangeIndicator({ value, positiveIsGood }: ChangeIndicatorProps) {
+export default function ChangeIndicator({ value, positiveIsGood, unit }: ChangeIndicatorProps) {
   if (value === 0) return null;
 
   const isPositive = value > 0;
   const isGood = positiveIsGood ? isPositive : !isPositive;
+  const formatted = Number.isInteger(value) ? value : value.toFixed(1);
 
   return (
     <span className={`text-[10px] font-medium ${isGood ? 'text-positive' : 'text-negative'}`}>
-      {isPositive ? '+' : ''}{Number.isInteger(value) ? value : value.toFixed(1)}
+      {isPositive ? '+' : ''}{formatted}{unit ?? ''}
     </span>
   );
 }

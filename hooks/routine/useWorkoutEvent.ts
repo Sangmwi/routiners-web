@@ -1,19 +1,18 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useConfirmDialog } from '@/lib/stores/modalStore';
 import { useShowError } from '@/lib/stores/errorStore';
 import { isWorkoutData } from '@/lib/types/guards';
 import { useRoutineEventByDateSuspense } from './queries';
 import { useCompleteRoutineEvent, useUpdateWorkoutData } from './mutations';
 import { clearPersistedTimer } from './useWorkoutSession';
-import { useRoutineEventActions } from './useRoutineEventActions';
+import { useRoutineEventConfirmActions } from './useRoutineEventConfirmActions';
+import { useRoutineEventDataMutation } from './useRoutineEventDataMutation';
 import type { WorkoutData, WorkoutSet } from '@/lib/types/routine';
 
 export function useWorkoutEvent(date: string) {
   const router = useRouter();
   const showError = useShowError();
-  const confirm = useConfirmDialog();
 
   const { data: event } = useRoutineEventByDateSuspense(date, 'workout');
   const workoutData: WorkoutData | null =
@@ -21,19 +20,15 @@ export function useWorkoutEvent(date: string) {
 
   const completeEvent = useCompleteRoutineEvent();
   const updateWorkout = useUpdateWorkoutData();
-  const { deleteEventAndGoBack, uncompleteEvent, isUncompleting } = useRoutineEventActions();
+  const { mutateData } = useRoutineEventDataMutation(event, updateWorkout);
+  const { confirmDelete, confirmUncomplete, isUncompleting } =
+    useRoutineEventConfirmActions();
 
   const handleDelete = () => {
     if (!event) return;
 
-    confirm({
-      title: '루틴을 삭제하시겠어요?',
-      message: '삭제하면 되돌릴 수 없어요.',
-      confirmText: '삭제',
-      onConfirm: () =>
-        deleteEventAndGoBack(event, {
-          errorMessage: '운동 삭제에 실패했어요.',
-        }),
+    confirmDelete(event, {
+      errorMessage: '운동 삭제에 실패했어요.',
     });
   };
 
@@ -59,30 +54,16 @@ export function useWorkoutEvent(date: string) {
       ),
     };
 
-    updateWorkout.mutate(
-      {
-        id: event.id,
-        data: updatedData,
-        date: event.date,
-        type: event.type,
-      },
-      {
-        onError: () => showError('운동 기록 저장에 실패했어요.'),
-      },
-    );
+    mutateData(updatedData, {
+      errorMessage: '운동 기록 저장에 실패했어요.',
+    });
   };
 
   const handleUncomplete = () => {
     if (!event || event.status !== 'completed') return;
 
-    confirm({
-      title: '완료를 되돌리시겠어요?',
-      message: '루틴이 미완료 상태로 돌아가요.',
-      confirmText: '되돌리기',
-      onConfirm: () =>
-        uncompleteEvent(event, {
-          errorMessage: '되돌리기에 실패했어요.',
-        }),
+    confirmUncomplete(event, {
+      errorMessage: '되돌리기에 실패했어요.',
     });
   };
 

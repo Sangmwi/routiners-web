@@ -61,7 +61,6 @@ interface ActiveExerciseViewProps {
  */
 export default function ActiveExerciseView({
   exercise,
-  exerciseIndex,
   nextSetIndex,
   onCompleteSet,
   onUndoSet,

@@ -19,7 +19,7 @@ import type { ChatMessage, Conversation, AppliedRoutineMetadata } from './chat';
  * 활성 목적 타입 (구조화된 프로세스)
  * 추후 확장 가능하도록 설계
  */
-export type ActivePurposeType = 'routine_generation' | 'routine_modification' | 'quick_routine';
+export type ActivePurposeType = 'routine_generation' | 'routine_modification' | 'quick_routine' | 'meal_plan_generation';
 
 /**
  * 루틴 생성 프로세스 단계

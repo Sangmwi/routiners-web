@@ -42,13 +42,13 @@ export default function InBodyMiniCard({ summary, history = [] }: InBodyMiniCard
                 <p className="text-[11px] text-muted-foreground mb-1">{label}</p>
                 <p className="text-base font-bold text-foreground">
                   {value != null ? (
-                    <>{value}<span className="text-xs font-normal text-muted-foreground ml-0.5">{unit}</span></>
+                    <>{value}<span className="text-xs font-normal text-muted-foreground ml-1">{unit}</span></>
                   ) : (
                     <span className="text-muted-foreground/50">-</span>
                   )}
                 </p>
                 {change != null && change !== 0 && (
-                  <ChangeIndicator value={change} positiveIsGood={positiveIsGood} />
+                  <ChangeIndicator value={change} positiveIsGood={positiveIsGood} unit={unit} />
                 )}
                 {hasHistory && (
                   <div className="mt-1">

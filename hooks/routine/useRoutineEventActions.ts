@@ -1,6 +1,5 @@
 'use client';
 
-import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useShowError } from '@/lib/stores/errorStore';
 import { useUpdateRoutineEvent, useDeleteRoutineEvent } from './mutations';
@@ -21,36 +20,30 @@ export function useRoutineEventActions() {
   const updateEvent = useUpdateRoutineEvent();
   const deleteEvent = useDeleteRoutineEvent();
 
-  const deleteEventAndGoBack = useCallback(
-    async (event: RoutineEvent, options: DeleteOptions) => {
-      try {
-        await deleteEvent.mutateAsync({
-          id: event.id,
-          date: event.date,
-          type: event.type,
-        });
-        router.back();
-      } catch {
-        showError(options.errorMessage);
-      }
-    },
-    [deleteEvent, router, showError],
-  );
+  const deleteEventAndGoBack = async (event: RoutineEvent, options: DeleteOptions) => {
+    try {
+      await deleteEvent.mutateAsync({
+        id: event.id,
+        date: event.date,
+        type: event.type,
+      });
+      router.back();
+    } catch {
+      showError(options.errorMessage);
+    }
+  };
 
-  const uncompleteEvent = useCallback(
-    (event: RoutineEvent, options: UncompleteOptions) => {
-      updateEvent.mutate(
-        {
-          id: event.id,
-          data: { status: 'scheduled' },
-        },
-        {
-          onError: () => showError(options.errorMessage),
-        },
-      );
-    },
-    [showError, updateEvent],
-  );
+  const uncompleteEvent = (event: RoutineEvent, options: UncompleteOptions) => {
+    updateEvent.mutate(
+      {
+        id: event.id,
+        data: { status: 'scheduled' },
+      },
+      {
+        onError: () => showError(options.errorMessage),
+      },
+    );
+  };
 
   return {
     deleteEventAndGoBack,

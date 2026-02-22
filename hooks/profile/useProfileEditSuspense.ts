@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCurrentUserProfileSuspense } from './queries';
 import { useUpdateProfile } from './mutations';
@@ -9,7 +9,6 @@ import { useProfileImageUpload } from './useProfileImageUpload';
 import { useModalStore } from '@/lib/stores/modalStore';
 import {
   type ProfileFormData,
-  INITIAL_FORM_DATA,
   userToFormData,
   formDataToUpdateData,
   hasFormChanges,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 
 // ============================================================================
 // Types
@@ -60,23 +60,20 @@ export function useSwipeGesture(
   const [isSwipeClosing, setIsSwipeClosing] = useState(false);
   const [isSnappingBack, setIsSnappingBack] = useState(false);
 
-  const handleDragStart = useCallback(
-    (clientY: number) => {
-      if (!enabled) return;
-      setState({ startY: clientY, deltaY: 0, isDragging: true, lastY: clientY, lastTime: Date.now() });
-    },
-    [enabled]
-  );
+  const handleDragStart = (clientY: number) => {
+    if (!enabled) return;
+    setState({ startY: clientY, deltaY: 0, isDragging: true, lastY: clientY, lastTime: Date.now() });
+  };
 
-  const handleDragMove = useCallback((clientY: number) => {
+  const handleDragMove = (clientY: number) => {
     setState((prev) => {
       if (!prev.isDragging || prev.startY === null) return prev;
       const delta = clientY - prev.startY;
       return { ...prev, deltaY: delta > 0 ? delta : 0, lastY: clientY, lastTime: Date.now() };
     });
-  }, []);
+  };
 
-  const handleDragEnd = useCallback(() => {
+  const handleDragEnd = () => {
     setState((prev) => {
       if (!prev.isDragging) return prev;
 
@@ -97,13 +94,13 @@ export function useSwipeGesture(
 
       return { startY: null, deltaY: 0, isDragging: false, lastY: null, lastTime: null };
     });
-  }, [threshold, onSwipeClose]);
+  };
 
-  const reset = useCallback(() => {
+  const reset = () => {
     setState({ startY: null, deltaY: 0, isDragging: false, lastY: null, lastTime: null });
     setIsSwipeClosing(false);
     setIsSnappingBack(false);
-  }, []);
+  };
 
   const handlers = {
     onTouchStart: (e: React.TouchEvent) => handleDragStart(e.touches[0].clientY),

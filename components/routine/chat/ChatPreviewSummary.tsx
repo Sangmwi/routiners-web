@@ -1,8 +1,7 @@
 'use client';
 
 import { CheckIcon, WarningIcon, ProhibitIcon, PencilSimpleIcon, ArrowRightIcon } from '@phosphor-icons/react';
-import { LoadingSpinner } from '@/components/ui/icons';
-import { getEventIcon } from '@/lib/config/eventTheme';
+import type { ReactNode } from 'react';
 import ViewMoreButton from '@/components/ui/ViewMoreButton';
 import type { RoutinePreviewStatus } from '@/lib/types/chat';
 
@@ -46,17 +45,15 @@ export default function ChatPreviewSummary({
   onViewDetails,
   onCancel,
   onEdit,
-  onApply,
   isApplying = false,
 }: ChatPreviewSummaryProps) {
-  const Icon = getEventIcon(type === 'routine' ? 'workout' : 'meal');
   const isActionable = status === 'pending' && !isApplying;
 
   // 상태별 표시
-  const statusDisplay: Record<Exclude<RoutinePreviewStatus, 'pending'>, { icon: React.ReactNode; text: string; className: string }> = {
+  const statusDisplay: Record<Exclude<RoutinePreviewStatus, 'pending'>, { icon: ReactNode; text: string; className: string }> = {
     applied: {
       icon: <CheckIcon size={14} weight="bold" />,
-      text: '루틴이 적용되었어요',
+      text: type === 'meal' ? '식단이 적용되었어요' : '루틴이 적용되었어요',
       className: 'text-green-600',
     },
     edited: {

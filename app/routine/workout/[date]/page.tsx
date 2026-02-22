@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, useCallback, type ReactNode } from 'react';
+import { Suspense, useState, type ReactNode } from 'react';
 import { use } from 'react';
 import dynamic from 'next/dynamic';
 import { DetailLayout } from '@/components/layouts';
@@ -29,9 +29,9 @@ export default function WorkoutPage({ params }: WorkoutPageProps) {
   const [title, setTitle] = useState('운동 루틴');
   const [headerAction, setHeaderAction] = useState<ReactNode>(null);
 
-  const handleTitleChange = useCallback((newTitle: string) => {
+  const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle);
-  }, []);
+  };
 
   return (
     <DetailLayout title={title} centered action={headerAction}>

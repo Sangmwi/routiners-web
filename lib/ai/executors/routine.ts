@@ -22,6 +22,104 @@ import { formatDate, checkEventDateConflicts, getRoutineStartDate, getMondayOfWe
 import { insertEventsWithConflictCheck, updateConversationApplied, type EventInsertData } from '../event-factory';
 import type { ToolExecutorContext } from './types';
 
+// 같은 대화에서 미리보기를 역순 탐색할 때 읽어올 최대 개수.
+const ROUTINE_PREVIEW_LOOKUP_LIMIT = 50;
+
+// apply_routine 처리에 필요한 미리보기 메시지 조회 결과 형태.
+export interface RoutinePreviewMessageLookup {
+  messageId: string;
+  metadata: { status?: string } | null;
+  previewData: RoutinePreviewData;
+}
+
+// 대화 metadata에 적용 결과를 기록할 때 사용하는 파라미터.
+export interface AppliedRoutineMetadataParams {
+  previewId: string;
+  messageId: string;
+  eventsCreated?: number;
+  startDate?: string;
+  appliedAt: string;
+}
+
+/**
+ * 메시지 metadata에서 status 문자열만 안전하게 추출한다.
+ */
+export function getRoutinePreviewStatus(metadata: unknown): string | undefined {
+  if (!metadata || typeof metadata !== 'object') return undefined;
+  const status = (metadata as { status?: unknown }).status;
+  return typeof status === 'string' ? status : undefined;
+}
+
+/**
+ * 기존 conversation metadata를 보존하면서 루틴 적용 결과만 병합한다.
+ */
+export function buildAppliedRoutineConversationMetadata(
+  existingMetadata: Record<string, unknown> | null | undefined,
+  params: AppliedRoutineMetadataParams
+): Record<string, unknown> {
+  return {
+    ...(existingMetadata ?? {}),
+    activePurpose: null,
+    applied_routine: {
+      previewId: params.previewId,
+      messageId: params.messageId,
+      eventsCreated: params.eventsCreated,
+      startDate: params.startDate,
+      appliedAt: params.appliedAt,
+    },
+  };
+}
+
+/**
+ * preview_id와 일치하는 routine_preview 메시지를 최신순으로 찾는다.
+ */
+export async function findRoutinePreviewMessageById(
+  supabase: ToolExecutorContext['supabase'],
+  conversationId: string,
+  previewId: string
+): Promise<AIToolResult<RoutinePreviewMessageLookup>> {
+  const { data, error } = await supabase
+    .from('chat_messages')
+    .select('id, content, metadata, created_at')
+    .eq('conversation_id', conversationId)
+    .eq('content_type', 'routine_preview')
+    .order('created_at', { ascending: false })
+    .limit(ROUTINE_PREVIEW_LOOKUP_LIMIT);
+
+  if (error || !data || data.length === 0) {
+    return {
+      success: false,
+      error: '루틴 미리보기 데이터를 찾을 수 없습니다.',
+    };
+  }
+
+  for (const message of data as Array<{ id: string; content: string; metadata: unknown }>) {
+    try {
+      const previewData = JSON.parse(message.content) as RoutinePreviewData;
+      if (previewData.id === previewId) {
+        return {
+          success: true,
+          data: {
+            messageId: message.id,
+            metadata:
+              message.metadata && typeof message.metadata === 'object'
+                ? (message.metadata as { status?: string })
+                : null,
+            previewData,
+          },
+        };
+      }
+    } catch {
+      // 깨진 행이 있어도 최신 미리보기를 계속 탐색한다.
+    }
+  }
+
+  return {
+    success: false,
+    error: '미리보기 ID가 일치하지 않습니다.',
+  };
+}
+
 // ============================================================================
 // Helper Functions
 // ============================================================================

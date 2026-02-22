@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { ScalesIcon, LockIcon } from '@phosphor-icons/react';
 import { useInBodySummary, useUserInBodySummary } from '@/hooks/inbody';
-import { InBodyDetailModal, MetricsGrid } from '@/components/inbody';
+import { InBodyDetailModal } from '@/components/inbody';
+import { MetricItem } from '@/components/inbody/MetricItem';
 import { InBodyRecord } from '@/lib/types';
 import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/common/EmptyState';
@@ -17,6 +18,12 @@ interface ProfileInbodySectionProps {
   /** 프로필 소유자 ID (타인 프로필에서 사용) */
   userId?: string;
 }
+
+const INBODY_METRICS = [
+  { key: 'weight', label: '체중', unit: 'kg', positiveIsGood: false },
+  { key: 'skeletalMuscleMass', label: '골격근량', unit: 'kg', positiveIsGood: true },
+  { key: 'bodyFatPercentage', label: '체지방률', unit: '%', positiveIsGood: false },
+] as const;
 
 export default function ProfileInbodySection({
   showInbodyPublic = true,
@@ -45,8 +52,6 @@ export default function ProfileInbodySection({
   const [selectedRecord, setSelectedRecord] = useState<InBodyRecord | null>(null);
 
   const latest = summary?.latest;
-  const changes = summary?.changes;
-  const totalRecords = summary?.totalRecords ?? 0;
 
   // 비공개 상태 렌더링
   const renderPrivateState = () => {
@@ -82,21 +87,17 @@ export default function ProfileInbodySection({
   // 데이터 표시 렌더링
   const renderDataState = () => (
     <>
-      <MetricsGrid data={latest} changes={changes} />
+      <div className="grid grid-cols-3 gap-3">
+        {INBODY_METRICS.map(({ key, label, unit }) => (
+          <MetricItem
+            key={key}
+            label={label}
+            value={latest?.[key]}
+            unit={unit}
+          />
+        ))}
+      </div>
 
-      {/* 변화 기간 표시 */}
-      {changes?.periodDays && (
-        <p className="text-center text-xs text-muted-foreground mt-3">
-          {changes.periodDays}일 전 대비 변화
-        </p>
-      )}
-
-      {/* 기록 개수 표시 */}
-      {totalRecords > 0 && (
-        <p className="text-center text-xs text-muted-foreground mt-2">
-          총 {totalRecords}개의 기록
-        </p>
-      )}
     </>
   );
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 // ============================================================================
 // Constants
@@ -25,18 +25,18 @@ interface UseModalStateReturn {
 // ============================================================================
 
 /**
- * 모달 상태 관리 훅
- * 열기/닫기 애니메이션 및 상태 동기화 처리
+ * Shared modal visibility/animation state.
+ * Handles open/close transitions and external close requests.
  */
 export function useModalState(
   isOpen: boolean,
-  onClose: () => void
+  onClose: () => void,
 ): UseModalStateReturn {
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
 
-  const executeClose = useCallback(() => {
+  const executeClose = () => {
     if (isAnimating) return;
 
     setIsAnimating(true);
@@ -46,21 +46,29 @@ export function useModalState(
       setHasOpened(false);
       onClose();
     }, ANIMATION_DURATION);
-  }, [isAnimating, onClose]);
+  };
 
   useEffect(() => {
     if (isOpen && !isVisible) {
-      // 열기
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsVisible(true);
       setIsAnimating(false);
       setHasOpened(false);
       const timer = setTimeout(() => setHasOpened(true), OPEN_ANIMATION_DURATION);
       return () => clearTimeout(timer);
-    } else if (!isOpen && isVisible && !isAnimating) {
-      // 외부에서 닫기
-      executeClose();
     }
-  }, [isOpen, isVisible, isAnimating, executeClose]);
+
+    if (!isOpen && isVisible && !isAnimating) {
+      setIsAnimating(true);
+      const timer = setTimeout(() => {
+        setIsAnimating(false);
+        setIsVisible(false);
+        setHasOpened(false);
+        onClose();
+      }, ANIMATION_DURATION);
+      return () => clearTimeout(timer);
+    }
+  }, [isAnimating, isOpen, isVisible, onClose]);
 
   return {
     isVisible,

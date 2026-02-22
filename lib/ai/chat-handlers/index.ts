@@ -1,9 +1,10 @@
 /**
- * AI Chat Handlers Index
+ * AI 채팅 핸들러 진입점
  *
- * Phase 21-E: OCP 준수를 위한 레지스트리 기반 라우팅
- * - 새 핸들러 추가 시 switch문 수정 불필요
- * - 핸들러 등록만으로 확장 가능
+ * 라우팅 원칙:
+ * - 레지스트리 핸들러: 스키마 검증 + 도메인별 전용 처리
+ * - 인라인 핸들러: 메타데이터 중심의 단순 처리
+ * - 폴백 경로: 공용 executor 기반 일반 도구 처리
  */
 
 import { executeTool, type ToolExecutorContext } from '@/lib/ai/executors';
@@ -12,6 +13,8 @@ import { handleRequestUserInput } from './request-user-input';
 import { handleConfirmProfile } from './confirm-profile';
 import { handleGenerateRoutinePreview } from './generate-routine-preview';
 import { handleApplyRoutine } from './apply-routine';
+import { handleGenerateMealPlanPreview } from './generate-meal-plan-preview';
+import { handleApplyMealPlan } from './apply-meal-plan';
 import type { ToolHandlerContext, ToolHandlerResult, FunctionCallInfo } from './types';
 import {
   RequestUserInputArgsSchema,
@@ -19,6 +22,8 @@ import {
   ApplyRoutineArgsSchema,
   SetActivePurposeArgsSchema,
   GenerateRoutinePreviewArgsSchema,
+  GenerateMealPlanPreviewArgsSchema,
+  ApplyMealPlanArgsSchema,
 } from './schemas';
 import type { AIToolName } from '@/lib/types/fitness';
 import type { ActivePurposeType } from '@/lib/types/counselor';
@@ -26,9 +31,10 @@ import {
   setActivePurpose as setActivePurposeFn,
   clearActivePurpose as clearActivePurposeFn,
 } from './metadata-manager';
+import { PURPOSE_START_INSTRUCTIONS } from './constants/purpose-start-instructions';
 
 // =============================================================================
-// Handler Registration (Phase 21-E: OCP)
+// 핸들러 등록
 // =============================================================================
 
 toolRegistry.register('request_user_input', RequestUserInputArgsSchema, handleRequestUserInput);
@@ -39,9 +45,15 @@ toolRegistry.register(
   handleGenerateRoutinePreview
 );
 toolRegistry.register('apply_routine', ApplyRoutineArgsSchema, handleApplyRoutine);
+toolRegistry.register(
+  'generate_meal_plan_preview',
+  GenerateMealPlanPreviewArgsSchema,
+  handleGenerateMealPlanPreview
+);
+toolRegistry.register('apply_meal_plan', ApplyMealPlanArgsSchema, handleApplyMealPlan);
 
 // =============================================================================
-// Re-exports
+// 재수출
 // =============================================================================
 
 export type {
@@ -72,15 +84,25 @@ export {
 } from './metadata-manager';
 
 // =============================================================================
-// Tool Handler Router
+// 도구 라우터
 // =============================================================================
 
+const inlineToolHandlers: Partial<
+  Record<
+    AIToolName,
+    (
+      fc: FunctionCallInfo,
+      args: Record<string, unknown>,
+      ctx: ToolHandlerContext
+    ) => Promise<ToolHandlerResult>
+  >
+> = {
+  set_active_purpose: handleSetActivePurpose,
+  clear_active_purpose: (fc, _args, ctx) => handleClearActivePurpose(fc, ctx),
+};
+
 /**
- * Tool Handler 라우터
- *
- * Phase 21-E: 레지스트리 기반 라우팅
- * - 등록된 핸들러는 레지스트리에서 자동 처리 (Zod 검증 포함)
- * - 인라인 핸들러만 switch문으로 처리
+ * StreamingLoop에서 호출되는 메인 도구 라우터
  */
 export async function handleToolCall(
   fc: FunctionCallInfo,
@@ -88,33 +110,26 @@ export async function handleToolCall(
   args: Record<string, unknown>,
   ctx: ToolHandlerContext
 ): Promise<ToolHandlerResult> {
-  // 1. 레지스트리에서 처리 시도 (Zod 검증 자동 포함)
+  // 1) 레지스트리 경로: 스키마 검증 + 전용 핸들러
   const registryResult = await toolRegistry.execute(toolName, fc, args, ctx);
   if (registryResult) {
     return registryResult;
   }
 
-  // 2. 인라인 핸들러 (간단한 DB 작업)
-  switch (toolName) {
-    case 'set_active_purpose':
-      return handleSetActivePurpose(fc, args, ctx);
-
-    case 'clear_active_purpose':
-      return handleClearActivePurpose(fc, ctx);
-
-    default:
-      // 3. 일반 도구 처리 (executeTool)
-      return handleGeneralTool(fc, toolName, args, ctx);
+  // 2) 인라인 경로: 단순 메타데이터 작업
+  const inlineHandler = inlineToolHandlers[toolName];
+  if (inlineHandler) {
+    return inlineHandler(fc, args, ctx);
   }
+
+  // 3) 폴백 경로: 공용 executor 처리
+  return handleGeneralTool(fc, toolName, args, ctx);
 }
 
 // =============================================================================
-// Inline Handlers (간단한 DB 작업)
+// 인라인 핸들러
 // =============================================================================
 
-/**
- * set_active_purpose 인라인 핸들러
- */
 async function handleSetActivePurpose(
   fc: FunctionCallInfo,
   args: Record<string, unknown>,
@@ -134,30 +149,6 @@ async function handleSetActivePurpose(
   const purposeType = parsed.data.purposeType as ActivePurposeType;
   await setActivePurposeFn(ctx.supabase, ctx.conversationId, purposeType);
 
-  const startInstructions: Record<string, string> = {
-    routine_generation: `🚨 즉시 실행: get_user_basic_info, get_fitness_profile 호출 후 프로필이 비어있으면 request_user_input을 반드시 호출하세요.
-
-⛔ 절대 금지: 텍스트로만 옵션 나열 (버튼이 표시되지 않음)
-
-✅ 다음 응답에서 request_user_input 도구를 호출하세요:
-{"message":"운동 목표를 선택해주세요","type":"radio","options":[{"value":"muscle_gain","label":"근육 증가 💪"},{"value":"fat_loss","label":"체지방 감소 🔥"},{"value":"endurance","label":"지구력 향상 🏃"},{"value":"general_fitness","label":"전반적 체력 🌟"}],"sliderConfig":null}`,
-
-    routine_modification: `🚨 즉시 실행: get_current_routine 호출하여 기존 루틴을 확인하세요.
-결과에서 이벤트 ID와 운동 ID를 파악하고, 사용자의 수정 요청에 따라:
-- 운동 추가: add_exercise_to_workout
-- 운동 삭제: remove_exercise_from_workout
-- 운동 순서 변경: reorder_workout_exercises
-- 세트 수정: update_exercise_sets
-- 전체 재구성이 필요하면: generate_routine_preview
-적절한 도구를 호출하세요.`,
-
-    quick_routine: `🚨 즉시 실행: get_fitness_profile 호출하여 프로필을 확인하세요.
-- 프로필 충분 → 바로 generate_routine_preview 호출 (days_per_week: 1)
-- 프로필 부족 → 최대 2개 핵심 질문만 한 후 생성
-- **중요: dayOfWeek는 시스템 프롬프트 "현재 날짜"의 dayOfWeek 번호를 사용하세요.**
-"오늘만"이라고 했다면 days_per_week: 1로 생성하세요.`,
-  };
-
   ctx.sendEvent('tool_done', {
     toolCallId: fc.id,
     name: 'set_active_purpose',
@@ -167,39 +158,41 @@ async function handleSetActivePurpose(
   return {
     toolResult: JSON.stringify({
       success: true,
-      instructions: startInstructions[purposeType] ?? '',
+      instructions: PURPOSE_START_INSTRUCTIONS[purposeType] ?? '',
     }),
     continueLoop: true,
   };
 }
 
-/**
- * clear_active_purpose 인라인 핸들러
- */
 async function handleClearActivePurpose(
   fc: FunctionCallInfo,
   ctx: ToolHandlerContext
 ): Promise<ToolHandlerResult> {
   await clearActivePurposeFn(ctx.supabase, ctx.conversationId);
 
-  // pending 상태의 routine_preview 메시지를 'cancelled'로 업데이트
-  const { data: previewMessage } = await ctx.supabase
-    .from('chat_messages')
-    .select('id')
-    .eq('conversation_id', ctx.conversationId)
-    .eq('content_type', 'routine_preview')
-    .eq('metadata->>status', 'pending')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
+  // 프로세스 취소 시 최근 pending 미리보기 메시지도 함께 취소 상태로 맞춘다.
+  const cancelledAt = new Date().toISOString();
+  const previewTypes = ['routine_preview', 'meal_preview'] as const;
 
-  if (previewMessage) {
-    await ctx.supabase
+  for (const contentType of previewTypes) {
+    const { data: previewMessage } = await ctx.supabase
       .from('chat_messages')
-      .update({
-        metadata: { status: 'cancelled', cancelledAt: new Date().toISOString() },
-      })
-      .eq('id', previewMessage.id);
+      .select('id')
+      .eq('conversation_id', ctx.conversationId)
+      .eq('content_type', contentType)
+      .eq('metadata->>status', 'pending')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (previewMessage) {
+      await ctx.supabase
+        .from('chat_messages')
+        .update({
+          metadata: { status: 'cancelled', cancelledAt },
+        })
+        .eq('id', previewMessage.id);
+    }
   }
 
   ctx.sendEvent('tool_done', {
@@ -211,17 +204,13 @@ async function handleClearActivePurpose(
   return {
     toolResult: JSON.stringify({
       success: true,
-      message: '프로세스가 취소되었습니다. 일반 대화 모드로 돌아갑니다.',
-      next_action:
-        '사용자에게 "알겠습니다. 다음에 언제든 루틴 만들어드릴게요!"라고 친근하게 응답하세요.',
+      message: '프로세스를 취소했습니다. 일반 대화 모드로 돌아갑니다.',
+      next_action: '사용자 요청이 있으면 새로운 프로세스를 다시 시작하세요.',
     }),
     continueLoop: true,
   };
 }
 
-/**
- * 일반 도구 처리 (상담 AI 도구)
- */
 async function handleGeneralTool(
   fc: FunctionCallInfo,
   toolName: AIToolName,

@@ -18,6 +18,8 @@ export type SSEEventType =
   | 'routine_preview'      // 루틴 미리보기
   | 'routine_progress'     // 루틴 생성 진행률
   | 'routine_applied'      // 루틴 적용 완료
+  | 'meal_preview'         // 식단 미리보기
+  | 'meal_plan_applied'    // 식단 적용 완료
   | 'done'                 // 스트리밍 완료
   | 'error';               // 에러 발생
 
@@ -31,6 +33,8 @@ export interface SSEEventDataMap {
   routine_preview: { previewId: string; title: string; description: string; preview: unknown };
   routine_progress: { progress: number; stage: string };
   routine_applied: { eventsCreated: number; startDate: string };
+  meal_preview: { previewId: string; title: string; description: string; preview: unknown; messageId?: string };
+  meal_plan_applied: { previewId: string; eventsCreated: number; startDate: string };
   done: { messageId: string | null };
   error: { error: string; code?: string };
 }

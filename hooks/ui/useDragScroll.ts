@@ -1,34 +1,24 @@
 'use client';
 
-import { useRef, useState, useEffect, useCallback, RefObject } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { snapToNearest } from './useSnapScroll';
 
 interface SnapConfig {
-  /** snap 활성화 여부 */
   enabled: boolean;
-  /** snap 대상 아이템 선택자 */
   itemSelector?: string;
 }
 
 interface UseDragScrollOptions {
-  /** 드래그 활성화 여부 */
   enabled?: boolean;
-  /** 스크롤 속도 배율 (기본: 2) */
   scrollSpeed?: number;
-  /** 드래그로 간주할 최소 이동 거리 (px) */
   dragThreshold?: number;
-  /** scroll-snap 설정 */
   snap?: SnapConfig;
 }
 
 interface UseDragScrollReturn<T extends HTMLElement> {
-  /** 스크롤 컨테이너에 연결할 ref */
   containerRef: RefObject<T | null>;
-  /** 현재 드래그 중인지 여부 */
   isDragging: boolean;
-  /** 드래그 동작이 발생했는지 (클릭과 구분용) */
   hasDragged: boolean;
-  /** 이벤트 핸들러들 */
   handlers: {
     onMouseDown: (e: React.MouseEvent) => void;
     onMouseMove: (e: React.MouseEvent) => void;
@@ -37,26 +27,6 @@ interface UseDragScrollReturn<T extends HTMLElement> {
   };
 }
 
-/**
- * 드래그 스크롤 기능을 제공하는 커스텀 훅
- *
- * 마우스 드래그를 지원하며, 클릭과 드래그를 자동으로 구분합니다.
- * snap 활성화 시 드래그 종료 후 가장 가까운 아이템으로 스냅합니다.
- * 모바일 터치는 네이티브 스크롤 + CSS scroll-snap에 위임합니다.
- *
- * @example
- * ```tsx
- * const { containerRef, handlers } = useDragScroll<HTMLDivElement>({
- *   snap: { enabled: true },
- * });
- *
- * return (
- *   <div ref={containerRef} {...handlers} className="overflow-x-auto snap-x snap-proximity">
- *     {children}
- *   </div>
- * );
- * ```
- */
 export function useDragScroll<T extends HTMLElement = HTMLDivElement>({
   enabled = true,
   scrollSpeed = 2,
@@ -67,60 +37,48 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>({
   const [isDragging, setIsDragging] = useState(false);
   const [hasDragged, setHasDragged] = useState(false);
 
-  // 드래그 상태를 ref로도 유지 (이벤트 리스너에서 최신 값 참조)
   const dragStateRef = useRef({ startX: 0, scrollLeft: 0 });
 
-  // 마우스 드래그 시작
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      if (!enabled || !containerRef.current) return;
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!enabled || !containerRef.current) return;
 
-      setIsDragging(true);
-      setHasDragged(false);
-      dragStateRef.current = {
-        startX: e.pageX - containerRef.current.offsetLeft,
-        scrollLeft: containerRef.current.scrollLeft,
-      };
-      e.preventDefault();
-    },
-    [enabled]
-  );
+    setIsDragging(true);
+    setHasDragged(false);
+    dragStateRef.current = {
+      startX: e.pageX - containerRef.current.offsetLeft,
+      scrollLeft: containerRef.current.scrollLeft,
+    };
+    e.preventDefault();
+  };
 
-  // 마우스 드래그 중
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (!isDragging || !containerRef.current) return;
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !containerRef.current) return;
 
-      e.preventDefault();
-      const x = e.pageX - containerRef.current.offsetLeft;
-      const walk = (x - dragStateRef.current.startX) * scrollSpeed;
+    e.preventDefault();
+    const x = e.pageX - containerRef.current.offsetLeft;
+    const walk = (x - dragStateRef.current.startX) * scrollSpeed;
 
-      if (Math.abs(walk) > dragThreshold) {
-        setHasDragged(true);
-      }
+    if (Math.abs(walk) > dragThreshold) {
+      setHasDragged(true);
+    }
 
-      containerRef.current.scrollLeft = dragStateRef.current.scrollLeft - walk;
-    },
-    [isDragging, scrollSpeed, dragThreshold]
-  );
+    containerRef.current.scrollLeft = dragStateRef.current.scrollLeft - walk;
+  };
 
-  // 마우스 드래그 종료 + snap
-  const handleMouseUpOrLeave = useCallback(() => {
+  const handleMouseUpOrLeave = () => {
     if (isDragging && snap?.enabled && containerRef.current && hasDragged) {
       snapToNearest(containerRef.current, snap.itemSelector);
     }
     setIsDragging(false);
-  }, [isDragging, hasDragged, snap]);
+  };
 
-  // 커서 스타일 변경
   useEffect(() => {
     const container = containerRef.current;
     if (!container || !enabled) return;
 
     container.style.cursor = isDragging ? 'grabbing' : 'grab';
-  }, [isDragging, enabled]);
+  }, [enabled, isDragging]);
 
-  // 드래그 중 클릭 이벤트 차단
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { LoadingSpinner } from '@/components/ui/icons';
 import FormToggle from '@/components/ui/FormToggle';
 import { useCurrentUserProfile, useUpdateProfile } from '@/hooks/profile/useProfile';
@@ -49,27 +49,24 @@ export default function InBodyVisibilitySettings({
   const { data: user, isPending: isUserLoading } = useCurrentUserProfile();
   const updateProfile = useUpdateProfile();
 
-  // Local state for immediate UI feedback
-  const [isPublic, setIsPublic] = useState<boolean>(true);
-
-  // Sync with server state
-  useEffect(() => {
-    if (user?.showInbodyPublic !== undefined) {
-      setIsPublic(user.showInbodyPublic);
-    }
-  }, [user?.showInbodyPublic]);
+  const serverIsPublic = user?.showInbodyPublic ?? true;
+  const [optimisticValue, setOptimisticValue] = useState<boolean | null>(null);
+  const isPublic = optimisticValue ?? serverIsPublic;
 
   const handleToggle = (newValue: boolean) => {
     // Optimistic update
-    setIsPublic(newValue);
+    setOptimisticValue(newValue);
 
     updateProfile.mutate(
       { showInbodyPublic: newValue },
       {
-        onSuccess: () => onSaveSuccess?.(),
+        onSuccess: () => {
+          setOptimisticValue(null);
+          onSaveSuccess?.();
+        },
         onError: (error) => {
           // Rollback on error
-          setIsPublic(!newValue);
+          setOptimisticValue(null);
           onSaveError?.(error instanceof Error ? error : new Error('저장에 실패했어요'));
         },
       }

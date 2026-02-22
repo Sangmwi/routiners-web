@@ -1,13 +1,14 @@
 'use client';
 
 import SectionHeader from '@/components/ui/SectionHeader';
-import ChangeIndicator from '@/components/ui/ChangeIndicator';
+import { MetricItem } from '@/components/inbody/MetricItem';
 import MiniSparkline from '@/components/ui/MiniSparkline';
-import type { InBodySummary, InBodyRecord } from '@/lib/types';
+import { getTrendColor } from '@/components/ui/ChangeIndicator';
+import { useInBodyRecordsSuspense } from '@/hooks/inbody/queries';
+import type { InBodySummary } from '@/lib/types';
 
 interface InBodySectionProps {
   summary: InBodySummary;
-  history: InBodyRecord[];
 }
 
 const INBODY_METRICS = [
@@ -19,11 +20,13 @@ const INBODY_METRICS = [
 /**
  * 홈 화면 인바디 독립 섹션
  *
- * SectionHeader + 3열 메트릭 카드
+ * SectionHeader + 3열 MetricItem + 미니 스파크라인
  */
-export default function InBodySection({ summary, history }: InBodySectionProps) {
+export default function InBodySection({ summary }: InBodySectionProps) {
   const hasData = !!summary.latest;
+  const { data: history } = useInBodyRecordsSuspense(8, 0);
   const hasHistory = history.length >= 2;
+  const chronological = hasHistory ? [...history].reverse() : [];
 
   return (
     <section>
@@ -41,36 +44,31 @@ export default function InBodySection({ summary, history }: InBodySectionProps) 
             <p className="text-xs text-muted-foreground">인바디 기록이 없어요</p>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2">
             {INBODY_METRICS.map(({ key, label, unit, positiveIsGood }) => {
-              const value = summary.latest?.[key];
+              const sparkData = hasHistory ? chronological.map((r) => r[key]) : [];
               const change = summary.changes?.[key];
-              const sparkData = hasHistory ? [...history].reverse().map((r) => r[key]) : [];
-
               return (
-                <div key={key} className="text-center">
-                  <p className="text-[11px] text-muted-foreground mb-1">{label}</p>
-                  <p className="text-base font-bold text-foreground">
-                    {value != null ? (
-                      <>
-                        {value}
-                        <span className="text-xs font-normal text-muted-foreground ml-0.5">
-                          {unit}
-                        </span>
-                      </>
-                    ) : (
-                      <span className="text-muted-foreground/50">-</span>
-                    )}
-                  </p>
-                  {change != null && change !== 0 && (
-                    <ChangeIndicator value={change} positiveIsGood={positiveIsGood} />
-                  )}
+                <MetricItem
+                  key={key}
+                  label={label}
+                  value={summary.latest?.[key]}
+                  unit={unit}
+                >
                   {hasHistory && (
-                    <div className="mt-1">
-                      <MiniSparkline data={sparkData} height={28} showAllDots />
+                    <div className="mt-6">
+                      <MiniSparkline
+                        data={sparkData}
+                        height={28}
+                        showEndDot
+                        showAllDots={false}
+                        gradientFill={false}
+                        color={getTrendColor(change, positiveIsGood)}
+                        lineOpacity={0.7}
+                      />
                     </div>
                   )}
-                </div>
+                </MetricItem>
               );
             })}
           </div>

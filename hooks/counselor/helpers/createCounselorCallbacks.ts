@@ -123,9 +123,8 @@ export function createCounselorCallbacks(ctx: CounselorCallbackContext): ChatStr
         success: event.success ?? true,
       });
 
-      // Phase 20: generate_routine_preview 완료 시 progress bar 클리어
-      // (성공/실패 무관하게 클리어 - 실패 시에도 progress가 남아있으면 안 됨)
-      if (event.name === 'generate_routine_preview') {
+      // generate_routine_preview / generate_meal_plan_preview 완료 시 progress bar 클리어
+      if (event.name === 'generate_routine_preview' || event.name === 'generate_meal_plan_preview') {
         dispatch({ type: 'CLEAR_ROUTINE_PROGRESS' });
       }
 
@@ -161,6 +160,16 @@ export function createCounselorCallbacks(ctx: CounselorCallbackContext): ChatStr
 
     onRoutineProgress: (event) => {
       dispatch({ type: 'SET_ROUTINE_PROGRESS', event });
+    },
+
+    onMealPreview: () => {
+      // 식단 생성 완료 → 프로그래스바 제거
+      dispatch({ type: 'CLEAR_ROUTINE_PROGRESS' });
+    },
+
+    onMealPlanApplied: () => {
+      // 식단 적용 완료 → 캘린더 + 이벤트 캐시 무효화
+      invalidateAfterRoutineApply(queryClient, conversationId);
     },
   };
 }

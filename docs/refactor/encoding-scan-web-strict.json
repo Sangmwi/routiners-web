@@ -1,0 +1,2993 @@
+{
+  "summary": {
+    "scanned_at": "2026-02-22T00:24:05.969Z",
+    "total_files_scanned": 560,
+    "files_with_issues": 103,
+    "type_count": {
+      "q_before_hangul": 434,
+      "bom": 6
+    },
+    "top_files": [
+      {
+        "file": "docs/refactor/encoding-scan-web.json",
+        "count": 264
+      },
+      {
+        "file": "lib/types/inbody.ts",
+        "count": 48
+      },
+      {
+        "file": "components/profile/dietary/DietaryContent.tsx",
+        "count": 28
+      },
+      {
+        "file": "components/profile/fitness/FitnessContent.tsx",
+        "count": 23
+      },
+      {
+        "file": "lib/types/chat.ts",
+        "count": 16
+      },
+      {
+        "file": "lib/stats/computations.ts",
+        "count": 15
+      },
+      {
+        "file": "components/routine/sheets/AddMealSheet.tsx",
+        "count": 11
+      },
+      {
+        "file": "lib/types/meal.ts",
+        "count": 11
+      },
+      {
+        "file": "lib/types/fitness.ts",
+        "count": 10
+      },
+      {
+        "file": "lib/types/user.ts",
+        "count": 10
+      },
+      {
+        "file": "components/routine/sheets/AddWorkoutSheet.tsx",
+        "count": 9
+      },
+      {
+        "file": "components/routine/event/ExerciseCard.tsx",
+        "count": 8
+      },
+      {
+        "file": "hooks/counselor/useCounselorChat.ts",
+        "count": 6
+      },
+      {
+        "file": "lib/ai/executors/dietary-profile.ts",
+        "count": 6
+      },
+      {
+        "file": "app/api/community/posts/route.ts",
+        "count": 5
+      },
+      {
+        "file": "lib/types/counselor.ts",
+        "count": 5
+      },
+      {
+        "file": "lib/types/routine.ts",
+        "count": 5
+      },
+      {
+        "file": "app/api/routine/events/stats/progress/route.ts",
+        "count": 4
+      },
+      {
+        "file": "components/stats/NutritionStatsTab.tsx",
+        "count": 4
+      },
+      {
+        "file": "hooks/routine/useRoutineEventConfirmActions.ts",
+        "count": 4
+      },
+      {
+        "file": "hooks/routine/workout-session/reducer.ts",
+        "count": 4
+      },
+      {
+        "file": "lib/ai/executors/fitness-profile.ts",
+        "count": 4
+      },
+      {
+        "file": "lib/config/theme/event.ts",
+        "count": 4
+      },
+      {
+        "file": "app/api/community/posts/[id]/comments/route.ts",
+        "count": 3
+      },
+      {
+        "file": "components/community/comments/CommentItem.tsx",
+        "count": 3
+      },
+      {
+        "file": "components/counselor/CounselorContent.tsx",
+        "count": 3
+      },
+      {
+        "file": "components/routine/workout/ActiveExerciseView.tsx",
+        "count": 3
+      },
+      {
+        "file": "components/routine/workout/SetRow.tsx",
+        "count": 3
+      },
+      {
+        "file": "hooks/routine/useMealEvent.ts",
+        "count": 3
+      },
+      {
+        "file": "lib/ai/chat-handlers/metadata-manager.ts",
+        "count": 3
+      },
+      {
+        "file": "lib/ai/executors/shared.ts",
+        "count": 3
+      },
+      {
+        "file": "lib/ai/tool-registry.ts",
+        "count": 3
+      },
+      {
+        "file": "lib/utils/tdee.ts",
+        "count": 3
+      },
+      {
+        "file": "app/api/counselor/conversations/[id]/messages/route.ts",
+        "count": 2
+      },
+      {
+        "file": "app/api/counselor/conversations/[id]/summarize/route.ts",
+        "count": 2
+      },
+      {
+        "file": "app/api/routine/apply-meal/route.ts",
+        "count": 2
+      },
+      {
+        "file": "app/api/routine/apply/route.ts",
+        "count": 2
+      },
+      {
+        "file": "components/community/detail/PostDetailContent.tsx",
+        "count": 2
+      },
+      {
+        "file": "components/community/PostCard.tsx",
+        "count": 2
+      },
+      {
+        "file": "components/home/TodayRoutineCard.tsx",
+        "count": 2
+      }
+    ]
+  },
+  "issues": [
+    {
+      "file": "docs/refactor/encoding-scan-web.json",
+      "count": 264,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 1074,
+          "excerpt": "\"excerpt\": \"dietaryGoal: profile?.dietaryGoal ?? null,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1079,
+          "excerpt": "\"excerpt\": \"dietType: profile?.dietType ?? null,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1084,
+          "excerpt": "\"excerpt\": \"targetCalories: profile?.targetCalories ?? null,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1089,
+          "excerpt": "\"excerpt\": \"targetProtein: profile?.targetProtein ?? null,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1094,
+          "excerpt": "\"excerpt\": \"mealsPerDay: profile?.mealsPerDay ?? null,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1099,
+          "excerpt": "\"excerpt\": \"foodRestrictions: profile?.foodRestrictions ?? [],\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1104,
+          "excerpt": "\"excerpt\": \"availableSources: profile?.availableSources ?? [],\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1109,
+          "excerpt": "\"excerpt\": \"eatingHabits: profile?.eatingHabits ?? [],\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1114,
+          "excerpt": "\"excerpt\": \"budgetPerMonth: profile?.budgetPerMonth ?? null,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1119,
+          "excerpt": "\"excerpt\": \"preferences: profile?.preferences ?? [],\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1124,
+          "excerpt": "\"excerpt\": \"formData.dietaryGoal !== (profile?.dietaryGoal ?? null) ||\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1129,
+          "excerpt": "\"excerpt\": \"formData.dietType !== (profile?.dietType ?? null) ||\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1134,
+          "excerpt": "\"excerpt\": \"formData.targetCalories !== (profile?.targetCalories ?? null) ||\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1139,
+          "excerpt": "\"excerpt\": \"formData.targetProtein !== (profile?.targetProtein ?? null) ||\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1144,
+          "excerpt": "\"excerpt\": \"formData.mealsPerDay !== (profile?.mealsPerDay ?? null) ||\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1149,
+          "excerpt": "\"excerpt\": \"formData.budgetPerMonth !== (profile?.budgetPerMonth ?? null) ||\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1154,
+          "excerpt": "\"excerpt\": \"JSON.stringify(profile?.foodRestrictions ?? []) ||\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1159,
+          "excerpt": "\"excerpt\": \"JSON.stringify(profile?.availableSources ?? []) ||\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1164,
+          "excerpt": "\"excerpt\": \"JSON.stringify(profile?.eatingHabits ?? []) ||\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1169,
+          "excerpt": "\"excerpt\": \"JSON.stringify(profile?.preferences ?? []);\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1184,
+          "excerpt": "\"excerpt\": \": [...(prev.foodRestrictions ?? []), restriction],\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1199,
+          "excerpt": "\"excerpt\": \": [...(prev.availableSources ?? []), source],\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1214,
+          "excerpt": "\"excerpt\": \": [...(prev.eatingHabits ?? []), habit],\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1461,
+          "excerpt": "\"excerpt\": \"fitnessGoal: db.fitness_goal ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1466,
+          "excerpt": "\"excerpt\": \"experienceLevel: db.experience_level ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1471,
+          "excerpt": "\"excerpt\": \"preferredDaysPerWeek: db.preferred_days_per_week ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1476,
+          "excerpt": "\"excerpt\": \"sessionDurationMinutes: db.session_duration_minutes ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1481,
+          "excerpt": "\"excerpt\": \"equipmentAccess: db.equipment_access ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1486,
+          "excerpt": "\"excerpt\": \"focusAreas: db.focus_areas ?? [],\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1491,
+          "excerpt": "\"excerpt\": \"injuries: db.injuries ?? [],\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1496,
+          "excerpt": "\"excerpt\": \"preferences: db.preferences ?? [],\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1501,
+          "excerpt": "\"excerpt\": \"restrictions: db.restrictions ?? [],\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1506,
+          "excerpt": "\"excerpt\": \"aiNotes: db.ai_notes ?? {},\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1698,
+          "excerpt": "\"excerpt\": \"fitnessGoal: profile.fitnessGoal ?? null,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1703,
+          "excerpt": "\"excerpt\": \"experienceLevel: profile.experienceLevel ?? null,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1708,
+          "excerpt": "\"excerpt\": \"preferredDaysPerWeek: profile.preferredDaysPerWeek ?? null,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1713,
+          "excerpt": "\"excerpt\": \"sessionDurationMinutes: profile.sessionDurationMinutes ?? null,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1718,
+          "excerpt": "\"excerpt\": \"equipmentAccess: profile.equipmentAccess ?? null,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1723,
+          "excerpt": "\"excerpt\": \"focusAreas: profile.focusAreas ?? [],\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1728,
+          "excerpt": "\"excerpt\": \"injuries: profile.injuries ?? [],\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1733,
+          "excerpt": "\"excerpt\": \"preferences: profile.preferences ?? [],\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1738,
+          "excerpt": "\"excerpt\": \"restrictions: profile.restrictions ?? [],\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1743,
+          "excerpt": "\"excerpt\": \"formData.fitnessGoal !== (profile.fitnessGoal ?? null) ||\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1748,
+          "excerpt": "\"excerpt\": \"formData.experienceLevel !== (profile.experienceLevel ?? null) ||\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1753,
+          "excerpt": "\"excerpt\": \"formData.preferredDaysPerWeek !== (profile.preferredDaysPerWeek ?? null) ||\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1758,
+          "excerpt": "\"excerpt\": \"formData.sessionDurationMinutes !== (profile.sessionDurationMinutes ?? null) ||\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1763,
+          "excerpt": "\"excerpt\": \"formData.equipmentAccess !== (profile.equipmentAccess ?? null) ||\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1768,
+          "excerpt": "\"excerpt\": \"JSON.stringify(formData.focusAreas) !== JSON.stringify(profile.focusAreas ?? []) ||\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1773,
+          "excerpt": "\"excerpt\": \"JSON.stringify(formData.injuries) !== JSON.stringify(profile.injuries ?? []) ||\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1778,
+          "excerpt": "\"excerpt\": \"JSON.stringify(formData.preferences) !== JSON.stringify(profile.preferences ?? []) ||\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1783,
+          "excerpt": "\"excerpt\": \"JSON.stringify(formData.restrictions) !== JSON.stringify(profile.restrictions ?? []);\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1798,
+          "excerpt": "\"excerpt\": \": [...(prev.focusAreas ?? []), area],\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1914,
+          "excerpt": "\"excerpt\": \"profileImages: dbUser.profile_images ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1919,
+          "excerpt": "\"excerpt\": \"bio: dbUser.bio ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1924,
+          "excerpt": "\"excerpt\": \"height: dbUser.height_cm ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1929,
+          "excerpt": "\"excerpt\": \"weight: dbUser.weight_kg ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1934,
+          "excerpt": "\"excerpt\": \"muscleMass: dbUser.skeletal_muscle_mass_kg ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1939,
+          "excerpt": "\"excerpt\": \"bodyFatPercentage: dbUser.body_fat_percentage ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1944,
+          "excerpt": "\"excerpt\": \"interestedLocations: dbUser.interested_exercise_locations ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1949,
+          "excerpt": "\"excerpt\": \"interestedExercises: dbUser.interested_exercise_types ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1954,
+          "excerpt": "\"excerpt\": \"isSmoker: dbUser.is_smoker ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 1959,
+          "excerpt": "\"excerpt\": \"showInbodyPublic: dbUser.show_body_metrics ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 2065,
+          "excerpt": "\"excerpt\": \"const reps = exercise.sets.map(s => s.actualReps ?? s.targetReps);\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 2070,
+          "excerpt": "\"excerpt\": \"const weights = exercise.sets.map(s => s.actualWeight ?? s.targetWeight ?? 0);\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 2135,
+          "excerpt": "\"excerpt\": \"weight={pickerSet.actualWeight ?? pickerSet.targetWeight ?? 0}\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 2140,
+          "excerpt": "\"excerpt\": \"reps={pickerSet.actualReps ?? pickerSet.targetReps ?? 10}\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 2145,
+          "excerpt": "\"excerpt\": \"const displayWeight = set.actualWeight ?? set.targetWeight ?? 0;\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 2150,
+          "excerpt": "\"excerpt\": \"const displayReps = set.actualReps ?? set.targetReps;\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 2155,
+          "excerpt": "\"excerpt\": \"const displayWeight = set.actualWeight ?? set.targetWeight ?? 0;\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 2442,
+          "excerpt": "\"excerpt\": \"aiResultAppliedAt: db.ai_result_applied_at ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 2447,
+          "excerpt": "\"excerpt\": \"title: db.title ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 2452,
+          "excerpt": "\"excerpt\": \"metadata: db.metadata ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 2457,
+          "excerpt": "\"excerpt\": \"contextSummary: db.context_summary ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 2462,
+          "excerpt": "\"excerpt\": \"summarizedUntil: db.summarized_until ?? undefined,\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 2619,
+          "excerpt": "\"excerpt\": \"const reps = set.actualReps ?? set.targetReps;\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 2624,
+          "excerpt": "\"excerpt\": \"const weight = set.actualWeight ?? set.targetWeight ?? 0;\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 2629,
+          "excerpt": "\"excerpt\": \"return exercises.reduce((sum, ex) => sum + (ex.distance ?? 0), 0);\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 2634,
+          "excerpt": "\"excerpt\": \"calories += meal.totalCalories ?? 0;\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 2639,
+          "excerpt": "\"excerpt\": \"protein += meal.totalProtein ?? 0;\""
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 2644,
+          "excerpt": "\"excerpt\": \"carbs += meal.totalCarbs ?? 0;\""
+        }
+      ]
+    },
+    {
+      "file": "lib/types/inbody.ts",
+      "count": 48,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 246,
+          "excerpt": "bmi: db.bmi ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 247,
+          "excerpt": "inbodyScore: db.inbody_score ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 248,
+          "excerpt": "totalBodyWater: db.total_body_water ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 249,
+          "excerpt": "protein: db.protein ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 250,
+          "excerpt": "minerals: db.minerals ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 251,
+          "excerpt": "bodyFatMass: db.body_fat_mass ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 252,
+          "excerpt": "rightArmMuscle: db.right_arm_muscle ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 253,
+          "excerpt": "leftArmMuscle: db.left_arm_muscle ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 254,
+          "excerpt": "trunkMuscle: db.trunk_muscle ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 255,
+          "excerpt": "rightLegMuscle: db.right_leg_muscle ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 256,
+          "excerpt": "leftLegMuscle: db.left_leg_muscle ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 257,
+          "excerpt": "rightArmFat: db.right_arm_fat ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 258,
+          "excerpt": "leftArmFat: db.left_arm_fat ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 259,
+          "excerpt": "trunkFat: db.trunk_fat ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 260,
+          "excerpt": "rightLegFat: db.right_leg_fat ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 261,
+          "excerpt": "leftLegFat: db.left_leg_fat ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 280,
+          "excerpt": "bmi: data.bmi ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 281,
+          "excerpt": "inbody_score: data.inbodyScore ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 282,
+          "excerpt": "total_body_water: data.totalBodyWater ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 283,
+          "excerpt": "protein: data.protein ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 284,
+          "excerpt": "minerals: data.minerals ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 285,
+          "excerpt": "body_fat_mass: data.bodyFatMass ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 286,
+          "excerpt": "right_arm_muscle: data.rightArmMuscle ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 287,
+          "excerpt": "left_arm_muscle: data.leftArmMuscle ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 288,
+          "excerpt": "trunk_muscle: data.trunkMuscle ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 289,
+          "excerpt": "right_leg_muscle: data.rightLegMuscle ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 290,
+          "excerpt": "left_leg_muscle: data.leftLegMuscle ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 291,
+          "excerpt": "right_arm_fat: data.rightArmFat ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 292,
+          "excerpt": "left_arm_fat: data.leftArmFat ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 293,
+          "excerpt": "trunk_fat: data.trunkFat ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 294,
+          "excerpt": "right_leg_fat: data.rightLegFat ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 295,
+          "excerpt": "left_leg_fat: data.leftLegFat ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 310,
+          "excerpt": "bmi: extracted.bmi ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 311,
+          "excerpt": "inbodyScore: extracted.inbody_score ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 312,
+          "excerpt": "totalBodyWater: extracted.total_body_water ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 313,
+          "excerpt": "protein: extracted.protein ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 314,
+          "excerpt": "minerals: extracted.minerals ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 315,
+          "excerpt": "bodyFatMass: extracted.body_fat_mass ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 316,
+          "excerpt": "rightArmMuscle: extracted.right_arm_muscle ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 317,
+          "excerpt": "leftArmMuscle: extracted.left_arm_muscle ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 318,
+          "excerpt": "trunkMuscle: extracted.trunk_muscle ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 319,
+          "excerpt": "rightLegMuscle: extracted.right_leg_muscle ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 320,
+          "excerpt": "leftLegMuscle: extracted.left_leg_muscle ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 321,
+          "excerpt": "rightArmFat: extracted.right_arm_fat ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 322,
+          "excerpt": "leftArmFat: extracted.left_arm_fat ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 323,
+          "excerpt": "trunkFat: extracted.trunk_fat ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 324,
+          "excerpt": "rightLegFat: extracted.right_leg_fat ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 325,
+          "excerpt": "leftLegFat: extracted.left_leg_fat ?? undefined,"
+        }
+      ]
+    },
+    {
+      "file": "components/profile/dietary/DietaryContent.tsx",
+      "count": 28,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 36,
+          "excerpt": "dietaryGoal: profile?.dietaryGoal ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 37,
+          "excerpt": "dietType: profile?.dietType ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 38,
+          "excerpt": "targetCalories: profile?.targetCalories ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 39,
+          "excerpt": "targetProtein: profile?.targetProtein ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 40,
+          "excerpt": "mealsPerDay: profile?.mealsPerDay ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 41,
+          "excerpt": "foodRestrictions: profile?.foodRestrictions ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 42,
+          "excerpt": "availableSources: profile?.availableSources ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 43,
+          "excerpt": "eatingHabits: profile?.eatingHabits ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 44,
+          "excerpt": "budgetPerMonth: profile?.budgetPerMonth ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 45,
+          "excerpt": "preferences: profile?.preferences ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 60,
+          "excerpt": "formData.dietaryGoal !== (profile?.dietaryGoal ?? null) ||"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 61,
+          "excerpt": "formData.dietType !== (profile?.dietType ?? null) ||"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 62,
+          "excerpt": "formData.targetCalories !== (profile?.targetCalories ?? null) ||"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 63,
+          "excerpt": "formData.targetProtein !== (profile?.targetProtein ?? null) ||"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 64,
+          "excerpt": "formData.mealsPerDay !== (profile?.mealsPerDay ?? null) ||"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 65,
+          "excerpt": "formData.budgetPerMonth !== (profile?.budgetPerMonth ?? null) ||"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 67,
+          "excerpt": "JSON.stringify(profile?.foodRestrictions ?? []) ||"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 69,
+          "excerpt": "JSON.stringify(profile?.availableSources ?? []) ||"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 71,
+          "excerpt": "JSON.stringify(profile?.eatingHabits ?? []) ||"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 73,
+          "excerpt": "JSON.stringify(profile?.preferences ?? []);"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 89,
+          "excerpt": ": [...(prev.foodRestrictions ?? []), restriction],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 98,
+          "excerpt": ": [...(prev.availableSources ?? []), source],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 107,
+          "excerpt": ": [...(prev.eatingHabits ?? []), habit],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 180,
+          "excerpt": "selected={formData.foodRestrictions?.includes(restriction) ?? false}"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 196,
+          "excerpt": "selected={formData.availableSources?.includes(source) ?? false}"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 209,
+          "excerpt": "selected={formData.eatingHabits?.includes(habit) ?? false}"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 220,
+          "excerpt": "value={formData.budgetPerMonth ?? ''}"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 236,
+          "excerpt": "value={formData.preferences ?? []}"
+        }
+      ]
+    },
+    {
+      "file": "components/profile/fitness/FitnessContent.tsx",
+      "count": 23,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 31,
+          "excerpt": "fitnessGoal: profile.fitnessGoal ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 32,
+          "excerpt": "experienceLevel: profile.experienceLevel ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 33,
+          "excerpt": "preferredDaysPerWeek: profile.preferredDaysPerWeek ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 34,
+          "excerpt": "sessionDurationMinutes: profile.sessionDurationMinutes ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 35,
+          "excerpt": "equipmentAccess: profile.equipmentAccess ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 36,
+          "excerpt": "focusAreas: profile.focusAreas ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 37,
+          "excerpt": "injuries: profile.injuries ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 38,
+          "excerpt": "preferences: profile.preferences ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 39,
+          "excerpt": "restrictions: profile.restrictions ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 54,
+          "excerpt": "formData.fitnessGoal !== (profile.fitnessGoal ?? null) ||"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 55,
+          "excerpt": "formData.experienceLevel !== (profile.experienceLevel ?? null) ||"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 56,
+          "excerpt": "formData.preferredDaysPerWeek !== (profile.preferredDaysPerWeek ?? null) ||"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 57,
+          "excerpt": "formData.sessionDurationMinutes !== (profile.sessionDurationMinutes ?? null) ||"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 58,
+          "excerpt": "formData.equipmentAccess !== (profile.equipmentAccess ?? null) ||"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 59,
+          "excerpt": "JSON.stringify(formData.focusAreas) !== JSON.stringify(profile.focusAreas ?? []) ||"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 60,
+          "excerpt": "JSON.stringify(formData.injuries) !== JSON.stringify(profile.injuries ?? []) ||"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 61,
+          "excerpt": "JSON.stringify(formData.preferences) !== JSON.stringify(profile.preferences ?? []) ||"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 62,
+          "excerpt": "JSON.stringify(formData.restrictions) !== JSON.stringify(profile.restrictions ?? []);"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 78,
+          "excerpt": ": [...(prev.focusAreas ?? []), area],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 191,
+          "excerpt": "selected={formData.focusAreas?.includes(area) ?? false}"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 203,
+          "excerpt": "value={formData.injuries ?? []}"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 211,
+          "excerpt": "value={formData.preferences ?? []}"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 224,
+          "excerpt": "value={formData.restrictions ?? []}"
+        }
+      ]
+    },
+    {
+      "file": "lib/types/chat.ts",
+      "count": 16,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 251,
+          "excerpt": "aiResultAppliedAt: db.ai_result_applied_at ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 252,
+          "excerpt": "title: db.title ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 256,
+          "excerpt": "metadata: db.metadata ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 257,
+          "excerpt": "contextSummary: db.context_summary ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 258,
+          "excerpt": "summarizedUntil: db.summarized_until ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 272,
+          "excerpt": "leftAt: db.left_at ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 273,
+          "excerpt": "lastReadAt: db.last_read_at ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 274,
+          "excerpt": "lastReadMessageId: db.last_read_message_id ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 276,
+          "excerpt": "mutedUntil: db.muted_until ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 287,
+          "excerpt": "senderId: db.sender_id ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 291,
+          "excerpt": "mediaUrl: db.media_url ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 292,
+          "excerpt": "mediaMetadata: db.media_metadata ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 293,
+          "excerpt": "metadata: db.metadata ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 294,
+          "excerpt": "replyToId: db.reply_to_id ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 296,
+          "excerpt": "editedAt: db.edited_at ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 297,
+          "excerpt": "deletedAt: db.deleted_at ?? undefined,"
+        }
+      ]
+    },
+    {
+      "file": "lib/stats/computations.ts",
+      "count": 15,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 14,
+          "excerpt": "const reps = set.actualReps ?? set.targetReps;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 15,
+          "excerpt": "const weight = set.actualWeight ?? set.targetWeight ?? 0;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 23,
+          "excerpt": "return exercises.reduce((sum, ex) => sum + (ex.distance ?? 0), 0);"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 37,
+          "excerpt": "calories += meal.totalCalories ?? 0;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 38,
+          "excerpt": "protein += meal.totalProtein ?? 0;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 39,
+          "excerpt": "carbs += meal.totalCarbs ?? 0;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 40,
+          "excerpt": "fat += meal.totalFat ?? 0;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 98,
+          "excerpt": "totalDuration += event.data.estimatedDuration ?? 0;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 99,
+          "excerpt": "totalCaloriesBurned += event.data.estimatedCaloriesBurned ?? 0;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 111,
+          "excerpt": "plannedDuration += event.data.estimatedDuration ?? 0;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 112,
+          "excerpt": "plannedCaloriesBurned += event.data.estimatedCaloriesBurned ?? 0;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 241,
+          "excerpt": "workoutDuration = workoutEvent.data.estimatedDuration ?? undefined;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 242,
+          "excerpt": "workoutCalories = workoutEvent.data.estimatedCaloriesBurned ?? undefined;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 255,
+          "excerpt": "workout: workoutEvent?.status ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 256,
+          "excerpt": "meal: mealEvent?.status ?? null,"
+        }
+      ]
+    },
+    {
+      "file": "components/routine/sheets/AddMealSheet.tsx",
+      "count": 11,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 62,
+          "excerpt": "calories: acc.calories + (f.calories ?? 0),"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 63,
+          "excerpt": "protein: acc.protein + (f.protein ?? 0),"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 64,
+          "excerpt": "carbs: acc.carbs + (f.carbs ?? 0),"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 65,
+          "excerpt": "fat: acc.fat + (f.fat ?? 0),"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 178,
+          "excerpt": "const prevMeals = prevMealData.meals ?? [];"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 186,
+          "excerpt": "foods: [...(existing.foods ?? []), ...foods],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 187,
+          "excerpt": "totalCalories: (existing.totalCalories ?? 0) + totals.calories,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 188,
+          "excerpt": "totalProtein: (existing.totalProtein ?? 0) + totals.protein,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 189,
+          "excerpt": "totalCarbs: (existing.totalCarbs ?? 0) + totals.carbs,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 190,
+          "excerpt": "totalFat: (existing.totalFat ?? 0) + totals.fat,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 197,
+          "excerpt": "const updatedCalories = updatedMeals.reduce((sum, m) => sum + (m.totalCalories ?? 0), 0);"
+        }
+      ]
+    },
+    {
+      "file": "lib/types/meal.ts",
+      "count": 11,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 308,
+          "excerpt": "dietaryGoal: db.dietary_goal ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 309,
+          "excerpt": "dietType: db.diet_type ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 310,
+          "excerpt": "targetCalories: db.target_calories ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 311,
+          "excerpt": "targetProtein: db.target_protein ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 312,
+          "excerpt": "mealsPerDay: db.meals_per_day ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 313,
+          "excerpt": "foodRestrictions: db.food_restrictions ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 314,
+          "excerpt": "availableSources: db.available_sources ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 315,
+          "excerpt": "eatingHabits: db.eating_habits ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 316,
+          "excerpt": "budgetPerMonth: db.budget_per_month ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 317,
+          "excerpt": "preferences: db.preferences ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 318,
+          "excerpt": "aiNotes: db.ai_notes ?? {},"
+        }
+      ]
+    },
+    {
+      "file": "lib/types/fitness.ts",
+      "count": 10,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 169,
+          "excerpt": "fitnessGoal: db.fitness_goal ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 170,
+          "excerpt": "experienceLevel: db.experience_level ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 171,
+          "excerpt": "preferredDaysPerWeek: db.preferred_days_per_week ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 172,
+          "excerpt": "sessionDurationMinutes: db.session_duration_minutes ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 173,
+          "excerpt": "equipmentAccess: db.equipment_access ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 174,
+          "excerpt": "focusAreas: db.focus_areas ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 175,
+          "excerpt": "injuries: db.injuries ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 176,
+          "excerpt": "preferences: db.preferences ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 177,
+          "excerpt": "restrictions: db.restrictions ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 178,
+          "excerpt": "aiNotes: db.ai_notes ?? {},"
+        }
+      ]
+    },
+    {
+      "file": "lib/types/user.ts",
+      "count": 10,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 111,
+          "excerpt": "profileImages: dbUser.profile_images ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 112,
+          "excerpt": "bio: dbUser.bio ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 113,
+          "excerpt": "height: dbUser.height_cm ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 114,
+          "excerpt": "weight: dbUser.weight_kg ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 115,
+          "excerpt": "muscleMass: dbUser.skeletal_muscle_mass_kg ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 116,
+          "excerpt": "bodyFatPercentage: dbUser.body_fat_percentage ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 117,
+          "excerpt": "interestedLocations: dbUser.interested_exercise_locations ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 118,
+          "excerpt": "interestedExercises: dbUser.interested_exercise_types ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 119,
+          "excerpt": "isSmoker: dbUser.is_smoker ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 120,
+          "excerpt": "showInbodyPublic: dbUser.show_body_metrics ?? undefined,"
+        }
+      ]
+    },
+    {
+      "file": "components/routine/sheets/AddWorkoutSheet.tsx",
+      "count": 9,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 72,
+          "excerpt": "<span className=\"tabular-nums\">{set.targetWeight ?? 0}kg</span>"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 127,
+          "excerpt": "targetReps: lastSet?.targetReps ?? 10,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 128,
+          "excerpt": "targetWeight: lastSet?.targetWeight ?? 20,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 134,
+          "excerpt": "const current = exercise.restSeconds ?? 60;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 178,
+          "excerpt": "<span>휴식 {formatRestSeconds(exercise.restSeconds ?? 60)}</span>"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 187,
+          "excerpt": "weight={pickerSet.targetWeight ?? 0}"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 188,
+          "excerpt": "reps={pickerSet.targetReps ?? 10}"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 229,
+          "excerpt": "category: (e.category ?? '전신') as ExerciseCategory,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 230,
+          "excerpt": "targetMuscle: e.targetMuscle ?? '',"
+        }
+      ]
+    },
+    {
+      "file": "components/routine/event/ExerciseCard.tsx",
+      "count": 8,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 72,
+          "excerpt": "const reps = exercise.sets.map(s => s.actualReps ?? s.targetReps);"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 73,
+          "excerpt": "const weights = exercise.sets.map(s => s.actualWeight ?? s.targetWeight ?? 0);"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 194,
+          "excerpt": "weight={pickerSet.actualWeight ?? pickerSet.targetWeight ?? 0}"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 195,
+          "excerpt": "reps={pickerSet.actualReps ?? pickerSet.targetReps ?? 10}"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 209,
+          "excerpt": "const displayWeight = set.actualWeight ?? set.targetWeight ?? 0;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 210,
+          "excerpt": "const displayReps = set.actualReps ?? set.targetReps;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 251,
+          "excerpt": "const displayWeight = set.actualWeight ?? set.targetWeight ?? 0;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 252,
+          "excerpt": "const displayReps = set.actualReps ?? set.targetReps;"
+        }
+      ]
+    },
+    {
+      "file": "hooks/counselor/useCounselorChat.ts",
+      "count": 6,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 116,
+          "excerpt": "initialConversationId ?? null"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 123,
+          "excerpt": "const { data: conversation } = useCounselorConversation(conversationId ?? undefined);"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 126,
+          "excerpt": "const messages = messagesQuery.data?.pages.toReversed().flatMap((p) => p.messages) ?? [];"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 327,
+          "excerpt": "const targetId = initialConversationId ?? null;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 342,
+          "excerpt": "conversation: conversation ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 352,
+          "excerpt": "hasNextPage: messagesQuery.hasNextPage ?? false,"
+        }
+      ]
+    },
+    {
+      "file": "lib/ai/executors/dietary-profile.ts",
+      "count": 6,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 74,
+          "excerpt": "foodRestrictions: data.food_restrictions ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 75,
+          "excerpt": "availableSources: data.available_sources ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 76,
+          "excerpt": "eatingHabits: data.eating_habits ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 78,
+          "excerpt": "preferences: data.preferences ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 193,
+          "excerpt": "const dietaryGoal = (profile?.dietary_goal as DietaryGoal) ?? null;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 194,
+          "excerpt": "const dietType = (profile?.diet_type as DietType) ?? null;"
+        }
+      ]
+    },
+    {
+      "file": "app/api/community/posts/route.ts",
+      "count": 5,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 28,
+          "excerpt": "const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10));"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 31,
+          "excerpt": "Math.max(1, parseInt(searchParams.get('limit') ?? String(DEFAULT_LIMIT), 10))"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 106,
+          "excerpt": "const likedPostIds = new Set(likes?.map((l) => l.post_id) ?? []);"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 117,
+          "excerpt": "const total = count ?? 0;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 164,
+          "excerpt": "image_urls: imageUrls ?? [],"
+        }
+      ]
+    },
+    {
+      "file": "lib/types/counselor.ts",
+      "count": 5,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 267,
+          "excerpt": "aiResultAppliedAt: db.ai_result_applied_at ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 268,
+          "excerpt": "title: db.title ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 272,
+          "excerpt": "metadata: db.metadata ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 273,
+          "excerpt": "contextSummary: db.context_summary ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 274,
+          "excerpt": "summarizedUntil: db.summarized_until ?? undefined,"
+        }
+      ]
+    },
+    {
+      "file": "lib/types/routine.ts",
+      "count": 5,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 221,
+          "excerpt": "rationale: db.rationale ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 223,
+          "excerpt": "completedAt: db.completed_at ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 225,
+          "excerpt": "aiSessionId: db.ai_session_id ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 243,
+          "excerpt": "rationale: data.rationale ?? null,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 246,
+          "excerpt": "ai_session_id: data.aiSessionId ?? null,"
+        }
+      ]
+    },
+    {
+      "file": "app/api/routine/events/stats/progress/route.ts",
+      "count": 4,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 25,
+          "excerpt": "...exercise.sets.map((s) => s.actualWeight ?? s.targetWeight ?? 0)"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 118,
+          "excerpt": "squat: (latest.squat ?? 0) - (previous.squat ?? 0),"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 119,
+          "excerpt": "bench: (latest.bench ?? 0) - (previous.bench ?? 0),"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 120,
+          "excerpt": "deadlift: (latest.deadlift ?? 0) - (previous.deadlift ?? 0),"
+        }
+      ]
+    },
+    {
+      "file": "components/stats/NutritionStatsTab.tsx",
+      "count": 4,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 213,
+          "excerpt": "color: MACRO_COLORS[label]?.stroke ?? '#888',"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 257,
+          "excerpt": "<div className={`w-2.5 h-2.5 rounded-full ${MACRO_COLORS[label]?.bg ?? 'bg-muted'}`} />"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 275,
+          "excerpt": ".map((d) => d.mealCalories ?? 0)"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 287,
+          "excerpt": "const cal = day.mealCalories ?? 0;"
+        }
+      ]
+    },
+    {
+      "file": "hooks/routine/useRoutineEventConfirmActions.ts",
+      "count": 4,
+      "issues": [
+        {
+          "type": "bom",
+          "line": 1,
+          "excerpt": "UTF-8 BOM detected"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 35,
+          "excerpt": "title: override?.title ?? fallback.title,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 36,
+          "excerpt": "message: override?.message ?? fallback.message,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 37,
+          "excerpt": "confirmText: override?.confirmText ?? fallback.confirmText,"
+        }
+      ]
+    },
+    {
+      "file": "hooks/routine/workout-session/reducer.ts",
+      "count": 4,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 29,
+          "excerpt": "pausedAt: restoredTimer.pausedAt ?? Date.now(),"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 85,
+          "excerpt": "actualReps: item.actualReps ?? item.targetReps,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 86,
+          "excerpt": "actualWeight: item.actualWeight ?? item.targetWeight,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 92,
+          "excerpt": "const restSeconds = set.restSeconds ?? exercise.restSeconds ?? 60;"
+        }
+      ]
+    },
+    {
+      "file": "lib/ai/executors/fitness-profile.ts",
+      "count": 4,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 68,
+          "excerpt": "focusAreas: data.focus_areas ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 69,
+          "excerpt": "preferences: data.preferences ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 70,
+          "excerpt": "injuries: data.injuries ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 71,
+          "excerpt": "restrictions: data.restrictions ?? [],"
+        }
+      ]
+    },
+    {
+      "file": "lib/config/theme/event.ts",
+      "count": 4,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 132,
+          "excerpt": "return EVENT_TYPE[type]?.icon ?? EVENT_TYPE.workout.icon;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 136,
+          "excerpt": "return EVENT_TYPE[type]?.label ?? EVENT_TYPE.workout.label;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 144,
+          "excerpt": "return EVENT_TYPE[type] ?? EVENT_TYPE.workout;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 148,
+          "excerpt": "return MEAL_TIME[type] ?? MEAL_TIME.lunch;"
+        }
+      ]
+    },
+    {
+      "file": "app/api/community/posts/[id]/comments/route.ts",
+      "count": 3,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 97,
+          "excerpt": "transformed.replies = repliesMap.get(comment.id) ?? [];"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 101,
+          "excerpt": "const totalWithReplies = (count ?? 0) + (replies?.length ?? 0);"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 173,
+          "excerpt": "parent_id: parentId ?? null,"
+        }
+      ]
+    },
+    {
+      "file": "components/community/comments/CommentItem.tsx",
+      "count": 3,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 30,
+          "excerpt": "const authorName = author?.nickname ?? '알 수 없음';"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 33,
+          "excerpt": "? RANK_OPTIONS.find((r) => r.value === author.rank)?.label ?? ''"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 51,
+          "excerpt": "const targetCommentId = comment.parentId ?? comment.id;"
+        }
+      ]
+    },
+    {
+      "file": "components/counselor/CounselorContent.tsx",
+      "count": 3,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 40,
+          "excerpt": "const conversationIdFromUrl = searchParams.get('id') ?? undefined;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 249,
+          "excerpt": "conversations={conversationsData?.conversations ?? []}"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 279,
+          "excerpt": "hasExistingScheduled={(previewData.conflicts?.length ?? 0) > 0}"
+        }
+      ]
+    },
+    {
+      "file": "components/routine/workout/ActiveExerciseView.tsx",
+      "count": 3,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 39,
+          "excerpt": "return map[value.toLowerCase()] ?? value;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 160,
+          "excerpt": "weight={pickerSet.actualWeight ?? pickerSet.targetWeight ?? 0}"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 161,
+          "excerpt": "reps={pickerSet.actualReps ?? pickerSet.targetReps ?? 10}"
+        }
+      ]
+    },
+    {
+      "file": "components/routine/workout/SetRow.tsx",
+      "count": 3,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 38,
+          "excerpt": "const displayWeight = set.actualWeight ?? set.targetWeight ?? 0;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 39,
+          "excerpt": "const displayReps = set.actualReps ?? set.targetReps;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 76,
+          "excerpt": "목표: {set.targetWeight ?? 0}kg × {set.targetReps}회"
+        }
+      ]
+    },
+    {
+      "file": "hooks/routine/useMealEvent.ts",
+      "count": 3,
+      "issues": [
+        {
+          "type": "bom",
+          "line": 1,
+          "excerpt": "UTF-8 BOM detected"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 92,
+          "excerpt": "(sum, meal) => sum + (meal.totalCalories ?? 0),"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 112,
+          "excerpt": "(sum, meal) => sum + (meal.totalCalories ?? 0),"
+        }
+      ]
+    },
+    {
+      "file": "lib/ai/chat-handlers/metadata-manager.ts",
+      "count": 3,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 33,
+          "excerpt": "return (data?.metadata as ConversationMetadata) ?? {};"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 210,
+          "excerpt": "return (metadata.activePurpose as ActivePurpose) ?? null;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 259,
+          "excerpt": "return (metadata.pending_preview as RoutinePreviewData) ?? null;"
+        }
+      ]
+    },
+    {
+      "file": "lib/ai/executors/shared.ts",
+      "count": 3,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 75,
+          "excerpt": "const limit = args.limit ?? 5;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 145,
+          "excerpt": "setsCount: ex.sets?.length ?? 0,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 146,
+          "excerpt": "})) ?? [];"
+        }
+      ]
+    },
+    {
+      "file": "lib/ai/tool-registry.ts",
+      "count": 3,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 104,
+          "excerpt": "return metadataMap[name] ?? { category: 'general' };"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 168,
+          "excerpt": "return tool?.metadata?.specialHandling ?? false;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 188,
+          "excerpt": "strict: tool.strict ?? null,"
+        }
+      ]
+    },
+    {
+      "file": "lib/utils/tdee.ts",
+      "count": 3,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 54,
+          "excerpt": "return Math.round(bmr * (activityMultiplier ?? DEFAULT_ACTIVITY_MULTIPLIER));"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 101,
+          "excerpt": "const adjustment = dietaryGoal ? (GOAL_ADJUSTMENTS[dietaryGoal] ?? 0) : 0;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 104,
+          "excerpt": "const ratio = dietType ? (MACRO_RATIOS[dietType] ?? DEFAULT_MACRO_RATIO) : DEFAULT_MACRO_RATIO;"
+        }
+      ]
+    },
+    {
+      "file": "app/api/counselor/conversations/[id]/messages/route.ts",
+      "count": 2,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 78,
+          "excerpt": "console.log(`[Counselor Messages] conv=${id}, total=${dbMessages.length}, cursor=${cursor ?? 'none'}`);"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 80,
+          "excerpt": "console.log(`  [${i}] role=${m.role} type=${m.content_type} content=${m.content?.slice(0, 80)}${(m.content?.length ?? 0) > 80 ? '...' : ''}`);"
+        }
+      ]
+    },
+    {
+      "file": "app/api/counselor/conversations/[id]/summarize/route.ts",
+      "count": 2,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 229,
+          "excerpt": "summarizedUntil: conversation.summarized_until ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 230,
+          "excerpt": "messageCount: count ?? 0,"
+        }
+      ]
+    },
+    {
+      "file": "app/api/routine/apply-meal/route.ts",
+      "count": 2,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 60,
+          "excerpt": "{ success: false, error: previewLookup.error ?? '식단 미리보기를 찾을 수 없습니다.' },"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 108,
+          "excerpt": "const existingMetadata = (conversation.metadata ?? {}) as Record<string, unknown>;"
+        }
+      ]
+    },
+    {
+      "file": "app/api/routine/apply/route.ts",
+      "count": 2,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 181,
+          "excerpt": "eventsPreserved = preservedEvents?.length ?? 0;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 236,
+          "excerpt": "const existingMetadata = (conversation.metadata ?? {}) as Record<string, unknown>;"
+        }
+      ]
+    },
+    {
+      "file": "components/community/detail/PostDetailContent.tsx",
+      "count": 2,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 29,
+          "excerpt": "const authorName = author?.nickname ?? '알 수 없음';"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 32,
+          "excerpt": "? RANK_OPTIONS.find((r) => r.value === author.rank)?.label ?? ''"
+        }
+      ]
+    },
+    {
+      "file": "components/community/PostCard.tsx",
+      "count": 2,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 22,
+          "excerpt": "const authorName = author?.nickname ?? '알 수 없음';"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 25,
+          "excerpt": "? RANK_OPTIONS.find((r) => r.value === author.rank)?.label ?? ''"
+        }
+      ]
+    },
+    {
+      "file": "components/home/TodayRoutineCard.tsx",
+      "count": 2,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 175,
+          "excerpt": "const exercises = event.data.exercises ?? [];"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 204,
+          "excerpt": "const meals = event.data.meals ?? [];"
+        }
+      ]
+    },
+    {
+      "file": "components/inbody/InBodyVisibilitySettings.tsx",
+      "count": 2,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 52,
+          "excerpt": "const serverIsPublic = user?.showInbodyPublic ?? true;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 54,
+          "excerpt": "const isPublic = optimisticValue ?? serverIsPublic;"
+        }
+      ]
+    },
+    {
+      "file": "components/profile/inbody/InBodyContent.tsx",
+      "count": 2,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 132,
+          "excerpt": "initialFile={scanFile ?? undefined}"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 133,
+          "excerpt": "initialPreview={scanPreview ?? undefined}"
+        }
+      ]
+    },
+    {
+      "file": "components/routine/calendar/DayEventSection.tsx",
+      "count": 2,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 49,
+          "excerpt": "date: targetEvent?.date ?? date,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 50,
+          "excerpt": "type: targetEvent?.type ?? 'workout',"
+        }
+      ]
+    },
+    {
+      "file": "components/routine/event/WorkoutContent.tsx",
+      "count": 2,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 100,
+          "excerpt": "exercises: workoutData?.exercises ?? [],"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 101,
+          "excerpt": "eventId: event?.id ?? '',"
+        }
+      ]
+    },
+    {
+      "file": "hooks/common/useBaseQuery.ts",
+      "count": 2,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 71,
+          "excerpt": "const { staleTime: staleTimeOption, ...restOptions } = options ?? {};"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 77,
+          "excerpt": ": staleTimeOption ?? STALE_TIME.default;"
+        }
+      ]
+    },
+    {
+      "file": "hooks/routine/mutations.ts",
+      "count": 2,
+      "issues": [
+        {
+          "type": "bom",
+          "line": 1,
+          "excerpt": "UTF-8 BOM detected"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 164,
+          "excerpt": "queryClient.getQueryData<RoutineEvent>(byDateKey) ??"
+        }
+      ]
+    },
+    {
+      "file": "lib/ai/chat-handlers/apply-meal-plan.ts",
+      "count": 2,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 40,
+          "excerpt": "error: previewLookup.error ?? '식단 미리보기를 찾을 수 없습니다.',"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 99,
+          "excerpt": "const existingMetadata = (conversation?.metadata ?? {}) as Record<string, unknown>;"
+        }
+      ]
+    },
+    {
+      "file": "lib/ai/chat-handlers/apply-routine.ts",
+      "count": 2,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 38,
+          "excerpt": "error: previewLookup.error ?? '루틴 미리보기를 찾을 수 없습니다.',"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 100,
+          "excerpt": "const existingMetadata = (conversation?.metadata ?? {}) as Record<string, unknown>;"
+        }
+      ]
+    },
+    {
+      "file": "lib/ai/chat-handlers/request-user-input.ts",
+      "count": 2,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 118,
+          "excerpt": "options: parseResult.data.options ?? undefined,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 119,
+          "excerpt": "sliderConfig: parseResult.data.sliderConfig ?? undefined,"
+        }
+      ]
+    },
+    {
+      "file": "lib/ai/executors/routine.ts",
+      "count": 2,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 61,
+          "excerpt": "...(existingMetadata ?? {}),"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 458,
+          "excerpt": "targetWeight: ex.weight ?? undefined,"
+        }
+      ]
+    },
+    {
+      "file": "lib/api/counselor.ts",
+      "count": 2,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 50,
+          "excerpt": "return api.post<CounselorConversation>(BASE_URL, data ?? {});"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 107,
+          "excerpt": "return response?.activePurpose ?? null;"
+        }
+      ]
+    },
+    {
+      "file": "lib/constants/aiChat.ts",
+      "count": 2,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 192,
+          "excerpt": "return COUNSELOR_PERSONAS[personaId] ?? DEFAULT_COUNSELOR_PERSONA;"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 220,
+          "excerpt": "return AI_ACTION_MESSAGE[message] ?? null;"
+        }
+      ]
+    },
+    {
+      "file": "lib/utils/profileUtils.ts",
+      "count": 2,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 82,
+          "excerpt": "showInbodyPublic: user.showInbodyPublic ?? true,"
+        },
+        {
+          "type": "q_before_hangul",
+          "line": 139,
+          "excerpt": "formData.showInbodyPublic !== (user.showInbodyPublic ?? true) ||"
+        }
+      ]
+    },
+    {
+      "file": "app/api/community/upload/route.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 59,
+          "excerpt": "const ext = file.name.split('.').pop() ?? 'jpg';"
+        }
+      ]
+    },
+    {
+      "file": "app/api/conversations/[id]/messages/ai/route.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 94,
+          "excerpt": "strict: tool.strict ?? null,"
+        }
+      ]
+    },
+    {
+      "file": "app/api/conversations/[id]/metadata/route.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 33,
+          "excerpt": "const currentMetadata = (conversation.metadata as Record<string, unknown>) ?? {};"
+        }
+      ]
+    },
+    {
+      "file": "app/api/counselor/conversations/[id]/purpose/route.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 36,
+          "excerpt": "activePurpose: found.conversation.metadata?.activePurpose ?? null,"
+        }
+      ]
+    },
+    {
+      "file": "app/api/meal/unit-menu/route.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 46,
+          "excerpt": "(sum, m) => sum + (m.totalCalories ?? 0),"
+        }
+      ]
+    },
+    {
+      "file": "app/api/routine/events/batch-meal/route.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 51,
+          "excerpt": "const existingDates = new Set(existing?.map((e) => e.date) ?? []);"
+        }
+      ]
+    },
+    {
+      "file": "app/api/user/recommendations/route.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 34,
+          "excerpt": "limit: searchParams.get('limit') ?? 20,"
+        }
+      ]
+    },
+    {
+      "file": "app/api/user/same-unit/route.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 30,
+          "excerpt": "limit: searchParams.get('limit') ?? 20,"
+        }
+      ]
+    },
+    {
+      "file": "app/auth/callback/route.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 7,
+          "excerpt": "const next = searchParams.get('next') ?? '/'"
+        }
+      ]
+    },
+    {
+      "file": "components/community/CommunityContent.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 78,
+          "excerpt": "const posts = data?.pages.flatMap((page) => page.posts) ?? [];"
+        }
+      ]
+    },
+    {
+      "file": "components/profile/edit/ProfileInbodyInput.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 23,
+          "excerpt": "const totalRecords = summary?.totalRecords ?? 0;"
+        }
+      ]
+    },
+    {
+      "file": "components/profile/ProfileInbodySection.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 48,
+          "excerpt": "const isPrivate = summary?.isPrivate ?? !showInbodyPublic;"
+        }
+      ]
+    },
+    {
+      "file": "components/routine/calendar/CalendarGrid.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 99,
+          "excerpt": "events: eventsByDate[dateStr] ?? [],"
+        }
+      ]
+    },
+    {
+      "file": "components/routine/calendar/DayEventCard.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 91,
+          "excerpt": "return Math.round(data.meals.reduce((sum, meal) => sum + (meal.totalProtein ?? 0), 0));"
+        }
+      ]
+    },
+    {
+      "file": "components/routine/chat/ChatInputRequest.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 42,
+          "excerpt": "request.sliderConfig?.defaultValue ?? request.sliderConfig?.min ?? 0"
+        }
+      ]
+    },
+    {
+      "file": "components/routine/chat/ChatMessageList.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 116,
+          "excerpt": "const showLoadingSpinner = useMinimumLoadingTime(isFetchingNextPage ?? false);"
+        }
+      ]
+    },
+    {
+      "file": "components/routine/chat/PreviewDetailDrawer.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 57,
+          "excerpt": "const hasConflicts = (preview.conflicts?.length ?? 0) > 0;"
+        }
+      ]
+    },
+    {
+      "file": "components/routine/RoutineContent.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 41,
+          "excerpt": "? workoutEvents?.find((e) => e.date > today && e.status === 'scheduled') ?? null"
+        }
+      ]
+    },
+    {
+      "file": "components/routine/sheets/AddExerciseSheet.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 54,
+          "excerpt": "const searchResults = searchExercises(query, categoryFilter ?? undefined);"
+        }
+      ]
+    },
+    {
+      "file": "components/stats/PeriodTabs.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 36,
+          "excerpt": "aria-label={dateLabelAriaLabel ?? '날짜 선택'}"
+        }
+      ]
+    },
+    {
+      "file": "components/stats/WorkoutStatsTab.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 445,
+          "excerpt": "? BIG3_LIFT_CONFIG.filter(({ key }) => (changes[key] ?? 0) > 0)"
+        }
+      ]
+    },
+    {
+      "file": "components/ui/ChangeIndicator.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 34,
+          "excerpt": "{isPositive ? '+' : ''}{formatted}{unit ?? ''}"
+        }
+      ]
+    },
+    {
+      "file": "components/ui/FormInput.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 18,
+          "excerpt": "value: props.value ?? '',"
+        }
+      ]
+    },
+    {
+      "file": "components/ui/FormSlider.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 50,
+          "excerpt": "const numericValue = value ? Number(value) : (defaultValue ?? min);"
+        }
+      ]
+    },
+    {
+      "file": "components/ui/icons/StatusIcon.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 35,
+          "excerpt": "const colorClass = className ?? STATUS_COLORS[status];"
+        }
+      ]
+    },
+    {
+      "file": "components/ui/image/FallbackUI.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 14,
+          "excerpt": "const baseClassName = `flex items-center justify-center ${fallbackClassName} ${className ?? ''}`;"
+        }
+      ]
+    },
+    {
+      "file": "components/ui/image/ImageWithFallback.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 51,
+          "excerpt": "const imageSrc = (isSupabaseUrl ? optimizedSrc : effectiveSrc) ?? effectiveSrc;"
+        }
+      ]
+    },
+    {
+      "file": "components/ui/image/NativeImage.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 15,
+          "excerpt": "? `absolute inset-0 w-full h-full object-cover ${className ?? ''}`"
+        }
+      ]
+    },
+    {
+      "file": "components/ui/SectionHeader.tsx",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 123,
+          "excerpt": "{rightSlot ?? renderAction()}"
+        }
+      ]
+    },
+    {
+      "file": "docs/refactor/baseline.md",
+      "count": 1,
+      "issues": [
+        {
+          "type": "bom",
+          "line": 1,
+          "excerpt": "UTF-8 BOM detected"
+        }
+      ]
+    },
+    {
+      "file": "hooks/common/useSuspenseBaseQuery.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 71,
+          "excerpt": ": staleTimeOption ?? STALE_TIME.default;"
+        }
+      ]
+    },
+    {
+      "file": "hooks/community/queries.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 85,
+          "excerpt": "queryKey: queryKeys.post.detail(postId ?? ''),"
+        }
+      ]
+    },
+    {
+      "file": "hooks/counselor/helpers/createCounselorCallbacks.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 123,
+          "excerpt": "success: event.success ?? true,"
+        }
+      ]
+    },
+    {
+      "file": "hooks/counselor/queries.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 81,
+          "excerpt": "* const messages = data?.pages.flatMap(p => p.messages) ?? [];"
+        }
+      ]
+    },
+    {
+      "file": "hooks/performance/useOptimizedRender.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 79,
+          "excerpt": "isIntersecting: entry?.isIntersecting ?? false,"
+        }
+      ]
+    },
+    {
+      "file": "hooks/routine/queries.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 153,
+          "excerpt": "return { data: events[0] ?? null, ...rest };"
+        }
+      ]
+    },
+    {
+      "file": "hooks/routine/useCatalogSelection.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 15,
+          "excerpt": "const searchResults = search(query, categoryFilter ?? undefined);"
+        }
+      ]
+    },
+    {
+      "file": "hooks/routine/useRoutineEventDataMutation.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "bom",
+          "line": 1,
+          "excerpt": "UTF-8 BOM detected"
+        }
+      ]
+    },
+    {
+      "file": "hooks/routine/useSetValuePicker.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 16,
+          "excerpt": "const pickerSet = pickerSetIndex !== null ? sets[pickerSetIndex] ?? null : null;"
+        }
+      ]
+    },
+    {
+      "file": "hooks/routine/useWorkoutEvent.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "bom",
+          "line": 1,
+          "excerpt": "UTF-8 BOM detected"
+        }
+      ]
+    },
+    {
+      "file": "hooks/routine/useWorkoutSession.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 115,
+          "excerpt": "const currentExercise = state.exercises[state.currentExerciseIndex] ?? null;"
+        }
+      ]
+    },
+    {
+      "file": "lib/ai/chat-handlers/index.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 161,
+          "excerpt": "instructions: PURPOSE_START_INSTRUCTIONS[purposeType] ?? '',"
+        }
+      ]
+    },
+    {
+      "file": "lib/ai/chat-handlers/schemas/generate-meal-plan-preview.schema.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 49,
+          "excerpt": "const daySet = new Set(data.weeks[0]?.days.map((day) => day.dayOfWeek) ?? []);"
+        }
+      ]
+    },
+    {
+      "file": "lib/ai/executors/meal-plan.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 72,
+          "excerpt": "...(existingMetadata ?? {}),"
+        }
+      ]
+    },
+    {
+      "file": "lib/ai/stream/ProgressTracker.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 56,
+          "excerpt": "const lastSent = this.lastProgress.get(itemId) ?? 0;"
+        }
+      ]
+    },
+    {
+      "file": "lib/ai/system-prompts/index.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 47,
+          "excerpt": "const header = PROCESS_HEADERS[processType] ?? processType;"
+        }
+      ]
+    },
+    {
+      "file": "lib/api/routine.server.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 66,
+          "excerpt": "return (data ?? []).map((db) => toRoutineEvent(db as DbRoutineEvent));"
+        }
+      ]
+    },
+    {
+      "file": "lib/data/unitMeals.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 222,
+          "excerpt": "return UNIT_MEAL_TEMPLATES[dayOfWeek] ?? UNIT_MEAL_TEMPLATES[1];"
+        }
+      ]
+    },
+    {
+      "file": "lib/types/community.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 129,
+          "excerpt": "imageUrls: dbPost.image_urls ?? [],"
+        }
+      ]
+    },
+    {
+      "file": "lib/utils/authFetch.ts",
+      "count": 1,
+      "issues": [
+        {
+          "type": "q_before_hangul",
+          "line": 76,
+          "excerpt": "resolve(event.detail.success ?? true);"
+        }
+      ]
+    }
+  ]
+}

@@ -1,13 +1,11 @@
 'use client';
 
-import { TrendUpIcon, TrendDownIcon } from '@phosphor-icons/react';
+import ChangeIndicator from '@/components/ui/ChangeIndicator';
 
 export interface MetricItemProps {
-  /** 아이콘 컴포넌트 */
-  icon: React.ElementType;
   /** 라벨 (예: "체중") */
   label: string;
-  /** 값 (예: "75.5kg" 또는 undefined/null) */
+  /** 값 (예: 75.5 또는 undefined/null) */
   value: string | number | undefined | null;
   /** 값의 단위 (value가 숫자일 때 사용) */
   unit?: string;
@@ -15,75 +13,56 @@ export interface MetricItemProps {
   change?: number;
   /** 양수가 긍정적인지 (체중, 체지방률은 false) */
   positiveIsGood?: boolean;
+  /** 하단 슬롯 (스파크라인 등) */
+  children?: React.ReactNode;
 }
 
 /**
  * InBody 메트릭 아이템 컴포넌트
  *
- * 아이콘, 라벨, 값, 변화량을 표시하는 단일 메트릭 셀
- *
- * @example
- * ```tsx
- * <MetricItem
- *   icon={Scale}
- *   label="체중"
- *   value={75.5}
- *   unit="kg"
- *   change={-1.2}
- *   positiveIsGood={false}
- * />
- * ```
+ * 라벨, 값, 변화량을 표시하는 단일 메트릭 셀
+ * children으로 스파크라인 등 추가 콘텐츠 표시 가능
  */
 export function MetricItem({
-  icon: Icon,
   label,
   value,
   unit = '',
   change,
   positiveIsGood = true,
+  children,
 }: MetricItemProps) {
-  const showChange = change !== undefined && change !== 0;
-  const isPositive = change !== undefined && change > 0;
-  const isGood = positiveIsGood ? isPositive : !isPositive;
-
-  // 값 포맷팅
-  const displayValue =
-    value === undefined || value === null
-      ? '-'
-      : typeof value === 'number'
-        ? `${value}${unit}`
-        : value;
-
   const hasValue = value !== undefined && value !== null;
 
+  const displayValue =
+    !hasValue
+      ? '-'
+      : typeof value === 'number'
+        ? value
+        : value;
+
   return (
-    <div className="text-center">
-      <Icon className="w-5 h-5 text-primary/50 mx-auto mb-1" />
-      <p className="text-xs text-muted-foreground">{label}</p>
+    <div className="text-center py-2 px-4">
+      <p className="text-xs text-muted-foreground mb-1">{label}</p>
       <p
-        className={`text-base font-bold ${
+        className={`text-lg font-bold ${
           hasValue ? 'text-card-foreground' : 'text-muted-foreground'
         }`}
       >
-        {displayValue}
+        {hasValue ? (
+          <>
+            {displayValue}
+            <span className="text-xs font-normal text-muted-foreground ml-1">{unit}</span>
+          </>
+        ) : (
+          '-'
+        )}
       </p>
-      {showChange && (
-        <div
-          className={`flex items-center justify-center gap-0.5 text-xs mt-0.5 ${
-            isGood ? 'text-success' : 'text-destructive'
-          }`}
-        >
-          {isPositive ? (
-            <TrendUpIcon size={12} weight="bold" />
-          ) : (
-            <TrendDownIcon size={12} weight="bold" />
-          )}
-          <span>
-            {isPositive ? '+' : ''}
-            {change.toFixed(1)}
-          </span>
+      {change != null && change !== 0 && (
+        <div className="mt-2.5">
+          <ChangeIndicator value={change} positiveIsGood={positiveIsGood} unit={unit} />
         </div>
       )}
+      {children}
     </div>
   );
 }

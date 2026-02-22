@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button';
 import { InBodyCreateData } from '@/lib/types/inbody';
 import FormInput from '@/components/ui/FormInput';
 import { DatePicker } from '@/components/ui/WheelPicker';
+import { ImageWithFallback } from '@/components/ui/image';
 
 interface InBodyPreviewProps {
   data: InBodyCreateData;
@@ -60,11 +61,12 @@ export default function InBodyPreview({
       {/* 이미지 미리보기 (옵션) */}
       {imagePreview && (
         <div className="flex justify-center">
-          <div className="w-24 h-24 rounded-lg overflow-hidden border border-border">
-            <img
+          <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-border">
+            <ImageWithFallback
               src={imagePreview}
               alt="InBody 결과지"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
             />
           </div>
         </div>

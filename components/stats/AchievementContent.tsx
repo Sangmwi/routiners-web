@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import {
   BarbellIcon,
   CalendarCheckIcon,
@@ -8,6 +8,7 @@ import {
   ForkKnifeIcon,
 } from '@phosphor-icons/react';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
+import DateJumpSheet from '@/components/ui/DateJumpSheet';
 import { PulseLoader } from '@/components/ui/PulseLoader';
 import {
   useMonthlyStatsSuspense,
@@ -15,7 +16,7 @@ import {
   useWeeklyStatsSuspense,
 } from '@/hooks/routine';
 import type { MonthlyStats, WeeklyStats } from '@/hooks/routine';
-import { addDays, formatDate } from '@/lib/utils/dateHelpers';
+import { addDays, formatDate, parseDate } from '@/lib/utils/dateHelpers';
 import MonthlyProgressChart from './MonthlyProgressChart';
 import PeriodTabs from './PeriodTabs';
 import WeeklyProgressChart from './WeeklyProgressChart';
@@ -30,7 +31,9 @@ export default function AchievementContent() {
   const {
     period,
     setPeriod,
+    setWeekBaseDate,
     monthYear,
+    setMonthYear,
     label,
     yearLabel,
     canGoNext,
@@ -38,6 +41,13 @@ export default function AchievementContent() {
     handleNext,
     weekDateStr,
   } = useStatsPeriodNavigator('weekly');
+  const [isDateJumpOpen, setIsDateJumpOpen] = useState(false);
+  const [dateJumpSession, setDateJumpSession] = useState(0);
+
+  const today = new Date();
+  const todayStr = formatDate(today);
+  const startYear = today.getFullYear() - 5;
+  const minDate = `${startYear}-01-01`;
 
   return (
     <div>
@@ -49,6 +59,11 @@ export default function AchievementContent() {
         onPrev={handlePrev}
         onNext={handleNext}
         canGoNext={canGoNext}
+        onDateLabelClick={() => {
+          setDateJumpSession((prev) => prev + 1);
+          setIsDateJumpOpen(true);
+        }}
+        dateLabelAriaLabel={period === 'weekly' ? '주간 날짜 선택' : '월간 날짜 선택'}
       />
 
       <div className="mt-6">
@@ -62,6 +77,39 @@ export default function AchievementContent() {
           </Suspense>
         </QueryErrorBoundary>
       </div>
+
+      {period === 'weekly' ? (
+        <DateJumpSheet
+          key={`achievement-date-${dateJumpSession}`}
+          mode="date"
+          isOpen={isDateJumpOpen}
+          onClose={() => setIsDateJumpOpen(false)}
+          title="주간 날짜 선택"
+          value={weekDateStr}
+          minDate={minDate}
+          maxDate={todayStr}
+          onConfirm={({ date }) => {
+            setWeekBaseDate(parseDate(date));
+          }}
+        />
+      ) : (
+        <DateJumpSheet
+          key={`achievement-month-${dateJumpSession}`}
+          mode="yearMonth"
+          isOpen={isDateJumpOpen}
+          onClose={() => setIsDateJumpOpen(false)}
+          title="월간 날짜 선택"
+          year={String(monthYear.year)}
+          month={String(monthYear.month).padStart(2, '0')}
+          yearRange={{ start: startYear, end: today.getFullYear() }}
+          onConfirm={({ year, month }) => {
+            setMonthYear({
+              year: parseInt(year, 10),
+              month: parseInt(month, 10),
+            });
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -71,11 +119,12 @@ function WeeklyAchievement({ dateStr }: { dateStr: string }) {
   const prevDateStr = formatDate(addDays(new Date(dateStr), -7));
   const prevStats = useWeeklyStatsSuspense(prevDateStr);
 
-  if (!stats || (stats.workout.scheduled === 0 && stats.meal.scheduled === 0)) {
+  if (!stats || (stats.workout.scheduled + stats.workout.completed === 0 && stats.meal.scheduled + stats.meal.completed === 0)) {
     return (
-      <p className="text-muted-foreground text-center py-8">
-        예정된 루틴이 없습니다.
-      </p>
+      <div className="rounded-2xl bg-muted/20 p-6 text-center">
+        <CalendarCheckIcon size={28} weight="duotone" className="text-muted-foreground/40 mx-auto mb-2" />
+        <p className="text-sm text-muted-foreground">루틴 기록이 없습니다.</p>
+      </div>
     );
   }
 
@@ -110,11 +159,12 @@ function MonthlyAchievement({ year, month }: { year: number; month: number }) {
   const prevMonth = month === 1 ? 12 : month - 1;
   const prevStats = useMonthlyStatsSuspense(prevYear, prevMonth);
 
-  if (!stats || (stats.workout.scheduled === 0 && stats.meal.scheduled === 0)) {
+  if (!stats || (stats.workout.scheduled + stats.workout.completed === 0 && stats.meal.scheduled + stats.meal.completed === 0)) {
     return (
-      <p className="text-muted-foreground text-center py-8">
-        예정된 루틴이 없습니다.
-      </p>
+      <div className="rounded-2xl bg-muted/20 p-6 text-center">
+        <CalendarCheckIcon size={28} weight="duotone" className="text-muted-foreground/40 mx-auto mb-2" />
+        <p className="text-sm text-muted-foreground">루틴 기록이 없습니다.</p>
+      </div>
     );
   }
 

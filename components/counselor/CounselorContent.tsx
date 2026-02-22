@@ -1,10 +1,11 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useCounselorChat, useCounselorDrawer, useRoutinePreview } from '@/hooks/counselor';
+import { useCounselorChat, useCounselorDrawer, useRoutinePreview, useMealPreview } from '@/hooks/counselor';
 import { useCounselorConversations } from '@/hooks/counselor/queries';
 import type { MessageActionType } from '@/components/routine/chat/ChatMessage';
 import type { RoutinePreviewData } from '@/lib/types/fitness';
+import type { MealPlanPreviewData } from '@/lib/types/meal';
 import WelcomeScreen from './WelcomeScreen';
 import SummarizationIndicator from './SummarizationIndicator';
 import ActionChips from './ActionChips';
@@ -63,7 +64,6 @@ export default function CounselorContent({ isDrawerOpen, onDrawerClose }: Counse
     cancelProfile,
     isMessagesLoading,
     isInitializing,
-    isRefetching,
     sendMessage,
     refetchMessages,
   } = useCounselorChat(conversationIdFromUrl);
@@ -76,6 +76,13 @@ export default function CounselorContent({ isDrawerOpen, onDrawerClose }: Counse
 
   // 루틴 프리뷰 관리 훅 (Phase 10: AI 대화 흐름)
   const preview = useRoutinePreview({
+    conversationId,
+    sendMessage,
+    refetchMessages,
+  });
+
+  // 식단 프리뷰 관리 훅
+  const mealPreview = useMealPreview({
     conversationId,
     sendMessage,
     refetchMessages,
@@ -107,14 +114,30 @@ export default function CounselorContent({ isDrawerOpen, onDrawerClose }: Counse
         cancelProfile(messageId);
         break;
       case 'editPreview':
-        preview.edit(messageId);
+        if (message?.contentType === 'meal_preview') {
+          mealPreview.edit(messageId);
+        } else {
+          preview.edit(messageId);
+        }
         break;
       case 'apply':
-        // DetailDrawer를 열어서 주차 선택 후 적용
-        preview.open(messageId);
+        if (message?.contentType === 'meal_preview') {
+          // 식단은 드로어 없이 직접 적용
+          try {
+            const mealData = JSON.parse(message.content) as MealPlanPreviewData;
+            mealPreview.apply(messageId, mealData);
+          } catch { /* parse error */ }
+        } else {
+          // 루틴은 DetailDrawer를 열어서 주차 선택 후 적용
+          preview.open(messageId);
+        }
         break;
       case 'cancel':
-        preview.cancel(messageId);
+        if (message?.contentType === 'meal_preview') {
+          mealPreview.cancel(messageId);
+        } else {
+          preview.cancel(messageId);
+        }
         break;
       case 'viewDetails':
         preview.open(messageId);
@@ -138,7 +161,8 @@ export default function CounselorContent({ isDrawerOpen, onDrawerClose }: Counse
     return (
       (m.contentType === 'profile_confirmation' && status === 'pending') ||
       (m.contentType === 'input_request' && status === 'pending') ||
-      (m.contentType === 'routine_preview' && status === 'pending')
+      (m.contentType === 'routine_preview' && status === 'pending') ||
+      (m.contentType === 'meal_preview' && status === 'pending')
     );
   });
   const showActionChips = !isStreaming && !streamingContent && !hasPendingInteraction && messages.length === 0;
@@ -149,7 +173,8 @@ export default function CounselorContent({ isDrawerOpen, onDrawerClose }: Counse
     const status = m.metadata?.status as string;
     return (
       (m.contentType === 'profile_confirmation' && status === 'pending') ||
-      (m.contentType === 'routine_preview' && status === 'pending')
+      (m.contentType === 'routine_preview' && status === 'pending') ||
+      (m.contentType === 'meal_preview' && status === 'pending')
     );
   });
 

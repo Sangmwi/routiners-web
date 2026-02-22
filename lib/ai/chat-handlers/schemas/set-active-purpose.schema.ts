@@ -7,7 +7,7 @@
 import { z } from 'zod';
 
 export const SetActivePurposeArgsSchema = z.object({
-  purposeType: z.enum(['routine_generation', 'routine_modification', 'quick_routine']),
+  purposeType: z.enum(['routine_generation', 'routine_modification', 'quick_routine', 'meal_plan_generation']),
 });
 
 export type SetActivePurposeArgs = z.infer<typeof SetActivePurposeArgsSchema>;

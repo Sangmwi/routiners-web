@@ -81,7 +81,6 @@ function EmptyState({ onClick }: { onClick?: () => void }) {
  */
 export default function InBodySummaryCard({
   latest,
-  totalRecords = 0,
   changes,
   onClick,
   compact = false,

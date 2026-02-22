@@ -10,7 +10,6 @@ import {
   useUpdatePost,
   useUploadImages,
 } from '@/hooks/community/mutations';
-import { POST_CATEGORIES } from '@/lib/types/community';
 import type { PostCategory } from '@/lib/types/community';
 import CategorySelector from './CategorySelector';
 import ImageUploader from './ImageUploader';
@@ -45,6 +44,7 @@ export default function PostWriteContent({ editPostId }: PostWriteContentProps) 
   // 수정 모드: 기존 데이터로 폼 초기화
   useEffect(() => {
     if (existingPost) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCategory(existingPost.category);
       setContent(existingPost.content);
       setExistingImageUrls(existingPost.imageUrls);

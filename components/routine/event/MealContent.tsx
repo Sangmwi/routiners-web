@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCallback, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { CalendarIcon, PlusIcon } from '@phosphor-icons/react';
 import EmptyState from '@/components/common/EmptyState';
 import {
@@ -55,14 +55,14 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
   const [isImportSheetOpen, setIsImportSheetOpen] = useState(false);
 
-  const enterEditMode = useCallback(() => {
+  const enterEditMode = () => {
     if (event) {
       setEditingTitle(event.title);
     }
     setIsEditMode(true);
-  }, [event]);
+  };
 
-  const exitEditMode = useCallback(() => {
+  const exitEditMode = () => {
     if (event) {
       const trimmed = editingTitle.trim();
       if (trimmed && trimmed !== event.title) {
@@ -71,11 +71,11 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
     }
     setIsEditMode(false);
     setEditingTitle('');
-  }, [editingTitle, event, updateEvent]);
+  };
 
-  const handleHeaderExit = useCallback(() => {
+  const handleHeaderExit = () => {
     exitEditMode();
-  }, [exitEditMode]);
+  };
 
   useEventHeaderActions({
     event,
@@ -86,8 +86,7 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
     onDelete: handleDelete,
   });
 
-  const handleAddOption = useCallback(
-    (option: MealAddOption) => {
+  const handleAddOption = (option: MealAddOption) => {
       setIsAddDrawerOpen(false);
       if (option === 'ai') {
         router.push('/routine/counselor');
@@ -96,12 +95,9 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
       } else {
         setIsImportSheetOpen(true);
       }
-    },
-    [router],
-  );
+    };
 
-  const handleRemoveMealWithConfirm = useCallback(
-    (mealIndex: number) => {
+  const handleRemoveMealWithConfirm = (mealIndex: number) => {
       const mealType = mealData?.meals[mealIndex]?.type;
       const typeIndex = mealType ? MEAL_TYPES.indexOf(mealType as (typeof MEAL_TYPES)[number]) : -1;
       const mealLabel = typeIndex >= 0 ? MEAL_LABELS[typeIndex] : '식사';
@@ -112,9 +108,7 @@ export default function MealContent({ date, onHeaderAction }: MealContentProps) 
         confirmText: '삭제',
         onConfirm: () => handleRemoveMeal(mealIndex),
       });
-    },
-    [confirm, handleRemoveMeal, mealData?.meals],
-  );
+    };
 
   if (!event) {
     return (

@@ -2,10 +2,9 @@
 
 import { useCurrentUserProfileSuspense } from '@/hooks/profile';
 import { useRoutineEventByDateSuspense, useNextScheduledWorkoutSuspense } from '@/hooks/routine';
-import { useInBodySummarySuspense, useInBodyRecordsSuspense } from '@/hooks/inbody/queries';
+import { useInBodySummarySuspense } from '@/hooks/inbody/queries';
 import { useProgressSummarySuspense } from '@/hooks/progress';
 import { formatDate } from '@/lib/utils/dateHelpers';
-import GreetingSection from '@/components/home/GreetingSection';
 import TodayRoutineCard from '@/components/home/TodayRoutineCard';
 import InBodySection from '@/components/home/InBodySection';
 import Big3Section from '@/components/home/Big3Section';
@@ -47,13 +46,12 @@ const DUMMY_INFLUENCERS: Influencer[] = [
  * - 상위 page.tsx의 Suspense boundary에서 로딩 처리
  */
 export default function HomeContent() {
-  const { data: user } = useCurrentUserProfileSuspense();
+  useCurrentUserProfileSuspense();
   const today = formatDate(new Date());
   const { data: todayWorkout } = useRoutineEventByDateSuspense(today, 'workout');
   const { data: todayMeal } = useRoutineEventByDateSuspense(today, 'meal');
   const { data: nextScheduledWorkout } = useNextScheduledWorkoutSuspense();
   const { data: inbodySummary } = useInBodySummarySuspense();
-  const { data: inbodyRecords } = useInBodyRecordsSuspense(12, 0);
   const { data: progressSummary } = useProgressSummarySuspense();
 
   const handleViewMoreProducts = () => {
@@ -84,7 +82,7 @@ export default function HomeContent() {
       />
 
       {/* 인바디 */}
-      <InBodySection summary={inbodySummary} history={inbodyRecords} />
+      <InBodySection summary={inbodySummary} />
 
       {/* 3대 운동 */}
       <Big3Section summary={progressSummary.big3} />

@@ -2,13 +2,12 @@
 
 import { useState } from 'react';
 import { MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
-import Input from '@/components/ui/Input';
 import { Unit } from '@/lib/types';
 
 interface UnitSearchProps {
   units: Unit[];
   selectedUnit: Unit | null;
-  onSelect: (unit: Unit) => void;
+  onSelect: (unit: Unit | null) => void;
   error?: string;
 }
 
@@ -38,7 +37,7 @@ export default function UnitSearch({ units, selectedUnit, onSelect, error }: Uni
   };
 
   const handleClear = () => {
-    onSelect(null as any);
+    onSelect(null);
     setSearchQuery('');
   };
 

@@ -8,9 +8,11 @@
 import { ROUTINE_PROCESS_RULES } from './routine-generation';
 import { ROUTINE_MODIFICATION_RULES } from './routine-modification';
 import { QUICK_ROUTINE_RULES } from './quick-routine';
+import { MEAL_PLAN_PROCESS_RULES } from './meal-plan-generation';
 
 export const PROCESS_RULES: Record<string, string> = {
   routine_generation: ROUTINE_PROCESS_RULES,
   routine_modification: ROUTINE_MODIFICATION_RULES,
   quick_routine: QUICK_ROUTINE_RULES,
+  meal_plan_generation: MEAL_PLAN_PROCESS_RULES,
 };

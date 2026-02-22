@@ -5,6 +5,8 @@
  * 운동 AI (WorkoutData)와 병렬 구조
  */
 
+import { z } from 'zod';
+
 // ============================================================================
 // Food Item Types (음식 항목)
 // ============================================================================
@@ -317,6 +319,73 @@ export function transformDbDietaryProfile(db: DbDietaryProfile): DietaryProfile 
     createdAt: db.created_at,
     updatedAt: db.updated_at,
   };
+}
+
+// ============================================================================
+// Zod Schemas
+// ============================================================================
+
+/**
+ * DietaryProfile 검증용 Zod 스키마
+ */
+export const DietaryProfileSchema = z.object({
+  dietaryGoal: z.enum(DIETARY_GOALS).nullable(),
+  dietType: z.enum(DIET_TYPES).nullable(),
+  targetCalories: z.number().int().min(500).max(10000).nullable(),
+  targetProtein: z.number().int().min(0).max(1000).nullable(),
+  mealsPerDay: z.number().int().min(1).max(6).nullable(),
+  foodRestrictions: z.array(z.enum(FOOD_RESTRICTIONS)).default([]),
+  availableSources: z.array(z.enum(AVAILABLE_SOURCES)).default([]),
+  eatingHabits: z.array(z.enum(EATING_HABITS)).default([]),
+  budgetPerMonth: z.number().int().min(0).nullable(),
+  preferences: z.array(z.string()).default([]),
+});
+
+/**
+ * DietaryProfile 생성/수정용 스키마 (모든 필드 optional)
+ */
+export const DietaryProfileUpdateSchema = DietaryProfileSchema.partial();
+
+// ============================================================================
+// Update Data Type
+// ============================================================================
+
+/**
+ * DietaryProfile 생성/수정용 데이터
+ */
+export interface DietaryProfileUpdateData {
+  dietaryGoal?: DietaryGoal | null;
+  dietType?: DietType | null;
+  targetCalories?: number | null;
+  targetProtein?: number | null;
+  mealsPerDay?: number | null;
+  foodRestrictions?: FoodRestriction[];
+  availableSources?: AvailableSource[];
+  eatingHabits?: EatingHabit[];
+  budgetPerMonth?: number | null;
+  preferences?: string[];
+}
+
+/**
+ * DietaryProfileUpdateData → DB Insert/Update 데이터 변환
+ */
+export function transformDietaryProfileToDb(
+  data: DietaryProfileUpdateData
+): Partial<Omit<DbDietaryProfile, 'user_id' | 'created_at' | 'updated_at' | 'ai_notes'>> {
+  const result: Partial<Omit<DbDietaryProfile, 'user_id' | 'created_at' | 'updated_at' | 'ai_notes'>> = {};
+
+  if (data.dietaryGoal !== undefined) result.dietary_goal = data.dietaryGoal;
+  if (data.dietType !== undefined) result.diet_type = data.dietType;
+  if (data.targetCalories !== undefined) result.target_calories = data.targetCalories;
+  if (data.targetProtein !== undefined) result.target_protein = data.targetProtein;
+  if (data.mealsPerDay !== undefined) result.meals_per_day = data.mealsPerDay;
+  if (data.foodRestrictions !== undefined) result.food_restrictions = data.foodRestrictions;
+  if (data.availableSources !== undefined) result.available_sources = data.availableSources;
+  if (data.eatingHabits !== undefined) result.eating_habits = data.eatingHabits;
+  if (data.budgetPerMonth !== undefined) result.budget_per_month = data.budgetPerMonth;
+  if (data.preferences !== undefined) result.preferences = data.preferences;
+
+  return result;
 }
 
 // ============================================================================

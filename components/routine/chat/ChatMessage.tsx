@@ -8,6 +8,7 @@ import type {
   InputRequestStatus,
 } from '@/lib/types/chat';
 import type { InputRequest, RoutinePreviewData } from '@/lib/types/fitness';
+import type { MealPlanPreviewData } from '@/lib/types/meal';
 import { RobotIcon } from '@phosphor-icons/react';
 import { Markdown } from '@/components/common/Markdown';
 import { ChatProfileConfirmation } from './ChatProfileConfirmation';
@@ -137,6 +138,37 @@ export default function ChatMessage({ message, onAction, isApplyingRoutine = fal
         onCancel={() => onAction?.('cancel', message.id)}
         onEdit={() => onAction?.('editPreview', message.id)}
         onApply={(forceOverwrite) => onAction?.('apply', message.id, forceOverwrite ? 'force' : undefined)}
+        isApplying={isApplyingRoutine}
+      />
+    );
+  }
+
+  // 식단 미리보기 카드
+  if (contentType === 'meal_preview') {
+    const previewData = JSON.parse(message.content) as MealPlanPreviewData;
+    const status = (message.metadata?.status as RoutinePreviewStatus) || 'pending';
+
+    const weekSummaries = (previewData.weeks || []).map((week) => {
+      return week.days.map((d) => d.title || `${d.dayOfWeek}일`).join(', ');
+    });
+
+    return (
+      <ChatPreviewSummary
+        type="meal"
+        title={previewData.title || '식단 계획'}
+        description={previewData.description || ''}
+        stats={{
+          duration: `${previewData.weeks?.length || 1}주`,
+          frequency: `하루 ${previewData.weeks?.[0]?.days?.[0]?.meals?.length || 3}끼`,
+          perSession: `${previewData.targetCalories || 0}kcal`,
+        }}
+        weekSummaries={weekSummaries}
+        hasConflicts={Boolean(previewData.conflicts?.length)}
+        status={status}
+        onViewDetails={() => onAction?.('viewDetails', message.id)}
+        onCancel={() => onAction?.('cancel', message.id)}
+        onEdit={() => onAction?.('editPreview', message.id)}
+        onApply={() => onAction?.('apply', message.id)}
         isApplying={isApplyingRoutine}
       />
     );

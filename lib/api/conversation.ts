@@ -17,6 +17,7 @@ import {
   MessageCreateData,
   ProfileConfirmationRequest,
 } from '@/lib/types/chat';
+import type { MealPlanPreviewData } from '@/lib/types/meal';
 import { api } from './client';
 
 // ============================================================================
@@ -186,6 +187,12 @@ export interface RoutineAppliedEvent {
   startDate: string;
 }
 
+export interface MealPlanAppliedEvent {
+  previewId: string;
+  eventsCreated: number;
+  startDate: string;
+}
+
 export interface RoutineProgressEvent {
   progress: number;
   stage: string;
@@ -223,6 +230,10 @@ export interface ChatStreamCallbacks {
   onRoutineProgress?: (event: RoutineProgressEvent) => void;
   /** 프로필 데이터 확인 요청 */
   onProfileConfirmation?: (request: ProfileConfirmationRequest) => void;
+  /** 식단 미리보기 표시 */
+  onMealPreview?: (preview: MealPlanPreviewData) => void;
+  /** 식단 적용 완료 */
+  onMealPlanApplied?: (event: MealPlanAppliedEvent) => void;
 }
 
 export const aiChatApi = {
@@ -332,6 +343,12 @@ export const aiChatApi = {
                     break;
                   case 'profile_confirmation':
                     callbacks.onProfileConfirmation?.(parsed as ProfileConfirmationRequest);
+                    break;
+                  case 'meal_preview':
+                    callbacks.onMealPreview?.(parsed as MealPlanPreviewData);
+                    break;
+                  case 'meal_plan_applied':
+                    callbacks.onMealPlanApplied?.(parsed as MealPlanAppliedEvent);
                     break;
                   // Phase 16: 'complete' + data 전달 (7.5KB refetch → 0KB 부분 업데이트)
                   case 'complete':

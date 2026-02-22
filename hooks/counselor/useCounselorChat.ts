@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useReducer, useRef, useEffect } from 'react';
+import { useState, useReducer, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { counselorContextApi } from '@/lib/api/counselor';
@@ -332,7 +332,7 @@ export function useCounselorChat(initialConversationId?: string): UseCounselorCh
         dispatch({ type: 'RESET_ALL' });
       }
     }
-  }, [initialConversationId]);
+  }, [initialConversationId, conversationId]);
 
   // Phase 13: 낙관적 메시지는 React Query 캐시에 직접 삽입됨
   // → 별도 병합 로직 불필요

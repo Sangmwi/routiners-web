@@ -1,26 +1,22 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  // React Compiler 활성화 (자동 메모이제이션)
-  // useCallback, useMemo, React.memo 수동 최적화 불필요
+  // Enable React Compiler (automatic memoization)
+  // In web app, avoid manual useCallback/useMemo optimizations
   reactCompiler: true,
 
   // ============================================================================
-  // 번들 최적화
+  // Bundle optimization
   // ============================================================================
+  productionBrowserSourceMaps: false, // Reduce production bundle size
 
-  // 프로덕션 빌드 최적화
-  productionBrowserSourceMaps: false, // 소스맵 비활성화 (번들 크기 감소)
-
-  // 실험적 기능
   experimental: {
-    // 패키지 최적화 (트리쉐이킹 개선)
-    // Next.js가 자동으로 각 아이콘을 개별 import로 변환
+    // Optimize frequently used package imports automatically
     optimizePackageImports: ['@phosphor-icons/react', '@tanstack/react-query', 'zod'],
   },
 
   // ============================================================================
-  // 보안 헤더
+  // Security headers
   // ============================================================================
   async headers() {
     return [
@@ -52,7 +48,7 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // 이미지 최적화 설정
+  // Image optimization settings
   images: {
     remotePatterns: [
       {
@@ -61,31 +57,31 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'lh3.googleusercontent.com', // Google 프로필 이미지
+        hostname: 'lh3.googleusercontent.com', // Google profile images
       },
       {
         protocol: 'https',
-        hostname: 'images.unsplash.com', // Unsplash 이미지
+        hostname: 'images.unsplash.com', // Unsplash images
       },
     ],
-    formats: ['image/avif', 'image/webp'], // 최신 이미지 포맷 사용
+    formats: ['image/avif', 'image/webp'], // Modern image formats
   },
 
-  // TurboPack 설정
+  // Turbopack settings
   turbopack: {
     rules: {
-      "*.svg": {
-        loaders: ["@svgr/webpack"],
-        as: "*.js",
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
       },
     },
   },
 
-  // webpack 설정
+  // webpack settings
   webpack: (config) => {
-    // @ts-expect-error 타입 에러 무시
+    // @ts-expect-error broad runtime shape for module rule lookup
     const fileLoaderRule = config.module.rules.find((rule) =>
-      rule.test?.test?.(".svg")
+      rule.test?.test?.('.svg'),
     );
 
     config.module.rules.push(
@@ -100,14 +96,14 @@ const nextConfig: NextConfig = {
         resourceQuery: { not: [...fileLoaderRule.resourceQuery.not, /url/] },
         use: [
           {
-            loader: "@svgr/webpack",
+            loader: '@svgr/webpack',
             options: {
               typescript: true,
-              ext: "tsx",
+              ext: 'tsx',
             },
           },
         ],
-      }
+      },
     );
     fileLoaderRule.exclude = /\.svg$/i;
     return config;

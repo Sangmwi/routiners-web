@@ -89,10 +89,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     });
   };
 
-  handleReload = (): void => {
-    window.location.reload();
-  };
-
   handleGoHome = (): void => {
     window.location.href = '/';
   };
@@ -110,7 +106,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           error={this.state.error}
           errorCode={this.state.errorCode}
           onReset={this.handleReset}
-          onReload={this.handleReload}
           onGoHome={this.handleGoHome}
         />
       );
@@ -128,7 +123,6 @@ interface ErrorFallbackProps {
   error: Error | null;
   errorCode: ApiErrorCode | null;
   onReset: () => void;
-  onReload: () => void;
   onGoHome: () => void;
 }
 
@@ -136,7 +130,6 @@ function ErrorFallback({
   error,
   errorCode,
   onReset,
-  onReload,
   onGoHome,
 }: ErrorFallbackProps) {
   // 에러 코드에 따른 메시지

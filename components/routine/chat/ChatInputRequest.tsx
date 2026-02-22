@@ -28,7 +28,6 @@ interface ChatInputRequestProps {
 export default function ChatInputRequest({
   request,
   status = 'pending',
-  submittedValue,
   onSubmit,
 }: ChatInputRequestProps) {
   // Radio: 선택된 값 (단일)

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { validateImageFile } from '@/lib/utils/imageValidation';
 
 // ============================================================
@@ -8,26 +8,26 @@ import { validateImageFile } from '@/lib/utils/imageValidation';
 // ============================================================
 
 export interface DraftImage {
-  /** 고유 식별자 */
+  /** Stable draft identifier */
   id: string;
-  /** 화면에 표시할 URL (blob URL 또는 서버 URL) */
+  /** URL used in UI (blob URL or server URL) */
   displayUrl: string;
-  /** 원본 서버 URL (기존 이미지인 경우) */
+  /** Original server URL when this image already exists */
   originalUrl?: string;
-  /** 업로드할 파일 (새 이미지인 경우) */
+  /** File to upload when this is a new image */
   file?: File;
-  /** 새로 추가된 이미지 여부 */
+  /** True when this image was newly added in draft state */
   isNew: boolean;
 }
 
 export interface ImageChanges {
-  /** 새로 추가된 이미지들 */
+  /** New images to upload */
   newImages: { file: File; id: string }[];
-  /** 삭제된 이미지 URL들 */
+  /** Existing image URLs to delete */
   deletedUrls: string[];
-  /** 최종 순서 */
+  /** Final ordering after all draft operations */
   finalOrder: DraftImage[];
-  /** 변경사항 존재 여부 */
+  /** True when any change exists */
   hasChanges: boolean;
 }
 
@@ -38,7 +38,10 @@ export interface AddImageResult {
 
 interface UseProfileImagesDraftOptions {
   maxImages?: number;
-  /** 저장 중 여부 - true면 initialImages 변경 무시 */
+  /**
+   * When true, incoming initialImages updates are ignored.
+   * This avoids resetting draft state while a save request is in flight.
+   */
   isSaving?: boolean;
 }
 
@@ -68,89 +71,72 @@ const createDraftFromFile = (file: File): DraftImage => ({
   isNew: true,
 });
 
-/**
- * Blob URL 해제 (메모리 누수 방지)
- */
 const revokeBlobUrl = (url: string) => {
   if (url.startsWith('blob:')) {
     URL.revokeObjectURL(url);
   }
 };
 
+const appendUniqueUrl = (urls: string[], url: string) =>
+  urls.includes(url) ? urls : [...urls, url];
+
 // ============================================================
 // Hook
 // ============================================================
 
 /**
- * 프로필 이미지 드래프트 관리 훅
+ * Manages local profile image draft state.
  *
- * 로컬 상태만 관리하며, 저장 시 일괄 처리를 위한 데이터를 제공합니다.
- * Blob URL을 사용하여 메모리 효율적으로 미리보기를 표시합니다.
- *
- * @example
- * ```tsx
- * const { images, addImage, removeImage, getChanges } = useProfileImagesDraft(initialUrls);
- *
- * const handleAdd = (file: File, index: number) => {
- *   const result = addImage(file, index);
- *   if (!result.success) {
- *     showError(result.error);
- *   }
- * };
- * ```
+ * It returns change sets for save requests and guarantees blob URL cleanup.
  */
 export function useProfileImagesDraft(
   initialImages: string[] = [],
-  options: UseProfileImagesDraftOptions = {}
+  options: UseProfileImagesDraftOptions = {},
 ) {
   const { maxImages = DEFAULT_MAX_IMAGES, isSaving = false } = options;
 
   // ========== State ==========
 
   const [images, setImages] = useState<DraftImage[]>(() =>
-    initialImages.map(createDraftFromUrl)
+    initialImages.map(createDraftFromUrl),
   );
-
   const [deletedUrls, setDeletedUrls] = useState<string[]>([]);
+  const [baselineUrls, setBaselineUrls] = useState<string[]>(() => initialImages);
 
   // ========== Refs ==========
 
-  /** 초기 이미지 URL 저장 (변경 감지용) */
-  const initialImagesRef = useRef<string[]>(initialImages);
+  // Used only for cleanup on unmount and reset synchronization.
+  const latestImagesRef = useRef<DraftImage[]>(images);
 
-  /** 최신 상태 참조 (getChanges에서 사용) */
-  const imagesRef = useRef<DraftImage[]>(images);
-  const deletedUrlsRef = useRef<string[]>(deletedUrls);
-
-  // Ref 동기화
-  imagesRef.current = images;
-  deletedUrlsRef.current = deletedUrls;
+  useEffect(() => {
+    latestImagesRef.current = images;
+  }, [images]);
 
   // ========== Effects ==========
 
-  // 초기 이미지 변경 시 리셋 (저장 중에는 무시)
+  // Reset local draft when source images changed (unless saving).
   useEffect(() => {
     if (isSaving) return;
 
     const hasInitialChanged =
-      JSON.stringify(initialImages) !== JSON.stringify(initialImagesRef.current);
+      JSON.stringify(initialImages) !== JSON.stringify(baselineUrls);
 
-    if (hasInitialChanged) {
-      // 기존 blob URL들 해제
-      imagesRef.current.forEach((img) => {
-        if (img.isNew) revokeBlobUrl(img.displayUrl);
-      });
+    if (!hasInitialChanged) return;
 
-      initialImagesRef.current = initialImages;
-      setImages(initialImages.map(createDraftFromUrl));
-      setDeletedUrls([]);
-    }
-  }, [initialImages, isSaving]);
+    latestImagesRef.current.forEach((img) => {
+      if (img.isNew) revokeBlobUrl(img.displayUrl);
+    });
 
-  // 컴포넌트 언마운트 시 모든 blob URL 해제
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setBaselineUrls(initialImages);
+    setImages(initialImages.map(createDraftFromUrl));
+    setDeletedUrls([]);
+  }, [baselineUrls, initialImages, isSaving]);
+
+  // Cleanup all blob URLs when unmounted.
   useEffect(() => {
     return () => {
-      imagesRef.current.forEach((img) => {
+      latestImagesRef.current.forEach((img) => {
         if (img.isNew) revokeBlobUrl(img.displayUrl);
       });
     };
@@ -158,153 +144,112 @@ export function useProfileImagesDraft(
 
   // ========== Computed ==========
 
-  const hasChanges = () => {
+  const hasChanges = (() => {
     if (deletedUrls.length > 0) return true;
     if (images.some((img) => img.isNew)) return true;
 
-    const currentUrls = images.map((img) => img.originalUrl).filter(Boolean);
-    if (currentUrls.length !== initialImagesRef.current.length) return true;
+    const currentUrls = images
+      .map((img) => img.originalUrl)
+      .filter((url): url is string => Boolean(url));
 
-    return currentUrls.some((url, i) => url !== initialImagesRef.current[i]);
-  };
+    if (currentUrls.length !== baselineUrls.length) return true;
+
+    return currentUrls.some((url, index) => url !== baselineUrls[index]);
+  })();
 
   // ========== Actions ==========
 
-  /**
-   * 이미지 추가 (동기 함수)
-   */
   const addImage = (file: File, index: number): AddImageResult => {
-    // 1. 파일 검증
     const validation = validateImageFile(file);
     if (!validation.valid) {
       return { success: false, error: validation.error };
     }
 
-    // 2. 최대 개수 체크
     if (images.length >= maxImages && index >= images.length) {
       return {
         success: false,
-        error: `최대 ${maxImages}장까지 업로드할 수 있어요.`,
+        error: `You can upload up to ${maxImages} images.`,
       };
     }
 
-    // 3. 드래프트 생성 (Blob URL 자동 생성)
     const newDraft = createDraftFromFile(file);
 
-    // 4. 상태 업데이트
     setImages((prev) => {
-      const newImages = [...prev];
+      const next = [...prev];
 
-      // 기존 이미지가 있는 슬롯이면 교체
-      if (index < newImages.length && newImages[index]) {
-        const existing = newImages[index];
+      if (index < next.length && next[index]) {
+        const existing = next[index];
 
-        // 기존 새 이미지의 blob URL 해제
         if (existing.isNew) {
           revokeBlobUrl(existing.displayUrl);
         }
 
-        // 기존 서버 이미지면 삭제 목록에 추가
         if (existing.originalUrl) {
-          setDeletedUrls((urls) => [...urls, existing.originalUrl!]);
+          setDeletedUrls((urls) => appendUniqueUrl(urls, existing.originalUrl!));
         }
 
-        newImages[index] = newDraft;
+        next[index] = newDraft;
       } else {
-        // 빈 슬롯이면 배열 끝에 추가
-        newImages.push(newDraft);
+        next.push(newDraft);
       }
 
-      return newImages.slice(0, maxImages);
+      return next.slice(0, maxImages);
     });
 
     return { success: true };
   };
 
-  /**
-   * 이미지 삭제
-   */
   const removeImage = (index: number) => {
     setImages((prev) => {
       const target = prev[index];
       if (!target) return prev;
 
-      // 새 이미지의 blob URL 해제
       if (target.isNew) {
         revokeBlobUrl(target.displayUrl);
       }
 
-      // 기존 이미지면 삭제 목록에 추가
       if (target.originalUrl) {
-        setDeletedUrls((urls) => [...urls, target.originalUrl!]);
+        setDeletedUrls((urls) => appendUniqueUrl(urls, target.originalUrl!));
       }
 
-      return prev.filter((_, i) => i !== index);
+      return prev.filter((_, currentIndex) => currentIndex !== index);
     });
   };
 
-  /**
-   * 이미지 순서 변경
-   */
   const reorderImages = (fromIndex: number, toIndex: number) => {
     if (fromIndex === toIndex) return;
 
     setImages((prev) => {
-      const newImages = [...prev];
-      const [removed] = newImages.splice(fromIndex, 1);
-      newImages.splice(toIndex, 0, removed);
-      return newImages;
+      const next = [...prev];
+      const [removed] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, removed);
+      return next;
     });
   };
 
-  /**
-   * 초기 상태로 복원
-   */
   const reset = () => {
-    // 모든 새 이미지의 blob URL 해제
     images.forEach((img) => {
       if (img.isNew) revokeBlobUrl(img.displayUrl);
     });
 
-    setImages(initialImagesRef.current.map(createDraftFromUrl));
+    setImages(baselineUrls.map(createDraftFromUrl));
     setDeletedUrls([]);
   };
 
-  /**
-   * 저장용 변경사항 반환 (항상 최신 상태를 ref에서 읽음)
-   */
-  const getChanges = (): ImageChanges => {
-    const currentImages = imagesRef.current;
-    const currentDeletedUrls = deletedUrlsRef.current;
-
-    const newImages = currentImages
+  const getChanges = (): ImageChanges => ({
+    newImages: images
       .filter((img) => img.isNew && img.file)
-      .map((img) => ({ file: img.file!, id: img.id }));
-
-    // hasChanges 로직 인라인
-    const hasAnyChanges = (() => {
-      if (currentDeletedUrls.length > 0) return true;
-      if (currentImages.some((img) => img.isNew)) return true;
-
-      const currentUrls = currentImages.map((img) => img.originalUrl).filter(Boolean);
-      if (currentUrls.length !== initialImagesRef.current.length) return true;
-
-      return currentUrls.some((url, i) => url !== initialImagesRef.current[i]);
-    })();
-
-    return {
-      newImages,
-      deletedUrls: currentDeletedUrls,
-      finalOrder: currentImages,
-      hasChanges: hasAnyChanges,
-    };
-  };
+      .map((img) => ({ file: img.file!, id: img.id })),
+    deletedUrls,
+    finalOrder: images,
+    hasChanges,
+  });
 
   // ========== Return ==========
 
   return {
     images,
-    hasChanges: hasChanges(),
+    hasChanges,
     addImage,
     removeImage,
     reorderImages,

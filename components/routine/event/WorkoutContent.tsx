@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { CalendarIcon, PlusIcon, RobotIcon } from '@phosphor-icons/react';
 import EmptyState from '@/components/common/EmptyState';
 import {
@@ -60,15 +60,14 @@ export default function WorkoutContent({
   const updateWorkout = useUpdateWorkoutData();
   const updateEvent = useUpdateRoutineEvent();
 
-  const enterEditMode = useCallback(() => {
+  const enterEditMode = () => {
     if (!workoutData || !event) return;
     setEditingExercises([...workoutData.exercises]);
     setEditingTitle(event.title);
     setIsEditMode(true);
-  }, [event, workoutData]);
+  };
 
-  const exitEditMode = useCallback(
-    (save: boolean) => {
+  const exitEditMode = (save: boolean) => {
       if (save && event && workoutData) {
         const updatedData = { ...workoutData, exercises: editingExercises };
         updateWorkout.mutate(
@@ -85,19 +84,17 @@ export default function WorkoutContent({
       setIsEditMode(false);
       setEditingExercises([]);
       setEditingTitle('');
-    },
-    [editingExercises, editingTitle, event, showError, updateEvent, updateWorkout, workoutData],
-  );
+    };
 
-  const handleEditSetsChange = useCallback((exerciseId: string, sets: WorkoutSet[]) => {
+  const handleEditSetsChange = (exerciseId: string, sets: WorkoutSet[]) => {
     setEditingExercises((prev) =>
       prev.map((exercise) => (exercise.id === exerciseId ? { ...exercise, sets } : exercise)),
     );
-  }, []);
+  };
 
-  const handleAddExercises = useCallback((newExercises: WorkoutExercise[]) => {
+  const handleAddExercises = (newExercises: WorkoutExercise[]) => {
     setEditingExercises((prev) => [...prev, ...newExercises]);
-  }, []);
+  };
 
   const session = useWorkoutSession({
     exercises: workoutData?.exercises ?? [],
@@ -111,9 +108,9 @@ export default function WorkoutContent({
     }
   }, [event?.title, onTitleChange]);
 
-  const handleHeaderSave = useCallback(() => {
+  const handleHeaderSave = () => {
     exitEditMode(true);
-  }, [exitEditMode]);
+  };
 
   useEventHeaderActions({
     event,
