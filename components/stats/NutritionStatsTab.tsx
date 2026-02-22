@@ -209,7 +209,7 @@ function CalorieSummaryCard({
     : null;
 
   return (
-    <div className="bg-muted/20 rounded-2xl p-4">
+    <div>
       {/* 상단: 예정 배지 + 비교 */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
@@ -336,7 +336,7 @@ function NutritionBalanceSection({
           {balanceText} {score}점
         </span>
       </div>
-      <div className="bg-muted/20 rounded-2xl p-4 space-y-4">
+      <div className="space-y-4">
         {macroData.map(({ label, avgActual, dailyTarget, prevAvg, percent, color }) => {
           const change = prevAvg != null ? avgActual - prevAvg : undefined;
           return (
@@ -412,7 +412,7 @@ function DonutChart({
   return (
     <div>
       <h3 className="text-sm font-medium text-foreground mb-3">3대 영양소</h3>
-      <div className="bg-muted/20 rounded-2xl p-4">
+      <div>
         <div className="flex items-center gap-6">
           {/* SVG Donut */}
           <div className="shrink-0">
@@ -529,7 +529,7 @@ function DailyNutritionLog({
           ))}
         </div>
       </div>
-      <div className="bg-muted/20 rounded-2xl p-4 space-y-2.5">
+      <div className="rounded-2xl py-4 px-2 space-y-2.5">
         {dailyStats.map((day) => {
           const isToday = day.date === today;
           const val = getDailyValue(day, metric);
@@ -537,7 +537,7 @@ function DailyNutritionLog({
 
           const formatted = val > 0
             ? metric === 'calories' ? `${val.toLocaleString()}kcal` : `${val}g`
-            : '-';
+            : '';
 
           // 상태: completed / scheduled / incomplete / null
           const displayStatus = day.meal
@@ -570,14 +570,24 @@ function DailyNutritionLog({
               <span className={`text-xs font-semibold w-5 shrink-0 ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
                 {day.dayOfWeek}
               </span>
-              {/* 바 (메트릭 색상, 완료=진한, 나머지=연한) */}
-              <div className="flex-1 min-w-0 h-5 bg-muted/30 rounded-md overflow-hidden relative">
+              {/* 바 + 수치 묶음 (flex-grow 비율로 분배) */}
+              <div className={`flex-1 min-w-0 h-5 rounded-md relative flex items-center overflow-hidden ${val > 0 ? '' : 'bg-muted/30'}`}>
+                {/* 채워진 바 */}
                 {val > 0 && (
                   <div
                     className={`h-full rounded-md transition-all duration-300 ${barColorClass}`}
-                    style={{ width: `${Math.max(pct, 3)}%` }}
+                    style={{ flex: `${Math.max(pct, 3)} 1 0px` }}
                   />
                 )}
+                {/* 수치 (바 바로 옆) */}
+                <span
+                  className={`text-[11px] font-medium whitespace-nowrap shrink-0 px-1.5 ${val > 0 ? 'text-foreground' : 'text-muted-foreground/40'}`}
+                >
+                  {formatted}
+                </span>
+                {/* 나머지 여백 */}
+                <div style={{ flex: `${val > 0 ? 100 - Math.max(pct, 3) : 1} 1 0px` }} />
+                {/* 목표선 */}
                 {targetPct !== null && (
                   <div
                     className="absolute top-0 h-full w-0.5 bg-foreground/30"
@@ -585,13 +595,6 @@ function DailyNutritionLog({
                   />
                 )}
               </div>
-              {/* 수치 + 단위 */}
-              <span
-                className={`text-[11px] font-medium text-right shrink-0 ${val > 0 ? 'text-foreground' : 'text-muted-foreground/40'}`}
-                style={{ minWidth: '4.5rem' }}
-              >
-                {formatted}
-              </span>
             </div>
           );
         })}

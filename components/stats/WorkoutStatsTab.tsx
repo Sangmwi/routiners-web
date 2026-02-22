@@ -4,13 +4,10 @@ import { Suspense, useState, type ReactNode } from 'react';
 import {
   BarbellIcon,
   ChartLineUpIcon,
-  CheckCircleIcon as CheckIcon,
-  ClockIcon,
   FireIcon,
   PersonSimpleRunIcon,
   TimerIcon,
   TrophyIcon,
-  XCircleIcon as XIcon,
 } from '@phosphor-icons/react';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import { Big3SummaryCard } from '@/components/progress/Big3SummaryCard';
@@ -25,8 +22,6 @@ import {
 import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
 import type { MonthlyStats, WeeklyStats } from '@/hooks/routine';
 import { formatDate, parseDate } from '@/lib/utils/dateHelpers';
-import { getDisplayStatus } from '@/lib/config/theme';
-import type { EventStatus } from '@/lib/types/routine';
 import PeriodTabs from './PeriodTabs';
 
 function formatShortDate(dateStr: string): string {
@@ -129,7 +124,7 @@ function WorkoutMetricsGrid({ metrics }: { metrics: WorkoutMetricItem[] }) {
         )}
       </div>
 
-      <div className="bg-muted/20 rounded-2xl p-4">
+      <div>
         <div className="grid grid-cols-2 gap-4">
           {metrics.map(({ icon, label, value }) => (
             <div key={label} className="flex items-center gap-3">
@@ -241,80 +236,6 @@ export default function WorkoutStatsTab() {
   );
 }
 
-function DailyWorkoutLog({ dailyStats }: { dailyStats: WeeklyStats['dailyStats'] }) {
-  const today = formatDate(new Date());
-
-  return (
-    <div>
-      <h3 className="text-sm font-medium text-foreground mb-3">일별 기록</h3>
-      <div className="bg-muted/20 rounded-2xl divide-y divide-border/20 overflow-hidden">
-        {dailyStats.map((day) => {
-          const isToday = day.date === today;
-          const hasWorkout = day.workout !== null;
-
-          const meta: string[] = [];
-          if (day.workoutDuration) meta.push(`${day.workoutDuration}분`);
-          if (day.workoutCalories) meta.push(`${day.workoutCalories}kcal`);
-
-          return (
-            <div key={day.date} className={`px-4 py-3 ${isToday ? 'bg-primary/5' : ''}`}>
-              <div className="flex items-center gap-3">
-                <span className={`text-xs font-semibold w-5 shrink-0 ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
-                  {day.dayOfWeek}
-                </span>
-                {hasWorkout ? (
-                  <div className="flex-1 min-w-0 flex items-center gap-1.5">
-                    <BarbellIcon size={13} weight="fill" className="text-primary shrink-0" />
-                    <span className="text-xs font-medium text-foreground truncate">
-                      {day.workoutTitle || '운동'}
-                    </span>
-                    {meta.length > 0 && (
-                      <span className="text-[10px] text-muted-foreground shrink-0">
-                        {meta.join(' · ')}
-                      </span>
-                    )}
-                    <span className="ml-auto shrink-0">
-                      <WorkoutStatusPill status={day.workout!} date={day.date} />
-                    </span>
-                  </div>
-                ) : (
-                  <span className="text-[11px] text-muted-foreground/50">활동 없음</span>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function WorkoutStatusPill({ status, date }: { status: EventStatus; date: string }) {
-  const displayStatus = getDisplayStatus(status, date);
-  if (displayStatus === 'completed') {
-    return (
-      <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-primary">
-        <CheckIcon size={12} weight="fill" />
-        완료
-      </span>
-    );
-  }
-  if (displayStatus === 'incomplete') {
-    return (
-      <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground/40">
-        <XIcon size={12} weight="fill" />
-        미완료
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-scheduled">
-      <ClockIcon size={12} weight="duotone" />
-      예정
-    </span>
-  );
-}
-
 function WeeklyWorkoutMetrics({ dateStr }: { dateStr: string }) {
   const stats = useWeeklyStatsSuspense(dateStr);
 
@@ -334,7 +255,6 @@ function WeeklyWorkoutMetrics({ dateStr }: { dateStr: string }) {
   return (
     <div className="space-y-6">
       <WorkoutMetricsGrid metrics={metrics} />
-      <DailyWorkoutLog dailyStats={stats.dailyStats} />
     </div>
   );
 }

@@ -100,7 +100,7 @@ export default function BodyStatsTab() {
           const fmt = (v: number) => v.toFixed(1);
 
           return (
-            <div key={key} className="bg-muted/20 rounded-2xl p-4">
+            <div key={key} className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs text-muted-foreground">{label}</p>
                 {change != null && change !== 0 && summary.changes?.periodDays != null && (
