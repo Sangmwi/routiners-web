@@ -1,8 +1,8 @@
 'use client';
 
 import { CigaretteIcon, CigaretteSlashIcon } from '@phosphor-icons/react';
-import FormSection from '@/components/ui/FormSection';
-import FormSlider from '@/components/ui/FormSlider';
+import { WheelPicker } from '@/components/ui/WheelPicker';
+import { HEIGHT_RANGE, WEIGHT_RANGE } from '@/lib/types/user';
 
 interface ProfileBodyInfoInputProps {
   height: string;
@@ -13,9 +13,16 @@ interface ProfileBodyInfoInputProps {
   onSmokerChange: (value: boolean) => void;
 }
 
-// 슬라이더 설정
-const HEIGHT_CONFIG = { min: 140, max: 200, default: 175 };
-const WEIGHT_CONFIG = { min: 40, max: 120, default: 70 };
+// WheelPicker 옵션 (범위 상수에서 생성)
+const heightOptions = Array.from({ length: HEIGHT_RANGE.max - HEIGHT_RANGE.min + 1 }, (_, i) => ({
+  value: String(HEIGHT_RANGE.min + i),
+  label: `${HEIGHT_RANGE.min + i}cm`,
+}));
+
+const weightOptions = Array.from({ length: WEIGHT_RANGE.max - WEIGHT_RANGE.min + 1 }, (_, i) => ({
+  value: String(WEIGHT_RANGE.min + i),
+  label: `${WEIGHT_RANGE.min + i}kg`,
+}));
 
 export default function ProfileBodyInfoInput({
   height,
@@ -26,68 +33,65 @@ export default function ProfileBodyInfoInput({
   onSmokerChange,
 }: ProfileBodyInfoInputProps) {
   return (
-    <FormSection
-      title="신체 정보"
-      description="슬라이더를 움직여 입력하세요."
-    >
-      <div className="space-y-6">
-        <FormSlider
-          label="신장"
-          value={height}
-          onChange={onHeightChange}
-          min={HEIGHT_CONFIG.min}
-          max={HEIGHT_CONFIG.max}
-          unit="cm"
-          defaultValue={HEIGHT_CONFIG.default}
-        />
-
-        <FormSlider
-          label="체중"
-          value={weight}
-          onChange={onWeightChange}
-          min={WEIGHT_CONFIG.min}
-          max={WEIGHT_CONFIG.max}
-          unit="kg"
-          defaultValue={WEIGHT_CONFIG.default}
-        />
-
-        {/* 흡연 여부 - 미니멀 토글 */}
-        <div className="flex items-center justify-between py-2">
-          <span className="text-sm text-muted-foreground">흡연 여부</span>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => onSmokerChange(false)}
-              className={`
-                flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all
-                ${
-                  isSmoker === false
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }
-              `}
-            >
-              <CigaretteSlashIcon size={14} />
-              비흡연
-            </button>
-            <button
-              type="button"
-              onClick={() => onSmokerChange(true)}
-              className={`
-                flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all
-                ${
-                  isSmoker === true
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }
-              `}
-            >
-              <CigaretteIcon size={14} />
-              흡연
-            </button>
+    <div className="space-y-6">
+      {/* 키/몸무게 WheelPicker */}
+      <div className="flex gap-4">
+        <div className="flex-1">
+          <label className="text-sm font-medium text-muted-foreground mb-1.5 block">키</label>
+          <div className="bg-muted/20 rounded-xl p-2">
+            <WheelPicker
+              options={heightOptions}
+              value={height || '175'}
+              onChange={onHeightChange}
+              itemHeight={40}
+              visibleItems={3}
+            />
+          </div>
+        </div>
+        <div className="flex-1">
+          <label className="text-sm font-medium text-muted-foreground mb-1.5 block">몸무게</label>
+          <div className="bg-muted/20 rounded-xl p-2">
+            <WheelPicker
+              options={weightOptions}
+              value={weight || '70'}
+              onChange={onWeightChange}
+              itemHeight={40}
+              visibleItems={3}
+            />
           </div>
         </div>
       </div>
-    </FormSection>
+
+      {/* 흡연 여부 - 토글 스위치 */}
+      <div className="flex items-center justify-between py-2">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-muted-foreground">흡연</span>
+          {isSmoker !== undefined && (
+            <span className={`flex items-center gap-1 text-xs ${
+              isSmoker ? 'text-orange-500' : 'text-emerald-500'
+            }`}>
+              {isSmoker ? (
+                <><CigaretteIcon size={14} /> 흡연</>
+              ) : (
+                <><CigaretteSlashIcon size={14} /> 비흡연</>
+              )}
+            </span>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => onSmokerChange(!(isSmoker ?? false))}
+          className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${
+            isSmoker ? 'bg-orange-500' : 'bg-emerald-500'
+          }`}
+        >
+          <div
+            className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
+              isSmoker ? 'translate-x-[22px]' : 'translate-x-0.5'
+            }`}
+          />
+        </button>
+      </div>
+    </div>
   );
 }

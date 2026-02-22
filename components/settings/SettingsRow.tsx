@@ -37,9 +37,11 @@ export default function SettingsRow({
     }
   };
 
+  const Wrapper = isCustom ? 'div' : 'button';
+
   return (
-    <button
-      onClick={handleClick}
+    <Wrapper
+      onClick={isCustom ? undefined : handleClick}
       className="flex items-center gap-3 w-full px-4 py-3.5 text-left hover:bg-muted/20 transition-colors"
     >
       {IconComponent && (
@@ -78,6 +80,6 @@ export default function SettingsRow({
         </div>
       )}
       {isCustom && accessory}
-    </button>
+    </Wrapper>
   );
 }

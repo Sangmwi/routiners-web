@@ -13,12 +13,12 @@ export default function ThemeSelector() {
   const { mode, setMode } = useTheme();
 
   return (
-    <div className="flex gap-1.5 bg-muted/40 rounded-xl p-1">
+    <div className="flex gap-1.5 bg-muted/40 rounded-xl p-1.5">
       {THEME_OPTIONS.map((option) => (
         <button
           key={option.value}
           onClick={() => setMode(option.value)}
-          className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-medium transition-all ${
+          className={`flex-1 py-2.5 px-4 whitespace-nowrap rounded-lg text-xs font-medium transition-all ${
             mode === option.value
               ? 'bg-card text-foreground shadow-sm'
               : 'text-muted-foreground hover:text-foreground'

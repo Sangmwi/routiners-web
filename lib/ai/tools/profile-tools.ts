@@ -127,11 +127,15 @@ export const UPDATE_FITNESS_PROFILE: AIToolDefinition = {
       },
       preferred_days_per_week: {
         type: 'integer',
+        minimum: 1,
+        maximum: 7,
         description: '주간 선호 운동 일수 (1-7)',
       },
       session_duration_minutes: {
         type: 'integer',
-        description: '세션당 운동 시간 (분)',
+        minimum: 10,
+        maximum: 180,
+        description: '세션당 운동 시간 (분, 10-180)',
       },
       equipment_access: {
         type: 'string',
@@ -217,6 +221,8 @@ export const UPDATE_DIETARY_PROFILE: AIToolDefinition = {
       },
       meals_per_day: {
         type: 'integer',
+        minimum: 1,
+        maximum: 6,
         description: '하루 식사 횟수 (1-6)',
       },
       food_restrictions: {

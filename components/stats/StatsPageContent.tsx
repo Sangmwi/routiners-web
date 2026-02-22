@@ -22,7 +22,7 @@ export default function StatsPageContent() {
     <>
       <DomainTabs domain={domain} onDomainChange={setDomain} />
 
-      <div className="mt-4">
+      <div className="mt-2">
         {domain === 'status' && <AchievementContent />}
         {domain === 'workout' && <WorkoutStatsTab />}
         {domain === 'meal' && <NutritionStatsTab />}

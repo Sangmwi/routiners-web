@@ -13,7 +13,7 @@ export default function ProfileBioInput({ value, onChange }: ProfileBioInputProp
   return (
     <FormSection
       title="소개"
-      description="나를 잘 표현할 수 있는 소개글을 작성해 보세요! 같이 운동할 사람을 찾고 있다면 이곳에서 만들어보세요!"
+      description="나를 잘 표현할 수 있는 소개글을 작성해 보세요!"
     >
       <div className="relative">
         <textarea

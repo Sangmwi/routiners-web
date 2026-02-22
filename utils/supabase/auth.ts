@@ -230,13 +230,13 @@ export function withAuth<T extends Response = NextResponse, P = Record<string, s
     request: NextRequest,
     auth: AuthContextWithParams<P>
   ) => Promise<T>
-): (request: NextRequest, context: { params: Promise<P> }) => Promise<T | NextResponse> {
-  return async (request: NextRequest, context: { params: Promise<P> }) => {
+): (request: NextRequest, context?: { params: Promise<P> }) => Promise<T | NextResponse> {
+  return async (request: NextRequest, context?: { params: Promise<P> }) => {
     try {
       const auth = await requireAuth(request);
       const authWithParams: AuthContextWithParams<P> = {
         ...auth,
-        params: context.params,
+        params: context?.params ?? (Promise.resolve({}) as Promise<P>),
       };
       return await handler(request, authWithParams);
     } catch (error) {
@@ -247,7 +247,7 @@ export function withAuth<T extends Response = NextResponse, P = Record<string, s
         );
       }
 
-      console.error('[withAuth] Unexpected error:', error);
+      console.error('[withAuth] Unexpected error:', error instanceof Error ? error.stack : error);
       return NextResponse.json(
         { error: 'Internal server error' },
         { status: 500 }

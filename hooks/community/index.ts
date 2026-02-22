@@ -6,3 +6,5 @@
 
 export * from './queries';
 export * from './mutations';
+export { useUserPosts } from './useUserPosts';
+export { useUserPostCount } from './useUserPostCount';

@@ -10,13 +10,14 @@ import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/common/EmptyState';
 
 interface ProfileInbodySectionProps {
-  showInbodyPublic?: boolean;
   /** 내 프로필인지 여부 */
   isOwnProfile?: boolean;
   /** 프로필 소유자 이름 (타인 프로필에서 사용) */
   userName?: string;
   /** 프로필 소유자 ID (타인 프로필에서 사용) */
   userId?: string;
+  /** false이면 SectionHeader와 카드 컨테이너 없이 콘텐츠만 반환 */
+  renderHeader?: boolean;
 }
 
 const INBODY_METRICS = [
@@ -26,10 +27,10 @@ const INBODY_METRICS = [
 ] as const;
 
 export default function ProfileInbodySection({
-  showInbodyPublic = true,
   isOwnProfile = false,
   userName,
   userId,
+  renderHeader = true,
 }: ProfileInbodySectionProps) {
 
   // 내 프로필: useInBodySummary, 타인 프로필: useUserInBodySummary
@@ -45,13 +46,15 @@ export default function ProfileInbodySection({
   const { data: summary, isPending: isLoading } = isOwnProfile ? ownSummaryQuery : otherSummaryQuery;
 
   // 비공개 여부 (API 응답에서 확인)
-  const isPrivate = summary?.isPrivate ?? !showInbodyPublic;
+  const isPrivate = summary?.isPrivate ?? false;
   const canViewData = !isPrivate || isOwnProfile;
 
   // 모달 상태 (타인 프로필에서만 사용 - 상세보기만)
   const [selectedRecord, setSelectedRecord] = useState<InBodyRecord | null>(null);
 
   const latest = summary?.latest;
+
+  const compact = !renderHeader;
 
   // 비공개 상태 렌더링
   const renderPrivateState = () => {
@@ -60,12 +63,13 @@ export default function ProfileInbodySection({
     return (
       <EmptyState
         icon={LockIcon}
+        size={compact ? 'sm' : 'md'}
         message={
           isOwnProfile
-            ? '인바디 정보가 비공개 상태예요'
-            : `아직 ${displayName}님이 인바디 정보를 공유하지 않았어요`
+            ? '인바디 정보가 비공개예요'
+            : `${displayName}님이 인바디를 공유하지 않았어요`
         }
-        hint={isOwnProfile ? '상단의 관리 버튼에서 공개 설정을 변경할 수 있어요' : undefined}
+        hint={isOwnProfile ? '프로필 편집에서 정보 공개를 설정할 수 있어요' : undefined}
         variant="private"
       />
     );
@@ -75,12 +79,9 @@ export default function ProfileInbodySection({
   const renderEmptyState = () => (
     <EmptyState
       icon={ScalesIcon}
-      message={
-        isOwnProfile
-          ? '아직 인바디 기록이 없어요'
-          : '인바디 기록이 없어요'
-      }
-      hint={isOwnProfile ? '상단의 관리 버튼에서 인바디 기록을 추가해보세요' : undefined}
+      size={compact ? 'sm' : 'md'}
+      message={isOwnProfile ? '인바디 기록이 없어요' : '인바디 기록이 없어요'}
+      hint={isOwnProfile ? '관리에서 인바디 기록을 추가해보세요' : undefined}
     />
   );
 
@@ -111,35 +112,41 @@ export default function ProfileInbodySection({
   // 타인 프로필에서만 클릭 가능
   const isClickable = !isOwnProfile && canViewData && !!latest;
 
+  const content = (
+    <div
+      className={isClickable ? 'cursor-pointer' : ''}
+      onClick={isClickable ? handleCardClick : undefined}
+    >
+      {isLoading ? (
+        <div className="flex items-center justify-center py-4">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : !canViewData ? (
+        renderPrivateState()
+      ) : !latest ? (
+        renderEmptyState()
+      ) : (
+        renderDataState()
+      )}
+    </div>
+  );
+
   return (
     <>
-      <div className="space-y-3">
-        <SectionHeader
-          title="인바디 정보"
-          action={isOwnProfile ? { label: '관리', href: '/profile/inbody' } : undefined}
-        />
-
-        <div
-          className={`bg-muted/20 rounded-2xl p-4 transition-colors ${
-            isClickable ? 'cursor-pointer hover:bg-muted/20' : ''
-          }`}
-          onClick={isClickable ? handleCardClick : undefined}
-        >
-          {isLoading ? (
-            <div className="flex items-center justify-center py-4">
-              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : !canViewData ? (
-            renderPrivateState()
-          ) : !latest ? (
-            renderEmptyState()
-          ) : (
-            renderDataState()
-          )}
+      {renderHeader ? (
+        <div className="space-y-3">
+          <SectionHeader
+            title="인바디 정보"
+            action={isOwnProfile ? { label: '관리', href: '/profile/inbody' } : undefined}
+          />
+          <div className="bg-muted/20 rounded-2xl p-4">
+            {content}
+          </div>
         </div>
-      </div>
+      ) : (
+        content
+      )}
 
-      {/* Detail Modal - 타인 프로필에서 최신 기록 상세보기 */}
       {selectedRecord && (
         <InBodyDetailModal
           isOpen={!!selectedRecord}

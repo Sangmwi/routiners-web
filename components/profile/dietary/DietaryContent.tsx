@@ -22,6 +22,7 @@ import {
   FOOD_RESTRICTIONS,
   AVAILABLE_SOURCES,
   EATING_HABITS,
+  MEALS_PER_DAY_OPTIONS,
   DIETARY_GOAL_LABELS,
   DIET_TYPE_LABELS,
   FOOD_RESTRICTION_LABELS,
@@ -197,8 +198,8 @@ export default function DietaryContent() {
         {/* 그룹 2: 식사 횟수 & 예산 */}
         <div className="bg-card rounded-2xl p-4 space-y-5 border border-border/30">
           <Section title="하루 식사 횟수" description="하루에 몇 끼를 드시나요?">
-            <div className="flex gap-2">
-              {[2, 3, 4, 5, 6].map((count) => (
+            <div className="flex flex-wrap gap-2">
+              {MEALS_PER_DAY_OPTIONS.map((count) => (
                 <NumberOption
                   key={count}
                   value={count}
@@ -230,7 +231,7 @@ export default function DietaryContent() {
                   }))
                 }
                 placeholder="예: 100000"
-                className="flex-1 px-4 py-3 rounded-xl bg-muted/50 border border-border/30 text-sm text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/40 focus:border-primary/30 outline-none transition-all"
+                className="flex-1 min-w-0 px-4 py-3 rounded-xl bg-muted/50 border border-border/30 text-sm text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/40 focus:border-primary/30 outline-none transition-all"
               />
               <span className="text-sm text-muted-foreground">원</span>
             </div>

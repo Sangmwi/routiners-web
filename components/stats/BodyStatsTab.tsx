@@ -62,7 +62,7 @@ export default function BodyStatsTab() {
         <div className="rounded-2xl bg-muted/20 p-6 text-center">
           <UserIcon size={28} weight="duotone" className="text-muted-foreground/40 mx-auto mb-2" />
           <p className="text-sm text-muted-foreground mb-1">인바디 기록이 없어요</p>
-          <p className="text-[11px] text-muted-foreground/60 mb-3">
+          <p className="text-xs text-muted-foreground/60 mb-3">
             체중, 골격근량, 체지방률을 기록해보세요
           </p>
           <AppLink
@@ -78,10 +78,10 @@ export default function BodyStatsTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* 인바디 관리 링크 */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-foreground">인바디 추이</h3>
+        <h3 className="text-base font-medium text-foreground">인바디 추이</h3>
         <AppLink
           href="/profile/inbody"
           className="text-xs font-medium text-primary flex items-center gap-0.5"
@@ -105,7 +105,7 @@ export default function BodyStatsTab() {
                 <p className="text-xs text-muted-foreground">{label}</p>
                 {change != null && change !== 0 && summary.changes?.periodDays != null && (
                   <div className="flex items-center gap-1">
-                    <span className="text-[10px] text-muted-foreground/50">
+                    <span className="text-[11px] text-muted-foreground/50">
                       {formatPeriod(summary.changes.periodDays)}보다
                     </span>
                     <ChangeIndicator value={change} positiveIsGood={positiveIsGood} unit={unit} />

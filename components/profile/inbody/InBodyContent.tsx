@@ -9,7 +9,6 @@ import {
   InBodyRecordList,
   InBodySummaryCard,
   InBodyDetailModal,
-  InBodyVisibilitySettings,
   InBodyScanModal,
 } from '@/components/inbody';
 import { useInBodyManagerSuspense } from '@/hooks/inbody';
@@ -81,12 +80,6 @@ export default function InBodyContent() {
             totalRecords={summary?.totalRecords}
             variant="card"
           />
-        </section>
-
-        {/* Visibility Settings */}
-        <section className="space-y-3">
-          <SectionHeader title="공개 설정" size="sm" />
-          <InBodyVisibilitySettings variant="card" showHeader={false} />
         </section>
 
         {/* Record List */}

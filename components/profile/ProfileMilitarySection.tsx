@@ -9,37 +9,45 @@ interface ProfileMilitarySectionProps {
   rank: Rank;
   unitName: string;
   specialty: Specialty;
+  /** false이면 SectionHeader와 카드 컨테이너 없이 콘텐츠만 반환 */
+  renderHeader?: boolean;
 }
 
 export default function ProfileMilitarySection({
   rank,
   unitName,
   specialty,
+  renderHeader = true,
 }: ProfileMilitarySectionProps) {
+  const content = (
+    <div className={renderHeader ? 'bg-muted/20 rounded-2xl divide-y divide-border/50' : 'divide-y divide-border/50'}>
+      <InfoCard
+        icon={<ShieldIcon />}
+        label="계급"
+        value={rank.split('-')[0]}
+        variant="flat"
+      />
+      <InfoCard
+        icon={<UsersThreeIcon />}
+        label="부대명"
+        value={unitName}
+        variant="flat"
+      />
+      <InfoCard
+        icon={<MedalIcon />}
+        label="병과"
+        value={specialty}
+        variant="flat"
+      />
+    </div>
+  );
+
+  if (!renderHeader) return content;
+
   return (
     <div className="space-y-3">
       <SectionHeader title="군 정보" />
-
-      <div className="bg-muted/20 rounded-2xl divide-y divide-border/50">
-        <InfoCard
-          icon={<ShieldIcon />}
-          label="계급"
-          value={rank.split('-')[0]}
-          variant="flat"
-        />
-        <InfoCard
-          icon={<UsersThreeIcon />}
-          label="부대명"
-          value={unitName}
-          variant="flat"
-        />
-        <InfoCard
-          icon={<MedalIcon />}
-          label="병과"
-          value={specialty}
-          variant="flat"
-        />
-      </div>
+      {content}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import SectionHeader from '@/components/ui/SectionHeader';
+import BodyCompositionSummary from '@/components/inbody/BodyCompositionSummary';
 import { MetricItem } from '@/components/inbody/MetricItem';
 import MiniSparkline from '@/components/ui/MiniSparkline';
 import { getTrendColor } from '@/components/ui/ChangeIndicator';
@@ -9,6 +10,8 @@ import type { InBodySummary, InBodyRecord } from '@/lib/types';
 interface InBodySectionProps {
   summary: InBodySummary;
   history: InBodyRecord[];
+  /** 유저 키 (cm) */
+  height?: number | null;
 }
 
 const INBODY_METRICS = [
@@ -22,7 +25,7 @@ const INBODY_METRICS = [
  *
  * SectionHeader + 3열 MetricItem + 미니 스파크라인
  */
-export default function InBodySection({ summary, history }: InBodySectionProps) {
+export default function InBodySection({ summary, history, height }: InBodySectionProps) {
   const hasData = !!summary.latest;
   const hasHistory = history.length >= 2;
   const chronological = hasHistory ? [...history].reverse() : [];
@@ -43,34 +46,39 @@ export default function InBodySection({ summary, history }: InBodySectionProps) 
             <p className="text-xs text-muted-foreground">인바디 기록이 없어요</p>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-2">
-            {INBODY_METRICS.map(({ key, label, unit, positiveIsGood }) => {
-              const sparkData = hasHistory ? chronological.map((r) => r[key]) : [];
-              const change = summary.changes?.[key];
-              return (
-                <MetricItem
-                  key={key}
-                  label={label}
-                  value={summary.latest?.[key]}
-                  unit={unit}
-                >
-                  {hasHistory && (
-                    <div className="mt-6">
-                      <MiniSparkline
-                        data={sparkData}
-                        height={28}
-                        showEndDot
-                        showAllDots={false}
-                        gradientFill={false}
-                        color={getTrendColor(change, positiveIsGood)}
-                        lineOpacity={0.7}
-                      />
-                    </div>
-                  )}
-                </MetricItem>
-              );
-            })}
-          </div>
+          <BodyCompositionSummary
+            height={height}
+            measuredAt={summary.latest?.measuredAt}
+          >
+            <div className="grid grid-cols-3 gap-2">
+              {INBODY_METRICS.map(({ key, label, unit, positiveIsGood }) => {
+                const sparkData = hasHistory ? chronological.map((r) => r[key]) : [];
+                const change = summary.changes?.[key];
+                return (
+                  <MetricItem
+                    key={key}
+                    label={label}
+                    value={summary.latest?.[key]}
+                    unit={unit}
+                  >
+                    {hasHistory && (
+                      <div className="mt-6">
+                        <MiniSparkline
+                          data={sparkData}
+                          height={28}
+                          showEndDot
+                          showAllDots={false}
+                          gradientFill={false}
+                          color={getTrendColor(change, positiveIsGood)}
+                          lineOpacity={0.7}
+                        />
+                      </div>
+                    )}
+                  </MetricItem>
+                );
+              })}
+            </div>
+          </BodyCompositionSummary>
         )}
       </div>
     </section>

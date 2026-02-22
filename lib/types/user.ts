@@ -24,21 +24,57 @@ export type DbUser = Tables<'users'>;
 
 export type Gender = 'male' | 'female';
 
-export type Rank = '이병' | '일병' | '상병' | '병장';
+// 신체 정보 범위 상수 (UI WheelPicker + AI 검증에서 공유)
+export const HEIGHT_RANGE = { min: 120, max: 240 } as const; // cm
+export const WEIGHT_RANGE = { min: 20, max: 160 } as const;  // kg
 
-export type Specialty =
-  | '보병'
-  | '포병'
-  | '기갑'
-  | '공병'
-  | '정보통신'
-  | '항공'
-  | '화생방'
-  | '병참'
-  | '의무'
-  | '법무'
-  | '행정'
-  | '기타';
+// 계급 상수 & 타입
+export const RANKS = ['이병', '일병', '상병', '병장'] as const;
+export type Rank = (typeof RANKS)[number];
+
+export const RANK_LABELS: Record<Rank, string> = {
+  '이병': '이병',
+  '일병': '일병',
+  '상병': '상병',
+  '병장': '병장',
+};
+
+// 병과 상수 & 타입
+export const SPECIALTIES = [
+  '보병', '포병', '기갑', '공병', '정보통신', '항공',
+  '화생방', '병참', '의무', '법무', '행정', '기타',
+] as const;
+export type Specialty = (typeof SPECIALTIES)[number];
+
+export const SPECIALTY_LABELS: Record<Specialty, string> = {
+  '보병': '보병',
+  '포병': '포병',
+  '기갑': '기갑',
+  '공병': '공병',
+  '정보통신': '정보통신',
+  '항공': '항공',
+  '화생방': '화생방',
+  '병참': '병참',
+  '의무': '의무',
+  '법무': '법무',
+  '행정': '행정',
+  '기타': '기타',
+};
+
+export const SPECIALTY_DESCRIPTIONS: Record<Specialty, string> = {
+  '보병': '지상 전투의 핵심 병과',
+  '포병': '화력 지원 병과',
+  '기갑': '전차 및 장갑차 운용',
+  '공병': '건설 및 장애물 처리',
+  '정보통신': '통신 체계 운용',
+  '항공': '항공기 운용 및 정비',
+  '화생방': '화학, 생물학, 방사능 방호',
+  '병참': '보급 및 군수 지원',
+  '의무': '의료 및 위생 지원',
+  '법무': '군 법률 업무',
+  '행정': '인사 및 행정 업무',
+  '기타': '그 외 병과',
+};
 
 export interface Unit {
   id: string;
@@ -77,7 +113,8 @@ export interface User {
   interestedLocations?: string[]; // tags
   interestedExercises?: string[]; // tags
   isSmoker?: boolean;
-  showInbodyPublic?: boolean;
+  showActivityPublic?: boolean;
+  showInfoPublic?: boolean;
 
   createdAt: string;
   updatedAt?: string;
@@ -117,7 +154,8 @@ export function toUser(dbUser: DbUser): User {
     interestedLocations: dbUser.interested_exercise_locations ?? undefined,
     interestedExercises: dbUser.interested_exercise_types ?? undefined,
     isSmoker: dbUser.is_smoker ?? undefined,
-    showInbodyPublic: dbUser.show_body_metrics ?? undefined,
+    showActivityPublic: dbUser.show_activity_public ?? undefined,
+    showInfoPublic: dbUser.show_info_public ?? undefined,
     createdAt: dbUser.created_at,
     updatedAt: dbUser.updated_at,
   };
@@ -126,7 +164,7 @@ export function toUser(dbUser: DbUser): User {
 /**
  * DbUser → User 변환 (공개 프로필용, privacy 설정 적용)
  *
- * show_body_metrics가 false인 경우 InBody 데이터 숨김 처리
+ * show_info_public이 false인 경우 정보 탭 민감 데이터 숨김
  *
  * @param dbUser - DB에서 조회한 사용자 데이터
  * @returns privacy 설정이 적용된 User 객체
@@ -134,10 +172,13 @@ export function toUser(dbUser: DbUser): User {
 export function toPublicUser(dbUser: DbUser): User {
   const user = toUser(dbUser);
 
-  // Privacy 설정에 따라 InBody 데이터 숨김
-  if (!dbUser.show_body_metrics) {
+  // 정보 탭 비공개 시 민감 데이터 숨김
+  if (!dbUser.show_info_public) {
     user.muscleMass = undefined;
     user.bodyFatPercentage = undefined;
+    user.height = undefined;
+    user.weight = undefined;
+    user.isSmoker = undefined;
   }
 
   return user;
@@ -193,7 +234,8 @@ export interface ProfileUpdateData {
   interestedLocations?: string[];
   interestedExercises?: string[];
   isSmoker?: boolean;
-  showInbodyPublic?: boolean;
+  showActivityPublic?: boolean;
+  showInfoPublic?: boolean;
   rank?: Rank;
   unitName?: string;
   specialty?: Specialty;

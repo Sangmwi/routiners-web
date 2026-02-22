@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { XIcon, PlusIcon } from '@phosphor-icons/react';
-import SectionHeader from '@/components/ui/SectionHeader';
 import Tag from '@/components/ui/Tag';
 
 interface ProfileLocationsInputProps {
@@ -34,11 +33,6 @@ export default function ProfileLocationsInput({ value, onChange }: ProfileLocati
 
   return (
     <section className="space-y-3">
-      <SectionHeader
-        title="자주 가는 운동 장소"
-        description="헬스장, 조깅 코스 등을 추가해주세요!"
-      />
-
       {/* Input Field */}
       <div className="flex gap-2">
         <input

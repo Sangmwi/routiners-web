@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BowlFoodIcon, CaretRightIcon } from '@phosphor-icons/react';
+import { ForkKnifeIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { useDietaryProfile, hasDietaryProfileData } from '@/hooks/dietaryProfile';
 import {
   DIETARY_GOAL_LABELS,
@@ -19,22 +19,32 @@ import { DietaryDetailDrawer } from '@/components/drawers';
  *
  * Hero(목표+유형) + 요약 텍스트 라인 + 제한사항 태그
  */
-export default function ProfileDietarySection() {
+interface ProfileDietarySectionProps {
+  /** false이면 SectionHeader와 카드 컨테이너 없이 콘텐츠만 반환 */
+  renderHeader?: boolean;
+}
+
+export default function ProfileDietarySection({
+  renderHeader = true,
+}: ProfileDietarySectionProps = {}) {
   const { data: profile, isPending: isLoading } = useDietaryProfile();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const hasData = hasDietaryProfileData(profile);
 
+  const compact = !renderHeader;
+
   const renderLoading = () => (
-    <div className="flex items-center justify-center py-6">
+    <div className="flex items-center justify-center py-4">
       <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
   const renderEmpty = () => (
     <EmptyState
-      icon={BowlFoodIcon}
-      message="아직 식단 프로필이 없어요"
+      icon={ForkKnifeIcon}
+      size={compact ? 'sm' : 'md'}
+      message="식단 프로필이 없어요"
       hint="AI 상담사와 대화하거나 직접 등록해보세요"
     />
   );
@@ -64,7 +74,7 @@ export default function ProfileDietarySection() {
         {/* Hero: 아이콘 + 목표/유형 + chevron */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-            <BowlFoodIcon size={20} className="text-primary" weight="duotone" />
+            <ForkKnifeIcon size={20} className="text-primary" weight="duotone" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-foreground truncate">
@@ -122,18 +132,23 @@ export default function ProfileDietarySection() {
     );
   };
 
+  const content = isLoading ? renderLoading() : !hasData ? renderEmpty() : renderData();
+
   return (
     <>
-      <div className="space-y-3">
-        <SectionHeader
-          title="식단 프로필"
-          action={{ label: '관리', href: '/profile/dietary' }}
-        />
-
-        <div className="bg-muted/20 rounded-2xl p-4">
-          {isLoading ? renderLoading() : !hasData ? renderEmpty() : renderData()}
+      {renderHeader ? (
+        <div className="space-y-3">
+          <SectionHeader
+            title="식단 프로필"
+            action={{ label: '관리', href: '/profile/dietary' }}
+          />
+          <div className="bg-muted/20 rounded-2xl p-4">
+            {content}
+          </div>
         </div>
-      </div>
+      ) : (
+        content
+      )}
 
       {profile && hasData && (
         <DietaryDetailDrawer

@@ -1,7 +1,7 @@
 'use client';
 
 import {
-  MoonIcon,
+  PaletteIcon,
   BellIcon,
   SignOutIcon,
   UserMinusIcon,
@@ -38,8 +38,8 @@ export default function SettingsContent() {
       {/* 앱 설정 */}
       <SettingsGroup title="앱 설정">
         <SettingsRow
-          icon={MoonIcon}
-          label="다크모드"
+          icon={PaletteIcon}
+          label="테마"
           accessory={<ThemeSelector />}
         />
         <SettingsRow

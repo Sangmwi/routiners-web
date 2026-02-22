@@ -16,12 +16,12 @@ interface FormSectionProps {
  */
 export default function FormSection({ title, description, children, action }: FormSectionProps) {
   return (
-    <section className="space-y-3">
+    <section className="space-y-2">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-xl font-bold text-card-foreground">{title}</h2>
+          <label className="text-sm font-medium text-muted-foreground">{title}</label>
           {description && (
-            <p className="text-xs text-muted-foreground mt-1">{description}</p>
+            <p className="text-xs text-muted-foreground/70 mt-0.5">{description}</p>
           )}
         </div>
         {action}

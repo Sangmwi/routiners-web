@@ -85,7 +85,8 @@ export type Database = {
           provider_id: string
           rank: string
           real_name: string
-          show_body_metrics: boolean | null
+          show_activity_public: boolean | null
+          show_info_public: boolean | null
           skeletal_muscle_mass_kg: number | null
           specialty: string
           unit_id: string
@@ -112,7 +113,8 @@ export type Database = {
           provider_id: string
           rank: string
           real_name: string
-          show_body_metrics?: boolean | null
+          show_activity_public?: boolean | null
+          show_info_public?: boolean | null
           skeletal_muscle_mass_kg?: number | null
           specialty: string
           unit_id: string
@@ -139,7 +141,8 @@ export type Database = {
           provider_id?: string
           rank?: string
           real_name?: string
-          show_body_metrics?: boolean | null
+          show_activity_public?: boolean | null
+          show_info_public?: boolean | null
           skeletal_muscle_mass_kg?: number | null
           specialty?: string
           unit_id?: string
@@ -203,7 +206,8 @@ export type Database = {
           provider_id: string
           rank: string
           real_name: string
-          show_body_metrics: boolean
+          show_activity_public: boolean
+          show_info_public: boolean
           similarity_score: number
           skeletal_muscle_mass_kg: number
           specialty: string

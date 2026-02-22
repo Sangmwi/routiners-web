@@ -140,6 +140,11 @@ export function useToggleLike() {
         queryKey: queryKeys.post.lists(),
       });
     },
+
+    // 성공/실패 무관하게 서버 데이터와 최종 재동기화
+    onSettled: (_, __, postId) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.post.detail(postId) });
+    },
   });
 }
 

@@ -10,6 +10,7 @@ import {
 } from '@phosphor-icons/react';
 import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
 import AppLink from '@/components/common/AppLink';
+import SegmentedControl from '@/components/ui/SegmentedControl';
 import { formatDate } from '@/lib/utils/dateHelpers';
 import { getDisplayStatus } from '@/lib/config/theme';
 import type { WeeklyStats } from '@/hooks/routine';
@@ -43,24 +44,13 @@ export default function WeeklyProgressChart({ stats }: WeeklyProgressChartProps)
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-medium text-foreground">일별 기록</h3>
-        <div className="flex items-center bg-muted/50 rounded-lg p-0.5">
-          {FILTER_OPTIONS.map(({ key, label }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setFilter(key)}
-              className={`px-2 py-0.5 text-[10px] font-medium rounded-md transition-all ${
-                filter === key
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-base font-medium text-foreground">주간 기록</h3>
+        <SegmentedControl
+          options={FILTER_OPTIONS}
+          value={filter}
+          onChange={setFilter}
+        />
       </div>
 
       <div className="flex flex-col items-center overflow-hidden">
@@ -85,7 +75,7 @@ export default function WeeklyProgressChart({ stats }: WeeklyProgressChartProps)
                 <div className="flex gap-3">
                   {/* 요일 */}
                   <span
-                    className={`text-xs font-semibold w-5 shrink-0 pt-0.5 ${
+                    className={`text-xs font-semibold w-6 shrink-0 pt-0.5 ${
                       isToday ? 'text-primary' : 'text-muted-foreground'
                     }`}
                   >
@@ -119,7 +109,7 @@ export default function WeeklyProgressChart({ stats }: WeeklyProgressChartProps)
                       />
                     )}
                     {!hasVisible && (
-                      <span className="text-[11px] text-muted-foreground/50">
+                      <span className="text-xs text-muted-foreground/50">
                         활동 없음
                       </span>
                     )}
@@ -154,12 +144,12 @@ function ActivityRow({
 }) {
   return (
     <AppLink href={href} className="flex items-center gap-1.5 w-full text-left">
-      <Icon size={13} weight="fill" className="text-primary shrink-0" />
+      <Icon size={15} weight="fill" className="text-primary shrink-0" />
       <span className="text-xs font-medium text-foreground truncate">
         {label}
       </span>
       {meta && (
-        <span className="text-[10px] text-muted-foreground shrink-0">
+        <span className="text-[11px] text-muted-foreground shrink-0">
           {meta}
         </span>
       )}
@@ -181,24 +171,24 @@ function StatusPill({
 
   if (displayStatus === 'completed') {
     return (
-      <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-primary">
-        <CheckCircleIcon size={12} weight="fill" />
+      <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-primary">
+        <CheckCircleIcon size={14} weight="fill" />
         완료
       </span>
     );
   }
   if (displayStatus === 'incomplete') {
     return (
-      <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground/40">
-        <XCircleIcon size={12} weight="fill" />
+      <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-muted-foreground/40">
+        <XCircleIcon size={14} weight="fill" />
         미완료
       </span>
     );
   }
   // scheduled
   return (
-    <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-scheduled">
-      <ClockIcon size={12} weight="duotone" />
+    <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-scheduled">
+      <ClockIcon size={14} weight="duotone" />
       예정
     </span>
   );

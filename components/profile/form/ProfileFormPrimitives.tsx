@@ -73,8 +73,8 @@ export function ProfileFormNumberOption({
   variant = 'circle',
 }: ProfileFormNumberOptionProps) {
   const baseClass = variant === 'circle'
-    ? 'shrink-0 w-11 h-11 rounded-full'
-    : 'shrink-0 px-4 h-11 rounded-full';
+    ? 'flex-shrink-0 w-11 h-11 rounded-full'
+    : 'flex-shrink-0 px-3 h-11 rounded-full';
 
   return (
     <button
@@ -119,10 +119,10 @@ export function ProfileFormChipOption({
       }`}
     >
       <span
-        className={`inline-flex items-center justify-center w-4 h-4 rounded-full transition-all ${
+        className={`inline-flex items-center justify-center w-4 h-4 rounded-full flex-shrink-0 transition-all ${
           selected
             ? 'bg-primary text-primary-foreground'
-            : 'ring-1.5 ring-muted-foreground/30'
+            : 'border-2 border-muted-foreground/40'
         }`}
       >
         {selected && <CheckIcon size={10} weight="bold" />}
@@ -152,16 +152,16 @@ export function ProfileFormSection({
   return (
     <div className="space-y-3">
       <div>
-        <div className="flex items-center gap-2">
-          <h3 className="text-base font-semibold text-foreground">{title}</h3>
+        <div className="flex items-center gap-1.5">
+          <label className="text-sm font-medium text-muted-foreground">{title}</label>
           {optional && (
-            <span className="text-[10px] text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">
+            <span className="text-[10px] text-muted-foreground/70 bg-muted/40 px-1.5 py-0.5 rounded">
               선택
             </span>
           )}
         </div>
         {description && (
-          <p className="text-sm text-muted-foreground mt-1">{description}</p>
+          <p className="text-xs text-muted-foreground/70 mt-0.5">{description}</p>
         )}
       </div>
       {children}

@@ -3,19 +3,10 @@
 import { useState } from 'react';
 import { GearIcon, CaretRightIcon } from '@phosphor-icons/react';
 import FormSection from '@/components/ui/FormSection';
-import FormToggle from '@/components/ui/FormToggle';
 import { InBodyManageModal, MetricsGrid } from '@/components/inbody';
 import { useInBodySummary } from '@/hooks/inbody';
 
-interface ProfileInbodyInputProps {
-  showInbodyPublic: boolean;
-  onShowInbodyPublicChange: (value: boolean) => void;
-}
-
-export default function ProfileInbodyInput({
-  showInbodyPublic,
-  onShowInbodyPublicChange,
-}: ProfileInbodyInputProps) {
+export default function ProfileInbodyInput() {
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const { data: summary } = useInBodySummary();
 
@@ -66,14 +57,6 @@ export default function ProfileInbodyInput({
               </div>
             )}
           </div>
-
-          {/* 공개 설정 토글 */}
-          <FormToggle
-            label="인바디 정보 공개"
-            description="다른 사용자에게 인바디 정보를 공개해요"
-            checked={showInbodyPublic}
-            onChange={onShowInbodyPublicChange}
-          />
         </div>
       </FormSection>
 

@@ -53,10 +53,10 @@ export default function RoutineContent() {
 
   return (
     <div className="space-y-10">
-      {/* 2. 이번 주 현황 (최상단) */}
+      {/* 1. 이번 주 현황 (최상단) */}
       <WeeklyOverview stats={weeklyStats} />
 
-      {/* 1. 오늘 섹션 (2열 카드, 홈과 동일) */}
+      {/* 2. 오늘 섹션 (2열 카드, 홈과 동일) */}
       <TodayRoutineCard
         workoutEvent={todayWorkout || null}
         mealEvent={todayMeal || null}

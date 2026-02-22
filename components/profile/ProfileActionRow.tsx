@@ -2,13 +2,19 @@
 
 import { useRouter } from 'next/navigation';
 import { useModalStore } from '@/lib/stores/modalStore';
+import { useUserPostCount } from '@/hooks/community/useUserPostCount';
+
+interface ProfileActionRowProps {
+  userId: string;
+}
 
 /**
- * 프로필 액션 로우: 팔로워 / 팔로잉 / 프로필 편집
+ * 프로필 액션 로우: 게시글/팔로워/팔로잉 스탯 + 프로필 편집 버튼
  */
-export default function ProfileActionRow() {
+export default function ProfileActionRow({ userId }: ProfileActionRowProps) {
   const router = useRouter();
   const openModal = useModalStore((state) => state.openModal);
+  const { data: postCount = 0 } = useUserPostCount(userId);
 
   const handleComingSoon = () => {
     openModal('alert', {
@@ -19,35 +25,29 @@ export default function ProfileActionRow() {
   };
 
   return (
-    <div className="bg-card rounded-2xl border border-border/30 p-3 flex items-center">
-      {/* 팔로워 */}
-      <button
-        onClick={handleComingSoon}
-        className="flex-1 flex flex-col items-center gap-0.5 py-1"
-      >
-        <span className="text-base font-bold text-foreground">0</span>
-        <span className="text-xs text-muted-foreground">팔로워</span>
-      </button>
+    <div className="space-y-3">
+      {/* 스탯 인라인 */}
+      <div className="flex items-center gap-3 text-sm">
+        <span>
+          <span className="font-semibold text-foreground">{postCount}</span>
+          <span className="text-muted-foreground ml-1">게시글</span>
+        </span>
+        <button onClick={handleComingSoon}>
+          <span className="font-semibold text-foreground">0</span>
+          <span className="text-muted-foreground ml-1">팔로워</span>
+        </button>
+        <button onClick={handleComingSoon}>
+          <span className="font-semibold text-foreground">0</span>
+          <span className="text-muted-foreground ml-1">팔로잉</span>
+        </button>
+      </div>
 
-      <div className="w-px h-8 bg-border/30" />
-
-      {/* 팔로잉 */}
-      <button
-        onClick={handleComingSoon}
-        className="flex-1 flex flex-col items-center gap-0.5 py-1"
-      >
-        <span className="text-base font-bold text-foreground">0</span>
-        <span className="text-xs text-muted-foreground">팔로잉</span>
-      </button>
-
-      <div className="w-px h-8 bg-border/30" />
-
-      {/* 프로필 편집 */}
+      {/* 프로필 편집 버튼 */}
       <button
         onClick={() => router.push('/profile/edit')}
-        className="flex-1 flex items-center justify-center py-2"
+        className="w-full border border-border rounded-xl py-2.5 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
       >
-        <span className="text-sm font-medium text-primary">프로필 편집</span>
+        프로필 편집
       </button>
     </div>
   );

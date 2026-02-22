@@ -46,7 +46,8 @@ export const PATCH = withAuth(async (request, { authUser, supabase }) => {
   if (body.interestedLocations !== undefined) updateData.interested_exercise_locations = body.interestedLocations;
   if (body.interestedExercises !== undefined) updateData.interested_exercise_types = body.interestedExercises;
   if (body.isSmoker !== undefined) updateData.is_smoker = body.isSmoker;
-  if (body.showInbodyPublic !== undefined) updateData.show_body_metrics = body.showInbodyPublic;
+  if (body.showActivityPublic !== undefined) updateData.show_activity_public = body.showActivityPublic;
+  if (body.showInfoPublic !== undefined) updateData.show_info_public = body.showInfoPublic;
   if (body.rank !== undefined) updateData.rank = body.rank;
   if (body.unitName !== undefined) updateData.unit_name = body.unitName;
   if (body.specialty !== undefined) updateData.specialty = body.specialty;

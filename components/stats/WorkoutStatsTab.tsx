@@ -1,197 +1,148 @@
 'use client';
 
-import { Suspense, useState, type ReactNode } from 'react';
+import { Suspense, useState } from 'react';
+
 import {
   BarbellIcon,
   ChartLineUpIcon,
   FireIcon,
+  ListBulletsIcon,
   PersonSimpleRunIcon,
   TimerIcon,
   TrophyIcon,
 } from '@phosphor-icons/react';
+import EmptyState from '@/components/common/EmptyState';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import { Big3SummaryCard } from '@/components/progress/Big3SummaryCard';
-import DateJumpSheet from '@/components/ui/DateJumpSheet';
 import { PulseLoader } from '@/components/ui/PulseLoader';
+import SegmentedControl from '@/components/ui/SegmentedControl';
 import { useProgressSummarySuspense } from '@/hooks/progress';
 import {
   useMonthlyStatsSuspense,
-  useStatsPeriodNavigator,
   useWeeklyStatsSuspense,
 } from '@/hooks/routine';
 import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
 import type { MonthlyStats, WeeklyStats } from '@/hooks/routine';
-import { formatDate, parseDate } from '@/lib/utils/dateHelpers';
-import PeriodTabs from './PeriodTabs';
+import StatsTabShell from './StatsTabShell';
 
 function formatShortDate(dateStr: string): string {
   const date = new Date(dateStr + 'T00:00:00');
   return `${date.getMonth() + 1}/${date.getDate()}`;
 }
 
-interface WorkoutMetricItem {
-  icon: ReactNode;
-  label: string;
-  value: string;
-  isPlanned?: boolean;
-}
+type SummaryMode = 'total' | 'average';
 
-function buildWorkoutMetrics(workout: WeeklyStats['workout'] | MonthlyStats['workout']) {
-  const metrics: WorkoutMetricItem[] = [];
+const SUMMARY_MODE_OPTIONS = [
+  { key: 'total' as const, label: '총합' },
+  { key: 'average' as const, label: '평균' },
+];
 
-  if (workout.totalDuration > 0) {
-    metrics.push({
-      icon: <TimerIcon size={18} weight="fill" className="text-primary" />,
-      label: '운동 시간',
-      value: `${workout.totalDuration}분`,
-    });
-  } else if (workout.plannedDuration > 0) {
-    metrics.push({
-      icon: <TimerIcon size={18} weight="duotone" className="text-muted-foreground" />,
-      label: '예상 시간',
-      value: `${workout.plannedDuration}분`,
-      isPlanned: true,
-    });
-  }
+function WorkoutSummarySection({
+  workout,
+}: {
+  workout: WeeklyStats['workout'] | MonthlyStats['workout'];
+}) {
+  const [mode, setMode] = useState<SummaryMode>('total');
 
-  if (workout.totalCaloriesBurned > 0) {
-    metrics.push({
-      icon: <FireIcon size={18} weight="fill" className="text-primary" />,
-      label: '소모 칼로리',
-      value: `${workout.totalCaloriesBurned.toLocaleString()}kcal`,
-    });
-  } else if (workout.plannedCaloriesBurned > 0) {
-    metrics.push({
-      icon: <FireIcon size={18} weight="duotone" className="text-muted-foreground" />,
-      label: '예상 소모',
-      value: `${workout.plannedCaloriesBurned.toLocaleString()}kcal`,
-      isPlanned: true,
-    });
-  }
+  const isPlannedOnly = workout.completed === 0;
+  const completed = workout.completed || 1;
 
-  if (workout.totalVolume > 0) {
-    metrics.push({
-      icon: <ChartLineUpIcon size={18} weight="fill" className="text-primary" />,
-      label: '총 볼륨',
-      value: `${workout.totalVolume.toLocaleString()}kg`,
-    });
-  } else if (workout.plannedVolume > 0) {
-    metrics.push({
-      icon: <ChartLineUpIcon size={18} weight="duotone" className="text-muted-foreground" />,
-      label: '예상 볼륨',
-      value: `${workout.plannedVolume.toLocaleString()}kg`,
-      isPlanned: true,
-    });
-  }
+  // 4번째 슬롯: distance > 0이면 거리, 아니면 세트
+  const hasDistance = workout.totalDistance > 0 || workout.plannedDistance > 0;
 
-  if (workout.totalDistance > 0) {
-    metrics.push({
-      icon: <PersonSimpleRunIcon size={18} weight="fill" className="text-primary" />,
-      label: '유산소 거리',
-      value: `${workout.totalDistance.toFixed(1)}km`,
-    });
-  } else if (workout.plannedDistance > 0) {
-    metrics.push({
-      icon: <PersonSimpleRunIcon size={18} weight="duotone" className="text-muted-foreground" />,
-      label: '예상 거리',
-      value: `${workout.plannedDistance.toFixed(1)}km`,
-      isPlanned: true,
-    });
-  }
+  const metrics = [
+    {
+      icon: <TimerIcon size={18} weight={isPlannedOnly ? 'duotone' : 'fill'} className={isPlannedOnly ? 'text-muted-foreground' : 'text-primary'} />,
+      label: mode === 'total' ? '운동시간' : '평균 운동시간',
+      total: isPlannedOnly ? workout.plannedDuration : workout.totalDuration,
+      avg: Math.round((isPlannedOnly ? workout.plannedDuration : workout.totalDuration) / completed),
+      format: (v: number) => `${v.toLocaleString()}`,
+      unit: '분',
+    },
+    {
+      icon: <FireIcon size={18} weight={isPlannedOnly ? 'duotone' : 'fill'} className={isPlannedOnly ? 'text-muted-foreground' : 'text-primary'} />,
+      label: mode === 'total' ? '소모 칼로리' : '평균 소모',
+      total: isPlannedOnly ? workout.plannedCaloriesBurned : workout.totalCaloriesBurned,
+      avg: Math.round((isPlannedOnly ? workout.plannedCaloriesBurned : workout.totalCaloriesBurned) / completed),
+      format: (v: number) => `${v.toLocaleString()}`,
+      unit: 'kcal',
+    },
+    {
+      icon: <ChartLineUpIcon size={18} weight={isPlannedOnly ? 'duotone' : 'fill'} className={isPlannedOnly ? 'text-muted-foreground' : 'text-primary'} />,
+      label: mode === 'total' ? '볼륨' : '평균 볼륨',
+      total: isPlannedOnly ? workout.plannedVolume : workout.totalVolume,
+      avg: Math.round((isPlannedOnly ? workout.plannedVolume : workout.totalVolume) / completed),
+      format: (v: number) => `${v.toLocaleString()}`,
+      unit: 'kg',
+    },
+    hasDistance
+      ? {
+          icon: <PersonSimpleRunIcon size={18} weight={isPlannedOnly ? 'duotone' : 'fill'} className={isPlannedOnly ? 'text-muted-foreground' : 'text-primary'} />,
+          label: mode === 'total' ? '유산소 거리' : '평균 거리',
+          total: isPlannedOnly ? workout.plannedDistance : workout.totalDistance,
+          avg: Number(((isPlannedOnly ? workout.plannedDistance : workout.totalDistance) / completed).toFixed(1)),
+          format: (v: number) => `${v.toFixed(1)}`,
+          unit: 'km',
+        }
+      : {
+          icon: <ListBulletsIcon size={18} weight={isPlannedOnly ? 'duotone' : 'fill'} className={isPlannedOnly ? 'text-muted-foreground' : 'text-primary'} />,
+          label: mode === 'total' ? '세트' : '평균 세트',
+          total: isPlannedOnly ? workout.plannedSets : workout.totalSets,
+          avg: Number(((isPlannedOnly ? workout.plannedSets : workout.totalSets) / completed).toFixed(1)),
+          format: (v: number) => Number.isInteger(v) ? `${v}` : `${v.toFixed(1)}`,
+          unit: '세트',
+        },
+  ];
 
-  return metrics;
-}
-
-function WorkoutMetricsGrid({ metrics }: { metrics: WorkoutMetricItem[] }) {
-  if (metrics.length === 0) {
-    return (
-      <div className="rounded-2xl bg-muted/20 p-6 text-center">
-        <BarbellIcon size={28} weight="duotone" className="text-muted-foreground/40 mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground">운동 데이터가 없습니다.</p>
-      </div>
-    );
-  }
-
-  const allPlanned = metrics.every((metric) => metric.isPlanned);
   return (
     <div>
-      <div className="flex items-center gap-1.5 mb-3">
-        <h3 className="text-sm font-medium text-foreground">운동 요약</h3>
-        {allPlanned && (
-          <span className="text-[10px] text-scheduled bg-scheduled/10 px-1.5 py-0.5 rounded-md">
-            예정
-          </span>
-        )}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-1.5">
+          <h3 className="text-base font-medium text-foreground">운동 요약</h3>
+          {isPlannedOnly && (
+            <span className="text-[11px] text-scheduled bg-scheduled/10 px-1.5 py-0.5 rounded-md">
+              예정
+            </span>
+          )}
+        </div>
+        <SegmentedControl
+          options={SUMMARY_MODE_OPTIONS}
+          value={mode}
+          onChange={setMode}
+        />
       </div>
 
-      <div className="p-4">
-        <div className="grid grid-cols-2 gap-4">
-          {metrics.map(({ icon, label, value }) => (
-            <div key={label} className="flex items-center gap-3">
-              <div className="shrink-0">{icon}</div>
-              <div>
-                <p className="text-[11px] text-muted-foreground">{label}</p>
-                <p className="text-base font-bold text-foreground">{value}</p>
+      <div className="grid grid-cols-2 gap-3">
+        {metrics.map(({ icon, label, total, avg, format, unit }) => {
+          const value = mode === 'total' ? total : avg;
+          return (
+            <div key={label} className="bg-muted/20 rounded-2xl p-4">
+              <div className="flex items-center gap-2.5 mb-2.5">
+                {icon}
+                <span className="text-xs text-muted-foreground">{label}</span>
               </div>
+              <p className="text-lg font-bold text-foreground">
+                {value > 0 ? format(value) : '-'}
+                {value > 0 && (
+                  <span className="text-xs font-normal text-muted-foreground ml-0.5">
+                    {unit}{mode === 'average' && '/일'}
+                  </span>
+                )}
+              </p>
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
     </div>
   );
 }
 
 export default function WorkoutStatsTab() {
-  const {
-    period,
-    setPeriod,
-    setWeekBaseDate,
-    monthYear,
-    setMonthYear,
-    label,
-    yearLabel,
-    canGoNext,
-    handlePrev,
-    handleNext,
-    weekDateStr,
-  } = useStatsPeriodNavigator('weekly');
-  const [isDateJumpOpen, setIsDateJumpOpen] = useState(false);
-  const [dateJumpSession, setDateJumpSession] = useState(0);
-
-  const today = new Date();
-  const todayStr = formatDate(today);
-  const startYear = today.getFullYear() - 5;
-  const minDate = `${startYear}-01-01`;
-
   return (
-    <div>
-      <PeriodTabs
-        period={period}
-        onPeriodChange={setPeriod}
-        label={label}
-        yearLabel={yearLabel}
-        onPrev={handlePrev}
-        onNext={handleNext}
-        canGoNext={canGoNext}
-        onDateLabelClick={() => {
-          setDateJumpSession((prev) => prev + 1);
-          setIsDateJumpOpen(true);
-        }}
-        dateLabelAriaLabel={period === 'weekly' ? '주간 날짜 선택' : '월간 날짜 선택'}
-      />
-
-      <div className="mt-6">
-        <QueryErrorBoundary>
-          <Suspense fallback={<PulseLoader />}>
-            {period === 'weekly' ? (
-              <WeeklyWorkoutMetrics dateStr={weekDateStr} />
-            ) : (
-              <MonthlyWorkoutMetrics year={monthYear.year} month={monthYear.month} />
-            )}
-          </Suspense>
-        </QueryErrorBoundary>
-      </div>
-
+    <StatsTabShell
+      weeklyContent={(dateStr) => <WeeklyWorkoutMetrics dateStr={dateStr} />}
+      monthlyContent={(year, month) => <MonthlyWorkoutMetrics year={year} month={month} />}
+    >
       <div className="mt-8">
         <QueryErrorBoundary>
           <Suspense fallback={<PulseLoader />}>
@@ -199,40 +150,7 @@ export default function WorkoutStatsTab() {
           </Suspense>
         </QueryErrorBoundary>
       </div>
-
-      {period === 'weekly' ? (
-        <DateJumpSheet
-          key={`workout-date-${dateJumpSession}`}
-          mode="date"
-          isOpen={isDateJumpOpen}
-          onClose={() => setIsDateJumpOpen(false)}
-          title="주간 날짜 선택"
-          value={weekDateStr}
-          minDate={minDate}
-          maxDate={todayStr}
-          onConfirm={({ date }) => {
-            setWeekBaseDate(parseDate(date));
-          }}
-        />
-      ) : (
-        <DateJumpSheet
-          key={`workout-month-${dateJumpSession}`}
-          mode="yearMonth"
-          isOpen={isDateJumpOpen}
-          onClose={() => setIsDateJumpOpen(false)}
-          title="월간 날짜 선택"
-          year={String(monthYear.year)}
-          month={String(monthYear.month).padStart(2, '0')}
-          yearRange={{ start: startYear, end: today.getFullYear() }}
-          onConfirm={({ year, month }) => {
-            setMonthYear({
-              year: parseInt(year, 10),
-              month: parseInt(month, 10),
-            });
-          }}
-        />
-      )}
-    </div>
+    </StatsTabShell>
   );
 }
 
@@ -242,19 +160,12 @@ function WeeklyWorkoutMetrics({ dateStr }: { dateStr: string }) {
   const workoutTotal = stats.workout.completed + stats.workout.scheduled;
 
   if (!stats || workoutTotal === 0) {
-    return (
-      <div className="rounded-2xl bg-muted/20 p-6 text-center">
-        <BarbellIcon size={28} weight="duotone" className="text-muted-foreground/40 mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground">운동 기록이 없습니다.</p>
-      </div>
-    );
+    return <EmptyState icon={BarbellIcon} message="운동 기록이 없습니다." className="rounded-2xl bg-muted/20" />;
   }
 
-  const metrics = buildWorkoutMetrics(stats.workout);
-
   return (
-    <div className="space-y-6">
-      <WorkoutMetricsGrid metrics={metrics} />
+    <div className="space-y-8">
+      <WorkoutSummarySection workout={stats.workout} />
     </div>
   );
 }
@@ -265,19 +176,12 @@ function MonthlyWorkoutMetrics({ year, month }: { year: number; month: number })
   const workoutTotal = stats.workout.completed + stats.workout.scheduled;
 
   if (!stats || workoutTotal === 0) {
-    return (
-      <div className="rounded-2xl bg-muted/20 p-6 text-center">
-        <BarbellIcon size={28} weight="duotone" className="text-muted-foreground/40 mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground">운동 기록이 없습니다.</p>
-      </div>
-    );
+    return <EmptyState icon={BarbellIcon} message="운동 기록이 없습니다." className="rounded-2xl bg-muted/20" />;
   }
 
-  const metrics = buildWorkoutMetrics(stats.workout);
-
   return (
-    <div className="space-y-6">
-      <WorkoutMetricsGrid metrics={metrics} />
+    <div className="space-y-8">
+      <WorkoutSummarySection workout={stats.workout} />
     </div>
   );
 }
@@ -308,7 +212,7 @@ function Big3Section() {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-medium text-foreground">
+      <h3 className="text-base font-medium text-foreground">
         {'3대 운동'}
       </h3>
 

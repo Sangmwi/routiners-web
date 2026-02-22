@@ -1,18 +1,17 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { useState } from 'react';
 import { CheckCircleIcon, ClockIcon, FireIcon, ForkKnifeIcon, XCircleIcon } from '@phosphor-icons/react';
-import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
-import DateJumpSheet from '@/components/ui/DateJumpSheet';
-import { PulseLoader } from '@/components/ui/PulseLoader';
+import EmptyState from '@/components/common/EmptyState';
+import ComparisonBadge from '@/components/ui/ComparisonBadge';
+import SegmentedControl from '@/components/ui/SegmentedControl';
 import {
   useMonthlyStatsSuspense,
-  useStatsPeriodNavigator,
   useWeeklyStatsSuspense,
 } from '@/hooks/routine';
 import type { WeeklyStats } from '@/hooks/routine';
 import { useDietaryProfileSuspense } from '@/hooks/dietaryProfile';
-import { addDays, formatDate, parseDate } from '@/lib/utils/dateHelpers';
+import { addDays, formatDate } from '@/lib/utils/dateHelpers';
 import {
   calculateBalanceScore,
   getBalanceLabel,
@@ -28,7 +27,7 @@ import {
 } from '@/lib/types/meal';
 import { MACRO_RATIOS, DEFAULT_MACRO_RATIO } from '@/lib/utils/tdee';
 import { getDisplayStatus } from '@/lib/config/theme';
-import PeriodTabs from './PeriodTabs';
+import StatsTabShell from './StatsTabShell';
 
 const MACRO_COLORS: Record<string, { bg: string; stroke: string }> = {
   탄수화물: { bg: 'bg-amber-400', stroke: '#fbbf24' },
@@ -69,89 +68,11 @@ function generateNutritionInsight(meal: MealMetrics, targets: NutritionTargets):
 }
 
 export default function NutritionStatsTab() {
-  const {
-    period,
-    setPeriod,
-    setWeekBaseDate,
-    monthYear,
-    setMonthYear,
-    label,
-    yearLabel,
-    canGoNext,
-    handlePrev,
-    handleNext,
-    weekDateStr,
-  } = useStatsPeriodNavigator('weekly');
-  const [isDateJumpOpen, setIsDateJumpOpen] = useState(false);
-  const [dateJumpSession, setDateJumpSession] = useState(0);
-
-  const today = new Date();
-  const todayStr = formatDate(today);
-  const startYear = today.getFullYear() - 5;
-  const minDate = `${startYear}-01-01`;
-
   return (
-    <div>
-      <PeriodTabs
-        period={period}
-        onPeriodChange={setPeriod}
-        label={label}
-        yearLabel={yearLabel}
-        onPrev={handlePrev}
-        onNext={handleNext}
-        canGoNext={canGoNext}
-        onDateLabelClick={() => {
-          setDateJumpSession((prev) => prev + 1);
-          setIsDateJumpOpen(true);
-        }}
-        dateLabelAriaLabel={period === 'weekly' ? '주간 날짜 선택' : '월간 날짜 선택'}
-      />
-
-      <div className="mt-6">
-        <QueryErrorBoundary>
-          <Suspense fallback={<PulseLoader />}>
-            {period === 'weekly' ? (
-              <WeeklyNutrition dateStr={weekDateStr} />
-            ) : (
-              <MonthlyNutrition year={monthYear.year} month={monthYear.month} />
-            )}
-          </Suspense>
-        </QueryErrorBoundary>
-      </div>
-
-      {period === 'weekly' ? (
-        <DateJumpSheet
-          key={`nutrition-date-${dateJumpSession}`}
-          mode="date"
-          isOpen={isDateJumpOpen}
-          onClose={() => setIsDateJumpOpen(false)}
-          title="주간 날짜 선택"
-          value={weekDateStr}
-          minDate={minDate}
-          maxDate={todayStr}
-          onConfirm={({ date }) => {
-            setWeekBaseDate(parseDate(date));
-          }}
-        />
-      ) : (
-        <DateJumpSheet
-          key={`nutrition-month-${dateJumpSession}`}
-          mode="yearMonth"
-          isOpen={isDateJumpOpen}
-          onClose={() => setIsDateJumpOpen(false)}
-          title="월간 날짜 선택"
-          year={String(monthYear.year)}
-          month={String(monthYear.month).padStart(2, '0')}
-          yearRange={{ start: startYear, end: today.getFullYear() }}
-          onConfirm={({ year, month }) => {
-            setMonthYear({
-              year: parseInt(year, 10),
-              month: parseInt(month, 10),
-            });
-          }}
-        />
-      )}
-    </div>
+    <StatsTabShell
+      weeklyContent={(dateStr) => <WeeklyNutrition dateStr={dateStr} />}
+      monthlyContent={(year, month) => <MonthlyNutrition year={year} month={month} />}
+    />
   );
 }
 
@@ -166,12 +87,12 @@ function DietProfileBanner({ targets }: { targets: NutritionTargets }) {
     <div className="bg-primary/5 border-l-2 border-primary rounded-r-xl px-4 py-3">
       <div className="flex items-center gap-2 mb-1.5">
         {targets.dietType && (
-          <span className="text-[10px] font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+          <span className="text-[11px] font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full">
             {DIET_TYPE_LABELS[targets.dietType]}
           </span>
         )}
         {targets.dietaryGoal && (
-          <span className="text-[10px] font-medium bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+          <span className="text-[11px] font-medium bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
             {DIETARY_GOAL_LABELS[targets.dietaryGoal]}
           </span>
         )}
@@ -183,9 +104,16 @@ function DietProfileBanner({ targets }: { targets: NutritionTargets }) {
   );
 }
 
-// ─── Calorie Summary Card (hero = 일 평균) ──────────────────────────────
+// ─── Nutrition Summary Section (2x2 grid + 총합/평균 토글) ──────────────
 
-function CalorieSummaryCard({
+type SummaryMode = 'total' | 'average';
+
+const SUMMARY_MODE_OPTIONS = [
+  { key: 'total' as const, label: '총합' },
+  { key: 'average' as const, label: '평균' },
+];
+
+function NutritionSummarySection({
   meal,
   targets,
   comparison,
@@ -194,88 +122,126 @@ function CalorieSummaryCard({
   targets: NutritionTargets;
   comparison?: { diff: number; label: string };
 }) {
+  const [mode, setMode] = useState<SummaryMode>('total');
+
   const isPlannedOnly = meal.completed === 0;
-  const total = meal.completed + meal.scheduled;
+  const completed = meal.completed || 1;
 
-  // hero = 일 평균 (예정만이면 총합)
-  const heroCalories = isPlannedOnly ? meal.plannedCalories : meal.avgCalories;
-  const totalCalories = isPlannedOnly ? meal.plannedCalories : meal.totalCalories;
-
-  if (heroCalories === 0 && totalCalories === 0 && total === 0) return null;
-
-  // 프로그레스바: 일 평균 vs 일일 목표
-  const caloriePercent = targets.hasTargets && targets.daily.calories > 0 && !isPlannedOnly
-    ? Math.round((heroCalories / targets.daily.calories) * 100)
-    : null;
+  const metrics = [
+    {
+      icon: <FireIcon size={18} weight={isPlannedOnly ? 'duotone' : 'fill'} className={isPlannedOnly ? 'text-muted-foreground' : 'text-orange-400'} />,
+      label: mode === 'total' ? '칼로리' : '평균 칼로리',
+      total: isPlannedOnly ? meal.plannedCalories : meal.totalCalories,
+      avg: isPlannedOnly ? meal.plannedCalories : meal.avgCalories,
+      format: (v: number) => `${v.toLocaleString()}`,
+      unit: 'kcal',
+      targetPeriod: targets.hasTargets ? targets.period.calories : 0,
+      targetDaily: targets.hasTargets ? targets.daily.calories : 0,
+      dotColor: null as string | null,
+      comparison,
+    },
+    {
+      icon: null,
+      label: mode === 'total' ? '단백질' : '평균 단백질',
+      total: isPlannedOnly ? meal.plannedProtein : meal.totalProtein,
+      avg: Math.round((isPlannedOnly ? meal.plannedProtein : meal.totalProtein) / completed),
+      format: (v: number) => `${v.toLocaleString()}`,
+      unit: 'g',
+      targetPeriod: targets.hasTargets ? targets.period.protein : 0,
+      targetDaily: targets.hasTargets ? targets.daily.protein : 0,
+      dotColor: 'bg-sky-400',
+    },
+    {
+      icon: null,
+      label: mode === 'total' ? '탄수화물' : '평균 탄수화물',
+      total: isPlannedOnly ? 0 : meal.totalCarbs,
+      avg: Math.round((isPlannedOnly ? 0 : meal.totalCarbs) / completed),
+      format: (v: number) => `${v.toLocaleString()}`,
+      unit: 'g',
+      targetPeriod: targets.hasTargets ? targets.period.carbs : 0,
+      targetDaily: targets.hasTargets ? targets.daily.carbs : 0,
+      dotColor: 'bg-amber-400',
+    },
+    {
+      icon: null,
+      label: mode === 'total' ? '지방' : '평균 지방',
+      total: isPlannedOnly ? 0 : meal.totalFat,
+      avg: Math.round((isPlannedOnly ? 0 : meal.totalFat) / completed),
+      format: (v: number) => `${v.toLocaleString()}`,
+      unit: 'g',
+      targetPeriod: targets.hasTargets ? targets.period.fat : 0,
+      targetDaily: targets.hasTargets ? targets.daily.fat : 0,
+      dotColor: 'bg-rose-400',
+    },
+  ];
 
   return (
-    <div className="p-4">
-      {/* 상단: 예정 배지 + 비교 */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-1.5">
+          <h3 className="text-base font-medium text-foreground">섭취 요약</h3>
           {isPlannedOnly && (
-            <span className="text-[10px] text-scheduled bg-scheduled/10 px-1.5 py-0.5 rounded-md">
+            <span className="text-[11px] text-scheduled bg-scheduled/10 px-1.5 py-0.5 rounded-md">
               예정
             </span>
           )}
         </div>
-        {comparison && comparison.diff !== 0 && (
-          <span className="text-[10px] font-medium">
-            <span className={comparison.diff > 0 ? 'text-positive' : 'text-negative'}>
-              {comparison.diff > 0 ? '▲' : '▼'}
-              {Math.abs(comparison.diff)}%
-            </span>
-            <span className="text-muted-foreground"> {comparison.label} 대비</span>
-          </span>
-        )}
+        <SegmentedControl
+          options={SUMMARY_MODE_OPTIONS}
+          value={mode}
+          onChange={setMode}
+        />
       </div>
 
-      {/* hero: 일 평균 칼로리 */}
-      <div className="flex items-center gap-2 mb-1">
-        <FireIcon size={28} weight="fill" className="text-orange-400" />
-        <div className="flex items-baseline gap-1">
-          <span className="text-3xl font-bold text-foreground">{heroCalories.toLocaleString()}</span>
-          <span className="text-sm text-muted-foreground">kcal</span>
-        </div>
-      </div>
+      <div className="grid grid-cols-2 gap-3">
+        {metrics.map((m) => {
+          const value = mode === 'total' ? m.total : m.avg;
+          const targetVal = mode === 'total' ? m.targetPeriod : m.targetDaily;
+          const percent = targetVal > 0 && value > 0 && !isPlannedOnly
+            ? Math.round((value / targetVal) * 100)
+            : null;
 
-      {/* 프로그레스바: 일 평균 vs 일일 목표 */}
-      {caloriePercent !== null && (
-        <div className="mt-2 mb-3">
-          <div className="h-2 bg-muted rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-300 ${getAdherenceColor(caloriePercent)}`}
-              style={{ width: `${Math.min(100, caloriePercent)}%` }}
-            />
-          </div>
-          <p className="text-[11px] text-muted-foreground mt-1">
-            목표 {targets.daily.calories.toLocaleString()}kcal의{' '}
-            <span className="font-medium text-foreground">{caloriePercent}%</span>
-          </p>
-        </div>
-      )}
-
-      {/* 보조: 총 섭취 + 달성 */}
-      <div className="flex gap-4 mt-3 pt-3 border-t border-border/20">
-        {totalCalories > 0 && (
-          <div>
-            <p className="text-[11px] text-muted-foreground">총 섭취</p>
-            <p className="text-sm font-bold text-foreground">
-              {totalCalories.toLocaleString()}kcal
-            </p>
-          </div>
-        )}
-        {total > 0 && (
-          <div>
-            <p className="text-[11px] text-muted-foreground">달성</p>
-            <p className="text-sm font-bold text-foreground">
-              {meal.completed}/{total}일
-              <span className="text-[10px] text-muted-foreground font-normal ml-1">
-                ({meal.completionRate}%)
-              </span>
-            </p>
-          </div>
-        )}
+          return (
+            <div key={m.label} className="bg-muted/20 rounded-2xl p-4">
+              <div className="flex items-center gap-2.5 mb-2.5">
+                {m.icon ? (
+                  m.icon
+                ) : (
+                  <div className={`w-2.5 h-2.5 rounded-full ${m.dotColor}`} />
+                )}
+                <span className="text-xs text-muted-foreground">{m.label}</span>
+              </div>
+              <p className="text-lg font-bold text-foreground">
+                {value > 0 ? m.format(value) : '-'}
+                {value > 0 && (
+                  <span className="text-xs font-normal text-muted-foreground ml-0.5">
+                    {m.unit}{mode === 'average' && '/일'}
+                  </span>
+                )}
+              </p>
+              {/* 비교 배지 (칼로리 카드만) */}
+              {'comparison' in m && m.comparison && m.comparison.diff !== 0 && (
+                <p className="mt-1">
+                  <ComparisonBadge diff={m.comparison.diff} label={m.comparison.label} />
+                </p>
+              )}
+              {/* 목표 프로그레스바 */}
+              {percent !== null && (
+                <div className="mt-2">
+                  <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-300 ${getAdherenceColor(percent)}`}
+                      style={{ width: `${Math.min(100, percent)}%` }}
+                    />
+                  </div>
+                  <span className={`text-[11px] font-medium ${getAdherenceTextColor(percent)}`}>
+                    {percent}%
+                  </span>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -286,11 +252,9 @@ function CalorieSummaryCard({
 function NutritionBalanceSection({
   meal,
   targets,
-  prevMeal,
 }: {
   meal: MealMetrics;
   targets: NutritionTargets;
-  prevMeal?: MealMetrics;
 }) {
   const score = calculateBalanceScore(
     { calories: meal.totalCalories, protein: meal.totalProtein, carbs: meal.totalCarbs, fat: meal.totalFat },
@@ -299,30 +263,19 @@ function NutritionBalanceSection({
   const { text: balanceText, colorClass } = getBalanceLabel(score);
   const insight = generateNutritionInsight(meal, targets);
 
-  const completed = meal.completed || 1;
-
   const macroData = [
     {
       label: '단백질',
-      avgActual: Math.round(meal.totalProtein / completed),
-      dailyTarget: targets.daily.protein,
-      prevAvg: prevMeal ? Math.round(prevMeal.totalProtein / (prevMeal.completed || 1)) : undefined,
       percent: targets.period.protein > 0 ? Math.round((meal.totalProtein / targets.period.protein) * 100) : 0,
       color: MACRO_COLORS['단백질'],
     },
     {
       label: '탄수화물',
-      avgActual: Math.round(meal.totalCarbs / completed),
-      dailyTarget: targets.daily.carbs,
-      prevAvg: prevMeal ? Math.round(prevMeal.totalCarbs / (prevMeal.completed || 1)) : undefined,
       percent: targets.period.carbs > 0 ? Math.round((meal.totalCarbs / targets.period.carbs) * 100) : 0,
       color: MACRO_COLORS['탄수화물'],
     },
     {
       label: '지방',
-      avgActual: Math.round(meal.totalFat / completed),
-      dailyTarget: targets.daily.fat,
-      prevAvg: prevMeal ? Math.round(prevMeal.totalFat / (prevMeal.completed || 1)) : undefined,
       percent: targets.period.fat > 0 ? Math.round((meal.totalFat / targets.period.fat) * 100) : 0,
       color: MACRO_COLORS['지방'],
     },
@@ -330,47 +283,32 @@ function NutritionBalanceSection({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-medium text-foreground">영양소 균형</h3>
-        <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full bg-muted/50 ${colorClass}`}>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-base font-medium text-foreground">영양소 균형</h3>
+        <span className={`text-xs font-medium px-2 py-0.5 rounded-full bg-muted/50 ${colorClass}`}>
           {balanceText} {score}점
         </span>
       </div>
-      <div className="p-4 space-y-4">
-        {macroData.map(({ label, avgActual, dailyTarget, prevAvg, percent, color }) => {
-          const change = prevAvg != null ? avgActual - prevAvg : undefined;
-          return (
-            <div key={label}>
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2.5 h-2.5 rounded-full ${color.bg}`} />
-                  <span className="text-xs text-muted-foreground">{label}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[11px] text-muted-foreground">일 평균</span>
-                  <span className="text-xs font-bold text-foreground">{avgActual}g</span>
-                  <span className="text-[10px] text-muted-foreground">/ {dailyTarget}g</span>
-                  {change != null && change !== 0 && (
-                    <span className={`text-[10px] font-medium ${change > 0 ? 'text-positive' : 'text-negative'}`}>
-                      {change > 0 ? '+' : ''}{change}g
-                    </span>
-                  )}
-                </div>
+      <div className="p-4 space-y-3">
+        {macroData.map(({ label, percent, color }) => (
+          <div key={label}>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2">
+                <div className={`w-2.5 h-2.5 rounded-full ${color.bg}`} />
+                <span className="text-xs text-muted-foreground">{label}</span>
               </div>
-              <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-300 ${getAdherenceColor(percent)}`}
-                  style={{ width: `${Math.min(100, Math.max(percent, 2))}%` }}
-                />
-              </div>
-              <div className="flex justify-end mt-0.5">
-                <span className={`text-[10px] font-medium ${getAdherenceTextColor(percent)}`}>
-                  {percent}%
-                </span>
-              </div>
+              <span className={`text-[11px] font-medium ${getAdherenceTextColor(percent)}`}>
+                {percent}%
+              </span>
             </div>
-          );
-        })}
+            <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${getAdherenceColor(percent)}`}
+                style={{ width: `${Math.min(100, Math.max(percent, 2))}%` }}
+              />
+            </div>
+          </div>
+        ))}
         {/* 인사이트 */}
         {insight && (
           <div className="pt-3 border-t border-border/20">
@@ -411,7 +349,7 @@ function DonutChart({
 
   return (
     <div>
-      <h3 className="text-sm font-medium text-foreground mb-3">3대 영양소</h3>
+      <h3 className="text-base font-medium text-foreground mb-3">3대 영양소</h3>
       <div className="p-4">
         <div className="flex items-center gap-6">
           {/* SVG Donut */}
@@ -451,12 +389,12 @@ function DonutChart({
                 <div className={`w-2.5 h-2.5 rounded-full ${MACRO_COLORS[label]?.bg ?? 'bg-muted'}`} />
                 <span className="text-xs text-muted-foreground flex-1">{label}</span>
                 <span className="text-xs font-bold text-foreground">{value}g</span>
-                <span className="text-[10px] text-muted-foreground w-8 text-right">{pct}%</span>
+                <span className="text-[11px] text-muted-foreground w-8 text-right">{pct}%</span>
               </div>
             ))}
           </div>
         </div>
-        <p className="text-[10px] text-muted-foreground/40 mt-6 text-center">
+        <p className="text-[11px] text-muted-foreground/40 mt-6 text-center">
           일반 권장 비율: 탄 50 · 단 30 · 지 20
         </p>
       </div>
@@ -509,25 +447,14 @@ function DailyNutritionLog({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-medium text-foreground">일별 기록</h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-base font-medium text-foreground">섭취 기록</h3>
         {/* 메트릭 필터 */}
-        <div className="flex items-center bg-muted/50 rounded-lg p-0.5">
-          {DAILY_METRIC_OPTIONS.map(({ key, label }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setMetric(key)}
-              className={`px-2 py-0.5 text-[10px] font-medium rounded-md transition-all ${
-                metric === key
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          options={DAILY_METRIC_OPTIONS}
+          value={metric}
+          onChange={setMetric}
+        />
       </div>
       <div className="rounded-2xl py-4 px-2 space-y-2.5">
         {dailyStats.map((day) => {
@@ -552,22 +479,22 @@ function DailyNutritionLog({
           return (
             <div key={day.date} className="flex items-center gap-1.5">
               {/* 상태 아이콘 (왼쪽) */}
-              <span className="w-4 shrink-0 flex justify-center">
+              <span className="w-5 shrink-0 flex justify-center">
                 {displayStatus === 'completed' && (
-                  <CheckCircleIcon size={13} weight="fill" className="text-primary" />
+                  <CheckCircleIcon size={15} weight="fill" className="text-primary" />
                 )}
                 {displayStatus === 'scheduled' && (
-                  <ClockIcon size={13} weight="duotone" className="text-scheduled" />
+                  <ClockIcon size={15} weight="duotone" className="text-scheduled" />
                 )}
                 {displayStatus === 'incomplete' && (
-                  <XCircleIcon size={13} weight="fill" className="text-muted-foreground/30" />
+                  <XCircleIcon size={15} weight="fill" className="text-muted-foreground/30" />
                 )}
                 {displayStatus === null && (
                   <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/15" />
                 )}
               </span>
               {/* 요일 */}
-              <span className={`text-xs font-semibold w-5 shrink-0 ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
+              <span className={`text-xs font-semibold w-6 shrink-0 ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
                 {day.dayOfWeek}
               </span>
               {/* 바 + 수치 묶음 (flex-grow 비율로 분배) */}
@@ -581,7 +508,7 @@ function DailyNutritionLog({
                 )}
                 {/* 수치 (바 바로 옆) */}
                 <span
-                  className={`text-[11px] font-medium whitespace-nowrap shrink-0 px-1.5 ${val > 0 ? 'text-foreground' : 'text-muted-foreground/40'}`}
+                  className={`text-xs font-medium whitespace-nowrap shrink-0 px-1.5 ${val > 0 ? 'text-foreground' : 'text-muted-foreground/40'}`}
                 >
                   {formatted}
                 </span>
@@ -602,7 +529,7 @@ function DailyNutritionLog({
         {targetPct !== null && dailyTarget > 0 && (
           <div className="flex items-center gap-1.5 pt-1.5">
             <div className="w-3 h-0.5 bg-foreground/30" />
-            <span className="text-[10px] text-muted-foreground">
+            <span className="text-[11px] text-muted-foreground">
               일일 목표 {dailyTarget.toLocaleString()}{metricOption.unit}
             </span>
           </div>
@@ -618,22 +545,15 @@ function NutritionMetrics({
   meal,
   targets,
   comparison,
-  prevMeal,
   dailyStats,
 }: {
   meal: MealMetrics;
   targets: NutritionTargets;
   comparison?: { diff: number; label: string };
-  prevMeal?: MealMetrics;
   dailyStats?: WeeklyStats['dailyStats'];
 }) {
   if (meal.totalCalories === 0 && meal.plannedCalories === 0 && meal.totalProtein === 0 && meal.plannedProtein === 0) {
-    return (
-      <div className="rounded-2xl bg-muted/20 p-6 text-center">
-        <ForkKnifeIcon size={28} weight="duotone" className="text-muted-foreground/40 mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground">식단 데이터가 없습니다.</p>
-      </div>
-    );
+    return <EmptyState icon={ForkKnifeIcon} message="식단 데이터가 없습니다." className="rounded-2xl bg-muted/20" />;
   }
 
   // DonutChart 폴백용 매크로 데이터
@@ -650,21 +570,18 @@ function NutritionMetrics({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* 0. 프로필 배너 */}
       {targets.hasTargets && (targets.dietType || targets.dietaryGoal) && (
         <DietProfileBanner targets={targets} />
       )}
 
-      {/* 1. 일일 평균 칼로리 */}
-      <div>
-        <h3 className="text-sm font-medium text-foreground mb-3">일일 평균</h3>
-        <CalorieSummaryCard meal={meal} targets={targets} comparison={comparison} />
-      </div>
+      {/* 1. 섭취 요약 2x2 그리드 */}
+      <NutritionSummarySection meal={meal} targets={targets} comparison={comparison} />
 
-      {/* 2. 영양소 균형 (목표 있을 때) — 매크로 바 + 점수 + 인사이트 통합 */}
+      {/* 2. 영양소 균형 (목표 있을 때) — 어드히어런스 바 + 점수 + 인사이트 */}
       {targets.hasTargets && macroTotal > 0 && (
-        <NutritionBalanceSection meal={meal} targets={targets} prevMeal={prevMeal} />
+        <NutritionBalanceSection meal={meal} targets={targets} />
       )}
 
       {/* 3a. 일별 기록 (주간) — 메트릭 필터로 칼로리/단백질/탄수/지방 전환 */}
@@ -692,12 +609,7 @@ function WeeklyNutrition({ dateStr }: { dateStr: string }) {
   const { data: profile } = useDietaryProfileSuspense();
 
   if (!stats || (stats.meal.scheduled === 0 && stats.meal.completed === 0)) {
-    return (
-      <div className="rounded-2xl bg-muted/20 p-6 text-center">
-        <ForkKnifeIcon size={28} weight="duotone" className="text-muted-foreground/40 mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground">식단 기록이 없습니다.</p>
-      </div>
-    );
+    return <EmptyState icon={ForkKnifeIcon} message="식단 기록이 없습니다." className="rounded-2xl bg-muted/20" />;
   }
 
   const targets = resolveNutritionTargets(stats.meal, profile, 7);
@@ -711,16 +623,11 @@ function WeeklyNutrition({ dateStr }: { dateStr: string }) {
     return { diff, label: '지난주' };
   })();
 
-  const prevMeal = prevStats && prevStats.meal.totalCalories > 0
-    ? prevStats.meal
-    : undefined;
-
   return (
     <NutritionMetrics
       meal={stats.meal}
       targets={targets}
       comparison={comparison}
-      prevMeal={prevMeal}
       dailyStats={stats.dailyStats}
     />
   );
@@ -734,12 +641,7 @@ function MonthlyNutrition({ year, month }: { year: number; month: number }) {
   const { data: profile } = useDietaryProfileSuspense();
 
   if (!stats || (stats.meal.scheduled === 0 && stats.meal.completed === 0)) {
-    return (
-      <div className="rounded-2xl bg-muted/20 p-6 text-center">
-        <ForkKnifeIcon size={28} weight="duotone" className="text-muted-foreground/40 mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground">식단 기록이 없습니다.</p>
-      </div>
-    );
+    return <EmptyState icon={ForkKnifeIcon} message="식단 기록이 없습니다." className="rounded-2xl bg-muted/20" />;
   }
 
   const daysInMonth = new Date(year, month, 0).getDate();
@@ -754,16 +656,11 @@ function MonthlyNutrition({ year, month }: { year: number; month: number }) {
     return { diff, label: '지난달' };
   })();
 
-  const prevMeal = prevStats && prevStats.meal.totalCalories > 0
-    ? prevStats.meal
-    : undefined;
-
   return (
     <NutritionMetrics
       meal={stats.meal}
       targets={targets}
       comparison={comparison}
-      prevMeal={prevMeal}
     />
   );
 }

@@ -64,7 +64,6 @@ function ProfileContent() {
       <div className="pt-4" />
 
       <ProfileInbodySection
-        showInbodyPublic={user.showInbodyPublic}
         isOwnProfile={true}
       />
 

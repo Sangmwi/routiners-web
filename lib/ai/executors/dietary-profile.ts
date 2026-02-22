@@ -107,7 +107,13 @@ export async function executeUpdateDietaryProfile(
   if (args.diet_type !== null) updateData.diet_type = args.diet_type;
   if (args.target_calories !== null) updateData.target_calories = args.target_calories;
   if (args.target_protein !== null) updateData.target_protein = args.target_protein;
-  if (args.meals_per_day !== null) updateData.meals_per_day = args.meals_per_day;
+  if (args.meals_per_day !== null) {
+    const mpd = Math.round(args.meals_per_day);
+    if (mpd < 1 || mpd > 6) {
+      return { success: false, error: 'meals_per_day는 1~6 사이여야 합니다.' };
+    }
+    updateData.meals_per_day = mpd;
+  }
   if (args.food_restrictions !== null) updateData.food_restrictions = args.food_restrictions;
   if (args.available_sources !== null) updateData.available_sources = args.available_sources;
   if (args.eating_habits !== null) updateData.eating_habits = args.eating_habits;

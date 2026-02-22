@@ -19,14 +19,23 @@ import { FitnessDetailDrawer } from '@/components/drawers';
  *
  * Hero(목표+경험) + 요약 텍스트 라인 + 집중 부위 태그
  */
-export default function ProfileFitnessSection() {
+interface ProfileFitnessSectionProps {
+  /** false이면 SectionHeader와 카드 컨테이너 없이 콘텐츠만 반환 */
+  renderHeader?: boolean;
+}
+
+export default function ProfileFitnessSection({
+  renderHeader = true,
+}: ProfileFitnessSectionProps = {}) {
   const { data: profile, isPending: isLoading } = useFitnessProfile();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const hasData = hasFitnessProfileData(profile);
 
+  const compact = !renderHeader;
+
   const renderLoading = () => (
-    <div className="flex items-center justify-center py-6">
+    <div className="flex items-center justify-center py-4">
       <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
     </div>
   );
@@ -34,7 +43,8 @@ export default function ProfileFitnessSection() {
   const renderEmpty = () => (
     <EmptyState
       icon={BarbellIcon}
-      message="아직 운동 프로필이 없어요"
+      size={compact ? 'sm' : 'md'}
+      message="운동 프로필이 없어요"
       hint="AI 트레이너와 대화하거나 직접 등록해보세요"
     />
   );
@@ -111,18 +121,23 @@ export default function ProfileFitnessSection() {
     );
   };
 
+  const content = isLoading ? renderLoading() : !hasData ? renderEmpty() : renderData();
+
   return (
     <>
-      <div className="space-y-3">
-        <SectionHeader
-          title="운동 프로필"
-          action={{ label: '관리', href: '/profile/fitness' }}
-        />
-
-        <div className="bg-muted/20 rounded-2xl p-4">
-          {isLoading ? renderLoading() : !hasData ? renderEmpty() : renderData()}
+      {renderHeader ? (
+        <div className="space-y-3">
+          <SectionHeader
+            title="운동 프로필"
+            action={{ label: '관리', href: '/profile/fitness' }}
+          />
+          <div className="bg-muted/20 rounded-2xl p-4">
+            {content}
+          </div>
         </div>
-      </div>
+      ) : (
+        content
+      )}
 
       {profile && hasData && (
         <FitnessDetailDrawer

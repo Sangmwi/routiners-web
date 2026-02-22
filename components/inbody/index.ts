@@ -8,7 +8,9 @@ export { default as InBodyManageModal } from './InBodyManageModal';
 export { default as InBodyPreview } from './InBodyPreview';
 export { default as InBodyRecordList } from './InBodyRecordList';
 export { default as InBodySummaryCard } from './InBodySummaryCard';
-export { default as InBodyVisibilitySettings } from './InBodyVisibilitySettings';
+
+// Layout
+export { default as BodyCompositionSummary } from './BodyCompositionSummary';
 
 // Shared Metric Components
 export { MetricItem } from './MetricItem';

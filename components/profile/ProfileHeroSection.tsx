@@ -159,27 +159,24 @@ export default function ProfileHeroSection({ user }: ProfileHeroSectionProps) {
       {/* Content */}
       <div className="absolute bottom-0 left-0 right-0 p-5">
         {/* Name and Age */}
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mb-1">
           <h1 className="text-2xl font-bold text-white">
-            {user.rank} {user.nickname}, {getAge(user.birthDate)}
+            {user.nickname}, {getAge(user.birthDate)}
           </h1>
           <CheckCircleIcon size={24} className="text-white" weight="fill" />
         </div>
 
+        {/* Military Info */}
+        <p className="text-sm text-white/70 mb-3">
+          {[user.rank, user.unitName, user.specialty].filter(Boolean).join(' · ')}
+        </p>
+
         {/* Interest Tag */}
         {user.interestedExercises && user.interestedExercises.length > 0 && (
-          <div className="inline-flex items-center px-3 py-1 rounded-full bg-card text-xs text-card-foreground mb-3">
+          <div className="inline-flex items-center px-3 py-1 rounded-full bg-card text-xs text-card-foreground">
             {user.interestedExercises.slice(0, 2).join('/')}
           </div>
         )}
-
-        {/* Unit Info */}
-        <div className="flex items-center gap-2 text-white text-xs">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-          </svg>
-          <span>{user.unitName}</span>
-        </div>
       </div>
     </div>
   );

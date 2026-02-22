@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { MedalIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
 import { SelectionCard, SelectionCardGroup } from '@/components/ui/SelectionCard';
-import type { Rank } from '@/lib/types/user';
+import { RANKS, RANK_LABELS, type Rank } from '@/lib/types/user';
 
 interface RankStepProps {
   selectedRank: Rank | null;
@@ -12,12 +12,13 @@ interface RankStepProps {
   onNext: (rank: Rank) => void;
 }
 
-const RANK_OPTIONS: { value: Rank; label: string; monthRange: string }[] = [
-  { value: '이병', label: '이병', monthRange: '0~2개월' },
-  { value: '일병', label: '일병', monthRange: '2~8개월' },
-  { value: '상병', label: '상병', monthRange: '8~14개월' },
-  { value: '병장', label: '병장', monthRange: '14개월 이상' },
-];
+// 가입 전용: 계급별 복무 기간 (RANKS 순서와 동일)
+const RANK_MONTH_RANGES: Record<Rank, string> = {
+  '이병': '0~2개월',
+  '일병': '2~8개월',
+  '상병': '8~14개월',
+  '병장': '14개월 이상',
+};
 
 /**
  * RankStep
@@ -81,15 +82,15 @@ export function RankStep({
           {/* Selection Cards */}
           <div>
             <SelectionCardGroup gap="md">
-              {RANK_OPTIONS.map((option) => (
+              {RANKS.map((r) => (
                 <SelectionCard
-                  key={option.value}
-                  label={option.label}
-                  description={option.monthRange}
-                  selected={rank === option.value}
-                  onClick={() => setRank(option.value)}
+                  key={r}
+                  label={RANK_LABELS[r]}
+                  description={RANK_MONTH_RANGES[r]}
+                  selected={rank === r}
+                  onClick={() => setRank(r)}
                   icon={
-                    recommendedRank === option.value ? (
+                    recommendedRank === r ? (
                       <span className="text-xs font-bold">추천</span>
                     ) : (
                       <MedalIcon size={20} />

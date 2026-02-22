@@ -2,39 +2,36 @@
 
 import { useRef, useState, useEffect, useCallback } from 'react';
 
-export type StatsDomain = 'status' | 'workout' | 'meal' | 'inbody';
+const TABS = [
+  { value: 'basic', label: '기본' },
+  { value: 'details', label: '상세' },
+  { value: 'military', label: '군 정보' },
+] as const;
 
-interface DomainTabsProps {
-  domain: StatsDomain;
-  onDomainChange: (domain: StatsDomain) => void;
+export type EditTab = (typeof TABS)[number]['value'];
+
+interface ProfileEditTabBarProps {
+  activeTab: EditTab;
+  onTabChange: (tab: EditTab) => void;
 }
 
-const TABS: { value: StatsDomain; label: string }[] = [
-  { value: 'status', label: '현황' },
-  { value: 'workout', label: '운동' },
-  { value: 'meal', label: '식단' },
-  { value: 'inbody', label: '인바디' },
-];
-
 /**
- * 통계 도메인 탭
- *
- * [현황] [운동] [식단] [인바디]
+ * 프로필 편집 탭바 (모션 언더라인)
  */
-export default function DomainTabs({ domain, onDomainChange }: DomainTabsProps) {
+export default function ProfileEditTabBar({ activeTab, onTabChange }: ProfileEditTabBarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [indicator, setIndicator] = useState({ left: 0, width: 0 });
 
   const updateIndicator = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
-    const activeBtn = container.querySelector<HTMLButtonElement>(`[data-tab="${domain}"]`);
+    const activeBtn = container.querySelector<HTMLButtonElement>(`[data-tab="${activeTab}"]`);
     if (!activeBtn) return;
     setIndicator({
       left: activeBtn.offsetLeft,
       width: activeBtn.offsetWidth,
     });
-  }, [domain]);
+  }, [activeTab]);
 
   useEffect(() => {
     updateIndicator();
@@ -48,9 +45,9 @@ export default function DomainTabs({ domain, onDomainChange }: DomainTabsProps) 
             key={tab.value}
             type="button"
             data-tab={tab.value}
-            onClick={() => onDomainChange(tab.value)}
+            onClick={() => onTabChange(tab.value)}
             className={`flex-1 py-3 text-sm font-medium text-center transition-colors ${
-              domain === tab.value
+              activeTab === tab.value
                 ? 'text-foreground'
                 : 'text-muted-foreground'
             }`}

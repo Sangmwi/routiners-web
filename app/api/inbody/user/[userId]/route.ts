@@ -10,7 +10,7 @@ import {
  * GET /api/inbody/user/[userId]
  * 특정 사용자의 InBody 요약 정보 조회
  *
- * - 해당 사용자의 showInbodyPublic이 true인 경우에만 데이터 반환
+ * - 해당 사용자의 showInfoPublic이 true인 경우에만 데이터 반환
  * - 비공개인 경우 빈 summary 반환
  */
 export const GET = withAuth(
@@ -32,7 +32,7 @@ export const GET = withAuth(
     // 1. 대상 사용자의 공개 설정 확인
     const { data: targetUser, error: userError } = await supabase
       .from('users')
-      .select('show_inbody_public')
+      .select('show_info_public')
       .eq('id', targetUserId)
       .single();
 
@@ -44,7 +44,7 @@ export const GET = withAuth(
     }
 
     // 비공개인 경우 빈 summary 반환
-    if (!targetUser.show_inbody_public) {
+    if (!targetUser.show_info_public) {
       const summary: InBodySummary = {
         totalRecords: 0,
         isPrivate: true,

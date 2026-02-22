@@ -4,27 +4,12 @@ import { useState } from 'react';
 import { BriefcaseIcon, MagnifyingGlassIcon, CheckIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
 import Modal, { ModalBody } from '@/components/ui/Modal';
-import type { Specialty } from '@/lib/types/user';
+import { SPECIALTIES, SPECIALTY_LABELS, SPECIALTY_DESCRIPTIONS, type Specialty } from '@/lib/types/user';
 
 interface SpecialtyStepProps {
   selectedSpecialty: Specialty | null;
   onNext: (specialty: Specialty) => void;
 }
-
-const SPECIALTIES: { value: Specialty; label: string; description: string }[] = [
-  { value: '보병', label: '보병', description: '지상 전투의 핵심 병과' },
-  { value: '포병', label: '포병', description: '화력 지원 병과' },
-  { value: '기갑', label: '기갑', description: '전차 및 장갑차 운용' },
-  { value: '공병', label: '공병', description: '건설 및 장애물 처리' },
-  { value: '정보통신', label: '정보통신', description: '통신 체계 운용' },
-  { value: '항공', label: '항공', description: '항공기 운용 및 정비' },
-  { value: '화생방', label: '화생방', description: '화학, 생물학, 방사능 방호' },
-  { value: '병참', label: '병참', description: '보급 및 군수 지원' },
-  { value: '의무', label: '의무', description: '의료 및 위생 지원' },
-  { value: '법무', label: '법무', description: '군 법률 업무' },
-  { value: '행정', label: '행정', description: '인사 및 행정 업무' },
-  { value: '기타', label: '기타', description: '그 외 병과' },
-];
 
 /**
  * SpecialtyStep
@@ -45,8 +30,8 @@ export function SpecialtyStep({
     ? SPECIALTIES.filter((s) => {
         const query = searchQuery.toLowerCase();
         return (
-          s.label.toLowerCase().includes(query) ||
-          s.description.toLowerCase().includes(query)
+          SPECIALTY_LABELS[s].toLowerCase().includes(query) ||
+          SPECIALTY_DESCRIPTIONS[s].toLowerCase().includes(query)
         );
       })
     : SPECIALTIES;
@@ -56,10 +41,6 @@ export function SpecialtyStep({
     setIsSheetOpen(false);
     setSearchQuery('');
   };
-
-  const selectedInfo = specialty
-    ? SPECIALTIES.find((s) => s.value === specialty)
-    : null;
 
   const isValid = specialty !== null;
 
@@ -99,7 +80,7 @@ export function SpecialtyStep({
                 flex items-center gap-4
                 rounded-xl border-2 transition-all duration-200
                 ${
-                  selectedInfo
+                  specialty
                     ? 'border-primary bg-primary/10'
                     : 'border-border bg-card hover:border-primary/50'
                 }
@@ -109,13 +90,13 @@ export function SpecialtyStep({
                 <MagnifyingGlassIcon size={20} className="text-muted-foreground" />
               </div>
               <div className="flex-1 text-left">
-                {selectedInfo ? (
+                {specialty ? (
                   <>
                     <span className="text-base font-medium text-foreground">
-                      {selectedInfo.label}
+                      {SPECIALTY_LABELS[specialty]}
                     </span>
                     <p className="text-sm text-muted-foreground">
-                      {selectedInfo.description}
+                      {SPECIALTY_DESCRIPTIONS[specialty]}
                     </p>
                   </>
                 ) : (
@@ -124,7 +105,7 @@ export function SpecialtyStep({
                   </span>
                 )}
               </div>
-              {selectedInfo && (
+              {specialty && (
                 <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
                   <CheckIcon size={16} className="text-primary-foreground" />
                 </div>
@@ -183,23 +164,23 @@ export function SpecialtyStep({
                 검색 결과가 없어요
               </div>
             ) : (
-              filteredSpecialties.map((item) => (
+              filteredSpecialties.map((s) => (
                 <button
-                  key={item.value}
+                  key={s}
                   type="button"
-                  onClick={() => handleSelect(item.value)}
+                  onClick={() => handleSelect(s)}
                   className={`
                     w-full px-4 py-3 rounded-xl text-left transition-all
                     ${
-                      item.value === specialty
+                      s === specialty
                         ? 'bg-primary/10 border-2 border-primary'
                         : 'bg-muted/20 border-2 border-transparent hover:bg-muted/50'
                     }
                   `}
                 >
-                  <p className="font-medium text-foreground">{item.label}</p>
+                  <p className="font-medium text-foreground">{SPECIALTY_LABELS[s]}</p>
                   <p className="text-sm text-muted-foreground">
-                    {item.description}
+                    {SPECIALTY_DESCRIPTIONS[s]}
                   </p>
                 </button>
               ))

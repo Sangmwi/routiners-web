@@ -43,6 +43,7 @@ const DUMMY_INFLUENCERS: Influencer[] = [
  */
 export default function HomeContent() {
   const {
+    user,
     todayWorkout,
     todayMeal,
     nextScheduledWorkout,
@@ -79,7 +80,7 @@ export default function HomeContent() {
       />
 
       {/* 인바디 */}
-      <InBodySection summary={inbodySummary} history={inbodyHistory} />
+      <InBodySection summary={inbodySummary} history={inbodyHistory} height={user.height} />
 
       {/* 3대 운동 */}
       <Big3Section summary={progressSummary.big3} />

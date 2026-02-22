@@ -20,6 +20,6 @@ export function useUserPosts(userId: string) {
       lastPage.hasMore ? lastPage.page + 1 : undefined,
     initialPageParam: 1,
     enabled: !!userId,
-    staleTime: STALE_TIME.medium,
+    staleTime: STALE_TIME.default,
   });
 }

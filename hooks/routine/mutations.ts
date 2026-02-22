@@ -183,6 +183,13 @@ export function useOptimisticEventDataMutation<TData>(
         updateEventCache(queryClient, context.previousEvent);
       }
     },
+
+    // 성공/실패 무관하게 서버 데이터와 최종 재동기화
+    onSettled: (_, __, { date, type }) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.routineEvent.byDate(date, type),
+      });
+    },
   });
 }
 

@@ -80,25 +80,27 @@ export function useDeleteCounselorConversation() {
     mutationFn: (conversationId: string) => counselorApi.deleteConversation(conversationId),
 
     onSuccess: (_, conversationId) => {
-      // 대화 목록에서 제거
+      // 활성 대화 여부 확인 후 별도 처리 (함수형 업데이터 내 사이드이펙트 방지)
+      const old = queryClient.getQueryData<CounselorConversationsResponse>(
+        queryKeys.counselor.conversations()
+      );
+      const wasActive = old?.activeConversationId === conversationId;
+
+      if (wasActive) {
+        queryClient.setQueryData(queryKeys.counselor.activeConversation(), null);
+      }
+
+      // 대화 목록에서 제거 (순수 함수형 업데이터)
       queryClient.setQueryData<CounselorConversationsResponse>(
         queryKeys.counselor.conversations(),
-        (old) => {
-          if (!old) return old;
-
-          const wasActive = old.activeConversationId === conversationId;
-
-          // 활성 대화였으면 activeConversation 캐시도 클리어
-          if (wasActive) {
-            queryClient.setQueryData(queryKeys.counselor.activeConversation(), null);
-          }
-
+        (prev) => {
+          if (!prev) return prev;
           return {
-            ...old,
-            conversations: old.conversations.filter(
+            ...prev,
+            conversations: prev.conversations.filter(
               (item) => item.conversation.id !== conversationId
             ),
-            activeConversationId: wasActive ? undefined : old.activeConversationId,
+            activeConversationId: wasActive ? undefined : prev.activeConversationId,
           };
         }
       );
@@ -112,6 +114,38 @@ export function useDeleteCounselorConversation() {
       });
     },
   });
+}
+
+// ============================================================================
+// Apply Helpers
+// ============================================================================
+
+/**
+ * 루틴/식단 적용 후 공통 캐시 처리
+ *
+ * 1. 크로스 도메인 캐시 무효화 (대화 + 루틴 이벤트 + AI 세션)
+ * 2. 대화 목록에서 activePurpose 즉시 제거 (서버 refetch 전 UI 반영)
+ */
+function handleApplySuccess(
+  queryClient: ReturnType<typeof useQueryClient>,
+  conversationId: string
+) {
+  invalidateAfterRoutineApply(queryClient, conversationId);
+
+  queryClient.setQueryData<CounselorConversationsResponse>(
+    queryKeys.counselor.conversations(),
+    (old) => {
+      if (!old) return old;
+      return {
+        ...old,
+        conversations: old.conversations.map((item) =>
+          item.conversation.id === conversationId
+            ? { ...item, hasActivePurpose: false }
+            : item
+        ),
+      };
+    }
+  );
 }
 
 // ============================================================================
@@ -149,24 +183,7 @@ export function useApplyRoutine() {
       ),
 
     onSuccess: (_, { conversationId }) => {
-      // 대화 + 루틴 이벤트 + AI 세션 캐시 무효화
-      invalidateAfterRoutineApply(queryClient, conversationId);
-
-      // 대화 목록에서 activePurpose 즉시 제거 (서버 refetch 전 UI 반영)
-      queryClient.setQueryData<CounselorConversationsResponse>(
-        queryKeys.counselor.conversations(),
-        (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            conversations: old.conversations.map((item) =>
-              item.conversation.id === conversationId
-                ? { ...item, hasActivePurpose: false }
-                : item
-            ),
-          };
-        }
-      );
+      handleApplySuccess(queryClient, conversationId);
     },
   });
 }
@@ -196,22 +213,7 @@ export function useApplyMealPlan() {
       ),
 
     onSuccess: (_, { conversationId }) => {
-      invalidateAfterRoutineApply(queryClient, conversationId);
-
-      queryClient.setQueryData<CounselorConversationsResponse>(
-        queryKeys.counselor.conversations(),
-        (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            conversations: old.conversations.map((item) =>
-              item.conversation.id === conversationId
-                ? { ...item, hasActivePurpose: false }
-                : item
-            ),
-          };
-        }
-      );
+      handleApplySuccess(queryClient, conversationId);
     },
   });
 }

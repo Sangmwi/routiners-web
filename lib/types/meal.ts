@@ -198,6 +198,9 @@ export const EATING_HABITS = [
 
 export type EatingHabit = (typeof EATING_HABITS)[number];
 
+// 숫자 옵션 상수 (UI + 검증에서 공유)
+export const MEALS_PER_DAY_OPTIONS = [1, 2, 3, 4, 5, 6] as const;
+
 // ============================================================================
 // Korean Labels (한국어 레이블)
 // ============================================================================

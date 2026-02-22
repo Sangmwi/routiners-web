@@ -17,6 +17,8 @@ import {
   EXPERIENCE_LEVELS,
   EQUIPMENT_ACCESS,
   FOCUS_AREAS,
+  PREFERRED_DAYS_OPTIONS,
+  SESSION_DURATION_OPTIONS,
   FITNESS_GOAL_LABELS,
   EXPERIENCE_LEVEL_LABELS,
   EQUIPMENT_ACCESS_LABELS,
@@ -167,8 +169,8 @@ export default function FitnessContent() {
         {/* 그룹 2: 스케줄 */}
         <div className="bg-card rounded-2xl p-4 space-y-5 border border-border/30">
           <Section title="주당 운동 일수" description="일주일에 몇 번 운동하시나요?">
-            <div className="flex gap-2">
-              {[1, 2, 3, 4, 5, 6, 7].map((days) => (
+            <div className="flex flex-wrap gap-2">
+              {PREFERRED_DAYS_OPTIONS.map((days) => (
                 <NumberOption
                   key={days}
                   value={days}
@@ -190,8 +192,8 @@ export default function FitnessContent() {
           <div className="border-t border-border/20" />
 
           <Section title="1회 운동 시간" description="한 번에 얼마나 운동하시나요?">
-            <div className="flex gap-2">
-              {[30, 45, 60, 90, 120].map((minutes) => (
+            <div className="flex flex-wrap gap-2">
+              {SESSION_DURATION_OPTIONS.map((minutes) => (
                 <NumberOption
                   key={minutes}
                   value={minutes}

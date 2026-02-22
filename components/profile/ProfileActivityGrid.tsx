@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ImageSquareIcon, ImagesIcon, PencilSimpleIcon } from '@phosphor-icons/react';
+import { ImageSquareIcon, ImagesIcon } from '@phosphor-icons/react';
 import { ImageWithFallback } from '@/components/ui/image';
 import { useUserPosts } from '@/hooks/community/useUserPosts';
 import type { CommunityPost } from '@/lib/types/community';
@@ -135,14 +135,6 @@ export default function ProfileActivityGrid({ userId }: ProfileActivityGridProps
           <LoadingSpinner size="md" />
         </div>
       )}
-
-      {/* FAB: 글쓰기 */}
-      <AppLink
-        href="/community/write"
-        className="fixed bottom-20 right-4 z-20 w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/30"
-      >
-        <PencilSimpleIcon size={24} weight="bold" className="text-primary-foreground" />
-      </AppLink>
     </>
   );
 }

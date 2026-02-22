@@ -26,7 +26,8 @@ export interface ProfileFormData {
   weight: string;
   muscleMass: string;
   bodyFatPercentage: string;
-  showInbodyPublic: boolean;
+  showActivityPublic: boolean;
+  showInfoPublic: boolean;
   isSmoker: boolean | undefined;
   interestedLocations: string[];
   interestedExercises: string[];
@@ -45,7 +46,8 @@ export const INITIAL_FORM_DATA: ProfileFormData = {
   weight: '',
   muscleMass: '',
   bodyFatPercentage: '',
-  showInbodyPublic: true,
+  showActivityPublic: true,
+  showInfoPublic: true,
   isSmoker: undefined,
   interestedLocations: [],
   interestedExercises: [],
@@ -85,7 +87,8 @@ export function userToFormData(user: User): ProfileFormData {
     weight: user.weight?.toString() || '',
     muscleMass: user.muscleMass?.toString() || '',
     bodyFatPercentage: user.bodyFatPercentage?.toString() || '',
-    showInbodyPublic: user.showInbodyPublic ?? true,
+    showActivityPublic: user.showActivityPublic ?? true,
+    showInfoPublic: user.showInfoPublic ?? true,
     isSmoker: user.isSmoker,
     interestedLocations: user.interestedLocations || [],
     interestedExercises: user.interestedExercises || [],
@@ -116,7 +119,8 @@ export function formDataToUpdateData(
     bodyFatPercentage: formData.bodyFatPercentage
       ? Number(formData.bodyFatPercentage)
       : undefined,
-    showInbodyPublic: formData.showInbodyPublic,
+    showActivityPublic: formData.showActivityPublic,
+    showInfoPublic: formData.showInfoPublic,
     isSmoker: formData.isSmoker,
     interestedLocations: formData.interestedLocations,
     interestedExercises: formData.interestedExercises,
@@ -148,7 +152,8 @@ export function hasFormChanges(formData: ProfileFormData, user: User): boolean {
     formData.weight !== (user.weight?.toString() || '') ||
     formData.muscleMass !== (user.muscleMass?.toString() || '') ||
     formData.bodyFatPercentage !== (user.bodyFatPercentage?.toString() || '') ||
-    formData.showInbodyPublic !== (user.showInbodyPublic ?? true) ||
+    formData.showActivityPublic !== (user.showActivityPublic ?? true) ||
+    formData.showInfoPublic !== (user.showInfoPublic ?? true) ||
     formData.isSmoker !== user.isSmoker ||
     !arraysEqual(formData.interestedLocations, user.interestedLocations || []) ||
     !arraysEqual(formData.interestedExercises, user.interestedExercises || []) ||

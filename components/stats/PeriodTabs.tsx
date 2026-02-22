@@ -1,8 +1,14 @@
 'use client';
 
 import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
+import SegmentedControl from '@/components/ui/SegmentedControl';
 
 export type StatsPeriod = 'weekly' | 'monthly';
+
+const PERIOD_OPTIONS = [
+  { key: 'weekly' as const, label: '주간' },
+  { key: 'monthly' as const, label: '월간' },
+];
 
 interface PeriodTabsProps {
   period: StatsPeriod;
@@ -37,7 +43,7 @@ export default function PeriodTabs({
       className="relative w-40 text-center text-sm text-muted-foreground font-medium hover:text-foreground transition-colors rounded-md px-1 py-0.5"
     >
       {yearLabel && (
-        <span className="absolute -top-3.5 inset-x-0 text-[10px] text-muted-foreground/60">
+        <span className="absolute -top-3.5 inset-x-0 text-[11px] text-muted-foreground/60">
           {yearLabel}
         </span>
       )}
@@ -46,7 +52,7 @@ export default function PeriodTabs({
   ) : (
     <span className="relative w-40 text-center text-sm text-muted-foreground font-medium">
       {yearLabel && (
-        <span className="absolute -top-3.5 inset-x-0 text-[10px] text-muted-foreground/60">
+        <span className="absolute -top-3.5 inset-x-0 text-[11px] text-muted-foreground/60">
           {yearLabel}
         </span>
       )}
@@ -61,9 +67,9 @@ export default function PeriodTabs({
         <button
           type="button"
           onClick={onPrev}
-          className="p-1 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground"
+          className="p-1.5 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground"
         >
-          <CaretLeftIcon size={16} weight="bold" />
+          <CaretLeftIcon size={18} weight="bold" />
         </button>
 
         {dateLabelNode}
@@ -72,41 +78,22 @@ export default function PeriodTabs({
           type="button"
           onClick={onNext}
           disabled={!canGoNext}
-          className={`p-1 rounded-lg transition-colors ${
+          className={`p-1.5 rounded-lg transition-colors ${
             canGoNext
               ? 'hover:bg-muted/50 text-muted-foreground'
               : 'text-muted-foreground/30 cursor-not-allowed'
           }`}
         >
-          <CaretRightIcon size={16} weight="bold" />
+          <CaretRightIcon size={18} weight="bold" />
         </button>
       </div>
 
       {/* 기간 토글 (세그먼트 컨트롤) */}
-      <div className="flex items-center bg-muted/50 rounded-lg p-0.5">
-        <button
-          type="button"
-          onClick={() => onPeriodChange('weekly')}
-          className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all ${
-            period === 'weekly'
-              ? 'bg-background text-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          주간
-        </button>
-        <button
-          type="button"
-          onClick={() => onPeriodChange('monthly')}
-          className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all ${
-            period === 'monthly'
-              ? 'bg-background text-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          월간
-        </button>
-      </div>
+      <SegmentedControl
+        options={PERIOD_OPTIONS}
+        value={period}
+        onChange={onPeriodChange}
+      />
     </div>
   );
 }

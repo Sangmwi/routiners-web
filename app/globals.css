@@ -14,46 +14,6 @@
   --color-green-900: #17451c;
   --color-green-950: #0a2610;
 
-  --background: #f8faf8;
-  --foreground: #0a2610; /* green-950 */
-
-  --primary: #50A76C; /* green-500 */
-  --primary-foreground: #ffffff;
-
-  --secondary: #dbf5e2; /* green-100 */
-  --secondary-foreground: #17451c; /* green-900 */
-
-  --muted: #e2e8f0; /* slate-200 - 중립 회색 */
-  --muted-foreground: #64748b; /* slate-500 - 중립 회색 텍스트 */
-
-  --card: #ffffff;
-  --card-foreground: #0a2610;
-
-  --border: #cbd5e1; /* slate-300 - 중립 회색 */
-  --input: #dbf5e2;
-
-  /* Semantic Colors */
-  --destructive: #d97373; /* muted red - 채도 낮은 빨강 */
-  --destructive-foreground: #ffffff;
-  --success: #22c55e; /* green-500 (Tailwind default) */
-  --success-foreground: #ffffff;
-
-  /* Positive/Negative Indicator */
-  --positive: #10b981; /* emerald-500 - 증가/긍정 */
-  --negative: #f87171; /* red-400 - 감소/부정 */
-
-  /* Warning/Alert Colors */
-  --warning: #d97706; /* amber-600 */
-  --warning-foreground: #ffffff;
-  --warning-muted: #fef3c7; /* amber-100 - 배경용 */
-
-  /* Scheduled Status */
-  --scheduled: #f59e0b; /* amber-500 */
-  --scheduled-foreground: #ffffff;
-
-  /* Primary Muted */
-  --primary-muted: var(--primary);
-
   /* Layout Spacing */
   --layout-padding-x: 1rem;      /* 16px - 좌우 패딩 */
   --layout-padding-y: 1rem;      /* 16px - 상하 패딩 */
@@ -106,72 +66,6 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* 배경: 가장 어두운 slate */
-    --background: #0f172a; /* slate-900 */
-    --foreground: #f1f5f9; /* slate-100 - 밝은 텍스트 */
-
-    /* Primary: 브랜드 그린을 밝게 (green-400) */
-    --primary: #5fc07f; /* green-400 */
-    --primary-foreground: #0a2610; /* green-950 - 어두운 텍스트 */
-
-    /* Secondary: 라이트모드보다 어둡게 */
-    --secondary: #1e293b; /* slate-800 */
-    --secondary-foreground: #e2e8f0; /* slate-200 - 밝은 텍스트 */
-
-    /* 카드: 배경보다 약간 밝은 어두운 톤 */
-    --card: #1e293b; /* slate-800 */
-    --card-foreground: #f1f5f9; /* slate-100 - 밝은 텍스트 */
-
-    /* Muted: 배경과 카드 사이의 중간 톤 */
-    --muted: #334155; /* slate-700 */
-    --muted-foreground: #94a3b8; /* slate-400 - 중간 밝기 */
-
-    /* Border: 미묘한 구분선 */
-    --border: #334155; /* slate-700 */
-
-    /* Input: 카드와 동일한 어두운 배경 */
-    --input: #1e293b; /* slate-800 */
-
-    /* Semantic Colors (Dark) */
-    --destructive: #e8a0a0; /* muted red - 채도 낮은 연한 빨강 */
-    --destructive-foreground: #1e1e1e;
-    --success: #4ade80; /* green-400 - 어두운 배경에서 더 밝게 */
-    --success-foreground: #0f172a;
-
-    /* Warning/Alert Colors (Dark) */
-    --warning: #fbbf24; /* amber-400 - 다크모드에서 더 밝게 */
-    --warning-foreground: #1e1e1e;
-    --warning-muted: #78350f; /* amber-900 - 어두운 배경 */
-
-    /* Scheduled Status (Dark) */
-    --scheduled: #fbbf24; /* amber-400 */
-    --scheduled-foreground: #1e1e1e;
-
-    /* Positive/Negative Indicator (Dark) */
-    --positive: #34d399; /* emerald-400 - 다크에서 더 밝게 */
-    --negative: #fca5a5; /* red-300 - 다크에서 더 밝게 */
-
-    /* Primary Muted (Dark) - 50% 투명도 */
-    --primary-muted: rgba(80, 167, 108, 0.5);
-
-    /* Green 브랜드 컬러 스케일 반전 */
-    --color-green-50: #0a2610;
-    --color-green-100: #17451c;
-    --color-green-200: #1a5421;
-    --color-green-300: #1B6523;
-    --color-green-400: #328a4d;
-    --color-green-500: #50A76C;
-    --color-green-600: #5fc07f;
-    --color-green-700: #88d9a2;
-    --color-green-800: #b9eac8;
-    --color-green-900: #dbf5e2;
-    --color-green-950: #f0faf3;
-  }
-}
-
-/* Manual theme override (synced with themeStore) */
 [data-theme="dark"] {
   --background: #0f172a;
   --foreground: #f1f5f9;
@@ -211,7 +105,7 @@
 }
 
 [data-theme="light"] {
-  --background: #f8faf8;
+  --background: #f3f6f3;
   --foreground: #0a2610;
   --primary: #50A76C;
   --primary-foreground: #ffffff;
@@ -442,6 +336,22 @@ main {
 
 .animate-tag-in {
   animation: tagIn 200ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Tab slide transition */
+@keyframes tabSlide {
+  from {
+    opacity: 0;
+    transform: translateX(var(--slide-from, 30px));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-tab-slide {
+  animation: tabSlide 250ms ease-out both;
 }
 
 /* ============================================================================

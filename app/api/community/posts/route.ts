@@ -74,7 +74,7 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   const { data: posts, error, count } = await query;
 
   if (error) {
-    console.error('[GET /api/community/posts] Error:', error);
+    console.error('[GET /api/community/posts] Supabase error:', error.message, error.details, error.hint);
     return NextResponse.json(
       { error: '게시글 목록을 불러오는데 실패했습니다.' },
       { status: 500 }
@@ -90,8 +90,14 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
     });
   }
 
-  // 현재 사용자의 public.users.id 조회
-  const { data: currentUserId } = await supabase.rpc('current_user_id');
+  // 현재 사용자의 public.users.id 조회 (실패해도 게시글은 반환)
+  let currentUserId: string | null = null;
+  try {
+    const { data } = await supabase.rpc('current_user_id');
+    currentUserId = data;
+  } catch (e) {
+    console.warn('[GET /api/community/posts] current_user_id RPC failed:', e);
+  }
 
   // 좋아요 여부 확인
   const postIds = posts.map((p) => p.id);

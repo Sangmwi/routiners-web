@@ -38,6 +38,10 @@ export type ExperienceLevel = (typeof EXPERIENCE_LEVELS)[number];
 export type EquipmentAccess = (typeof EQUIPMENT_ACCESS)[number];
 export type FocusArea = (typeof FOCUS_AREAS)[number];
 
+// 숫자 옵션 상수 (UI + 검증에서 공유)
+export const PREFERRED_DAYS_OPTIONS = [1, 2, 3, 4, 5, 6, 7] as const;
+export const SESSION_DURATION_OPTIONS = [30, 45, 60, 90, 120] as const;
+
 // 한국어 레이블
 export const FITNESS_GOAL_LABELS: Record<FitnessGoal, string> = {
   muscle_gain: '근육 증가',

@@ -1,7 +1,6 @@
 'use client';
 
 import { XIcon } from '@phosphor-icons/react';
-import SectionHeader from '@/components/ui/SectionHeader';
 
 interface ProfileInterestsInputProps {
   value: string[];
@@ -59,12 +58,7 @@ export default function ProfileInterestsInput({ value, onChange }: ProfileIntere
   };
 
   return (
-    <section className="space-y-3">
-      <SectionHeader
-        title="관심 운동 종목"
-        description="관심있는 운동 종목을 선택하세요!"
-      />
-
+    <div className="space-y-3">
       {/* Selected Interests */}
       {value.length > 0 && (
         <div className="flex flex-wrap gap-2 p-3 rounded-xl bg-muted/20">
@@ -86,26 +80,28 @@ export default function ProfileInterestsInput({ value, onChange }: ProfileIntere
         </div>
       )}
 
-      {/* Exercise Options */}
-      <div className="flex flex-wrap gap-2">
-        {EXERCISE_OPTIONS.map((exercise) => {
-          const isSelected = value.includes(exercise);
-          return (
-            <button
-              key={exercise}
-              type="button"
-              onClick={() => handleToggleInterest(exercise)}
-              className={`px-3 py-1.5 rounded-[14px] text-xs transition-colors ${
-                isSelected
-                  ? 'bg-primary/10 text-primary border-2 border-primary'
-                  : 'bg-muted text-card-foreground border border-border/50 hover:border-primary/50'
-              }`}
-            >
-              {exercise}
-            </button>
-          );
-        })}
+      {/* Exercise Options - max-height 스크롤 */}
+      <div className="max-h-48 overflow-y-auto scrollbar-hide">
+        <div className="flex flex-wrap gap-2">
+          {EXERCISE_OPTIONS.map((exercise) => {
+            const isSelected = value.includes(exercise);
+            return (
+              <button
+                key={exercise}
+                type="button"
+                onClick={() => handleToggleInterest(exercise)}
+                className={`px-3 py-1.5 rounded-[14px] text-xs transition-colors ${
+                  isSelected
+                    ? 'bg-primary/10 text-primary border-2 border-primary'
+                    : 'bg-muted text-card-foreground border border-border/50 hover:border-primary/50'
+                }`}
+              >
+                {exercise}
+              </button>
+            );
+          })}
+        </div>
       </div>
-    </section>
+    </div>
   );
 }

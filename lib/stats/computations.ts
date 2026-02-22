@@ -57,6 +57,8 @@ interface WorkoutMetrics {
   plannedCaloriesBurned: number;
   plannedVolume: number;
   plannedDistance: number;
+  totalSets: number;
+  plannedSets: number;
   completionRate: number;
 }
 
@@ -100,6 +102,7 @@ function aggregateEventMetrics(events: RoutineEvent[]): {
   let totalDuration = 0;
   let totalCaloriesBurned = 0;
   let totalDistance = 0;
+  let totalSets = 0;
   for (const event of workoutCompleted) {
     if (isWorkoutData(event.data)) {
       totalVolume += calculateWorkoutVolume(event.data);
@@ -110,6 +113,7 @@ function aggregateEventMetrics(events: RoutineEvent[]): {
       totalDuration += durationMin;
       totalCaloriesBurned += event.data.estimatedCaloriesBurned ?? 0;
       totalDistance += calculateTotalDistance(event.data.exercises);
+      totalSets += event.data.exercises.reduce((s, ex) => s + ex.sets.length, 0);
     }
   }
 
@@ -118,12 +122,14 @@ function aggregateEventMetrics(events: RoutineEvent[]): {
   let plannedCaloriesBurned = 0;
   let plannedVolume = 0;
   let plannedDistance = 0;
+  let plannedSets = 0;
   for (const event of workoutEvents) {
     if (isWorkoutData(event.data)) {
       plannedDuration += event.data.estimatedDuration ?? 0;
       plannedCaloriesBurned += event.data.estimatedCaloriesBurned ?? 0;
       plannedVolume += calculateWorkoutVolume(event.data);
       plannedDistance += calculateTotalDistance(event.data.exercises);
+      plannedSets += event.data.exercises.reduce((s, ex) => s + ex.sets.length, 0);
     }
   }
 
@@ -179,10 +185,12 @@ function aggregateEventMetrics(events: RoutineEvent[]): {
       totalDuration,
       totalCaloriesBurned,
       totalDistance,
+      totalSets,
       plannedDuration,
       plannedCaloriesBurned,
       plannedVolume,
       plannedDistance,
+      plannedSets,
       completionRate: workoutTotal > 0
         ? Math.round((workoutCompleted.length / workoutTotal) * 100)
         : 0,

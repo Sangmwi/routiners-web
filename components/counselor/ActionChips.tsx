@@ -1,4 +1,4 @@
-import { BarbellIcon, BowlFoodIcon, type Icon } from '@phosphor-icons/react';
+import { BarbellIcon, ForkKnifeIcon, type Icon } from '@phosphor-icons/react';
 import type { ActionChip } from '@/lib/types/counselor';
 
 /**
@@ -16,7 +16,7 @@ export const DEFAULT_ACTION_CHIPS: ActionChip[] = [
   },
   {
     id: 'diet_counseling',
-    icon: 'BowlFood',
+    icon: 'ForkKnife',
     label: '식단 상담',
     description: '맞춤 식단을 만들어 드려요',
     triggerMessage: '식단에 대해 상담하고 싶어요',
@@ -28,5 +28,5 @@ export const DEFAULT_ACTION_CHIPS: ActionChip[] = [
  */
 export const ICON_MAP: Record<string, Icon> = {
   Barbell: BarbellIcon,
-  BowlFood: BowlFoodIcon,
+  ForkKnife: ForkKnifeIcon,
 };

@@ -96,8 +96,20 @@ export async function executeUpdateFitnessProfile(
 
   if (args.fitness_goal !== null) updateData.fitness_goal = args.fitness_goal;
   if (args.experience_level !== null) updateData.experience_level = args.experience_level;
-  if (args.preferred_days_per_week !== null) updateData.preferred_days_per_week = args.preferred_days_per_week;
-  if (args.session_duration_minutes !== null) updateData.session_duration_minutes = args.session_duration_minutes;
+  if (args.preferred_days_per_week !== null) {
+    const days = Math.round(args.preferred_days_per_week);
+    if (days < 1 || days > 7) {
+      return { success: false, error: 'preferred_days_per_week는 1~7 사이여야 합니다.' };
+    }
+    updateData.preferred_days_per_week = days;
+  }
+  if (args.session_duration_minutes !== null) {
+    const mins = Math.round(args.session_duration_minutes);
+    if (mins < 10 || mins > 180) {
+      return { success: false, error: 'session_duration_minutes는 10~180 사이여야 합니다.' };
+    }
+    updateData.session_duration_minutes = mins;
+  }
   if (args.equipment_access !== null) updateData.equipment_access = args.equipment_access;
   if (args.focus_areas !== null) updateData.focus_areas = args.focus_areas;
   if (args.injuries !== null) updateData.injuries = args.injuries;

@@ -76,5 +76,10 @@ export function useUpdateProfile() {
         });
       }, 100);
     },
+
+    // 성공/실패 무관하게 서버 데이터와 최종 재동기화
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.user.me() });
+    },
   });
 }
