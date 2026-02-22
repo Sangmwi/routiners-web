@@ -3,7 +3,7 @@
 import { Suspense } from 'react';
 import { useCurrentUserProfileSuspense } from '@/hooks/profile';
 import { useLogout, useWithdrawal } from '@/hooks';
-import MainTabLayout from '@/components/common/MainTabLayout';
+import { MainTabLayout } from '@/components/layouts';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileHeroSection from '@/components/profile/ProfileHeroSection';

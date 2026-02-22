@@ -2,7 +2,7 @@
 
 import { PencilSimpleLineIcon, FunnelIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
-import MainTabHeader from '@/components/common/MainTabHeader';
+import { MainTabHeader } from '@/components/layouts';
 
 interface CommunityHeaderProps {
   onNewPost?: () => void;

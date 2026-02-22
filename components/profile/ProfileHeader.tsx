@@ -1,7 +1,7 @@
 'use client';
 
 import { PencilSimpleIcon } from '@phosphor-icons/react';
-import MainTabHeader from '@/components/common/MainTabHeader';
+import { MainTabHeader } from '@/components/layouts';
 import AppLink from '@/components/common/AppLink';
 
 /**

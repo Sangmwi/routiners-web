@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import MainTabLayout from '@/components/common/MainTabLayout';
+import { MainTabLayout } from '@/components/layouts';
 import CommunityHeader from './CommunityHeader';
 import CategoryTabs from './CategoryTabs';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
