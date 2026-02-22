@@ -53,7 +53,7 @@ export const UserSchema = z.object({
   specialty: SpecialtySchema,
 
   // Optional profile fields
-  profileImages: z.array(z.string().url()).max(4).optional(),
+  profilePhotoUrl: z.string().url().optional(),
   bio: z.string().max(500).optional(),
   height: z.number().min(100).max(250).optional(),
   weight: z.number().min(30).max(200).optional(),
@@ -79,7 +79,7 @@ export type UserSchemaType = z.infer<typeof UserSchema>;
  */
 export const ProfileUpdateSchema = z.object({
   nickname: z.string().min(2).max(20).optional(),
-  profileImages: z.array(z.string().url()).max(4).optional(),
+  profilePhotoUrl: z.string().url().optional(),
   bio: z.string().max(500).optional(),
   height: z.number().min(100).max(250).optional(),
   weight: z.number().min(30).max(200).optional(),
@@ -89,6 +89,9 @@ export const ProfileUpdateSchema = z.object({
   interestedExercises: z.array(z.string()).optional(),
   isSmoker: z.boolean().optional(),
   showInbodyPublic: z.boolean().optional(),
+  rank: RankSchema.optional(),
+  unitName: z.string().min(1).optional(),
+  specialty: SpecialtySchema.optional(),
 });
 
 export type ProfileUpdateSchemaType = z.infer<typeof ProfileUpdateSchema>;

@@ -81,7 +81,7 @@ export type Database = {
           is_smoker: boolean | null
           nickname: string
           phone_number: string
-          profile_images: string[] | null
+          profile_photo_url: string | null
           provider_id: string
           rank: string
           real_name: string
@@ -108,7 +108,7 @@ export type Database = {
           is_smoker?: boolean | null
           nickname: string
           phone_number: string
-          profile_images?: string[] | null
+          profile_photo_url?: string | null
           provider_id: string
           rank: string
           real_name: string
@@ -135,7 +135,7 @@ export type Database = {
           is_smoker?: boolean | null
           nickname?: string
           phone_number?: string
-          profile_images?: string[] | null
+          profile_photo_url?: string | null
           provider_id?: string
           rank?: string
           real_name?: string
@@ -199,7 +199,7 @@ export type Database = {
           is_smoker: boolean
           nickname: string
           phone_number: string
-          profile_images: string[]
+          profile_photo_url: string
           provider_id: string
           rank: string
           real_name: string

@@ -100,7 +100,7 @@ export function useProfileEdit(): UseProfileEditReturn {
   const { uploadImages, isUploading, progressPercent } = useProfileImageUpload();
 
   // 초기 이미지 드래프트 생성 (user가 로드될 때까지 빈 배열)
-  const imageDraft = useProfileImagesDraft(user?.profileImages || []);
+  const imageDraft = useProfileImagesDraft(user?.profilePhotoUrl ? [user.profilePhotoUrl] : []);
 
   // ========== Modal ==========
 
@@ -200,7 +200,7 @@ export function useProfileEdit(): UseProfileEditReturn {
       // draft가 없거나 변경이 없으면 finalImageUrls는 undefined → 이미지 필드 업데이트 안 함
 
       // 2. 프로필 업데이트 데이터 구성 (타입 안전)
-      const updates = formDataToUpdateData(formData, finalImageUrls);
+      const updates = formDataToUpdateData(formData, finalImageUrls?.[0]);
 
       // 3. 프로필 업데이트 실행
       updateProfile.mutate(updates, {

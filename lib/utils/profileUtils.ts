@@ -7,7 +7,7 @@
  * - 배열 비교
  */
 
-import type { User, ProfileUpdateData } from '@/lib/types';
+import type { User, ProfileUpdateData, Rank, Specialty } from '@/lib/types';
 
 // ============================================================================
 // Types
@@ -30,6 +30,9 @@ export interface ProfileFormData {
   isSmoker: boolean | undefined;
   interestedLocations: string[];
   interestedExercises: string[];
+  rank: Rank;
+  unitName: string;
+  specialty: Specialty;
 }
 
 /**
@@ -46,6 +49,9 @@ export const INITIAL_FORM_DATA: ProfileFormData = {
   isSmoker: undefined,
   interestedLocations: [],
   interestedExercises: [],
+  rank: '이병',
+  unitName: '',
+  specialty: '보병',
 };
 
 // ============================================================================
@@ -83,6 +89,9 @@ export function userToFormData(user: User): ProfileFormData {
     isSmoker: user.isSmoker,
     interestedLocations: user.interestedLocations || [],
     interestedExercises: user.interestedExercises || [],
+    rank: user.rank,
+    unitName: user.unitName || '',
+    specialty: user.specialty,
   };
 }
 
@@ -92,11 +101,11 @@ export function userToFormData(user: User): ProfileFormData {
  * 문자열 필드를 숫자로 변환하고, 빈 값은 undefined로 처리
  *
  * @param formData - 폼 데이터
- * @param imageUrls - 최종 이미지 URL 배열 (undefined면 이미지 필드 업데이트 안 함)
+ * @param profilePhotoUrl - 프로필 사진 URL (undefined면 사진 필드 업데이트 안 함)
  */
 export function formDataToUpdateData(
   formData: ProfileFormData,
-  imageUrls?: string[]
+  profilePhotoUrl?: string
 ): ProfileUpdateData {
   const result: ProfileUpdateData = {
     nickname: formData.nickname.trim() || undefined,
@@ -111,11 +120,14 @@ export function formDataToUpdateData(
     isSmoker: formData.isSmoker,
     interestedLocations: formData.interestedLocations,
     interestedExercises: formData.interestedExercises,
+    rank: formData.rank,
+    unitName: formData.unitName.trim() || undefined,
+    specialty: formData.specialty,
   };
 
-  // 이미지 배열이 명시적으로 제공된 경우에만 포함
-  if (imageUrls !== undefined) {
-    result.profileImages = imageUrls;
+  // 프로필 사진 URL이 명시적으로 제공된 경우에만 포함
+  if (profilePhotoUrl !== undefined) {
+    result.profilePhotoUrl = profilePhotoUrl;
   }
 
   return result;
@@ -139,6 +151,9 @@ export function hasFormChanges(formData: ProfileFormData, user: User): boolean {
     formData.showInbodyPublic !== (user.showInbodyPublic ?? true) ||
     formData.isSmoker !== user.isSmoker ||
     !arraysEqual(formData.interestedLocations, user.interestedLocations || []) ||
-    !arraysEqual(formData.interestedExercises, user.interestedExercises || [])
+    !arraysEqual(formData.interestedExercises, user.interestedExercises || []) ||
+    formData.rank !== user.rank ||
+    formData.unitName !== (user.unitName || '') ||
+    formData.specialty !== user.specialty
   );
 }

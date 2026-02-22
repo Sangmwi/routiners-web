@@ -93,7 +93,7 @@ async function deleteSingleImage(
  *   const changes = draft.getChanges();
  *   const result = await uploadImages(changes);
  *   if (result.success) {
- *     await updateProfile({ profileImages: result.imageUrls });
+ *     await updateProfile({ profilePhotoUrl: result.imageUrls?.[0] });
  *   }
  * };
  * ```

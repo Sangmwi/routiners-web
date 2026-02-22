@@ -92,7 +92,7 @@ export function useProfileEditSuspense(): UseProfileEditSuspenseReturn {
   const { uploadImages, isUploading, progressPercent } = useProfileImageUpload();
 
   // 초기 이미지 드래프트 생성
-  const imageDraft = useProfileImagesDraft(user.profileImages || []);
+  const imageDraft = useProfileImagesDraft(user.profilePhotoUrl ? [user.profilePhotoUrl] : []);
 
   // ========== Modal ==========
 
@@ -177,7 +177,7 @@ export function useProfileEditSuspense(): UseProfileEditSuspenseReturn {
       }
 
       // 2. 프로필 업데이트 데이터 구성
-      const updates = formDataToUpdateData(formData, finalImageUrls);
+      const updates = formDataToUpdateData(formData, finalImageUrls?.[0]);
 
       // 3. 프로필 업데이트 실행
       updateProfile.mutate(updates, {

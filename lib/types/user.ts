@@ -68,7 +68,7 @@ export interface User {
   specialty: Specialty;
 
   // Profile additional fields
-  profileImages?: string[]; // Array of profile image URLs (max 4). First image is the main profile photo.
+  profilePhotoUrl?: string; // Single profile photo URL
   bio?: string;
   height?: number;
   weight?: number;
@@ -108,7 +108,7 @@ export function toUser(dbUser: DbUser): User {
     unitId: dbUser.unit_id,
     unitName: dbUser.unit_name,
     specialty: dbUser.specialty as Specialty,
-    profileImages: dbUser.profile_images ?? undefined,
+    profilePhotoUrl: dbUser.profile_photo_url ?? undefined,
     bio: dbUser.bio ?? undefined,
     height: dbUser.height_cm ?? undefined,
     weight: dbUser.weight_kg ?? undefined,
@@ -184,7 +184,7 @@ export interface SignupCompleteData extends PassVerificationData, MilitaryInfoDa
 
 export interface ProfileUpdateData {
   nickname?: string;
-  profileImages?: string[];
+  profilePhotoUrl?: string;
   bio?: string;
   height?: number;
   weight?: number;
@@ -194,4 +194,7 @@ export interface ProfileUpdateData {
   interestedExercises?: string[];
   isSmoker?: boolean;
   showInbodyPublic?: boolean;
+  rank?: Rank;
+  unitName?: string;
+  specialty?: Specialty;
 }

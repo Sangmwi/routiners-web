@@ -10,7 +10,7 @@ interface ProfileHeroSectionProps {
 }
 
 export default function ProfileHeroSection({ user }: ProfileHeroSectionProps) {
-  const images = user.profileImages || [];
+  const images = user.profilePhotoUrl ? [user.profilePhotoUrl] : [];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);

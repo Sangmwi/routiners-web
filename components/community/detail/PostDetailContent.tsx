@@ -39,7 +39,7 @@ export default function PostDetailContent({ postId }: PostDetailContentProps) {
   };
 
   const handleDeleted = () => {
-    router.replace('/community');
+    router.back();
   };
 
   return (

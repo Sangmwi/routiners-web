@@ -97,7 +97,7 @@ export default function PostWriteContent({ editPostId }: PostWriteContentProps) 
           content: content.trim(),
           imageUrls: allImageUrls.length > 0 ? allImageUrls : undefined,
         });
-        router.replace('/community');
+        router.back();
       }
     } catch {
       // 에러는 mutation의 onError에서 처리

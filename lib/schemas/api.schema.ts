@@ -76,8 +76,6 @@ export const RecommendedProfilesResponseSchema = z.array(UserSchema);
  */
 export const ImageUploadResponseSchema = z.object({
   url: z.string().url(),
-  index: z.number(),
-  profileImages: z.array(z.string().url()),
 });
 
 /**
@@ -85,7 +83,6 @@ export const ImageUploadResponseSchema = z.object({
  */
 export const ImageDeleteResponseSchema = z.object({
   success: z.boolean(),
-  profileImages: z.array(z.string().url()),
 });
 
 // ============================================================================

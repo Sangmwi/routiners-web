@@ -1,6 +1,6 @@
 'use client';
 
-import { PencilSimpleIcon } from '@phosphor-icons/react';
+import { GearSixIcon } from '@phosphor-icons/react';
 import { MainTabHeader } from '@/components/layouts';
 import AppLink from '@/components/common/AppLink';
 
@@ -11,13 +11,13 @@ import AppLink from '@/components/common/AppLink';
 export default function ProfileHeader() {
   return (
     <MainTabHeader
-      title="내 프로필"
+      title="프로필"
       action={
         <AppLink
-          href="/profile/edit"
+          href="/settings"
           className="p-1.5 hover:bg-muted/50 rounded-lg transition-colors"
         >
-          <PencilSimpleIcon size={20} className="text-muted-foreground" />
+          <GearSixIcon size={20} className="text-muted-foreground" />
         </AppLink>
       }
     />

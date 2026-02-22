@@ -38,7 +38,7 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
     .select(
       `
       *,
-      author:users!author_id(id, nickname, rank, profile_images)
+      author:users!author_id(id, nickname, rank, profile_photo_url)
     `,
       { count: 'exact' }
     )
@@ -166,7 +166,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
     .select(
       `
       *,
-      author:users!author_id(id, nickname, rank, profile_images)
+      author:users!author_id(id, nickname, rank, profile_photo_url)
     `
     )
     .single();

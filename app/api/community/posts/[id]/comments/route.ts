@@ -41,7 +41,7 @@ export const GET = withAuth<NextResponse, { id: string }>(async (_request: NextR
     .select(
       `
       *,
-      author:users!author_id(id, nickname, rank, profile_images)
+      author:users!author_id(id, nickname, rank, profile_photo_url)
     `,
       { count: 'exact' }
     )
@@ -72,7 +72,7 @@ export const GET = withAuth<NextResponse, { id: string }>(async (_request: NextR
     .select(
       `
       *,
-      author:users!author_id(id, nickname, rank, profile_images)
+      author:users!author_id(id, nickname, rank, profile_photo_url)
     `
     )
     .in('parent_id', parentIds)
@@ -175,7 +175,7 @@ export const POST = withAuth<NextResponse, { id: string }>(async (request: NextR
     .select(
       `
       *,
-      author:users!author_id(id, nickname, rank, profile_images)
+      author:users!author_id(id, nickname, rank, profile_photo_url)
     `
     )
     .single();

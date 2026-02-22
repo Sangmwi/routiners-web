@@ -20,7 +20,7 @@ const ProfileEditContent = dynamic(
  */
 export default function ProfileEditPage() {
   return (
-    <DetailLayout title="프로필 만들기" centered>
+    <DetailLayout title="프로필 편집" centered>
       <QueryErrorBoundary>
         <Suspense fallback={<PulseLoader />}>
           <ProfileEditContent />

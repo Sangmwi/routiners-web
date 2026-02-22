@@ -132,7 +132,7 @@ export function useProfileProgress(user: User | null | undefined): number {
   if (!user) return 0;
 
   const fields = [
-    user.profileImages?.[0],
+    user.profilePhotoUrl,
     user.bio,
     user.height,
     user.weight,

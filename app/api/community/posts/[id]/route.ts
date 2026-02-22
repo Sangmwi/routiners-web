@@ -22,7 +22,7 @@ export const GET = withAuth<NextResponse, { id: string }>(async (_request: NextR
     .select(
       `
       *,
-      author:users!author_id(id, nickname, rank, profile_images)
+      author:users!author_id(id, nickname, rank, profile_photo_url)
     `
     )
     .eq('id', id)
@@ -130,7 +130,7 @@ export const PATCH = withAuth<NextResponse, { id: string }>(async (request: Next
     .select(
       `
       *,
-      author:users!author_id(id, nickname, rank, profile_images)
+      author:users!author_id(id, nickname, rank, profile_photo_url)
     `
     )
     .single();

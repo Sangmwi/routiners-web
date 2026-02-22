@@ -97,7 +97,7 @@ interface DbAuthorJoin {
   id: string;
   nickname: string;
   rank: string;
-  profile_images?: string[] | null;
+  profile_photo_url?: string | null;
 }
 
 /**
@@ -108,7 +108,7 @@ export function toPostAuthor(dbAuthor: DbAuthorJoin): PostAuthor {
     id: dbAuthor.id,
     nickname: dbAuthor.nickname,
     rank: dbAuthor.rank,
-    profileImage: dbAuthor.profile_images?.[0],
+    profileImage: dbAuthor.profile_photo_url ?? undefined,
   };
 }
 

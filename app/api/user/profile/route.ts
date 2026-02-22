@@ -37,7 +37,7 @@ export const PATCH = withAuth(async (request, { authUser, supabase }) => {
   const updateData: Record<string, unknown> = {};
 
   if (body.nickname !== undefined) updateData.nickname = body.nickname;
-  if (body.profileImages !== undefined) updateData.profile_images = body.profileImages;
+  if (body.profilePhotoUrl !== undefined) updateData.profile_photo_url = body.profilePhotoUrl;
   if (body.bio !== undefined) updateData.bio = body.bio;
   if (body.height !== undefined) updateData.height_cm = body.height;
   if (body.weight !== undefined) updateData.weight_kg = body.weight;
@@ -47,6 +47,9 @@ export const PATCH = withAuth(async (request, { authUser, supabase }) => {
   if (body.interestedExercises !== undefined) updateData.interested_exercise_types = body.interestedExercises;
   if (body.isSmoker !== undefined) updateData.is_smoker = body.isSmoker;
   if (body.showInbodyPublic !== undefined) updateData.show_body_metrics = body.showInbodyPublic;
+  if (body.rank !== undefined) updateData.rank = body.rank;
+  if (body.unitName !== undefined) updateData.unit_name = body.unitName;
+  if (body.specialty !== undefined) updateData.specialty = body.specialty;
 
   updateData.updated_at = new Date().toISOString();
 
