@@ -16,7 +16,7 @@ export default function ProductSlider({ products, onCardClick }: ProductSliderPr
   return (
     <Carousel gap="gap-3" enableDrag fullBleed snap>
       {products.map((product) => (
-        <Carousel.Item key={product.id} className="w-64">
+        <Carousel.Item key={product.id} className="w-48">
           <ProductCard
             brand={product.brand}
             name={product.name}

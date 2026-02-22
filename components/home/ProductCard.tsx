@@ -15,7 +15,7 @@ export default function ProductCard({ brand, name, price, imageUrl, badge, onCli
   return (
     <div
       onClick={onClick}
-      className="rounded-2xl bg-card overflow-hidden shadow-sm border border-border/30
+      className="rounded-2xl bg-muted/20 overflow-hidden border border-border/30
                  transition-all duration-200 active:scale-[0.98] cursor-pointer
                  hover:shadow-md hover:border-border/60"
     >

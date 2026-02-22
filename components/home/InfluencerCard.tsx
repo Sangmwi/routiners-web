@@ -15,7 +15,7 @@ export default function InfluencerCard({ author, title, imageUrl, votes, onClick
   return (
     <div
       onClick={onClick}
-      className="flex-shrink-0 w-64 rounded-2xl bg-muted/20 overflow-hidden border border-border/30
+      className="flex-shrink-0 rounded-2xl bg-muted/20 overflow-hidden border border-border/30
                  transition-all duration-200 active:scale-[0.98] cursor-pointer
                  hover:shadow-md"
     >

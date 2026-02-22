@@ -16,7 +16,7 @@ export default function InfluencerSlider({ influencers, onCardClick }: Influence
   return (
     <Carousel gap="gap-4" enableDrag fullBleed snap>
       {influencers.map((influencer) => (
-        <Carousel.Item key={influencer.id}>
+        <Carousel.Item key={influencer.id} className='w-64'>
           <InfluencerCard
             author={influencer.author}
             title={influencer.title}
