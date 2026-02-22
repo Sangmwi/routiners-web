@@ -10,7 +10,7 @@ import { formatDate, addDays } from '@/lib/utils/dateHelpers';
 import { STALE_TIME } from '@/hooks/common/useBaseQuery';
 import type { User } from '@/lib/types/user';
 import type { RoutineEvent } from '@/lib/types/routine';
-import type { InBodySummary } from '@/lib/types/inbody';
+import type { InBodySummary, InBodyRecord } from '@/lib/types/inbody';
 import type { ProgressSummary } from '@/lib/types/progress';
 
 export interface HomeData {
@@ -19,6 +19,7 @@ export interface HomeData {
   todayMeal: RoutineEvent | null;
   nextScheduledWorkout: RoutineEvent | null;
   inbodySummary: InBodySummary;
+  inbodyHistory: InBodyRecord[];
   progressSummary: ProgressSummary;
 }
 
@@ -49,6 +50,7 @@ export function useHomeDataSuspense(): HomeData {
     todayMealResult,
     nextWorkoutResult,
     inbodyResult,
+    inbodyHistoryResult,
     progressResult,
   ] = useSuspenseQueries({
     queries: [
@@ -78,6 +80,11 @@ export function useHomeDataSuspense(): HomeData {
         staleTime: STALE_TIME.default,
       },
       {
+        queryKey: queryKeys.inbody.list(8, 0),
+        queryFn: () => inbodyApi.getRecords(8, 0),
+        staleTime: STALE_TIME.default,
+      },
+      {
         queryKey: queryKeys.progress.summary(6),
         queryFn: () => progressApi.getSummary(6),
         staleTime: STALE_TIME.default,
@@ -93,6 +100,7 @@ export function useHomeDataSuspense(): HomeData {
     todayMeal: todayMealResult.data as RoutineEvent | null,
     nextScheduledWorkout: nextWorkoutEvents[0] ?? null,
     inbodySummary: inbodyResult.data as InBodySummary,
+    inbodyHistory: inbodyHistoryResult.data as InBodyRecord[],
     progressSummary: progressResult.data as ProgressSummary,
   };
 }

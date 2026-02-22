@@ -4,11 +4,11 @@ import SectionHeader from '@/components/ui/SectionHeader';
 import { MetricItem } from '@/components/inbody/MetricItem';
 import MiniSparkline from '@/components/ui/MiniSparkline';
 import { getTrendColor } from '@/components/ui/ChangeIndicator';
-import { useInBodyRecordsSuspense } from '@/hooks/inbody/queries';
-import type { InBodySummary } from '@/lib/types';
+import type { InBodySummary, InBodyRecord } from '@/lib/types';
 
 interface InBodySectionProps {
   summary: InBodySummary;
+  history: InBodyRecord[];
 }
 
 const INBODY_METRICS = [
@@ -22,9 +22,8 @@ const INBODY_METRICS = [
  *
  * SectionHeader + 3열 MetricItem + 미니 스파크라인
  */
-export default function InBodySection({ summary }: InBodySectionProps) {
+export default function InBodySection({ summary, history }: InBodySectionProps) {
   const hasData = !!summary.latest;
-  const { data: history } = useInBodyRecordsSuspense(8, 0);
   const hasHistory = history.length >= 2;
   const chronological = hasHistory ? [...history].reverse() : [];
 

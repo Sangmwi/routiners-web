@@ -47,6 +47,7 @@ export default function HomeContent() {
     todayMeal,
     nextScheduledWorkout,
     inbodySummary,
+    inbodyHistory,
     progressSummary,
   } = useHomeDataSuspense();
 
@@ -78,7 +79,7 @@ export default function HomeContent() {
       />
 
       {/* 인바디 */}
-      <InBodySection summary={inbodySummary} />
+      <InBodySection summary={inbodySummary} history={inbodyHistory} />
 
       {/* 3대 운동 */}
       <Big3Section summary={progressSummary.big3} />
