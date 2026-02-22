@@ -209,7 +209,7 @@ function CalorieSummaryCard({
     : null;
 
   return (
-    <div>
+    <div className="p-4">
       {/* 상단: 예정 배지 + 비교 */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
@@ -336,7 +336,7 @@ function NutritionBalanceSection({
           {balanceText} {score}점
         </span>
       </div>
-      <div className="space-y-4">
+      <div className="p-4 space-y-4">
         {macroData.map(({ label, avgActual, dailyTarget, prevAvg, percent, color }) => {
           const change = prevAvg != null ? avgActual - prevAvg : undefined;
           return (
@@ -412,7 +412,7 @@ function DonutChart({
   return (
     <div>
       <h3 className="text-sm font-medium text-foreground mb-3">3대 영양소</h3>
-      <div>
+      <div className="p-4">
         <div className="flex items-center gap-6">
           {/* SVG Donut */}
           <div className="shrink-0">

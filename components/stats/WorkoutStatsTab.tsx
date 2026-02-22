@@ -124,7 +124,7 @@ function WorkoutMetricsGrid({ metrics }: { metrics: WorkoutMetricItem[] }) {
         )}
       </div>
 
-      <div>
+      <div className="p-4">
         <div className="grid grid-cols-2 gap-4">
           {metrics.map(({ icon, label, value }) => (
             <div key={label} className="flex items-center gap-3">
