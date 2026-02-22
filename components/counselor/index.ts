@@ -13,7 +13,7 @@ export { default as WelcomeScreen } from './WelcomeScreen';
 
 // Chat Components
 export { default as SummarizationIndicator } from './SummarizationIndicator';
-export { default as ActionChips } from './ActionChips';
+export { DEFAULT_ACTION_CHIPS, ICON_MAP } from './ActionChips';
 export { default as ChatListDrawer } from './ChatListDrawer';
 
 // Entry Point

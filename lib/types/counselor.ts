@@ -107,6 +107,8 @@ export interface ActionChipDefinition {
   triggersPurpose?: ActivePurposeType;
   /** 즉시 실행 액션 (라우팅 등) */
   action?: string;
+  /** AI에게 보낼 트리거 메시지 (프로세스 없이 AI가 상태 확인 후 라우팅) */
+  triggerMessage?: string;
   /** 표시 조건 */
   enabled: (context: ActionChipContext) => boolean;
 }
@@ -121,6 +123,7 @@ export interface ActionChip {
   description: string;
   triggersPurpose?: ActivePurposeType;
   action?: string;
+  triggerMessage?: string;
 }
 
 // ============================================================================

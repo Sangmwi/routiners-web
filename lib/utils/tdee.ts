@@ -68,7 +68,7 @@ const GOAL_ADJUSTMENTS: Record<DietaryGoal, number> = {
 };
 
 /** 식단 유형별 매크로 비율 (protein / carbs / fat) */
-const MACRO_RATIOS: Record<DietType, { protein: number; carbs: number; fat: number }> = {
+export const MACRO_RATIOS: Record<DietType, { protein: number; carbs: number; fat: number }> = {
   regular: { protein: 0.3, carbs: 0.5, fat: 0.2 },
   balanced: { protein: 0.3, carbs: 0.5, fat: 0.2 },
   high_protein: { protein: 0.4, carbs: 0.35, fat: 0.25 },
@@ -77,7 +77,7 @@ const MACRO_RATIOS: Record<DietType, { protein: number; carbs: number; fat: numb
   cutting: { protein: 0.4, carbs: 0.35, fat: 0.25 },
 };
 
-const DEFAULT_MACRO_RATIO = MACRO_RATIOS.balanced;
+export const DEFAULT_MACRO_RATIO = MACRO_RATIOS.balanced;
 
 /**
  * 목표별 칼로리 조정 + 매크로 분배

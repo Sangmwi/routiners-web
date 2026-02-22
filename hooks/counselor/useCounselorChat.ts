@@ -231,7 +231,13 @@ export function useCounselorChat(initialConversationId?: string): UseCounselorCh
 
   // ── 액션 칩 핸들러 ──
   const handleChipClick = async (chip: ActionChip) => {
-    if (chip.triggersPurpose) {
+    if (chip.triggerMessage) {
+      // 프로세스 없이 메시지만 전송 → AI가 상태 확인 후 라우팅
+      const currentId = await ensureConversation();
+      if (!currentId) return;
+      sendMessage(currentId, chip.triggerMessage);
+    } else if (chip.triggersPurpose) {
+      // 레거시: 직접 프로세스 세팅
       const purposeData: ActivePurpose = {
         type: chip.triggersPurpose,
         stage: 'init',
@@ -250,7 +256,6 @@ export function useCounselorChat(initialConversationId?: string): UseCounselorCh
         });
       }
 
-      // sendMessage 직접 호출 (setState 반영 전 handleSend → ensureConversation 중복 호출 방지)
       sendMessage(currentId, `[${chip.label}] 시작`);
     } else if (chip.action) {
       router.push(chip.action);

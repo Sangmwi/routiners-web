@@ -54,7 +54,7 @@ async function getAuthUserFromToken(accessToken: string): Promise<AuthContext | 
   // 이 클라이언트가 RLS 정책에서 auth.uid()를 올바르게 반환함
   const supabaseWithToken = createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       global: {
         headers: {

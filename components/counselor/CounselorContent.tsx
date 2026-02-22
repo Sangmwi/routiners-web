@@ -8,11 +8,11 @@ import type { RoutinePreviewData } from '@/lib/types/fitness';
 import type { MealPlanPreviewData } from '@/lib/types/meal';
 import WelcomeScreen from './WelcomeScreen';
 import SummarizationIndicator from './SummarizationIndicator';
-import ActionChips from './ActionChips';
 import ChatListDrawer from './ChatListDrawer';
 import ChatMessageList from '@/components/routine/chat/ChatMessageList';
 import ChatInput from '@/components/routine/chat/ChatInput';
 import PreviewDetailDrawer from '@/components/routine/chat/PreviewDetailDrawer';
+import MealPreviewDetailDrawer from '@/components/routine/chat/MealPreviewDetailDrawer';
 import { PulseLoader } from '@/components/ui/PulseLoader';
 
 interface CounselorContentProps {
@@ -122,13 +122,8 @@ export default function CounselorContent({ isDrawerOpen, onDrawerClose }: Counse
         break;
       case 'apply':
         if (message?.contentType === 'meal_preview') {
-          // 식단은 드로어 없이 직접 적용
-          try {
-            const mealData = JSON.parse(message.content) as MealPlanPreviewData;
-            mealPreview.apply(messageId, mealData);
-          } catch { /* parse error */ }
+          mealPreview.open(messageId);
         } else {
-          // 루틴은 DetailDrawer를 열어서 주차 선택 후 적용
           preview.open(messageId);
         }
         break;
@@ -140,7 +135,11 @@ export default function CounselorContent({ isDrawerOpen, onDrawerClose }: Counse
         }
         break;
       case 'viewDetails':
-        preview.open(messageId);
+        if (message?.contentType === 'meal_preview') {
+          mealPreview.open(messageId);
+        } else {
+          preview.open(messageId);
+        }
         break;
       case 'submitInput':
         if (value) {
@@ -154,18 +153,6 @@ export default function CounselorContent({ isDrawerOpen, onDrawerClose }: Counse
   // 낙관적 메시지(isStreaming 중 pendingUserMessage)가 있으면 로딩 상태여도 채팅 표시
   const showChatLoader = (isMessagesLoading || isInitializing) && !isStreaming && messages.length === 0;
   const showWelcome = messages.length === 0 && !isStreaming && !isMessagesLoading && !isInitializing;
-  
-  // Phase 9: 메시지에서 pending 상태의 트랜지언트 UI 체크
-  const hasPendingInteraction = messages.some(m => {
-    const status = m.metadata?.status as string;
-    return (
-      (m.contentType === 'profile_confirmation' && status === 'pending') ||
-      (m.contentType === 'input_request' && status === 'pending') ||
-      (m.contentType === 'routine_preview' && status === 'pending') ||
-      (m.contentType === 'meal_preview' && status === 'pending')
-    );
-  });
-  const showActionChips = !isStreaming && !streamingContent && !hasPendingInteraction && messages.length === 0;
 
   // Phase 21: profile_confirmation, routine_preview pending 시 입력 차단
   // input_request는 텍스트로 답변 가능하므로 차단하지 않음
@@ -185,7 +172,7 @@ export default function CounselorContent({ isDrawerOpen, onDrawerClose }: Counse
         {showChatLoader ? (
           <PulseLoader variant="chat" className="p-4" />
         ) : showWelcome ? (
-          <WelcomeScreen />
+          <WelcomeScreen onChipClick={handleChipClick} disabled={isStreaming} />
         ) : (
           <ChatMessageList
             messages={messages}
@@ -219,14 +206,6 @@ export default function CounselorContent({ isDrawerOpen, onDrawerClose }: Counse
         </div>
       )}
 
-      {/* 액션 칩 */}
-      {showActionChips && (
-        <ActionChips
-          onChipClick={handleChipClick}
-          disabled={isStreaming}
-        />
-      )}
-
       {/* 인풋 */}
       <ChatInput
         onSend={handleSend}
@@ -255,7 +234,6 @@ export default function CounselorContent({ isDrawerOpen, onDrawerClose }: Counse
 
       {/* 루틴 상세 보기 드로어 */}
       {(() => {
-        // Phase 9: 메시지에서 preview 데이터 추출
         const previewMessageId = preview.currentPreviewMessageId;
         const previewMessage = previewMessageId
           ? messages.find((m) => m.id === previewMessageId)
@@ -279,6 +257,36 @@ export default function CounselorContent({ isDrawerOpen, onDrawerClose }: Counse
             onApply={(forceOverwrite, weekCount, appendMode) => {
               if (previewMessageId) {
                 preview.apply(previewMessageId, previewData, forceOverwrite, weekCount, appendMode);
+              }
+            }}
+          />
+        );
+      })()}
+
+      {/* 식단 상세 보기 드로어 */}
+      {(() => {
+        const mealMessageId = mealPreview.currentPreviewMessageId;
+        const mealMessage = mealMessageId
+          ? messages.find((m) => m.id === mealMessageId)
+          : null;
+
+        if (!mealMessage || mealMessage.contentType !== 'meal_preview') {
+          return null;
+        }
+
+        const mealData = JSON.parse(mealMessage.content) as MealPlanPreviewData;
+        const mealStatus = (mealMessage.metadata?.status as 'pending' | 'applied' | 'cancelled') || 'pending';
+
+        return (
+          <MealPreviewDetailDrawer
+            isOpen={mealPreview.isOpen}
+            onClose={mealPreview.close}
+            preview={mealData}
+            status={mealStatus}
+            isApplying={mealPreview.isApplying}
+            onApply={() => {
+              if (mealMessageId) {
+                mealPreview.apply(mealMessageId, mealData);
               }
             }}
           />

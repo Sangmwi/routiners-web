@@ -1,10 +1,6 @@
 'use client';
 
-import { useCurrentUserProfileSuspense } from '@/hooks/profile';
-import { useRoutineEventByDateSuspense, useNextScheduledWorkoutSuspense } from '@/hooks/routine';
-import { useInBodySummarySuspense } from '@/hooks/inbody/queries';
-import { useProgressSummarySuspense } from '@/hooks/progress';
-import { formatDate } from '@/lib/utils/dateHelpers';
+import { useHomeDataSuspense } from '@/hooks/home';
 import TodayRoutineCard from '@/components/home/TodayRoutineCard';
 import InBodySection from '@/components/home/InBodySection';
 import Big3Section from '@/components/home/Big3Section';
@@ -46,13 +42,13 @@ const DUMMY_INFLUENCERS: Influencer[] = [
  * - 상위 page.tsx의 Suspense boundary에서 로딩 처리
  */
 export default function HomeContent() {
-  useCurrentUserProfileSuspense();
-  const today = formatDate(new Date());
-  const { data: todayWorkout } = useRoutineEventByDateSuspense(today, 'workout');
-  const { data: todayMeal } = useRoutineEventByDateSuspense(today, 'meal');
-  const { data: nextScheduledWorkout } = useNextScheduledWorkoutSuspense();
-  const { data: inbodySummary } = useInBodySummarySuspense();
-  const { data: progressSummary } = useProgressSummarySuspense();
+  const {
+    todayWorkout,
+    todayMeal,
+    nextScheduledWorkout,
+    inbodySummary,
+    progressSummary,
+  } = useHomeDataSuspense();
 
   const handleViewMoreProducts = () => {
     console.log('PX 상품 더보기');

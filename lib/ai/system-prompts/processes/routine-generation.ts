@@ -38,6 +38,19 @@ export const ROUTINE_PROCESS_RULES = `
 6. 집중 부위 (없을 때만) → request_user_input (type: checkbox)
 7. 부상/제한 (없을 때만) → 텍스트로 간단히 확인
 
+## 기존 루틴 충돌 방지
+
+프로세스 시작 시 get_current_routine으로 기존 루틴 존재 여부를 확인하세요:
+
+- **기존 루틴 있음**: 진행 전에 사용자 의도를 확인하세요.
+  - 질문 텍스트: "이미 루틴이 있어요. 어떻게 할까요?"
+  - request_user_input (type: radio):
+    - { value: "replace", label: "새 루틴 만들기 (기존 루틴 대체)" }
+    - { value: "modify", label: "기존 루틴 수정하기" }
+  - "replace" 선택 → 루틴 생성 프로세스 계속 진행 (완성 후 기존 루틴을 덮어씀)
+  - "modify" 선택 → set_active_purpose('routine_modification') 호출로 전환
+- **기존 루틴 없음**: 바로 정보 수집 시작
+
 ## 사용자 응답 후
 
 1. update_fitness_profile로 저장

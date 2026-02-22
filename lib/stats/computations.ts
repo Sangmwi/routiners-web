@@ -60,7 +60,7 @@ interface WorkoutMetrics {
   completionRate: number;
 }
 
-interface MealMetrics {
+export interface MealMetrics {
   scheduled: number;
   completed: number;
   avgCalories: number;
@@ -72,6 +72,14 @@ interface MealMetrics {
   plannedCalories: number;
   plannedProtein: number;
   completionRate: number;
+  /** 이벤트별 targetCalories 합산 */
+  targetCalories: number;
+  /** 이벤트별 targetProtein 합산 */
+  targetProtein: number;
+  /** 일 평균 목표 칼로리 */
+  avgTargetCalories: number;
+  /** target 데이터가 있는 이벤트 수 */
+  daysWithTargets: number;
 }
 
 /**
@@ -139,11 +147,21 @@ function aggregateEventMetrics(events: RoutineEvent[]): {
 
   let plannedMealCalories = 0;
   let plannedMealProtein = 0;
+  let mTargetCalories = 0;
+  let mTargetProtein = 0;
+  let daysWithTargets = 0;
   for (const event of mealEvents) {
     if (isMealData(event.data)) {
       const nutrients = calculateMealNutrients(event.data);
       plannedMealCalories += nutrients.calories;
       plannedMealProtein += nutrients.protein;
+      if (event.data.targetCalories) {
+        mTargetCalories += event.data.targetCalories;
+        daysWithTargets++;
+      }
+      if (event.data.targetProtein) {
+        mTargetProtein += event.data.targetProtein;
+      }
     }
   }
 
@@ -179,6 +197,10 @@ function aggregateEventMetrics(events: RoutineEvent[]): {
       completionRate: mealTotal > 0
         ? Math.round((mealCompleted.length / mealTotal) * 100)
         : 0,
+      targetCalories: Math.round(mTargetCalories),
+      targetProtein: Math.round(mTargetProtein),
+      avgTargetCalories: daysWithTargets > 0 ? Math.round(mTargetCalories / daysWithTargets) : 0,
+      daysWithTargets,
     },
   };
 }
@@ -203,6 +225,14 @@ export interface WeeklyStats {
     workoutCalories?: number;
     /** 식단 총 칼로리 */
     mealCalories?: number;
+    /** 식단 목표 칼로리 */
+    mealTargetCalories?: number;
+    /** 식단 총 단백질 */
+    mealProtein?: number;
+    /** 식단 총 탄수화물 */
+    mealCarbs?: number;
+    /** 식단 총 지방 */
+    mealFat?: number;
   }>;
   completedDays: number;
   weekLabel: string;
@@ -244,9 +274,17 @@ export function computeWeeklyStats(
     }
 
     let mealCalories: number | undefined;
+    let mealTargetCalories: number | undefined;
+    let mealProtein: number | undefined;
+    let mealCarbs: number | undefined;
+    let mealFat: number | undefined;
     if (mealEvent && isMealData(mealEvent.data)) {
       const nutrients = calculateMealNutrients(mealEvent.data);
       if (nutrients.calories > 0) mealCalories = nutrients.calories;
+      if (nutrients.protein > 0) mealProtein = nutrients.protein;
+      if (nutrients.carbs > 0) mealCarbs = nutrients.carbs;
+      if (nutrients.fat > 0) mealFat = nutrients.fat;
+      if (mealEvent.data.targetCalories) mealTargetCalories = mealEvent.data.targetCalories;
     }
 
     dailyStats.push({
@@ -258,6 +296,10 @@ export function computeWeeklyStats(
       workoutDuration,
       workoutCalories,
       mealCalories,
+      mealTargetCalories,
+      mealProtein,
+      mealCarbs,
+      mealFat,
     });
   }
 
@@ -363,4 +405,46 @@ export function computeMonthlyStats(
     endDate,
     totalDays,
   };
+}
+
+// ============================================================================
+// Balance Score (영양소 균형 점수)
+// ============================================================================
+
+export interface MacroValues {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+/**
+ * 실제 섭취량 vs 목표량의 균형 점수 (0-100)
+ *
+ * 각 매크로별 min(actual/target, target/actual) * 100으로 대칭 비율 계산 후 평균
+ */
+export function calculateBalanceScore(actual: MacroValues, target: MacroValues): number {
+  const pairs = [
+    { a: actual.calories, t: target.calories },
+    { a: actual.protein, t: target.protein },
+    { a: actual.carbs, t: target.carbs },
+    { a: actual.fat, t: target.fat },
+  ].filter((p) => p.t > 0);
+
+  if (pairs.length === 0) return 0;
+
+  const total = pairs.reduce((sum, { a, t }) => {
+    const ratio = t > 0 ? a / t : 0;
+    const adherence = Math.min(ratio, 1 / Math.max(ratio, 0.001)) * 100;
+    return sum + Math.min(adherence, 100);
+  }, 0);
+
+  return Math.round(total / pairs.length);
+}
+
+export function getBalanceLabel(score: number): { text: string; colorClass: string } {
+  if (score >= 90) return { text: '균형 잡힘', colorClass: 'text-primary' };
+  if (score >= 70) return { text: '양호', colorClass: 'text-positive' };
+  if (score >= 50) return { text: '개선 필요', colorClass: 'text-warning' };
+  return { text: '주의', colorClass: 'text-destructive' };
 }
