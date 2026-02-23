@@ -4,7 +4,7 @@ import { useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ImageSquareIcon, ImagesIcon } from '@phosphor-icons/react';
 import { ImageWithFallback } from '@/components/ui/image';
-import { useUserPosts } from '@/hooks/community/useUserPosts';
+import { useUserPostsSuspense } from '@/hooks/community/useUserPosts';
 import type { CommunityPost } from '@/lib/types/community';
 import { LoadingSpinner } from '@/components/ui/icons';
 import AppLink from '@/components/common/AppLink';
@@ -79,10 +79,9 @@ export default function ProfileActivityGrid({ userId }: ProfileActivityGridProps
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    isLoading,
-  } = useUserPosts(userId);
+  } = useUserPostsSuspense(userId);
 
-  const posts = data?.pages.flatMap((page) => page.posts) ?? [];
+  const posts = data.pages.flatMap((page) => page.posts);
 
   // Infinite scroll observer
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -107,21 +106,13 @@ export default function ProfileActivityGrid({ userId }: ProfileActivityGridProps
     return () => observer.disconnect();
   }, [handleIntersect]);
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-12">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
-
   if (posts.length === 0) {
     return <EmptyState />;
   }
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-0.5">
+      <div className="grid grid-cols-3 gap-0.5 py-4 px-1">
         {posts.map((post) => (
           <GridCell key={post.id} post={post} />
         ))}

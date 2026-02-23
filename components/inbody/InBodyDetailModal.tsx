@@ -125,13 +125,22 @@ export default function InBodyDetailModal({
       enableSwipe={state === 'view' && !isProcessing}
       headerAction={
         state === 'view' ? (
-          <button
-            onClick={handleEdit}
-            className="p-1.5 rounded-lg hover:bg-muted/50 transition-colors"
-            aria-label="수정"
-          >
-            <PencilSimpleIcon size={20} className="text-muted-foreground" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleConfirmDelete}
+              className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"
+              aria-label="삭제"
+            >
+              <DeleteIcon size="md" className="text-muted-foreground hover:text-destructive transition-colors" />
+            </button>
+            <button
+              onClick={handleEdit}
+              className="p-1.5 rounded-lg hover:bg-muted/50 transition-colors"
+              aria-label="수정"
+            >
+              <PencilSimpleIcon size={20} className="text-muted-foreground" />
+            </button>
+          </div>
         ) : undefined
       }
     >
@@ -226,19 +235,9 @@ export default function InBodyDetailModal({
 
       <ModalFooter>
         {state === 'view' && (
-          <>
-            <Button
-              variant="outline"
-              onClick={handleConfirmDelete}
-              className="text-destructive hover:bg-destructive/10"
-            >
-              <DeleteIcon size="sm" className="mr-2" />
-              삭제
-            </Button>
-            <Button variant="outline" onClick={handleClose} className="flex-1">
-              닫기
-            </Button>
-          </>
+          <Button variant="outline" onClick={handleClose} className="flex-1">
+            닫기
+          </Button>
         )}
 
         {state === 'edit' && (

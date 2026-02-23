@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { Suspense, useState, useRef, useEffect, useMemo } from 'react';
 import { PencilSimpleIcon, LockSimpleIcon } from '@phosphor-icons/react';
 import { useCurrentUserProfileSuspense } from '@/hooks/profile';
 import type { ProfileTab } from '@/components/profile/ProfileTabBar';
@@ -10,6 +10,8 @@ import ProfileTabBar from '@/components/profile/ProfileTabBar';
 import ProfileActivityGrid from '@/components/profile/ProfileActivityGrid';
 import ProfileInfoTab from '@/components/profile/ProfileInfoTab';
 import AppLink from '@/components/common/AppLink';
+import { PulseLoader } from '@/components/ui/PulseLoader';
+import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 
 /**
  * 소셜 프로필 페이지 콘텐츠 (Suspense 내부)
@@ -69,9 +71,12 @@ export default function ProfileContent() {
               </div>
             )}
 
-            {activeTab === 'activity' && <ProfileActivityGrid userId={user.id} />}
-
-            {activeTab === 'info' && <ProfileInfoTab user={user} />}
+            <QueryErrorBoundary>
+              <Suspense fallback={<PulseLoader />}>
+                {activeTab === 'activity' && <ProfileActivityGrid userId={user.id} />}
+                {activeTab === 'info' && <ProfileInfoTab user={user} />}
+              </Suspense>
+            </QueryErrorBoundary>
           </div>
         </div>
       </div>

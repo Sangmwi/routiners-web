@@ -56,27 +56,29 @@ function RecordItem({
 
   return (
     <div
-      className="flex items-center justify-between px-4 py-4 hover:bg-muted/20 transition-colors cursor-pointer"
+      className="flex items-center justify-between px-4 py-3.5 hover:bg-muted/20 transition-colors cursor-pointer"
       onClick={() => onClick?.(record)}
     >
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-card-foreground">{formattedDate}</p>
-        <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-          <span>체중 {record.weight}kg</span>
-          <span className="text-border">·</span>
-          <span>골격근 {record.skeletalMuscleMass}kg</span>
-          <span className="text-border">·</span>
-          <span>체지방률 {record.bodyFatPercentage}%</span>
-        </div>
-        {record.inbodyScore && (
-          <div className="mt-1">
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-              점수 {record.inbodyScore}점
+        {/* Row 1: Date + Score badge inline */}
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium text-muted-foreground">{formattedDate}</p>
+          {record.inbodyScore && (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary">
+              {record.inbodyScore}점
             </span>
-          </div>
-        )}
+          )}
+        </div>
+        {/* Row 2: Metrics with emphasized values */}
+        <div className="flex items-center gap-3 mt-2.5 text-xs text-muted-foreground">
+          <span>체중 <span className="font-semibold text-card-foreground">{record.weight}</span>kg</span>
+          <span className="text-border">·</span>
+          <span>골격근 <span className="font-semibold text-card-foreground">{record.skeletalMuscleMass}</span>kg</span>
+          <span className="text-border">·</span>
+          <span>체지방률 <span className="font-semibold text-card-foreground">{record.bodyFatPercentage}</span>%</span>
+        </div>
       </div>
-      <NextIcon size="md" className="text-muted-foreground flex-shrink-0" />
+      <NextIcon size="md" className="text-muted-foreground flex-shrink-0 ml-3" />
     </div>
   );
 }

@@ -78,7 +78,7 @@ export default function CommunityContent({
   const posts = data?.pages.flatMap((page) => page.posts) ?? [];
 
   return (
-    <div className="space-y-4">
+    <div>
       {posts.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <p className="text-muted-foreground mb-2">
@@ -95,14 +95,16 @@ export default function CommunityContent({
         </div>
       ) : (
         <>
-          {posts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              onClick={() => handlePostClick(post.id)}
-              onLike={() => handleLike(post.id)}
-            />
-          ))}
+          <div className="divide-y divide-border/40">
+            {posts.map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                onClick={() => handlePostClick(post.id)}
+                onLike={() => handleLike(post.id)}
+              />
+            ))}
+          </div>
 
           {/* 무한스크롤 sentinel */}
           <div ref={sentinelRef} className="h-1" />

@@ -216,3 +216,80 @@ export function validateImageFiles(
   }
   return { valid: true };
 }
+
+// ============================================================
+// Image Compression
+// ============================================================
+
+export interface CompressImageOptions {
+  /** 최대 너비 (px). 기본 1080 */
+  maxWidth?: number;
+  /** 최대 높이 (px). 기본 1080 */
+  maxHeight?: number;
+  /** 압축 품질 0~1. 기본 0.8 */
+  quality?: number;
+  /** 출력 MIME 타입. 기본 'image/webp' */
+  outputType?: 'image/webp' | 'image/jpeg';
+}
+
+/**
+ * 이미지를 canvas로 리사이즈 + 압축
+ *
+ * - 최대 1080px로 리사이즈 (비율 유지)
+ * - WebP 80% 품질로 압축
+ * - 원본이 이미 작으면 그대로 반환
+ *
+ * @example
+ * ```ts
+ * const compressed = await compressImage(file);
+ * // 5MB → ~200KB
+ * ```
+ */
+export async function compressImage(
+  file: File,
+  options: CompressImageOptions = {}
+): Promise<File> {
+  const {
+    maxWidth = 1080,
+    maxHeight = 1080,
+    quality = 0.8,
+    outputType = 'image/webp',
+  } = options;
+
+  // GIF는 애니메이션 유지를 위해 압축하지 않음
+  if (file.type === 'image/gif') {
+    return file;
+  }
+
+  const bitmap = await createImageBitmap(file);
+  const { width, height } = bitmap;
+
+  // 리사이즈 비율 계산
+  let targetWidth = width;
+  let targetHeight = height;
+
+  if (width > maxWidth || height > maxHeight) {
+    const ratio = Math.min(maxWidth / width, maxHeight / height);
+    targetWidth = Math.round(width * ratio);
+    targetHeight = Math.round(height * ratio);
+  }
+
+  // canvas에 그리기
+  const canvas = new OffscreenCanvas(targetWidth, targetHeight);
+  const ctx = canvas.getContext('2d')!;
+  ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
+  bitmap.close();
+
+  // 압축된 Blob 생성
+  const blob = await canvas.convertToBlob({ type: outputType, quality });
+
+  // 압축 후 더 커졌으면 원본 반환
+  if (blob.size >= file.size) {
+    return file;
+  }
+
+  const ext = outputType === 'image/webp' ? 'webp' : 'jpg';
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+
+  return new File([blob], `${baseName}.${ext}`, { type: outputType });
+}

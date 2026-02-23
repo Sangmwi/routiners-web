@@ -250,10 +250,12 @@ function DataItem({
   unit?: string;
 }) {
   return (
-    <div className="flex justify-between items-center">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="font-medium text-card-foreground">
-        {value !== undefined ? `${value}${unit || ''}` : '-'}
+    <div className="flex justify-between items-center py-0.5">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="text-sm font-semibold text-card-foreground">
+        {value !== undefined ? (
+          <>{value}<span className="text-xs font-normal text-muted-foreground ml-0.5">{unit || ''}</span></>
+        ) : '-'}
       </span>
     </div>
   );

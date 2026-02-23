@@ -5,7 +5,7 @@ import {
   CigaretteSlashIcon,
   CigaretteIcon,
 } from '@phosphor-icons/react';
-import { useInBodySummary } from '@/hooks/inbody';
+import { useInBodySummarySuspense } from '@/hooks/inbody';
 import ProfileInbodySection from '@/components/profile/ProfileInbodySection';
 import BodyCompositionSummary from '@/components/inbody/BodyCompositionSummary';
 import ProfileBig3Section from '@/components/profile/ProfileBig3Section';
@@ -49,7 +49,7 @@ interface ProfileInfoTabProps {
 }
 
 export default function ProfileInfoTab({ user }: ProfileInfoTabProps) {
-  const { data: inbodySummary } = useInBodySummary({ enabled: true });
+  const { data: inbodySummary } = useInBodySummarySuspense();
   const hasInBodyData = !!inbodySummary?.latest;
 
   const hasInterests =

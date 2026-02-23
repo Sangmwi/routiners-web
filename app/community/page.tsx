@@ -5,12 +5,12 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { MainTabLayout, MainTabHeader } from '@/components/layouts';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
+import EmptyState from '@/components/common/EmptyState';
 import { PulseLoader } from '@/components/ui/PulseLoader';
+import PrimaryTabs, { type PrimaryTab } from '@/components/community/PrimaryTabs';
 import CategoryTabs from '@/components/community/CategoryTabs';
-import SearchBar from '@/components/community/SearchBar';
 import FilterModal, { type DateRange } from '@/components/community/FilterModal';
-import Button from '@/components/ui/Button';
-import { PencilSimpleLineIcon, FunnelIcon } from '@phosphor-icons/react';
+import { UserFocusIcon, PlusIcon, UsersThreeIcon } from '@phosphor-icons/react';
 import type { PostCategory } from '@/lib/types/community';
 
 const CommunityContent = dynamic(
@@ -25,6 +25,7 @@ const VALID_CATEGORIES = ['general', 'workout', 'meal', 'qna'] as const;
  */
 export default function CommunityPage() {
   const router = useRouter();
+  const [primaryTab, setPrimaryTab] = useState<PrimaryTab>('recommended');
   const [category, setCategory] = useState<PostCategory | 'all'>(() => {
     if (typeof window === 'undefined') return 'all';
     const params = new URLSearchParams(window.location.search);
@@ -34,13 +35,15 @@ export default function CommunityPage() {
     }
     return 'all';
   });
-  const [search, setSearch] = useState('');
   const [dateRange, setDateRange] = useState<DateRange>('all');
   const [filterOpen, setFilterOpen] = useState(false);
 
-  // URL에서 초기 카테고리 읽기 (클라이언트 사이드)
   const handleNewPost = () => {
     router.push('/community/write');
+  };
+
+  const handleSearchUsers = () => {
+    router.push('/community/search-users');
   };
 
   const handleCategoryChange = (categoryId: string) => {
@@ -66,35 +69,69 @@ export default function CommunityPage() {
         title="커뮤니티"
         action={
           <>
-            <Button
-              variant="outline"
-              size="xs"
-              onClick={() => setFilterOpen(true)}
-              className={hasActiveFilter ? 'border-primary text-primary' : ''}
+            <button
+              type="button"
+              onClick={handleSearchUsers}
+              className="p-2 rounded-xl hover:bg-muted/50 active:bg-muted/80 transition-colors"
+              aria-label="사용자 검색"
             >
-              <FunnelIcon size={16} weight={hasActiveFilter ? 'fill' : 'regular'} />
-            </Button>
-            <Button variant="primary" size="xs" onClick={handleNewPost}>
-              <PencilSimpleLineIcon size={16} />
-              글쓰기
-            </Button>
+              <UserFocusIcon size={22} className="text-muted-foreground" />
+            </button>
+            <button
+              type="button"
+              onClick={handleNewPost}
+              className="p-2 rounded-xl hover:bg-muted/50 active:bg-muted/80 transition-colors"
+              aria-label="글쓰기"
+            >
+              <PlusIcon size={22} className="text-muted-foreground" />
+            </button>
           </>
         }
       />
-      <CategoryTabs
-        selectedCategory={category}
-        onCategoryChange={handleCategoryChange}
-      />
-      <SearchBar onSearchChange={setSearch} />
-      <QueryErrorBoundary>
-        <Suspense fallback={<PulseLoader />}>
-          <CommunityContent
-            category={category}
-            search={search}
-            dateRange={dateRange}
-          />
-        </Suspense>
-      </QueryErrorBoundary>
+
+      {/* 필터 존: 메인탭 + 카테고리 서브탭 */}
+      <div className="flex flex-col gap-4">
+        <PrimaryTabs
+          activeTab={primaryTab}
+          onTabChange={setPrimaryTab}
+          hasActiveFilter={hasActiveFilter}
+          onFilterOpen={() => setFilterOpen(true)}
+        />
+        <CategoryTabs
+          selectedCategory={category}
+          onCategoryChange={handleCategoryChange}
+        />
+      </div>
+
+      {/* 콘텐츠 영역 */}
+      {primaryTab === 'following' ? (
+        <EmptyState
+          icon={UsersThreeIcon}
+          message="팔로우한 사용자의 글이 여기에 표시돼요"
+          hint="관심있는 사용자를 팔로우해보세요"
+          action={{
+            label: '사용자 찾기',
+            onClick: handleSearchUsers,
+          }}
+          size="lg"
+          showIconBackground
+        />
+      ) : (
+        <div
+          key={primaryTab}
+          className="animate-tab-slide"
+          style={{ '--slide-from': '-30px' } as React.CSSProperties}
+        >
+          <QueryErrorBoundary>
+            <Suspense fallback={<PulseLoader />}>
+              <CommunityContent
+                category={category}
+                dateRange={dateRange}
+              />
+            </Suspense>
+          </QueryErrorBoundary>
+        </div>
+      )}
 
       <FilterModal
         isOpen={filterOpen}

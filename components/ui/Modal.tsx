@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { CloseIcon } from '@/components/ui/icons';
 import {
   useModalState,
@@ -62,7 +63,7 @@ function getModalAnimationClass(
   isDragging: boolean
 ): string {
   const baseClass = isBottom
-    ? 'rounded-t-3xl sm:rounded-2xl'
+    ? 'rounded-t-3xl'
     : 'rounded-2xl mx-4';
 
   if (isSwipeClosing) return baseClass;
@@ -170,7 +171,7 @@ export default function Modal({
   const modalRef = useRef<HTMLDivElement>(null);
 
   // 모달 상태 관리
-  const { isVisible, isAnimating, hasOpened, executeClose } = useModalState(
+  const { isVisible, isAnimating, hasOpened, markOpened, executeClose } = useModalState(
     isOpen,
     onClose
   );
@@ -182,8 +183,12 @@ export default function Modal({
     executeClose
   );
 
-  // 드래그 상호작용 추적 (한 번 드래그하면 애니메이션 재실행 방지)
-  
+  // 드래그 시작 시 오픈 애니메이션 재실행 방지
+  useEffect(() => {
+    if (swipe.isDragging) {
+      markOpened();
+    }
+  }, [swipe.isDragging, markOpened]);
 
   // 모달 닫힐 때 스와이프 상태 초기화
   useEffect(() => {
@@ -206,6 +211,9 @@ export default function Modal({
   };
 
   if (!isVisible) return null;
+
+  // SSR 안전: document가 없으면 렌더링하지 않음
+  if (typeof document === 'undefined') return null;
 
   // 스타일 계산
   const heightClass = isBottom ? HEIGHT_CLASSES[height] : 'max-h-[90vh]';
@@ -230,7 +238,7 @@ export default function Modal({
     ? getSwipeTransform(swipe.isSwipeClosing, swipe.isSnappingBack, swipe.isDragging, swipe.deltaY, hasOpened, isAnimating)
     : undefined;
 
-  return (
+  return createPortal(
     <div
       className={`fixed inset-0 z-60 flex ${containerAlign} justify-center`}
       onClick={handleBackdropClick}
@@ -246,7 +254,7 @@ export default function Modal({
       {/* Modal Content */}
       <div
         ref={modalRef}
-        className={`relative w-full bg-card shadow-xl ${heightClass} flex flex-col ${modalAnimationClass} ${SIZE_CLASSES[size]} ${className}`}
+        className={`relative w-full bg-card shadow-xl ${heightClass} flex flex-col ${modalAnimationClass} ${isBottom ? 'sm:max-w-md' : SIZE_CLASSES[size]} ${className}`}
         style={swipeStyle}
         onClick={(e) => e.stopPropagation()}
       >
@@ -289,11 +297,16 @@ export default function Modal({
         )}
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto overscroll-contain">
+        <div
+          ref={enableSwipe && isBottom ? swipe.contentRef : undefined}
+          className="flex-1 overflow-y-auto overscroll-contain"
+          {...(enableSwipe && isBottom ? swipe.contentHandlers : {})}
+        >
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

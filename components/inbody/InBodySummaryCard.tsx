@@ -93,7 +93,7 @@ export default function InBodySummaryCard({
   const formattedDate = formatKoreanDate(latest.measuredAt, { monthFormat: 'short' });
 
   const baseClass = variant === 'card'
-    ? 'bg-card rounded-xl p-4 border border-border/50'
+    ? 'bg-card rounded-2xl p-5'
     : 'bg-muted/20 rounded-xl p-4';
 
   return (
@@ -106,19 +106,17 @@ export default function InBodySummaryCard({
       {/* 메트릭 그리드 */}
       <MetricsGrid data={latest} changes={changes} />
 
-      {/* 점수 뱃지 (있는 경우) */}
-      {latest.inbodyScore && !compact && (
-        <div className="flex justify-center mt-3">
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-            인바디 점수 {latest.inbodyScore}점
-          </span>
+      {/* Footer: Date (left) + Score badge (right) */}
+      <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/30">
+        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <span>{formattedDate} 측정</span>
+          {onClick && <NextIcon size="xs" />}
         </div>
-      )}
-
-      {/* 하단 정보 */}
-      <div className="flex items-center justify-center gap-1 mt-3 text-xs text-muted-foreground">
-        <span>{formattedDate} 측정</span>
-        {onClick && <NextIcon size="xs" />}
+        {latest.inbodyScore && !compact && (
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+            {latest.inbodyScore}점
+          </span>
+        )}
       </div>
     </div>
   );

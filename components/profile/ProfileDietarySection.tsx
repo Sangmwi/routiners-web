@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { BowlFoodIcon, CaretRightIcon } from '@phosphor-icons/react';
-import { useDietaryProfile, hasDietaryProfileData } from '@/hooks/dietaryProfile';
+import { useDietaryProfileSuspense, hasDietaryProfileData } from '@/hooks/dietaryProfile';
 import {
   DIETARY_GOAL_LABELS,
   DIET_TYPE_LABELS,
@@ -27,18 +27,12 @@ interface ProfileDietarySectionProps {
 export default function ProfileDietarySection({
   renderHeader = true,
 }: ProfileDietarySectionProps = {}) {
-  const { data: profile, isPending: isLoading } = useDietaryProfile();
+  const { data: profile } = useDietaryProfileSuspense();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const hasData = hasDietaryProfileData(profile);
 
   const compact = !renderHeader;
-
-  const renderLoading = () => (
-    <div className="flex items-center justify-center py-4">
-      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
 
   const renderEmpty = () => (
     <EmptyState
@@ -132,7 +126,7 @@ export default function ProfileDietarySection({
     );
   };
 
-  const content = isLoading ? renderLoading() : !hasData ? renderEmpty() : renderData();
+  const content = !hasData ? renderEmpty() : renderData();
 
   return (
     <>

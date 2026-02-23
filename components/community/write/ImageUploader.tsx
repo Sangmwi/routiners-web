@@ -5,7 +5,7 @@ import { CameraIcon, XCircleIcon } from '@phosphor-icons/react';
 import { ImageWithFallback } from '@/components/ui/image';
 import { ImageSourceDrawer } from '@/components/drawers';
 import { useNativeImagePicker } from '@/hooks/webview';
-import { validateImageFile } from '@/lib/utils/imageValidation';
+import { validateImageFile, compressImage } from '@/lib/utils/imageValidation';
 import type { ImagePickerSource } from '@/lib/webview';
 import ErrorToast from '@/components/ui/ErrorToast';
 
@@ -53,19 +53,20 @@ export default function ImageUploader({
     }
 
     if (result.base64) {
-      const file = base64ToFile(
+      const rawFile = base64ToFile(
         result.base64,
         result.fileName || 'community.jpg',
       );
 
-      const validation = validateImageFile(file);
+      const validation = validateImageFile(rawFile);
       if (!validation.valid) {
         setErrorMessage(validation.error || '파일 검증에 실패했어요.');
         setIsProcessing(false);
         return;
       }
 
-      onAddFiles([file]);
+      const compressed = await compressImage(rawFile);
+      onAddFiles([compressed]);
     }
 
     setIsProcessing(false);

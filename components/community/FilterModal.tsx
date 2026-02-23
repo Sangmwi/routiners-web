@@ -35,30 +35,37 @@ export default function FilterModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} position="bottom" enableSwipe>
-      <ModalBody className="p-4 pb-safe">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold text-foreground">필터</h3>
-            <button
-              onClick={handleReset}
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              초기화
-            </button>
-          </div>
-
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="필터"
+      headerAction={
+        <button
+          onClick={handleReset}
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          초기화
+        </button>
+      }
+      position="bottom"
+      enableSwipe
+      showCloseButton={false}
+    >
+      <ModalBody className="px-5 pt-4 pb-6 pb-safe">
+        <div className="space-y-6">
           {/* 기간 필터 */}
-          <div className="space-y-2">
-            <span className="text-sm font-medium text-foreground">기간</span>
+          <div className="space-y-3">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              기간
+            </span>
             <div className="flex flex-wrap gap-2">
               {DATE_RANGE_OPTIONS.map((option) => (
                 <button
                   key={option.id}
                   onClick={() => handleSelect(option.id)}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                  className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
                     dateRange === option.id
-                      ? 'bg-primary text-white'
+                      ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
                       : 'bg-muted/20 text-muted-foreground hover:bg-muted/40'
                   }`}
                 >
@@ -68,15 +75,17 @@ export default function FilterModal({
             </div>
           </div>
 
-          {/* 정렬 (Phase 2에서 인기순 추가) */}
-          <div className="space-y-2">
-            <span className="text-sm font-medium text-foreground">정렬</span>
+          {/* 정렬 */}
+          <div className="space-y-3">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              정렬
+            </span>
             <div className="flex flex-wrap gap-2">
-              <button className="rounded-full px-4 py-2 text-sm font-medium bg-primary text-white">
+              <button className="rounded-full px-3.5 py-1.5 text-xs font-medium bg-primary text-primary-foreground shadow-sm shadow-primary/20">
                 최신순
               </button>
               <button
-                className="rounded-full px-4 py-2 text-sm font-medium bg-muted/20 text-muted-foreground/50 cursor-not-allowed"
+                className="rounded-full px-3.5 py-1.5 text-xs font-medium bg-muted/20 text-muted-foreground/40 cursor-not-allowed"
                 disabled
               >
                 인기순

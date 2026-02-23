@@ -17,6 +17,8 @@ interface UseModalStateReturn {
   isVisible: boolean;
   isAnimating: boolean;
   hasOpened: boolean;
+  /** 드래그 등 상호작용 시 오픈 애니메이션 재실행 방지 */
+  markOpened: () => void;
   executeClose: () => void;
 }
 
@@ -85,10 +87,14 @@ export function useModalState(
     }
   }, [isOpen, isVisible]);
 
+  /** 드래그 등 상호작용 시 오픈 애니메이션 재실행 방지용 */
+  const markOpened = useCallback(() => setHasOpened(true), []);
+
   return {
     isVisible,
     isAnimating,
     hasOpened,
+    markOpened,
     executeClose,
   };
 }

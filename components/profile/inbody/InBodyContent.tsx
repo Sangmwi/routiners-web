@@ -71,10 +71,10 @@ export default function InBodyContent() {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Summary Card */}
-        <section className="space-y-3">
-          <SectionHeader title="최근 측정" size="sm" />
+        <section className="space-y-4">
+          <SectionHeader title="최근 측정" size="md" />
           <InBodySummaryCard
             latest={summary?.latest}
             totalRecords={summary?.totalRecords}
@@ -83,13 +83,13 @@ export default function InBodyContent() {
         </section>
 
         {/* Record List */}
-        <section className="space-y-3">
+        <section className="space-y-4">
           <SectionHeader
             title="측정 기록"
-            size="sm"
+            size="md"
             badge={records.length}
           />
-          <div className="bg-card rounded-xl border border-border/50 overflow-hidden">
+          <div className="bg-card rounded-2xl border border-border/50 overflow-hidden">
             <InBodyRecordList
               records={records}
               onRecordClick={openDetailModal}

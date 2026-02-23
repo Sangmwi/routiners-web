@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { BarbellIcon, CaretRightIcon } from '@phosphor-icons/react';
-import { useFitnessProfile, hasFitnessProfileData } from '@/hooks/fitnessProfile';
+import { useFitnessProfileSuspense, hasFitnessProfileData } from '@/hooks/fitnessProfile';
 import {
   FITNESS_GOAL_LABELS,
   EXPERIENCE_LEVEL_LABELS,
@@ -27,18 +27,12 @@ interface ProfileFitnessSectionProps {
 export default function ProfileFitnessSection({
   renderHeader = true,
 }: ProfileFitnessSectionProps = {}) {
-  const { data: profile, isPending: isLoading } = useFitnessProfile();
+  const { data: profile } = useFitnessProfileSuspense();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const hasData = hasFitnessProfileData(profile);
 
   const compact = !renderHeader;
-
-  const renderLoading = () => (
-    <div className="flex items-center justify-center py-4">
-      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
 
   const renderEmpty = () => (
     <EmptyState
@@ -121,7 +115,7 @@ export default function ProfileFitnessSection({
     );
   };
 
-  const content = isLoading ? renderLoading() : !hasData ? renderEmpty() : renderData();
+  const content = !hasData ? renderEmpty() : renderData();
 
   return (
     <>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ScalesIcon, LockIcon } from '@phosphor-icons/react';
-import { useInBodySummary, useUserInBodySummary } from '@/hooks/inbody';
+import { useInBodySummarySuspense } from '@/hooks/inbody';
 import { InBodyDetailModal } from '@/components/inbody';
 import { MetricItem } from '@/components/inbody/MetricItem';
 import { InBodyRecord } from '@/lib/types';
@@ -33,17 +33,7 @@ export default function ProfileInbodySection({
   renderHeader = true,
 }: ProfileInbodySectionProps) {
 
-  // 내 프로필: useInBodySummary, 타인 프로필: useUserInBodySummary
-  const ownSummaryQuery = useInBodySummary({
-    enabled: isOwnProfile,
-  });
-
-  const otherSummaryQuery = useUserInBodySummary(userId, {
-    enabled: !isOwnProfile && !!userId,
-  });
-
-  // 사용할 데이터 선택
-  const { data: summary, isPending: isLoading } = isOwnProfile ? ownSummaryQuery : otherSummaryQuery;
+  const { data: summary } = useInBodySummarySuspense();
 
   // 비공개 여부 (API 응답에서 확인)
   const isPrivate = summary?.isPrivate ?? false;
@@ -117,11 +107,7 @@ export default function ProfileInbodySection({
       className={isClickable ? 'cursor-pointer' : ''}
       onClick={isClickable ? handleCardClick : undefined}
     >
-      {isLoading ? (
-        <div className="flex items-center justify-center py-4">
-          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
-      ) : !canViewData ? (
+      {!canViewData ? (
         renderPrivateState()
       ) : !latest ? (
         renderEmptyState()

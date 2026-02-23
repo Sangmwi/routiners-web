@@ -8,7 +8,7 @@ import { useNativeImagePicker } from '@/hooks/webview';
 import { useProfileImagesDraft } from '@/hooks/profile';
 import type { AddImageResult } from '@/hooks/profile/useProfileImagesDraft';
 import type { ImagePickerSource } from '@/lib/webview';
-import { validateImageFile } from '@/lib/utils/imageValidation';
+import { validateImageFile, compressImage } from '@/lib/utils/imageValidation';
 import ErrorToast from '@/components/ui/ErrorToast';
 import { LoadingSpinner } from '@/components/ui/icons';
 
@@ -65,16 +65,17 @@ export default function ProfilePhotoEdit({
     }
 
     if (result.base64) {
-      const file = base64ToFile(result.base64, result.fileName || 'profile.jpg');
+      const rawFile = base64ToFile(result.base64, result.fileName || 'profile.jpg');
 
-      const validation = validateImageFile(file);
+      const validation = validateImageFile(rawFile);
       if (!validation.valid) {
         setErrorMessage(validation.error || '파일 검증에 실패했어요.');
         setIsProcessing(false);
         return;
       }
 
-      const addResult: AddImageResult = addImage(file, 0);
+      const compressed = await compressImage(rawFile);
+      const addResult: AddImageResult = addImage(compressed, 0);
       if (!addResult.success && addResult.error) {
         setErrorMessage(addResult.error);
       }
