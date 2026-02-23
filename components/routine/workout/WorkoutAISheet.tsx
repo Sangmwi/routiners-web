@@ -108,7 +108,7 @@ export default function WorkoutAISheet({ isOpen, onClose, exerciseName }: Workou
               <PaperPlaneRightIcon size={18} className="text-primary" weight="fill" />
             </button>
           </div>
-          <p className="text-[11px] text-muted-foreground/50 text-center mt-2">
+          <p className="text-xs text-muted-foreground/50 text-center mt-2">
             곧 AI 트레이너 기능이 추가될 예정이에요
           </p>
         </div>

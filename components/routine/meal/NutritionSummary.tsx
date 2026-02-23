@@ -49,7 +49,7 @@ function NutritionOverview({ calories, protein, carbs, fat }: NutritionOverviewP
       <div className="grid grid-cols-3 gap-3">
         {MACRO_CONFIG.map(({ key, label, unit }) => (
           <div key={key} className="text-center">
-            <p className="text-[11px] text-muted-foreground mb-1">{label}</p>
+            <p className="text-xs text-muted-foreground mb-1">{label}</p>
             <p className="text-base font-bold text-foreground tabular-nums">
               {macros[key]}
               <span className="text-xs font-normal text-muted-foreground ml-1">{unit}</span>

@@ -39,7 +39,7 @@ export default function InBodyMiniCard({ summary, history = [] }: InBodyMiniCard
 
             return (
               <div key={key} className="text-center">
-                <p className="text-[11px] text-muted-foreground mb-1">{label}</p>
+                <p className="text-xs text-muted-foreground mb-1">{label}</p>
                 <p className="text-base font-bold text-foreground">
                   {value != null ? (
                     <>{value}<span className="text-xs font-normal text-muted-foreground ml-1">{unit}</span></>

@@ -34,7 +34,7 @@ export default function InfluencerCard({ author, title, imageUrl, votes, onClick
               {author.charAt(0).toUpperCase()}
             </span>
           </div>
-          <span className="text-[11px] text-white/90 font-medium drop-shadow-sm">
+          <span className="text-xs text-white/90 font-medium drop-shadow-sm">
             @{author}
           </span>
         </div>

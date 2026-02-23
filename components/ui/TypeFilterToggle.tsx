@@ -1,6 +1,7 @@
 'use client';
 
 import type { EventType } from '@/lib/types/routine';
+import SegmentedControl from './SegmentedControl';
 
 export type FilterValue = EventType | 'all';
 
@@ -9,47 +10,33 @@ interface TypeFilterToggleProps {
   value: FilterValue;
   /** 필터 변경 핸들러 */
   onChange: (type: FilterValue) => void;
-  /** 컴팩트 사이즈 (헤더 인라인용) */
+  /** sm: 인라인 (기본), md: 독립 배치 */
   size?: 'sm' | 'md';
 }
 
-const filterOptions: { value: FilterValue; label: string }[] = [
-  { value: 'all', label: '전체' },
-  { value: 'workout', label: '운동' },
-  { value: 'meal', label: '식단' },
+const FILTER_OPTIONS = [
+  { key: 'all' as const, label: '전체' },
+  { key: 'workout' as const, label: '운동' },
+  { key: 'meal' as const, label: '식단' },
 ];
 
 /**
  * 이벤트 타입 필터 토글 (공용)
  *
  * - 전체 / 운동 / 식단 필터
- * - 캘린더, 다가오는 루틴 등에서 공유
+ * - 내부적으로 SegmentedControl을 사용하여 앱 전체 토글 스타일 통일
  */
 export default function TypeFilterToggle({
   value,
   onChange,
-  size = 'md',
+  size = 'sm',
 }: TypeFilterToggleProps) {
-  const sizeClass = size === 'sm'
-    ? 'px-2.5 py-1 text-[11px]'
-    : 'px-3 py-1.5 text-xs';
-
   return (
-    <div className="flex gap-1.5">
-      {filterOptions.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          onClick={() => onChange(option.value)}
-          className={`${sizeClass} font-medium rounded-full transition-colors ${
-            value === option.value
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-          }`}
-        >
-          {option.label}
-        </button>
-      ))}
-    </div>
+    <SegmentedControl
+      options={FILTER_OPTIONS}
+      value={value}
+      onChange={onChange}
+      size={size}
+    />
   );
 }

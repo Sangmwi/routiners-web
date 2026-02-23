@@ -42,7 +42,7 @@ export default function BodyCompositionSummary({
               <span />
             )}
             {dateLabel && (
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 {dateLabel} 측정
               </p>
             )}

@@ -43,7 +43,7 @@ export default function PeriodTabs({
       className="relative w-40 text-center text-sm text-muted-foreground font-medium hover:text-foreground transition-colors rounded-md px-1 py-0.5"
     >
       {yearLabel && (
-        <span className="absolute -top-3.5 inset-x-0 text-[11px] text-muted-foreground/60">
+        <span className="absolute -top-3.5 inset-x-0 text-xs text-muted-foreground/60">
           {yearLabel}
         </span>
       )}
@@ -52,7 +52,7 @@ export default function PeriodTabs({
   ) : (
     <span className="relative w-40 text-center text-sm text-muted-foreground font-medium">
       {yearLabel && (
-        <span className="absolute -top-3.5 inset-x-0 text-[11px] text-muted-foreground/60">
+        <span className="absolute -top-3.5 inset-x-0 text-xs text-muted-foreground/60">
           {yearLabel}
         </span>
       )}
@@ -93,6 +93,7 @@ export default function PeriodTabs({
         options={PERIOD_OPTIONS}
         value={period}
         onChange={onPeriodChange}
+        size="md"
       />
     </div>
   );

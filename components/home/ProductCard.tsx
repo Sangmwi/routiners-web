@@ -34,7 +34,7 @@ export default function ProductCard({ brand, name, price, imageUrl, badge, onCli
         )}
       </div>
       <div className="p-3.5">
-        <p className="text-[11px] text-muted-foreground mb-0.5 tracking-wide line-clamp-1">
+        <p className="text-xs text-muted-foreground mb-0.5 tracking-wide line-clamp-1">
           {brand}
         </p>
         <p className="text-[13px] font-medium text-card-foreground mb-2 line-clamp-2 leading-snug min-h-[2.5rem]">

@@ -105,7 +105,7 @@ export default function BodyStatsTab() {
                 <p className="text-xs text-muted-foreground">{label}</p>
                 {change != null && change !== 0 && summary.changes?.periodDays != null && (
                   <div className="flex items-center gap-1">
-                    <span className="text-[11px] text-muted-foreground/50">
+                    <span className="text-xs text-muted-foreground/50">
                       {formatPeriod(summary.changes.periodDays)}보다
                     </span>
                     <ChangeIndicator value={change} positiveIsGood={positiveIsGood} unit={unit} />

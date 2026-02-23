@@ -70,7 +70,7 @@ export default function DietaryDetailDrawer({
             <div className="grid grid-cols-2 gap-x-4 gap-y-3">
               {infoItems.map((item) => (
                 <div key={item.label}>
-                  <p className="text-[11px] text-muted-foreground">{item.label}</p>
+                  <p className="text-xs text-muted-foreground">{item.label}</p>
                   <p className="text-sm font-medium text-foreground">{item.value}</p>
                 </div>
               ))}

@@ -102,7 +102,7 @@ export default function ProfileFitnessSection({
                 {focusAreas.map((area) => (
                   <span
                     key={area}
-                    className="px-2 py-0.5 text-[11px] rounded-md bg-muted/50 text-muted-foreground"
+                    className="px-2 py-0.5 text-xs rounded-md bg-muted/50 text-muted-foreground"
                   >
                     {FOCUS_AREA_LABELS[area]}
                   </span>

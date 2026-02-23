@@ -149,7 +149,7 @@ function ActivityRow({
         {label}
       </span>
       {meta && (
-        <span className="text-[11px] text-muted-foreground shrink-0">
+        <span className="text-xs text-muted-foreground shrink-0">
           {meta}
         </span>
       )}
@@ -171,7 +171,7 @@ function StatusPill({
 
   if (displayStatus === 'completed') {
     return (
-      <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-primary">
+      <span className="inline-flex items-center gap-0.5 text-xs font-medium text-primary">
         <CheckCircleIcon size={14} weight="fill" />
         완료
       </span>
@@ -179,7 +179,7 @@ function StatusPill({
   }
   if (displayStatus === 'incomplete') {
     return (
-      <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-muted-foreground/40">
+      <span className="inline-flex items-center gap-0.5 text-xs font-medium text-muted-foreground/40">
         <XCircleIcon size={14} weight="fill" />
         미완료
       </span>
@@ -187,7 +187,7 @@ function StatusPill({
   }
   // scheduled
   return (
-    <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-scheduled">
+    <span className="inline-flex items-center gap-0.5 text-xs font-medium text-scheduled">
       <ClockIcon size={14} weight="duotone" />
       예정
     </span>

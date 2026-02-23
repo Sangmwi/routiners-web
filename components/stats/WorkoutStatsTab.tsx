@@ -100,7 +100,7 @@ function WorkoutSummarySection({
         <div className="flex items-center gap-1.5">
           <h3 className="text-base font-medium text-foreground">운동 요약</h3>
           {isPlannedOnly && (
-            <span className="text-[11px] text-scheduled bg-scheduled/10 px-1.5 py-0.5 rounded-md">
+            <span className="text-xs text-scheduled bg-scheduled/10 px-1.5 py-0.5 rounded-md">
               예정
             </span>
           )}

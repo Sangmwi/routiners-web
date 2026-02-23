@@ -87,12 +87,12 @@ function DietProfileBanner({ targets }: { targets: NutritionTargets }) {
     <div className="bg-primary/5 border-l-2 border-primary rounded-r-xl px-4 py-3">
       <div className="flex items-center gap-2 mb-1.5">
         {targets.dietType && (
-          <span className="text-[11px] font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+          <span className="text-xs font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full">
             {DIET_TYPE_LABELS[targets.dietType]}
           </span>
         )}
         {targets.dietaryGoal && (
-          <span className="text-[11px] font-medium bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+          <span className="text-xs font-medium bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
             {DIETARY_GOAL_LABELS[targets.dietaryGoal]}
           </span>
         )}
@@ -181,7 +181,7 @@ function NutritionSummarySection({
         <div className="flex items-center gap-1.5">
           <h3 className="text-base font-medium text-foreground">섭취 요약</h3>
           {isPlannedOnly && (
-            <span className="text-[11px] text-scheduled bg-scheduled/10 px-1.5 py-0.5 rounded-md">
+            <span className="text-xs text-scheduled bg-scheduled/10 px-1.5 py-0.5 rounded-md">
               예정
             </span>
           )}
@@ -234,7 +234,7 @@ function NutritionSummarySection({
                       style={{ width: `${Math.min(100, percent)}%` }}
                     />
                   </div>
-                  <span className={`text-[11px] font-medium ${getAdherenceTextColor(percent)}`}>
+                  <span className={`text-xs font-medium ${getAdherenceTextColor(percent)}`}>
                     {percent}%
                   </span>
                 </div>
@@ -297,7 +297,7 @@ function NutritionBalanceSection({
                 <div className={`w-2.5 h-2.5 rounded-full ${color.bg}`} />
                 <span className="text-xs text-muted-foreground">{label}</span>
               </div>
-              <span className={`text-[11px] font-medium ${getAdherenceTextColor(percent)}`}>
+              <span className={`text-xs font-medium ${getAdherenceTextColor(percent)}`}>
                 {percent}%
               </span>
             </div>
@@ -389,12 +389,12 @@ function DonutChart({
                 <div className={`w-2.5 h-2.5 rounded-full ${MACRO_COLORS[label]?.bg ?? 'bg-muted'}`} />
                 <span className="text-xs text-muted-foreground flex-1">{label}</span>
                 <span className="text-xs font-bold text-foreground">{value}g</span>
-                <span className="text-[11px] text-muted-foreground w-8 text-right">{pct}%</span>
+                <span className="text-xs text-muted-foreground w-8 text-right">{pct}%</span>
               </div>
             ))}
           </div>
         </div>
-        <p className="text-[11px] text-muted-foreground/40 mt-6 text-center">
+        <p className="text-xs text-muted-foreground/40 mt-6 text-center">
           일반 권장 비율: 탄 50 · 단 30 · 지 20
         </p>
       </div>
@@ -529,7 +529,7 @@ function DailyNutritionLog({
         {targetPct !== null && dailyTarget > 0 && (
           <div className="flex items-center gap-1.5 pt-1.5">
             <div className="w-3 h-0.5 bg-foreground/30" />
-            <span className="text-[11px] text-muted-foreground">
+            <span className="text-xs text-muted-foreground">
               일일 목표 {dailyTarget.toLocaleString()}{metricOption.unit}
             </span>
           </div>

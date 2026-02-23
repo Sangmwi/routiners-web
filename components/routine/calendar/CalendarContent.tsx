@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import {
   CalendarHeader,
   CalendarGrid,
-  TypeFilterToggle,
 } from '@/components/routine';
 import DayEventSection from './DayEventSection';
 import { useCalendarEventsSuspense } from '@/hooks/routine';
@@ -108,9 +107,6 @@ export default function CalendarContent() {
 
   return (
     <div className="space-y-4">
-      {/* 타입 필터 토글 */}
-      <TypeFilterToggle value={filterType} onChange={handleFilterChange} />
-
       {/* 캘린더 (transition 중 opacity 변화) */}
       <div
         className={`transition-opacity ${isPending ? 'opacity-60' : ''}`}
@@ -124,6 +120,8 @@ export default function CalendarContent() {
             setDateJumpSession((prev) => prev + 1);
             setIsDateJumpOpen(true);
           }}
+          filterValue={filterType}
+          onFilterChange={handleFilterChange}
         />
 
         <CalendarGrid

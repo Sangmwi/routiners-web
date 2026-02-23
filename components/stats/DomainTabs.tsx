@@ -1,20 +1,20 @@
 'use client';
 
-import { useRef, useState, useEffect, useCallback } from 'react';
+import UnderlineTabs from '@/components/ui/UnderlineTabs';
 
 export type StatsDomain = 'status' | 'workout' | 'meal' | 'inbody';
+
+const TABS = [
+  { value: 'status', label: '현황' },
+  { value: 'workout', label: '운동' },
+  { value: 'meal', label: '식단' },
+  { value: 'inbody', label: '인바디' },
+] as const;
 
 interface DomainTabsProps {
   domain: StatsDomain;
   onDomainChange: (domain: StatsDomain) => void;
 }
-
-const TABS: { value: StatsDomain; label: string }[] = [
-  { value: 'status', label: '현황' },
-  { value: 'workout', label: '운동' },
-  { value: 'meal', label: '식단' },
-  { value: 'inbody', label: '인바디' },
-];
 
 /**
  * 통계 도메인 탭
@@ -22,48 +22,12 @@ const TABS: { value: StatsDomain; label: string }[] = [
  * [현황] [운동] [식단] [인바디]
  */
 export default function DomainTabs({ domain, onDomainChange }: DomainTabsProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
-
-  const updateIndicator = useCallback(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    const activeBtn = container.querySelector<HTMLButtonElement>(`[data-tab="${domain}"]`);
-    if (!activeBtn) return;
-    setIndicator({
-      left: activeBtn.offsetLeft,
-      width: activeBtn.offsetWidth,
-    });
-  }, [domain]);
-
-  useEffect(() => {
-    updateIndicator();
-  }, [updateIndicator]);
-
   return (
-    <div ref={containerRef} className="relative border-b border-border">
-      <div className="flex">
-        {TABS.map((tab) => (
-          <button
-            key={tab.value}
-            type="button"
-            data-tab={tab.value}
-            onClick={() => onDomainChange(tab.value)}
-            className={`flex-1 py-3 text-sm font-medium text-center transition-colors ${
-              domain === tab.value
-                ? 'text-foreground'
-                : 'text-muted-foreground'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-      {/* Animated indicator */}
-      <div
-        className="absolute bottom-0 h-0.5 bg-primary rounded-full transition-all duration-300 ease-out"
-        style={{ left: indicator.left, width: indicator.width }}
-      />
-    </div>
+    <UnderlineTabs
+      tabs={TABS}
+      value={domain}
+      onChange={onDomainChange}
+      layout="equal"
+    />
   );
 }

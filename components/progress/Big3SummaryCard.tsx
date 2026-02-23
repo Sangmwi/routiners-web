@@ -44,7 +44,7 @@ export function Big3SummaryCard({
     <div className={cardClassName}>
       <div className="flex items-center gap-3 mb-3">
         <div className="shrink-0">
-          <p className="text-[11px] text-muted-foreground mb-0.5">합계</p>
+          <p className="text-xs text-muted-foreground mb-0.5">합계</p>
           <div className="flex items-baseline gap-1">
             <span className="text-xl font-bold text-foreground">{latest.total}</span>
             <span className="text-xs text-muted-foreground">kg</span>
@@ -75,7 +75,7 @@ export function Big3SummaryCard({
 
           return (
             <div key={key} className="text-center">
-              <p className="text-[11px] text-muted-foreground mb-0.5">{label}</p>
+              <p className="text-xs text-muted-foreground mb-0.5">{label}</p>
               <p className="text-sm font-bold text-foreground">
                 {value != null ? (
                   <>
