@@ -59,8 +59,8 @@ export function WeeklyOverview({ stats }: WeeklyOverviewProps) {
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-foreground">이번 주</h2>
-        <AppLink href="/stats" className="text-sm font-medium text-primary flex items-center gap-0.5">
-          통계
+        <AppLink href="/routine/calendar" className="text-sm font-medium text-primary flex items-center gap-0.5">
+          캘린더
           <CaretRightIcon size={16} weight="bold" />
         </AppLink>
       </div>

@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import AppLink from '@/components/common/AppLink';
-import { CaretRightIcon, CalendarBlankIcon } from '@phosphor-icons/react';
+import { CalendarBlankIcon } from '@phosphor-icons/react';
 import TypeFilterToggle, { type FilterValue } from '@/components/ui/TypeFilterToggle';
 import { UpcomingEventItem } from './UpcomingEventItem';
 import { formatDate } from '@/lib/utils/dateHelpers';
@@ -34,23 +33,12 @@ export function UpcomingSection({
 
   return (
     <section>
-      {/* 헤더 */}
+      {/* 헤더 + 인라인 필터 */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-foreground">
+        <h2 className="text-xl font-bold text-foreground shrink-0">
           다가오는 루틴
         </h2>
-        <AppLink
-          href="/routine/calendar"
-          className="text-sm font-medium text-primary flex items-center gap-0.5"
-        >
-          캘린더
-          <CaretRightIcon size={16} weight="bold" />
-        </AppLink>
-      </div>
-
-      {/* 필터 */}
-      <div className="mb-4">
-        <TypeFilterToggle value={filter} onChange={setFilter} />
+        <TypeFilterToggle value={filter} onChange={setFilter} size="sm" />
       </div>
 
       {/* 이벤트 리스트 */}

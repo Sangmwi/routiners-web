@@ -9,6 +9,8 @@ interface TypeFilterToggleProps {
   value: FilterValue;
   /** 필터 변경 핸들러 */
   onChange: (type: FilterValue) => void;
+  /** 컴팩트 사이즈 (헤더 인라인용) */
+  size?: 'sm' | 'md';
 }
 
 const filterOptions: { value: FilterValue; label: string }[] = [
@@ -26,15 +28,20 @@ const filterOptions: { value: FilterValue; label: string }[] = [
 export default function TypeFilterToggle({
   value,
   onChange,
+  size = 'md',
 }: TypeFilterToggleProps) {
+  const sizeClass = size === 'sm'
+    ? 'px-2.5 py-1 text-[11px]'
+    : 'px-3 py-1.5 text-xs';
+
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-1.5">
       {filterOptions.map((option) => (
         <button
           key={option.value}
           type="button"
           onClick={() => onChange(option.value)}
-          className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+          className={`${sizeClass} font-medium rounded-full transition-colors ${
             value === option.value
               ? 'bg-primary text-primary-foreground'
               : 'bg-muted/50 text-muted-foreground hover:bg-muted'
