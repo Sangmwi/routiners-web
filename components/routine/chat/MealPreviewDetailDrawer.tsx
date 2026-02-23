@@ -1,7 +1,7 @@
 'use client';
 
 import { CheckIcon, ProhibitIcon } from '@phosphor-icons/react';
-import { LoadingSpinner } from '@/components/ui/icons';
+import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import type { MealPlanPreviewData, MealPreviewDay, MealPreviewMeal } from '@/lib/types/meal';
 import { MEAL_TYPE_LABELS } from '@/lib/types/meal';
@@ -49,20 +49,16 @@ export default function MealPreviewDetailDrawer({
       stickyFooter={
         <div className="p-4 bg-card border-t border-border/50">
           {status === 'pending' ? (
-            <button
+            <Button
+              variant="primary"
+              fullWidth
               onClick={onApply}
               disabled={!isActionable}
-              className="w-full py-3.5 rounded-xl font-medium transition-all disabled:opacity-50 active:scale-[0.98] bg-primary text-primary-foreground hover:bg-primary/90"
+              isLoading={isApplying}
+              className="shadow-none hover:shadow-none"
             >
-              {isApplying ? (
-                <span className="flex items-center justify-center gap-2">
-                  <LoadingSpinner size="sm" variant="current" />
-                  적용 중...
-                </span>
-              ) : (
-                '식단 적용하기'
-              )}
-            </button>
+              {isApplying ? '적용 중...' : '식단 적용하기'}
+            </Button>
           ) : (
             <div className="flex items-center justify-center py-3.5">
               <span className={`text-sm font-medium flex items-center gap-1.5 ${

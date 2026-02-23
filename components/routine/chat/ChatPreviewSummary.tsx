@@ -59,7 +59,7 @@ export default function ChatPreviewSummary({
     edited: {
       icon: <PencilSimpleIcon size={14} />,
       text: '수정 요청됨',
-      className: 'text-amber-600',
+      className: 'text-warning',
     },
     cancelled: {
       icon: <ProhibitIcon size={14} />,
@@ -124,7 +124,7 @@ export default function ChatPreviewSummary({
       {/* 충돌 경고 */}
       {hasConflicts && status === 'pending' && (
         <div className="px-5 pb-4">
-          <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/10 text-amber-600">
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-warning/10 text-warning">
             <WarningIcon size={14} className="shrink-0" />
             <span className="text-xs font-medium">기존 일정과 겹치는 날이 있어요</span>
           </div>

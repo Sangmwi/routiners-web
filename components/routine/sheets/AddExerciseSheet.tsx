@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import { MagnifyingGlassIcon, PlusIcon } from '@phosphor-icons/react';
+import ChipButton from '@/components/ui/ChipButton';
+import SheetFooterAction from '@/components/ui/SheetFooterAction';
 import { searchExercises, EXERCISE_CATEGORIES } from '@/lib/data/exercises';
 import type { ExerciseCategory, ExerciseInfo } from '@/lib/data/exercises';
 import type { WorkoutExercise, WorkoutSet } from '@/lib/types/routine';
@@ -90,18 +92,11 @@ export default function AddExerciseSheet({
       height="full"
       showCloseButton
       stickyFooter={
-        <div className="p-4 bg-card border-t border-border/50 pb-safe">
-          <button
-            type="button"
-            onClick={handleConfirm}
-            disabled={selected.length === 0}
-            className="w-full py-3.5 rounded-xl font-medium bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {selected.length > 0
-              ? `${selected.length}개 운동 추가`
-              : '운동을 선택해주세요'}
-          </button>
-        </div>
+        <SheetFooterAction
+          label={selected.length > 0 ? `${selected.length}개 운동 추가` : '운동을 선택해주세요'}
+          onClick={handleConfirm}
+          disabled={selected.length === 0}
+        />
       }
     >
       <ModalBody className="p-4 space-y-4">
@@ -123,30 +118,20 @@ export default function AddExerciseSheet({
 
           {/* 카테고리 필터 */}
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            <button
-              type="button"
+            <ChipButton
+              selected={!categoryFilter}
               onClick={() => setCategoryFilter(null)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap ${
-                !categoryFilter
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted/50 text-muted-foreground'
-              }`}
             >
               전체
-            </button>
+            </ChipButton>
             {EXERCISE_CATEGORIES.map((cat) => (
-              <button
+              <ChipButton
                 key={cat}
-                type="button"
+                selected={categoryFilter === cat}
                 onClick={() => setCategoryFilter(cat === categoryFilter ? null : cat)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap ${
-                  categoryFilter === cat
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted/50 text-muted-foreground'
-                }`}
               >
                 {cat}
-              </button>
+              </ChipButton>
             ))}
           </div>
         </div>

@@ -48,7 +48,7 @@ export function UpcomingSection({
             <div key={event.id} className="w-full">
               <UpcomingEventItem event={event} />
               {index < upcomingEvents.length - 1 && (
-                <div className="w-8 h-px bg-border/50 mx-auto" />
+                <div className="w-full px-4 h-px bg-border/30 mx-auto" />
               )}
             </div>
           ))}

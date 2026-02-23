@@ -99,7 +99,7 @@ export default function ProfileDietarySection({
                 {restrictions.map((r) => (
                   <span
                     key={r}
-                    className="px-2 py-0.5 text-xs rounded-md bg-amber-500/10 text-amber-400"
+                    className="px-2 py-0.5 text-xs rounded-md bg-warning/10 text-warning"
                   >
                     {FOOD_RESTRICTION_LABELS[r]}
                   </span>

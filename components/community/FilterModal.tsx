@@ -1,6 +1,7 @@
 'use client';
 
 import Modal, { ModalBody } from '@/components/ui/Modal';
+import ChipButton from '@/components/ui/ChipButton';
 
 export type DateRange = 'all' | 'today' | 'week' | 'month';
 
@@ -60,17 +61,13 @@ export default function FilterModal({
             </span>
             <div className="flex flex-wrap gap-2">
               {DATE_RANGE_OPTIONS.map((option) => (
-                <button
+                <ChipButton
                   key={option.id}
+                  selected={dateRange === option.id}
                   onClick={() => handleSelect(option.id)}
-                  className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
-                    dateRange === option.id
-                      ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
-                      : 'bg-muted/20 text-muted-foreground hover:bg-muted/40'
-                  }`}
                 >
                   {option.label}
-                </button>
+                </ChipButton>
               ))}
             </div>
           </div>
@@ -81,15 +78,12 @@ export default function FilterModal({
               정렬
             </span>
             <div className="flex flex-wrap gap-2">
-              <button className="rounded-full px-3.5 py-1.5 text-xs font-medium bg-primary text-primary-foreground shadow-sm shadow-primary/20">
+              <ChipButton selected>
                 최신순
-              </button>
-              <button
-                className="rounded-full px-3.5 py-1.5 text-xs font-medium bg-muted/20 text-muted-foreground/40 cursor-not-allowed"
-                disabled
-              >
+              </ChipButton>
+              <ChipButton selected={false} disabled>
                 인기순
-              </button>
+              </ChipButton>
             </div>
           </div>
         </div>

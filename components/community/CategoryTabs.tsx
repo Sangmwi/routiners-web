@@ -1,5 +1,6 @@
 'use client';
 
+import ChipButton from '@/components/ui/ChipButton';
 import type { PostCategory } from '@/lib/types/community';
 
 // 서브탭용 축약 라벨
@@ -26,17 +27,18 @@ export default function CategoryTabs({
   return (
     <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
       {ALL_CATEGORIES.map((category) => (
-        <button
+        <ChipButton
           key={category.id}
+          selected={selectedCategory === category.id}
           onClick={() => onCategoryChange?.(category.id)}
-          className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium transition-all ${
+          className={
             selectedCategory === category.id
-              ? 'bg-foreground/10 text-foreground'
-              : 'bg-muted/20 text-muted-foreground hover:bg-muted/40'
-          }`}
+              ? 'bg-foreground/10 text-foreground text-sm'
+              : 'bg-muted/20 hover:bg-muted/40 text-sm'
+          }
         >
           {category.label}
-        </button>
+        </ChipButton>
       ))}
     </div>
   );

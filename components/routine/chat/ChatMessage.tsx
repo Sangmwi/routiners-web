@@ -213,7 +213,7 @@ export default function ChatMessage({ message, onAction, isApplyingRoutine = fal
         {isAssistant ? (
           <Markdown content={message.content} />
         ) : (
-          <p className="text-sm whitespace-pre-wrap leading-relaxed">
+          <p className="select-text text-sm whitespace-pre-wrap leading-relaxed">
             {message.content}
           </p>
         )}

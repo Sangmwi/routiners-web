@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { CheckIcon, ClockIcon, ProhibitIcon, ArrowsClockwiseIcon, PlusCircleIcon } from '@phosphor-icons/react';
-import { LoadingSpinner } from '@/components/ui/icons';
+import ChipButton from '@/components/ui/ChipButton';
+import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import type { RoutinePreviewData, RoutinePreviewDay, RoutinePreviewExercise } from '@/lib/types/fitness';
 import type { RoutinePreviewStatus } from '@/lib/types/chat';
@@ -83,17 +84,13 @@ export default function PreviewDetailDrawer({
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
                   {weekOptions.map((opt) => (
-                    <button
+                    <ChipButton
                       key={opt.value}
+                      selected={selectedWeekCount === opt.value}
                       onClick={() => setSelectedWeekCount(opt.value)}
-                      className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap transition-all shrink-0 ${
-                        selectedWeekCount === opt.value
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-                      }`}
                     >
                       {opt.label}
-                    </button>
+                    </ChipButton>
                   ))}
                 </div>
                 <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
@@ -130,28 +127,26 @@ export default function PreviewDetailDrawer({
               )}
 
               {/* 적용 버튼 */}
-              <button
+              <Button
+                variant="primary"
+                fullWidth
                 onClick={() => onApply(
                   hasConflicts && applyMode === 'replace',
                   selectedWeekCount,
                   applyMode === 'append'
                 )}
                 disabled={!isActionable}
-                className={`w-full py-3.5 rounded-xl font-medium transition-all disabled:opacity-50 active:scale-[0.98] ${
+                isLoading={isApplying}
+                className={`shadow-none hover:shadow-none ${
                   hasConflicts && applyMode === 'replace'
-                    ? 'bg-amber-500 text-white hover:bg-amber-600'
-                    : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                    ? 'bg-warning text-warning-foreground hover:bg-warning/90'
+                    : ''
                 }`}
               >
-                {isApplying ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <LoadingSpinner size="sm" variant="current" />
-                    적용 중...
-                  </span>
-                ) : (
-                  `${selectedWeekCount}주 루틴 ${applyMode === 'append' ? '이어붙이기' : '적용하기'}`
-                )}
-              </button>
+                {isApplying
+                  ? '적용 중...'
+                  : `${selectedWeekCount}주 루틴 ${applyMode === 'append' ? '이어붙이기' : '적용하기'}`}
+              </Button>
             </>
           ) : (
             <div className="flex items-center justify-center py-3.5">

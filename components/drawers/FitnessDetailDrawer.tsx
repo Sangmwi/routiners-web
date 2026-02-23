@@ -100,7 +100,7 @@ export default function FitnessDetailDrawer({
               {injuries.map((injury) => (
                 <span
                   key={injury}
-                  className="px-2.5 py-1 text-xs rounded-full bg-amber-500/10 text-amber-400 font-medium"
+                  className="px-2.5 py-1 text-xs rounded-full bg-warning/10 text-warning font-medium"
                 >
                   {injury}
                 </span>

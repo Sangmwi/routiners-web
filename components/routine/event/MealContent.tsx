@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { CalendarIcon, PlusIcon } from '@phosphor-icons/react';
+import Button from '@/components/ui/Button';
 import EmptyState from '@/components/common/EmptyState';
 import {
   EventActionButtons,
@@ -134,14 +135,15 @@ export default function MealContent({ date, onTitleChange, onHeaderAction }: Mea
             size="lg"
           />
           <div className="mt-6 px-4">
-            <button
-              type="button"
+            <Button
+              variant="primary"
+              fullWidth
               onClick={() => setIsAddDrawerOpen(true)}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium bg-primary text-primary-foreground"
+              className="shadow-none hover:shadow-none"
             >
               <PlusIcon size={18} weight="bold" />
               식단 추가하기
-            </button>
+            </Button>
           </div>
         </div>
 

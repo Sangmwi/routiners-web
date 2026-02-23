@@ -6,7 +6,8 @@ import {
   MagnifyingGlassIcon,
   TrashIcon,
 } from '@phosphor-icons/react';
-import { LoadingSpinner } from '@/components/ui/icons';
+import ChipButton from '@/components/ui/ChipButton';
+import SheetFooterAction from '@/components/ui/SheetFooterAction';
 import {
   useCatalogSelection,
   useCreateRoutineEvent,
@@ -258,17 +259,13 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated, existin
       height="full"
       showCloseButton
       stickyFooter={
-        <div className="p-4 bg-card border-t border-border/50 pb-safe">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={foods.length === 0 || isPending}
-            className="w-full py-3.5 rounded-xl font-medium bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {isPending && <LoadingSpinner size="sm" variant="current" />}
-            {isPending ? '저장 중...' : '저장하기'}
-          </button>
-        </div>
+        <SheetFooterAction
+          label="저장하기"
+          pendingLabel="저장 중..."
+          onClick={handleSave}
+          disabled={foods.length === 0}
+          isLoading={isPending}
+        />
       }
     >
       <ModalBody className="p-4 space-y-5">
@@ -277,18 +274,13 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated, existin
           <h3 className="text-sm font-semibold">식사 시간</h3>
           <div className="flex gap-2">
             {MEAL_TYPES.map((type) => (
-              <button
+              <ChipButton
                 key={type}
-                type="button"
+                selected={mealType === type}
                 onClick={() => setMealType(type)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-full ${
-                  mealType === type
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted/50 text-muted-foreground'
-                }`}
               >
                 {MEAL_TYPE_LABELS[type]}
-              </button>
+              </ChipButton>
             ))}
           </div>
         </div>
@@ -311,30 +303,20 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated, existin
 
           {/* 카테고리 필터 */}
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            <button
-              type="button"
+            <ChipButton
+              selected={!categoryFilter}
               onClick={() => setCategoryFilter(null)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap ${
-                !categoryFilter
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted/50 text-muted-foreground'
-              }`}
             >
               전체
-            </button>
+            </ChipButton>
             {foodCategories.map(([key, label]) => (
-              <button
+              <ChipButton
                 key={key}
-                type="button"
+                selected={categoryFilter === key}
                 onClick={() => setCategoryFilter(key === categoryFilter ? null : key)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap ${
-                  categoryFilter === key
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted/50 text-muted-foreground'
-                }`}
               >
                 {label}
-              </button>
+              </ChipButton>
             ))}
           </div>
 

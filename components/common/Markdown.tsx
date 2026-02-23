@@ -19,7 +19,7 @@ interface MarkdownProps {
  */
 export function Markdown({ content, className }: MarkdownProps) {
   return (
-    <div className={className}>
+    <div className={`select-text ${className}`}>
       <ReactMarkdown
         remarkPlugins={[remarkBreaks]}
         components={{

@@ -85,7 +85,7 @@ export default function DietaryDetailDrawer({
               {foodRestrictions!.map((restriction) => (
                 <span
                   key={restriction}
-                  className="px-2.5 py-1 text-xs rounded-full bg-amber-500/10 text-amber-400 font-medium"
+                  className="px-2.5 py-1 text-xs rounded-full bg-warning/10 text-warning font-medium"
                 >
                   {FOOD_RESTRICTION_LABELS[restriction] || restriction}
                 </span>

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import { DatePicker } from '@/components/ui/WheelPicker';
 import { LoadingSpinner } from '@/components/ui/icons';
+import Button from '@/components/ui/Button';
 import {
   BuildingsIcon,
   MagnifyingGlassIcon,
@@ -417,8 +418,9 @@ export default function ImportUnitMealSheet({
       stickyFooter={
         <div className="p-4 bg-card border-t border-border/50 pb-safe">
           {step === 'select' && (
-            <button
-              type="button"
+            <Button
+              variant="primary"
+              fullWidth
               onClick={handleStartImport}
               disabled={
                 !selectedUnitId ||
@@ -426,33 +428,30 @@ export default function ImportUnitMealSheet({
                 !isRangeValid ||
                 isCheckingExisting
               }
-              className="w-full py-3.5 rounded-xl font-medium bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              isLoading={isCheckingExisting}
+              className="shadow-none hover:shadow-none"
             >
-              {isCheckingExisting ? (
-                <>
-                  <LoadingSpinner size="sm" variant="current" />
-                  확인 중...
-                </>
-              ) : !selectedUnitId ? (
-                '부대를 선택해주세요'
-              ) : newDates.length === 0 ? (
-                '불러올 날짜가 없어요'
-              ) : (
-                `${newDates.length}일분 식단 불러오기`
-              )}
-            </button>
+              {isCheckingExisting
+                ? '확인 중...'
+                : !selectedUnitId
+                  ? '부대를 선택해주세요'
+                  : newDates.length === 0
+                    ? '불러올 날짜가 없어요'
+                    : `${newDates.length}일분 식단 불러오기`}
+            </Button>
           )}
 
           {step === 'importing' && (
-            <button
-              type="button"
+            <Button
+              variant="primary"
+              fullWidth
               onClick={handleDone}
               disabled={!importDone}
-              className="w-full py-3.5 rounded-xl font-medium bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              isLoading={isImporting}
+              className="shadow-none hover:shadow-none"
             >
-              {isImporting && <LoadingSpinner size="sm" variant="current" />}
               {isImporting ? '불러오는 중...' : '확인'}
-            </button>
+            </Button>
           )}
         </div>
       }
