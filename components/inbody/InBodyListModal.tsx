@@ -28,7 +28,7 @@ export default function InBodyListModal({
   });
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="인바디 기록" size="lg" position="bottom" enableSwipe>
+    <Modal isOpen={isOpen} onClose={onClose} title="인바디 기록" position="bottom" enableSwipe>
       <ModalBody className="min-h-[200px]">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">

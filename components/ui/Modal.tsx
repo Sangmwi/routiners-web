@@ -284,8 +284,8 @@ export default function Modal({
           </div>
         )}
 
-        {/* Header */}
-        {(title || showCloseButton) && (
+        {/* Header — title이 있을 때만 렌더 (bottom sheet에서 title 없으면 고아 닫기버튼 방지) */}
+        {title && (
           <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
             {title && (
               <h2

@@ -142,7 +142,6 @@ export function UnitStep({
         position="bottom"
         enableSwipe
         height="full"
-        size="lg"
       >
         <ModalBody>
           {/* Search input */}

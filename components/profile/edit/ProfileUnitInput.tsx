@@ -75,7 +75,6 @@ export default function ProfileUnitInput({ value, onChange }: ProfileUnitInputPr
         position="bottom"
         enableSwipe
         height="full"
-        size="lg"
       >
         <ModalBody>
           <div className="sticky top-0 bg-card px-4 pb-4 pt-2 border-b border-border">

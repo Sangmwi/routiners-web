@@ -62,7 +62,6 @@ export default function ProfileSpecialtyInput({ value, onChange }: ProfileSpecia
         position="bottom"
         enableSwipe
         height="half"
-        size="lg"
       >
         <ModalBody>
           <div className="sticky top-0 bg-card px-4 pb-4 pt-2 border-b border-border">

@@ -50,7 +50,6 @@ export default function FitnessDetailDrawer({
       isOpen={isOpen}
       onClose={onClose}
       title="운동 프로필 상세"
-      size="lg"
       position="bottom"
       enableSwipe
       headerAction={

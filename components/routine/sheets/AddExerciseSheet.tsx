@@ -89,8 +89,22 @@ export default function AddExerciseSheet({
       enableSwipe
       height="full"
       showCloseButton
+      stickyFooter={
+        <div className="p-4 bg-card border-t border-border/50 pb-safe">
+          <button
+            type="button"
+            onClick={handleConfirm}
+            disabled={selected.length === 0}
+            className="w-full py-3.5 rounded-xl font-medium bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {selected.length > 0
+              ? `${selected.length}개 운동 추가`
+              : '운동을 선택해주세요'}
+          </button>
+        </div>
+      }
     >
-      <ModalBody className="p-4 space-y-4 pb-32">
+      <ModalBody className="p-4 space-y-4">
         {/* 검색 */}
         <div className="space-y-3">
           <div className="relative">
@@ -194,20 +208,6 @@ export default function AddExerciseSheet({
           )}
         </div>
       </ModalBody>
-
-      {/* 추가 버튼 (고정) */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 bg-card border-t border-border/50 pb-safe">
-        <button
-          type="button"
-          onClick={handleConfirm}
-          disabled={selected.length === 0}
-          className="w-full py-3.5 rounded-xl font-medium bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        >
-          {selected.length > 0
-            ? `${selected.length}개 운동 추가`
-            : '운동을 선택해주세요'}
-        </button>
-      </div>
     </Modal>
   );
 }

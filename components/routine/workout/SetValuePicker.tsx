@@ -49,8 +49,6 @@ function SetValuePickerContent({
 
   return (
     <ModalBody className="p-4 pb-2">
-      <h3 className="text-lg font-bold text-foreground text-center mb-4">{title}</h3>
-
       <div className="flex gap-4">
         <div className="flex-1">
           <p className="text-sm text-muted-foreground text-center mb-2">중량</p>
@@ -91,7 +89,7 @@ export default function SetValuePicker({
       onClose={onClose}
       position="bottom"
       enableSwipe
-      size="sm"
+      title={title}
       showCloseButton={false}
     >
       <SetValuePickerContent

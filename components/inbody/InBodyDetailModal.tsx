@@ -119,7 +119,6 @@ export default function InBodyDetailModal({
       isOpen={isOpen}
       onClose={handleClose}
       title={`${formattedDate} 측정 기록`}
-      size="lg"
       closeOnBackdrop={state === 'view' && !isProcessing}
       position="bottom"
       enableSwipe={state === 'view' && !isProcessing}

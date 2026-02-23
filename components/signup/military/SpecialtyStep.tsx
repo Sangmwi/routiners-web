@@ -139,7 +139,6 @@ export function SpecialtyStep({
         position="bottom"
         enableSwipe
         height="half"
-        size="lg"
       >
         <ModalBody>
           {/* Search input */}

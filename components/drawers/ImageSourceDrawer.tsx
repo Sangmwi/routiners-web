@@ -45,7 +45,6 @@ export default function ImageSourceDrawer({
       enableSwipe
       showCloseButton={false}
       closeOnBackdrop={!isLoading}
-      size="lg"
     >
       <ModalBody className="p-4 pb-safe">
         {isLoading ? (

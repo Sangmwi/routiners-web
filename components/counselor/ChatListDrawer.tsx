@@ -60,16 +60,11 @@ export default function ChatListDrawer({
       onClose={onClose}
       position="bottom"
       enableSwipe
+      title="대화 목록"
       showCloseButton={false}
-      size="lg"
       height="half"
     >
       <ModalBody className="p-4 pb-safe">
-        {/* 타이틀 */}
-        <div className="text-center mb-4">
-          <h2 className="text-lg font-bold text-foreground">대화 목록</h2>
-        </div>
-
         {/* 새 대화 버튼 */}
         <button
           onClick={handleNewChat}

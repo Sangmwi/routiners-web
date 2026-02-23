@@ -124,10 +124,8 @@ export function useSwipeGesture(
     onMouseMove: (e: React.MouseEvent) => handleDragMove(e.clientY),
     onMouseUp: handleDragEnd,
     onMouseLeave: () => {
-      if (state.isDragging) {
-        contentDraggingRef.current = false;
-        setState({ startY: null, deltaY: 0, isDragging: false, lastY: null, lastTime: null });
-      }
+      // 드래그 중 마우스 이탈 시 dragEnd로 처리 (스냅백/닫기 판정 포함)
+      if (state.isDragging) handleDragEnd();
     },
   };
 
@@ -170,10 +168,8 @@ export function useSwipeGesture(
       handleDragEnd();
     },
     onMouseLeave: () => {
-      if (contentDraggingRef.current && state.isDragging) {
-        contentDraggingRef.current = false;
-        setState({ startY: null, deltaY: 0, isDragging: false, lastY: null, lastTime: null });
-      }
+      // 콘텐츠 드래그 중 마우스 이탈 시 dragEnd로 처리
+      if (contentDraggingRef.current && state.isDragging) handleDragEnd();
     },
   };
 

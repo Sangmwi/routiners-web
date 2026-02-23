@@ -114,7 +114,6 @@ export default function DateJumpSheet(props: DateJumpSheetProps) {
       title={title}
       position="bottom"
       enableSwipe
-      size="sm"
     >
       <ModalBody className="p-4 pb-2">
         {props.mode === 'date' ? (

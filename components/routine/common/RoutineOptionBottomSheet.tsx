@@ -1,6 +1,5 @@
 'use client';
 
-import { XIcon } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 
@@ -34,21 +33,9 @@ export default function RoutineOptionBottomSheet<TOption extends string>({
       position="bottom"
       enableSwipe
       height="auto"
-      showCloseButton={false}
+      title={title}
     >
       <ModalBody className="p-4 pb-safe">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold text-foreground">{title}</h3>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1 text-muted-foreground"
-            aria-label="닫기"
-          >
-            <XIcon size={20} />
-          </button>
-        </div>
-
         <div className="space-y-2">
           {options.map((option) => (
             <button

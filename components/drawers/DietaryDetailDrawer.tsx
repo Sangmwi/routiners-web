@@ -52,7 +52,6 @@ export default function DietaryDetailDrawer({
       isOpen={isOpen}
       onClose={onClose}
       title="식단 프로필 상세"
-      size="lg"
       position="bottom"
       enableSwipe
       headerAction={

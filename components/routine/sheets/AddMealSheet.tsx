@@ -257,8 +257,21 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated, existin
       enableSwipe
       height="full"
       showCloseButton
+      stickyFooter={
+        <div className="p-4 bg-card border-t border-border/50 pb-safe">
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={foods.length === 0 || isPending}
+            className="w-full py-3.5 rounded-xl font-medium bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {isPending && <LoadingSpinner size="sm" variant="current" />}
+            {isPending ? '저장 중...' : '저장하기'}
+          </button>
+        </div>
+      }
     >
-      <ModalBody className="p-4 space-y-5 pb-32">
+      <ModalBody className="p-4 space-y-5">
         {/* 식사 시간 선택 */}
         <div className="space-y-2">
           <h3 className="text-sm font-semibold">식사 시간</h3>
@@ -411,19 +424,6 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated, existin
           </div>
         )}
       </ModalBody>
-
-      {/* 저장 버튼 (고정) */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 bg-card border-t border-border/50 pb-safe">
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={foods.length === 0 || isPending}
-          className="w-full py-3.5 rounded-xl font-medium bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        >
-          {isPending && <LoadingSpinner size="sm" variant="current" />}
-          {isPending ? '저장 중...' : '저장하기'}
-        </button>
-      </div>
     </Modal>
   );
 }

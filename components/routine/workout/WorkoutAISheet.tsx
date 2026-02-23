@@ -43,7 +43,6 @@ export default function WorkoutAISheet({ isOpen, onClose, exerciseName }: Workou
       position="bottom"
       enableSwipe
       height="full"
-      size="lg"
       showCloseButton={false}
     >
       <ModalBody className="flex flex-col h-full">

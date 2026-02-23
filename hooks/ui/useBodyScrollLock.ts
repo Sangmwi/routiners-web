@@ -33,7 +33,8 @@ export function useBodyScrollLock(isLocked: boolean) {
       lockedRef.current = true;
       lock();
     } else if (!isLocked && lockedRef.current) {
-      lockedRef.current = true; // will be set false below
+      // true로 먼저 설정: StrictMode cleanup이 중간에 실행돼도 이중 unlock 방지
+      lockedRef.current = true;
       unlock();
       lockedRef.current = false;
     }

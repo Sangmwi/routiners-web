@@ -51,6 +51,7 @@ export default function PostMoreMenu({
       onClose={onClose}
       position="bottom"
       enableSwipe
+      showCloseButton={false}
     >
       <ModalBody className="p-2 pb-safe">
         <div className="space-y-1">

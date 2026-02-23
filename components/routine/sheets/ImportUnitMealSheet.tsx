@@ -414,8 +414,50 @@ export default function ImportUnitMealSheet({
       enableSwipe={!isImporting}
       height="full"
       showCloseButton={!isImporting}
+      stickyFooter={
+        <div className="p-4 bg-card border-t border-border/50 pb-safe">
+          {step === 'select' && (
+            <button
+              type="button"
+              onClick={handleStartImport}
+              disabled={
+                !selectedUnitId ||
+                newDates.length === 0 ||
+                !isRangeValid ||
+                isCheckingExisting
+              }
+              className="w-full py-3.5 rounded-xl font-medium bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isCheckingExisting ? (
+                <>
+                  <LoadingSpinner size="sm" variant="current" />
+                  확인 중...
+                </>
+              ) : !selectedUnitId ? (
+                '부대를 선택해주세요'
+              ) : newDates.length === 0 ? (
+                '불러올 날짜가 없어요'
+              ) : (
+                `${newDates.length}일분 식단 불러오기`
+              )}
+            </button>
+          )}
+
+          {step === 'importing' && (
+            <button
+              type="button"
+              onClick={handleDone}
+              disabled={!importDone}
+              className="w-full py-3.5 rounded-xl font-medium bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isImporting && <LoadingSpinner size="sm" variant="current" />}
+              {isImporting ? '불러오는 중...' : '확인'}
+            </button>
+          )}
+        </div>
+      }
     >
-      <ModalBody className="p-4 space-y-5 pb-32">
+      <ModalBody className="p-4 space-y-5">
         {/* ================================================ */}
         {/* Step 1: 부대 선택 + 날짜 범위 (병합)              */}
         {/* ================================================ */}
@@ -776,48 +818,6 @@ export default function ImportUnitMealSheet({
           </>
         )}
       </ModalBody>
-
-      {/* 하단 고정 버튼 */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 bg-card border-t border-border/50 pb-safe">
-        {step === 'select' && (
-          <button
-            type="button"
-            onClick={handleStartImport}
-            disabled={
-              !selectedUnitId ||
-              newDates.length === 0 ||
-              !isRangeValid ||
-              isCheckingExisting
-            }
-            className="w-full py-3.5 rounded-xl font-medium bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {isCheckingExisting ? (
-              <>
-                <LoadingSpinner size="sm" variant="current" />
-                확인 중...
-              </>
-            ) : !selectedUnitId ? (
-              '부대를 선택해주세요'
-            ) : newDates.length === 0 ? (
-              '불러올 날짜가 없어요'
-            ) : (
-              `${newDates.length}일분 식단 불러오기`
-            )}
-          </button>
-        )}
-
-        {step === 'importing' && (
-          <button
-            type="button"
-            onClick={handleDone}
-            disabled={!importDone}
-            className="w-full py-3.5 rounded-xl font-medium bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {isImporting && <LoadingSpinner size="sm" variant="current" />}
-            {isImporting ? '불러오는 중...' : '확인'}
-          </button>
-        )}
-      </div>
     </Modal>
   );
 }

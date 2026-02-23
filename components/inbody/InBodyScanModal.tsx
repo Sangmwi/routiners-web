@@ -223,7 +223,6 @@ export default function InBodyScanModal({
       isOpen={isOpen}
       onClose={handleClose}
       title="인바디 스캔"
-      size="lg"
       closeOnBackdrop={state === 'idle' || state === 'error'}
       position="bottom"
       enableSwipe={state === 'idle' || state === 'error'}

@@ -10,7 +10,10 @@ export function useEscapeKey(enabled: boolean, onEscape: () => void) {
     if (!enabled) return;
 
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onEscape();
+      if (e.key === 'Escape') {
+        e.stopPropagation(); // 중첩 모달에서 가장 위 모달만 닫히도록
+        onEscape();
+      }
     };
 
     document.addEventListener('keydown', handleEsc);

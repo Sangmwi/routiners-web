@@ -75,10 +75,108 @@ export default function PreviewDetailDrawer({
       enableSwipe
       height="full"
       showCloseButton={false}
+      stickyFooter={
+        <div className="p-4 bg-card border-t border-border/50 space-y-3">
+          {status === 'pending' ? (
+            <>
+              {/* 주차 선택 */}
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+                  {weekOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setSelectedWeekCount(opt.value)}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap transition-all shrink-0 ${
+                        selectedWeekCount === opt.value
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
+                  총 {totalDays}일
+                </span>
+              </div>
+
+              {/* 대체/이어붙이기 선택 (기존 스케줄이 있을 때만) */}
+              {hasExistingScheduled && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setApplyMode('replace')}
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium rounded-xl transition-all ${
+                      applyMode === 'replace'
+                        ? 'bg-primary/10 text-primary ring-1 ring-primary/30'
+                        : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                    }`}
+                  >
+                    <ArrowsClockwiseIcon size={14} weight={applyMode === 'replace' ? 'bold' : 'regular'} />
+                    기존 루틴 대체
+                  </button>
+                  <button
+                    onClick={() => setApplyMode('append')}
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium rounded-xl transition-all ${
+                      applyMode === 'append'
+                        ? 'bg-primary/10 text-primary ring-1 ring-primary/30'
+                        : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                    }`}
+                  >
+                    <PlusCircleIcon size={14} weight={applyMode === 'append' ? 'bold' : 'regular'} />
+                    기존 루틴 이후에 추가
+                  </button>
+                </div>
+              )}
+
+              {/* 적용 버튼 */}
+              <button
+                onClick={() => onApply(
+                  hasConflicts && applyMode === 'replace',
+                  selectedWeekCount,
+                  applyMode === 'append'
+                )}
+                disabled={!isActionable}
+                className={`w-full py-3.5 rounded-xl font-medium transition-all disabled:opacity-50 active:scale-[0.98] ${
+                  hasConflicts && applyMode === 'replace'
+                    ? 'bg-amber-500 text-white hover:bg-amber-600'
+                    : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                }`}
+              >
+                {isApplying ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <LoadingSpinner size="sm" variant="current" />
+                    적용 중...
+                  </span>
+                ) : (
+                  `${selectedWeekCount}주 루틴 ${applyMode === 'append' ? '이어붙이기' : '적용하기'}`
+                )}
+              </button>
+            </>
+          ) : (
+            <div className="flex items-center justify-center py-3.5">
+              <span className={`text-sm font-medium flex items-center gap-1.5 ${
+                status === 'applied' ? 'text-green-600' : 'text-muted-foreground'
+              }`}>
+                {status === 'applied' ? (
+                  <>
+                    <CheckIcon size={16} weight="bold" />
+                    이미 적용된 루틴이에요
+                  </>
+                ) : (
+                  <>
+                    <ProhibitIcon size={16} />
+                    취소된 루틴이에요
+                  </>
+                )}
+              </span>
+            </div>
+          )}
+        </div>
+      }
     >
       {/* 헤더 - 배지 + 타이틀 + 설명 */}
       <div className="px-5 pt-2 pb-4">
-        {/* 배지들 */}
         <div className="flex items-center gap-2 mb-4">
           <span className="px-2.5 py-1 text-xs font-medium bg-muted/50 text-muted-foreground rounded-full">
             주 {preview.daysPerWeek}회
@@ -89,13 +187,9 @@ export default function PreviewDetailDrawer({
             </span>
           )}
         </div>
-
-        {/* 타이틀 */}
         <h2 className="font-semibold text-foreground text-lg leading-tight">
           {preview.title}
         </h2>
-
-        {/* 설명 - 전체 표시 */}
         {preview.description && (
           <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
             {preview.description}
@@ -103,113 +197,11 @@ export default function PreviewDetailDrawer({
         )}
       </div>
 
-      {/* 일별 상세 (스크롤 영역) - 첫 주만 표시 */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="px-5 pb-6 space-y-4">
-          {firstWeek?.days.map((day, idx) => (
-            <RoutineDayCard key={idx} day={day} />
-          ))}
-        </div>
-      </div>
-
-      {/* 하단 고정: 주차 선택 + 버튼 */}
-      <div className="sticky bottom-0 p-4 bg-card space-y-3">
-        {status === 'pending' ? (
-          <>
-            {/* 주차 선택 */}
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-                {weekOptions.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setSelectedWeekCount(opt.value)}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap transition-all shrink-0 ${
-                      selectedWeekCount === opt.value
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-              <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
-                총 {totalDays}일
-              </span>
-            </div>
-
-            {/* 대체/이어붙이기 선택 (기존 스케줄이 있을 때만) */}
-            {hasExistingScheduled && (
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setApplyMode('replace')}
-                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium rounded-xl transition-all ${
-                    applyMode === 'replace'
-                      ? 'bg-primary/10 text-primary ring-1 ring-primary/30'
-                      : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-                  }`}
-                >
-                  <ArrowsClockwiseIcon size={14} weight={applyMode === 'replace' ? 'bold' : 'regular'} />
-                  기존 루틴 대체
-                </button>
-                <button
-                  onClick={() => setApplyMode('append')}
-                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium rounded-xl transition-all ${
-                    applyMode === 'append'
-                      ? 'bg-primary/10 text-primary ring-1 ring-primary/30'
-                      : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-                  }`}
-                >
-                  <PlusCircleIcon size={14} weight={applyMode === 'append' ? 'bold' : 'regular'} />
-                  기존 루틴 이후에 추가
-                </button>
-              </div>
-            )}
-
-            {/* 적용 버튼 */}
-            <button
-              onClick={() => onApply(
-                hasConflicts && applyMode === 'replace',
-                selectedWeekCount,
-                applyMode === 'append'
-              )}
-              disabled={!isActionable}
-              className={`w-full py-3.5 rounded-xl font-medium transition-all disabled:opacity-50 active:scale-[0.98] ${
-                hasConflicts && applyMode === 'replace'
-                  ? 'bg-amber-500 text-white hover:bg-amber-600'
-                  : 'bg-primary text-primary-foreground hover:bg-primary/90'
-              }`}
-            >
-              {isApplying ? (
-                <span className="flex items-center justify-center gap-2">
-                  <LoadingSpinner size="sm" variant="current" />
-                  적용 중...
-                </span>
-              ) : (
-                `${selectedWeekCount}주 루틴 ${applyMode === 'append' ? '이어붙이기' : '적용하기'}`
-              )}
-            </button>
-          </>
-        ) : (
-          /* 상태 표시 (중앙 정렬) */
-          <div className="flex items-center justify-center py-3.5">
-            <span className={`text-sm font-medium flex items-center gap-1.5 ${
-              status === 'applied' ? 'text-green-600' : 'text-muted-foreground'
-            }`}>
-              {status === 'applied' ? (
-                <>
-                  <CheckIcon size={16} weight="bold" />
-                  이미 적용된 루틴이에요
-                </>
-              ) : (
-                <>
-                  <ProhibitIcon size={16} />
-                  취소된 루틴이에요
-                </>
-              )}
-            </span>
-          </div>
-        )}
+      {/* 일별 상세 - 첫 주만 표시 */}
+      <div className="px-5 pb-6 space-y-4">
+        {firstWeek?.days.map((day, idx) => (
+          <RoutineDayCard key={idx} day={day} />
+        ))}
       </div>
     </Modal>
   );

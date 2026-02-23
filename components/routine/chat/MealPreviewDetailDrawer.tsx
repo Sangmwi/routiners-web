@@ -46,10 +46,47 @@ export default function MealPreviewDetailDrawer({
       enableSwipe
       height="full"
       showCloseButton={false}
+      stickyFooter={
+        <div className="p-4 bg-card border-t border-border/50">
+          {status === 'pending' ? (
+            <button
+              onClick={onApply}
+              disabled={!isActionable}
+              className="w-full py-3.5 rounded-xl font-medium transition-all disabled:opacity-50 active:scale-[0.98] bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              {isApplying ? (
+                <span className="flex items-center justify-center gap-2">
+                  <LoadingSpinner size="sm" variant="current" />
+                  적용 중...
+                </span>
+              ) : (
+                '식단 적용하기'
+              )}
+            </button>
+          ) : (
+            <div className="flex items-center justify-center py-3.5">
+              <span className={`text-sm font-medium flex items-center gap-1.5 ${
+                status === 'applied' ? 'text-green-600' : 'text-muted-foreground'
+              }`}>
+                {status === 'applied' ? (
+                  <>
+                    <CheckIcon size={16} weight="bold" />
+                    이미 적용된 식단이에요
+                  </>
+                ) : (
+                  <>
+                    <ProhibitIcon size={16} />
+                    취소된 식단이에요
+                  </>
+                )}
+              </span>
+            </div>
+          )}
+        </div>
+      }
     >
       {/* 헤더 - 배지 + 타이틀 + 설명 */}
       <div className="px-5 pt-2 pb-4">
-        {/* 배지들 */}
         <div className="flex items-center gap-2 mb-4">
           <span className="px-2.5 py-1 text-xs font-medium bg-muted/50 text-muted-foreground rounded-full">
             {preview.durationWeeks}주
@@ -65,13 +102,9 @@ export default function MealPreviewDetailDrawer({
             </span>
           )}
         </div>
-
-        {/* 타이틀 */}
         <h2 className="font-semibold text-foreground text-lg leading-tight">
           {preview.title}
         </h2>
-
-        {/* 설명 */}
         {preview.description && (
           <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
             {preview.description}
@@ -79,51 +112,11 @@ export default function MealPreviewDetailDrawer({
         )}
       </div>
 
-      {/* 일별 상세 (스크롤 영역) */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="px-5 pb-6 space-y-4">
-          {firstWeek?.days.map((day, idx) => (
-            <MealDayCard key={idx} day={day} />
-          ))}
-        </div>
-      </div>
-
-      {/* 하단 고정: 적용 버튼 또는 상태 표시 */}
-      <div className="sticky bottom-0 p-4 bg-card">
-        {status === 'pending' ? (
-          <button
-            onClick={onApply}
-            disabled={!isActionable}
-            className="w-full py-3.5 rounded-xl font-medium transition-all disabled:opacity-50 active:scale-[0.98] bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            {isApplying ? (
-              <span className="flex items-center justify-center gap-2">
-                <LoadingSpinner size="sm" variant="current" />
-                적용 중...
-              </span>
-            ) : (
-              '식단 적용하기'
-            )}
-          </button>
-        ) : (
-          <div className="flex items-center justify-center py-3.5">
-            <span className={`text-sm font-medium flex items-center gap-1.5 ${
-              status === 'applied' ? 'text-green-600' : 'text-muted-foreground'
-            }`}>
-              {status === 'applied' ? (
-                <>
-                  <CheckIcon size={16} weight="bold" />
-                  이미 적용된 식단이에요
-                </>
-              ) : (
-                <>
-                  <ProhibitIcon size={16} />
-                  취소된 식단이에요
-                </>
-              )}
-            </span>
-          </div>
-        )}
+      {/* 일별 상세 */}
+      <div className="px-5 pb-6 space-y-4">
+        {firstWeek?.days.map((day, idx) => (
+          <MealDayCard key={idx} day={day} />
+        ))}
       </div>
     </Modal>
   );
