@@ -29,6 +29,10 @@ interface ModalProps {
   enableSwipe?: boolean;
   swipeThreshold?: number;
   height?: 'auto' | 'half' | 'full';
+  /** 스크롤 영역 바깥 하단에 고정되는 요소 (입력창 등) */
+  stickyFooter?: ReactNode;
+  /** 모달이 열릴 때 실행할 콜백 (autoFocus 등) */
+  onOpened?: () => void;
 }
 
 // ============================================================================
@@ -45,9 +49,9 @@ const SIZE_CLASSES = {
 } as const;
 
 const HEIGHT_CLASSES = {
-  auto: 'max-h-[85vh]',
-  half: 'h-[50vh]',
-  full: 'h-[90vh]',
+  auto: 'max-h-[85dvh]',
+  half: 'h-[50dvh]',
+  full: 'h-dvh',
 } as const;
 
 // ============================================================================
@@ -166,6 +170,8 @@ export default function Modal({
   enableSwipe = false,
   swipeThreshold = 100,
   height = 'auto',
+  stickyFooter,
+  onOpened,
 }: ModalProps) {
   const isBottom = position === 'bottom';
   const modalRef = useRef<HTMLDivElement>(null);
@@ -182,6 +188,14 @@ export default function Modal({
     swipeThreshold,
     executeClose
   );
+
+  // 모달 열림 콜백
+  useEffect(() => {
+    if (isVisible && onOpened) {
+      const timer = setTimeout(onOpened, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, onOpened]);
 
   // 드래그 시작 시 오픈 애니메이션 재실행 방지
   useEffect(() => {
@@ -216,7 +230,7 @@ export default function Modal({
   if (typeof document === 'undefined') return null;
 
   // 스타일 계산
-  const heightClass = isBottom ? HEIGHT_CLASSES[height] : 'max-h-[90vh]';
+  const heightClass = isBottom ? HEIGHT_CLASSES[height] : 'max-h-[85dvh]';
   const containerAlign = isBottom ? 'items-end' : 'items-center';
 
   const modalAnimationClass = getModalAnimationClass(
@@ -257,6 +271,7 @@ export default function Modal({
         className={`relative w-full bg-card shadow-xl ${heightClass} flex flex-col ${modalAnimationClass} ${isBottom ? 'sm:max-w-md' : SIZE_CLASSES[size]} ${className}`}
         style={swipeStyle}
         onClick={(e) => e.stopPropagation()}
+        {...(enableSwipe ? swipe.handlers : {})}
       >
         {/* Drag Handle (Bottom Sheet) - 스와이프 핸들러는 여기에만 적용 */}
         {isBottom && (
@@ -264,7 +279,6 @@ export default function Modal({
             className={`flex justify-center pt-3 pb-2 ${
               enableSwipe ? 'cursor-grab active:cursor-grabbing' : ''
             }`}
-            {...(enableSwipe ? swipe.handlers : {})}
           >
             <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
           </div>
@@ -276,7 +290,7 @@ export default function Modal({
             {title && (
               <h2
                 id="modal-title"
-                className="text-lg font-semibold text-card-foreground"
+                className="text-base font-medium text-card-foreground"
               >
                 {title}
               </h2>
@@ -304,6 +318,9 @@ export default function Modal({
         >
           {children}
         </div>
+
+        {/* Sticky Footer — 스크롤 영역 바깥 하단 고정 */}
+        {stickyFooter}
       </div>
     </div>,
     document.body

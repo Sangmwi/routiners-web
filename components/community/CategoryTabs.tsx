@@ -31,7 +31,7 @@ export default function CategoryTabs({
           onClick={() => onCategoryChange?.(category.id)}
           className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium transition-all ${
             selectedCategory === category.id
-              ? 'bg-foreground/10 text-foreground ring-1 ring-foreground/15'
+              ? 'bg-foreground/10 text-foreground'
               : 'bg-muted/20 text-muted-foreground hover:bg-muted/40'
           }`}
         >

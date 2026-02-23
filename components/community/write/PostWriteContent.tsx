@@ -90,7 +90,7 @@ export default function PostWriteContent({ editPostId }: PostWriteContentProps) 
             imageUrls: allImageUrls,
           },
         });
-        router.replace(`/community/${editPostId}`);
+        router.replace('/community');
       } else {
         await createPost.mutateAsync({
           category,

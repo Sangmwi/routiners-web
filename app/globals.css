@@ -38,6 +38,7 @@
   --input: #dbf5e2;
   --destructive: #d97373;
   --destructive-foreground: #ffffff;
+  --like: #dc2626;
   --success: #22c55e;
   --success-foreground: #ffffff;
   --warning: #d97706;
@@ -67,6 +68,7 @@
     --input: #1e293b;
     --destructive: #e8a0a0;
     --destructive-foreground: #1e1e1e;
+    --like: #f87171;
     --success: #4ade80;
     --success-foreground: #0f172a;
     --warning: #fbbf24;
@@ -115,6 +117,7 @@
   --color-scheduled-foreground: var(--scheduled-foreground);
   --color-positive: var(--positive);
   --color-negative: var(--negative);
+  --color-like: var(--like);
 
   /* Green Brand Scale */
   --color-green-50: var(--color-green-50);
@@ -150,6 +153,7 @@
   --input: #dbf5e2;
   --destructive: #d97373;
   --destructive-foreground: #ffffff;
+  --like: #dc2626;
   --success: #22c55e;
   --success-foreground: #ffffff;
   --warning: #d97706;
@@ -189,6 +193,7 @@
   --input: #1e293b;
   --destructive: #e8a0a0;
   --destructive-foreground: #1e1e1e;
+  --like: #f87171;
   --success: #4ade80;
   --success-foreground: #0f172a;
   --warning: #fbbf24;

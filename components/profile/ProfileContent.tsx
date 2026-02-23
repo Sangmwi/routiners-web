@@ -72,7 +72,7 @@ export default function ProfileContent() {
             )}
 
             <QueryErrorBoundary>
-              <Suspense fallback={<PulseLoader />}>
+              <Suspense fallback={<PulseLoader className="py-4 px-1" />}>
                 {activeTab === 'activity' && <ProfileActivityGrid userId={user.id} />}
                 {activeTab === 'info' && <ProfileInfoTab user={user} />}
               </Suspense>

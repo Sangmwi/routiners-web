@@ -74,7 +74,7 @@ export default function InBodyPreview({
 
       {/* 추출 결과 헤더 */}
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold text-card-foreground">
+        <h3 className="text-sm font-medium text-card-foreground">
           {readOnly ? '인바디 데이터' : '추출된 데이터'}
         </h3>
         {canEdit && !initialEditing && (

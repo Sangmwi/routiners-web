@@ -17,14 +17,14 @@ interface ProfileActivityGridProps {
 // Sub Components
 // ============================================================
 
-function GridCell({ post }: { post: CommunityPost }) {
+function GridCell({ post, userId, index }: { post: CommunityPost; userId: string; index: number }) {
   const router = useRouter();
   const hasImages = post.imageUrls.length > 0;
   const hasMultipleImages = post.imageUrls.length > 1;
 
   return (
     <button
-      onClick={() => router.push(`/community/${post.id}`)}
+      onClick={() => router.push(`/profile/user/${userId}/posts?startIndex=${index}`)}
       className="aspect-square relative overflow-hidden bg-muted/20"
     >
       {hasImages ? (
@@ -113,8 +113,8 @@ export default function ProfileActivityGrid({ userId }: ProfileActivityGridProps
   return (
     <>
       <div className="grid grid-cols-3 gap-0.5 py-4 px-1">
-        {posts.map((post) => (
-          <GridCell key={post.id} post={post} />
+        {posts.map((post, index) => (
+          <GridCell key={post.id} post={post} userId={userId} index={index} />
         ))}
       </div>
 

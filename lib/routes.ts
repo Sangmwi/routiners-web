@@ -13,11 +13,13 @@ export const ROUTES_WITHOUT_TAB = [
   '/app-init',        // 앱 초기화 페이지 (WebView 세션 동기화)
   // 하위 페이지들 (prefix 매칭)
   '/routine/',        // /routine/counselor, /routine/2025-01-01 등
-  '/community/',      // /community/post/123 등
+  '/community/write', // 게시글 작성
+  '/community/search-users', // 유저 검색
   '/profile/edit',
   '/profile/inbody',  // 인바디 관리
   '/profile/fitness', // 피트니스 관리
   '/profile/dietary', // 식단 관리
+  '/profile/user/',   // 다른 유저 프로필
   '/settings',        // 설정 페이지
 ] as const;
 

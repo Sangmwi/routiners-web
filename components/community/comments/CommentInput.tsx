@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { PaperPlaneRightIcon, XIcon } from '@phosphor-icons/react';
+import { useState, useRef, useEffect } from 'react';
+import { ArrowUpIcon, XIcon } from '@phosphor-icons/react';
 import { useCreateComment } from '@/hooks/community/mutations';
 import type { ReplyTarget } from './CommentSection';
 
@@ -10,6 +10,7 @@ interface CommentInputProps {
   replyingTo: ReplyTarget | null;
   onCancelReply: () => void;
   onCreated: () => void;
+  autoFocus?: boolean;
 }
 
 export default function CommentInput({
@@ -17,9 +18,18 @@ export default function CommentInput({
   replyingTo,
   onCancelReply,
   onCreated,
+  autoFocus = false,
 }: CommentInputProps) {
   const [content, setContent] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
   const createComment = useCreateComment();
+
+  // autoFocus: 드로어 열릴 때 인풋에 포커스 → 키보드 열림
+  useEffect(() => {
+    if (autoFocus && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [autoFocus]);
 
   const handleSubmit = () => {
     const trimmed = content.trim();
@@ -49,41 +59,50 @@ export default function CommentInput({
     }
   };
 
+  const hasContent = content.trim().length > 0;
+
   return (
-    <div className="border-t border-border/30 pt-3 space-y-2">
-      {/* 답글 모드 표시 */}
-      {replyingTo && (
-        <div className="flex items-center gap-2 px-1">
-          <span className="text-xs text-primary">
-            @{replyingTo.authorName}에게 답글
-          </span>
+    <div className="border-t border-border/30 bg-card">
+      <div className="px-4 py-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))]">
+        {/* 답글 모드 표시 */}
+        {replyingTo && (
+          <div className="flex items-center gap-2 px-1 mb-1.5">
+            <span className="text-xs text-primary">
+              @{replyingTo.authorName}에게 답글
+            </span>
+            <button
+              onClick={onCancelReply}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <XIcon size={14} />
+            </button>
+          </div>
+        )}
+
+        {/* 입력 영역 — 보내기 버튼이 인풋 안에 원형으로 */}
+        <div className="relative flex items-center">
+          <input
+            ref={inputRef}
+            type="text"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="댓글을 입력하세요..."
+            maxLength={500}
+            className="w-full rounded-full bg-muted/20 border border-border/50 pl-4 pr-11 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+          />
           <button
-            onClick={onCancelReply}
-            className="text-muted-foreground hover:text-foreground transition-colors"
+            onClick={handleSubmit}
+            disabled={!hasContent || createComment.isPending}
+            className={`absolute right-1.5 w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+              hasContent
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted/40 text-muted-foreground/40'
+            }`}
           >
-            <XIcon size={14} />
+            <ArrowUpIcon size={14} weight="bold" />
           </button>
         </div>
-      )}
-
-      {/* 입력 영역 */}
-      <div className="flex items-center gap-2">
-        <input
-          type="text"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="댓글을 입력하세요..."
-          maxLength={500}
-          className="flex-1 rounded-full bg-muted/20 border border-border/50 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-        />
-        <button
-          onClick={handleSubmit}
-          disabled={!content.trim() || createComment.isPending}
-          className="shrink-0 p-2.5 rounded-full text-primary disabled:opacity-30 transition-opacity"
-        >
-          <PaperPlaneRightIcon size={20} weight="fill" />
-        </button>
       </div>
     </div>
   );

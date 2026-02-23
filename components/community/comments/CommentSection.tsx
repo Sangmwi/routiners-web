@@ -1,14 +1,13 @@
 'use client';
 
-import { useState } from 'react';
 import { LoadingSpinner } from '@/components/ui/icons';
 import { usePostComments } from '@/hooks/community/queries';
 import CommentItem from './CommentItem';
-import CommentInput from './CommentInput';
 
 interface CommentSectionProps {
   postId: string;
-  commentsCount: number;
+  commentsCount?: number;
+  onReply: (commentId: string, authorName: string) => void;
 }
 
 export interface ReplyTarget {
@@ -19,28 +18,18 @@ export interface ReplyTarget {
 export default function CommentSection({
   postId,
   commentsCount,
+  onReply,
 }: CommentSectionProps) {
   const { data, isLoading } = usePostComments(postId);
-  const [replyingTo, setReplyingTo] = useState<ReplyTarget | null>(null);
-
-  const handleReply = (commentId: string, authorName: string) => {
-    setReplyingTo({ commentId, authorName });
-  };
-
-  const handleCancelReply = () => {
-    setReplyingTo(null);
-  };
-
-  const handleCommentCreated = () => {
-    setReplyingTo(null);
-  };
 
   return (
     <div className="space-y-4">
       {/* 헤더 */}
-      <h3 className="text-sm font-semibold text-foreground">
-        댓글 {commentsCount}
-      </h3>
+      {commentsCount !== undefined && (
+        <h3 className="text-sm font-semibold text-foreground">
+          댓글 {commentsCount}
+        </h3>
+      )}
 
       {/* 댓글 목록 */}
       {isLoading ? (
@@ -54,7 +43,7 @@ export default function CommentSection({
               key={comment.id}
               comment={comment}
               postId={postId}
-              onReply={handleReply}
+              onReply={onReply}
             />
           ))}
         </div>
@@ -63,14 +52,6 @@ export default function CommentSection({
           아직 댓글이 없어요. 첫 댓글을 남겨보세요!
         </p>
       )}
-
-      {/* 댓글 입력 */}
-      <CommentInput
-        postId={postId}
-        replyingTo={replyingTo}
-        onCancelReply={handleCancelReply}
-        onCreated={handleCommentCreated}
-      />
     </div>
   );
 }

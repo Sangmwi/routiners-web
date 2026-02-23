@@ -6,23 +6,23 @@ import { DetailLayout } from '@/components/layouts';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import { PulseLoader } from '@/components/ui/PulseLoader';
 
-const PostDetailContent = dynamic(
-  () => import('@/components/community/detail/PostDetailContent'),
+const UserProfileContent = dynamic(
+  () => import('@/components/profile/UserProfileContent'),
   { ssr: false, loading: () => <PulseLoader /> }
 );
 
-export default function PostDetailPage({
+export default function UserProfilePage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ userId: string }>;
 }) {
-  const { id } = use(params);
+  const { userId } = use(params);
 
   return (
-    <DetailLayout title="게시글" centered>
+    <DetailLayout title="프로필" centered>
       <QueryErrorBoundary>
         <Suspense fallback={<PulseLoader />}>
-          <PostDetailContent postId={id} />
+          <UserProfileContent userId={userId} />
         </Suspense>
       </QueryErrorBoundary>
     </DetailLayout>

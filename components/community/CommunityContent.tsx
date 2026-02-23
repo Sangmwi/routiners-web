@@ -1,12 +1,15 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PostCard from './PostCard';
+import PostMoreMenu from './PostMoreMenu';
+import CommentDrawer from './CommentDrawer';
 import { PulseLoader } from '@/components/ui/PulseLoader';
 import { LoadingSpinner } from '@/components/ui/icons';
 import { useInfiniteCommunityPosts } from '@/hooks/community/queries';
 import { useToggleLike } from '@/hooks/community/mutations';
+import { useCurrentUserProfile } from '@/hooks/profile/queries';
 import type { PostCategory } from '@/lib/types/community';
 
 interface CommunityContentProps {
@@ -26,6 +29,13 @@ export default function CommunityContent({
   const router = useRouter();
   const sentinelRef = useRef<HTMLDivElement>(null);
   const toggleLike = useToggleLike();
+  const { data: currentUser } = useCurrentUserProfile();
+
+  // 댓글 드로어
+  const [commentPostId, setCommentPostId] = useState<string | null>(null);
+
+  // 더보기 메뉴
+  const [moreMenuPostId, setMoreMenuPostId] = useState<string | null>(null);
 
   const {
     data,
@@ -62,12 +72,24 @@ export default function CommunityContent({
     router.push('/community/write');
   };
 
-  const handlePostClick = (postId: string) => {
-    router.push(`/community/${postId}`);
-  };
-
   const handleLike = (postId: string) => {
     toggleLike.mutate(postId);
+  };
+
+  const handleComment = (postId: string) => {
+    setCommentPostId(postId);
+  };
+
+  const handleAuthorClick = (authorId: string) => {
+    router.push(`/profile/user/${authorId}`);
+  };
+
+  const handleMore = (postId: string) => {
+    setMoreMenuPostId(postId);
+  };
+
+  const handleDeleted = () => {
+    setMoreMenuPostId(null);
   };
 
   // 초기 로딩
@@ -100,8 +122,11 @@ export default function CommunityContent({
               <PostCard
                 key={post.id}
                 post={post}
-                onClick={() => handlePostClick(post.id)}
                 onLike={() => handleLike(post.id)}
+                onComment={() => handleComment(post.id)}
+                onAuthorClick={() => handleAuthorClick(post.authorId)}
+                onMore={() => handleMore(post.id)}
+                showMoreButton={currentUser?.id === post.authorId}
               />
             ))}
           </div>
@@ -123,6 +148,26 @@ export default function CommunityContent({
             </p>
           )}
         </>
+      )}
+
+      {/* 댓글 드로어 */}
+      {commentPostId && (
+        <CommentDrawer
+          isOpen={!!commentPostId}
+          onClose={() => setCommentPostId(null)}
+          postId={commentPostId}
+        />
+      )}
+
+      {/* 더보기 메뉴 */}
+      {moreMenuPostId && (
+        <PostMoreMenu
+          isOpen={!!moreMenuPostId}
+          onClose={() => setMoreMenuPostId(null)}
+          postId={moreMenuPostId}
+          isOwner={currentUser?.id === posts.find((p) => p.id === moreMenuPostId)?.authorId}
+          onDeleted={handleDeleted}
+        />
       )}
     </div>
   );

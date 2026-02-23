@@ -20,7 +20,9 @@ import type {
   UpdatePostRequest,
   CreateCommentRequest,
   CommunityPost,
+  PostListResponse,
 } from '@/lib/types/community';
+import type { InfiniteData } from '@tanstack/react-query';
 
 /**
  * 게시글 작성
@@ -86,6 +88,19 @@ export function useDeletePost() {
 }
 
 /**
+ * list 캐시 내 특정 게시글의 좋아요 상태를 업데이트하는 헬퍼
+ */
+function updatePostInListCache(
+  post: CommunityPost,
+  postId: string,
+  isLiked: boolean,
+  likesCount: number
+): CommunityPost {
+  if (post.id !== postId) return post;
+  return { ...post, isLiked, likesCount };
+}
+
+/**
  * 좋아요 토글
  */
 export function useToggleLike() {
@@ -94,17 +109,23 @@ export function useToggleLike() {
   return useMutation({
     mutationFn: (postId: string) => togglePostLike(postId),
     onMutate: async (postId) => {
-      // 낙관적 업데이트
+      // detail + list 쿼리 모두 취소
       await queryClient.cancelQueries({
         queryKey: queryKeys.post.detail(postId),
       });
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.post.lists(),
+      });
 
+      // 1) detail 캐시 낙관적 업데이트
       const previousPost = queryClient.getQueryData<CommunityPost>(
         queryKeys.post.detail(postId)
       );
 
+      let newIsLiked: boolean | undefined;
+
       if (previousPost) {
-        const newIsLiked = !previousPost.isLiked;
+        newIsLiked = !previousPost.isLiked;
         queryClient.setQueryData(queryKeys.post.detail(postId), {
           ...previousPost,
           isLiked: newIsLiked,
@@ -112,19 +133,99 @@ export function useToggleLike() {
         });
       }
 
-      return { previousPost };
+      // 2) list 캐시 낙관적 업데이트 (infinite query + 일반 query 모두)
+      const previousLists: Array<{
+        queryKey: readonly unknown[];
+        data: unknown;
+      }> = [];
+
+      queryClient
+        .getQueriesData<InfiniteData<PostListResponse>>({
+          queryKey: queryKeys.post.lists(),
+        })
+        .forEach(([queryKey, data]) => {
+          if (!data) return;
+          previousLists.push({ queryKey, data });
+
+          // infinite query (pages 배열이 있는 경우)
+          if ('pages' in data && Array.isArray(data.pages)) {
+            // 아직 newIsLiked를 모르면 첫 번째 매칭 게시글에서 결정
+            if (newIsLiked === undefined) {
+              for (const page of data.pages) {
+                const found = page.posts.find(
+                  (p: CommunityPost) => p.id === postId
+                );
+                if (found) {
+                  newIsLiked = !found.isLiked;
+                  break;
+                }
+              }
+            }
+
+            if (newIsLiked === undefined) return;
+
+            queryClient.setQueryData(queryKey, {
+              ...data,
+              pages: data.pages.map((page: PostListResponse) => ({
+                ...page,
+                posts: page.posts.map((post: CommunityPost) =>
+                  updatePostInListCache(
+                    post,
+                    postId,
+                    newIsLiked!,
+                    post.id === postId
+                      ? post.likesCount + (newIsLiked! ? 1 : -1)
+                      : post.likesCount
+                  )
+                ),
+              })),
+            });
+          }
+
+          // 일반 query (PostListResponse 형태)
+          else if ('posts' in data) {
+            const listData = data as unknown as PostListResponse;
+
+            if (newIsLiked === undefined) {
+              const found = listData.posts.find((p) => p.id === postId);
+              if (found) newIsLiked = !found.isLiked;
+            }
+
+            if (newIsLiked === undefined) return;
+
+            queryClient.setQueryData(queryKey, {
+              ...listData,
+              posts: listData.posts.map((post: CommunityPost) =>
+                updatePostInListCache(
+                  post,
+                  postId,
+                  newIsLiked!,
+                  post.id === postId
+                    ? post.likesCount + (newIsLiked! ? 1 : -1)
+                    : post.likesCount
+                )
+              ),
+            });
+          }
+        });
+
+      return { previousPost, previousLists };
     },
     onError: (_, postId, context) => {
-      // 에러 시 롤백
+      // detail 캐시 롤백
       if (context?.previousPost) {
         queryClient.setQueryData(
           queryKeys.post.detail(postId),
           context.previousPost
         );
       }
+      // list 캐시 롤백
+      context?.previousLists?.forEach(({ queryKey, data }) => {
+        queryClient.setQueryData(queryKey, data);
+      });
     },
     onSuccess: (result, postId) => {
-      // 서버 결과로 최종 업데이트
+      // detail 캐시를 서버 결과로 최종 업데이트
       const currentPost = queryClient.getQueryData<CommunityPost>(
         queryKeys.post.detail(postId)
       );
@@ -135,10 +236,37 @@ export function useToggleLike() {
           likesCount: result.likesCount,
         });
       }
-      // 목록 캐시 무효화
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.post.lists(),
-      });
+
+      // list 캐시도 서버 결과로 최종 업데이트
+      queryClient
+        .getQueriesData({ queryKey: queryKeys.post.lists() })
+        .forEach(([queryKey, data]) => {
+          if (!data || typeof data !== 'object') return;
+
+          // infinite query (pages 배열이 있는 경우)
+          if ('pages' in data) {
+            const infiniteData = data as InfiniteData<PostListResponse>;
+            if (!Array.isArray(infiniteData.pages)) return;
+            queryClient.setQueryData(queryKey, {
+              ...infiniteData,
+              pages: infiniteData.pages.map((page) => ({
+                ...page,
+                posts: page.posts.map((post) =>
+                  updatePostInListCache(post, postId, result.isLiked, result.likesCount)
+                ),
+              })),
+            });
+          } else if ('posts' in data) {
+            // 일반 query (PostListResponse 형태)
+            const listData = data as unknown as PostListResponse;
+            queryClient.setQueryData(queryKey, {
+              ...listData,
+              posts: listData.posts.map((post) =>
+                updatePostInListCache(post, postId, result.isLiked, result.likesCount)
+              ),
+            });
+          }
+        });
     },
 
     // 성공/실패 무관하게 서버 데이터와 최종 재동기화

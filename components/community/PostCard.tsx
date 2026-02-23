@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useCallback, useEffect } from 'react';
-import { HeartIcon, ChatCircleIcon, ShareNetworkIcon } from '@phosphor-icons/react';
+import { HeartIcon, ChatCircleIcon, ShareNetworkIcon, DotsThreeVerticalIcon } from '@phosphor-icons/react';
 import { ImageWithFallback } from '@/components/ui/image';
 import type { CommunityPost } from '@/lib/types/community';
 import { formatTimeAgo } from '@/lib/types/community';
@@ -9,8 +9,11 @@ import { RANK_OPTIONS } from '@/lib/constants/military';
 
 interface PostCardProps {
   post: CommunityPost;
-  onClick?: () => void;
   onLike?: () => void;
+  onComment?: () => void;
+  onAuthorClick?: () => void;
+  onMore?: () => void;
+  showMoreButton?: boolean;
 }
 
 /**
@@ -20,7 +23,7 @@ interface PostCardProps {
  * - 이미지는 레이아웃 패딩 무시하고 화면 꽉 채움
  * - 텍스트/액션은 레이아웃 패딩 내에서 표시
  */
-export default function PostCard({ post, onClick, onLike }: PostCardProps) {
+export default function PostCard({ post, onLike, onComment, onAuthorClick, onMore, showMoreButton }: PostCardProps) {
   const { author, content, likesCount, commentsCount, imageUrls, createdAt, isLiked } = post;
 
   const authorName = author?.nickname ?? '알 수 없음';
@@ -35,11 +38,39 @@ export default function PostCard({ post, onClick, onLike }: PostCardProps) {
     onLike?.();
   };
 
+  const handleCommentClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onComment?.();
+  };
+
+  const handleAuthorClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onAuthorClick?.();
+  };
+
+  const handleMoreClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onMore?.();
+  };
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const text = content.length > 100 ? content.slice(0, 100) + '...' : content;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // 클립보드 복사 실패 시 무시
+    }
+  };
+
   return (
-    <div onClick={onClick} className="cursor-pointer py-3">
+    <div className="py-3">
       {/* 작성자 헤더 */}
       <div className="flex items-center gap-3 py-2.5">
-        <div className="relative h-9 w-9 overflow-hidden rounded-full bg-primary/10 border border-border/50">
+        <button
+          onClick={handleAuthorClick}
+          className="relative h-9 w-9 overflow-hidden rounded-full bg-primary/10 border border-border/50"
+        >
           <ImageWithFallback
             src={authorAvatar}
             alt={authorName}
@@ -53,8 +84,8 @@ export default function PostCard({ post, onClick, onLike }: PostCardProps) {
               {authorName.charAt(0)}
             </div>
           )}
-        </div>
-        <div className="flex-1 min-w-0">
+        </button>
+        <button onClick={handleAuthorClick} className="flex-1 min-w-0 text-left">
           <p className="text-sm font-semibold text-foreground leading-tight">
             {authorName}
             {authorRank && (
@@ -62,12 +93,20 @@ export default function PostCard({ post, onClick, onLike }: PostCardProps) {
             )}
           </p>
           <p className="text-xs text-muted-foreground">{timeAgo}</p>
-        </div>
+        </button>
+        {showMoreButton && (
+          <button
+            onClick={handleMoreClick}
+            className="p-2 rounded-full hover:bg-muted/30 transition-colors text-muted-foreground"
+          >
+            <DotsThreeVerticalIcon size={20} weight="bold" />
+          </button>
+        )}
       </div>
 
       {/* 이미지 캐러셀 — full bleed (레이아웃 패딩 무시) */}
       {imageUrls.length > 0 && (
-        <div className="-mx-(--layout-padding-x)" onClick={(e) => e.stopPropagation()}>
+        <div className="-mx-(--layout-padding-x)">
           <PostCardImages images={imageUrls} />
         </div>
       )}
@@ -77,18 +116,24 @@ export default function PostCard({ post, onClick, onLike }: PostCardProps) {
         <button
           onClick={handleLikeClick}
           className={`flex items-center gap-1.5 transition-colors ${
-            isLiked ? 'text-destructive' : 'text-muted-foreground hover:text-foreground'
+            isLiked ? 'text-like' : 'text-muted-foreground'
           }`}
         >
-          <HeartIcon size={22} weight={isLiked ? 'fill' : 'regular'} />
-          <span className="text-xs font-medium">{likesCount}</span>
+          <HeartIcon size={20} weight={isLiked ? 'fill' : 'regular'} />
+          <span className="text-sm font-medium">{likesCount}</span>
         </button>
-        <button className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
-          <ChatCircleIcon size={22} />
-          <span className="text-xs font-medium">{commentsCount}</span>
+        <button
+          onClick={handleCommentClick}
+          className="flex items-center gap-1.5 text-muted-foreground"
+        >
+          <ChatCircleIcon size={20} />
+          <span className="text-sm font-medium">{commentsCount}</span>
         </button>
-        <button className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors ml-auto">
-          <ShareNetworkIcon size={22} />
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-1.5 text-muted-foreground ml-auto"
+        >
+          <ShareNetworkIcon size={20} />
         </button>
       </div>
 
