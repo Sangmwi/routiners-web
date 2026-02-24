@@ -143,19 +143,21 @@ export default function ProfileEditContent() {
 
   return (
     <>
-      <div className="space-y-6 pb-footer-clearance">
+      <div className="pb-footer-clearance">
         {/* 프로필 사진 (탭 위에 항상 표시) */}
-        <ProfilePhotoEdit
-          initialImage={user.profilePhotoUrl}
-          isSaving={isSaving}
-          onDraftChange={handleDraftChange}
-        />
+        <div className="mb-6">
+          <ProfilePhotoEdit
+            initialImage={user.profilePhotoUrl}
+            isSaving={isSaving}
+            onDraftChange={handleDraftChange}
+          />
+        </div>
 
         {/* 탭바 */}
         <ProfileEditTabBar activeTab={activeTab} onTabChange={setActiveTab} />
 
         {/* 탭 콘텐츠 */}
-        <div className="overflow-hidden">
+        <div className="mt-4 overflow-hidden">
           <div
             key={activeTab}
             className="animate-tab-slide"

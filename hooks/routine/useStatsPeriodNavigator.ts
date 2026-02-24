@@ -4,6 +4,7 @@ import { useState, type Dispatch, type SetStateAction } from 'react';
 import {
   addDays,
   formatDate,
+  formatWeekLabelWithYear,
   getMonthRange,
   getWeekRange,
 } from '@/lib/utils/dateHelpers';
@@ -15,7 +16,7 @@ interface MonthYear {
   month: number;
 }
 
-interface UseStatsPeriodNavigatorReturn {
+export interface UseStatsPeriodNavigatorReturn {
   period: StatsPeriod;
   setPeriod: (period: StatsPeriod) => void;
   weekBaseDate: Date;
@@ -23,9 +24,12 @@ interface UseStatsPeriodNavigatorReturn {
   monthYear: MonthYear;
   setMonthYear: Dispatch<SetStateAction<MonthYear>>;
   label: string;
-  yearLabel?: string;
   canGoNext: boolean;
   weekDateStr: string;
+  /** 주간: startDate, 월간: startDate */
+  startDate: string;
+  /** 주간: endDate, 월간: endDate */
+  endDate: string;
   handlePrev: () => void;
   handleNext: () => void;
   handleToday: () => void;
@@ -44,8 +48,12 @@ export function useStatsPeriodNavigator(
   const weekRange = getWeekRange(weekBaseDate);
   const monthRange = getMonthRange(monthYear.year, monthYear.month);
 
-  const label = period === 'weekly' ? weekRange.weekLabel : monthRange.monthLabel;
-  const yearLabel = period === 'weekly' ? `${weekBaseDate.getFullYear()}년` : undefined;
+  const label = period === 'weekly'
+    ? formatWeekLabelWithYear(weekBaseDate)
+    : monthRange.monthLabel;
+
+  const startDate = period === 'weekly' ? weekRange.startDate : monthRange.startDate;
+  const endDate = period === 'weekly' ? weekRange.endDate : monthRange.endDate;
 
   const today = new Date();
   const canGoNext =
@@ -102,9 +110,10 @@ export function useStatsPeriodNavigator(
     monthYear,
     setMonthYear,
     label,
-    yearLabel,
     canGoNext,
     weekDateStr: formatDate(weekBaseDate),
+    startDate,
+    endDate,
     handlePrev,
     handleNext,
     handleToday,

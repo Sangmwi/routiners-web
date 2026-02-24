@@ -58,7 +58,7 @@ export default function ProfileInfoTab({ user }: ProfileInfoTabProps) {
   const hasLifestyle = user.isSmoker !== undefined || hasInterests;
 
   return (
-    <div className="space-y-4 py-4 px-1">
+    <div className="space-y-4">
       {/* 1. 신체 정보 */}
       <InfoTabSection title="신체 정보">
         <BodyCompositionSummary

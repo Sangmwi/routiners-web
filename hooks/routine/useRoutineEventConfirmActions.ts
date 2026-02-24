@@ -1,7 +1,7 @@
 'use client';
 
 import { useConfirmDialog } from '@/lib/stores/modalStore';
-import type { RoutineEvent } from '@/lib/types/routine';
+import type { EventData, RoutineEvent } from '@/lib/types/routine';
 import { useRoutineEventActions } from './useRoutineEventActions';
 
 interface ConfirmCopy {
@@ -13,6 +13,7 @@ interface ConfirmCopy {
 interface ConfirmActionOptions {
   errorMessage: string;
   copy?: Partial<ConfirmCopy>;
+  resetData?: EventData;
 }
 
 const DEFAULT_DELETE_CONFIRM_COPY: ConfirmCopy = {
@@ -61,6 +62,7 @@ export function useRoutineEventConfirmActions() {
       onConfirm: () =>
         uncompleteEvent(event, {
           errorMessage: options.errorMessage,
+          resetData: options.resetData,
         }),
     });
   };

@@ -118,7 +118,7 @@ export default function LoginPage() {
       <div className="relative z-10 w-full px-6 pb-12">
         <div className="mx-auto max-w-sm">
           {error && (
-            <div className="mb-4 rounded-xl bg-surface-danger p-3 text-center text-sm text-destructive ring-1 ring-destructive/20">
+            <div className="mb-4 rounded-xl bg-surface-danger p-3 text-center text-sm text-destructive ring-1 ring-error">
               {error}
             </div>
           )}

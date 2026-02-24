@@ -3,10 +3,11 @@
 import { useRouter } from 'next/navigation';
 import { useShowError } from '@/lib/stores/errorStore';
 import { useUpdateRoutineEvent, useDeleteRoutineEvent } from './mutations';
-import type { RoutineEvent } from '@/lib/types/routine';
+import type { EventData, RoutineEvent } from '@/lib/types/routine';
 
 interface UncompleteOptions {
   errorMessage: string;
+  resetData?: EventData;
 }
 
 interface DeleteOptions {
@@ -37,7 +38,10 @@ export function useRoutineEventActions() {
     updateEvent.mutate(
       {
         id: event.id,
-        data: { status: 'scheduled' },
+        data: {
+          status: 'scheduled',
+          ...(options.resetData !== undefined && { data: options.resetData }),
+        },
       },
       {
         onError: () => showError(options.errorMessage),

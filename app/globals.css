@@ -200,120 +200,65 @@
   --spacing-footer-clearance: 5rem;
 }
 
-/* 명시적 라이트 모드 — OS가 다크여도 라이트 강제 */
+/*
+ * 명시적 테마 — [data-theme] 속성으로 OS 설정 무시
+ * :root와 @media dark 블록의 값을 그대로 재사용.
+ * 특이도가 @media보다 높아 OS가 다크여도 라이트 강제 (역도 마찬가지).
+ */
 [data-theme="light"] {
-  --background: #f3f6f3;
-  --foreground: #0a2610;
-  --primary: #50A76C;
-  --primary-foreground: #ffffff;
-  --primary-muted: var(--primary);
-  --secondary: #dbf5e2;
-  --secondary-foreground: #17451c;
-  --muted: #e2e8f0;
-  --muted-foreground: #64748b;
-  --card: #ffffff;
-  --card-foreground: #0a2610;
-  --border: #cbd5e1;
-  --input: #dbf5e2;
-  --destructive: #d97373;
-  --destructive-foreground: #ffffff;
+  --background: #f3f6f3; --foreground: #0a2610;
+  --primary: #50A76C; --primary-foreground: #ffffff; --primary-muted: var(--primary);
+  --secondary: #dbf5e2; --secondary-foreground: #17451c;
+  --muted: #e2e8f0; --muted-foreground: #64748b;
+  --card: #ffffff; --card-foreground: #0a2610;
+  --border: #cbd5e1; --input: #dbf5e2;
+  --destructive: #d97373; --destructive-foreground: #ffffff;
   --like: #dc2626;
-  --success: #22c55e;
-  --success-foreground: #ffffff;
-  --warning: #d97706;
-  --warning-foreground: #ffffff;
-  --warning-muted: #fef3c7;
-  --scheduled: #f59e0b;
-  --scheduled-foreground: #ffffff;
-  --positive: #10b981;
-  --negative: #f87171;
-  --color-green-50: #f0faf3;
-  --color-green-100: #dbf5e2;
-  --color-green-200: #b9eac8;
-  --color-green-300: #88d9a2;
-  --color-green-400: #5fc07f;
-  --color-green-500: #50A76C;
-  --color-green-600: #328a4d;
-  --color-green-700: #1B6523;
-  --color-green-800: #1a5421;
-  --color-green-900: #17451c;
-  --color-green-950: #0a2610;
-
-  /* 시맨틱 서피스 (라이트) */
-  --surface-secondary: rgba(226, 232, 240, 0.2);
-  --surface-hover: rgba(226, 232, 240, 0.3);
-  --surface-muted: rgba(226, 232, 240, 0.5);
-  --surface-accent: rgba(80, 167, 108, 0.1);
-  --surface-accent-strong: rgba(80, 167, 108, 0.15);
-  --surface-danger: rgba(217, 115, 115, 0.1);
-  --surface-scheduled: rgba(245, 158, 11, 0.1);
-  --surface-glass: rgba(243, 246, 243, 0.8);
-  --surface-pressed: rgba(226, 232, 240, 0.8);
-  --edge-subtle: rgba(203, 213, 225, 0.5);
-  --edge-faint: rgba(203, 213, 225, 0.3);
-  --edge-divider: rgba(203, 213, 225, 0.2);
-  --edge-error: rgba(217, 115, 115, 0.5);
-  --ring-focus: rgba(80, 167, 108, 0.2);
-  --ring-accent: rgba(80, 167, 108, 0.3);
-  --ring-error: rgba(217, 115, 115, 0.2);
+  --success: #22c55e; --success-foreground: #ffffff;
+  --warning: #d97706; --warning-foreground: #ffffff; --warning-muted: #fef3c7;
+  --scheduled: #f59e0b; --scheduled-foreground: #ffffff;
+  --positive: #10b981; --negative: #f87171;
+  --color-green-50:#f0faf3; --color-green-100:#dbf5e2; --color-green-200:#b9eac8;
+  --color-green-300:#88d9a2; --color-green-400:#5fc07f; --color-green-500:#50A76C;
+  --color-green-600:#328a4d; --color-green-700:#1B6523; --color-green-800:#1a5421;
+  --color-green-900:#17451c; --color-green-950:#0a2610;
+  --surface-secondary:rgba(226,232,240,0.2); --surface-hover:rgba(226,232,240,0.3);
+  --surface-muted:rgba(226,232,240,0.5); --surface-accent:rgba(80,167,108,0.1);
+  --surface-accent-strong:rgba(80,167,108,0.15); --surface-danger:rgba(217,115,115,0.1);
+  --surface-scheduled:rgba(245,158,11,0.1); --surface-glass:rgba(243,246,243,0.8);
+  --surface-pressed:rgba(226,232,240,0.8);
+  --edge-subtle:rgba(203,213,225,0.5); --edge-faint:rgba(203,213,225,0.3);
+  --edge-divider:rgba(203,213,225,0.2); --edge-error:rgba(217,115,115,0.5);
+  --ring-focus:rgba(80,167,108,0.2); --ring-accent:rgba(80,167,108,0.3);
+  --ring-error:rgba(217,115,115,0.2);
 }
 
-/* 명시적 다크 모드 — system 다크 + 사용자가 직접 dark 선택 */
 [data-theme="dark"] {
-  --background: #0f172a;
-  --foreground: #f1f5f9;
-  --primary: #5fc07f;
-  --primary-foreground: #0a2610;
-  --primary-muted: rgba(80, 167, 108, 0.5);
-  --secondary: #1e293b;
-  --secondary-foreground: #e2e8f0;
-  --muted: #334155;
-  --muted-foreground: #94a3b8;
-  --card: #1e293b;
-  --card-foreground: #f1f5f9;
-  --border: #334155;
-  --input: #1e293b;
-  --destructive: #e8a0a0;
-  --destructive-foreground: #1e1e1e;
+  --background: #0f172a; --foreground: #f1f5f9;
+  --primary: #5fc07f; --primary-foreground: #0a2610; --primary-muted: rgba(80,167,108,0.5);
+  --secondary: #1e293b; --secondary-foreground: #e2e8f0;
+  --muted: #334155; --muted-foreground: #94a3b8;
+  --card: #1e293b; --card-foreground: #f1f5f9;
+  --border: #334155; --input: #1e293b;
+  --destructive: #e8a0a0; --destructive-foreground: #1e1e1e;
   --like: #f87171;
-  --success: #4ade80;
-  --success-foreground: #0f172a;
-  --warning: #fbbf24;
-  --warning-foreground: #1e1e1e;
-  --warning-muted: #78350f;
-  --scheduled: #fbbf24;
-  --scheduled-foreground: #1e1e1e;
-  --positive: #34d399;
-  --negative: #fca5a5;
-  --color-green-50: #0a2610;
-  --color-green-100: #17451c;
-  --color-green-200: #1a5421;
-  --color-green-300: #1B6523;
-  --color-green-400: #328a4d;
-  --color-green-500: #50A76C;
-  --color-green-600: #5fc07f;
-  --color-green-700: #88d9a2;
-  --color-green-800: #b9eac8;
-  --color-green-900: #dbf5e2;
-  --color-green-950: #f0faf3;
-
-  /* 시맨틱 서피스 (다크) */
-  --surface-secondary: rgba(51, 65, 85, 0.2);
-  --surface-hover: rgba(51, 65, 85, 0.3);
-  --surface-muted: rgba(51, 65, 85, 0.5);
-  --surface-accent: rgba(95, 192, 127, 0.1);
-  --surface-accent-strong: rgba(95, 192, 127, 0.15);
-  --surface-danger: rgba(232, 160, 160, 0.1);
-  --surface-scheduled: rgba(251, 191, 36, 0.1);
-  --surface-glass: rgba(15, 23, 42, 0.8);
-  --surface-pressed: rgba(51, 65, 85, 0.8);
-  --edge-subtle: rgba(51, 65, 85, 0.5);
-  --edge-faint: rgba(51, 65, 85, 0.3);
-  --edge-divider: rgba(51, 65, 85, 0.2);
-  --edge-error: rgba(232, 160, 160, 0.5);
-  --ring-focus: rgba(95, 192, 127, 0.2);
-  --ring-accent: rgba(95, 192, 127, 0.3);
-  --ring-error: rgba(232, 160, 160, 0.2);
+  --success: #4ade80; --success-foreground: #0f172a;
+  --warning: #fbbf24; --warning-foreground: #1e1e1e; --warning-muted: #78350f;
+  --scheduled: #fbbf24; --scheduled-foreground: #1e1e1e;
+  --positive: #34d399; --negative: #fca5a5;
+  --color-green-50:#0a2610; --color-green-100:#17451c; --color-green-200:#1a5421;
+  --color-green-300:#1B6523; --color-green-400:#328a4d; --color-green-500:#50A76C;
+  --color-green-600:#5fc07f; --color-green-700:#88d9a2; --color-green-800:#b9eac8;
+  --color-green-900:#dbf5e2; --color-green-950:#f0faf3;
+  --surface-secondary:rgba(51,65,85,0.2); --surface-hover:rgba(51,65,85,0.3);
+  --surface-muted:rgba(51,65,85,0.5); --surface-accent:rgba(95,192,127,0.1);
+  --surface-accent-strong:rgba(95,192,127,0.15); --surface-danger:rgba(232,160,160,0.1);
+  --surface-scheduled:rgba(251,191,36,0.1); --surface-glass:rgba(15,23,42,0.8);
+  --surface-pressed:rgba(51,65,85,0.8);
+  --edge-subtle:rgba(51,65,85,0.5); --edge-faint:rgba(51,65,85,0.3);
+  --edge-divider:rgba(51,65,85,0.2); --edge-error:rgba(232,160,160,0.5);
+  --ring-focus:rgba(95,192,127,0.2); --ring-accent:rgba(95,192,127,0.3);
+  --ring-error:rgba(232,160,160,0.2);
 }
 
 body {

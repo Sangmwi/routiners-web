@@ -267,7 +267,7 @@ export default function MealContent({ date, onTitleChange, onHeaderAction }: Mea
             date={event.date}
             onComplete={handleComplete}
             onUncomplete={handleUncomplete}
-            isLoading={isCompleting || isUncompleting || isUpdating}
+            isLoading={isCompleting || isUncompleting}
           />
         </GradientFooter>
       )}

@@ -56,7 +56,7 @@ export default function ProfileContent() {
 
         <ProfileTabBar activeTab={activeTab} onTabChange={setActiveTab} privateTabs={privateTabs} />
 
-        <div className="overflow-hidden">
+        <div className="mt-4 overflow-hidden">
           <div
             key={activeTab}
             className="animate-tab-slide"
@@ -65,14 +65,14 @@ export default function ProfileContent() {
             } as React.CSSProperties}
           >
             {isCurrentTabPrivate && (
-              <div className="flex items-center gap-1.5 px-4 py-2 mx-1 mt-3 rounded-lg bg-surface-hover text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5 px-4 py-2 mx-1 rounded-lg bg-surface-hover text-xs text-muted-foreground">
                 <LockSimpleIcon size={12} weight="bold" className="flex-shrink-0" />
                 <span>다른 사용자에게 공개되지 않는 탭이에요</span>
               </div>
             )}
 
             <QueryErrorBoundary>
-              <Suspense fallback={<PulseLoader className="py-4 px-1" />}>
+              <Suspense fallback={<PulseLoader />}>
                 {activeTab === 'activity' && <ProfileActivityGrid userId={user.id} />}
                 {activeTab === 'info' && <ProfileInfoTab user={user} />}
               </Suspense>

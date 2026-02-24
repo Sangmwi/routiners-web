@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { BowlFoodIcon, CheckCircleIcon, ClockIcon, FireIcon, XCircleIcon } from '@phosphor-icons/react';
 import EmptyState from '@/components/common/EmptyState';
 import ComparisonBadge from '@/components/ui/ComparisonBadge';
+import ProgressRateBar from '@/components/ui/ProgressRateBar';
 import SegmentedControl from '@/components/ui/SegmentedControl';
 import {
   useMonthlyStatsSuspense,
@@ -27,6 +28,7 @@ import {
 } from '@/lib/types/meal';
 import { MACRO_RATIOS, DEFAULT_MACRO_RATIO } from '@/lib/utils/tdee';
 import { getDisplayStatus } from '@/lib/config/theme';
+import type { UseStatsPeriodNavigatorReturn } from '@/hooks/routine/useStatsPeriodNavigator';
 import StatsTabShell from './StatsTabShell';
 
 const MACRO_COLORS: Record<string, { bg: string; stroke: string }> = {
@@ -67,9 +69,10 @@ function generateNutritionInsight(meal: MealMetrics, targets: NutritionTargets):
     : `${worst.name}이 목표보다 ${Math.round(100 - worst.pct)}% 부족해요`;
 }
 
-export default function NutritionStatsTab() {
+export default function NutritionStatsTab({ navigator }: { navigator: UseStatsPeriodNavigatorReturn }) {
   return (
     <StatsTabShell
+      navigator={navigator}
       weeklyContent={(dateStr) => <WeeklyNutrition dateStr={dateStr} />}
       monthlyContent={(year, month) => <MonthlyNutrition year={year} month={month} />}
     />
@@ -607,6 +610,7 @@ function WeeklyNutrition({ dateStr }: { dateStr: string }) {
   }
 
   const targets = resolveNutritionTargets(stats.meal, profile, 7);
+  const mealTotal = stats.meal.completed + stats.meal.scheduled;
 
   // 비교: 일 평균 칼로리 변화율
   const comparison = (() => {
@@ -617,13 +621,27 @@ function WeeklyNutrition({ dateStr }: { dateStr: string }) {
     return { diff, label: '지난주' };
   })();
 
+  const rateComparison = prevStats && (prevStats.meal.completed + prevStats.meal.scheduled) > 0
+    ? { diff: stats.meal.completionRate - prevStats.meal.completionRate, label: '지난주' }
+    : undefined;
+
   return (
-    <NutritionMetrics
-      meal={stats.meal}
-      targets={targets}
-      comparison={comparison}
-      dailyStats={stats.dailyStats}
-    />
+    <div className="space-y-8">
+      <ProgressRateBar
+        icon={BowlFoodIcon}
+        label="식단"
+        completionRate={stats.meal.completionRate}
+        completed={stats.meal.completed}
+        total={mealTotal}
+        comparison={rateComparison}
+      />
+      <NutritionMetrics
+        meal={stats.meal}
+        targets={targets}
+        comparison={comparison}
+        dailyStats={stats.dailyStats}
+      />
+    </div>
   );
 }
 
@@ -650,11 +668,27 @@ function MonthlyNutrition({ year, month }: { year: number; month: number }) {
     return { diff, label: '지난달' };
   })();
 
+  const mealTotal = stats.meal.completed + stats.meal.scheduled;
+
+  const rateComparison = prevStats && (prevStats.meal.completed + prevStats.meal.scheduled) > 0
+    ? { diff: stats.meal.completionRate - prevStats.meal.completionRate, label: '지난달' }
+    : undefined;
+
   return (
-    <NutritionMetrics
-      meal={stats.meal}
-      targets={targets}
-      comparison={comparison}
-    />
+    <div className="space-y-8">
+      <ProgressRateBar
+        icon={BowlFoodIcon}
+        label="식단"
+        completionRate={stats.meal.completionRate}
+        completed={stats.meal.completed}
+        total={mealTotal}
+        comparison={rateComparison}
+      />
+      <NutritionMetrics
+        meal={stats.meal}
+        targets={targets}
+        comparison={comparison}
+      />
+    </div>
   );
 }

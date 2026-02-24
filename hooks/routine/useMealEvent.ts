@@ -125,10 +125,15 @@ export function useMealEvent(date: string) {
   };
 
   const handleUncomplete = () => {
-    if (!event || event.status !== 'completed') return;
+    if (!event || !mealData || event.status !== 'completed') return;
 
+    const resetData: MealData = {
+      ...mealData,
+      meals: mealData.meals.map((meal) => ({ ...meal, completed: false })),
+    };
     confirmUncomplete(event, {
       errorMessage: '되돌리기에 실패했어요.',
+      resetData,
     });
   };
 

@@ -195,7 +195,7 @@ export default function CounselorContent({ isDrawerOpen, onDrawerClose }: Counse
 
       {/* 에러 표시 */}
       {error && (
-        <div className="flex items-center justify-between px-4 py-2 bg-surface-danger border-t border-destructive/20">
+        <div className="flex items-center justify-between px-4 py-2 bg-surface-danger border-t border-edge-error">
           <span className="text-sm text-destructive">{error}</span>
           <button
             onClick={clearError}

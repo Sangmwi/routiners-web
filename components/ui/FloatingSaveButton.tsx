@@ -58,10 +58,10 @@ export default function FloatingSaveButton({
     <GradientFooter variant="page" wrapperClassName="animate-float-up" className="pb-6">
       <Button
         onClick={onSave}
-        className={`w-full shadow-xl ${
+        className={`w-full shadow-none hover:shadow-none ${
           showSuccess
-            ? 'bg-emerald-500 hover:bg-emerald-500 shadow-emerald-500/30'
-            : 'shadow-primary/40'
+            ? 'bg-emerald-500 hover:bg-emerald-500'
+            : ''
         }`}
         disabled={isPending || showSuccess || disabled}
       >

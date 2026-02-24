@@ -47,23 +47,38 @@ export function useWorkoutEvent(date: string) {
   const handleSetsChange = (exerciseId: string, sets: WorkoutSet[]) => {
     if (!event || !workoutData) return;
 
-    const updatedData: WorkoutData = {
-      ...workoutData,
-      exercises: workoutData.exercises.map((exercise) =>
-        exercise.id === exerciseId ? { ...exercise, sets } : exercise,
-      ),
-    };
+    const updatedExercises = workoutData.exercises.map((exercise) =>
+      exercise.id === exerciseId ? { ...exercise, sets } : exercise,
+    );
+    const updatedData: WorkoutData = { ...workoutData, exercises: updatedExercises };
+    const allSetsCompleted = updatedExercises.every((ex) =>
+      ex.sets.every((s) => s.completed),
+    );
 
     mutateData(updatedData, {
       errorMessage: '운동 기록 저장에 실패했어요.',
+      onSuccess: () => {
+        if (!allSetsCompleted || event.status === 'completed') return;
+        completeEvent.mutate(event.id, {
+          onError: () => showError('운동 완료에 실패했어요.'),
+        });
+      },
     });
   };
 
   const handleUncomplete = () => {
-    if (!event || event.status !== 'completed') return;
+    if (!event || !workoutData || event.status !== 'completed') return;
 
+    const resetData: WorkoutData = {
+      ...workoutData,
+      exercises: workoutData.exercises.map((ex) => ({
+        ...ex,
+        sets: ex.sets.map((s) => ({ ...s, completed: false })),
+      })),
+    };
     confirmUncomplete(event, {
       errorMessage: '되돌리기에 실패했어요.',
+      resetData,
     });
   };
 

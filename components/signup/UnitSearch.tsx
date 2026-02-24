@@ -76,7 +76,7 @@ export default function UnitSearch({ units, selectedUnit, onSelect, error }: Uni
               placeholder="부대명 또는 지역으로 검색"
               className={`w-full rounded-xl border py-3 pl-10 pr-4 text-sm transition-all duration-200 focus:outline-none focus:ring-2 bg-background text-foreground ${
                 error
-                  ? 'border-destructive/50 focus:border-destructive focus:ring-destructive/20'
+                  ? 'border-edge-error focus:border-destructive focus:ring-error'
                   : 'border-border focus:border-primary focus:ring-focus'
               }`}
             />

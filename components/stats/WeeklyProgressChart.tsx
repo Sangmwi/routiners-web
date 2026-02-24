@@ -8,11 +8,15 @@ import DayGroup from '@/components/ui/DayGroup';
 import { formatDate } from '@/lib/utils/dateHelpers';
 import type { WeeklyStats } from '@/hooks/routine';
 
+type ActivityFilter = 'all' | 'workout' | 'meal';
+
 interface WeeklyProgressChartProps {
   stats: WeeklyStats;
+  /** 'large' 모드: 루틴 페이지에서 확대된 크기로 표시 */
+  size?: 'default' | 'large';
+  /** 외부 필터 (제공 시 인라인 토글 숨김) */
+  filter?: ActivityFilter;
 }
-
-type ActivityFilter = 'all' | 'workout' | 'meal';
 
 const FILTER_OPTIONS: { key: ActivityFilter; label: string }[] = [
   { key: 'all', label: '전체' },
@@ -29,20 +33,27 @@ const FILTER_OPTIONS: { key: ActivityFilter; label: string }[] = [
  * - 식단: 아이콘 + "식단" + 칼로리 + 상태 (→ 식단 상세 링크)
  * - 빈 날: "활동 없음" 표시
  */
-export default function WeeklyProgressChart({ stats }: WeeklyProgressChartProps) {
+export default function WeeklyProgressChart({ stats, size = 'default', filter: externalFilter }: WeeklyProgressChartProps) {
   const { dailyStats } = stats;
   const today = formatDate(new Date());
-  const [filter, setFilter] = useState<ActivityFilter>('all');
+  const [internalFilter, setInternalFilter] = useState<ActivityFilter>('all');
+
+  const filter = externalFilter ?? internalFilter;
+  const isLarge = size === 'large';
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-base font-medium text-foreground">주간 기록</h3>
-        <SegmentedControl
-          options={FILTER_OPTIONS}
-          value={filter}
-          onChange={setFilter}
-        />
+        <h3 className={`font-medium text-foreground ${isLarge ? 'text-lg' : 'text-base'}`}>
+          주간 기록
+        </h3>
+        {externalFilter === undefined && (
+          <SegmentedControl
+            options={FILTER_OPTIONS}
+            value={internalFilter}
+            onChange={setInternalFilter}
+          />
+        )}
       </div>
 
       <div className="flex flex-col items-center overflow-hidden">
@@ -59,9 +70,17 @@ export default function WeeklyProgressChart({ stats }: WeeklyProgressChartProps)
           if (day.workoutDuration) workoutMeta.push(`${day.workoutDuration}분`);
           if (day.workoutCalories) workoutMeta.push(`${day.workoutCalories}kcal`);
 
+          const d = new Date(day.date);
+          const dateNum = String(d.getDate());
+
           return (
             <div key={day.date} className="w-full">
-              <DayGroup dayLabel={day.dayOfWeek} isToday={isToday}>
+              <DayGroup
+                dateNum={dateNum}
+                dayOfWeek={day.dayOfWeek}
+                isToday={isToday}
+                size={isLarge ? 'large' : 'default'}
+              >
                 {showWorkout && (
                   <ActivityRow
                     icon={BarbellIcon}
@@ -70,6 +89,7 @@ export default function WeeklyProgressChart({ stats }: WeeklyProgressChartProps)
                     status={day.workout!}
                     date={day.date}
                     href={`/routine/workout/${day.date}`}
+                    size={isLarge ? 'large' : 'default'}
                   />
                 )}
                 {showMeal && (
@@ -84,10 +104,11 @@ export default function WeeklyProgressChart({ stats }: WeeklyProgressChartProps)
                     status={day.meal!}
                     date={day.date}
                     href={`/routine/meal/${day.date}`}
+                    size={isLarge ? 'large' : 'default'}
                   />
                 )}
                 {!hasVisible && (
-                  <span className="text-xs text-muted-foreground/50">
+                  <span className={`text-muted-foreground/50 ${isLarge ? 'text-sm' : 'text-xs'}`}>
                     활동 없음
                   </span>
                 )}

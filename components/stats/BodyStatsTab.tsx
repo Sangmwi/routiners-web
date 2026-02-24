@@ -4,7 +4,9 @@ import AppLink from '@/components/common/AppLink';
 import ChangeIndicator, { getTrendColor } from '@/components/ui/ChangeIndicator';
 import MiniSparkline from '@/components/ui/MiniSparkline';
 import { CaretRightIcon, UserIcon } from '@phosphor-icons/react';
-import { useInBodySummarySuspense, useInBodyRecordsSuspense } from '@/hooks/inbody/queries';
+import { useInBodyRecordsSuspense } from '@/hooks/inbody/queries';
+import type { UseStatsPeriodNavigatorReturn } from '@/hooks/routine/useStatsPeriodNavigator';
+import type { InBodyRecord } from '@/lib/types';
 
 const METRICS_CONFIG = [
   { key: 'weight', label: '체중', unit: 'kg', positiveIsGood: false },
@@ -18,21 +20,36 @@ function formatFullDate(dateStr: string): string {
   return `${String(d.getFullYear()).slice(2)}.${d.getMonth() + 1}.${d.getDate()}`;
 }
 
-/** 일수 → 자연스러운 한국어 기간 ("어제", "3일 전", "2주 전", "3개월 전", "1년 6개월 전") */
-function formatPeriod(days: number): string {
-  if (days <= 0) return '오늘';
-  if (days === 1) return '어제';
-  if (days < 7) return `${days}일 전`;
-  if (days < 14) return '1주 전';
-  if (days < 30) return `${Math.round(days / 7)}주 전`;
+/** 기간 내 기록을 시간순으로 필터링 */
+function filterRecordsByPeriod(
+  records: InBodyRecord[],
+  startDate: string,
+  endDate: string,
+): InBodyRecord[] {
+  return records
+    .filter((r) => r.measuredAt >= startDate && r.measuredAt <= endDate)
+    .sort((a, b) => a.measuredAt.localeCompare(b.measuredAt));
+}
 
-  const months = Math.round(days / 30.44);
-  if (months < 12) return months === 1 ? '1개월 전' : `${months}개월 전`;
-
-  const years = Math.floor(days / 365.25);
-  const remainMonths = Math.round((days - years * 365.25) / 30.44);
-  if (remainMonths <= 0) return years === 1 ? '1년 전' : `${years}년 전`;
-  return `${years}년 ${remainMonths}개월 전`;
+/** 첫/마지막 기록 사이 변화량 계산 */
+function computeChanges(chronological: InBodyRecord[]) {
+  if (chronological.length < 2) return undefined;
+  const first = chronological[0];
+  const last = chronological[chronological.length - 1];
+  const periodDays = Math.round(
+    (new Date(last.measuredAt).getTime() - new Date(first.measuredAt).getTime()) /
+      (1000 * 60 * 60 * 24),
+  );
+  return {
+    weight: Number((last.weight - first.weight).toFixed(2)),
+    skeletalMuscleMass: Number(
+      (last.skeletalMuscleMass - first.skeletalMuscleMass).toFixed(2),
+    ),
+    bodyFatPercentage: Number(
+      (last.bodyFatPercentage - first.bodyFatPercentage).toFixed(1),
+    ),
+    periodDays,
+  };
 }
 
 /**
@@ -40,28 +57,38 @@ function formatPeriod(days: number): string {
  *
  * - 인바디 3대 메트릭 (체중/골격근량/체지방률)
  * - 스파크라인으로 추이 표시
+ * - 기간 필터 (주간/월간) navigator로 제어
  * - 인바디 관리 페이지 링크
  */
-export default function BodyStatsTab() {
-  const { data: summary } = useInBodySummarySuspense();
-  const { data: history } = useInBodyRecordsSuspense(12, 0);
+export default function BodyStatsTab({
+  navigator,
+}: {
+  navigator: UseStatsPeriodNavigatorReturn;
+}) {
+  const { startDate, endDate } = navigator;
+  // 충분한 기록을 가져와서 클라이언트 필터링
+  const { data: allRecords } = useInBodyRecordsSuspense(100, 0);
 
-  const hasData = !!summary.latest;
-  const hasHistory = history.length >= 2;
+  const chronological = filterRecordsByPeriod(allRecords, startDate, endDate);
+  const hasData = chronological.length > 0;
+  const hasHistory = chronological.length >= 2;
+  const latestInPeriod = hasData ? chronological[chronological.length - 1] : undefined;
+  const changes = computeChanges(chronological);
 
-  // history는 최신순 → reverse로 시간순 정렬
-  const chronological = hasHistory ? [...history].reverse() : [];
-  const pointLabels = hasHistory ? chronological.map((r) => formatFullDate(r.measuredAt)) : [];
+  const pointLabels = chronological.map((r) => formatFullDate(r.measuredAt));
   const dateRange: [string, string] | undefined = hasHistory
-    ? [formatFullDate(chronological[0].measuredAt), formatFullDate(chronological[chronological.length - 1].measuredAt)]
+    ? [
+        formatFullDate(chronological[0].measuredAt),
+        formatFullDate(chronological[chronological.length - 1].measuredAt),
+      ]
     : undefined;
 
   if (!hasData) {
     return (
-      <div className="mt-6">
+      <div>
         <div className="rounded-2xl bg-surface-secondary p-6 text-center">
           <UserIcon size={28} weight="duotone" className="text-muted-foreground/40 mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground mb-1">인바디 기록이 없어요</p>
+          <p className="text-sm text-muted-foreground mb-1">이 기간에 인바디 기록이 없어요</p>
           <p className="text-xs text-muted-foreground/60 mb-3">
             체중, 골격근량, 체지방률을 기록해보세요
           </p>
@@ -94,8 +121,8 @@ export default function BodyStatsTab() {
       {/* 메트릭 카드 */}
       <div className="space-y-4">
         {METRICS_CONFIG.map(({ key, label, unit, positiveIsGood }) => {
-          const value = summary.latest?.[key];
-          const change = summary.changes?.[key];
+          const value = latestInPeriod?.[key];
+          const change = changes?.[key];
           const sparkData = chronological.map((r) => r[key]);
           const fmt = (v: number) => v.toFixed(1);
 
@@ -103,10 +130,10 @@ export default function BodyStatsTab() {
             <div key={key} className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs text-muted-foreground">{label}</p>
-                {change != null && change !== 0 && summary.changes?.periodDays != null && (
+                {change != null && change !== 0 && changes?.periodDays != null && (
                   <div className="flex items-center gap-1">
                     <span className="text-xs text-muted-foreground/50">
-                      {formatPeriod(summary.changes.periodDays)}보다
+                      {chronological.length}회 측정
                     </span>
                     <ChangeIndicator value={change} positiveIsGood={positiveIsGood} unit={unit} />
                   </div>

@@ -95,10 +95,15 @@ export function useWorkoutSessionAutosave({
 }: UseWorkoutSessionAutosaveOptions) {
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const exercisesRef = useRef(state.exercises);
+  const saveRef = useRef(saveWorkoutData);
 
   useEffect(() => {
     exercisesRef.current = state.exercises;
   }, [state.exercises]);
+
+  useEffect(() => {
+    saveRef.current = saveWorkoutData;
+  }, [saveWorkoutData]);
 
   useEffect(() => {
     if (state.phase === 'overview') return;
@@ -108,7 +113,7 @@ export function useWorkoutSessionAutosave({
     }
 
     saveTimerRef.current = setTimeout(() => {
-      saveWorkoutData({ exercises: exercisesRef.current });
+      saveRef.current({ exercises: exercisesRef.current });
     }, 500);
 
     return () => {
@@ -116,26 +121,26 @@ export function useWorkoutSessionAutosave({
         clearTimeout(saveTimerRef.current);
       }
     };
-  }, [saveWorkoutData, state.exercises, state.phase]);
+  }, [state.exercises, state.phase]);
 
   useEffect(() => {
     if (state.phase !== 'active' || !state.startedAt) return;
 
     const interval = setInterval(() => {
       const elapsed = calculateElapsedSeconds(state.startedAt!, state.pausedDuration);
-      saveWorkoutData({
+      saveRef.current({
         exercises: exercisesRef.current,
         elapsedSeconds: elapsed,
       });
     }, 60000);
 
     return () => clearInterval(interval);
-  }, [saveWorkoutData, state.pausedDuration, state.phase, state.startedAt]);
+  }, [state.pausedDuration, state.phase, state.startedAt]);
 
   useEffect(() => {
     if (state.phase !== 'complete' || !state.startedAt || !state.completedAt) return;
 
-    saveWorkoutData({
+    saveRef.current({
       exercises: exercisesRef.current,
       elapsedSeconds: calculateElapsedSeconds(
         state.startedAt,
@@ -143,13 +148,7 @@ export function useWorkoutSessionAutosave({
         state.completedAt,
       ),
     });
-  }, [
-    saveWorkoutData,
-    state.completedAt,
-    state.pausedDuration,
-    state.phase,
-    state.startedAt,
-  ]);
+  }, [state.completedAt, state.pausedDuration, state.phase, state.startedAt]);
 }
 
 export function useWorkoutRestTimer(

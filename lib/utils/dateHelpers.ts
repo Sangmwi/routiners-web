@@ -173,6 +173,19 @@ export function getWeekRange(date: Date = new Date()): {
 }
 
 /**
+ * 연도 포함 주간 라벨 반환 (e.g. "2026년 2월 23일 ~ 3월 1일")
+ *
+ * 연말 교차 시 월요일 기준 연도: "2025년 12월 29일 ~ 1월 4일"
+ */
+export function formatWeekLabelWithYear(date: Date = new Date()): string {
+  const { weekLabel } = getWeekRange(date);
+  const day = date.getDay();
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  const monday = addDays(date, diffToMonday);
+  return `${monday.getFullYear()}년 ${weekLabel}`;
+}
+
+/**
  * 월간 범위 반환 (1일 ~ 말일)
  *
  * @param year - 연도

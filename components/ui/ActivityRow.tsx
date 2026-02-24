@@ -12,6 +12,8 @@ interface ActivityRowProps {
   href: string;
   status?: EventStatus;
   date?: string;
+  /** 'large' 모드: 루틴 페이지에서 확대된 크기로 표시 */
+  size?: 'default' | 'large';
 }
 
 /**
@@ -27,15 +29,18 @@ export default function ActivityRow({
   href,
   status,
   date,
+  size = 'default',
 }: ActivityRowProps) {
+  const isLarge = size === 'large';
+
   return (
-    <AppLink href={href} className="flex items-center gap-1.5 w-full text-left">
-      <Icon size={15} weight="fill" className="text-primary shrink-0" />
-      <span className="text-xs font-medium text-foreground truncate">
+    <AppLink href={href} className={`flex items-center w-full text-left ${isLarge ? 'gap-2' : 'gap-1.5'}`}>
+      <Icon size={isLarge ? 18 : 15} weight="fill" className="text-primary shrink-0" />
+      <span className={`font-medium text-foreground truncate ${isLarge ? 'text-sm' : 'text-xs'}`}>
         {label}
       </span>
       {meta && (
-        <span className="text-xs text-muted-foreground shrink-0">
+        <span className={`text-muted-foreground shrink-0 ${isLarge ? 'text-sm' : 'text-xs'}`}>
           {meta}
         </span>
       )}

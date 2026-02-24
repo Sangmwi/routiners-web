@@ -495,6 +495,32 @@ export function computeMonthlyStats(
 }
 
 // ============================================================================
+// Streak Computation
+// ============================================================================
+
+/**
+ * 연속 운동 완료일 수 계산
+ *
+ * dailyStats를 날짜 역순으로 정렬 후 오늘부터 과거로 순회하며
+ * completed가 연속인 일수를 세고, scheduled가 나오면 중단.
+ */
+export function computeWorkoutStreak(dailyStats: WeeklyStats['dailyStats']): number {
+  const today = formatDate(new Date());
+  const days = [...dailyStats].sort((a, b) => b.date.localeCompare(a.date));
+
+  let streak = 0;
+  for (const day of days) {
+    if (day.date > today) continue;
+    if (day.workout === 'completed') {
+      streak++;
+    } else if (day.workout === 'scheduled') {
+      break;
+    }
+  }
+  return streak;
+}
+
+// ============================================================================
 // Balance Score (영양소 균형 점수)
 // ============================================================================
 

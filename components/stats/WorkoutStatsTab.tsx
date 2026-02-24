@@ -14,6 +14,7 @@ import {
 import EmptyState from '@/components/common/EmptyState';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import { Big3SummaryCard } from '@/components/progress/Big3SummaryCard';
+import ProgressRateBar from '@/components/ui/ProgressRateBar';
 import { PulseLoader } from '@/components/ui/PulseLoader';
 import SegmentedControl from '@/components/ui/SegmentedControl';
 import { useProgressSummarySuspense } from '@/hooks/progress';
@@ -22,7 +23,9 @@ import {
   useWeeklyStatsSuspense,
 } from '@/hooks/routine';
 import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
+import { addDays, formatDate } from '@/lib/utils/dateHelpers';
 import type { MonthlyStats, WeeklyStats } from '@/hooks/routine';
+import type { UseStatsPeriodNavigatorReturn } from '@/hooks/routine/useStatsPeriodNavigator';
 import StatsTabShell from './StatsTabShell';
 
 function formatShortDate(dateStr: string): string {
@@ -137,9 +140,10 @@ function WorkoutSummarySection({
   );
 }
 
-export default function WorkoutStatsTab() {
+export default function WorkoutStatsTab({ navigator }: { navigator: UseStatsPeriodNavigatorReturn }) {
   return (
     <StatsTabShell
+      navigator={navigator}
       weeklyContent={(dateStr) => <WeeklyWorkoutMetrics dateStr={dateStr} />}
       monthlyContent={(year, month) => <MonthlyWorkoutMetrics year={year} month={month} />}
     >
@@ -156,6 +160,8 @@ export default function WorkoutStatsTab() {
 
 function WeeklyWorkoutMetrics({ dateStr }: { dateStr: string }) {
   const stats = useWeeklyStatsSuspense(dateStr);
+  const prevDateStr = formatDate(addDays(new Date(dateStr), -7));
+  const prevStats = useWeeklyStatsSuspense(prevDateStr);
 
   const workoutTotal = stats.workout.completed + stats.workout.scheduled;
 
@@ -163,8 +169,20 @@ function WeeklyWorkoutMetrics({ dateStr }: { dateStr: string }) {
     return <EmptyState icon={BarbellIcon} message="운동 기록이 없습니다." className="rounded-2xl bg-surface-secondary" />;
   }
 
+  const comparison = prevStats && (prevStats.workout.completed + prevStats.workout.scheduled) > 0
+    ? { diff: stats.workout.completionRate - prevStats.workout.completionRate, label: '지난주' }
+    : undefined;
+
   return (
     <div className="space-y-8">
+      <ProgressRateBar
+        icon={BarbellIcon}
+        label="운동"
+        completionRate={stats.workout.completionRate}
+        completed={stats.workout.completed}
+        total={workoutTotal}
+        comparison={comparison}
+      />
       <WorkoutSummarySection workout={stats.workout} />
     </div>
   );
@@ -172,6 +190,9 @@ function WeeklyWorkoutMetrics({ dateStr }: { dateStr: string }) {
 
 function MonthlyWorkoutMetrics({ year, month }: { year: number; month: number }) {
   const stats = useMonthlyStatsSuspense(year, month);
+  const prevYear = month === 1 ? year - 1 : year;
+  const prevMonth = month === 1 ? 12 : month - 1;
+  const prevStats = useMonthlyStatsSuspense(prevYear, prevMonth);
 
   const workoutTotal = stats.workout.completed + stats.workout.scheduled;
 
@@ -179,8 +200,20 @@ function MonthlyWorkoutMetrics({ year, month }: { year: number; month: number })
     return <EmptyState icon={BarbellIcon} message="운동 기록이 없습니다." className="rounded-2xl bg-surface-secondary" />;
   }
 
+  const comparison = prevStats && (prevStats.workout.completed + prevStats.workout.scheduled) > 0
+    ? { diff: stats.workout.completionRate - prevStats.workout.completionRate, label: '지난달' }
+    : undefined;
+
   return (
     <div className="space-y-8">
+      <ProgressRateBar
+        icon={BarbellIcon}
+        label="운동"
+        completionRate={stats.workout.completionRate}
+        completed={stats.workout.completed}
+        total={workoutTotal}
+        comparison={comparison}
+      />
       <WorkoutSummarySection workout={stats.workout} />
     </div>
   );

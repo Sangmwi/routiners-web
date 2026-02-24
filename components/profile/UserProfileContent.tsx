@@ -69,7 +69,7 @@ export default function UserProfileContent({ userId }: UserProfileContentProps) 
 
       <ProfileTabBar activeTab={activeTab} onTabChange={setActiveTab} privateTabs={privateTabs} />
 
-      <div className="overflow-hidden">
+      <div className="mt-4 overflow-hidden">
         <div
           key={activeTab}
           className="animate-tab-slide"
@@ -78,7 +78,7 @@ export default function UserProfileContent({ userId }: UserProfileContentProps) 
           } as React.CSSProperties}
         >
           <QueryErrorBoundary>
-            <Suspense fallback={<PulseLoader className="py-4 px-1" />}>
+            <Suspense fallback={<PulseLoader />}>
               {activeTab === 'activity' && (
                 privateTabs.includes('activity') ? (
                   <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">

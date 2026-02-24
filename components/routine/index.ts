@@ -20,11 +20,5 @@ export * from '@/components/stats';
 // Today Section Components
 export * from './today';
 
-// Weekly Section Components
-export * from './weekly';
-
-// Upcoming Section Components
-export * from './upcoming';
-
 // Content Page Component
 export { default as RoutineContent } from './RoutineContent';

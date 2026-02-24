@@ -38,13 +38,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html lang="ko" suppressHydrationWarning className={pretendardVariable.variable}>
       <head>
         {/* FOUC 방지: hydration 전에 테마 적용 */}
         <Script src="/theme-init.js" strategy="beforeInteractive" />
       </head>
       <body
-        className={`${pretendardVariable.variable} antialiased bg-background`}
+        className="antialiased bg-background"
       >
         <QueryProvider>
           <ErrorBoundary>
