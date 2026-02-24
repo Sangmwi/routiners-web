@@ -94,7 +94,7 @@ export default function ToolStatusIndicator({ tools }: ToolStatusIndicatorProps)
   if (tools.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground/70">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-hint-strong">
       {tools.map((tool) => {
         const isError = tool.status === 'error';
         const isSysError = isError && isSystemError(tool);
@@ -112,14 +112,14 @@ export default function ToolStatusIndicator({ tools }: ToolStatusIndicatorProps)
               <XIcon size={12} className="text-amber-500/70" />
             )}
             {isError && !isSysError && (
-              <InfoIcon size={12} className="text-muted-foreground/50" />
+              <InfoIcon size={12} className="text-hint" />
             )}
 
             {/* 도구명 + 에러 */}
             <span>
               {getShortToolLabel(tool.name)}
               {isError && (
-                <span className={`ml-0.5 ${isSysError ? 'text-amber-500/70' : 'text-muted-foreground/50'}`}>
+                <span className={`ml-0.5 ${isSysError ? 'text-amber-500/70' : 'text-hint'}`}>
                   ({getErrorDisplayText(tool)})
                 </span>
               )}

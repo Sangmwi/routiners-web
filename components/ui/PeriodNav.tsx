@@ -60,7 +60,7 @@ export default function PeriodNav({
           disabled={!canGoNext}
           className={`p-1.5 rounded-lg transition-colors ${canGoNext
             ? 'hover:bg-surface-muted text-muted-foreground'
-            : 'text-muted-foreground/30 cursor-not-allowed'
+            : 'text-hint-faint cursor-not-allowed'
             }`}
           aria-label="다음"
         >

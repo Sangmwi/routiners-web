@@ -10,12 +10,14 @@ import type { WeeklyStats } from '@/hooks/routine';
 
 type ActivityFilter = 'all' | 'workout' | 'meal';
 
-interface WeeklyProgressChartProps {
+interface WeeklyScheduleProps {
   stats: WeeklyStats;
   /** 'large' 모드: 루틴 페이지에서 확대된 크기로 표시 */
   size?: 'default' | 'large';
   /** 외부 필터 (제공 시 인라인 토글 숨김) */
   filter?: ActivityFilter;
+  /** 삭제 콜백 (롱프레스 → 확인 다이얼로그) */
+  onDelete?: (id: string, date: string, type: 'workout' | 'meal') => void;
 }
 
 const FILTER_OPTIONS: { key: ActivityFilter; label: string }[] = [
@@ -25,15 +27,15 @@ const FILTER_OPTIONS: { key: ActivityFilter; label: string }[] = [
 ];
 
 /**
- * 일별 상세 기록 테이블
+ * 주간 루틴 스케줄
  *
  * 각 날짜에 운동/식단 활동을 개별 행으로 표시
  * - 필터: 전체 / 운동 / 식단
  * - 운동: 아이콘 + 제목 + 시간/칼로리 + 상태 (→ 운동 상세 링크)
  * - 식단: 아이콘 + "식단" + 칼로리 + 상태 (→ 식단 상세 링크)
- * - 빈 날: "활동 없음" 표시
+ * - 활동 없는 날은 행 자체가 표시되지 않음
  */
-export default function WeeklyProgressChart({ stats, size = 'default', filter: externalFilter }: WeeklyProgressChartProps) {
+export default function WeeklySchedule({ stats, size = 'default', filter: externalFilter, onDelete }: WeeklyScheduleProps) {
   const { dailyStats } = stats;
   const today = formatDate(new Date());
   const [internalFilter, setInternalFilter] = useState<ActivityFilter>('all');
@@ -53,15 +55,16 @@ export default function WeeklyProgressChart({ stats, size = 'default', filter: e
         )}
       </div>
 
-      <div className="flex flex-col items-center overflow-hidden">
+      <div className="flex flex-col divide-y divide-edge-divider">
         {dailyStats.map((day) => {
           const isToday = day.date === today;
           const hasWorkout = day.workout !== null;
           const hasMeal = day.meal !== null;
 
-          const showWorkout = hasWorkout && (filter === 'all' || filter === 'workout');
-          const showMeal = hasMeal && (filter === 'all' || filter === 'meal');
-          const hasVisible = showWorkout || showMeal;
+          const wantWorkout = filter === 'all' || filter === 'workout';
+          const wantMeal = filter === 'all' || filter === 'meal';
+          const showWorkout = hasWorkout && wantWorkout;
+          const showMeal = hasMeal && wantMeal;
 
           const workoutMeta: string[] = [];
           if (day.workoutDuration) workoutMeta.push(`${day.workoutDuration}분`);
@@ -87,6 +90,7 @@ export default function WeeklyProgressChart({ stats, size = 'default', filter: e
                     date={day.date}
                     href={`/routine/workout/${day.date}`}
                     size={isLarge ? 'large' : 'default'}
+                    onLongPress={onDelete && day.workoutEventId ? () => onDelete(day.workoutEventId!, day.date, 'workout') : undefined}
                   />
                 )}
                 {showMeal && (
@@ -102,12 +106,8 @@ export default function WeeklyProgressChart({ stats, size = 'default', filter: e
                     date={day.date}
                     href={`/routine/meal/${day.date}`}
                     size={isLarge ? 'large' : 'default'}
+                    onLongPress={onDelete && day.mealEventId ? () => onDelete(day.mealEventId!, day.date, 'meal') : undefined}
                   />
-                )}
-                {!hasVisible && (
-                  <span className={`text-muted-foreground/50 ${isLarge ? 'text-sm' : 'text-xs'}`}>
-                    활동 없음
-                  </span>
                 )}
               </DayGroup>
             </div>

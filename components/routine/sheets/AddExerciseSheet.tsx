@@ -112,7 +112,7 @@ export default function AddExerciseSheet({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="운동 검색..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-muted text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-accent"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-muted text-sm placeholder:text-hint focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </div>
 

@@ -231,7 +231,7 @@ export default function DietaryContent() {
                   }))
                 }
                 placeholder="예: 100000"
-                className="flex-1 min-w-0 px-4 py-3 rounded-xl bg-surface-muted border border-edge-faint text-sm text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-accent focus:border-edge-faint outline-none transition-all"
+                className="flex-1 min-w-0 px-4 py-3 rounded-xl bg-surface-muted border border-edge-faint text-sm text-foreground placeholder:text-hint-strong focus:ring-2 focus:ring-accent focus:border-edge-faint outline-none transition-all"
               />
               <span className="text-sm text-muted-foreground">원</span>
             </div>

@@ -13,7 +13,7 @@ export const EVENT_TYPE = {
     label: '운동',
     description: '운동 루틴',
     weight: ICON_WEIGHT.active as IconWeight,
-    color: 'text-primary',
+    color: 'text-foreground',
     bgColor: 'bg-surface-accent',
     borderColor: 'border-edge-faint',
     badgeClass: 'bg-surface-accent-strong text-primary',
@@ -23,7 +23,7 @@ export const EVENT_TYPE = {
     label: '식단',
     description: '식단 관리',
     weight: ICON_WEIGHT.active as IconWeight,
-    color: 'text-primary',
+    color: 'text-foreground',
     bgColor: 'bg-surface-accent',
     borderColor: 'border-edge-faint',
     badgeClass: 'bg-surface-accent-strong text-primary',
@@ -45,23 +45,29 @@ export const EVENT_STATUS = {
   scheduled: {
     label: '예정',
     icon: ClockIcon,
-    weight: ICON_WEIGHT.scheduled as IconWeight,    // duotone
+    weight: ICON_WEIGHT.scheduled as IconWeight,       // 상태 아이콘 weight (duotone)
+    eventIconWeight: ICON_WEIGHT.active as IconWeight,  // 이벤트 타입 아이콘 weight (fill)
     badgeClass: 'bg-surface-scheduled text-warning',
-    iconClass: 'text-scheduled',
+    eventIconClass: 'text-foreground/50',               // 이벤트 타입 아이콘 색상 (바벨/그릇)
+    statusClass: 'text-scheduled',                      // 상태 텍스트 색상 (예정/완료/미완)
   },
   completed: {
     label: '완료',
     icon: CheckCircleIcon,
-    weight: ICON_WEIGHT.completed as IconWeight,    // fill
+    weight: ICON_WEIGHT.completed as IconWeight,        // fill
+    eventIconWeight: ICON_WEIGHT.active as IconWeight,  // fill
     badgeClass: 'bg-surface-accent text-primary',
-    iconClass: 'text-primary',
+    eventIconClass: 'text-primary',
+    statusClass: 'text-primary',
   },
   incomplete: {
-    label: '미완료',
+    label: '미완',
     icon: XCircleIcon,
-    weight: ICON_WEIGHT.inactive as IconWeight,     // regular
+    weight: ICON_WEIGHT.inactive as IconWeight,         // regular
+    eventIconWeight: ICON_WEIGHT.inactive as IconWeight, // regular
     badgeClass: 'bg-surface-muted text-muted-foreground',
-    iconClass: 'text-muted-foreground/40',
+    eventIconClass: 'text-hint-faint',
+    statusClass: 'text-hint-faint',
   },
 } as const;
 

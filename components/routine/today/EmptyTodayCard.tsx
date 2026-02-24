@@ -87,12 +87,12 @@ export function EmptyTodayCard({ type }: EmptyTodayCardProps) {
         onClick={handleCardClick}
         className="w-full flex items-center gap-4 px-2 py-5 active:bg-surface-secondary transition-colors rounded-xl"
       >
-        <Icon size={32} weight="duotone" className="text-muted-foreground/60 shrink-0" />
+        <Icon size={32} weight="duotone" className="text-hint-strong shrink-0" />
         <div className="flex-1 min-w-0 text-left">
           <h3 className="text-base font-medium text-muted-foreground">{title}</h3>
-          <p className="text-sm text-muted-foreground/60 mt-1">{subtitle}</p>
+          <p className="text-sm text-hint-strong mt-1">{subtitle}</p>
         </div>
-        <CaretRightIcon size={20} weight="bold" className="text-muted-foreground/50 shrink-0" />
+        <CaretRightIcon size={20} weight="bold" className="text-hint shrink-0" />
       </button>
 
       {/* 운동: AI / 직접 추가 드로어 */}

@@ -57,7 +57,7 @@ function GridCell({ post, userId, index }: { post: CommunityPost; userId: string
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-12 gap-3">
-      <ImageSquareIcon size={40} className="text-muted-foreground/30" />
+      <ImageSquareIcon size={40} className="text-hint-faint" />
       <p className="text-sm text-muted-foreground">아직 활동이 없어요</p>
       <AppLink
         href="/community/write"

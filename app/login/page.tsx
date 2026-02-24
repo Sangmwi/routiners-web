@@ -109,7 +109,7 @@ export default function LoginPage() {
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-3 pt-4">
         <LogoFillRow className="h-12 w-auto dark:hidden" />
         <LogoFillRowDark className="hidden h-13 w-auto dark:block" />
-        <p className="text-xs text-muted-foreground/90">
+        <p className="text-xs text-muted-foreground">
           군에서 시작되는 평생 루틴.
         </p>
       </div>
@@ -140,7 +140,7 @@ export default function LoginPage() {
           </button>
 
           {/* Footer */}
-          <p className="mt-6 text-center text-xs text-muted-foreground/60">
+          <p className="mt-6 text-center text-xs text-hint-strong">
             © 2024 루티너스. All rights reserved.
           </p>
         </div>

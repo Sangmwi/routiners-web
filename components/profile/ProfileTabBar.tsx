@@ -25,7 +25,7 @@ export default function ProfileTabBar({
   const tabs = BASE_TABS.map((tab) => ({
     ...tab,
     icon: privateTabs.includes(tab.value) ? (
-      <LockSimpleIcon size={12} weight="bold" className="text-muted-foreground/60" />
+      <LockSimpleIcon size={12} weight="bold" className="text-hint-strong" />
     ) : undefined,
   }));
 

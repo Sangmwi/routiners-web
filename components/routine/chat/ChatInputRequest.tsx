@@ -97,7 +97,7 @@ export default function ChatInputRequest({
     return (
       <div className="py-2 px-1">
         <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-          <CheckCircleIcon size={14} weight="fill" className="text-muted-foreground/50" />
+          <CheckCircleIcon size={14} weight="fill" className="text-hint" />
           응답 완료
         </span>
       </div>
@@ -134,7 +134,7 @@ export default function ChatInputRequest({
                 {isSelected ? (
                   <CheckCircleIcon size={20} weight="fill" className="text-primary shrink-0" />
                 ) : (
-                  <CircleIcon size={20} weight="regular" className="text-muted-foreground/50 shrink-0" />
+                  <CircleIcon size={20} weight="regular" className="text-hint shrink-0" />
                 )}
                 {/* 라벨 */}
                 <span
@@ -195,7 +195,7 @@ export default function ChatInputRequest({
                 {isSelected ? (
                   <CheckSquareIcon size={18} weight="fill" className="text-primary shrink-0" />
                 ) : (
-                  <SquareIcon size={18} weight="regular" className="text-muted-foreground/50 shrink-0" />
+                  <SquareIcon size={18} weight="regular" className="text-hint shrink-0" />
                 )}
                 {/* 라벨 */}
                 <span

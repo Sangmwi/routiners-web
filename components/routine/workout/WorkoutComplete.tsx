@@ -84,7 +84,7 @@ export default function WorkoutComplete({
 
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-surface-accent flex items-center justify-center">
-                <BarbellIcon size={20} weight="fill" className="text-primary" />
+                <BarbellIcon size={20} weight="fill" className="text-foreground" />
               </div>
               <div className="flex-1">
                 <p className="text-xs text-muted-foreground">운동 수</p>

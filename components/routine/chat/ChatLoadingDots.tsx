@@ -19,7 +19,7 @@ export function ChatLoadingDots() {
           {[0, 150, 300].map((delay) => (
             <span
               key={delay}
-              className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce"
+              className="w-2 h-2 bg-hint rounded-full animate-bounce"
               style={{ animationDelay: `${delay}ms` }}
             />
           ))}

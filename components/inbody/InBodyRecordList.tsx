@@ -56,7 +56,7 @@ function RecordItem({
 
   return (
     <div
-      className="flex items-center justify-between px-4 py-3.5 hover:bg-surface-secondary transition-colors cursor-pointer"
+      className="flex items-center justify-between px-(--layout-padding-x) py-3.5 hover:bg-surface-secondary active:bg-surface-secondary transition-colors cursor-pointer"
       onClick={() => onClick?.(record)}
     >
       <div className="flex-1 min-w-0">
@@ -111,7 +111,7 @@ export default function InBodyRecordList({
   }
 
   return (
-    <div className="divide-y divide-border">
+    <div className="divide-y divide-edge-divider">
       {records.map((record) => (
         <RecordItem
           key={record.id}

@@ -160,7 +160,7 @@ export default function EmptyState({
 
       {/* 힌트 */}
       {hint && (
-        <p className="text-xs text-muted-foreground/70 mt-1">{hint}</p>
+        <p className="text-xs text-hint-strong mt-1">{hint}</p>
       )}
 
       {/* 액션 버튼 */}

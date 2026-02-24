@@ -12,10 +12,10 @@ interface DayGroupProps {
 /**
  * 요일/날짜 그룹 레이아웃
  *
- * [DateNum DayOfWk]  [ActivityRows...]
+ * [DateNum]  [ActivityRows...]
+ * [DayOfWk]
  *
- * - 날짜 숫자 + 요일 가로 나열
- * - 오늘이면 배경 하이라이트 + primary 색상 텍스트
+ * - 오늘이면 full-bleed 배경 하이라이트 + primary 색상 텍스트
  */
 export default function DayGroup({
   dateNum,
@@ -27,31 +27,29 @@ export default function DayGroup({
   const isLarge = size === 'large';
 
   return (
-    <div>
-      <div className={`rounded-2xl px-2 ${isLarge ? 'py-4' : 'py-3'} ${isToday ? 'bg-primary/10' : ''}`}>
-        <div className={`flex ${isLarge ? 'gap-3' : 'gap-2.5'}`}>
-          {/* 날짜 라벨: 숫자 + 요일 가로 배치 */}
-          <div className={`${isLarge ? 'w-10' : 'w-8'} shrink-0 flex flex-col items-center justify-center gap-1`}>
-            <span
-              className={`${isLarge ? 'text-sm' : 'text-xs'} ${
-                isToday ? 'font-bold text-primary' : 'font-semibold text-muted-foreground'
-              }`}
-            >
-              {dateNum}
-            </span>
-            <span
-              className={`${isLarge ? 'text-[11px]' : 'text-[10px]'} ${
-                isToday ? 'text-primary/70' : 'text-muted-foreground'
-              }`}
-            >
-              {dayOfWeek}
-            </span>
-          </div>
+    <div className={isToday ? '-mx-(--layout-padding-x) px-(--layout-padding-x) bg-primary/10 is-today' : ''}>
+      <div className={`flex ${isLarge ? 'gap-3 py-4' : 'gap-2.5 py-3'}`}>
+        {/* 날짜 라벨 */}
+        <div className="shrink-0 flex flex-col items-center justify-center px-2 min-w-9 tabular-nums">
+          <span
+            className={`${isLarge ? 'text-sm' : 'text-xs'} ${
+              isToday ? 'font-bold text-foreground' : 'font-semibold text-muted-foreground'
+            }`}
+          >
+            {dateNum}
+          </span>
+          <span
+            className={`${isLarge ? 'text-[11px]' : 'text-[10px]'} ${
+              isToday ? 'text-foreground' : 'text-muted-foreground'
+            }`}
+          >
+            {dayOfWeek}
+          </span>
+        </div>
 
-          {/* 활동 행 */}
-          <div className={`flex-1 min-w-0 ${isLarge ? 'space-y-3' : 'space-y-2'}`}>
-            {children}
-          </div>
+        {/* 활동 행 */}
+        <div className={`flex-1 min-w-0 ${isLarge ? 'space-y-1' : 'space-y-0.5'}`}>
+          {children}
         </div>
       </div>
     </div>

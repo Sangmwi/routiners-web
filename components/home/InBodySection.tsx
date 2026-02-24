@@ -49,6 +49,7 @@ export default function InBodySection({ summary, history, height }: InBodySectio
           <BodyCompositionSummary
             height={height}
             measuredAt={summary.latest?.measuredAt}
+            score={summary.latest?.inbodyScore}
           >
             <div className="grid grid-cols-3 gap-2">
               {INBODY_METRICS.map(({ key, label, unit, positiveIsGood }) => {

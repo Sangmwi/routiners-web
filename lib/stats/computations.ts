@@ -245,6 +245,10 @@ export interface WeeklyStats {
     mealCarbs?: number;
     /** 식단 총 지방 */
     mealFat?: number;
+    /** 운동 이벤트 ID (삭제용) */
+    workoutEventId?: string;
+    /** 식단 이벤트 ID (삭제용) */
+    mealEventId?: string;
   }>;
   completedDays: number;
   weekLabel: string;
@@ -315,6 +319,8 @@ export function computeWeeklyStats(
       mealProtein,
       mealCarbs,
       mealFat,
+      workoutEventId: workoutEvent?.id,
+      mealEventId: mealEvent?.id,
     });
   }
 

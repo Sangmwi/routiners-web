@@ -11,8 +11,10 @@ import {
   InBodySummaryCard,
   InBodyDetailModal,
   InBodyScanModal,
+  BodyCompositionSummary,
 } from '@/components/inbody';
 import { useInBodyManagerSuspense } from '@/hooks/inbody';
+import { useCurrentUserProfileSuspense } from '@/hooks/profile';
 import { useNativeImagePicker } from '@/hooks/webview';
 import type { ImagePickerSource } from '@/lib/webview';
 
@@ -43,6 +45,8 @@ export default function InBodyContent() {
     closeDetailModal,
   } = useInBodyManagerSuspense();
 
+  const { data: user } = useCurrentUserProfileSuspense();
+
   // 이미지 선택 → 스캔 모달 플로우
   const [isImageSourceOpen, setIsImageSourceOpen] = useState(false);
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
@@ -72,31 +76,39 @@ export default function InBodyContent() {
 
   return (
     <>
-      <div className="space-y-8 pb-footer-clearance">
-        {/* Summary Card */}
-        <section className="space-y-4">
-          <SectionHeader title="최근 측정" size="md" />
-          <InBodySummaryCard
-            latest={summary?.latest}
-            totalRecords={summary?.totalRecords}
-            variant="card"
-          />
-        </section>
+      <div className="pb-footer-clearance -mx-(--layout-padding-x)">
+        <div className="divide-y divide-edge-divider">
+          {/* 최근 측정 */}
+          <div className="px-(--layout-padding-x) pt-1 pb-5">
+            <SectionHeader title="최근 측정" size="md" className="mb-4" />
+            <BodyCompositionSummary
+              height={user.height}
+              measuredAt={summary?.latest?.measuredAt}
+              score={summary?.latest?.inbodyScore}
+            >
+              <InBodySummaryCard
+                latest={summary?.latest}
+                totalRecords={summary?.totalRecords}
+                variant="inline"
+              />
+            </BodyCompositionSummary>
+          </div>
 
-        {/* Record List */}
-        <section className="space-y-4">
-          <SectionHeader
-            title="측정 기록"
-            size="md"
-            badge={records.length}
-          />
-          <div className="bg-card rounded-2xl border border-edge-subtle overflow-hidden">
-            <InBodyRecordList
-              records={records}
-              onRecordClick={openDetailModal}
+          {/* 측정 기록 헤더 */}
+          <div className="px-(--layout-padding-x) pt-5 pb-2">
+            <SectionHeader
+              title="측정 기록"
+              size="md"
+              badge={records.length}
             />
           </div>
-        </section>
+
+          {/* 기록 행들 */}
+          <InBodyRecordList
+            records={records}
+            onRecordClick={openDetailModal}
+          />
+        </div>
       </div>
 
       {/* Fixed Bottom Button */}

@@ -98,7 +98,7 @@ export default function WorkoutAISheet({ isOpen, onClose, exerciseName }: Workou
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="AI에게 질문하기..."
               disabled
-              className="flex-1 h-10 px-4 rounded-full bg-surface-hover border border-border text-sm text-foreground placeholder:text-muted-foreground/50 disabled:opacity-60"
+              className="flex-1 h-10 px-4 rounded-full bg-surface-hover border border-border text-sm text-foreground placeholder:text-hint disabled:opacity-60"
             />
             <button
               disabled
@@ -107,7 +107,7 @@ export default function WorkoutAISheet({ isOpen, onClose, exerciseName }: Workou
               <PaperPlaneRightIcon size={18} className="text-primary" weight="fill" />
             </button>
           </div>
-          <p className="text-xs text-muted-foreground/50 text-center mt-2">
+          <p className="text-xs text-hint text-center mt-2">
             곧 AI 트레이너 기능이 추가될 예정이에요
           </p>
         </div>

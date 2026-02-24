@@ -60,6 +60,11 @@
   --surface-glass: rgba(243, 246, 243, 0.8);         /* bg-background/80 — 반투명 헤더 */
   --surface-pressed: rgba(226, 232, 240, 0.8);       /* active/pressed 상태 */
 
+  /* ===== 시맨틱 힌트 토큰 (muted-foreground 투명도 스케일) ===== */
+  --hint-faint: rgba(100, 116, 139, 0.3);           /* /30 — 비활성 아이콘, 빈 상태 */
+  --hint: rgba(100, 116, 139, 0.5);                  /* /50 — placeholder, 보조 아이콘 */
+  --hint-strong: rgba(100, 116, 139, 0.7);           /* /70 — 설명 텍스트, 힌트 */
+
   /* ===== 시맨틱 보더 토큰 ===== */
   --edge-subtle: rgba(203, 213, 225, 0.5);           /* border-border/50 — 카드 테두리 */
   --edge-faint: rgba(203, 213, 225, 0.3);            /* border-border/30 — 폼 카드 테두리 */
@@ -122,6 +127,11 @@
     --surface-scheduled: rgba(251, 191, 36, 0.1);
     --surface-glass: rgba(15, 23, 42, 0.8);
     --surface-pressed: rgba(51, 65, 85, 0.8);
+
+    /* 시맨틱 힌트 (다크) */
+    --hint-faint: rgba(148, 163, 184, 0.3);
+    --hint: rgba(148, 163, 184, 0.5);
+    --hint-strong: rgba(148, 163, 184, 0.7);
 
     /* 시맨틱 보더 (다크) */
     --edge-subtle: rgba(51, 65, 85, 0.5);
@@ -193,6 +203,11 @@
   --color-edge-divider: var(--edge-divider);
   --color-edge-error: var(--edge-error);
 
+  /* 시맨틱 힌트 — text-hint-*, placeholder:text-hint-* 로 사용 */
+  --color-hint-faint: var(--hint-faint);
+  --color-hint: var(--hint);
+  --color-hint-strong: var(--hint-strong);
+
   --font-sans: var(--font-pretendard-variable);
   --font-mono: var(--font-geist-mono);
 
@@ -229,6 +244,7 @@
   --surface-pressed:rgba(226,232,240,0.8);
   --edge-subtle:rgba(203,213,225,0.5); --edge-faint:rgba(203,213,225,0.3);
   --edge-divider:rgba(203,213,225,0.2); --edge-error:rgba(217,115,115,0.5);
+  --hint-faint:rgba(100,116,139,0.3); --hint:rgba(100,116,139,0.5); --hint-strong:rgba(100,116,139,0.7);
   --ring-focus:rgba(80,167,108,0.2); --ring-accent:rgba(80,167,108,0.3);
   --ring-error:rgba(217,115,115,0.2);
 }
@@ -257,6 +273,7 @@
   --surface-pressed:rgba(51,65,85,0.8);
   --edge-subtle:rgba(51,65,85,0.5); --edge-faint:rgba(51,65,85,0.3);
   --edge-divider:rgba(51,65,85,0.2); --edge-error:rgba(232,160,160,0.5);
+  --hint-faint:rgba(148,163,184,0.3); --hint:rgba(148,163,184,0.5); --hint-strong:rgba(148,163,184,0.7);
   --ring-focus:rgba(95,192,127,0.2); --ring-accent:rgba(95,192,127,0.3);
   --ring-error:rgba(232,160,160,0.2);
 }

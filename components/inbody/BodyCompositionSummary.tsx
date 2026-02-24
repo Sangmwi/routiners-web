@@ -8,6 +8,8 @@ interface BodyCompositionSummaryProps {
   height?: number | null;
   /** 최근 측정일 (ISO string 또는 YYYY-MM-DD) */
   measuredAt?: string | null;
+  /** 인바디 점수 */
+  score?: number | null;
   /** 메트릭 그리드 + 추가 콘텐츠 (MetricItem, 스파크라인 등) */
   children: ReactNode;
 }
@@ -21,6 +23,7 @@ interface BodyCompositionSummaryProps {
 export default function BodyCompositionSummary({
   height,
   measuredAt,
+  score,
   children,
 }: BodyCompositionSummaryProps) {
   const hasHeader = !!height || !!measuredAt;
@@ -41,11 +44,18 @@ export default function BodyCompositionSummary({
             ) : (
               <span />
             )}
-            {dateLabel && (
-              <p className="text-xs text-muted-foreground">
-                {dateLabel} 측정
-              </p>
-            )}
+            <div className="flex items-center gap-2">
+              {dateLabel && (
+                <p className="text-xs text-muted-foreground">
+                  {dateLabel} 측정
+                </p>
+              )}
+              {score != null && (
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-surface-accent text-primary">
+                  {score}점
+                </span>
+              )}
+            </div>
           </div>
           <div className="border-t border-edge-faint mb-3" />
         </>

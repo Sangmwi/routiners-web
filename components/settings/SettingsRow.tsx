@@ -64,7 +64,7 @@ export default function SettingsRow({
         )}
       </div>
       {isChevron && (
-        <CaretRightIcon size={16} className="text-muted-foreground/50 flex-shrink-0" />
+        <CaretRightIcon size={16} className="text-hint flex-shrink-0" />
       )}
       {isToggle && (
         <div

@@ -262,7 +262,7 @@ export default function Modal({
               enableSwipe ? 'cursor-grab active:cursor-grabbing' : ''
             }`}
           >
-            <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
+            <div className="w-10 h-1 bg-hint-faint rounded-full" />
           </div>
         )}
 

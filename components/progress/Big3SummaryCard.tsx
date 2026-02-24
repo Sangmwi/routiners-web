@@ -30,7 +30,7 @@ export function Big3SummaryCard({
   if (!summary.latest) {
     return (
       <div className="rounded-2xl bg-surface-secondary p-6 text-center">
-        <BarbellIcon size={28} weight="duotone" className="text-muted-foreground/40 mx-auto mb-2" />
+        <BarbellIcon size={28} weight="duotone" className="text-hint-faint mx-auto mb-2" />
         <p className="text-sm text-muted-foreground">{emptyMessage}</p>
       </div>
     );
@@ -83,7 +83,7 @@ export function Big3SummaryCard({
                     <span className="text-xs font-normal text-muted-foreground ml-1">kg</span>
                   </>
                 ) : (
-                  <span className="text-muted-foreground/50">-</span>
+                  <span className="text-hint">-</span>
                 )}
               </p>
               {change != null && change !== 0 && (

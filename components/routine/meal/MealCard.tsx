@@ -30,7 +30,7 @@ function FoodItemRow({ food }: { food: FoodItem }) {
         <span className="text-sm text-foreground truncate block">{food.name}</span>
       </div>
       <div className="flex items-center gap-3 text-xs text-muted-foreground shrink-0 ml-2">
-        <span className="text-muted-foreground/70">{food.portion}</span>
+        <span className="text-hint-strong">{food.portion}</span>
         {food.calories && (
           <span className="text-foreground/80">{food.calories}kcal</span>
         )}
@@ -87,7 +87,7 @@ export default function MealCard({
             >
               {meal.completed
                 ? <CheckCircleIcon size={24} weight="fill" className="text-primary" />
-                : <CircleIcon size={24} className="text-muted-foreground/40" />
+                : <CircleIcon size={24} className="text-hint-faint" />
               }
             </button>
           ) : showDeleteButton ? (

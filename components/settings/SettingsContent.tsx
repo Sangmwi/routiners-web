@@ -118,7 +118,7 @@ export default function SettingsContent() {
       </SettingsGroup>
 
       {/* 버전 */}
-      <p className="text-center text-xs text-muted-foreground/50 py-4">
+      <p className="text-center text-xs text-hint py-4">
         v1.0.0
       </p>
     </div>

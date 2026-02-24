@@ -81,7 +81,7 @@ export default function ActiveExerciseView({
       {/* 운동 이미지 placeholder */}
       {/* TODO: 운동 시범 애니메이션 영상 (무한 재생) */}
       <div className="bg-surface-secondary rounded-2xl h-48 flex items-center justify-center">
-        <BarbellIcon size={48} weight="duotone" className="text-muted-foreground/30" />
+        <BarbellIcon size={48} weight="duotone" className="text-hint-faint" />
       </div>
 
       {/* 운동 정보 */}

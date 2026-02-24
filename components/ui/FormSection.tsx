@@ -21,7 +21,7 @@ export default function FormSection({ title, description, children, action }: Fo
         <div>
           <label className="text-sm font-medium text-muted-foreground">{title}</label>
           {description && (
-            <p className="text-xs text-muted-foreground/70 mt-0.5">{description}</p>
+            <p className="text-xs text-hint-strong mt-0.5">{description}</p>
           )}
         </div>
         {action}

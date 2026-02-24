@@ -53,7 +53,7 @@ function LinkedSectionCard({
             <p className="text-sm text-muted-foreground">{emptyText}</p>
           )}
         </div>
-        <CaretRightIcon size={16} className="text-muted-foreground/50 flex-shrink-0" />
+        <CaretRightIcon size={16} className="text-hint flex-shrink-0" />
       </button>
     </div>
   );

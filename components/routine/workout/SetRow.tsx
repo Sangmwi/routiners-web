@@ -116,7 +116,7 @@ export default function SetRow({
           {displayWeight}kg × {displayReps}회
         </span>
       </div>
-      <PencilSimpleIcon size={14} className="text-muted-foreground/50" />
+      <PencilSimpleIcon size={14} className="text-hint" />
     </button>
   );
 }

@@ -97,7 +97,7 @@ export default function CommentInput({
             className={`absolute right-1.5 w-7 h-7 rounded-full flex items-center justify-center transition-all ${
               hasContent
                 ? 'bg-primary text-primary-foreground'
-                : 'bg-surface-hover text-muted-foreground/40'
+                : 'bg-surface-hover text-hint-faint'
             }`}
           >
             <ArrowUpIcon size={14} weight="bold" />

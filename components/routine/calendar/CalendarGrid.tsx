@@ -162,7 +162,7 @@ export default function CalendarGrid({
               <div className="flex-1 flex items-center">
                 {dayInfo.events.length > 0 && (
                   <div className="flex items-center gap-1">
-                    {dayInfo.events.map((event) => (
+                    {[...dayInfo.events].sort((a, b) => (a.type === 'workout' ? 0 : 1) - (b.type === 'workout' ? 0 : 1)).map((event) => (
                       <EventDot
                         key={event.id}
                         type={event.type}

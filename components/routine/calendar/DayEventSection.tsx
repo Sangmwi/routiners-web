@@ -37,8 +37,7 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
   const deleteEvent = useDeleteRoutineEvent();
   const confirm = useConfirmDialog();
 
-  const handleDelete = (eventId: string) => {
-    const targetEvent = workoutEvent?.id === eventId ? workoutEvent : mealEvent;
+  const handleLongPressDelete = (eventId: string, eventDate: string, eventType: 'workout' | 'meal') => {
     confirm({
       title: '루틴을 삭제하시겠어요?',
       message: '삭제하면 되돌릴 수 없어요.',
@@ -46,8 +45,8 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
       onConfirm: async () => {
         await deleteEvent.mutateAsync({
           id: eventId,
-          date: targetEvent?.date ?? date,
-          type: targetEvent?.type ?? 'workout',
+          date: eventDate,
+          type: eventType,
         });
       },
     });
@@ -103,16 +102,16 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
       <div>
         {showWorkout && (
           workoutEvent ? (
-            <DayEventCard event={workoutEvent} date={date} onDelete={handleDelete} />
+            <DayEventCard event={workoutEvent} date={date} onLongPress={() => handleLongPressDelete(workoutEvent.id, workoutEvent.date, 'workout')} />
           ) : (
             <button
               type="button"
               onClick={() => setIsWorkoutDrawerOpen(true)}
               className="w-full flex items-center gap-4 px-2 py-5 active:bg-surface-secondary transition-colors rounded-xl"
             >
-              <BarbellIcon size={28} weight="duotone" className="text-muted-foreground/50 shrink-0" />
+              <BarbellIcon size={28} weight="duotone" className="text-hint-faint shrink-0" />
               <div className="flex-1 min-w-0 text-left">
-                <p className="text-sm font-medium text-muted-foreground">예정된 운동이 없어요</p>
+                <p className="text-sm font-medium text-hint">예정된 운동이 없어요</p>
               </div>
               <div className="flex items-center gap-1 text-primary shrink-0">
                 <PlusIcon size={16} weight="bold" />
@@ -128,16 +127,16 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
 
         {showMeal && (
           mealEvent ? (
-            <DayEventCard event={mealEvent} date={date} onDelete={handleDelete} />
+            <DayEventCard event={mealEvent} date={date} onLongPress={() => handleLongPressDelete(mealEvent.id, mealEvent.date, 'meal')} />
           ) : (
             <button
               type="button"
               onClick={() => setIsMealDrawerOpen(true)}
               className="w-full flex items-center gap-4 px-2 py-5 active:bg-surface-secondary transition-colors rounded-xl"
             >
-              <BowlFoodIcon size={28} weight="duotone" className="text-muted-foreground/50 shrink-0" />
+              <BowlFoodIcon size={28} weight="duotone" className="text-hint-faint shrink-0" />
               <div className="flex-1 min-w-0 text-left">
-                <p className="text-sm font-medium text-muted-foreground">예정된 식단이 없어요</p>
+                <p className="text-sm font-medium text-hint">예정된 식단이 없어요</p>
               </div>
               <div className="flex items-center gap-1 text-primary shrink-0">
                 <PlusIcon size={16} weight="bold" />

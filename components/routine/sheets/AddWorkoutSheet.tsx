@@ -79,7 +79,7 @@ function ExerciseSetRow({ set, onTapEdit, onRemove, canRemove }: ExerciseSetRowP
         <button
           type="button"
           onClick={onRemove}
-          className="p-1 text-muted-foreground/50"
+          className="p-1 text-hint"
         >
           <XIcon size={14} />
         </button>
@@ -145,7 +145,7 @@ function SelectedExerciseCard({ exercise, onUpdate, onRemove }: SelectedExercise
           <h4 className="font-medium text-sm">{exercise.name}</h4>
           <p className="text-xs text-muted-foreground">{exercise.targetMuscle}</p>
         </div>
-        <button type="button" onClick={onRemove} className="p-1.5 text-muted-foreground/50">
+        <button type="button" onClick={onRemove} className="p-1.5 text-hint">
           <TrashIcon size={16} />
         </button>
       </div>
@@ -305,7 +305,7 @@ export default function AddWorkoutSheet({ isOpen, onClose, date, onCreated }: Ad
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="운동 검색..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-muted text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-accent"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-muted text-sm placeholder:text-hint focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </div>
 

@@ -124,7 +124,7 @@ export default function ExerciseCard({
           <p className="text-sm text-muted-foreground">
             {setsSummary}
           </p>
-          <p className={`text-xs mt-0.5 ${completedSetCount > 0 ? 'text-primary' : 'text-muted-foreground/50'}`}>
+          <p className={`text-xs mt-0.5 ${completedSetCount > 0 ? 'text-primary' : 'text-hint'}`}>
             {completedSetCount > 0
               ? `✓ ${completedSetCount}/${exercise.sets.length}세트 완료`
               : `0/${exercise.sets.length}세트 완료`}
@@ -137,7 +137,7 @@ export default function ExerciseCard({
             type="button"
             onClick={(e) => { e.stopPropagation(); onDelete(); }}
             disabled={!canDelete}
-            className="w-10 h-10 flex items-center justify-center shrink-0 text-muted-foreground/50 hover:text-destructive disabled:opacity-30 transition-colors"
+            className="w-10 h-10 flex items-center justify-center shrink-0 text-hint hover:text-destructive disabled:opacity-30 transition-colors"
             aria-label="운동 삭제"
           >
             <TrashIcon size={18} />

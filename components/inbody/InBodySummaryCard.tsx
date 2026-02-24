@@ -28,7 +28,7 @@ interface InBodySummaryCardProps {
   /** 간소화 모드 (프로필 페이지용) */
   compact?: boolean;
   /** 카드 스타일 변형 */
-  variant?: 'flat' | 'card';
+  variant?: 'flat' | 'card' | 'inline';
 }
 
 // ============================================================
@@ -92,9 +92,11 @@ export default function InBodySummaryCard({
 
   const formattedDate = formatKoreanDate(latest.measuredAt, { monthFormat: 'short' });
 
-  const baseClass = variant === 'card'
-    ? 'bg-card rounded-2xl p-5'
-    : 'bg-surface-secondary rounded-xl p-4';
+  const baseClass = {
+    flat: 'bg-surface-secondary rounded-xl p-4',
+    card: 'bg-card rounded-2xl p-5',
+    inline: '',
+  }[variant];
 
   return (
     <div
@@ -106,18 +108,20 @@ export default function InBodySummaryCard({
       {/* 메트릭 그리드 */}
       <MetricsGrid data={latest} changes={changes} />
 
-      {/* Footer: Date (left) + Score badge (right) */}
-      <div className="flex items-center justify-between mt-4 pt-3 border-t border-edge-faint">
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <span>{formattedDate} 측정</span>
-          {onClick && <NextIcon size="xs" />}
+      {/* Footer: Date (left) + Score badge (right) — inline variant는 외부에서 헤더 처리 */}
+      {variant !== 'inline' && (
+        <div className="flex items-center justify-between mt-4 pt-3 border-t border-edge-faint">
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <span>{formattedDate} 측정</span>
+            {onClick && <NextIcon size="xs" />}
+          </div>
+          {latest.inbodyScore && !compact && (
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-surface-accent text-primary">
+              {latest.inbodyScore}점
+            </span>
+          )}
         </div>
-        {latest.inbodyScore && !compact && (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-surface-accent text-primary">
-            {latest.inbodyScore}점
-          </span>
-        )}
-      </div>
+      )}
     </div>
   );
 }

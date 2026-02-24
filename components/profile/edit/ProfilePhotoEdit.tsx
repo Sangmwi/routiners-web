@@ -106,7 +106,7 @@ export default function ProfilePhotoEdit({
               />
             ) : (
               <div className="w-full h-full bg-surface-hover flex items-center justify-center">
-                <CameraIcon size={28} weight="duotone" className="text-muted-foreground/50" />
+                <CameraIcon size={28} weight="duotone" className="text-hint" />
               </div>
             )}
 

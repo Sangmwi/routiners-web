@@ -44,7 +44,7 @@ export default function InBodyMiniCard({ summary, history = [] }: InBodyMiniCard
                   {value != null ? (
                     <>{value}<span className="text-xs font-normal text-muted-foreground ml-1">{unit}</span></>
                   ) : (
-                    <span className="text-muted-foreground/50">-</span>
+                    <span className="text-hint">-</span>
                   )}
                 </p>
                 {change != null && change !== 0 && (

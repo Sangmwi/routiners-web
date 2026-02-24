@@ -192,7 +192,7 @@ function ConversationItem({ item, isCurrent, onSelect, onDelete }: ConversationI
           e.stopPropagation();
           onDelete();
         }}
-        className="absolute top-2.5 right-1.5 p-1.5 rounded-full text-muted-foreground/50 hover:text-destructive hover:bg-surface-danger transition-colors"
+        className="absolute top-2.5 right-1.5 p-1.5 rounded-full text-hint hover:text-destructive hover:bg-surface-danger transition-colors"
         aria-label="대화 삭제"
       >
         <TrashSimpleIcon size={14} />

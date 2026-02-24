@@ -32,10 +32,10 @@ export function TodaySection({ workoutEvent, mealEvent, nextScheduledWorkout }: 
           <TodayEventCard event={workoutEvent} type="workout" />
         ) : nextScheduledWorkout ? (
           <div className="w-full flex items-center gap-4 px-2 py-5">
-            <BedIcon size={32} weight="duotone" className="text-muted-foreground/60 shrink-0" />
+            <BedIcon size={32} weight="duotone" className="text-hint-strong shrink-0" />
             <div className="flex-1 min-w-0 text-left">
               <h3 className="text-base font-medium text-muted-foreground">오늘은 쉬는날</h3>
-              <p className="text-sm text-muted-foreground/60 mt-1">
+              <p className="text-sm text-hint-strong mt-1">
                 다음 운동 {getCountdownText(nextScheduledWorkout.date)} · {formatKoreanDate(nextScheduledWorkout.date, { year: false, weekday: true, weekdayFormat: 'short' })}
               </p>
             </div>

@@ -42,9 +42,9 @@ export function TodayEventCard({ event, type }: TodayEventCardProps) {
     >
       {/* 아이콘 - 배경 없음, 32px */}
       {isWorkout ? (
-        <BarbellIcon size={32} weight="fill" className="text-primary shrink-0" />
+        <BarbellIcon size={32} weight="fill" className="text-foreground shrink-0" />
       ) : (
-        <BowlFoodIcon size={32} weight="fill" className="text-primary shrink-0" />
+        <BowlFoodIcon size={32} weight="fill" className="text-foreground shrink-0" />
       )}
 
       {/* 콘텐츠 */}

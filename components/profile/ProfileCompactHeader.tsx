@@ -24,7 +24,7 @@ export default function ProfileCompactHeader({ user }: ProfileCompactHeaderProps
             {user.bio}
           </p>
         ) : (
-          <p className="text-sm text-muted-foreground/50 mt-3">
+          <p className="text-sm text-hint mt-3">
             한줄소개를 작성해보세요
           </p>
         )}

@@ -115,7 +115,7 @@ export default function ChatPreviewSummary({
           </div>
         ))}
         {weekSummaries.length > 2 && (
-          <p className="text-xs text-muted-foreground/60 pl-4">
+          <p className="text-xs text-hint-strong pl-4">
             +{weekSummaries.length - 2}주 더...
           </p>
         )}

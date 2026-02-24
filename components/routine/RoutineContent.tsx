@@ -7,13 +7,14 @@ import UnderlineTabs from '@/components/ui/UnderlineTabs';
 import TypeFilterToggle, { type FilterValue } from '@/components/ui/TypeFilterToggle';
 import ProgressRateBar from '@/components/ui/ProgressRateBar';
 import StreakBanner from '@/components/ui/StreakBanner';
-import WeeklyProgressChart from '@/components/stats/WeeklyProgressChart';
+import WeeklySchedule from '@/components/routine/WeeklySchedule';
 import DateJumpSheet from '@/components/ui/DateJumpSheet';
 import CalendarContent from '@/components/routine/calendar/CalendarContent';
 import { CounselorButton } from '@/components/counselor';
 import { PulseLoader } from '@/components/ui/PulseLoader';
-import { useWeeklyStatsSuspense } from '@/hooks/routine';
+import { useWeeklyStatsSuspense, useDeleteRoutineEvent } from '@/hooks/routine';
 import { useActiveCounselorConversation } from '@/hooks/counselor';
+import { useConfirmDialog } from '@/lib/stores/modalStore';
 import { useStatsPeriodNavigator } from '@/hooks/routine/useStatsPeriodNavigator';
 import { computeWorkoutStreak } from '@/lib/stats/computations';
 import { addDays, formatDate, parseDate } from '@/lib/utils/dateHelpers';
@@ -122,10 +123,10 @@ export default function RoutineContent() {
         />
       )}
 
-      <div className="[overflow-x:clip]">
+      <div className="[overflow-x:clip] -mx-(--layout-padding-x) px-(--layout-padding-x)">
         <div
           key={tab}
-          className="animate-tab-slide"
+          className="animate-tab-slide pb-footer-clearance"
           style={{
             '--slide-from': direction === 'right' ? '30px' : '-30px',
           } as React.CSSProperties}
@@ -207,6 +208,19 @@ function WeeklyContent({
   const prevDateStr = formatDate(addDays(new Date(weekDateStr), -7));
   const prevStats = useWeeklyStatsSuspense(prevDateStr);
 
+  // 롱프레스 삭제
+  const deleteEvent = useDeleteRoutineEvent();
+  const confirm = useConfirmDialog();
+
+  const handleDelete = (id: string, date: string, type: 'workout' | 'meal') => {
+    confirm({
+      title: '루틴을 삭제하시겠어요?',
+      message: '삭제하면 되돌릴 수 없어요.',
+      confirmText: '삭제',
+      onConfirm: async () => { await deleteEvent.mutateAsync({ id, date, type }); },
+    });
+  };
+
   // 스트릭 계산 (이전 주 + 현재 주 합산)
   const allDailyStats = [
     ...(prevStats?.dailyStats ?? []),
@@ -253,8 +267,8 @@ function WeeklyContent({
         />
       </div>
 
-      {/* 주간 기록 (확대 사이즈) */}
-      {stats && <WeeklyProgressChart stats={stats} size="large" filter={filter} />}
+      {/* 주간 스케줄 (확대 사이즈) */}
+      {stats && <WeeklySchedule stats={stats} size="large" filter={filter} onDelete={handleDelete} />}
     </div>
   );
 }

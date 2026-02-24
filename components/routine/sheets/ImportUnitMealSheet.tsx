@@ -63,7 +63,7 @@ type DayImportStatus =
 function StatusIcon({ status }: { status: DayImportStatus }) {
   switch (status) {
     case 'pending':
-      return <ClockIcon size={18} className="text-muted-foreground/50" />;
+      return <ClockIcon size={18} className="text-hint" />;
     case 'fetching':
     case 'saving':
       return (
@@ -97,7 +97,7 @@ function StatusLabel({ status }: { status: DayImportStatus }) {
     error: '실패',
   };
   const colors: Record<DayImportStatus, string> = {
-    pending: 'text-muted-foreground/50',
+    pending: 'text-hint',
     fetching: 'text-primary',
     fetched: 'text-blue-500',
     saving: 'text-primary',
@@ -518,7 +518,7 @@ export default function ImportUnitMealSheet({
                       value={unitSearchQuery}
                       onChange={(e) => setUnitSearchQuery(e.target.value)}
                       placeholder="부대명 검색..."
-                      className="w-full pl-9 pr-4 py-2 rounded-xl bg-surface-muted text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-accent"
+                      className="w-full pl-9 pr-4 py-2 rounded-xl bg-surface-muted text-sm placeholder:text-hint focus:outline-none focus:ring-1 focus:ring-accent"
                     />
                   </div>
                   <div className="max-h-48 overflow-y-auto rounded-xl border border-edge-subtle divide-y divide-edge-faint">
@@ -685,14 +685,14 @@ export default function ImportUnitMealSheet({
                           size={16}
                           className={
                             isExisting
-                              ? 'text-muted-foreground/40'
+                              ? 'text-hint-faint'
                               : 'text-foreground'
                           }
                         />
                         <span
                           className={`text-sm flex-1 ${
                             isExisting
-                              ? 'text-muted-foreground/50 line-through'
+                              ? 'text-hint line-through'
                               : 'text-foreground'
                           }`}
                         >

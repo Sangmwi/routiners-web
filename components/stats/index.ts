@@ -12,6 +12,3 @@ export type { StatsDomain } from './DomainTabs';
 export { default as WorkoutStatsTab } from './WorkoutStatsTab';
 export { default as BodyStatsTab } from './BodyStatsTab';
 export { default as NutritionStatsTab } from './NutritionStatsTab';
-
-// Shared
-export { default as WeeklyProgressChart } from './WeeklyProgressChart';

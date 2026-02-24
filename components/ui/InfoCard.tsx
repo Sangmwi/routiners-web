@@ -104,7 +104,7 @@ export default function InfoCard({
           )}
         </div>
         {subValue && (
-          <p className="text-xs text-muted-foreground/70 mt-0.5 truncate">
+          <p className="text-xs text-hint-strong mt-0.5 truncate">
             {subValue}
           </p>
         )}

@@ -16,7 +16,7 @@ function RankInsignia({ rank, active }: { rank: Rank; active: boolean }) {
     '병장': 4,
   };
   const count = barCount[rank];
-  const barColor = active ? 'bg-primary-foreground' : 'bg-muted-foreground/60';
+  const barColor = active ? 'bg-primary-foreground' : 'bg-hint-strong';
 
   return (
     <div className="flex flex-col items-center justify-center gap-[3px] w-6 h-5">

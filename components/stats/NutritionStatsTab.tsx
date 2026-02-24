@@ -397,7 +397,7 @@ function DonutChart({
             ))}
           </div>
         </div>
-        <p className="text-xs text-muted-foreground/40 mt-6 text-center">
+        <p className="text-xs text-hint-faint mt-6 text-center">
           일반 권장 비율: 탄 50 · 단 30 · 지 20
         </p>
       </div>
@@ -496,7 +496,7 @@ function DailyNutritionLog({
                 )}
                 {/* 수치 + 상태아이콘 (바 바로 옆) */}
                 <span
-                  className={`inline-flex items-center gap-0.5 whitespace-nowrap shrink-0 px-1.5 text-xs font-medium ${val > 0 ? 'text-foreground' : 'text-muted-foreground/40'}`}
+                  className={`inline-flex items-center gap-0.5 whitespace-nowrap shrink-0 px-1.5 text-xs font-medium ${val > 0 ? 'text-foreground' : 'text-hint-faint'}`}
                 >
                   {formatted}
                   {displayStatus === 'completed' && (
@@ -506,7 +506,7 @@ function DailyNutritionLog({
                     <ClockIcon size={13} weight="duotone" className="text-scheduled" />
                   )}
                   {displayStatus === 'incomplete' && (
-                    <XCircleIcon size={13} weight="fill" className="text-muted-foreground/30" />
+                    <XCircleIcon size={13} weight="fill" className="text-hint-faint" />
                   )}
                 </span>
                 {/* 나머지 여백 */}

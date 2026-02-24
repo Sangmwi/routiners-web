@@ -122,7 +122,7 @@ export function ProfileFormChipOption({
         className={`inline-flex items-center justify-center w-4 h-4 rounded-full flex-shrink-0 transition-all ${
           selected
             ? 'bg-primary text-primary-foreground'
-            : 'border-2 border-muted-foreground/40'
+            : 'border-2 border-hint-faint'
         }`}
       >
         {selected && <CheckIcon size={10} weight="bold" />}
@@ -155,13 +155,13 @@ export function ProfileFormSection({
         <div className="flex items-center gap-1.5">
           <label className="text-sm font-medium text-muted-foreground">{title}</label>
           {optional && (
-            <span className="text-[10px] text-muted-foreground/70 bg-surface-hover px-1.5 py-0.5 rounded">
+            <span className="text-[10px] text-hint-strong bg-surface-hover px-1.5 py-0.5 rounded">
               선택
             </span>
           )}
         </div>
         {description && (
-          <p className="text-xs text-muted-foreground/70 mt-0.5">{description}</p>
+          <p className="text-xs text-hint-strong mt-0.5">{description}</p>
         )}
       </div>
       {children}
@@ -214,7 +214,7 @@ export function ProfileFormTagInput({
           onChange={(event) => setInputValue(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full pl-4 pr-10 py-3 rounded-xl bg-surface-muted border border-edge-faint text-sm text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-accent focus:border-edge-faint outline-none transition-all"
+          className="w-full pl-4 pr-10 py-3 rounded-xl bg-surface-muted border border-edge-faint text-sm text-foreground placeholder:text-hint-strong focus:ring-2 focus:ring-accent focus:border-edge-faint outline-none transition-all"
         />
         {inputValue.trim() && (
           <button

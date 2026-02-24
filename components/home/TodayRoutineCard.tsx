@@ -146,7 +146,7 @@ function RoutineColumnCard({
         <div className="flex-1 flex flex-col justify-center">
           <h3 className="text-base font-semibold text-foreground leading-snug">{fallback.title}</h3>
         </div>
-        <p className="text-xs text-muted-foreground/60">{fallback.subLabel}</p>
+        <p className="text-xs text-hint-strong">{fallback.subLabel}</p>
       </div>
     );
   }
@@ -184,7 +184,7 @@ function getWorkoutModel(event: RoutineEvent | null) {
   const maxIcons = 4;
   const visible = exercises.slice(0, maxIcons);
   const avatarItems = visible.map((exercise: WorkoutExercise) => (
-    <BarbellIcon key={exercise.id} size={20} weight="fill" className="text-primary" />
+    <BarbellIcon key={exercise.id} size={20} weight="fill" className="text-foreground" />
   ));
 
   return {
@@ -251,7 +251,7 @@ function WorkoutColumn({
     <div>
       <div className="flex items-center mb-3">
         <div className="flex items-center gap-1.5">
-          <BarbellIcon size={14} weight="fill" className="text-primary" />
+          <BarbellIcon size={14} weight="fill" className="text-foreground" />
           <span className="text-xs font-medium text-muted-foreground">운동</span>
         </div>
       </div>
@@ -262,7 +262,7 @@ function WorkoutColumn({
         <RoutineColumnCard
           title="쉬는 날"
           fallback={{
-            icon: <BedIcon size={40} weight="duotone" className="text-muted-foreground/60" />,
+            icon: <BedIcon size={40} weight="duotone" className="text-hint-strong" />,
             title: '쉬는 날',
             subLabel: `다음 운동 · ${formatKoreanDate(nextScheduledWorkout.date, {
               year: false,
@@ -278,7 +278,7 @@ function WorkoutColumn({
             emptyAction={{
               label: '오늘 운동 없음',
               subLabel: '기록 추가',
-              icon: <BarbellIcon size={40} weight="duotone" className="text-muted-foreground/60" />,
+              icon: <BarbellIcon size={40} weight="duotone" className="text-hint-strong" />,
               onClick: () => setIsDrawerOpen(true),
             }}
           />
@@ -323,7 +323,7 @@ function MealColumn({ event }: { event: RoutineEvent | null }) {
     <div>
       <div className="flex items-center mb-3">
         <div className="flex items-center gap-1.5">
-          <BowlFoodIcon size={14} weight="fill" className="text-primary" />
+          <BowlFoodIcon size={14} weight="fill" className="text-foreground" />
           <span className="text-xs font-medium text-muted-foreground">식단</span>
         </div>
       </div>
@@ -337,7 +337,7 @@ function MealColumn({ event }: { event: RoutineEvent | null }) {
             emptyAction={{
               label: '오늘 식단 없음',
               subLabel: '기록 추가',
-              icon: <BowlFoodIcon size={40} weight="duotone" className="text-muted-foreground/60" />,
+              icon: <BowlFoodIcon size={40} weight="duotone" className="text-hint-strong" />,
               onClick: () => setIsDrawerOpen(true),
             }}
           />

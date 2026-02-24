@@ -96,9 +96,9 @@ export default function BodyStatsTab() {
     return (
       <div>
         <div className="rounded-2xl bg-surface-secondary p-6 text-center">
-          <UserIcon size={28} weight="duotone" className="text-muted-foreground/40 mx-auto mb-2" />
+          <UserIcon size={28} weight="duotone" className="text-hint-faint mx-auto mb-2" />
           <p className="text-sm text-muted-foreground mb-1">인바디 기록이 없어요</p>
-          <p className="text-xs text-muted-foreground/60 mb-3">
+          <p className="text-xs text-hint-strong mb-3">
             체중, 골격근량, 체지방률을 기록해보세요
           </p>
           <AppLink
@@ -151,7 +151,7 @@ export default function BodyStatsTab() {
                 <p className="text-xs text-muted-foreground">{label}</p>
                 {change != null && change !== 0 && changes?.periodDays != null && (
                   <div className="flex items-center gap-1">
-                    <span className="text-xs text-muted-foreground/50">
+                    <span className="text-xs text-hint">
                       {chronological.length}회 측정
                     </span>
                     <ChangeIndicator value={change} positiveIsGood={positiveIsGood} unit={unit} />
@@ -165,7 +165,7 @@ export default function BodyStatsTab() {
                     <span className="text-sm font-normal text-muted-foreground ml-1">{unit}</span>
                   </>
                 ) : (
-                  <span className="text-muted-foreground/50">-</span>
+                  <span className="text-hint">-</span>
                 )}
               </p>
               {hasHistory && (

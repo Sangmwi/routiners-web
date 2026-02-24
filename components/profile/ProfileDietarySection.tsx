@@ -68,7 +68,7 @@ export default function ProfileDietarySection({
         {/* Hero: 아이콘 + 목표/유형 + chevron */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-surface-accent flex items-center justify-center shrink-0">
-            <BowlFoodIcon size={20} className="text-primary" weight="duotone" />
+            <BowlFoodIcon size={20} className="text-foreground" weight="duotone" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-foreground truncate">

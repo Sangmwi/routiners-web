@@ -340,7 +340,7 @@ export default function MiniSparkline({
           return (
             <span
               key={tick}
-              className="absolute left-1 -translate-y-1/2 text-[9px] leading-none text-muted-foreground/30 pointer-events-none"
+              className="absolute left-1 -translate-y-1/2 text-[9px] leading-none text-hint-faint pointer-events-none"
               style={{ top: `${yPct}%` }}
             >
               {formatValue(tick)}
@@ -469,22 +469,22 @@ export default function MiniSparkline({
       {/* 차트 하단 레이블 영역 */}
       {hasLabelsBelow && (
         <div className="flex items-center justify-between mt-2 gap-2">
-          <div className="text-[9px] leading-none text-muted-foreground/70">
+          <div className="text-[9px] leading-none text-hint-strong">
             {showMinMax && !showYAxis && minVal !== maxVal && (
               <span>최소 {formatValue(minVal)}</span>
             )}
             {dateRange && (
-              <span className={showMinMax && !showYAxis && minVal !== maxVal ? ' ml-1 text-muted-foreground/40' : ''}>
+              <span className={showMinMax && !showYAxis && minVal !== maxVal ? ' ml-1 text-hint-faint' : ''}>
                 {dateRange[0]}
               </span>
             )}
           </div>
-          <div className="text-[9px] leading-none text-muted-foreground/70 text-right">
+          <div className="text-[9px] leading-none text-hint-strong text-right">
             {showMinMax && !showYAxis && minVal !== maxVal && (
               <span>최대 {formatValue(maxVal)}</span>
             )}
             {dateRange && (
-              <span className={showMinMax && !showYAxis && minVal !== maxVal ? ' ml-1 text-muted-foreground/40' : ''}>
+              <span className={showMinMax && !showYAxis && minVal !== maxVal ? ' ml-1 text-hint-faint' : ''}>
                 {dateRange[1]}
               </span>
             )}
