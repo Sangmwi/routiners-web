@@ -138,7 +138,7 @@ export default function ChatMessageList({
       ref={scrollContainerRef}
       className="h-full overflow-y-auto overflow-x-hidden p-4"
     >
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4">
         {/* 상단 센티널 — 이전 메시지 로드 트리거 */}
         <div ref={topSentinelRef} className="shrink-0">
           {showLoadingSpinner && (
