@@ -86,7 +86,7 @@ function InBodyListItem({
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center justify-between px-4 py-4 hover:bg-muted/20 transition-colors text-left"
+      className="w-full flex items-center justify-between px-4 py-4 hover:bg-surface-secondary transition-colors text-left"
     >
       <div className="flex-1">
         <p className="font-medium text-card-foreground">{formattedDate}</p>
@@ -99,7 +99,7 @@ function InBodyListItem({
         </div>
         {record.inbodyScore && (
           <div className="mt-1">
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-surface-accent text-primary">
               점수 {record.inbodyScore}점
             </span>
           </div>

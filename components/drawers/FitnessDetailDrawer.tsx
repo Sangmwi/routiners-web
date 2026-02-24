@@ -54,7 +54,7 @@ export default function FitnessDetailDrawer({
       enableSwipe
       headerAction={
         profile.updatedAt ? (
-          <span className="text-[10px] text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">
+          <span className="text-[10px] text-muted-foreground bg-surface-muted px-2 py-0.5 rounded-full">
             {formatKoreanDate(profile.updatedAt)}
           </span>
         ) : undefined
@@ -63,7 +63,7 @@ export default function FitnessDetailDrawer({
       <ModalBody className="p-4 space-y-3">
         {/* 기본 정보 그룹 */}
         {infoItems.length > 0 && (
-          <div className="bg-muted/30 rounded-xl p-3">
+          <div className="bg-surface-hover rounded-xl p-3">
             <div className="grid grid-cols-2 gap-x-4 gap-y-3">
               {infoItems.map((item) => (
                 <div key={item.label}>
@@ -77,13 +77,13 @@ export default function FitnessDetailDrawer({
 
         {/* 집중 부위 - primary 틴트 */}
         {focusAreas && (
-          <div className="bg-muted/30 rounded-xl p-3">
+          <div className="bg-surface-hover rounded-xl p-3">
             <p className="text-xs font-medium text-muted-foreground mb-2">집중 부위</p>
             <div className="flex flex-wrap gap-1.5">
               {focusAreas.map((area) => (
                 <span
                   key={area}
-                  className="px-2.5 py-1 text-xs rounded-full bg-primary/10 text-primary font-medium"
+                  className="px-2.5 py-1 text-xs rounded-full bg-surface-accent text-primary font-medium"
                 >
                   {FOCUS_AREA_LABELS[area] || area}
                 </span>
@@ -94,7 +94,7 @@ export default function FitnessDetailDrawer({
 
         {/* 부상/제한사항 - warning 틴트 */}
         {injuries && (
-          <div className="bg-muted/30 rounded-xl p-3">
+          <div className="bg-surface-hover rounded-xl p-3">
             <p className="text-xs font-medium text-muted-foreground mb-2">부상/제한사항</p>
             <div className="flex flex-wrap gap-1.5">
               {injuries.map((injury) => (
@@ -111,7 +111,7 @@ export default function FitnessDetailDrawer({
 
         {/* 선호 운동 */}
         {preferences && (
-          <div className="bg-muted/30 rounded-xl p-3">
+          <div className="bg-surface-hover rounded-xl p-3">
             <p className="text-xs font-medium text-muted-foreground mb-2">선호 운동</p>
             <div className="flex flex-wrap gap-1.5">
               {preferences.map((pref) => (
@@ -128,7 +128,7 @@ export default function FitnessDetailDrawer({
 
         {/* 운동 제한 */}
         {restrictions && (
-          <div className="bg-muted/30 rounded-xl p-3">
+          <div className="bg-surface-hover rounded-xl p-3">
             <p className="text-xs font-medium text-muted-foreground mb-2">피하고 싶은 운동</p>
             <div className="flex flex-wrap gap-1.5">
               {restrictions.map((rest) => (

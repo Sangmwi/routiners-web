@@ -6,14 +6,6 @@ import { useRef, useState, useCallback, RefObject } from 'react';
 // Types
 // ============================================================================
 
-interface SwipeState {
-  startY: number | null;
-  deltaY: number;
-  isDragging: boolean;
-  lastY: number | null;
-  lastTime: number | null;
-}
-
 interface SwipeHandlers {
   onTouchStart: (e: React.TouchEvent) => void;
   onTouchMove: (e: React.TouchEvent) => void;
@@ -25,7 +17,6 @@ interface SwipeHandlers {
 }
 
 interface UseSwipeGestureReturn {
-  deltaY: number;
   isDragging: boolean;
   isSwipeClosing: boolean;
   isSnappingBack: boolean;
@@ -35,6 +26,8 @@ interface UseSwipeGestureReturn {
   contentHandlers: SwipeHandlers;
   /** 스크롤 콘텐츠 영역 ref */
   contentRef: RefObject<HTMLDivElement | null>;
+  /** 모달 컨테이너 ref — rAF로 transform을 직접 조작 */
+  modalRef: RefObject<HTMLDivElement | null>;
   reset: () => void;
 }
 
@@ -49,70 +42,119 @@ const ANIMATION_DURATION = 200;
 // ============================================================================
 
 /**
- * 스와이프 제스처 훅
- * 터치 + 마우스 드래그 통합 지원
+ * 스와이프 제스처 훅 (ref + rAF 기반)
+ *
+ * 드래그 중 React 리렌더 없이 rAF로 DOM transform을 직접 조작하여
+ * 120Hz 디스플레이에서도 부드러운 드래그 동작 보장
  *
  * - handlers: 드래그 핸들 전용 (항상 동작)
  * - contentHandlers + contentRef: 스크롤 콘텐츠 영역 (스크롤 최상단에서만 dismiss)
+ * - modalRef: 모달 컨테이너 div에 연결 (rAF transform 적용 대상)
  */
 export function useSwipeGesture(
   enabled: boolean,
   threshold: number,
   onSwipeClose: () => void
 ): UseSwipeGestureReturn {
-  const [state, setState] = useState<SwipeState>({
-    startY: null,
-    deltaY: 0,
-    isDragging: false,
-    lastY: null,
-    lastTime: null,
-  });
+  // 드래그 끝 결과만 state로 관리 (close/snapback 전환 애니메이션 트리거용)
+  const [isDragging, setIsDragging] = useState(false);
   const [isSwipeClosing, setIsSwipeClosing] = useState(false);
   const [isSnappingBack, setIsSnappingBack] = useState(false);
+
+  // 드래그 중 고빈도 값은 ref로 추적 (리렌더 없음)
+  const startYRef = useRef<number | null>(null);
+  const deltaYRef = useRef(0);
+  const lastYRef = useRef<number | null>(null);
+  const lastTimeRef = useRef<number | null>(null);
+  const isDraggingRef = useRef(false);
+  const rafRef = useRef(0);
+
   const contentRef = useRef<HTMLDivElement | null>(null);
-  // 콘텐츠 영역 드래그가 활성화되었는지 추적 (스크롤 최상단에서 시작한 경우에만)
+  const modalRef = useRef<HTMLDivElement | null>(null);
   const contentDraggingRef = useRef(false);
 
-  const handleDragStart = useCallback((clientY: number) => {
-    if (!enabled) return;
-    setState({ startY: clientY, deltaY: 0, isDragging: true, lastY: clientY, lastTime: Date.now() });
-  }, [enabled]);
-
-  const handleDragMove = useCallback((clientY: number) => {
-    setState((prev) => {
-      if (!prev.isDragging || prev.startY === null) return prev;
-      const delta = clientY - prev.startY;
-      return { ...prev, deltaY: delta > 0 ? delta : 0, lastY: clientY, lastTime: Date.now() };
+  const applyTransform = useCallback((deltaY: number) => {
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      if (modalRef.current) {
+        modalRef.current.style.transform = `translateY(${deltaY}px)`;
+        modalRef.current.style.transition = 'none';
+      }
     });
   }, []);
 
+  const handleDragStart = useCallback((clientY: number) => {
+    if (!enabled) return;
+    startYRef.current = clientY;
+    deltaYRef.current = 0;
+    lastYRef.current = clientY;
+    lastTimeRef.current = Date.now();
+    isDraggingRef.current = true;
+    setIsDragging(true);
+  }, [enabled]);
+
+  const handleDragMove = useCallback((clientY: number) => {
+    if (!isDraggingRef.current || startYRef.current === null) return;
+    const delta = clientY - startYRef.current;
+    const clampedDelta = delta > 0 ? delta : 0;
+    deltaYRef.current = clampedDelta;
+    lastYRef.current = clientY;
+    lastTimeRef.current = Date.now();
+    applyTransform(clampedDelta);
+  }, [applyTransform]);
+
   const handleDragEnd = useCallback(() => {
     contentDraggingRef.current = false;
-    setState((prev) => {
-      if (!prev.isDragging) return prev;
+    if (!isDraggingRef.current) return;
 
-      // 스와이프 속도 계산 (px/ms)
-      const now = Date.now();
-      const timeDiff = prev.lastTime ? now - prev.lastTime : 100;
-      const velocity = timeDiff > 0 ? prev.deltaY / Math.max(timeDiff, 50) : 0;
+    cancelAnimationFrame(rafRef.current);
+    isDraggingRef.current = false;
 
-      if (prev.deltaY > threshold || (prev.deltaY > 30 && velocity > 0.5)) {
-        setIsSwipeClosing(true);
-        onSwipeClose();
-      } else if (prev.deltaY > 0) {
-        setIsSnappingBack(true);
-        setTimeout(() => setIsSnappingBack(false), ANIMATION_DURATION);
+    const deltaY = deltaYRef.current;
+    const now = Date.now();
+    const timeDiff = lastTimeRef.current ? now - lastTimeRef.current : 100;
+    const velocity = timeDiff > 0 ? deltaY / Math.max(timeDiff, 50) : 0;
+
+    if (deltaY > threshold || (deltaY > 30 && velocity > 0.5)) {
+      // 스와이프 닫기
+      setIsSwipeClosing(true);
+      setIsDragging(false);
+      onSwipeClose();
+    } else if (deltaY > 0) {
+      // 스냅백: CSS transition으로 부드러운 복귀
+      if (modalRef.current) {
+        modalRef.current.style.transform = 'translateY(0)';
+        modalRef.current.style.transition = `transform ${ANIMATION_DURATION}ms ease-out`;
       }
+      setIsSnappingBack(true);
+      setIsDragging(false);
+      setTimeout(() => setIsSnappingBack(false), ANIMATION_DURATION);
+    } else {
+      setIsDragging(false);
+    }
 
-      return { startY: null, deltaY: 0, isDragging: false, lastY: null, lastTime: null };
-    });
+    // ref 초기화
+    startYRef.current = null;
+    deltaYRef.current = 0;
+    lastYRef.current = null;
+    lastTimeRef.current = null;
   }, [threshold, onSwipeClose]);
 
   const reset = useCallback(() => {
+    cancelAnimationFrame(rafRef.current);
     contentDraggingRef.current = false;
-    setState({ startY: null, deltaY: 0, isDragging: false, lastY: null, lastTime: null });
+    isDraggingRef.current = false;
+    startYRef.current = null;
+    deltaYRef.current = 0;
+    lastYRef.current = null;
+    lastTimeRef.current = null;
+    setIsDragging(false);
     setIsSwipeClosing(false);
     setIsSnappingBack(false);
+    if (modalRef.current) {
+      modalRef.current.style.transform = '';
+      modalRef.current.style.transition = '';
+    }
   }, []);
 
   // 드래그 핸들 전용 핸들러 (항상 동작)
@@ -124,8 +166,7 @@ export function useSwipeGesture(
     onMouseMove: (e: React.MouseEvent) => handleDragMove(e.clientY),
     onMouseUp: handleDragEnd,
     onMouseLeave: () => {
-      // 드래그 중 마우스 이탈 시 dragEnd로 처리 (스냅백/닫기 판정 포함)
-      if (state.isDragging) handleDragEnd();
+      if (isDraggingRef.current) handleDragEnd();
     },
   };
 
@@ -142,8 +183,7 @@ export function useSwipeGesture(
     onTouchMove: (e: React.TouchEvent) => {
       if (!contentDraggingRef.current) return;
       handleDragMove(e.touches[0].clientY);
-      // 드래그 중이면 스크롤 방지
-      if (state.deltaY > 0) {
+      if (deltaYRef.current > 0) {
         e.preventDefault();
       }
     },
@@ -168,19 +208,18 @@ export function useSwipeGesture(
       handleDragEnd();
     },
     onMouseLeave: () => {
-      // 콘텐츠 드래그 중 마우스 이탈 시 dragEnd로 처리
-      if (contentDraggingRef.current && state.isDragging) handleDragEnd();
+      if (contentDraggingRef.current && isDraggingRef.current) handleDragEnd();
     },
   };
 
   return {
-    deltaY: state.deltaY,
-    isDragging: state.isDragging,
+    isDragging,
     isSwipeClosing,
     isSnappingBack,
     handlers,
     contentHandlers,
     contentRef,
+    modalRef,
     reset,
   };
 }

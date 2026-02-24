@@ -115,7 +115,7 @@ export default function InBodyManageModal({
                   {records.map((record) => (
                     <div
                       key={record.id}
-                      className="flex items-center justify-between px-4 py-4 hover:bg-muted/20 transition-colors cursor-pointer"
+                      className="flex items-center justify-between px-4 py-4 hover:bg-surface-secondary transition-colors cursor-pointer"
                       onClick={() => handleRecordClick(record)}
                     >
                       <div className="flex-1">
@@ -131,7 +131,7 @@ export default function InBodyManageModal({
                         </div>
                         {record.inbodyScore && (
                           <div className="mt-1">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-surface-accent text-primary">
                               점수 {record.inbodyScore}점
                             </span>
                           </div>
@@ -142,7 +142,7 @@ export default function InBodyManageModal({
                         <button
                           type="button"
                           onClick={(e) => handleDeleteClick(e, record)}
-                          className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                          className="p-2 text-muted-foreground hover:text-destructive hover:bg-surface-danger rounded-lg transition-colors"
                           aria-label="삭제"
                         >
                           <DeleteIcon size="sm" />

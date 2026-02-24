@@ -24,7 +24,7 @@ export default function FormSelect({ label, error, options, ...props }: FormSele
       <div className="relative">
         <select
           {...props}
-          className="w-full px-4 py-3 rounded-xl bg-muted/20 border border-border text-sm text-card-foreground appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full px-4 py-3 rounded-xl bg-surface-secondary border border-border text-sm text-card-foreground appearance-none focus:outline-none focus:ring-2 ring-focus focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {options.map((option) => (
             <option key={option.value} value={option.value}>

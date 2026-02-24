@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, ReactNode } from 'react';
+import { useEffect, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { CloseIcon } from '@/components/ui/icons';
 import {
@@ -96,13 +96,14 @@ function getBackdropAnimationClass(
   return 'animate-in fade-in duration-200';
 }
 
+/**
+ * 스와이프 스타일 계산
+ * 드래그 중 transform은 useSwipeGesture가 rAF로 직접 DOM 조작하므로 여기서 처리하지 않음
+ */
 function getSwipeTransform(
   isSwipeClosing: boolean,
-  isSnappingBack: boolean,
-  isDragging: boolean,
-  deltaY: number,
+  isAnimating: boolean,
   hasOpened: boolean,
-  isAnimating: boolean
 ): React.CSSProperties | undefined {
   // 스와이프로 닫히는 중
   if (isSwipeClosing) {
@@ -112,7 +113,7 @@ function getSwipeTransform(
     };
   }
 
-  // backdrop 클릭/ESC 등으로 닫히는 중 (inline transition으로 처리)
+  // backdrop 클릭/ESC 등으로 닫히는 중
   if (isAnimating) {
     return {
       transform: 'translateY(100%)',
@@ -121,25 +122,7 @@ function getSwipeTransform(
     };
   }
 
-  // 임계치 미달로 복귀 중 (스냅백 애니메이션)
-  if (isSnappingBack) {
-    return {
-      transform: 'translateY(0)',
-      transition: `transform ${ANIMATION_DURATION}ms ease-out`,
-      animation: 'none',
-    };
-  }
-
-  // 드래그 중
-  if (isDragging && deltaY > 0) {
-    return {
-      transform: `translateY(${deltaY}px)`,
-      transition: 'none',
-      animation: 'none',
-    };
-  }
-
-  // 이미 열린 상태 또는 드래그 경험 있으면 위치 고정 + 애니메이션 명시적 비활성화
+  // 이미 열린 상태: 위치 고정 + 애니메이션 비활성화
   if (hasOpened) {
     return {
       transform: 'translateY(0)',
@@ -174,7 +157,6 @@ export default function Modal({
   onOpened,
 }: ModalProps) {
   const isBottom = position === 'bottom';
-  const modalRef = useRef<HTMLDivElement>(null);
 
   // 모달 상태 관리
   const { isVisible, isAnimating, hasOpened, markOpened, executeClose } = useModalState(
@@ -249,7 +231,7 @@ export default function Modal({
   );
 
   const swipeStyle = isBottom
-    ? getSwipeTransform(swipe.isSwipeClosing, swipe.isSnappingBack, swipe.isDragging, swipe.deltaY, hasOpened, isAnimating)
+    ? getSwipeTransform(swipe.isSwipeClosing, isAnimating, hasOpened)
     : undefined;
 
   return createPortal(
@@ -267,7 +249,7 @@ export default function Modal({
 
       {/* Modal Content */}
       <div
-        ref={modalRef}
+        ref={swipe.modalRef}
         className={`relative w-full bg-card shadow-xl ${heightClass} flex flex-col ${modalAnimationClass} ${isBottom ? 'sm:max-w-md' : SIZE_CLASSES[size]} ${className}`}
         style={swipeStyle}
         onClick={(e) => e.stopPropagation()}
@@ -286,7 +268,7 @@ export default function Modal({
 
         {/* Header — title이 있을 때만 렌더 (bottom sheet에서 title 없으면 고아 닫기버튼 방지) */}
         {title && (
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-edge-subtle">
             {title && (
               <h2
                 id="modal-title"
@@ -300,7 +282,7 @@ export default function Modal({
               {showCloseButton && (
                 <button
                   onClick={executeClose}
-                  className="p-2 -mr-2 rounded-full hover:bg-muted/50 active:bg-muted/80 transition-colors"
+                  className="p-2 -mr-2 rounded-full hover:bg-surface-muted active:bg-muted/80 transition-colors"
                   aria-label="닫기"
                 >
                   <CloseIcon size="md" className="text-muted-foreground" />
@@ -339,7 +321,7 @@ interface ModalFooterProps {
 export function ModalFooter({ children, className = '' }: ModalFooterProps) {
   return (
     <div
-      className={`flex gap-3 px-4 py-4 border-t border-border/50 bg-card ${className}`}
+      className={`flex gap-3 px-4 py-4 border-t border-edge-subtle bg-card ${className}`}
     >
       {children}
     </div>

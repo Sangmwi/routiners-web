@@ -62,7 +62,7 @@ export default function CommentInput({
   const hasContent = content.trim().length > 0;
 
   return (
-    <div className="border-t border-border/30 bg-card">
+    <div className="border-t border-edge-faint bg-card">
       <div className="px-4 py-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))]">
         {/* 답글 모드 표시 */}
         {replyingTo && (
@@ -89,7 +89,7 @@ export default function CommentInput({
             onKeyDown={handleKeyDown}
             placeholder="댓글을 입력하세요..."
             maxLength={500}
-            className="w-full rounded-full bg-muted/20 border border-border/50 pl-4 pr-11 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            className="w-full rounded-full bg-surface-secondary border border-edge-subtle pl-4 pr-11 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-focus focus:border-primary"
           />
           <button
             onClick={handleSubmit}

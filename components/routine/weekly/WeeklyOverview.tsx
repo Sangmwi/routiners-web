@@ -36,7 +36,7 @@ export function WeeklyOverview({ stats }: WeeklyOverviewProps) {
     return (
       <section>
         <h2 className="text-xl font-bold text-foreground mb-4">이번 주</h2>
-        <div className="rounded-2xl bg-muted/20 p-4 text-center">
+        <div className="rounded-2xl bg-surface-secondary p-4 text-center">
           <SparkleIcon size={24} weight="duotone" className="text-muted-foreground mx-auto mb-2" />
           <p className="text-sm text-muted-foreground">
             AI 상담으로 루틴을 생성해보세요
@@ -119,7 +119,7 @@ interface DayGridProps {
 
 function DayGrid({ dailyStats, today, statusKey }: DayGridProps) {
   return (
-    <div className="rounded-xl bg-muted/20 px-2.5 py-2">
+    <div className="rounded-xl bg-surface-secondary px-2.5 py-2">
       <div className="grid grid-cols-7 gap-1">
         {dailyStats.map((day) => {
           const isToday = day.date === today;
@@ -139,7 +139,7 @@ function DayGrid({ dailyStats, today, statusKey }: DayGridProps) {
             </>
           );
           const className = `flex flex-col items-center gap-2 py-2.5 rounded-lg ${
-            isToday ? 'bg-primary/10' : ''
+            isToday ? 'bg-surface-accent' : ''
           }`;
 
           return hasEvent ? (

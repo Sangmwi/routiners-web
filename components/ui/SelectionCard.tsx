@@ -44,8 +44,8 @@ export function SelectionCard({
         rounded-xl border-2 transition-all duration-200
         ${
           selected
-            ? 'border-primary bg-primary/10 shadow-sm'
-            : 'border-border bg-card hover:border-primary/50 hover:bg-muted/50'
+            ? 'border-primary bg-surface-accent shadow-sm'
+            : 'border-border bg-card hover:border-primary/50 hover:bg-surface-muted'
         }
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-[0.98]'}
       `}
@@ -57,7 +57,7 @@ export function SelectionCard({
           className={`
           flex-shrink-0 w-10 h-10 rounded-full
           flex items-center justify-center
-          ${selected ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'}
+          ${selected ? 'bg-surface-accent text-primary' : 'bg-muted text-muted-foreground'}
         `}
         >
           {icon}

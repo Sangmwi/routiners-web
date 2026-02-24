@@ -40,7 +40,7 @@ export default function InBodySection({ summary, history, height }: InBodySectio
         }
       />
 
-      <div className="bg-muted/20 rounded-2xl p-4 mt-3">
+      <div className="bg-surface-secondary rounded-2xl p-4 mt-3">
         {!hasData ? (
           <div className="flex flex-col items-center gap-1.5 py-3">
             <p className="text-xs text-muted-foreground">인바디 기록이 없어요</p>

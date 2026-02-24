@@ -104,7 +104,7 @@ function RoutineColumnCard({
         <div className="flex flex-col gap-1.5 mt-3">
           <p className="text-xs text-muted-foreground text-left">{summary}</p>
           {progressPercent != null && (
-            <div className="h-1.5 bg-muted/50 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-surface-muted rounded-full overflow-hidden">
               <div
                 className="h-full bg-primary rounded-full transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
@@ -127,7 +127,7 @@ function RoutineColumnCard({
       <button
         type="button"
         onClick={emptyAction.onClick}
-        className="w-full bg-muted/20 rounded-xl p-4 flex flex-col items-center justify-center gap-2 min-h-[200px] active:bg-muted/30 transition-colors"
+        className="w-full bg-surface-secondary rounded-xl p-4 flex flex-col items-center justify-center gap-2 min-h-[200px] active:bg-surface-hover transition-colors"
       >
         {emptyAction.icon}
         <p className="text-sm font-medium text-muted-foreground">{emptyAction.label}</p>
@@ -141,7 +141,7 @@ function RoutineColumnCard({
 
   if (fallback) {
     return (
-      <div className="w-full bg-muted/20 rounded-xl p-4 flex flex-col min-h-[200px]">
+      <div className="w-full bg-surface-secondary rounded-xl p-4 flex flex-col min-h-[200px]">
         {fallback.icon}
         <div className="flex-1 flex flex-col justify-center">
           <h3 className="text-base font-semibold text-foreground leading-snug">{fallback.title}</h3>
@@ -155,7 +155,7 @@ function RoutineColumnCard({
     return (
       <AppLink
         href={href}
-        className="relative w-full bg-muted/20 rounded-xl p-4 flex flex-col active:bg-muted/30 transition-colors min-h-[200px]"
+        className="relative w-full bg-surface-secondary rounded-xl p-4 flex flex-col active:bg-surface-hover transition-colors min-h-[200px]"
       >
         {content}
       </AppLink>
@@ -163,7 +163,7 @@ function RoutineColumnCard({
   }
 
   return (
-    <div className="relative w-full bg-muted/20 rounded-xl p-4 flex flex-col min-h-[200px]">
+    <div className="relative w-full bg-surface-secondary rounded-xl p-4 flex flex-col min-h-[200px]">
       {content}
     </div>
   );

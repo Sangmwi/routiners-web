@@ -137,7 +137,7 @@ export default function DietaryContent() {
   return (
     <>
       {/* 프로그레스바 */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm px-4 py-2 -mx-4 mb-2">
+      <div className="sticky top-0 z-10 bg-surface-glass backdrop-blur-sm px-4 py-2 -mx-4 mb-2">
         <div className="flex items-center gap-2">
           <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
             <div
@@ -153,7 +153,7 @@ export default function DietaryContent() {
 
       <div className="space-y-4 pb-24">
         {/* 그룹 1: 목표 & 유형 */}
-        <div className="bg-card rounded-2xl p-4 space-y-5 border border-border/30">
+        <div className="bg-card rounded-2xl p-4 space-y-5 border border-edge-faint">
           <Section title="식단 목표" description="어떤 목표로 식단을 관리하고 있나요?">
             <div className="flex flex-wrap gap-2">
               {DIETARY_GOALS.map((goal) => (
@@ -173,7 +173,7 @@ export default function DietaryContent() {
             </div>
           </Section>
 
-          <div className="border-t border-border/20" />
+          <div className="border-t border-edge-divider" />
 
           <Section title="식단 유형" description="선호하는 식단 유형을 선택해 주세요.">
             <div className="flex flex-wrap gap-2">
@@ -196,7 +196,7 @@ export default function DietaryContent() {
         </div>
 
         {/* 그룹 2: 식사 횟수 & 예산 */}
-        <div className="bg-card rounded-2xl p-4 space-y-5 border border-border/30">
+        <div className="bg-card rounded-2xl p-4 space-y-5 border border-edge-faint">
           <Section title="하루 식사 횟수" description="하루에 몇 끼를 드시나요?">
             <div className="flex flex-wrap gap-2">
               {MEALS_PER_DAY_OPTIONS.map((count) => (
@@ -217,7 +217,7 @@ export default function DietaryContent() {
             </div>
           </Section>
 
-          <div className="border-t border-border/20" />
+          <div className="border-t border-edge-divider" />
 
           <Section title="월 식단 예산" description="PX, 외식 등을 포함한 월 식단 예산" optional>
             <div className="flex items-center gap-2">
@@ -231,7 +231,7 @@ export default function DietaryContent() {
                   }))
                 }
                 placeholder="예: 100000"
-                className="flex-1 min-w-0 px-4 py-3 rounded-xl bg-muted/50 border border-border/30 text-sm text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/40 focus:border-primary/30 outline-none transition-all"
+                className="flex-1 min-w-0 px-4 py-3 rounded-xl bg-surface-muted border border-edge-faint text-sm text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/40 focus:border-primary/30 outline-none transition-all"
               />
               <span className="text-sm text-muted-foreground">원</span>
             </div>
@@ -239,7 +239,7 @@ export default function DietaryContent() {
         </div>
 
         {/* 그룹 3: 제한사항 & 출처 & 식습관 */}
-        <div className="bg-card rounded-2xl p-4 space-y-5 border border-border/30">
+        <div className="bg-card rounded-2xl p-4 space-y-5 border border-edge-faint">
           <Section
             title="음식 제한사항"
             description="알레르기나 먹지 않는 음식이 있다면 선택해 주세요."
@@ -256,7 +256,7 @@ export default function DietaryContent() {
             </div>
           </Section>
 
-          <div className="border-t border-border/20" />
+          <div className="border-t border-edge-divider" />
 
           <Section
             title="이용 가능한 식단 출처"
@@ -274,7 +274,7 @@ export default function DietaryContent() {
             </div>
           </Section>
 
-          <div className="border-t border-border/20" />
+          <div className="border-t border-edge-divider" />
 
           <Section title="식습관" description="해당하는 식습관을 선택해 주세요.">
             <div className="flex flex-wrap gap-2">
@@ -291,7 +291,7 @@ export default function DietaryContent() {
         </div>
 
         {/* 그룹 4: 자유 입력 */}
-        <div className="bg-card rounded-2xl p-4 space-y-5 border border-border/30">
+        <div className="bg-card rounded-2xl p-4 space-y-5 border border-edge-faint">
           <Section title="식단 선호사항" description="식단에 대한 추가 요청사항을 입력해 주세요." optional>
             <TagInput
               value={formData.preferences ?? []}
@@ -304,7 +304,7 @@ export default function DietaryContent() {
         </div>
 
         {saveError && (
-          <div className="p-4 rounded-xl bg-destructive/10 text-destructive text-sm text-center">
+          <div className="p-4 rounded-xl bg-surface-danger text-destructive text-sm text-center">
             {saveError}
           </div>
         )}

@@ -38,10 +38,15 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>({
   const [hasDragged, setHasDragged] = useState(false);
 
   const dragStateRef = useRef({ startX: 0, scrollLeft: 0 });
+  const isDraggingRef = useRef(false);
+  const hasDraggedRef = useRef(false);
+  const rafRef = useRef(0);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!enabled || !containerRef.current) return;
 
+    isDraggingRef.current = true;
+    hasDraggedRef.current = false;
     setIsDragging(true);
     setHasDragged(false);
     dragStateRef.current = {
@@ -52,23 +57,32 @@ export function useDragScroll<T extends HTMLElement = HTMLDivElement>({
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !containerRef.current) return;
+    if (!isDraggingRef.current || !containerRef.current) return;
 
     e.preventDefault();
     const x = e.pageX - containerRef.current.offsetLeft;
     const walk = (x - dragStateRef.current.startX) * scrollSpeed;
 
-    if (Math.abs(walk) > dragThreshold) {
+    if (!hasDraggedRef.current && Math.abs(walk) > dragThreshold) {
+      hasDraggedRef.current = true;
       setHasDragged(true);
     }
 
-    containerRef.current.scrollLeft = dragStateRef.current.scrollLeft - walk;
+    const targetScrollLeft = dragStateRef.current.scrollLeft - walk;
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      if (containerRef.current) {
+        containerRef.current.scrollLeft = targetScrollLeft;
+      }
+    });
   };
 
   const handleMouseUpOrLeave = () => {
-    if (isDragging && snap?.enabled && containerRef.current && hasDragged) {
+    cancelAnimationFrame(rafRef.current);
+    if (isDraggingRef.current && snap?.enabled && containerRef.current && hasDraggedRef.current) {
       snapToNearest(containerRef.current, snap.itemSelector);
     }
+    isDraggingRef.current = false;
     setIsDragging(false);
   };
 

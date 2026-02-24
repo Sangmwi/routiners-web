@@ -14,7 +14,7 @@ export default function ProfileLocationsSection({ locations }: ProfileLocationsS
     <div className="space-y-3">
       <SectionHeader title="자주 가는 운동 장소" />
 
-      <div className="bg-muted/20 rounded-2xl p-4">
+      <div className="bg-surface-secondary rounded-2xl p-4">
         {locations && locations.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {locations.map((location, index) => (

@@ -58,7 +58,7 @@ export function SpecialtyStep({
           {/* Question */}
           <div className="space-y-2">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full bg-surface-accent flex items-center justify-center">
                 <BriefcaseIcon size={24} className="text-primary" />
               </div>
             </div>
@@ -81,7 +81,7 @@ export function SpecialtyStep({
                 rounded-xl border-2 transition-all duration-200
                 ${
                   specialty
-                    ? 'border-primary bg-primary/10'
+                    ? 'border-primary bg-surface-accent'
                     : 'border-border bg-card hover:border-primary/50'
                 }
               `}
@@ -150,7 +150,7 @@ export function SpecialtyStep({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="병과명으로 검색"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-focus focus:border-primary"
                 autoFocus
               />
             </div>
@@ -172,8 +172,8 @@ export function SpecialtyStep({
                     w-full px-4 py-3 rounded-xl text-left transition-all
                     ${
                       s === specialty
-                        ? 'bg-primary/10 border-2 border-primary'
-                        : 'bg-muted/20 border-2 border-transparent hover:bg-muted/50'
+                        ? 'bg-surface-accent border-2 border-primary'
+                        : 'bg-surface-secondary border-2 border-transparent hover:bg-surface-muted'
                     }
                   `}
                 >

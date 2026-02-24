@@ -67,7 +67,7 @@ export default function PeriodTabs({
         <button
           type="button"
           onClick={onPrev}
-          className="p-1.5 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground"
+          className="p-1.5 rounded-lg hover:bg-surface-muted transition-colors text-muted-foreground"
         >
           <CaretLeftIcon size={18} weight="bold" />
         </button>
@@ -80,7 +80,7 @@ export default function PeriodTabs({
           disabled={!canGoNext}
           className={`p-1.5 rounded-lg transition-colors ${
             canGoNext
-              ? 'hover:bg-muted/50 text-muted-foreground'
+              ? 'hover:bg-surface-muted text-muted-foreground'
               : 'text-muted-foreground/30 cursor-not-allowed'
           }`}
         >

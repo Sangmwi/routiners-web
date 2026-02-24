@@ -31,8 +31,8 @@ export function ProfileFormSelectOption<T extends string | number>({
       aria-pressed={selected}
       className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-left transition-all active:scale-[0.97] ${
         selected
-          ? 'bg-primary/10 ring-1.5 ring-primary/50'
-          : 'bg-muted/50 text-muted-foreground hover:bg-muted/70'
+          ? 'bg-surface-accent ring-1.5 ring-primary/50'
+          : 'bg-surface-muted text-muted-foreground hover:bg-muted/70'
       }`}
     >
       {IconComponent && (
@@ -84,7 +84,7 @@ export function ProfileFormNumberOption({
       className={`${baseClass} text-sm font-semibold transition-all active:scale-95 ${
         selected
           ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25'
-          : 'bg-muted/50 text-muted-foreground hover:bg-muted/70'
+          : 'bg-surface-muted text-muted-foreground hover:bg-muted/70'
       }`}
     >
       {label}
@@ -114,8 +114,8 @@ export function ProfileFormChipOption({
       aria-pressed={selected}
       className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium transition-all active:scale-95 ${
         selected
-          ? 'bg-primary/15 text-primary ring-1 ring-primary/40'
-          : 'bg-muted/50 text-muted-foreground hover:bg-muted/70'
+          ? 'bg-surface-accent-strong text-primary ring-1 ring-primary/40'
+          : 'bg-surface-muted text-muted-foreground hover:bg-muted/70'
       }`}
     >
       <span
@@ -214,13 +214,13 @@ export function ProfileFormTagInput({
           onChange={(event) => setInputValue(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full pl-4 pr-10 py-3 rounded-xl bg-muted/50 border border-border/30 text-sm text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/40 focus:border-primary/30 outline-none transition-all"
+          className="w-full pl-4 pr-10 py-3 rounded-xl bg-surface-muted border border-edge-faint text-sm text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/40 focus:border-primary/30 outline-none transition-all"
         />
         {inputValue.trim() && (
           <button
             type="button"
             onClick={addTag}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center transition-colors hover:bg-primary/20"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg bg-surface-accent flex items-center justify-center transition-colors hover:bg-primary/20"
           >
             <PlusIcon size={14} className="text-primary" weight="bold" />
           </button>

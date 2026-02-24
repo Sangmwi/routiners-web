@@ -11,7 +11,7 @@ export default function ProfileBioSection({ bio }: ProfileBioSectionProps) {
   return (
     <div className="space-y-3">
       <SectionHeader title="소개" />
-      <div className="bg-muted/20 rounded-2xl p-4">
+      <div className="bg-surface-secondary rounded-2xl p-4">
         {bio ? (
           <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">
             {bio}

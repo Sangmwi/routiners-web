@@ -125,7 +125,7 @@ function EmptySlot({
         type="button"
         onClick={onClick}
         disabled={disabled}
-        className="w-full h-full bg-muted/50 border-2 border-dashed border-border rounded-2xl hover:border-primary hover:bg-muted/80 transition-colors flex flex-col items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full h-full bg-surface-muted border-2 border-dashed border-border rounded-2xl hover:border-primary hover:bg-muted/80 transition-colors flex flex-col items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <PlusIcon size={32} className="text-muted-foreground" />
         <span className="text-sm text-muted-foreground">사진 추가</span>

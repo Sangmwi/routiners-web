@@ -30,7 +30,7 @@ export default function ConfirmationStep({
         <div className="space-y-6">
           {/* Icon + Title */}
           <div className="space-y-4">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-surface-accent flex items-center justify-center">
               <CheckCircleIcon size={24} className="text-primary" />
             </div>
             <div className="space-y-2">
@@ -40,7 +40,7 @@ export default function ConfirmationStep({
           </div>
 
           {/* Info Summary */}
-          <div className="space-y-3 rounded-2xl bg-muted/20 p-5 border border-border">
+          <div className="space-y-3 rounded-2xl bg-surface-secondary p-5 border border-border">
             <InfoRow label="닉네임" value={militaryData.nickname} />
             <InfoRow label="입대 시기" value={formatDate(militaryData.enlistmentMonth)} />
             <InfoRow label="계급" value={militaryData.rank.replace('-', ' ')} />
@@ -49,7 +49,7 @@ export default function ConfirmationStep({
           </div>
 
           {/* Privacy Notice */}
-          <div className="rounded-xl bg-primary/10 p-4">
+          <div className="rounded-xl bg-surface-accent p-4">
             <p className="text-xs text-muted-foreground">
               <span className="font-semibold text-foreground">본인 확인 완료</span>
               <br />
@@ -82,7 +82,7 @@ export default function ConfirmationStep({
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between border-b border-border/50 pb-3 last:border-b-0 last:pb-0">
+    <div className="flex items-center justify-between border-b border-edge-subtle pb-3 last:border-b-0 last:pb-0">
       <span className="text-sm text-muted-foreground">{label}</span>
       <span className="text-sm font-semibold text-foreground">{value}</span>
     </div>

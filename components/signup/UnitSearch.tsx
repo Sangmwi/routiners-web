@@ -48,7 +48,7 @@ export default function UnitSearch({ units, selectedUnit, onSelect, error }: Uni
       </label>
 
       {selectedUnit ? (
-        <div className="flex items-center justify-between rounded-xl border border-border bg-primary/10 px-4 py-3">
+        <div className="flex items-center justify-between rounded-xl border border-border bg-surface-accent px-4 py-3">
           <div>
             <p className="text-sm font-medium text-foreground">{selectedUnit.name}</p>
             {selectedUnit.location && <p className="text-xs text-muted-foreground">{selectedUnit.location}</p>}
@@ -77,7 +77,7 @@ export default function UnitSearch({ units, selectedUnit, onSelect, error }: Uni
               className={`w-full rounded-xl border py-3 pl-10 pr-4 text-sm transition-all duration-200 focus:outline-none focus:ring-2 bg-background text-foreground ${
                 error
                   ? 'border-destructive/50 focus:border-destructive focus:ring-destructive/20'
-                  : 'border-border focus:border-primary focus:ring-primary/20'
+                  : 'border-border focus:border-primary focus:ring-focus'
               }`}
             />
           </div>
@@ -91,7 +91,7 @@ export default function UnitSearch({ units, selectedUnit, onSelect, error }: Uni
                     key={unit.id}
                     type="button"
                     onClick={() => handleSelect(unit)}
-                    className="w-full border-b border-border/50 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-primary/10"
+                    className="w-full border-b border-edge-subtle px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-surface-accent"
                   >
                     <p className="text-sm font-medium text-foreground">{unit.name}</p>
                     {unit.location && <p className="text-xs text-muted-foreground">{unit.location}</p>}

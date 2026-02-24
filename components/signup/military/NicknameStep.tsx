@@ -184,7 +184,7 @@ export function NicknameStep({
           {/* Question */}
           <div className="space-y-2">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full bg-surface-accent flex items-center justify-center">
                 <UserIcon size={24} className="text-primary" />
               </div>
             </div>
@@ -212,7 +212,7 @@ export function NicknameStep({
                     w-full px-4 py-4 text-lg
                     rounded-xl border-2 transition-all duration-200
                     bg-card text-foreground
-                    focus:outline-none focus:ring-2 focus:ring-primary/20
+                    focus:outline-none focus:ring-2 focus:ring-focus
                     ${getBorderClass()}
                   `}
                   autoComplete="off"
@@ -246,7 +246,7 @@ export function NicknameStep({
                     key={suggestion}
                     type="button"
                     onClick={() => handleSuggestionClick(suggestion)}
-                    className="px-3 py-1.5 rounded-full bg-muted/50 text-sm text-foreground hover:bg-muted transition-colors"
+                    className="px-3 py-1.5 rounded-full bg-surface-muted text-sm text-foreground hover:bg-muted transition-colors"
                   >
                     {suggestion}
                   </button>

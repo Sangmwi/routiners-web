@@ -132,7 +132,7 @@ export default function ImageUploader({
             type="button"
             onClick={() => setIsDrawerOpen(true)}
             disabled={isProcessing}
-            className="aspect-square rounded-xl border-2 border-dashed border-border/50 flex flex-col items-center justify-center gap-1 hover:bg-muted/20 transition-colors disabled:opacity-50"
+            className="aspect-square rounded-xl border-2 border-dashed border-edge-subtle flex flex-col items-center justify-center gap-1 hover:bg-surface-secondary transition-colors disabled:opacity-50"
           >
             <CameraIcon size={24} className="text-muted-foreground" />
             <span className="text-xs text-muted-foreground">추가</span>

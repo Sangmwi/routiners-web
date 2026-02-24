@@ -28,7 +28,7 @@ const SIZE = {
 
 const STATE = {
   active: 'bg-primary text-primary-foreground',
-  inactive: 'bg-muted/50 text-muted-foreground hover:bg-muted',
+  inactive: 'bg-surface-muted text-muted-foreground hover:bg-muted',
 } as const;
 
 // ============================================================================

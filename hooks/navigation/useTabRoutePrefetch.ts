@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { BOTTOM_NAV } from '@/lib/config/theme';
+import { useDocumentEventListener } from '@/hooks/common/useEventListener';
 
 const TAB_ROUTES = BOTTOM_NAV.items.map((item) => item.href);
 const PREFETCH_INTERVAL_MS = 4 * 60 * 1000;
@@ -42,16 +43,9 @@ export function useTabRoutePrefetch() {
     };
   }, [router]);
 
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        prefetchAllTabs(router);
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [router]);
+  useDocumentEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      prefetchAllTabs(router);
+    }
+  });
 }

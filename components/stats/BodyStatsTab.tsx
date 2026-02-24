@@ -59,7 +59,7 @@ export default function BodyStatsTab() {
   if (!hasData) {
     return (
       <div className="mt-6">
-        <div className="rounded-2xl bg-muted/20 p-6 text-center">
+        <div className="rounded-2xl bg-surface-secondary p-6 text-center">
           <UserIcon size={28} weight="duotone" className="text-muted-foreground/40 mx-auto mb-2" />
           <p className="text-sm text-muted-foreground mb-1">인바디 기록이 없어요</p>
           <p className="text-xs text-muted-foreground/60 mb-3">

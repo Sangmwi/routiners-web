@@ -144,7 +144,7 @@ function ErrorFallback({
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6">
       <div className="w-full max-w-sm text-center">
         {/* 에러 아이콘 */}
-        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-destructive/10">
+        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-surface-danger">
           <WarningIcon size={40} className="text-destructive" />
         </div>
 
@@ -160,7 +160,7 @@ function ErrorFallback({
 
         {/* 개발 환경: 상세 에러 정보 */}
         {isDev && error && (
-          <details className="mt-4 rounded-lg bg-muted/50 p-3 text-left">
+          <details className="mt-4 rounded-lg bg-surface-muted p-3 text-left">
             <summary className="cursor-pointer text-xs font-medium text-muted-foreground">
               개발자 정보 (Dev Only)
             </summary>

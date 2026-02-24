@@ -63,7 +63,7 @@ export default function SheetFooterAction({
       : '';
 
   return (
-    <div className="p-4 bg-card border-t border-border/50 pb-safe">
+    <div className="p-4 bg-card border-t border-edge-subtle pb-safe">
       <Button
         type="button"
         variant="primary"

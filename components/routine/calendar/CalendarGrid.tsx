@@ -143,7 +143,7 @@ export default function CalendarGrid({
               className={`
                 relative aspect-[5/7] flex flex-col items-center rounded-lg transition-all
                 ${dayInfo.isCurrentMonth ? '' : 'opacity-30'}
-                ${isSelected ? 'bg-foreground/10' : 'hover:bg-muted/50'}
+                ${isSelected ? 'bg-foreground/10' : 'hover:bg-surface-muted'}
                 ${dayInfo.isToday && !isSelected ? 'ring-2 ring-foreground/30 ring-inset' : ''}
               `}
             >

@@ -13,7 +13,7 @@ export default function ProfileInterestsTags({ interests }: ProfileInterestsTags
     <div className="space-y-3">
       <SectionHeader title="관심 종목" />
 
-      <div className="bg-muted/20 rounded-2xl p-4">
+      <div className="bg-surface-secondary rounded-2xl p-4">
         {interests && interests.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {interests.map((interest, index) => (

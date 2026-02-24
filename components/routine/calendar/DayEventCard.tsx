@@ -30,7 +30,7 @@ export default function DayEventCard({ event, date, onDelete }: DayEventCardProp
     <div className="flex items-center rounded-xl">
       <AppLink
         href={`/routine/${event.type}/${date}`}
-        className="flex flex-1 items-center gap-4 px-2 py-5 text-left hover:bg-muted/20 active:bg-muted/20 transition-colors rounded-xl min-w-0"
+        className="flex flex-1 items-center gap-4 px-2 py-5 text-left hover:bg-surface-secondary active:bg-surface-secondary transition-colors rounded-xl min-w-0"
       >
         <EventTypeIcon type={event.type} />
 

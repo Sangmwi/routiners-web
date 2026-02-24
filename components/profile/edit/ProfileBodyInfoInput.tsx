@@ -38,7 +38,7 @@ export default function ProfileBodyInfoInput({
       <div className="flex gap-4">
         <div className="flex-1">
           <label className="text-sm font-medium text-muted-foreground mb-1.5 block">키</label>
-          <div className="bg-muted/20 rounded-xl p-2">
+          <div className="bg-surface-secondary rounded-xl p-2">
             <WheelPicker
               options={heightOptions}
               value={height || '175'}
@@ -50,7 +50,7 @@ export default function ProfileBodyInfoInput({
         </div>
         <div className="flex-1">
           <label className="text-sm font-medium text-muted-foreground mb-1.5 block">몸무게</label>
-          <div className="bg-muted/20 rounded-xl p-2">
+          <div className="bg-surface-secondary rounded-xl p-2">
             <WheelPicker
               options={weightOptions}
               value={weight || '70'}

@@ -56,7 +56,7 @@ export default function EventActionButtons({
             type="button"
             onClick={onUncomplete}
             disabled={isLoading}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-xl font-medium py-3 text-sm text-muted-foreground hover:bg-muted/30 transition-colors"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-xl font-medium py-3 text-sm text-muted-foreground hover:bg-surface-hover transition-colors"
           >
             <ArrowCounterClockwiseIcon size={14} weight="bold" />
             되돌리기

@@ -34,7 +34,7 @@ export default function PassVerificationStep({ onVerified }: PassVerificationSte
         <div className="space-y-6">
           {/* Icon + Title */}
           <div className="space-y-4">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-surface-accent flex items-center justify-center">
               <ShieldIcon size={24} className="text-primary" />
             </div>
             <div className="space-y-2">
@@ -48,7 +48,7 @@ export default function PassVerificationStep({ onVerified }: PassVerificationSte
           </div>
 
           {/* Steps Guide */}
-          <div className="space-y-4 rounded-2xl bg-muted/20 border border-border p-5">
+          <div className="space-y-4 rounded-2xl bg-surface-secondary border border-border p-5">
             <div className="flex items-start gap-3">
               <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground shrink-0">
                 1

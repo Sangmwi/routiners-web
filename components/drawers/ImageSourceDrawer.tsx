@@ -61,22 +61,22 @@ export default function ImageSourceDrawer({
             </div>
 
             {/* 옵션 목록 */}
-            <div className="bg-muted/30 rounded-2xl overflow-hidden">
+            <div className="bg-surface-hover rounded-2xl overflow-hidden">
               <button
                 type="button"
                 onClick={handleSelectCamera}
-                className="w-full flex items-center justify-center gap-3 py-4 px-5 hover:bg-muted/50 active:bg-muted/70 transition-colors"
+                className="w-full flex items-center justify-center gap-3 py-4 px-5 hover:bg-surface-muted active:bg-muted/70 transition-colors"
               >
                 <CameraIcon size={22} className="text-muted-foreground" />
                 <span className="text-base font-medium text-foreground">카메라로 촬영</span>
               </button>
 
-              <div className="mx-5 border-t border-border/50" />
+              <div className="mx-5 border-t border-edge-subtle" />
 
               <button
                 type="button"
                 onClick={handleSelectGallery}
-                className="w-full flex items-center justify-center gap-3 py-4 px-5 hover:bg-muted/50 active:bg-muted/70 transition-colors"
+                className="w-full flex items-center justify-center gap-3 py-4 px-5 hover:bg-surface-muted active:bg-muted/70 transition-colors"
               >
                 <ImageSquareIcon size={22} className="text-muted-foreground" />
                 <span className="text-base font-medium text-foreground">앨범에서 선택</span>

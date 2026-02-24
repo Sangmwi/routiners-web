@@ -48,7 +48,7 @@ export default function AlertModal({
       <ModalBody className="p-6">
         <div className="text-center">
           {/* 아이콘 */}
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-surface-accent">
             <InfoIcon size="lg" className="text-primary" />
           </div>
 

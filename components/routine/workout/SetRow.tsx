@@ -41,7 +41,7 @@ export default function SetRow({
   // 완료 상태
   if (isCompleted) {
     return (
-      <div className="flex items-center gap-3 rounded-xl bg-primary/10 px-4 py-3">
+      <div className="flex items-center gap-3 rounded-xl bg-surface-accent px-4 py-3">
         <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
           <CheckIcon size={16} weight="bold" className="text-primary-foreground" />
         </div>
@@ -67,7 +67,7 @@ export default function SetRow({
   // 활성 상태 (현재 수행할 세트)
   if (isActive) {
     return (
-      <div className="rounded-xl bg-card ring-2 ring-primary/30 px-4 py-3 space-y-3">
+      <div className="rounded-xl bg-card ring-2 ring-accent px-4 py-3 space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold text-foreground">
             {index + 1}세트
@@ -81,7 +81,7 @@ export default function SetRow({
           {/* 탭하여 값 수정 */}
           <button
             onClick={onTapToEdit}
-            className="flex-1 h-10 px-3 flex items-center justify-center gap-2 text-sm font-medium bg-muted/30 border border-border rounded-lg active:bg-muted/50 transition-colors"
+            className="flex-1 h-10 px-3 flex items-center justify-center gap-2 text-sm font-medium bg-surface-hover border border-border rounded-lg active:bg-surface-muted transition-colors"
           >
             <span className="tabular-nums">{displayWeight}kg</span>
             <span className="text-muted-foreground">×</span>
@@ -106,7 +106,7 @@ export default function SetRow({
   return (
     <button
       onClick={onTapToEdit}
-      className="w-full flex items-center gap-3 rounded-xl bg-muted/20 px-4 py-3 text-left active:bg-muted/30 transition-colors"
+      className="w-full flex items-center gap-3 rounded-xl bg-surface-secondary px-4 py-3 text-left active:bg-surface-hover transition-colors"
     >
       <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
         <span className="text-xs font-bold text-muted-foreground">{index + 1}</span>

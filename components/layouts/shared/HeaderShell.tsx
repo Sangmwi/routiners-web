@@ -29,7 +29,7 @@ export default function HeaderShell({
 }: HeaderShellProps) {
   const bgClass = transparent
     ? 'bg-transparent'
-    : 'bg-background border-b border-border/50';
+    : 'bg-background border-b border-edge-subtle';
 
   const stickyClass = sticky ? 'sticky top-0 z-40' : '';
 
@@ -55,7 +55,7 @@ export function HeaderBackButton({ onClick, label = '뒤로가기' }: HeaderBack
     <button
       type="button"
       onClick={onClick}
-      className="p-1 -ml-1 hover:bg-muted/50 rounded-lg transition-colors"
+      className="p-1 -ml-1 hover:bg-surface-muted rounded-lg transition-colors"
       aria-label={label}
     >
       <BackIcon size="lg" className="text-foreground" />

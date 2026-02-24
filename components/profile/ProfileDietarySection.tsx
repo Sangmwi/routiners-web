@@ -67,7 +67,7 @@ export default function ProfileDietarySection({
       >
         {/* Hero: 아이콘 + 목표/유형 + chevron */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-surface-accent flex items-center justify-center shrink-0">
             <BowlFoodIcon size={20} className="text-primary" weight="duotone" />
           </div>
           <div className="flex-1 min-w-0">
@@ -87,7 +87,7 @@ export default function ProfileDietarySection({
 
         {/* 구분선 아래 요약 정보 */}
         {(summaryText || restrictions.length > 0 || sources.length > 0) && (
-          <div className="border-t border-border/30 mt-3 pt-3 space-y-2">
+          <div className="border-t border-edge-faint mt-3 pt-3 space-y-2">
             {/* 수치 요약 */}
             {summaryText && (
               <p className="text-xs text-muted-foreground">{summaryText}</p>
@@ -113,7 +113,7 @@ export default function ProfileDietarySection({
                 {sources.map((s) => (
                   <span
                     key={s}
-                    className="px-2 py-0.5 text-xs rounded-md bg-muted/50 text-muted-foreground"
+                    className="px-2 py-0.5 text-xs rounded-md bg-surface-muted text-muted-foreground"
                   >
                     {AVAILABLE_SOURCE_LABELS[s]}
                   </span>
@@ -136,7 +136,7 @@ export default function ProfileDietarySection({
             title="식단 프로필"
             action={{ label: '관리', href: '/profile/dietary' }}
           />
-          <div className="bg-muted/20 rounded-2xl p-4">
+          <div className="bg-surface-secondary rounded-2xl p-4">
             {content}
           </div>
         </div>

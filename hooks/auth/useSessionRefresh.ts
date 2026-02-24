@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import { useDocumentEventListener } from '@/hooks/common/useEventListener';
 
 // ============================================================================
 // Constants
@@ -27,35 +28,26 @@ const REFRESH_THRESHOLD_MS = 10 * 60 * 1000; // 만료 10분 전
  */
 export function useSessionRefresh() {
   const lastRefreshRef = useRef<number>(0);
+  const supabaseRef = useRef(createClient());
 
-  useEffect(() => {
-    const supabase = createClient();
+  useDocumentEventListener('visibilitychange', async () => {
+    if (document.visibilityState !== 'visible') return;
 
-    const handleVisibilityChange = async () => {
-      if (document.visibilityState !== 'visible') return;
+    const now = Date.now();
+    if (now - lastRefreshRef.current < REFRESH_COOLDOWN_MS) return;
 
-      const now = Date.now();
-      if (now - lastRefreshRef.current < REFRESH_COOLDOWN_MS) return;
+    try {
+      const { data: { session } } = await supabaseRef.current.auth.getSession();
 
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.expires_at) return;
 
-        // 세션이 없으면 스킵 (로그인 안 된 상태)
-        if (!session?.expires_at) return;
+      const expiresAt = session.expires_at * 1000;
+      if (expiresAt - now > REFRESH_THRESHOLD_MS) return;
 
-        // 만료까지 충분한 시간이 있으면 스킵
-        const expiresAt = session.expires_at * 1000;
-        if (expiresAt - now > REFRESH_THRESHOLD_MS) return;
-
-        // 갱신 실행
-        lastRefreshRef.current = now;
-        await supabase.auth.refreshSession();
-      } catch {
-        // 조용히 실패 (다음 복귀 시 재시도)
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
+      lastRefreshRef.current = now;
+      await supabaseRef.current.auth.refreshSession();
+    } catch {
+      // 조용히 실패 (다음 복귀 시 재시도)
+    }
+  });
 }

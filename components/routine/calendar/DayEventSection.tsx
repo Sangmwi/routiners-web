@@ -108,7 +108,7 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
             <button
               type="button"
               onClick={() => setIsWorkoutDrawerOpen(true)}
-              className="w-full flex items-center gap-4 px-2 py-5 active:bg-muted/20 transition-colors rounded-xl"
+              className="w-full flex items-center gap-4 px-2 py-5 active:bg-surface-secondary transition-colors rounded-xl"
             >
               <BarbellIcon size={28} weight="duotone" className="text-muted-foreground/50 shrink-0" />
               <div className="flex-1 min-w-0 text-left">
@@ -133,7 +133,7 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
             <button
               type="button"
               onClick={() => setIsMealDrawerOpen(true)}
-              className="w-full flex items-center gap-4 px-2 py-5 active:bg-muted/20 transition-colors rounded-xl"
+              className="w-full flex items-center gap-4 px-2 py-5 active:bg-surface-secondary transition-colors rounded-xl"
             >
               <BowlFoodIcon size={28} weight="duotone" className="text-muted-foreground/50 shrink-0" />
               <div className="flex-1 min-w-0 text-left">

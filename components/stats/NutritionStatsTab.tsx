@@ -87,7 +87,7 @@ function DietProfileBanner({ targets }: { targets: NutritionTargets }) {
     <div className="bg-primary/5 border-l-2 border-primary rounded-r-xl px-4 py-3">
       <div className="flex items-center gap-2 mb-1.5">
         {targets.dietType && (
-          <span className="text-xs font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+          <span className="text-xs font-medium bg-surface-accent text-primary px-2 py-0.5 rounded-full">
             {DIET_TYPE_LABELS[targets.dietType]}
           </span>
         )}
@@ -181,7 +181,7 @@ function NutritionSummarySection({
         <div className="flex items-center gap-1.5">
           <h3 className="text-base font-medium text-foreground">섭취 요약</h3>
           {isPlannedOnly && (
-            <span className="text-xs text-scheduled bg-scheduled/10 px-1.5 py-0.5 rounded-md">
+            <span className="text-xs text-scheduled bg-surface-scheduled px-1.5 py-0.5 rounded-md">
               예정
             </span>
           )}
@@ -202,7 +202,7 @@ function NutritionSummarySection({
             : null;
 
           return (
-            <div key={m.label} className="bg-muted/20 rounded-2xl p-4">
+            <div key={m.label} className="bg-surface-secondary rounded-2xl p-4">
               <div className="flex items-center gap-2.5 mb-2.5">
                 {m.icon ? (
                   m.icon
@@ -228,7 +228,7 @@ function NutritionSummarySection({
               {/* 목표 프로그레스바 */}
               {percent !== null && (
                 <div className="mt-2">
-                  <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
+                  <div className="h-2 bg-surface-hover rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-300 ${getAdherenceColor(percent)}`}
                       style={{ width: `${Math.min(100, percent)}%` }}
@@ -285,7 +285,7 @@ function NutritionBalanceSection({
     <div>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-medium text-foreground">영양소 균형</h3>
-        <span className={`text-xs font-medium px-2 py-0.5 rounded-full bg-muted/50 ${colorClass}`}>
+        <span className={`text-xs font-medium px-2 py-0.5 rounded-full bg-surface-muted ${colorClass}`}>
           {balanceText} {score}점
         </span>
       </div>
@@ -301,7 +301,7 @@ function NutritionBalanceSection({
                 {percent}%
               </span>
             </div>
-            <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
+            <div className="h-2 bg-surface-hover rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all duration-300 ${getAdherenceColor(percent)}`}
                 style={{ width: `${Math.min(100, Math.max(percent, 2))}%` }}
@@ -311,7 +311,7 @@ function NutritionBalanceSection({
         ))}
         {/* 인사이트 */}
         {insight && (
-          <div className="pt-3 border-t border-border/20">
+          <div className="pt-3 border-t border-edge-divider">
             <p className="text-xs text-muted-foreground">
               <span className="text-foreground font-medium">💡</span> {insight}
             </p>
@@ -478,27 +478,12 @@ function DailyNutritionLog({
 
           return (
             <div key={day.date} className="flex items-center gap-1.5">
-              {/* 상태 아이콘 (왼쪽) */}
-              <span className="w-5 shrink-0 flex justify-center">
-                {displayStatus === 'completed' && (
-                  <CheckCircleIcon size={15} weight="fill" className="text-primary" />
-                )}
-                {displayStatus === 'scheduled' && (
-                  <ClockIcon size={15} weight="duotone" className="text-scheduled" />
-                )}
-                {displayStatus === 'incomplete' && (
-                  <XCircleIcon size={15} weight="fill" className="text-muted-foreground/30" />
-                )}
-                {displayStatus === null && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/15" />
-                )}
-              </span>
               {/* 요일 */}
               <span className={`text-xs font-semibold w-6 shrink-0 ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
                 {day.dayOfWeek}
               </span>
-              {/* 바 + 수치 묶음 (flex-grow 비율로 분배) */}
-              <div className={`flex-1 min-w-0 h-5 rounded-md relative flex items-center overflow-hidden ${val > 0 ? '' : 'bg-muted/30'}`}>
+              {/* 바 + 수치 + 상태아이콘 묶음 */}
+              <div className={`flex-1 min-w-0 h-5 rounded-md relative flex items-center overflow-hidden ${val > 0 ? '' : 'bg-surface-hover'}`}>
                 {/* 채워진 바 */}
                 {val > 0 && (
                   <div
@@ -506,11 +491,20 @@ function DailyNutritionLog({
                     style={{ flex: `${Math.max(pct, 3)} 1 0px` }}
                   />
                 )}
-                {/* 수치 (바 바로 옆) */}
+                {/* 수치 + 상태아이콘 (바 바로 옆) */}
                 <span
-                  className={`text-xs font-medium whitespace-nowrap shrink-0 px-1.5 ${val > 0 ? 'text-foreground' : 'text-muted-foreground/40'}`}
+                  className={`inline-flex items-center gap-0.5 whitespace-nowrap shrink-0 px-1.5 text-xs font-medium ${val > 0 ? 'text-foreground' : 'text-muted-foreground/40'}`}
                 >
                   {formatted}
+                  {displayStatus === 'completed' && (
+                    <CheckCircleIcon size={13} weight="fill" className="text-primary" />
+                  )}
+                  {displayStatus === 'scheduled' && (
+                    <ClockIcon size={13} weight="duotone" className="text-scheduled" />
+                  )}
+                  {displayStatus === 'incomplete' && (
+                    <XCircleIcon size={13} weight="fill" className="text-muted-foreground/30" />
+                  )}
                 </span>
                 {/* 나머지 여백 */}
                 <div style={{ flex: `${val > 0 ? 100 - Math.max(pct, 3) : 1} 1 0px` }} />
@@ -553,7 +547,7 @@ function NutritionMetrics({
   dailyStats?: WeeklyStats['dailyStats'];
 }) {
   if (meal.totalCalories === 0 && meal.plannedCalories === 0 && meal.totalProtein === 0 && meal.plannedProtein === 0) {
-    return <EmptyState icon={BowlFoodIcon} message="식단 데이터가 없습니다." className="rounded-2xl bg-muted/20" />;
+    return <EmptyState icon={BowlFoodIcon} message="식단 데이터가 없습니다." className="rounded-2xl bg-surface-secondary" />;
   }
 
   // DonutChart 폴백용 매크로 데이터
@@ -609,7 +603,7 @@ function WeeklyNutrition({ dateStr }: { dateStr: string }) {
   const { data: profile } = useDietaryProfileSuspense();
 
   if (!stats || (stats.meal.scheduled === 0 && stats.meal.completed === 0)) {
-    return <EmptyState icon={BowlFoodIcon} message="식단 기록이 없습니다." className="rounded-2xl bg-muted/20" />;
+    return <EmptyState icon={BowlFoodIcon} message="식단 기록이 없습니다." className="rounded-2xl bg-surface-secondary" />;
   }
 
   const targets = resolveNutritionTargets(stats.meal, profile, 7);
@@ -641,7 +635,7 @@ function MonthlyNutrition({ year, month }: { year: number; month: number }) {
   const { data: profile } = useDietaryProfileSuspense();
 
   if (!stats || (stats.meal.scheduled === 0 && stats.meal.completed === 0)) {
-    return <EmptyState icon={BowlFoodIcon} message="식단 기록이 없습니다." className="rounded-2xl bg-muted/20" />;
+    return <EmptyState icon={BowlFoodIcon} message="식단 기록이 없습니다." className="rounded-2xl bg-surface-secondary" />;
   }
 
   const daysInMonth = new Date(year, month, 0).getDate();

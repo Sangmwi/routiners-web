@@ -89,7 +89,7 @@ export default function InBodyContent() {
             size="md"
             badge={records.length}
           />
-          <div className="bg-card rounded-2xl border border-border/50 overflow-hidden">
+          <div className="bg-card rounded-2xl border border-edge-subtle overflow-hidden">
             <InBodyRecordList
               records={records}
               onRecordClick={openDetailModal}
@@ -99,7 +99,7 @@ export default function InBodyContent() {
       </div>
 
       {/* Fixed Bottom Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 pb-safe bg-background border-t border-border/50">
+      <div className="fixed bottom-0 left-0 right-0 p-4 pb-safe bg-background border-t border-edge-subtle">
         <Button
           onClick={() => setIsImageSourceOpen(true)}
           className="w-full"

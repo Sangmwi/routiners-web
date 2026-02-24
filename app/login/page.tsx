@@ -102,7 +102,7 @@ export default function LoginPage() {
     <div className="fixed inset-0 flex flex-col overflow-hidden bg-background">
       {/* Background blur - 로고 위치에서 발산 */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-[42%] left-1/2 -translate-x-1/2 -translate-y-1/2 h-[16rem] w-[16rem] rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute top-[42%] left-1/2 -translate-x-1/2 -translate-y-1/2 h-[16rem] w-[16rem] rounded-full bg-surface-accent blur-3xl" />
       </div>
 
       {/* Logo - 화면 상단 ~40% 위치 */}
@@ -118,7 +118,7 @@ export default function LoginPage() {
       <div className="relative z-10 w-full px-6 pb-12">
         <div className="mx-auto max-w-sm">
           {error && (
-            <div className="mb-4 rounded-xl bg-destructive/10 p-3 text-center text-sm text-destructive ring-1 ring-destructive/20">
+            <div className="mb-4 rounded-xl bg-surface-danger p-3 text-center text-sm text-destructive ring-1 ring-destructive/20">
               {error}
             </div>
           )}

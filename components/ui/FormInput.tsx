@@ -27,7 +27,7 @@ export default function FormInput({ label, error, ...props }: FormInputProps) {
       )}
       <input
         {...inputProps}
-        className="w-full px-4 py-3 rounded-xl bg-muted/20 border border-border text-sm text-card-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full px-4 py-3 rounded-xl bg-surface-secondary border border-border text-sm text-card-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 ring-focus focus:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       />
       {error && (
         <p className="text-xs text-destructive">{error}</p>

@@ -54,7 +54,7 @@ export default function CalendarHeader({
         <button
           type="button"
           onClick={onPrevMonth}
-          className="p-1.5 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground"
+          className="p-1.5 rounded-lg hover:bg-surface-muted transition-colors text-muted-foreground"
           aria-label="이전 달"
         >
           <CaretLeftIcon size={18} weight="bold" />
@@ -65,7 +65,7 @@ export default function CalendarHeader({
         <button
           type="button"
           onClick={onNextMonth}
-          className="p-1.5 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground"
+          className="p-1.5 rounded-lg hover:bg-surface-muted transition-colors text-muted-foreground"
           aria-label="다음 달"
         >
           <CaretRightIcon size={18} weight="bold" />

@@ -1,20 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  CheckCircleIcon,
-  XCircleIcon,
-  ClockIcon,
-  BarbellIcon,
-  BowlFoodIcon,
-} from '@phosphor-icons/react';
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
-import AppLink from '@/components/common/AppLink';
+import { BarbellIcon, BowlFoodIcon } from '@phosphor-icons/react';
 import SegmentedControl from '@/components/ui/SegmentedControl';
+import ActivityRow from '@/components/ui/ActivityRow';
+import DayGroup from '@/components/ui/DayGroup';
 import { formatDate } from '@/lib/utils/dateHelpers';
-import { getDisplayStatus } from '@/lib/config/theme';
 import type { WeeklyStats } from '@/hooks/routine';
-import type { EventStatus } from '@/lib/types/routine';
 
 interface WeeklyProgressChartProps {
   stats: WeeklyStats;
@@ -54,7 +46,7 @@ export default function WeeklyProgressChart({ stats }: WeeklyProgressChartProps)
       </div>
 
       <div className="flex flex-col items-center overflow-hidden">
-        {dailyStats.map((day, index) => {
+        {dailyStats.map((day) => {
           const isToday = day.date === today;
           const hasWorkout = day.workout !== null;
           const hasMeal = day.meal !== null;
@@ -69,127 +61,41 @@ export default function WeeklyProgressChart({ stats }: WeeklyProgressChartProps)
 
           return (
             <div key={day.date} className="w-full">
-              <div
-                className={`rounded-2xl px-4 py-3 ${isToday ? 'bg-primary/5' : ''}`}
-              >
-                <div className="flex gap-3">
-                  {/* 요일 */}
-                  <span
-                    className={`text-xs font-semibold w-6 shrink-0 pt-0.5 ${
-                      isToday ? 'text-primary' : 'text-muted-foreground'
-                    }`}
-                  >
-                    {day.dayOfWeek}
+              <DayGroup dayLabel={day.dayOfWeek} isToday={isToday}>
+                {showWorkout && (
+                  <ActivityRow
+                    icon={BarbellIcon}
+                    label={day.workoutTitle || '운동'}
+                    meta={workoutMeta.length > 0 ? workoutMeta.join(' · ') : undefined}
+                    status={day.workout!}
+                    date={day.date}
+                    href={`/routine/workout/${day.date}`}
+                  />
+                )}
+                {showMeal && (
+                  <ActivityRow
+                    icon={BowlFoodIcon}
+                    label="식단"
+                    meta={
+                      day.mealCalories
+                        ? `${day.mealCalories.toLocaleString()}kcal`
+                        : undefined
+                    }
+                    status={day.meal!}
+                    date={day.date}
+                    href={`/routine/meal/${day.date}`}
+                  />
+                )}
+                {!hasVisible && (
+                  <span className="text-xs text-muted-foreground/50">
+                    활동 없음
                   </span>
-
-                  {/* 활동 행들 */}
-                  <div className="flex-1 min-w-0 space-y-1.5">
-                    {showWorkout && (
-                      <ActivityRow
-                        icon={BarbellIcon}
-                        label={day.workoutTitle || '운동'}
-                        meta={workoutMeta.length > 0 ? workoutMeta.join(' · ') : undefined}
-                        status={day.workout!}
-                        date={day.date}
-                        href={`/routine/workout/${day.date}`}
-                      />
-                    )}
-                    {showMeal && (
-                      <ActivityRow
-                        icon={BowlFoodIcon}
-                        label="식단"
-                        meta={
-                          day.mealCalories
-                            ? `${day.mealCalories.toLocaleString()}kcal`
-                            : undefined
-                        }
-                        status={day.meal!}
-                        date={day.date}
-                        href={`/routine/meal/${day.date}`}
-                      />
-                    )}
-                    {!hasVisible && (
-                      <span className="text-xs text-muted-foreground/50">
-                        활동 없음
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-              {/* {index < dailyStats.length - 1 && (
-                <div className="w-full h-px bg-border/50 mx-auto" />
-              )} */}
+                )}
+              </DayGroup>
             </div>
           );
         })}
       </div>
     </div>
-  );
-}
-
-function ActivityRow({
-  icon: Icon,
-  label,
-  meta,
-  status,
-  date,
-  href,
-}: {
-  icon: PhosphorIcon;
-  label: string;
-  meta?: string;
-  status: EventStatus;
-  date: string;
-  href: string;
-}) {
-  return (
-    <AppLink href={href} className="flex items-center gap-1.5 w-full text-left">
-      <Icon size={15} weight="fill" className="text-primary shrink-0" />
-      <span className="text-xs font-medium text-foreground truncate">
-        {label}
-      </span>
-      {meta && (
-        <span className="text-xs text-muted-foreground shrink-0">
-          {meta}
-        </span>
-      )}
-      <span className="ml-auto shrink-0">
-        <StatusPill status={status} date={date} />
-      </span>
-    </AppLink>
-  );
-}
-
-function StatusPill({
-  status,
-  date,
-}: {
-  status: EventStatus;
-  date: string;
-}) {
-  const displayStatus = getDisplayStatus(status, date);
-
-  if (displayStatus === 'completed') {
-    return (
-      <span className="inline-flex items-center gap-0.5 text-xs font-medium text-primary">
-        <CheckCircleIcon size={14} weight="fill" />
-        완료
-      </span>
-    );
-  }
-  if (displayStatus === 'incomplete') {
-    return (
-      <span className="inline-flex items-center gap-0.5 text-xs font-medium text-muted-foreground/40">
-        <XCircleIcon size={14} weight="fill" />
-        미완료
-      </span>
-    );
-  }
-  // scheduled
-  return (
-    <span className="inline-flex items-center gap-0.5 text-xs font-medium text-scheduled">
-      <ClockIcon size={14} weight="duotone" />
-      예정
-    </span>
   );
 }

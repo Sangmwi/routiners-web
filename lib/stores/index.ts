@@ -8,15 +8,6 @@
  * - 클라이언트 상태: Zustand 사용 (UI 상태, 모달, 앱 설정)
  */
 
-// App Store - 앱 전역 상태
-export {
-  useAppStore,
-  selectIsInWebView,
-  selectIsWebViewReady,
-  selectIsOnline,
-  selectIsInitialized,
-} from './appStore';
-
 // Modal Store - 모달 관리
 export {
   useModalStore,

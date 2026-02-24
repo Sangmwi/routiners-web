@@ -20,7 +20,3 @@ export { useRoutineEventActions } from './useRoutineEventActions';
 export { useStatsPeriodNavigator } from './useStatsPeriodNavigator';
 export { useEventHeaderActions } from './useEventHeaderActions';
 export { useCatalogSelection } from './useCatalogSelection';
-
-// Legacy re-export (deprecated - use queries.ts and mutations.ts directly)
-export * from './useRoutineEvents';
-export * from './useWeeklyStats';

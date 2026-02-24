@@ -56,7 +56,7 @@ export default function ChatMessage({ message, onAction, isApplyingRoutine = fal
   if (contentType === 'system_log') {
     return (
       <div className="flex justify-center py-2">
-        <div className="px-4 py-2.5 bg-muted/20 rounded-2xl max-w-[85%]">
+        <div className="px-4 py-2.5 bg-surface-secondary rounded-2xl max-w-[85%]">
           <Markdown
             content={message.content}
             className="text-sm text-muted-foreground text-center"

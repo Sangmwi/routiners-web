@@ -416,7 +416,7 @@ export default function ImportUnitMealSheet({
       height="full"
       showCloseButton={!isImporting}
       stickyFooter={
-        <div className="p-4 bg-card border-t border-border/50 pb-safe">
+        <div className="p-4 bg-card border-t border-edge-subtle pb-safe">
           {step === 'select' && (
             <Button
               variant="primary"
@@ -466,7 +466,7 @@ export default function ImportUnitMealSheet({
             <div className="space-y-2">
               <h3 className="text-sm font-semibold">부대</h3>
               {selectedUnit ? (
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/30">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-surface-hover">
                   <BuildingsIcon
                     size={20}
                     className="text-muted-foreground"
@@ -476,7 +476,7 @@ export default function ImportUnitMealSheet({
                   </span>
                 </div>
               ) : (
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/30">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-surface-hover">
                   <BuildingsIcon
                     size={20}
                     className="text-muted-foreground"
@@ -517,10 +517,10 @@ export default function ImportUnitMealSheet({
                       value={unitSearchQuery}
                       onChange={(e) => setUnitSearchQuery(e.target.value)}
                       placeholder="부대명 검색..."
-                      className="w-full pl-9 pr-4 py-2 rounded-xl bg-muted/50 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30"
+                      className="w-full pl-9 pr-4 py-2 rounded-xl bg-surface-muted text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-accent"
                     />
                   </div>
-                  <div className="max-h-48 overflow-y-auto rounded-xl border border-border/50 divide-y divide-border/30">
+                  <div className="max-h-48 overflow-y-auto rounded-xl border border-edge-subtle divide-y divide-edge-faint">
                     {filteredUnits.length === 0 ? (
                       <p className="p-3 text-sm text-muted-foreground text-center">
                         검색 결과 없음
@@ -537,7 +537,7 @@ export default function ImportUnitMealSheet({
                           }}
                           className={`w-full px-3 py-2.5 text-left text-sm ${
                             unit.id === selectedUnitId
-                              ? 'bg-primary/10 text-primary font-medium'
+                              ? 'bg-surface-accent text-primary font-medium'
                               : 'text-foreground'
                           }`}
                         >
@@ -563,7 +563,7 @@ export default function ImportUnitMealSheet({
                     setShowStartDatePicker((prev) => !prev);
                     setShowEndDatePicker(false);
                   }}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/20"
+                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-surface-secondary"
                 >
                   <CalendarIcon
                     size={18}
@@ -589,7 +589,7 @@ export default function ImportUnitMealSheet({
                   )}
                 </button>
                 {showStartDatePicker && (
-                  <div className="bg-muted/20 rounded-xl px-3 py-2">
+                  <div className="bg-surface-secondary rounded-xl px-3 py-2">
                     <DatePicker
                       value={startDate}
                       onChange={setStartDate}
@@ -616,7 +616,7 @@ export default function ImportUnitMealSheet({
                     setShowEndDatePicker((prev) => !prev);
                     setShowStartDatePicker(false);
                   }}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/20"
+                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-surface-secondary"
                 >
                   <CalendarIcon
                     size={18}
@@ -642,7 +642,7 @@ export default function ImportUnitMealSheet({
                   )}
                 </button>
                 {showEndDatePicker && (
-                  <div className="bg-muted/20 rounded-xl px-3 py-2">
+                  <div className="bg-surface-secondary rounded-xl px-3 py-2">
                     <DatePicker
                       value={endDate}
                       onChange={setEndDate}
@@ -677,7 +677,7 @@ export default function ImportUnitMealSheet({
                       <div
                         key={d}
                         className={`flex items-center gap-3 px-3 py-2 rounded-lg ${
-                          isExisting ? 'bg-muted/20' : 'bg-muted/5'
+                          isExisting ? 'bg-surface-secondary' : 'bg-muted/5'
                         }`}
                       >
                         <CalendarIcon
@@ -702,7 +702,7 @@ export default function ImportUnitMealSheet({
                           })}
                         </span>
                         {isExisting && (
-                          <span className="text-xs bg-muted/50 text-muted-foreground px-2 py-0.5 rounded-full">
+                          <span className="text-xs bg-surface-muted text-muted-foreground px-2 py-0.5 rounded-full">
                             등록됨
                           </span>
                         )}
@@ -758,7 +758,7 @@ export default function ImportUnitMealSheet({
                 </span>
                 <span>{progress}%</span>
               </div>
-              <div className="h-1.5 bg-muted/30 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-surface-hover rounded-full overflow-hidden">
                 <div
                   className="h-full bg-primary rounded-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
@@ -788,7 +788,7 @@ export default function ImportUnitMealSheet({
 
             {/* 완료 결과 */}
             {importDone && (
-              <div className="bg-muted/20 rounded-xl p-4 space-y-2">
+              <div className="bg-surface-secondary rounded-xl p-4 space-y-2">
                 {savedCount > 0 ? (
                   <p className="text-sm font-medium text-green-600">
                     {savedCount}일분 식단이 등록되었어요!

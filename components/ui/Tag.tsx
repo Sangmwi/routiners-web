@@ -16,6 +16,8 @@ interface TagProps {
   variant?: 'default' | 'muted' | 'outline';
   /** 크기 */
   size?: 'sm' | 'md';
+  /** 시맨틱 컬러 스킴 (variant와 독립적으로 배경+텍스트 색상 지정) */
+  colorScheme?: 'default' | 'primary' | 'scheduled' | 'success' | 'destructive' | 'muted';
   /** 비활성화 스타일 (값이 없을 때) */
   inactive?: boolean;
   /** 추가 클래스 */
@@ -47,14 +49,25 @@ export default function Tag({
   icon,
   variant = 'default',
   size = 'md',
+  colorScheme = 'default',
   inactive = false,
   className = '',
 }: TagProps) {
   // variant별 스타일
   const variantStyles = {
-    default: 'bg-card border border-border/50',
+    default: 'bg-card border border-edge-subtle',
     muted: 'bg-muted border-none',
     outline: 'bg-transparent border border-border',
+  };
+
+  // colorScheme별 스타일 (variant 대신 배경+텍스트 색상 직접 지정)
+  const colorSchemeStyles = {
+    default: '',
+    primary: 'bg-surface-accent text-primary border-none',
+    scheduled: 'bg-surface-scheduled text-warning border-none',
+    success: 'bg-surface-accent text-success border-none',
+    destructive: 'bg-surface-danger text-destructive border-none',
+    muted: 'bg-surface-muted text-muted-foreground border-none',
   };
 
   // size별 스타일
@@ -92,9 +105,9 @@ export default function Tag({
     <div
       className={`
         inline-flex items-center rounded-full
-        ${variantStyles[variant]}
+        ${colorScheme !== 'default' ? colorSchemeStyles[colorScheme] : variantStyles[variant]}
         ${sizeStyles[size]}
-        ${inactive ? 'text-muted-foreground' : 'text-card-foreground'}
+        ${inactive ? 'text-muted-foreground' : colorScheme !== 'default' ? '' : 'text-card-foreground'}
         ${className}
       `.trim().replace(/\s+/g, ' ')}
     >

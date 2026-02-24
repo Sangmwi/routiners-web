@@ -59,14 +59,14 @@ export default function PostMoreMenu({
             <>
               <button
                 onClick={handleEdit}
-                className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left hover:bg-muted/30 transition-colors"
+                className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left hover:bg-surface-hover transition-colors"
               >
                 <PencilSimpleIcon size={20} className="text-muted-foreground" />
                 <span className="text-sm font-medium text-foreground">수정</span>
               </button>
               <button
                 onClick={handleDelete}
-                className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left hover:bg-muted/30 transition-colors"
+                className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left hover:bg-surface-hover transition-colors"
               >
                 <TrashIcon size={20} className="text-destructive" />
                 <span className="text-sm font-medium text-destructive">삭제</span>
@@ -75,7 +75,7 @@ export default function PostMoreMenu({
           ) : (
             <button
               onClick={onClose}
-              className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left hover:bg-muted/30 transition-colors opacity-50 cursor-not-allowed"
+              className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left hover:bg-surface-hover transition-colors opacity-50 cursor-not-allowed"
               disabled
             >
               <WarningIcon size={20} className="text-muted-foreground" />

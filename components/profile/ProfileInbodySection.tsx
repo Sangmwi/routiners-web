@@ -125,7 +125,7 @@ export default function ProfileInbodySection({
             title="인바디 정보"
             action={isOwnProfile ? { label: '관리', href: '/profile/inbody' } : undefined}
           />
-          <div className="bg-muted/20 rounded-2xl p-4">
+          <div className="bg-surface-secondary rounded-2xl p-4">
             {content}
           </div>
         </div>

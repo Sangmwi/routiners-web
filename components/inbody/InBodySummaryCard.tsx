@@ -38,8 +38,8 @@ interface InBodySummaryCardProps {
 function EmptyState({ onClick }: { onClick?: () => void }) {
   return (
     <div
-      className={`bg-muted/20 rounded-xl p-4 ${
-        onClick ? 'cursor-pointer hover:bg-muted/50 transition-colors' : ''
+      className={`bg-surface-secondary rounded-xl p-4 ${
+        onClick ? 'cursor-pointer hover:bg-surface-muted transition-colors' : ''
       }`}
       onClick={onClick}
     >
@@ -94,12 +94,12 @@ export default function InBodySummaryCard({
 
   const baseClass = variant === 'card'
     ? 'bg-card rounded-2xl p-5'
-    : 'bg-muted/20 rounded-xl p-4';
+    : 'bg-surface-secondary rounded-xl p-4';
 
   return (
     <div
       className={`${baseClass} ${
-        onClick ? 'cursor-pointer hover:bg-muted/50 transition-colors' : ''
+        onClick ? 'cursor-pointer hover:bg-surface-muted transition-colors' : ''
       }`}
       onClick={onClick}
     >
@@ -107,13 +107,13 @@ export default function InBodySummaryCard({
       <MetricsGrid data={latest} changes={changes} />
 
       {/* Footer: Date (left) + Score badge (right) */}
-      <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/30">
+      <div className="flex items-center justify-between mt-4 pt-3 border-t border-edge-faint">
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <span>{formattedDate} 측정</span>
           {onClick && <NextIcon size="xs" />}
         </div>
         {latest.inbodyScore && !compact && (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-surface-accent text-primary">
             {latest.inbodyScore}점
           </span>
         )}

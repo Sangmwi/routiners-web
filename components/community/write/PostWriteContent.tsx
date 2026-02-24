@@ -121,7 +121,7 @@ export default function PostWriteContent({ editPostId }: PostWriteContentProps) 
           placeholder="자유롭게 이야기를 나눠보세요"
           maxLength={MAX_CONTENT_LENGTH}
           rows={8}
-          className="w-full rounded-xl border border-border bg-card text-foreground px-4 py-3 text-sm leading-relaxed resize-none transition-all focus:outline-none focus:ring-2 focus:border-primary focus:ring-primary/20 placeholder:text-muted-foreground"
+          className="w-full rounded-xl border border-border bg-card text-foreground px-4 py-3 text-sm leading-relaxed resize-none transition-all focus:outline-none focus:ring-2 focus:border-primary focus:ring-focus placeholder:text-muted-foreground"
         />
         <p className="text-right text-xs text-muted-foreground">
           <span className={content.length > MAX_CONTENT_LENGTH ? 'text-destructive' : ''}>

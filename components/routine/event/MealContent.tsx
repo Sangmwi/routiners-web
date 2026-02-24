@@ -235,7 +235,7 @@ export default function MealContent({ date, onTitleChange, onHeaderAction }: Mea
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="bg-muted/50 rounded-xl p-6 text-center">
+            <div className="bg-surface-muted rounded-xl p-6 text-center">
               <p className="text-muted-foreground">상세 식단 정보가 없습니다.</p>
             </div>
             {event.status === 'scheduled' && (
@@ -252,7 +252,7 @@ export default function MealContent({ date, onTitleChange, onHeaderAction }: Mea
         )}
 
         {mealData?.notes && (
-          <div className="bg-muted/20 rounded-2xl p-4">
+          <div className="bg-surface-secondary rounded-2xl p-4">
             <h3 className="text-sm font-medium text-muted-foreground mb-2">메모</h3>
             <p className="text-foreground">{mealData.notes}</p>
           </div>

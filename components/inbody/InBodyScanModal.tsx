@@ -324,7 +324,7 @@ export default function InBodyScanModal({
             </div>
 
             {/* 해결 안내 */}
-            <div className="bg-muted/20 rounded-xl p-4 text-sm text-muted-foreground space-y-2 w-full max-w-sm">
+            <div className="bg-surface-secondary rounded-xl p-4 text-sm text-muted-foreground space-y-2 w-full max-w-sm">
               <p className="font-medium text-card-foreground">이렇게 해보세요</p>
               <ul className="list-disc list-inside space-y-1">
                 <li>결과지 글자가 선명하게 보이도록 촬영</li>

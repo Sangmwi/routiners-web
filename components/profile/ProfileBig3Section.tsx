@@ -46,7 +46,7 @@ export default function ProfileBig3Section({
         title="3대운동"
         action={isOwnProfile ? { label: '통계', href: '/stats?tab=workout' } : undefined}
       />
-      <div className="bg-muted/20 rounded-2xl p-4">
+      <div className="bg-surface-secondary rounded-2xl p-4">
         {content}
       </div>
     </div>

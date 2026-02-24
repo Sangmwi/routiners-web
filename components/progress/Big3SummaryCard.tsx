@@ -20,7 +20,7 @@ interface Big3SummaryCardProps {
 export function Big3SummaryCard({
   summary,
   emptyMessage = '3대 운동 기록이 없습니다.',
-  cardClassName = 'bg-muted/20 rounded-2xl p-4',
+  cardClassName = 'bg-surface-secondary rounded-2xl p-4',
   sparklineHeight = 36,
   sparklineShowMinMax = false,
   sparklineShowAllDots = true,
@@ -29,7 +29,7 @@ export function Big3SummaryCard({
 }: Big3SummaryCardProps) {
   if (!summary.latest) {
     return (
-      <div className="rounded-2xl bg-muted/20 p-6 text-center">
+      <div className="rounded-2xl bg-surface-secondary p-6 text-center">
         <BarbellIcon size={28} weight="duotone" className="text-muted-foreground/40 mx-auto mb-2" />
         <p className="text-sm text-muted-foreground">{emptyMessage}</p>
       </div>

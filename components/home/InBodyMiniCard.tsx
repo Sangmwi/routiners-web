@@ -30,7 +30,7 @@ export default function InBodyMiniCard({ summary, history = [] }: InBodyMiniCard
         }}
       />
 
-      <div className="bg-muted/20 rounded-2xl p-4 mt-3">
+      <div className="bg-surface-secondary rounded-2xl p-4 mt-3">
         <div className="grid grid-cols-3 gap-3">
           {METRICS_CONFIG.map(({ key, label, unit, positiveIsGood }) => {
             const value = summary.latest?.[key];

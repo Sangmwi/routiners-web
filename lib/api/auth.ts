@@ -11,6 +11,8 @@ import { User, SignupCompleteData, ApiError } from '@/lib/types';
 import { authFetch } from '@/lib/utils/authFetch';
 import { createClient } from '@/utils/supabase/client';
 import { api } from './client';
+import { parseApiResponse } from '@/lib/schemas/api.schema';
+import { UserSchema } from '@/lib/schemas/user.schema';
 
 export const authApi = {
   /**
@@ -61,7 +63,7 @@ export const authApi = {
       throw new ApiError('Server returned non-JSON response', 500, 'INTERNAL_ERROR');
     }
 
-    return response.json();
+    return parseApiResponse(response, UserSchema);
   },
 
   /**

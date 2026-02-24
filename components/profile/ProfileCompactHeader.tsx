@@ -31,7 +31,7 @@ export default function ProfileCompactHeader({ user }: ProfileCompactHeaderProps
       </div>
 
       {/* 프로필 사진 (64px 원형) */}
-      <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-border/30 flex-shrink-0">
+      <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-edge-faint flex-shrink-0">
         <ImageWithFallback
           src={user.profilePhotoUrl}
           alt={user.nickname}

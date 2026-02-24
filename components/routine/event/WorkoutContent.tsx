@@ -257,13 +257,13 @@ export default function WorkoutContent({
             )}
           </div>
         ) : (
-          <div className="bg-muted/50 rounded-xl p-6 text-center">
+          <div className="bg-surface-muted rounded-xl p-6 text-center">
             <p className="text-muted-foreground">상세 운동 정보가 없습니다.</p>
           </div>
         )}
 
         {workoutData?.notes && (
-          <div className="bg-muted/20 rounded-2xl p-4">
+          <div className="bg-surface-secondary rounded-2xl p-4">
             <h3 className="text-sm font-medium text-muted-foreground mb-2">메모</h3>
             <p className="text-foreground">{workoutData.notes}</p>
           </div>

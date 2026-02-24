@@ -14,9 +14,9 @@ export const EVENT_TYPE = {
     description: '운동 루틴',
     weight: ICON_WEIGHT.active as IconWeight,
     color: 'text-primary',
-    bgColor: 'bg-primary/10',
+    bgColor: 'bg-surface-accent',
     borderColor: 'border-primary/30',
-    badgeClass: 'bg-primary/15 text-primary',
+    badgeClass: 'bg-surface-accent-strong text-primary',
   },
   meal: {
     icon: BowlFoodIcon,
@@ -24,9 +24,9 @@ export const EVENT_TYPE = {
     description: '식단 관리',
     weight: ICON_WEIGHT.active as IconWeight,
     color: 'text-primary',
-    bgColor: 'bg-primary/10',
+    bgColor: 'bg-surface-accent',
     borderColor: 'border-primary/30',
-    badgeClass: 'bg-primary/15 text-primary',
+    badgeClass: 'bg-surface-accent-strong text-primary',
   },
   rest: {
     icon: MoonIcon,
@@ -34,7 +34,7 @@ export const EVENT_TYPE = {
     description: '쉬는 날',
     weight: ICON_WEIGHT.inactive as IconWeight,
     color: 'text-muted-foreground',
-    bgColor: 'bg-muted/20',
+    bgColor: 'bg-surface-secondary',
     borderColor: 'border-border',
     badgeClass: 'bg-muted text-muted-foreground',
   },
@@ -46,22 +46,22 @@ export const EVENT_STATUS = {
     label: '예정',
     icon: ClockIcon,
     weight: ICON_WEIGHT.scheduled as IconWeight,    // duotone
-    badgeClass: 'bg-scheduled/10 text-warning',
+    badgeClass: 'bg-surface-scheduled text-warning',
     iconClass: 'text-scheduled',
   },
   completed: {
     label: '완료',
     icon: CheckCircleIcon,
     weight: ICON_WEIGHT.completed as IconWeight,    // fill
-    badgeClass: 'bg-primary/10 text-primary',
+    badgeClass: 'bg-surface-accent text-primary',
     iconClass: 'text-primary',
   },
   incomplete: {
     label: '미완료',
     icon: XCircleIcon,
     weight: ICON_WEIGHT.inactive as IconWeight,     // regular
-    badgeClass: 'bg-muted/50 text-muted-foreground',
-    iconClass: 'text-muted-foreground',
+    badgeClass: 'bg-surface-muted text-muted-foreground',
+    iconClass: 'text-muted-foreground/40',
   },
 } as const;
 
@@ -72,28 +72,28 @@ export const MEAL_TIME = {
     label: '아침',
     weight: ICON_WEIGHT.active as IconWeight,
     color: 'text-muted-foreground',
-    bgColor: 'bg-muted/20',
+    bgColor: 'bg-surface-secondary',
   },
   lunch: {
     icon: CloudSunIcon,
     label: '점심',
     weight: ICON_WEIGHT.active as IconWeight,
     color: 'text-muted-foreground',
-    bgColor: 'bg-muted/20',
+    bgColor: 'bg-surface-secondary',
   },
   dinner: {
     icon: MoonIcon,
     label: '저녁',
     weight: ICON_WEIGHT.active as IconWeight,
     color: 'text-muted-foreground',
-    bgColor: 'bg-muted/20',
+    bgColor: 'bg-surface-secondary',
   },
   snack: {
     icon: CoffeeIcon,
     label: '간식',
     weight: ICON_WEIGHT.inactive as IconWeight,
     color: 'text-muted-foreground',
-    bgColor: 'bg-muted/20',
+    bgColor: 'bg-surface-secondary',
   },
 } as const;
 

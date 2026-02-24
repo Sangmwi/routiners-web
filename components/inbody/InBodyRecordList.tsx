@@ -56,7 +56,7 @@ function RecordItem({
 
   return (
     <div
-      className="flex items-center justify-between px-4 py-3.5 hover:bg-muted/20 transition-colors cursor-pointer"
+      className="flex items-center justify-between px-4 py-3.5 hover:bg-surface-secondary transition-colors cursor-pointer"
       onClick={() => onClick?.(record)}
     >
       <div className="flex-1 min-w-0">
@@ -64,7 +64,7 @@ function RecordItem({
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium text-muted-foreground">{formattedDate}</p>
           {record.inbodyScore && (
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary">
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-surface-accent text-primary">
               {record.inbodyScore}점
             </span>
           )}

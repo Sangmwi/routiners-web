@@ -45,7 +45,7 @@ export default function ProfileActionRow({ userId }: ProfileActionRowProps) {
       {/* 프로필 편집 버튼 */}
       <button
         onClick={() => router.push('/profile/edit')}
-        className="w-full border border-border rounded-xl py-2.5 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
+        className="w-full border border-border rounded-xl py-2.5 text-sm font-medium text-foreground hover:bg-surface-muted transition-colors"
       >
         프로필 편집
       </button>

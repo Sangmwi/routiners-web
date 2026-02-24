@@ -63,12 +63,12 @@ interface ExerciseSetRowProps {
 
 function ExerciseSetRow({ set, onTapEdit, onRemove, canRemove }: ExerciseSetRowProps) {
   return (
-    <div className="flex items-center gap-3 rounded-xl bg-muted/20 px-4 py-3">
+    <div className="flex items-center gap-3 rounded-xl bg-surface-secondary px-4 py-3">
       <span className="text-xs text-muted-foreground shrink-0">{set.setNumber}세트</span>
       <button
         type="button"
         onClick={onTapEdit}
-        className="flex-1 h-9 px-3 flex items-center justify-center gap-2 text-sm font-medium bg-background border border-border rounded-lg active:bg-muted/50 transition-colors"
+        className="flex-1 h-9 px-3 flex items-center justify-center gap-2 text-sm font-medium bg-background border border-border rounded-lg active:bg-surface-muted transition-colors"
       >
         <span className="tabular-nums">{set.targetWeight ?? 0}kg</span>
         <span className="text-muted-foreground">×</span>
@@ -139,7 +139,7 @@ function SelectedExerciseCard({ exercise, onUpdate, onRemove }: SelectedExercise
   };
 
   return (
-    <div className="bg-card border border-border/50 rounded-xl p-4 space-y-3">
+    <div className="bg-card border border-edge-subtle rounded-xl p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div>
           <h4 className="font-medium text-sm">{exercise.name}</h4>
@@ -173,7 +173,7 @@ function SelectedExerciseCard({ exercise, onUpdate, onRemove }: SelectedExercise
         <button
           type="button"
           onClick={cycleRestSeconds}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-muted-foreground rounded-lg hover:bg-muted/30 transition-colors"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-muted-foreground rounded-lg hover:bg-surface-hover transition-colors"
         >
           <TimerIcon size={14} />
           <span>휴식 {formatRestSeconds(exercise.restSeconds ?? 60)}</span>
@@ -305,7 +305,7 @@ export default function AddWorkoutSheet({ isOpen, onClose, date, onCreated }: Ad
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="운동 검색..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-muted/50 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-muted text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </div>
 
@@ -330,7 +330,7 @@ export default function AddWorkoutSheet({ isOpen, onClose, date, onCreated }: Ad
 
           {/* 검색 결과 */}
           {query && (
-            <div className="max-h-48 overflow-y-auto rounded-xl border border-border/50 divide-y divide-border/30">
+            <div className="max-h-48 overflow-y-auto rounded-xl border border-edge-subtle divide-y divide-edge-faint">
               {searchResults.length === 0 ? (
                 <p className="p-3 text-sm text-muted-foreground text-center">
                   결과 없음
@@ -359,7 +359,7 @@ export default function AddWorkoutSheet({ isOpen, onClose, date, onCreated }: Ad
 
           {/* 카테고리별 빠른 선택 (검색어 없을 때 항상 표시, 추가된 항목 있으면 높이 축소) */}
           {!query && (
-            <div className={`overflow-y-auto rounded-xl border border-border/50 divide-y divide-border/30 ${
+            <div className={`overflow-y-auto rounded-xl border border-edge-subtle divide-y divide-edge-faint ${
               exercises.length === 0 ? 'max-h-72' : 'max-h-44'
             }`}>
               {searchResults.slice(0, 20).map((item) => (

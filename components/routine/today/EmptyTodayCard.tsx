@@ -85,7 +85,7 @@ export function EmptyTodayCard({ type }: EmptyTodayCardProps) {
       <button
         type="button"
         onClick={handleCardClick}
-        className="w-full flex items-center gap-4 px-2 py-5 active:bg-muted/20 transition-colors rounded-xl"
+        className="w-full flex items-center gap-4 px-2 py-5 active:bg-surface-secondary transition-colors rounded-xl"
       >
         <Icon size={32} weight="duotone" className="text-muted-foreground/60 shrink-0" />
         <div className="flex-1 min-w-0 text-left">

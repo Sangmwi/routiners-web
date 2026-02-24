@@ -45,7 +45,7 @@ export default function RoutineOptionBottomSheet<TOption extends string>({
               className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium ${
                 option.primary
                   ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted/50 text-foreground'
+                  : 'bg-surface-muted text-foreground'
               }`}
             >
               <span className={option.primary ? '' : 'text-muted-foreground shrink-0'}>

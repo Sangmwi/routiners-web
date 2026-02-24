@@ -17,7 +17,7 @@ export default function RestTimer({ remaining, total, onSkip }: RestTimerProps) 
   return (
     <div className="flex flex-col items-center gap-3 py-4">
       {/* 프로그레스 바 */}
-      <div className="w-full h-1.5 bg-muted/30 rounded-full overflow-hidden">
+      <div className="w-full h-1.5 bg-surface-hover rounded-full overflow-hidden">
         <div
           className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
           style={{ width: `${progress * 100}%` }}

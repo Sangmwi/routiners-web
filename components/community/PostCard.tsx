@@ -3,6 +3,7 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { HeartIcon, ChatCircleIcon, ShareNetworkIcon, DotsThreeVerticalIcon } from '@phosphor-icons/react';
 import { ImageWithFallback } from '@/components/ui/image';
+import { useThrottle } from '@/hooks/useThrottle';
 import type { CommunityPost } from '@/lib/types/community';
 import { formatTimeAgo } from '@/lib/types/community';
 import { RANK_OPTIONS } from '@/lib/constants/military';
@@ -69,14 +70,14 @@ export default function PostCard({ post, onLike, onComment, onAuthorClick, onMor
       <div className="flex items-center gap-3 py-2.5">
         <button
           onClick={handleAuthorClick}
-          className="relative h-9 w-9 overflow-hidden rounded-full bg-primary/10 border border-border/50"
+          className="relative h-9 w-9 overflow-hidden rounded-full bg-surface-accent border border-edge-subtle"
         >
           <ImageWithFallback
             src={authorAvatar}
             alt={authorName}
             fill
             className="object-cover"
-            fallbackClassName="bg-primary/10"
+            fallbackClassName="bg-surface-accent"
             showFallbackIcon={false}
           />
           {!authorAvatar && (
@@ -97,7 +98,7 @@ export default function PostCard({ post, onLike, onComment, onAuthorClick, onMor
         {showMoreButton && (
           <button
             onClick={handleMoreClick}
-            className="p-2 rounded-full hover:bg-muted/30 transition-colors text-muted-foreground"
+            className="p-2 rounded-full hover:bg-surface-hover transition-colors text-muted-foreground"
           >
             <DotsThreeVerticalIcon size={20} weight="bold" />
           </button>
@@ -152,12 +153,12 @@ function PostCardImages({ images }: { images: string[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const handleScroll = useCallback(() => {
+  const handleScroll = useThrottle(() => {
     const el = scrollRef.current;
     if (!el) return;
     const index = Math.round(el.scrollLeft / el.clientWidth);
     setActiveIndex(index);
-  }, []);
+  }, 100);
 
   useEffect(() => {
     const el = scrollRef.current;

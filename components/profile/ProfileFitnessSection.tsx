@@ -68,7 +68,7 @@ export default function ProfileFitnessSection({
       >
         {/* Hero: 아이콘 + 목표/경험 + chevron */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-surface-accent flex items-center justify-center shrink-0">
             <BarbellIcon size={20} className="text-primary" weight="duotone" />
           </div>
           <div className="flex-1 min-w-0">
@@ -88,7 +88,7 @@ export default function ProfileFitnessSection({
 
         {/* 구분선 */}
         {(scheduleText || equipmentText || focusAreas.length > 0) && (
-          <div className="border-t border-border/30 mt-3 pt-3 space-y-2">
+          <div className="border-t border-edge-faint mt-3 pt-3 space-y-2">
             {/* 스케줄 + 장비 (한 줄 텍스트) */}
             {(scheduleText || equipmentText) && (
               <p className="text-xs text-muted-foreground">
@@ -102,7 +102,7 @@ export default function ProfileFitnessSection({
                 {focusAreas.map((area) => (
                   <span
                     key={area}
-                    className="px-2 py-0.5 text-xs rounded-md bg-muted/50 text-muted-foreground"
+                    className="px-2 py-0.5 text-xs rounded-md bg-surface-muted text-muted-foreground"
                   >
                     {FOCUS_AREA_LABELS[area]}
                   </span>
@@ -125,7 +125,7 @@ export default function ProfileFitnessSection({
             title="운동 프로필"
             action={{ label: '관리', href: '/profile/fitness' }}
           />
-          <div className="bg-muted/20 rounded-2xl p-4">
+          <div className="bg-surface-secondary rounded-2xl p-4">
             {content}
           </div>
         </div>

@@ -88,7 +88,7 @@ export default function ExerciseCard({
   return (
     <div
       className={`rounded-xl overflow-hidden ${
-        isCompleted ? 'bg-primary/5' : 'bg-muted/20'
+        isCompleted ? 'bg-primary/5' : 'bg-surface-secondary'
       }`}
     >
       {/* 헤더: 전체 영역 탭으로 확장/축소, 편집 모드에서는 드래그도 가능 */}
@@ -220,7 +220,7 @@ function ReadSetRow({ set }: { set: WorkoutSet }) {
 
   if (set.completed || hasActual) {
     return (
-      <div className="flex items-center gap-3 rounded-xl bg-primary/10 px-4 py-3">
+      <div className="flex items-center gap-3 rounded-xl bg-surface-accent px-4 py-3">
         <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
           <CheckIcon size={16} weight="bold" className="text-primary-foreground" />
         </div>
@@ -235,7 +235,7 @@ function ReadSetRow({ set }: { set: WorkoutSet }) {
   }
 
   return (
-    <div className="flex items-center gap-3 rounded-xl bg-muted/20 px-4 py-3">
+    <div className="flex items-center gap-3 rounded-xl bg-surface-secondary px-4 py-3">
       <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
         <span className="text-xs font-bold text-muted-foreground">{set.setNumber}</span>
       </div>
@@ -260,14 +260,14 @@ function EditSetRow({
   const displayReps = set.actualReps ?? set.targetReps;
 
   return (
-    <div className="flex items-center gap-3 rounded-xl bg-muted/30 px-4 py-3">
+    <div className="flex items-center gap-3 rounded-xl bg-surface-hover px-4 py-3">
       <span className="text-xs text-foreground shrink-0">
         {set.setNumber} 세트
       </span>
 
       <button
         onClick={onTapEdit}
-        className="flex-1 h-10 px-3 flex items-center justify-center gap-2 text-sm font-medium bg-background border border-border rounded-lg active:bg-muted/50 transition-colors"
+        className="flex-1 h-10 px-3 flex items-center justify-center gap-2 text-sm font-medium bg-background border border-border rounded-lg active:bg-surface-muted transition-colors"
       >
         <span className="tabular-nums">{displayWeight}kg</span>
         <span className="text-muted-foreground">×</span>

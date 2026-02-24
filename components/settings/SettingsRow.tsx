@@ -42,7 +42,7 @@ export default function SettingsRow({
   return (
     <Wrapper
       onClick={isCustom ? undefined : handleClick}
-      className="flex items-center gap-3 w-full px-4 py-3.5 text-left hover:bg-muted/20 transition-colors"
+      className="flex items-center gap-3 w-full px-4 py-3.5 text-left hover:bg-surface-secondary transition-colors"
     >
       {IconComponent && (
         <IconComponent

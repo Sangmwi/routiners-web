@@ -125,8 +125,8 @@ export default function ChatInputRequest({
                   transition-all duration-150
                   ${
                     isSelected
-                      ? 'bg-primary/10 ring-1 ring-primary/30'
-                      : 'bg-muted/20 hover:bg-muted/50'
+                      ? 'bg-surface-accent ring-1 ring-accent'
+                      : 'bg-surface-secondary hover:bg-surface-muted'
                   }
                 `}
               >
@@ -157,7 +157,7 @@ export default function ChatInputRequest({
             ${
               selectedRadio
                 ? 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98]'
-                : 'bg-muted/50 text-muted-foreground cursor-not-allowed'
+                : 'bg-surface-muted text-muted-foreground cursor-not-allowed'
             }
           `}
         >
@@ -186,8 +186,8 @@ export default function ChatInputRequest({
                   transition-all duration-150
                   ${
                     isSelected
-                      ? 'bg-primary/10 ring-1 ring-primary/30'
-                      : 'bg-muted/20 hover:bg-muted/50'
+                      ? 'bg-surface-accent ring-1 ring-accent'
+                      : 'bg-surface-secondary hover:bg-surface-muted'
                   }
                 `}
               >
@@ -218,7 +218,7 @@ export default function ChatInputRequest({
             ${
               selectedCheckbox.length > 0
                 ? 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98]'
-                : 'bg-muted/50 text-muted-foreground cursor-not-allowed'
+                : 'bg-surface-muted text-muted-foreground cursor-not-allowed'
             }
           `}
         >
@@ -248,7 +248,7 @@ export default function ChatInputRequest({
         {/* 슬라이더 */}
         <div className="relative mb-4 px-1">
           {/* 트랙 배경 */}
-          <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
+          <div className="h-2 bg-surface-muted rounded-full overflow-hidden">
             {/* 채워진 부분 */}
             <div
               className="h-full bg-primary rounded-full transition-all duration-100"

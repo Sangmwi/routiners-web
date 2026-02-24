@@ -32,7 +32,7 @@ export default function ProfileInbodyInput() {
         <div className="space-y-4">
           {/* 현재 인바디 요약 */}
           <div
-            className="bg-muted/20 rounded-xl p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+            className="bg-surface-secondary rounded-xl p-4 cursor-pointer hover:bg-surface-muted transition-colors"
             onClick={() => setIsManageModalOpen(true)}
           >
             {latest ? (

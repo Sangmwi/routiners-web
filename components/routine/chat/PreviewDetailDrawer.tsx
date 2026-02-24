@@ -77,7 +77,7 @@ export default function PreviewDetailDrawer({
       height="full"
       showCloseButton={false}
       stickyFooter={
-        <div className="p-4 bg-card border-t border-border/50 space-y-3">
+        <div className="p-4 bg-card border-t border-edge-subtle space-y-3">
           {status === 'pending' ? (
             <>
               {/* 주차 선택 */}
@@ -105,8 +105,8 @@ export default function PreviewDetailDrawer({
                     onClick={() => setApplyMode('replace')}
                     className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium rounded-xl transition-all ${
                       applyMode === 'replace'
-                        ? 'bg-primary/10 text-primary ring-1 ring-primary/30'
-                        : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                        ? 'bg-surface-accent text-primary ring-1 ring-accent'
+                        : 'bg-surface-muted text-muted-foreground hover:bg-muted'
                     }`}
                   >
                     <ArrowsClockwiseIcon size={14} weight={applyMode === 'replace' ? 'bold' : 'regular'} />
@@ -116,8 +116,8 @@ export default function PreviewDetailDrawer({
                     onClick={() => setApplyMode('append')}
                     className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium rounded-xl transition-all ${
                       applyMode === 'append'
-                        ? 'bg-primary/10 text-primary ring-1 ring-primary/30'
-                        : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                        ? 'bg-surface-accent text-primary ring-1 ring-accent'
+                        : 'bg-surface-muted text-muted-foreground hover:bg-muted'
                     }`}
                   >
                     <PlusCircleIcon size={14} weight={applyMode === 'append' ? 'bold' : 'regular'} />
@@ -173,11 +173,11 @@ export default function PreviewDetailDrawer({
       {/* 헤더 - 배지 + 타이틀 + 설명 */}
       <div className="px-5 pt-2 pb-4">
         <div className="flex items-center gap-2 mb-4">
-          <span className="px-2.5 py-1 text-xs font-medium bg-muted/50 text-muted-foreground rounded-full">
+          <span className="px-2.5 py-1 text-xs font-medium bg-surface-muted text-muted-foreground rounded-full">
             주 {preview.daysPerWeek}회
           </span>
           {firstWeek?.days[0]?.estimatedDuration && (
-            <span className="px-2.5 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
+            <span className="px-2.5 py-1 text-xs font-medium bg-surface-accent text-primary rounded-full">
               {firstWeek.days[0].estimatedDuration}분
             </span>
           )}
@@ -211,11 +211,11 @@ export default function PreviewDetailDrawer({
  */
 function RoutineDayCard({ day }: { day: RoutinePreviewDay }) {
   return (
-    <div className="bg-muted/20 rounded-2xl overflow-hidden">
+    <div className="bg-surface-secondary rounded-2xl overflow-hidden">
       {/* 카드 헤더 */}
-      <div className="flex items-center justify-between gap-3 px-4 py-3 bg-primary/10">
+      <div className="flex items-center justify-between gap-3 px-4 py-3 bg-surface-accent">
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
-          <span className="w-7 h-7 rounded-full bg-primary/15 text-primary text-xs font-semibold flex items-center justify-center shrink-0">
+          <span className="w-7 h-7 rounded-full bg-surface-accent-strong text-primary text-xs font-semibold flex items-center justify-center shrink-0">
             {DAY_NAMES[day.dayOfWeek]}
           </span>
           <span className="text-sm font-medium text-foreground truncate">{day.title}</span>
@@ -253,7 +253,7 @@ function ExerciseItem({
   isLast: boolean;
 }) {
   return (
-    <div className={`pb-4 ${!isLast ? 'border-b border-border/20' : ''}`}>
+    <div className={`pb-4 ${!isLast ? 'border-b border-edge-divider' : ''}`}>
       <p className="text-sm font-medium text-foreground">{exercise.name}</p>
       <p className="text-sm text-muted-foreground mt-1.5">
         {exercise.sets}세트 · {exercise.reps}회

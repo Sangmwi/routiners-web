@@ -47,7 +47,7 @@ export default function BodyCompositionSummary({
               </p>
             )}
           </div>
-          <div className="border-t border-border/30 mb-3" />
+          <div className="border-t border-edge-faint mb-3" />
         </>
       )}
       {children}

@@ -18,7 +18,7 @@ export default function WelcomeScreen({ onChipClick, disabled }: WelcomeScreenPr
   return (
     <div className="flex flex-col items-center justify-center h-full px-6 py-12 text-center">
       {/* 로고/아이콘 */}
-      <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
+      <div className="w-20 h-20 rounded-2xl bg-surface-accent flex items-center justify-center mb-6">
         <RobotIcon size={40} weight="fill" className="text-primary" />
       </div>
 
@@ -46,7 +46,7 @@ export default function WelcomeScreen({ onChipClick, disabled }: WelcomeScreenPr
               className="flex items-center gap-4 w-full rounded-2xl border border-border bg-card px-5 py-4 text-left transition-colors active:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {IconComp && (
-                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-surface-accent flex items-center justify-center">
                   <IconComp size={22} weight="fill" className="text-primary" />
                 </div>
               )}

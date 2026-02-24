@@ -53,7 +53,7 @@ export default function WorkoutComplete({
       <div className="flex-1 overflow-y-auto">
         <div className="flex flex-col items-center px-(--layout-padding-x) pt-16 pb-32">
           {/* 축하 아이콘 */}
-          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+          <div className="w-20 h-20 rounded-full bg-surface-accent flex items-center justify-center mb-4">
             <TrophyIcon size={40} weight="fill" className="text-primary" />
           </div>
 
@@ -65,9 +65,9 @@ export default function WorkoutComplete({
           </p>
 
           {/* 통계 카드 */}
-          <div className="w-full rounded-2xl bg-muted/20 p-5 space-y-4 mb-8">
+          <div className="w-full rounded-2xl bg-surface-secondary p-5 space-y-4 mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-surface-accent flex items-center justify-center">
                 <TimerIcon size={20} weight="fill" className="text-primary" />
               </div>
               <div className="flex-1">
@@ -82,7 +82,7 @@ export default function WorkoutComplete({
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-surface-accent flex items-center justify-center">
                 <BarbellIcon size={20} weight="fill" className="text-primary" />
               </div>
               <div className="flex-1">
@@ -94,7 +94,7 @@ export default function WorkoutComplete({
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-surface-accent flex items-center justify-center">
                 <ChartBarIcon size={20} weight="fill" className="text-primary" />
               </div>
               <div className="flex-1">
@@ -114,7 +114,7 @@ export default function WorkoutComplete({
             {exerciseSummaries.map((summary) => (
               <div
                 key={summary.name}
-                className="flex items-center gap-3 rounded-xl bg-muted/20 px-4 py-3"
+                className="flex items-center gap-3 rounded-xl bg-surface-secondary px-4 py-3"
               >
                 {summary.isCompleted ? (
                   <CheckCircleIcon

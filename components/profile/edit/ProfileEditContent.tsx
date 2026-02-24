@@ -44,7 +44,7 @@ function LinkedSectionCard({
       <label className="text-sm font-medium text-muted-foreground block">{title}</label>
       <button
         onClick={() => router.push(href)}
-        className="w-full rounded-xl border border-border/50 px-4 py-3 flex items-center gap-3 text-left hover:bg-muted/20 transition-colors"
+        className="w-full rounded-xl border border-edge-subtle px-4 py-3 flex items-center gap-3 text-left hover:bg-surface-secondary transition-colors"
       >
         <div className="flex-1 min-w-0">
           {summary ? (
@@ -178,7 +178,7 @@ export default function ProfileEditContent() {
                 />
 
                 {/* 공개 설정 */}
-                <div className="space-y-3 pt-4 border-t border-border/30">
+                <div className="space-y-3 pt-4 border-t border-edge-faint">
                   <ToggleRow
                     label="활동 공개"
                     description="게시글과 활동 기록을 다른 사용자에게 공개해요"

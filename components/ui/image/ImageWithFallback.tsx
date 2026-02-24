@@ -27,7 +27,7 @@ function ResolvedImage({
   alt,
   fallbackSrc,
   showFallbackIcon = true,
-  fallbackClassName = 'bg-muted/80 border border-border/30',
+  fallbackClassName = 'bg-muted/80 border border-edge-faint',
   className,
   fill,
   sizes,
@@ -113,7 +113,7 @@ export default function ImageWithFallback({
   alt,
   fallbackSrc,
   showFallbackIcon = true,
-  fallbackClassName = 'bg-muted/80 border border-border/30',
+  fallbackClassName = 'bg-muted/80 border border-edge-faint',
   ...props
 }: ImageWithFallbackProps) {
   if (!src) {

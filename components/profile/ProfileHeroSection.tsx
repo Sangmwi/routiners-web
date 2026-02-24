@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { User } from '@/lib/types';
 import { ImageWithFallback } from '@/components/ui/image';
+import { useWindowEventListener } from '@/hooks/common/useEventListener';
 import { CheckCircleIcon, CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 
 interface ProfileHeroSectionProps {
@@ -62,20 +63,15 @@ export default function ProfileHeroSection({ user }: ProfileHeroSectionProps) {
   };
 
   // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (images.length <= 1) return;
-      if (e.key === 'ArrowLeft') {
-        setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-      }
-      if (e.key === 'ArrowRight') {
-        setCurrentIndex((prev) => (prev + 1) % images.length);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [images.length]);
+  useWindowEventListener('keydown', (e) => {
+    if (images.length <= 1) return;
+    if (e.key === 'ArrowLeft') {
+      setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+    }
+    if (e.key === 'ArrowRight') {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+    }
+  });
 
   return (
     <div

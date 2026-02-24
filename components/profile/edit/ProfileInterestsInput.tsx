@@ -61,7 +61,7 @@ export default function ProfileInterestsInput({ value, onChange }: ProfileIntere
     <div className="space-y-3">
       {/* Selected Interests */}
       {value.length > 0 && (
-        <div className="flex flex-wrap gap-2 p-3 rounded-xl bg-muted/20">
+        <div className="flex flex-wrap gap-2 p-3 rounded-xl bg-surface-secondary">
           {value.map((interest, index) => (
             <div
               key={index}
@@ -92,8 +92,8 @@ export default function ProfileInterestsInput({ value, onChange }: ProfileIntere
                 onClick={() => handleToggleInterest(exercise)}
                 className={`px-3 py-1.5 rounded-[14px] text-xs transition-colors ${
                   isSelected
-                    ? 'bg-primary/10 text-primary border-2 border-primary'
-                    : 'bg-muted text-card-foreground border border-border/50 hover:border-primary/50'
+                    ? 'bg-surface-accent text-primary border-2 border-primary'
+                    : 'bg-muted text-card-foreground border border-edge-subtle hover:border-primary/50'
                 }`}
               >
                 {exercise}

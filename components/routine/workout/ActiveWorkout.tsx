@@ -64,7 +64,7 @@ export default function ActiveWorkout({ session }: ActiveWorkoutProps) {
       {/* 헤더 */}
       <HeaderShell
         below={
-          <div className="h-1 bg-muted/20">
+          <div className="h-1 bg-surface-secondary">
             <div
               className="h-full bg-primary rounded-full transition-all duration-300"
               style={{ width: `${progress * 100}%` }}

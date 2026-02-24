@@ -133,7 +133,7 @@ export default function CalendarContent() {
         />
       </div>
 
-      <hr className="border-border/50" />
+      <hr className="border-edge-subtle" />
 
       {/* 선택된 날짜의 이벤트 (독립 Suspense) */}
       <Suspense fallback={<PulseLoader className="py-8" />}>

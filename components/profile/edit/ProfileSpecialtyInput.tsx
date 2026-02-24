@@ -72,7 +72,7 @@ export default function ProfileSpecialtyInput({ value, onChange }: ProfileSpecia
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="병과명으로 검색"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-focus focus:border-primary"
                 autoFocus
               />
             </div>
@@ -91,8 +91,8 @@ export default function ProfileSpecialtyInput({ value, onChange }: ProfileSpecia
                   onClick={() => handleSelect(specialty)}
                   className={`w-full px-4 py-3 rounded-xl text-left transition-all ${
                     specialty === value
-                      ? 'bg-primary/10 border-2 border-primary'
-                      : 'bg-muted/20 border-2 border-transparent hover:bg-muted/50'
+                      ? 'bg-surface-accent border-2 border-primary'
+                      : 'bg-surface-secondary border-2 border-transparent hover:bg-surface-muted'
                   }`}
                 >
                   <p className="font-medium text-foreground">{SPECIALTY_LABELS[specialty]}</p>

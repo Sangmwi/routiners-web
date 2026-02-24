@@ -15,11 +15,11 @@ export default function InfluencerCard({ author, title, imageUrl, votes, onClick
   return (
     <div
       onClick={onClick}
-      className="flex-shrink-0 rounded-2xl bg-muted/20 overflow-hidden border border-border/30
+      className="flex-shrink-0 rounded-2xl bg-surface-secondary overflow-hidden border border-edge-faint
                  transition-all duration-200 active:scale-[0.98] cursor-pointer
                  hover:shadow-md"
     >
-      <div className="relative w-full aspect-video bg-muted/20">
+      <div className="relative w-full aspect-video bg-surface-secondary">
         <ImageWithFallback
           src={imageUrl}
           alt={title}

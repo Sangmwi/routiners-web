@@ -100,7 +100,7 @@ function WorkoutSummarySection({
         <div className="flex items-center gap-1.5">
           <h3 className="text-base font-medium text-foreground">운동 요약</h3>
           {isPlannedOnly && (
-            <span className="text-xs text-scheduled bg-scheduled/10 px-1.5 py-0.5 rounded-md">
+            <span className="text-xs text-scheduled bg-surface-scheduled px-1.5 py-0.5 rounded-md">
               예정
             </span>
           )}
@@ -116,7 +116,7 @@ function WorkoutSummarySection({
         {metrics.map(({ icon, label, total, avg, format, unit }) => {
           const value = mode === 'total' ? total : avg;
           return (
-            <div key={label} className="bg-muted/20 rounded-2xl p-4">
+            <div key={label} className="bg-surface-secondary rounded-2xl p-4">
               <div className="flex items-center gap-2.5 mb-2.5">
                 {icon}
                 <span className="text-xs text-muted-foreground">{label}</span>
@@ -160,7 +160,7 @@ function WeeklyWorkoutMetrics({ dateStr }: { dateStr: string }) {
   const workoutTotal = stats.workout.completed + stats.workout.scheduled;
 
   if (!stats || workoutTotal === 0) {
-    return <EmptyState icon={BarbellIcon} message="운동 기록이 없습니다." className="rounded-2xl bg-muted/20" />;
+    return <EmptyState icon={BarbellIcon} message="운동 기록이 없습니다." className="rounded-2xl bg-surface-secondary" />;
   }
 
   return (
@@ -176,7 +176,7 @@ function MonthlyWorkoutMetrics({ year, month }: { year: number; month: number })
   const workoutTotal = stats.workout.completed + stats.workout.scheduled;
 
   if (!stats || workoutTotal === 0) {
-    return <EmptyState icon={BarbellIcon} message="운동 기록이 없습니다." className="rounded-2xl bg-muted/20" />;
+    return <EmptyState icon={BarbellIcon} message="운동 기록이 없습니다." className="rounded-2xl bg-surface-secondary" />;
   }
 
   return (
@@ -234,7 +234,7 @@ function Big3Section() {
         sparklineShowMinMax
         sparklineShowAllDots
         dateRange={dateRange}
-        metricGridClassName="grid grid-cols-3 gap-3 pt-3 border-t border-border/20"
+        metricGridClassName="grid grid-cols-3 gap-3 pt-3 border-t border-edge-divider"
       />
     </div>
   );

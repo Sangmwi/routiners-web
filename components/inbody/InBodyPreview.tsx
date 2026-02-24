@@ -90,7 +90,7 @@ export default function InBodyPreview({
       </div>
 
       {/* 측정일 */}
-      <div className="bg-muted/20 rounded-xl p-4">
+      <div className="bg-surface-secondary rounded-xl p-4">
         {isEditing ? (
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">측정일</p>
@@ -113,7 +113,7 @@ export default function InBodyPreview({
       </div>
 
       {/* 핵심 지표 */}
-      <div className="bg-muted/20 rounded-xl p-4 space-y-3">
+      <div className="bg-surface-secondary rounded-xl p-4 space-y-3">
         <h4 className="text-sm font-medium text-muted-foreground mb-3">
           핵심 지표
         </h4>
@@ -190,7 +190,7 @@ export default function InBodyPreview({
       {showDetails && !isEditing && (
         <div className="space-y-4">
           {/* 체성분 */}
-          <div className="bg-muted/20 rounded-xl p-4">
+          <div className="bg-surface-secondary rounded-xl p-4">
             <h4 className="text-sm font-medium text-muted-foreground mb-3">
               체성분
             </h4>
@@ -204,7 +204,7 @@ export default function InBodyPreview({
 
           {/* 부위별 근육량 */}
           {(data.rightArmMuscle || data.leftArmMuscle || data.trunkMuscle || data.rightLegMuscle || data.leftLegMuscle) && (
-            <div className="bg-muted/20 rounded-xl p-4">
+            <div className="bg-surface-secondary rounded-xl p-4">
               <h4 className="text-sm font-medium text-muted-foreground mb-3">
                 부위별 근육량
               </h4>
@@ -220,7 +220,7 @@ export default function InBodyPreview({
 
           {/* 부위별 체지방량 */}
           {(data.rightArmFat || data.leftArmFat || data.trunkFat || data.rightLegFat || data.leftLegFat) && (
-            <div className="bg-muted/20 rounded-xl p-4">
+            <div className="bg-surface-secondary rounded-xl p-4">
               <h4 className="text-sm font-medium text-muted-foreground mb-3">
                 부위별 체지방량
               </h4>

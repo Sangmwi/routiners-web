@@ -45,7 +45,7 @@ export default function ProfileRankInput({ value, onChange }: ProfileRankInputPr
               className={`flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl text-sm font-medium transition-all ${
                 isSelected
                   ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25'
-                  : 'bg-muted/30 text-muted-foreground border border-border/50 hover:border-primary/50'
+                  : 'bg-surface-hover text-muted-foreground border border-edge-subtle hover:border-primary/50'
               }`}
             >
               <RankInsignia rank={rank} active={isSelected} />

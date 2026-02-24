@@ -25,7 +25,7 @@ interface MealCardProps {
  */
 function FoodItemRow({ food }: { food: FoodItem }) {
   return (
-    <div className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
+    <div className="flex items-center justify-between py-1.5 border-b border-edge-faint last:border-0">
       <div className="flex-1 min-w-0">
         <span className="text-sm text-foreground truncate block">{food.name}</span>
       </div>
@@ -58,7 +58,7 @@ export default function MealCard({
   const mealConfig = getMealTimeConfig(meal.type);
 
   return (
-    <div className={`bg-muted/20 rounded-2xl overflow-hidden ${
+    <div className={`bg-surface-secondary rounded-2xl overflow-hidden ${
       isCompleted || meal.completed ? 'opacity-60' : ''
     }`}>
       {/* Row 1: 제목 + 액션 */}

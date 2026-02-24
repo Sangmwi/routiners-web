@@ -25,7 +25,7 @@ function GridCell({ post, userId, index }: { post: CommunityPost; userId: string
   return (
     <button
       onClick={() => router.push(`/profile/user/${userId}/posts?startIndex=${index}`)}
-      className="aspect-square relative overflow-hidden bg-muted/20"
+      className="aspect-square relative overflow-hidden bg-surface-secondary"
     >
       {hasImages ? (
         <>

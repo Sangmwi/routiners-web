@@ -127,14 +127,14 @@ export default function InBodyDetailModal({
           <div className="flex items-center gap-1">
             <button
               onClick={handleConfirmDelete}
-              className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-surface-danger transition-colors"
               aria-label="삭제"
             >
               <DeleteIcon size="md" className="text-muted-foreground hover:text-destructive transition-colors" />
             </button>
             <button
               onClick={handleEdit}
-              className="p-1.5 rounded-lg hover:bg-muted/50 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-surface-muted transition-colors"
               aria-label="수정"
             >
               <PencilSimpleIcon size={20} className="text-muted-foreground" />

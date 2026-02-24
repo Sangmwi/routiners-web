@@ -10,8 +10,5 @@ export * from './queries';
 // Mutation Hooks
 export * from './mutations';
 
-// Legacy re-export (deprecated - use queries.ts and mutations.ts directly)
-export * from './useInBody';
-
 // Page-level State Management
 export { useInBodyManagerSuspense } from './useInBodyManagerSuspense';

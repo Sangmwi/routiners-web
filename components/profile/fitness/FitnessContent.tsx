@@ -108,7 +108,7 @@ export default function FitnessContent() {
   return (
     <>
       {/* 프로그레스바 */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm px-4 py-2 -mx-4 mb-2">
+      <div className="sticky top-0 z-10 bg-surface-glass backdrop-blur-sm px-4 py-2 -mx-4 mb-2">
         <div className="flex items-center gap-2">
           <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
             <div
@@ -124,7 +124,7 @@ export default function FitnessContent() {
 
       <div className="space-y-4 pb-24">
         {/* 그룹 1: 목표 & 경험 */}
-        <div className="bg-card rounded-2xl p-4 space-y-5 border border-border/30">
+        <div className="bg-card rounded-2xl p-4 space-y-5 border border-edge-faint">
           <Section title="운동 목표" description="어떤 목표를 위해 운동하시나요?">
             <div className="flex flex-wrap gap-2">
               {FITNESS_GOALS.map((goal) => (
@@ -144,7 +144,7 @@ export default function FitnessContent() {
             </div>
           </Section>
 
-          <div className="border-t border-border/20" />
+          <div className="border-t border-edge-divider" />
 
           <Section title="운동 경험" description="현재 운동 수준은 어느 정도인가요?">
             <div className="flex flex-wrap gap-2">
@@ -167,7 +167,7 @@ export default function FitnessContent() {
         </div>
 
         {/* 그룹 2: 스케줄 */}
-        <div className="bg-card rounded-2xl p-4 space-y-5 border border-border/30">
+        <div className="bg-card rounded-2xl p-4 space-y-5 border border-edge-faint">
           <Section title="주당 운동 일수" description="일주일에 몇 번 운동하시나요?">
             <div className="flex flex-wrap gap-2">
               {PREFERRED_DAYS_OPTIONS.map((days) => (
@@ -189,7 +189,7 @@ export default function FitnessContent() {
             </div>
           </Section>
 
-          <div className="border-t border-border/20" />
+          <div className="border-t border-edge-divider" />
 
           <Section title="1회 운동 시간" description="한 번에 얼마나 운동하시나요?">
             <div className="flex flex-wrap gap-2">
@@ -214,7 +214,7 @@ export default function FitnessContent() {
         </div>
 
         {/* 그룹 3: 장비 & 집중 부위 */}
-        <div className="bg-card rounded-2xl p-4 space-y-5 border border-border/30">
+        <div className="bg-card rounded-2xl p-4 space-y-5 border border-edge-faint">
           <Section title="장비 접근성" description="어떤 장비를 사용할 수 있나요?">
             <div className="flex flex-wrap gap-2">
               {EQUIPMENT_ACCESS.map((access) => (
@@ -234,7 +234,7 @@ export default function FitnessContent() {
             </div>
           </Section>
 
-          <div className="border-t border-border/20" />
+          <div className="border-t border-edge-divider" />
 
           <Section
             title="집중 부위"
@@ -254,7 +254,7 @@ export default function FitnessContent() {
         </div>
 
         {/* 그룹 4: 자유 입력 */}
-        <div className="bg-card rounded-2xl p-4 space-y-5 border border-border/30">
+        <div className="bg-card rounded-2xl p-4 space-y-5 border border-edge-faint">
           <Section
             title="부상 및 제한사항"
             description="주의가 필요한 부상이나 제한사항을 입력해 주세요."
@@ -267,7 +267,7 @@ export default function FitnessContent() {
             />
           </Section>
 
-          <div className="border-t border-border/20" />
+          <div className="border-t border-edge-divider" />
 
           <Section title="선호 운동" description="좋아하는 운동을 입력해 주세요." optional>
             <TagInput
@@ -279,7 +279,7 @@ export default function FitnessContent() {
             />
           </Section>
 
-          <div className="border-t border-border/20" />
+          <div className="border-t border-edge-divider" />
 
           <Section
             title="피하고 싶은 운동"
@@ -297,7 +297,7 @@ export default function FitnessContent() {
         </div>
 
         {saveError && (
-          <div className="p-4 rounded-xl bg-destructive/10 text-destructive text-sm text-center">
+          <div className="p-4 rounded-xl bg-surface-danger text-destructive text-sm text-center">
             {saveError}
           </div>
         )}

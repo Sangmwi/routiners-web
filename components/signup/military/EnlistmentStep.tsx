@@ -45,7 +45,7 @@ export function EnlistmentStep({
           {/* Question */}
           <div className="space-y-2">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full bg-surface-accent flex items-center justify-center">
                 <CalendarIcon size={24} className="text-primary" />
               </div>
             </div>
@@ -59,7 +59,7 @@ export function EnlistmentStep({
 
           {/* Year/Month Picker */}
           <div className="py-4">
-            <div className="bg-muted/20 rounded-2xl border border-border p-6">
+            <div className="bg-surface-secondary rounded-2xl border border-border p-6">
               <YearMonthPicker
                 year={year}
                 month={month}

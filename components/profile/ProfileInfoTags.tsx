@@ -31,7 +31,7 @@ export default function ProfileInfoTags({ user }: ProfileInfoTagsProps) {
     <div className="space-y-3">
       <SectionHeader title="내 정보" />
 
-      <div className="bg-muted/20 rounded-2xl p-4 space-y-2">
+      <div className="bg-surface-secondary rounded-2xl p-4 space-y-2">
         <div className="flex flex-wrap gap-2">
           <Tag icon={RulerIcon} inactive={!user.height}>
             {user.height ? `${user.height}cm` : '미입력'}

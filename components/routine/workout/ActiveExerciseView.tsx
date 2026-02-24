@@ -80,7 +80,7 @@ export default function ActiveExerciseView({
     <div className="space-y-5">
       {/* 운동 이미지 placeholder */}
       {/* TODO: 운동 시범 애니메이션 영상 (무한 재생) */}
-      <div className="bg-muted/20 rounded-2xl h-48 flex items-center justify-center">
+      <div className="bg-surface-secondary rounded-2xl h-48 flex items-center justify-center">
         <BarbellIcon size={48} weight="duotone" className="text-muted-foreground/30" />
       </div>
 
@@ -89,7 +89,7 @@ export default function ActiveExerciseView({
         <h2 className="text-xl font-bold text-foreground">{exercise.name}</h2>
         <div className="flex items-center gap-2 mt-1">
           {exercise.category && (
-            <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-primary/10 text-primary">
+            <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-surface-accent text-primary">
               {toKorean(exercise.category, CATEGORY_KO)}
             </span>
           )}
@@ -124,7 +124,7 @@ export default function ActiveExerciseView({
 
       {/* 메모 */}
       {exercise.notes && (
-        <div className="bg-muted/20 rounded-xl p-3">
+        <div className="bg-surface-secondary rounded-xl p-3">
           <p className="text-sm text-muted-foreground">{exercise.notes}</p>
         </div>
       )}
@@ -133,17 +133,17 @@ export default function ActiveExerciseView({
       {(exercise.tempo || exercise.rir !== undefined || exercise.technique) && (
         <div className="flex flex-wrap gap-2">
           {exercise.tempo && (
-            <span className="px-2.5 py-1 text-xs rounded-lg bg-muted/30 text-muted-foreground">
+            <span className="px-2.5 py-1 text-xs rounded-lg bg-surface-hover text-muted-foreground">
               템포: {exercise.tempo}
             </span>
           )}
           {exercise.rir !== undefined && (
-            <span className="px-2.5 py-1 text-xs rounded-lg bg-muted/30 text-muted-foreground">
+            <span className="px-2.5 py-1 text-xs rounded-lg bg-surface-hover text-muted-foreground">
               RIR: {exercise.rir}
             </span>
           )}
           {exercise.technique && (
-            <span className="px-2.5 py-1 text-xs rounded-lg bg-muted/30 text-muted-foreground">
+            <span className="px-2.5 py-1 text-xs rounded-lg bg-surface-hover text-muted-foreground">
               {exercise.technique}
             </span>
           )}

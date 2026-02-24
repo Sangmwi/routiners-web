@@ -5,4 +5,3 @@
  */
 
 export { UpcomingSection, default as UpcomingSectionDefault } from './UpcomingSection';
-export { UpcomingEventItem } from './UpcomingEventItem';

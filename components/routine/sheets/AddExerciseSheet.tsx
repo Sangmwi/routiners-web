@@ -112,7 +112,7 @@ export default function AddExerciseSheet({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="운동 검색..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-muted/50 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-muted text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </div>
 
@@ -148,7 +148,7 @@ export default function AddExerciseSheet({
                   key={exercise.id}
                   type="button"
                   onClick={() => handleRemove(index)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-primary/10 text-primary rounded-full"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-surface-accent text-primary rounded-full"
                 >
                   {exercise.name}
                   <span className="text-primary/60">×</span>
@@ -159,7 +159,7 @@ export default function AddExerciseSheet({
         )}
 
         {/* 운동 목록 */}
-        <div className="rounded-xl border border-border/50 divide-y divide-border/30 max-h-[60vh] overflow-y-auto">
+        <div className="rounded-xl border border-edge-subtle divide-y divide-edge-faint max-h-[60vh] overflow-y-auto">
           {searchResults.length === 0 ? (
             <p className="p-3 text-sm text-muted-foreground text-center">
               결과 없음

@@ -56,13 +56,13 @@ export default function CommentItem({
     <div className={isReply ? 'ml-10' : ''}>
       <div className="flex gap-2.5">
         {/* 아바타 */}
-        <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full bg-primary/10">
+        <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full bg-surface-accent">
           <ImageWithFallback
             src={authorAvatar}
             alt={authorName}
             fill
             className="object-cover"
-            fallbackClassName="bg-primary/10"
+            fallbackClassName="bg-surface-accent"
             showFallbackIcon={false}
           />
           {!authorAvatar && (

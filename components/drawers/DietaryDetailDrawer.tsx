@@ -56,7 +56,7 @@ export default function DietaryDetailDrawer({
       enableSwipe
       headerAction={
         profile.updatedAt ? (
-          <span className="text-[10px] text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">
+          <span className="text-[10px] text-muted-foreground bg-surface-muted px-2 py-0.5 rounded-full">
             {formatKoreanDate(profile.updatedAt)}
           </span>
         ) : undefined
@@ -65,7 +65,7 @@ export default function DietaryDetailDrawer({
       <ModalBody className="p-4 space-y-3">
         {/* 기본 정보 그룹 */}
         {infoItems.length > 0 && (
-          <div className="bg-muted/30 rounded-xl p-3">
+          <div className="bg-surface-hover rounded-xl p-3">
             <div className="grid grid-cols-2 gap-x-4 gap-y-3">
               {infoItems.map((item) => (
                 <div key={item.label}>
@@ -79,7 +79,7 @@ export default function DietaryDetailDrawer({
 
         {/* 음식 제한사항 - warning 틴트 */}
         {hasRestrictions && (
-          <div className="bg-muted/30 rounded-xl p-3">
+          <div className="bg-surface-hover rounded-xl p-3">
             <p className="text-xs font-medium text-muted-foreground mb-2">음식 제한사항</p>
             <div className="flex flex-wrap gap-1.5">
               {foodRestrictions!.map((restriction) => (
@@ -96,13 +96,13 @@ export default function DietaryDetailDrawer({
 
         {/* 이용 가능한 출처 - primary 틴트 */}
         {hasSources && (
-          <div className="bg-muted/30 rounded-xl p-3">
+          <div className="bg-surface-hover rounded-xl p-3">
             <p className="text-xs font-medium text-muted-foreground mb-2">이용 가능한 출처</p>
             <div className="flex flex-wrap gap-1.5">
               {profile.availableSources!.map((source) => (
                 <span
                   key={source}
-                  className="px-2.5 py-1 text-xs rounded-full bg-primary/10 text-primary font-medium"
+                  className="px-2.5 py-1 text-xs rounded-full bg-surface-accent text-primary font-medium"
                 >
                   {AVAILABLE_SOURCE_LABELS[source] || source}
                 </span>
@@ -113,7 +113,7 @@ export default function DietaryDetailDrawer({
 
         {/* 식습관 */}
         {hasHabits && (
-          <div className="bg-muted/30 rounded-xl p-3">
+          <div className="bg-surface-hover rounded-xl p-3">
             <p className="text-xs font-medium text-muted-foreground mb-2">식습관</p>
             <div className="flex flex-wrap gap-1.5">
               {profile.eatingHabits!.map((habit) => (
@@ -130,7 +130,7 @@ export default function DietaryDetailDrawer({
 
         {/* 선호사항 */}
         {hasPreferences && (
-          <div className="bg-muted/30 rounded-xl p-3">
+          <div className="bg-surface-hover rounded-xl p-3">
             <p className="text-xs font-medium text-muted-foreground mb-2">선호사항</p>
             <div className="flex flex-wrap gap-1.5">
               {profile.preferences!.map((pref) => (

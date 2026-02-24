@@ -49,7 +49,7 @@ export default function ErrorState({
       }`}
     >
       {/* 에러 아이콘 */}
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-danger">
         <ErrorIcon size="xl" className="text-destructive" />
       </div>
 

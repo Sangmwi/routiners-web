@@ -38,7 +38,7 @@ function WeeklyAchievement({ dateStr }: { dateStr: string }) {
   const prevStats = useWeeklyStatsSuspense(prevDateStr);
 
   if (!stats || (stats.workout.scheduled + stats.workout.completed === 0 && stats.meal.scheduled + stats.meal.completed === 0)) {
-    return <EmptyState icon={CalendarCheckIcon} message="루틴 기록이 없습니다." className="rounded-2xl bg-muted/20" />;
+    return <EmptyState icon={CalendarCheckIcon} message="루틴 기록이 없습니다." className="rounded-2xl bg-surface-secondary" />;
   }
 
   const comparison = prevStats
@@ -73,7 +73,7 @@ function MonthlyAchievement({ year, month }: { year: number; month: number }) {
   const prevStats = useMonthlyStatsSuspense(prevYear, prevMonth);
 
   if (!stats || (stats.workout.scheduled + stats.workout.completed === 0 && stats.meal.scheduled + stats.meal.completed === 0)) {
-    return <EmptyState icon={CalendarCheckIcon} message="루틴 기록이 없습니다." className="rounded-2xl bg-muted/20" />;
+    return <EmptyState icon={CalendarCheckIcon} message="루틴 기록이 없습니다." className="rounded-2xl bg-surface-secondary" />;
   }
 
   const comparison = prevStats
@@ -107,7 +107,7 @@ function AchievementCards({
   return (
     <div className="space-y-6">
       {stats.completedDays > 0 && (
-        <div className="flex items-center gap-2 bg-primary/10 rounded-xl px-4 py-3">
+        <div className="flex items-center gap-2 bg-surface-accent rounded-xl px-4 py-3">
           <CalendarCheckIcon size={20} weight="fill" className="text-primary" />
           <span className="text-sm font-medium text-foreground">
             {totalLabel} 중 <span className="text-primary">{stats.completedDays}일</span> 완료
@@ -116,7 +116,7 @@ function AchievementCards({
       )}
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-muted/20 rounded-2xl p-4">
+        <div className="bg-surface-secondary rounded-2xl p-4">
           <div className="flex items-center gap-1.5 mb-3">
             <BarbellIcon size={16} weight="fill" className="text-primary" />
             <span className="text-xs font-medium text-muted-foreground">운동</span>
@@ -138,7 +138,7 @@ function AchievementCards({
           </div>
         </div>
 
-        <div className="bg-muted/20 rounded-2xl p-4">
+        <div className="bg-surface-secondary rounded-2xl p-4">
           <div className="flex items-center gap-1.5 mb-3">
             <BowlFoodIcon size={16} weight="fill" className="text-primary" />
             <span className="text-xs font-medium text-muted-foreground">식단</span>

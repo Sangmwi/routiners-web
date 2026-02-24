@@ -63,7 +63,7 @@ export default function CounselorHeader({
       <button
         type="button"
         onClick={onMenuClick}
-        className="p-1 -mr-1 hover:bg-muted/50 rounded-lg transition-colors"
+        className="p-1 -mr-1 hover:bg-surface-muted rounded-lg transition-colors"
         aria-label="채팅 목록"
       >
         <ListIcon size={24} className="text-foreground" />

@@ -63,9 +63,9 @@ export default function InfoCard({
   // variant별 스타일
   const containerStyles = {
     default:
-      'flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-border/50',
+      'flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-edge-subtle',
     compact:
-      'flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border/50',
+      'flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-edge-subtle',
     flat:
       'flex items-center gap-3 px-4 py-3.5',
   };

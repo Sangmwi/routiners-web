@@ -81,7 +81,7 @@ export default function ChatPreviewSummary({
               {stats.frequency}
             </span>
             {stats.perSession && (
-              <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary">
+              <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-surface-accent text-primary">
                 {stats.perSession}
               </span>
             )}
@@ -141,7 +141,7 @@ export default function ChatPreviewSummary({
               disabled={!isActionable}
               className="h-11 px-5 rounded-full text-sm font-medium
                          border border-border/60 text-muted-foreground
-                         hover:bg-muted/20 hover:border-border
+                         hover:bg-surface-secondary hover:border-border
                          transition-all active:scale-[0.97] disabled:opacity-50"
             >
               종료
@@ -153,7 +153,7 @@ export default function ChatPreviewSummary({
               disabled={!isActionable}
               className="h-11 px-5 rounded-full text-sm font-medium
                          border border-border/60 text-muted-foreground
-                         hover:bg-muted/20 hover:border-border
+                         hover:bg-surface-secondary hover:border-border
                          transition-all active:scale-[0.97] disabled:opacity-50"
             >
               수정
@@ -174,7 +174,7 @@ export default function ChatPreviewSummary({
           </div>
         ) : (
           /* 상태 표시 */
-          <div className="flex items-center justify-center h-11 rounded-full bg-muted/20">
+          <div className="flex items-center justify-center h-11 rounded-full bg-surface-secondary">
             <span className={`text-sm font-medium flex items-center gap-1.5 ${statusDisplay[status as Exclude<RoutinePreviewStatus, 'pending'>].className}`}>
               {statusDisplay[status as Exclude<RoutinePreviewStatus, 'pending'>].icon}
               {statusDisplay[status as Exclude<RoutinePreviewStatus, 'pending'>].text}

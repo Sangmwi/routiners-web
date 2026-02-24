@@ -23,7 +23,7 @@ export function ChatAppliedBanner({
 
   return (
     <div className="flex justify-center py-4">
-      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs bg-primary/10 text-primary">
+      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs bg-surface-accent text-primary">
         <CheckIcon size={14} weight="bold" />
         <span>{isMeal ? '식단이 캘린더에 추가됨' : '루틴이 캘린더에 추가됨'}</span>
       </div>

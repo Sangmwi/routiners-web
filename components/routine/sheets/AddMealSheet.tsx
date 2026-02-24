@@ -297,7 +297,7 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated, existin
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="음식 검색..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-muted/50 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-muted text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </div>
 
@@ -322,7 +322,7 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated, existin
 
           {/* 검색 결과 */}
           {query && (
-            <div className="max-h-48 overflow-y-auto rounded-xl border border-border/50 divide-y divide-border/30">
+            <div className="max-h-48 overflow-y-auto rounded-xl border border-edge-subtle divide-y divide-edge-faint">
               {searchResults.length === 0 ? (
                 <p className="p-3 text-sm text-muted-foreground text-center">
                   결과 없음
@@ -352,7 +352,7 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated, existin
 
           {/* 빠른 선택 (검색어 없을 때 항상 표시, 추가된 항목 있으면 높이 축소) */}
           {!query && (
-            <div className={`overflow-y-auto rounded-xl border border-border/50 divide-y divide-border/30 ${
+            <div className={`overflow-y-auto rounded-xl border border-edge-subtle divide-y divide-edge-faint ${
               foods.length === 0 ? 'max-h-80' : 'max-h-32'
             }`}>
               {searchResults.slice(0, 20).map((item) => (
@@ -381,7 +381,7 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated, existin
         {foods.length > 0 && (
           <div className="space-y-4">
             {/* 영양소 요약 */}
-            <div className="bg-muted/20 rounded-xl p-4 flex justify-around">
+            <div className="bg-surface-secondary rounded-xl p-4 flex justify-around">
               <NutritionChip label="칼로리" value={totals.calories} unit="kcal" color="text-orange-500" />
               <NutritionChip label="단백질" value={totals.protein} unit="g" color="text-foreground" />
               <NutritionChip label="탄수화물" value={totals.carbs} unit="g" color="text-foreground" />
@@ -393,7 +393,7 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated, existin
               <h3 className="text-sm font-semibold mb-2">
                 추가된 음식 ({foods.length}개)
               </h3>
-              <div className="divide-y divide-border/30">
+              <div className="divide-y divide-edge-faint">
                 {foods.map((food, index) => (
                   <FoodItemRow
                     key={food.id}

@@ -33,7 +33,7 @@ function InfoTabSection({
           {title}
         </h4>
       </div>
-      <div className={`bg-muted/20 rounded-2xl p-4 ${className || ''}`}>
+      <div className={`bg-surface-secondary rounded-2xl p-4 ${className || ''}`}>
         {children}
       </div>
     </div>
@@ -112,7 +112,7 @@ export default function ProfileInfoTab({ user }: ProfileInfoTabProps) {
             </div>
           )}
           {user.isSmoker !== undefined && hasInterests && (
-            <div className="border-t border-border/30" />
+            <div className="border-t border-edge-faint" />
           )}
           {(user.interestedExercises?.length ?? 0) > 0 && (
             <div>

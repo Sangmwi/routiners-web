@@ -54,7 +54,7 @@ export function ChatProfileConfirmation({
       {/* 헤더 */}
       <div className="px-5 pt-5 pb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-primary/10">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-surface-accent">
             <UserIcon className="w-5 h-5 text-primary" weight="fill" />
           </div>
           <h3 className="font-semibold text-foreground">
@@ -88,7 +88,7 @@ export function ChatProfileConfirmation({
               disabled={!isActionable}
               className="h-11 px-5 rounded-full text-sm font-medium
                          border border-border/60 text-muted-foreground
-                         hover:bg-muted/20 hover:border-border
+                         hover:bg-surface-secondary hover:border-border
                          transition-all active:scale-[0.97] disabled:opacity-50"
             >
               종료
@@ -100,7 +100,7 @@ export function ChatProfileConfirmation({
               disabled={!isActionable}
               className="h-11 px-5 rounded-full text-sm font-medium
                          border border-border/60 text-muted-foreground
-                         hover:bg-muted/20 hover:border-border
+                         hover:bg-surface-secondary hover:border-border
                          transition-all active:scale-[0.97] disabled:opacity-50"
             >
               수정
@@ -122,7 +122,7 @@ export function ChatProfileConfirmation({
           </div>
         ) : (
           /* 상태 표시 */
-          <div className="flex items-center justify-center h-11 rounded-full bg-muted/20">
+          <div className="flex items-center justify-center h-11 rounded-full bg-surface-secondary">
             <span className={`text-sm font-medium flex items-center gap-1.5 ${statusDisplay[status as Exclude<ProfileConfirmationStatus, 'pending'>].className}`}>
               {statusDisplay[status as Exclude<ProfileConfirmationStatus, 'pending'>].icon}
               {statusDisplay[status as Exclude<ProfileConfirmationStatus, 'pending'>].text}

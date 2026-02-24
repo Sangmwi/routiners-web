@@ -22,7 +22,7 @@ export default function SegmentedControl<T extends string>({
   const sizeClass = SIZE_CLASSES[size];
 
   return (
-    <div className="flex items-center bg-muted/50 rounded-lg p-0.5">
+    <div className="flex items-center bg-surface-muted rounded-lg p-0.5">
       {options.map(({ key, label }) => (
         <button
           key={key}

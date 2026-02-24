@@ -47,7 +47,7 @@ export default function MealPreviewDetailDrawer({
       height="full"
       showCloseButton={false}
       stickyFooter={
-        <div className="p-4 bg-card border-t border-border/50">
+        <div className="p-4 bg-card border-t border-edge-subtle">
           {status === 'pending' ? (
             <Button
               variant="primary"
@@ -84,16 +84,16 @@ export default function MealPreviewDetailDrawer({
       {/* 헤더 - 배지 + 타이틀 + 설명 */}
       <div className="px-5 pt-2 pb-4">
         <div className="flex items-center gap-2 mb-4">
-          <span className="px-2.5 py-1 text-xs font-medium bg-muted/50 text-muted-foreground rounded-full">
+          <span className="px-2.5 py-1 text-xs font-medium bg-surface-muted text-muted-foreground rounded-full">
             {preview.durationWeeks}주
           </span>
           {mealsPerDay > 0 && (
-            <span className="px-2.5 py-1 text-xs font-medium bg-muted/50 text-muted-foreground rounded-full">
+            <span className="px-2.5 py-1 text-xs font-medium bg-surface-muted text-muted-foreground rounded-full">
               하루 {mealsPerDay}끼
             </span>
           )}
           {preview.targetCalories > 0 && (
-            <span className="px-2.5 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
+            <span className="px-2.5 py-1 text-xs font-medium bg-surface-accent text-primary rounded-full">
               {preview.targetCalories}kcal
             </span>
           )}
@@ -124,11 +124,11 @@ export default function MealPreviewDetailDrawer({
 
 function MealDayCard({ day }: { day: MealPreviewDay }) {
   return (
-    <div className="bg-muted/20 rounded-2xl overflow-hidden">
+    <div className="bg-surface-secondary rounded-2xl overflow-hidden">
       {/* 카드 헤더 */}
-      <div className="flex items-center justify-between gap-3 px-4 py-3 bg-primary/10">
+      <div className="flex items-center justify-between gap-3 px-4 py-3 bg-surface-accent">
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
-          <span className="w-7 h-7 rounded-full bg-primary/15 text-primary text-xs font-semibold flex items-center justify-center shrink-0">
+          <span className="w-7 h-7 rounded-full bg-surface-accent-strong text-primary text-xs font-semibold flex items-center justify-center shrink-0">
             {DAY_NAMES[day.dayOfWeek]}
           </span>
           {day.title && (
@@ -162,7 +162,7 @@ function MealDayCard({ day }: { day: MealPreviewDay }) {
 
 function MealSection({ meal, isLast }: { meal: MealPreviewMeal; isLast: boolean }) {
   return (
-    <div className={`pb-3 ${!isLast ? 'border-b border-border/20' : ''}`}>
+    <div className={`pb-3 ${!isLast ? 'border-b border-edge-divider' : ''}`}>
       {/* 식사 유형 라벨 */}
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs font-semibold text-primary">

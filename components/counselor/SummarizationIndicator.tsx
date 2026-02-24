@@ -23,7 +23,7 @@ export default function SummarizationIndicator({
   const isComplete = state.message?.includes('완료');
 
   return (
-    <div className="flex items-center gap-2 px-4 py-2 bg-muted/50 border-t border-border">
+    <div className="flex items-center gap-2 px-4 py-2 bg-surface-muted border-t border-border">
       {isComplete ? (
         <CheckCircleIcon size={16} weight="fill" className="text-success" />
       ) : (

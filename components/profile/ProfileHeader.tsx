@@ -15,7 +15,7 @@ export default function ProfileHeader() {
       action={
         <AppLink
           href="/settings"
-          className="p-1.5 hover:bg-muted/50 rounded-lg transition-colors"
+          className="p-1.5 hover:bg-surface-muted rounded-lg transition-colors"
         >
           <GearSixIcon size={20} className="text-muted-foreground" />
         </AppLink>

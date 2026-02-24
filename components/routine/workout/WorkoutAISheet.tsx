@@ -47,9 +47,9 @@ export default function WorkoutAISheet({ isOpen, onClose, exerciseName }: Workou
     >
       <ModalBody className="flex flex-col h-full">
         {/* 헤더 */}
-        <div className="px-4 pt-1 pb-3 border-b border-border/50">
+        <div className="px-4 pt-1 pb-3 border-b border-edge-subtle">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-surface-accent flex items-center justify-center">
               <RobotIcon size={18} className="text-primary" weight="fill" />
             </div>
             <div>
@@ -64,7 +64,7 @@ export default function WorkoutAISheet({ isOpen, onClose, exerciseName }: Workou
           {/* 운동 팁 카드들 */}
           <div className="space-y-3">
             {MOCK_TIPS.map((tip) => (
-              <div key={tip.label} className="rounded-xl bg-muted/20 p-3.5">
+              <div key={tip.label} className="rounded-xl bg-surface-secondary p-3.5">
                 <div className="flex items-center gap-2 mb-1.5">
                   <tip.icon size={16} weight="fill" className="text-primary" />
                   <span className="text-xs font-semibold text-foreground">{tip.label}</span>
@@ -78,10 +78,10 @@ export default function WorkoutAISheet({ isOpen, onClose, exerciseName }: Workou
           <div className="space-y-3 pt-2">
             {MOCK_MESSAGES.map((msg, i) => (
               <div key={i} className="flex gap-2">
-                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-6 h-6 rounded-full bg-surface-accent flex items-center justify-center shrink-0 mt-0.5">
                   <RobotIcon size={12} className="text-primary" weight="fill" />
                 </div>
-                <div className="rounded-2xl rounded-tl-md bg-muted/30 px-3.5 py-2.5 max-w-[85%]">
+                <div className="rounded-2xl rounded-tl-md bg-surface-hover px-3.5 py-2.5 max-w-[85%]">
                   <p className="text-sm text-foreground">{msg.text}</p>
                 </div>
               </div>
@@ -90,7 +90,7 @@ export default function WorkoutAISheet({ isOpen, onClose, exerciseName }: Workou
         </div>
 
         {/* 입력 영역 */}
-        <div className="px-4 py-3 pb-safe border-t border-border/50">
+        <div className="px-4 py-3 pb-safe border-t border-edge-subtle">
           <div className="flex items-center gap-2">
             <input
               type="text"
@@ -98,7 +98,7 @@ export default function WorkoutAISheet({ isOpen, onClose, exerciseName }: Workou
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="AI에게 질문하기..."
               disabled
-              className="flex-1 h-10 px-4 rounded-full bg-muted/30 border border-border text-sm text-foreground placeholder:text-muted-foreground/50 disabled:opacity-60"
+              className="flex-1 h-10 px-4 rounded-full bg-surface-hover border border-border text-sm text-foreground placeholder:text-muted-foreground/50 disabled:opacity-60"
             />
             <button
               disabled

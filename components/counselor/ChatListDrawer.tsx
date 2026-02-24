@@ -68,7 +68,7 @@ export default function ChatListDrawer({
         {/* 새 대화 버튼 */}
         <button
           onClick={handleNewChat}
-          className="w-full flex items-center gap-3 p-4 mb-4 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
+          className="w-full flex items-center gap-3 p-4 mb-4 rounded-xl bg-surface-accent hover:bg-primary/20 transition-colors"
         >
           <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
             <PlusIcon size={20} weight="bold" className="text-primary" />
@@ -77,7 +77,7 @@ export default function ChatListDrawer({
         </button>
 
         {/* 대화 목록 */}
-        <div className="bg-muted/20 rounded-xl overflow-hidden max-h-64 overflow-y-auto">
+        <div className="bg-surface-secondary rounded-xl overflow-hidden max-h-64 overflow-y-auto">
           {isLoading ? (
             <div className="p-4 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
               <LoadingSpinner size="sm" />
@@ -92,7 +92,7 @@ export default function ChatListDrawer({
               {Object.entries(groupedConversations).map(([dateLabel, items]) => (
                 <div key={dateLabel}>
                   {/* 날짜 헤더 */}
-                  <div className="px-3 py-1.5 text-xs font-medium text-muted-foreground bg-muted/50 border-t border-border/30 first:border-t-0">
+                  <div className="px-3 py-1.5 text-xs font-medium text-muted-foreground bg-surface-muted border-t border-edge-faint first:border-t-0">
                     {dateLabel}
                   </div>
                   {/* 대화 항목들 */}
@@ -144,14 +144,14 @@ function ConversationItem({ item, isCurrent, onSelect, onDelete }: ConversationI
       role="button"
       tabIndex={isCurrent ? undefined : 0}
       onClick={isCurrent ? undefined : onSelect}
-      className={`relative w-full px-3 py-3 pr-10 flex items-center gap-3 transition-colors border-t border-border/30 ${
+      className={`relative w-full px-3 py-3 pr-10 flex items-center gap-3 transition-colors border-t border-edge-faint ${
         isCurrent
           ? 'bg-primary/5 cursor-default'
-          : 'hover:bg-muted/50 active:bg-muted cursor-pointer'
+          : 'hover:bg-surface-muted active:bg-muted cursor-pointer'
       }`}
     >
       {/* 아이콘 */}
-      <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-primary/10">
+      <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-surface-accent">
         <RobotIcon size={16} weight="fill" className="text-primary" />
       </div>
 
@@ -159,7 +159,7 @@ function ConversationItem({ item, isCurrent, onSelect, onDelete }: ConversationI
       <div className="flex-1 min-w-0 text-left">
         <div className="flex items-center gap-2">
           {isCurrent && (
-            <span className="px-1.5 py-0.5 text-[10px] rounded bg-primary/10 text-primary font-medium">
+            <span className="px-1.5 py-0.5 text-[10px] rounded bg-surface-accent text-primary font-medium">
               현재
             </span>
           )}
@@ -192,7 +192,7 @@ function ConversationItem({ item, isCurrent, onSelect, onDelete }: ConversationI
           e.stopPropagation();
           onDelete();
         }}
-        className="absolute top-2.5 right-1.5 p-1.5 rounded-full text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-colors"
+        className="absolute top-2.5 right-1.5 p-1.5 rounded-full text-muted-foreground/50 hover:text-destructive hover:bg-surface-danger transition-colors"
         aria-label="대화 삭제"
       >
         <TrashSimpleIcon size={14} />
