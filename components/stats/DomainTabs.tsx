@@ -45,7 +45,7 @@ export default function DomainTabs({
         options={PERIOD_OPTIONS}
         value={period}
         onChange={onPeriodChange}
-        size="sm"
+        size="md"
       />
     );
 
