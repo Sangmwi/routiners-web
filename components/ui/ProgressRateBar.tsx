@@ -30,7 +30,7 @@ export default function ProgressRateBar({
   comparison,
 }: ProgressRateBarProps) {
   return (
-    <div className="bg-surface-secondary rounded-2xl px-4 py-3.5">
+    <div className="rounded-2x p-2">
       {/* 타이틀 */}
       <div className="flex items-center gap-1.5 mb-1.5">
         <Icon size={15} weight="fill" className="text-primary" />
