@@ -26,7 +26,7 @@ interface UnderlineTabsProps<T extends string> {
   rightSlot?: ReactNode;
   /** 추가 CSS 클래스 */
   className?: string;
-  /** 하단 border 표시 여부 (기본: true) */
+  /** 하단 border 표시 여부 (기본: equal→true, auto→false) */
   showBorder?: boolean;
 }
 
@@ -53,8 +53,10 @@ export default function UnderlineTabs<T extends string>({
   layout = 'equal',
   rightSlot,
   className = '',
-  showBorder = true,
+  showBorder,
 }: UnderlineTabsProps<T>) {
+  const hasBorder = showBorder ?? layout === 'equal';
+
   const containerRef = useRef<HTMLDivElement>(null);
   const [indicator, setIndicator] = useState({ left: 0, width: 0 });
 
@@ -74,7 +76,7 @@ export default function UnderlineTabs<T extends string>({
   const tabContainer = (
     <div
       ref={containerRef}
-      className={`relative ${showBorder ? 'border-b border-border' : ''} ${
+      className={`relative ${hasBorder ? 'border-b border-border' : ''} ${
         rightSlot ? '' : 'w-full'
       } ${className}`.trim()}
     >

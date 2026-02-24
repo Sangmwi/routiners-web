@@ -32,7 +32,6 @@ export default function PrimaryTabs({
       value={activeTab}
       onChange={onTabChange}
       layout="auto"
-      showBorder={false}
       rightSlot={
         <button
           type="button"

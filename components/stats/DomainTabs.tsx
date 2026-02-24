@@ -55,7 +55,6 @@ export default function DomainTabs({
       value={domain}
       onChange={onDomainChange}
       layout="auto"
-      showBorder={false}
       rightSlot={slot}
     />
   );
