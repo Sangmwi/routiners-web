@@ -49,19 +49,22 @@ export default function StatsPageContent() {
         onDomainChange={setDomain}
         period={navigator.period}
         onPeriodChange={navigator.setPeriod}
+        showPeriodSelector={domain !== 'inbody'}
       />
 
-      <PeriodNav
-        label={navigator.label}
-        onPrev={navigator.handlePrev}
-        onNext={navigator.handleNext}
-        canGoNext={navigator.canGoNext}
-        onLabelClick={() => {
-          setDateJumpSession((prev) => prev + 1);
-          setIsDateJumpOpen(true);
-        }}
-        labelAriaLabel={navigator.period === 'weekly' ? '주간 날짜 선택' : '월간 날짜 선택'}
-      />
+      {domain !== 'inbody' && (
+        <PeriodNav
+          label={navigator.label}
+          onPrev={navigator.handlePrev}
+          onNext={navigator.handleNext}
+          canGoNext={navigator.canGoNext}
+          onLabelClick={() => {
+            setDateJumpSession((prev) => prev + 1);
+            setIsDateJumpOpen(true);
+          }}
+          labelAriaLabel={navigator.period === 'weekly' ? '주간 날짜 선택' : '월간 날짜 선택'}
+        />
+      )}
 
       <div className="[overflow-x:clip]">
         <div
@@ -76,7 +79,7 @@ export default function StatsPageContent() {
           {domain === 'inbody' && (
             <QueryErrorBoundary>
               <Suspense fallback={<PulseLoader />}>
-                <BodyStatsTab navigator={navigator} />
+                <BodyStatsTab />
               </Suspense>
             </QueryErrorBoundary>
           )}

@@ -1,12 +1,29 @@
 'use client';
 
+import { useState } from 'react';
 import AppLink from '@/components/common/AppLink';
 import ChangeIndicator, { getTrendColor } from '@/components/ui/ChangeIndicator';
 import MiniSparkline from '@/components/ui/MiniSparkline';
+import SegmentedControl from '@/components/ui/SegmentedControl';
 import { CaretRightIcon, UserIcon } from '@phosphor-icons/react';
 import { useInBodyRecordsSuspense } from '@/hooks/inbody/queries';
-import type { UseStatsPeriodNavigatorReturn } from '@/hooks/routine/useStatsPeriodNavigator';
 import type { InBodyRecord } from '@/lib/types';
+
+type RecordCount = '5' | '10' | '20' | 'all';
+
+const COUNT_OPTIONS = [
+  { key: '5' as const, label: '5개' },
+  { key: '10' as const, label: '10개' },
+  { key: '20' as const, label: '20개' },
+  { key: 'all' as const, label: '전체' },
+];
+
+const COUNT_TO_LIMIT: Record<RecordCount, number> = {
+  '5': 5,
+  '10': 10,
+  '20': 20,
+  all: 100,
+};
 
 const METRICS_CONFIG = [
   { key: 'weight', label: '체중', unit: 'kg', positiveIsGood: false },
@@ -18,17 +35,6 @@ const METRICS_CONFIG = [
 function formatFullDate(dateStr: string): string {
   const d = new Date(dateStr + 'T00:00:00');
   return `${String(d.getFullYear()).slice(2)}.${d.getMonth() + 1}.${d.getDate()}`;
-}
-
-/** 기간 내 기록을 시간순으로 필터링 */
-function filterRecordsByPeriod(
-  records: InBodyRecord[],
-  startDate: string,
-  endDate: string,
-): InBodyRecord[] {
-  return records
-    .filter((r) => r.measuredAt >= startDate && r.measuredAt <= endDate)
-    .sort((a, b) => a.measuredAt.localeCompare(b.measuredAt));
 }
 
 /** 첫/마지막 기록 사이 변화량 계산 */
@@ -57,22 +63,22 @@ function computeChanges(chronological: InBodyRecord[]) {
  *
  * - 인바디 3대 메트릭 (체중/골격근량/체지방률)
  * - 스파크라인으로 추이 표시
- * - 기간 필터 (주간/월간) navigator로 제어
+ * - 개수 선택기 (5/10/20/전체)로 표시 데이터 제어
  * - 인바디 관리 페이지 링크
  */
-export default function BodyStatsTab({
-  navigator,
-}: {
-  navigator: UseStatsPeriodNavigatorReturn;
-}) {
-  const { startDate, endDate } = navigator;
-  // 충분한 기록을 가져와서 클라이언트 필터링
-  const { data: allRecords } = useInBodyRecordsSuspense(100, 0);
+export default function BodyStatsTab() {
+  const [recordCount, setRecordCount] = useState<RecordCount>('5');
+  const limit = COUNT_TO_LIMIT[recordCount];
 
-  const chronological = filterRecordsByPeriod(allRecords, startDate, endDate);
+  const { data: records } = useInBodyRecordsSuspense(limit, 0);
+
+  // API는 newest-first로 반환하므로 시간순 정렬
+  const chronological = [...records].sort((a, b) =>
+    a.measuredAt.localeCompare(b.measuredAt),
+  );
   const hasData = chronological.length > 0;
   const hasHistory = chronological.length >= 2;
-  const latestInPeriod = hasData ? chronological[chronological.length - 1] : undefined;
+  const latest = hasData ? chronological[chronological.length - 1] : undefined;
   const changes = computeChanges(chronological);
 
   const pointLabels = chronological.map((r) => formatFullDate(r.measuredAt));
@@ -83,12 +89,15 @@ export default function BodyStatsTab({
       ]
     : undefined;
 
+  // 10개 이하: 모든 점 표시, 초과: 선만 (interactive로 터치 확인)
+  const showDots = chronological.length <= 10;
+
   if (!hasData) {
     return (
       <div>
         <div className="rounded-2xl bg-surface-secondary p-6 text-center">
           <UserIcon size={28} weight="duotone" className="text-muted-foreground/40 mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground mb-1">이 기간에 인바디 기록이 없어요</p>
+          <p className="text-sm text-muted-foreground mb-1">인바디 기록이 없어요</p>
           <p className="text-xs text-muted-foreground/60 mb-3">
             체중, 골격근량, 체지방률을 기록해보세요
           </p>
@@ -106,7 +115,7 @@ export default function BodyStatsTab({
 
   return (
     <div className="space-y-8">
-      {/* 인바디 관리 링크 */}
+      {/* 헤더: 타이틀 + 관리 링크 */}
       <div className="flex items-center justify-between">
         <h3 className="text-base font-medium text-foreground">인바디 추이</h3>
         <AppLink
@@ -118,10 +127,20 @@ export default function BodyStatsTab({
         </AppLink>
       </div>
 
+      {/* 개수 선택기 */}
+      <div className="flex justify-center">
+        <SegmentedControl
+          options={COUNT_OPTIONS}
+          value={recordCount}
+          onChange={setRecordCount}
+          size="sm"
+        />
+      </div>
+
       {/* 메트릭 카드 */}
       <div className="space-y-4">
         {METRICS_CONFIG.map(({ key, label, unit, positiveIsGood }) => {
-          const value = latestInPeriod?.[key];
+          const value = latest?.[key];
           const change = changes?.[key];
           const sparkData = chronological.map((r) => r[key]);
           const fmt = (v: number) => v.toFixed(1);
@@ -153,7 +172,8 @@ export default function BodyStatsTab({
                 <MiniSparkline
                   data={sparkData}
                   height={120}
-                  showAllDots={sparkData.length <= 10}
+                  showAllDots={showDots}
+                  showEndDot={false}
                   showYAxis
                   lineOpacity={0.5}
                   dateRange={dateRange}

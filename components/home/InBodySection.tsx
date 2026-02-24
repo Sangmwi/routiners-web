@@ -67,7 +67,7 @@ export default function InBodySection({ summary, history, height }: InBodySectio
                           data={sparkData}
                           height={28}
                           showEndDot
-                          showAllDots={false}
+                          showAllDots={true}
                           gradientFill={false}
                           color={getTrendColor(change, positiveIsGood)}
                           lineOpacity={0.7}

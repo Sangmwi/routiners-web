@@ -28,10 +28,10 @@ export default function DayGroup({
 
   return (
     <div>
-      <div className={`rounded-2xl px-4 ${isLarge ? 'py-4' : 'py-3'} ${isToday ? 'bg-surface-accent' : ''}`}>
+      <div className={`rounded-2xl px-2 ${isLarge ? 'py-4' : 'py-3'} ${isToday ? 'bg-primary/10' : ''}`}>
         <div className={`flex ${isLarge ? 'gap-3' : 'gap-2.5'}`}>
           {/* 날짜 라벨: 숫자 + 요일 가로 배치 */}
-          <div className={`${isLarge ? 'w-10' : 'w-8'} shrink-0 flex items-baseline gap-1`}>
+          <div className={`${isLarge ? 'w-10' : 'w-8'} shrink-0 flex flex-col items-center justify-center gap-1`}>
             <span
               className={`${isLarge ? 'text-sm' : 'text-xs'} ${
                 isToday ? 'font-bold text-primary' : 'font-semibold text-muted-foreground'

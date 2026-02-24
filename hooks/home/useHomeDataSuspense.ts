@@ -80,8 +80,8 @@ export function useHomeDataSuspense(): HomeData {
         staleTime: STALE_TIME.default,
       },
       {
-        queryKey: queryKeys.inbody.list(8, 0),
-        queryFn: () => inbodyApi.getRecords(8, 0),
+        queryKey: queryKeys.inbody.list(5, 0),
+        queryFn: () => inbodyApi.getRecords(5, 0),
         staleTime: STALE_TIME.default,
       },
       {

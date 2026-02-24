@@ -22,6 +22,8 @@ interface DomainTabsProps {
   onDomainChange: (domain: StatsDomain) => void;
   period: StatsPeriod;
   onPeriodChange: (period: StatsPeriod) => void;
+  /** false이면 주간/월간 토글 숨김 (인바디 탭 등) */
+  showPeriodSelector?: boolean;
 }
 
 /**
@@ -34,6 +36,7 @@ export default function DomainTabs({
   onDomainChange,
   period,
   onPeriodChange,
+  showPeriodSelector = true,
 }: DomainTabsProps) {
   return (
     <UnderlineTabs
@@ -42,12 +45,14 @@ export default function DomainTabs({
       onChange={onDomainChange}
       layout="auto"
       rightSlot={
-        <SegmentedControl
-          options={PERIOD_OPTIONS}
-          value={period}
-          onChange={onPeriodChange}
-          size="md"
-        />
+        showPeriodSelector ? (
+          <SegmentedControl
+            options={PERIOD_OPTIONS}
+            value={period}
+            onChange={onPeriodChange}
+            size="md"
+          />
+        ) : undefined
       }
     />
   );

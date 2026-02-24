@@ -63,7 +63,7 @@ function AvatarStack({
       {items.map((item, index, arr) => (
         <div
           key={index}
-          className="relative size-10 rounded-full bg-background ring-1 ring-focus flex items-center justify-center"
+          className="relative size-10 rounded-full bg-background ring-1 ring-surface-secondary flex items-center justify-center"
           style={{
             marginLeft: index > 0 ? -10 : undefined,
             zIndex: arr.length - index,
