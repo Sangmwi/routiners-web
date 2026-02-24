@@ -91,7 +91,7 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-foreground mb-3">
+      <h2 className="text-sm font-medium text-muted-foreground mb-3">
         {formatKoreanDate(date, {
           year: false,
           weekday: true,

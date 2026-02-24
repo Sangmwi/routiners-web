@@ -43,10 +43,7 @@ export default function WeeklyProgressChart({ stats, size = 'default', filter: e
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h3 className={`font-medium text-foreground ${isLarge ? 'text-lg' : 'text-base'}`}>
-          주간 기록
-        </h3>
+      <div className="flex items-center justify-between">
         {externalFilter === undefined && (
           <SegmentedControl
             options={FILTER_OPTIONS}
