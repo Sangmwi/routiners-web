@@ -70,7 +70,7 @@ export default function StatsPageContent() {
               options={COUNT_OPTIONS}
               value={recordCount}
               onChange={setRecordCount}
-              size="md"
+              size="sm"
             />
           ) : undefined
         }
