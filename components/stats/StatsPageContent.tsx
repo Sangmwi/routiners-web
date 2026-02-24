@@ -1,17 +1,30 @@
 'use client';
 
-import { Suspense, useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import PeriodNav from '@/components/ui/PeriodNav';
 import DateJumpSheet from '@/components/ui/DateJumpSheet';
-import { PulseLoader } from '@/components/ui/PulseLoader';
+import SegmentedControl from '@/components/ui/SegmentedControl';
 import DomainTabs, { type StatsDomain } from '@/components/stats/DomainTabs';
 import WorkoutStatsTab from '@/components/stats/WorkoutStatsTab';
 import BodyStatsTab from '@/components/stats/BodyStatsTab';
 import NutritionStatsTab from '@/components/stats/NutritionStatsTab';
 import { useStatsPeriodNavigator } from '@/hooks/routine/useStatsPeriodNavigator';
 import { formatDate, parseDate } from '@/lib/utils/dateHelpers';
+
+type RecordCount = '5' | '15' | 'all';
+
+const COUNT_OPTIONS = [
+  { key: '5' as const, label: '5개' },
+  { key: '15' as const, label: '15개' },
+  { key: 'all' as const, label: '모두' },
+];
+
+const COUNT_TO_LIMIT: Record<RecordCount, number> = {
+  '5': 5,
+  '15': 15,
+  all: 100,
+};
 
 const VALID_TABS: StatsDomain[] = ['workout', 'meal', 'inbody'];
 
@@ -24,6 +37,8 @@ export default function StatsPageContent() {
   const prevDomain = useRef(domain);
 
   const navigator = useStatsPeriodNavigator('weekly');
+
+  const [recordCount, setRecordCount] = useState<RecordCount>('5');
 
   const [isDateJumpOpen, setIsDateJumpOpen] = useState(false);
   const [dateJumpSession, setDateJumpSession] = useState(0);
@@ -49,7 +64,16 @@ export default function StatsPageContent() {
         onDomainChange={setDomain}
         period={navigator.period}
         onPeriodChange={navigator.setPeriod}
-        showPeriodSelector={domain !== 'inbody'}
+        rightSlot={
+          domain === 'inbody' ? (
+            <SegmentedControl
+              options={COUNT_OPTIONS}
+              value={recordCount}
+              onChange={setRecordCount}
+              size="md"
+            />
+          ) : undefined
+        }
       />
 
       {domain !== 'inbody' && (
@@ -77,11 +101,7 @@ export default function StatsPageContent() {
           {domain === 'workout' && <WorkoutStatsTab navigator={navigator} />}
           {domain === 'meal' && <NutritionStatsTab navigator={navigator} />}
           {domain === 'inbody' && (
-            <QueryErrorBoundary>
-              <Suspense fallback={<PulseLoader />}>
-                <BodyStatsTab />
-              </Suspense>
-            </QueryErrorBoundary>
+            <BodyStatsTab limit={COUNT_TO_LIMIT[recordCount]} />
           )}
         </div>
       </div>

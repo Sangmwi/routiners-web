@@ -37,7 +37,13 @@ interface ChatContentProps {
  */
 export function ChatLayout({ children }: ChatLayoutProps) {
   return (
-    <div className="flex flex-col h-dvh bg-background">
+    <div
+      className="flex flex-col bg-background"
+      style={{
+        height: 'calc(100dvh - var(--keyboard-height, 0px))',
+        transition: 'height 0.25s ease-out',
+      }}
+    >
       {children}
     </div>
   );

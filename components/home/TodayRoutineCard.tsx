@@ -251,7 +251,7 @@ function WorkoutColumn({
     <div>
       <div className="flex items-center mb-3">
         <div className="flex items-center gap-1.5">
-          <BarbellIcon size={14} weight="fill" className="text-foreground" />
+          <BarbellIcon size={14} weight="fill" className="text-primary" />
           <span className="text-xs font-medium text-muted-foreground">운동</span>
         </div>
       </div>
@@ -323,7 +323,7 @@ function MealColumn({ event }: { event: RoutineEvent | null }) {
     <div>
       <div className="flex items-center mb-3">
         <div className="flex items-center gap-1.5">
-          <BowlFoodIcon size={14} weight="fill" className="text-foreground" />
+          <BowlFoodIcon size={14} weight="fill" className="text-primary" />
           <span className="text-xs font-medium text-muted-foreground">식단</span>
         </div>
       </div>

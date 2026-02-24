@@ -33,6 +33,7 @@ type HandlerRegistry = Map<CommandType, Set<CommandHandler>>;
 // 개별 메시지 타입 추출
 type NavigateToMessage = Extract<AppToWebMessage, { type: "NAVIGATE_TO" }>;
 type SetSessionMessage = Extract<AppToWebMessage, { type: "SET_SESSION" }>;
+type KeyboardShowMessage = Extract<AppToWebMessage, { type: "KEYBOARD_SHOW" }>;
 
 // ============================================================================
 // Global Registry (싱글톤)
@@ -126,6 +127,23 @@ export const useWebViewCommands = ({ resetSessionCheck }: UseWebViewCommandsOpti
           await new Promise<void>((resolve) => queueMicrotask(resolve));
           window.location.replace("/");
         }
+      })
+    );
+
+    // KEYBOARD_SHOW
+    cleanups.push(
+      registerCommandHandler<KeyboardShowMessage>("KEYBOARD_SHOW", (cmd) => {
+        document.documentElement.style.setProperty(
+          "--keyboard-height",
+          `${cmd.height}px`
+        );
+      })
+    );
+
+    // KEYBOARD_HIDE
+    cleanups.push(
+      registerCommandHandler("KEYBOARD_HIDE", () => {
+        document.documentElement.style.setProperty("--keyboard-height", "0px");
       })
     );
 

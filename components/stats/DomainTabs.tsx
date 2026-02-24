@@ -1,8 +1,9 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import UnderlineTabs from '@/components/ui/UnderlineTabs';
-import SegmentedControl from '@/components/ui/SegmentedControl';
 import type { StatsPeriod } from '@/hooks/routine/useStatsPeriodNavigator';
+import SegmentedControl from '@/components/ui/SegmentedControl';
 
 export type StatsDomain = 'workout' | 'meal' | 'inbody';
 
@@ -22,38 +23,40 @@ interface DomainTabsProps {
   onDomainChange: (domain: StatsDomain) => void;
   period: StatsPeriod;
   onPeriodChange: (period: StatsPeriod) => void;
-  /** false이면 주간/월간 토글 숨김 (인바디 탭 등) */
-  showPeriodSelector?: boolean;
+  /** 우측 슬롯 커스텀 (인바디 개수 토글 등) */
+  rightSlot?: ReactNode;
 }
 
 /**
  * 통계 도메인 탭
  *
- * [운동] [식단] [인바디]          [주간 | 월간]
+ * [운동] [식단] [인바디]          [주간 | 월간] or [5개 | 15개 | 모두]
  */
 export default function DomainTabs({
   domain,
   onDomainChange,
   period,
   onPeriodChange,
-  showPeriodSelector = true,
+  rightSlot,
 }: DomainTabsProps) {
+  const slot =
+    rightSlot !== undefined ? rightSlot : (
+      <SegmentedControl
+        options={PERIOD_OPTIONS}
+        value={period}
+        onChange={onPeriodChange}
+        size="md"
+      />
+    );
+
   return (
     <UnderlineTabs
       tabs={TABS}
       value={domain}
       onChange={onDomainChange}
       layout="auto"
-      rightSlot={
-        showPeriodSelector ? (
-          <SegmentedControl
-            options={PERIOD_OPTIONS}
-            value={period}
-            onChange={onPeriodChange}
-            size="md"
-          />
-        ) : undefined
-      }
+      showBorder={false}
+      rightSlot={slot}
     />
   );
 }

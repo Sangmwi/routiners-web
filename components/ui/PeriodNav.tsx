@@ -34,12 +34,12 @@ export default function PeriodNav({
           type="button"
           onClick={onLabelClick}
           aria-label={labelAriaLabel}
-          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md px-2 py-0.5"
+          className="text-base font-medium text-muted-foreground active:text-foreground transition-colors rounded-md px-2 py-0.5"
         >
           {label}
         </button>
       ) : (
-        <span className="text-sm font-medium text-muted-foreground">
+        <span className="text-base font-medium text-muted-foreground">
           {label}
         </span>
       )}
@@ -48,23 +48,23 @@ export default function PeriodNav({
         <button
           type="button"
           onClick={onPrev}
-          className="p-1.5 rounded-lg hover:bg-surface-muted transition-colors text-muted-foreground"
+          className="p-2 rounded-lg active:bg-surface-muted transition-colors text-muted-foreground"
           aria-label="이전"
         >
-          <CaretLeftIcon size={18} weight="bold" />
+          <CaretLeftIcon size={20} weight="bold" />
         </button>
 
         <button
           type="button"
           onClick={onNext}
           disabled={!canGoNext}
-          className={`p-1.5 rounded-lg transition-colors ${canGoNext
-            ? 'hover:bg-surface-muted text-muted-foreground'
+          className={`p-2 rounded-lg transition-colors ${canGoNext
+            ? 'active:bg-surface-muted text-muted-foreground'
             : 'text-hint-faint cursor-not-allowed'
             }`}
           aria-label="다음"
         >
-          <CaretRightIcon size={18} weight="bold" />
+          <CaretRightIcon size={20} weight="bold" />
         </button>
       </div>
     </div>

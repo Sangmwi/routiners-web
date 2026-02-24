@@ -85,7 +85,7 @@ export default function UnderlineTabs<T extends string>({
             type="button"
             data-tab={tab.value}
             onClick={() => onChange(tab.value)}
-            className={`${layout === 'equal' ? 'flex-1' : 'px-4'} py-3 text-sm font-medium text-center transition-colors ${
+            className={`${layout === 'equal' ? 'flex-1' : 'px-4'} py-3.5 text-base font-medium text-center transition-colors ${
               value === tab.value
                 ? 'text-foreground'
                 : 'text-muted-foreground'
@@ -104,7 +104,7 @@ export default function UnderlineTabs<T extends string>({
       </div>
       {/* Animated indicator */}
       <div
-        className="absolute bottom-0 h-0.5 bg-primary rounded-full transition-all duration-300 ease-out"
+        className="absolute bottom-0 h-[3px] bg-primary rounded-full transition-all duration-300 ease-out"
         style={{ left: indicator.left, width: indicator.width }}
       />
     </div>

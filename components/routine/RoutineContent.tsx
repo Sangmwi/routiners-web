@@ -99,8 +99,9 @@ export default function RoutineContent() {
         value={tab}
         onChange={setTab}
         layout="auto"
+        showBorder={false}
         rightSlot={
-          <TypeFilterToggle value={filter} onChange={setFilter} />
+          <TypeFilterToggle value={filter} onChange={setFilter} size="md" />
         }
       />
 

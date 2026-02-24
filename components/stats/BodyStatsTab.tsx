@@ -1,29 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense } from 'react';
 import AppLink from '@/components/common/AppLink';
+import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import ChangeIndicator, { getTrendColor } from '@/components/ui/ChangeIndicator';
 import MiniSparkline from '@/components/ui/MiniSparkline';
-import SegmentedControl from '@/components/ui/SegmentedControl';
+import { PulseLoader } from '@/components/ui/PulseLoader';
 import { CaretRightIcon, UserIcon } from '@phosphor-icons/react';
 import { useInBodyRecordsSuspense } from '@/hooks/inbody/queries';
 import type { InBodyRecord } from '@/lib/types';
-
-type RecordCount = '5' | '10' | '20' | 'all';
-
-const COUNT_OPTIONS = [
-  { key: '5' as const, label: '5개' },
-  { key: '10' as const, label: '10개' },
-  { key: '20' as const, label: '20개' },
-  { key: 'all' as const, label: '전체' },
-];
-
-const COUNT_TO_LIMIT: Record<RecordCount, number> = {
-  '5': 5,
-  '10': 10,
-  '20': 20,
-  all: 100,
-};
 
 const METRICS_CONFIG = [
   { key: 'weight', label: '체중', unit: 'kg', positiveIsGood: false },
@@ -44,7 +29,7 @@ function computeChanges(chronological: InBodyRecord[]) {
   const last = chronological[chronological.length - 1];
   const periodDays = Math.round(
     (new Date(last.measuredAt).getTime() - new Date(first.measuredAt).getTime()) /
-      (1000 * 60 * 60 * 24),
+    (1000 * 60 * 60 * 24),
   );
   return {
     weight: Number((last.weight - first.weight).toFixed(2)),
@@ -58,18 +43,11 @@ function computeChanges(chronological: InBodyRecord[]) {
   };
 }
 
-/**
- * 신체 탭 콘텐츠
- *
- * - 인바디 3대 메트릭 (체중/골격근량/체지방률)
- * - 스파크라인으로 추이 표시
- * - 개수 선택기 (5/10/20/전체)로 표시 데이터 제어
- * - 인바디 관리 페이지 링크
- */
-export default function BodyStatsTab() {
-  const [recordCount, setRecordCount] = useState<RecordCount>('5');
-  const limit = COUNT_TO_LIMIT[recordCount];
+// ============================================================================
+// MetricCards — Suspense 내부에서 데이터 fetch
+// ============================================================================
 
+function MetricCards({ limit }: { limit: number }) {
   const { data: records } = useInBodyRecordsSuspense(limit, 0);
 
   // API는 newest-first로 반환하므로 시간순 정렬
@@ -84,9 +62,9 @@ export default function BodyStatsTab() {
   const pointLabels = chronological.map((r) => formatFullDate(r.measuredAt));
   const dateRange: [string, string] | undefined = hasHistory
     ? [
-        formatFullDate(chronological[0].measuredAt),
-        formatFullDate(chronological[chronological.length - 1].measuredAt),
-      ]
+      formatFullDate(chronological[0].measuredAt),
+      formatFullDate(chronological[chronological.length - 1].measuredAt),
+    ]
     : undefined;
 
   // 10개 이하: 모든 점 표시, 초과: 선만 (interactive로 터치 확인)
@@ -94,100 +72,141 @@ export default function BodyStatsTab() {
 
   if (!hasData) {
     return (
-      <div>
-        <div className="rounded-2xl bg-surface-secondary p-6 text-center">
-          <UserIcon size={28} weight="duotone" className="text-hint-faint mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground mb-1">인바디 기록이 없어요</p>
-          <p className="text-xs text-hint-strong mb-3">
-            체중, 골격근량, 체지방률을 기록해보세요
-          </p>
-          <AppLink
-            href="/profile/inbody"
-            className="inline-flex items-center gap-1 text-xs font-medium text-primary"
-          >
-            등록하기
-            <CaretRightIcon size={12} weight="bold" />
-          </AppLink>
-        </div>
+      <div className="rounded-2xl bg-surface-secondary p-6 text-center">
+        <UserIcon size={28} weight="duotone" className="text-hint-faint mx-auto mb-2" />
+        <p className="text-sm text-muted-foreground mb-1">인바디 기록이 없어요</p>
+        <p className="text-xs text-hint-strong mb-3">
+          체중, 골격근량, 체지방률을 기록해보세요
+        </p>
+        <AppLink
+          href="/profile/inbody"
+          className="inline-flex items-center gap-1 text-xs font-medium text-primary"
+        >
+          등록하기
+          <CaretRightIcon size={12} weight="bold" />
+        </AppLink>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      {/* 헤더: 타이틀 + 관리 링크 */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-base font-medium text-foreground">인바디 추이</h3>
+    <div className="space-y-4">
+      {METRICS_CONFIG.map(({ key, label, unit, positiveIsGood }) => {
+        const value = latest?.[key];
+        const change = changes?.[key];
+        const sparkData = chronological.map((r) => r[key]);
+        const fmt = (v: number) => v.toFixed(1);
+
+        return (
+          <div key={key} className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs text-muted-foreground">{label}</p>
+              {change != null && change !== 0 && changes?.periodDays != null && (
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-hint">
+                    {chronological.length}회 측정
+                  </span>
+                  <ChangeIndicator value={change} positiveIsGood={positiveIsGood} unit={unit} />
+                </div>
+              )}
+            </div>
+            <p className="text-xl font-bold text-foreground mb-1">
+              {value != null ? (
+                <>
+                  {value}
+                  <span className="text-sm font-normal text-muted-foreground ml-1">{unit}</span>
+                </>
+              ) : (
+                <span className="text-hint">-</span>
+              )}
+            </p>
+            {hasHistory && (
+              <MiniSparkline
+                data={sparkData}
+                height={120}
+                showAllDots={showDots}
+                showEndDot={false}
+                showYAxis
+                lineOpacity={0.5}
+                dateRange={dateRange}
+                color={getTrendColor(change, positiveIsGood)}
+                interactive
+                pointLabels={pointLabels}
+                unit={unit}
+                formatValue={fmt}
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ============================================================================
+// InBody 메트릭 스켈레톤
+// ============================================================================
+
+function MetricCardsSkeleton() {
+  return (
+    <div className="space-y-4">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="p-4">
+          <div
+            className="pulse-bar rounded-lg mb-3"
+            style={{ width: '20%', height: 16, animationDelay: `${i * 120}ms` }}
+          />
+          <div
+            className="pulse-bar rounded-lg mb-3"
+            style={{ width: '35%', height: 28, animationDelay: `${i * 120 + 60}ms` }}
+          />
+          <div
+            className="pulse-bar rounded-2xl"
+            style={{ width: '100%', height: 120, animationDelay: `${i * 120 + 120}ms` }}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ============================================================================
+// BodyStatsTab — 헤더는 Suspense 밖, 메트릭만 Suspense 안
+// ============================================================================
+
+interface BodyStatsTabProps {
+  limit: number;
+}
+
+/**
+ * 신체 탭 콘텐츠
+ *
+ * - 인바디 3대 메트릭 (체중/골격근량/체지방률)
+ * - 스파크라인으로 추이 표시
+ * - 개수 선택은 상위 StatsPageContent에서 DomainTabs rightSlot으로 제어
+ * - 인바디 관리 페이지 링크
+ */
+export default function BodyStatsTab({ limit }: BodyStatsTabProps) {
+  return (
+    <>
+      {/* 헤더: 타이틀 + 관리 링크 — Suspense 밖 */}
+      <div className="flex items-center justify-between my-4">
+        <h3 className="text-base font-medium text-foreground px-2">인바디 추이</h3>
         <AppLink
           href="/profile/inbody"
-          className="text-xs font-medium text-primary flex items-center gap-0.5"
+          className="text-xs font-medium text-primary flex items-center gap-0.5 px-2"
         >
           관리
           <CaretRightIcon size={12} weight="bold" />
         </AppLink>
       </div>
 
-      {/* 개수 선택기 */}
-      <div className="flex justify-center">
-        <SegmentedControl
-          options={COUNT_OPTIONS}
-          value={recordCount}
-          onChange={setRecordCount}
-          size="sm"
-        />
-      </div>
-
-      {/* 메트릭 카드 */}
-      <div className="space-y-4">
-        {METRICS_CONFIG.map(({ key, label, unit, positiveIsGood }) => {
-          const value = latest?.[key];
-          const change = changes?.[key];
-          const sparkData = chronological.map((r) => r[key]);
-          const fmt = (v: number) => v.toFixed(1);
-
-          return (
-            <div key={key} className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs text-muted-foreground">{label}</p>
-                {change != null && change !== 0 && changes?.periodDays != null && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs text-hint">
-                      {chronological.length}회 측정
-                    </span>
-                    <ChangeIndicator value={change} positiveIsGood={positiveIsGood} unit={unit} />
-                  </div>
-                )}
-              </div>
-              <p className="text-xl font-bold text-foreground mb-1">
-                {value != null ? (
-                  <>
-                    {value}
-                    <span className="text-sm font-normal text-muted-foreground ml-1">{unit}</span>
-                  </>
-                ) : (
-                  <span className="text-hint">-</span>
-                )}
-              </p>
-              {hasHistory && (
-                <MiniSparkline
-                  data={sparkData}
-                  height={120}
-                  showAllDots={showDots}
-                  showEndDot={false}
-                  showYAxis
-                  lineOpacity={0.5}
-                  dateRange={dateRange}
-                  color={getTrendColor(change, positiveIsGood)}
-                  interactive
-                  pointLabels={pointLabels}
-                  unit={unit}
-                  formatValue={fmt}
-                />
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
+      {/* 메트릭 카드 — Suspense 경계 */}
+      <QueryErrorBoundary>
+        <Suspense fallback={<MetricCardsSkeleton />}>
+          <MetricCards limit={limit} />
+        </Suspense>
+      </QueryErrorBoundary>
+    </>
   );
 }

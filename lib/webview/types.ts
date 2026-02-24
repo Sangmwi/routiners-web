@@ -58,7 +58,9 @@ export type AppToWebMessage =
   | { type: 'CLEAR_SESSION' }
   | { type: 'LOGIN_ERROR'; error: string }
   | { type: 'LOGIN_CANCELLED' }
-  | { type: 'IMAGE_PICKER_RESULT'; requestId: string; result: ImagePickerResult };
+  | { type: 'IMAGE_PICKER_RESULT'; requestId: string; result: ImagePickerResult }
+  | { type: 'KEYBOARD_SHOW'; height: number }
+  | { type: 'KEYBOARD_HIDE' };
 
 /** 웹 → 앱 메시지 (postMessage로 전송) */
 export type WebToAppMessage =

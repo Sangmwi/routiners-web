@@ -51,7 +51,7 @@ const SIZE_CLASSES = {
 const HEIGHT_CLASSES = {
   auto: 'max-h-[85dvh]',
   half: 'h-[50dvh]',
-  full: 'h-dvh',
+  full: '', // inline style로 키보드 높이 반영
 } as const;
 
 // ============================================================================
@@ -215,6 +215,15 @@ export default function Modal({
   const heightClass = isBottom ? HEIGHT_CLASSES[height] : 'max-h-[85dvh]';
   const containerAlign = isBottom ? 'items-end' : 'items-center';
 
+  // full 높이일 때 키보드 높이를 반영한 inline style
+  const heightStyle: React.CSSProperties | undefined =
+    isBottom && height === 'full'
+      ? {
+          height: 'calc(100dvh - var(--keyboard-height, 0px))',
+          transition: 'height 0.25s ease-out',
+        }
+      : undefined;
+
   const modalAnimationClass = getModalAnimationClass(
     isBottom,
     isAnimating,
@@ -251,7 +260,7 @@ export default function Modal({
       <div
         ref={swipe.modalRef}
         className={`relative w-full bg-card shadow-xl ${heightClass} flex flex-col ${modalAnimationClass} ${isBottom ? 'sm:max-w-md' : SIZE_CLASSES[size]} ${className}`}
-        style={swipeStyle}
+        style={{ ...heightStyle, ...swipeStyle }}
         onClick={(e) => e.stopPropagation()}
         {...(enableSwipe ? swipe.handlers : {})}
       >

@@ -14,6 +14,9 @@
   --color-green-900: #17451c;
   --color-green-950: #0a2610;
 
+  /* Keyboard Height (네이티브 bridge에서 설정, 키보드 닫힌 상태 0) */
+  --keyboard-height: 0px;
+
   /* Layout Spacing */
   --layout-padding-x: 1rem;      /* 16px - 좌우 패딩 */
   --layout-padding-y: 1rem;      /* 16px - 상하 패딩 */
