@@ -72,7 +72,7 @@ export default function CommunityPage() {
             <button
               type="button"
               onClick={handleSearchUsers}
-              className="p-2 rounded-xl hover:bg-surface-muted active:bg-muted/80 transition-colors"
+              className="p-2 rounded-xl hover:bg-surface-muted active:bg-surface-pressed transition-colors"
               aria-label="사용자 검색"
             >
               <UserFocusIcon size={22} className="text-muted-foreground" />
@@ -80,7 +80,7 @@ export default function CommunityPage() {
             <button
               type="button"
               onClick={handleNewPost}
-              className="p-2 rounded-xl hover:bg-surface-muted active:bg-muted/80 transition-colors"
+              className="p-2 rounded-xl hover:bg-surface-muted active:bg-surface-pressed transition-colors"
               aria-label="글쓰기"
             >
               <PlusIcon size={22} className="text-muted-foreground" />

@@ -19,7 +19,7 @@ export default function DayGroup({
   children,
 }: DayGroupProps) {
   return (
-    <div className={`rounded-2xl px-4 py-3 ${isToday ? 'bg-primary/5' : ''}`}>
+    <div className={`rounded-2xl px-4 py-3 ${isToday ? 'bg-surface-accent' : ''}`}>
       <div className="flex gap-3">
         <span
           className={`text-xs font-semibold ${labelWidth} shrink-0 pt-0.5 ${

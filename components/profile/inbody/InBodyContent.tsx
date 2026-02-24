@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { PlusIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
+import GradientFooter from '@/components/ui/GradientFooter';
 import SectionHeader from '@/components/ui/SectionHeader';
 import { ImageSourceDrawer } from '@/components/drawers';
 import {
@@ -71,7 +72,7 @@ export default function InBodyContent() {
 
   return (
     <>
-      <div className="space-y-8">
+      <div className="space-y-8 pb-footer-clearance">
         {/* Summary Card */}
         <section className="space-y-4">
           <SectionHeader title="최근 측정" size="md" />
@@ -99,7 +100,7 @@ export default function InBodyContent() {
       </div>
 
       {/* Fixed Bottom Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 pb-safe bg-background border-t border-edge-subtle">
+      <GradientFooter variant="page">
         <Button
           onClick={() => setIsImageSourceOpen(true)}
           className="w-full"
@@ -107,7 +108,7 @@ export default function InBodyContent() {
           <PlusIcon size={16} className="mr-2" />
           새 기록 추가
         </Button>
-      </div>
+      </GradientFooter>
 
       {/* 이미지 소스 선택 드로어 (카메라/갤러리) */}
       <ImageSourceDrawer

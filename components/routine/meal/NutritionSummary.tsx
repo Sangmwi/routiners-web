@@ -228,7 +228,7 @@ export default function NutritionSummary({ data }: NutritionSummaryProps) {
       {/* AI 팁 */}
       {data.tips && data.tips.length > 0 && (
         <div className="mt-4 pt-4 border-t border-edge-subtle">
-          <div className="bg-primary/5 rounded-lg p-3">
+          <div className="bg-surface-accent rounded-lg p-3">
             <p className="text-xs text-primary font-medium mb-1">AI 조언</p>
             <ul className="text-xs text-muted-foreground space-y-1">
               {data.tips.slice(0, 3).map((tip, idx) => (

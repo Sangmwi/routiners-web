@@ -1,6 +1,7 @@
 'use client';
 
 import Button from '@/components/ui/Button';
+import GradientFooter from '@/components/ui/GradientFooter';
 import {
   TrophyIcon,
   TimerIcon,
@@ -51,7 +52,7 @@ export default function WorkoutComplete({
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
       <div className="flex-1 overflow-y-auto">
-        <div className="flex flex-col items-center px-(--layout-padding-x) pt-16 pb-32">
+        <div className="flex flex-col items-center px-(--layout-padding-x) pt-16 pb-footer-clearance">
           {/* 축하 아이콘 */}
           <div className="w-20 h-20 rounded-full bg-surface-accent flex items-center justify-center mb-4">
             <TrophyIcon size={40} weight="fill" className="text-primary" />
@@ -142,7 +143,7 @@ export default function WorkoutComplete({
       </div>
 
       {/* 하단 완료 버튼 */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 pb-safe bg-background border-t border-border">
+      <GradientFooter variant="page">
         <Button
           variant="primary"
           fullWidth
@@ -152,7 +153,7 @@ export default function WorkoutComplete({
         >
           완료하기
         </Button>
-      </div>
+      </GradientFooter>
     </div>
   );
 }

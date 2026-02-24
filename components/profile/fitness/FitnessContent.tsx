@@ -122,7 +122,7 @@ export default function FitnessContent() {
         </div>
       </div>
 
-      <div className="space-y-4 pb-24">
+      <div className="space-y-4 pb-footer-clearance">
         {/* 그룹 1: 목표 & 경험 */}
         <div className="bg-card rounded-2xl p-4 space-y-5 border border-edge-faint">
           <Section title="운동 목표" description="어떤 목표를 위해 운동하시나요?">

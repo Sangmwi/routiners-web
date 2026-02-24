@@ -93,7 +93,7 @@ export default function ProfileInterestsInput({ value, onChange }: ProfileIntere
                 className={`px-3 py-1.5 rounded-[14px] text-xs transition-colors ${
                   isSelected
                     ? 'bg-surface-accent text-primary border-2 border-primary'
-                    : 'bg-muted text-card-foreground border border-edge-subtle hover:border-primary/50'
+                    : 'bg-muted text-card-foreground border border-edge-subtle hover:border-edge-subtle'
                 }`}
               >
                 {exercise}

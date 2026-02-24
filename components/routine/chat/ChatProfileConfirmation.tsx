@@ -68,7 +68,7 @@ export function ChatProfileConfirmation({
         {request.fields.map((field) => (
           <div
             key={field.key}
-            className="flex justify-between items-center py-3 px-4 bg-muted/25 rounded-xl"
+            className="flex justify-between items-center py-3 px-4 bg-surface-secondary rounded-xl"
           >
             <span className="text-sm text-muted-foreground">{field.label}</span>
             <span className="text-sm font-medium text-foreground">
@@ -87,7 +87,7 @@ export function ChatProfileConfirmation({
               onClick={onCancel}
               disabled={!isActionable}
               className="h-11 px-5 rounded-full text-sm font-medium
-                         border border-border/60 text-muted-foreground
+                         border border-edge-subtle text-muted-foreground
                          hover:bg-surface-secondary hover:border-border
                          transition-all active:scale-[0.97] disabled:opacity-50"
             >
@@ -99,7 +99,7 @@ export function ChatProfileConfirmation({
               onClick={onEdit}
               disabled={!isActionable}
               className="h-11 px-5 rounded-full text-sm font-medium
-                         border border-border/60 text-muted-foreground
+                         border border-edge-subtle text-muted-foreground
                          hover:bg-surface-secondary hover:border-border
                          transition-all active:scale-[0.97] disabled:opacity-50"
             >

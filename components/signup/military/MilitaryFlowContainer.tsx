@@ -108,7 +108,7 @@ export default function MilitaryFlowContainer({
       <div className="flex items-center justify-between mb-6 shrink-0">
         <button
           onClick={goBack}
-          className="p-2 -ml-2 rounded-full hover:bg-muted active:bg-muted/80 transition-colors"
+          className="p-2 -ml-2 rounded-full hover:bg-muted active:bg-surface-pressed transition-colors"
           aria-label="뒤로가기"
         >
           <CaretLeftIcon size={20} className="text-foreground" />

@@ -74,10 +74,10 @@ export default function ChatPreviewSummary({
       <div className="px-5 pt-5 pb-4">
         <div className="flex items-center gap-3">
           <div className="flex-1 flex items-center gap-2">
-            <span className="px-2.5 py-1 text-xs font-medium bg-muted/40 text-muted-foreground rounded-full">
+            <span className="px-2.5 py-1 text-xs font-medium bg-surface-hover text-muted-foreground rounded-full">
               {stats.duration}
             </span>
-            <span className="px-2.5 py-1 text-xs font-medium bg-muted/40 text-muted-foreground rounded-full">
+            <span className="px-2.5 py-1 text-xs font-medium bg-surface-hover text-muted-foreground rounded-full">
               {stats.frequency}
             </span>
             {stats.perSession && (
@@ -107,7 +107,7 @@ export default function ChatPreviewSummary({
       {/* 주차별 요약 */}
       <div className="px-5 pb-4 space-y-2">
         {weekSummaries.slice(0, 2).map((summary, idx) => (
-          <div key={idx} className="flex items-start gap-3 py-3 px-4 bg-muted/25 rounded-xl">
+          <div key={idx} className="flex items-start gap-3 py-3 px-4 bg-surface-secondary rounded-xl">
             <span className="shrink-0 text-xs font-semibold text-primary">
               {idx + 1}주차
             </span>
@@ -140,7 +140,7 @@ export default function ChatPreviewSummary({
               onClick={onCancel}
               disabled={!isActionable}
               className="h-11 px-5 rounded-full text-sm font-medium
-                         border border-border/60 text-muted-foreground
+                         border border-edge-subtle text-muted-foreground
                          hover:bg-surface-secondary hover:border-border
                          transition-all active:scale-[0.97] disabled:opacity-50"
             >
@@ -152,7 +152,7 @@ export default function ChatPreviewSummary({
               onClick={onEdit}
               disabled={!isActionable}
               className="h-11 px-5 rounded-full text-sm font-medium
-                         border border-border/60 text-muted-foreground
+                         border border-edge-subtle text-muted-foreground
                          hover:bg-surface-secondary hover:border-border
                          transition-all active:scale-[0.97] disabled:opacity-50"
             >

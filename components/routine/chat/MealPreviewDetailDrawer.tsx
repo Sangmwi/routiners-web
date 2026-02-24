@@ -2,6 +2,7 @@
 
 import { CheckIcon, ProhibitIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
+import GradientFooter from '@/components/ui/GradientFooter';
 import Modal from '@/components/ui/Modal';
 import type { MealPlanPreviewData, MealPreviewDay, MealPreviewMeal } from '@/lib/types/meal';
 import { MEAL_TYPE_LABELS } from '@/lib/types/meal';
@@ -47,7 +48,7 @@ export default function MealPreviewDetailDrawer({
       height="full"
       showCloseButton={false}
       stickyFooter={
-        <div className="p-4 bg-card border-t border-edge-subtle">
+        <GradientFooter variant="sheet">
           {status === 'pending' ? (
             <Button
               variant="primary"
@@ -78,7 +79,7 @@ export default function MealPreviewDetailDrawer({
               </span>
             </div>
           )}
-        </div>
+        </GradientFooter>
       }
     >
       {/* 헤더 - 배지 + 타이틀 + 설명 */}

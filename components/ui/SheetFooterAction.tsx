@@ -2,6 +2,7 @@
 
 import { type ReactNode } from 'react';
 import Button from '@/components/ui/Button';
+import GradientFooter from '@/components/ui/GradientFooter';
 
 // ============================================================================
 // Types
@@ -31,8 +32,8 @@ interface SheetFooterActionProps {
  * 시트/모달 하단 고정 주요 액션 버튼
  *
  * stickyFooter prop에 사용하는 표준 CTA 래퍼.
- * FloatingSaveButton과 유사하지만 항상 보이는 고정 영역용이므로
- * 그라디언트·그림자·애니메이션 없음.
+ * FloatingSaveButton과 동일한 그라디언트 페이드를 적용하되,
+ * 항상 보이는 고정 영역용이므로 그림자·애니메이션 없음.
  *
  * @example
  * <Modal stickyFooter={
@@ -63,7 +64,7 @@ export default function SheetFooterAction({
       : '';
 
   return (
-    <div className="p-4 bg-card border-t border-edge-subtle pb-safe">
+    <GradientFooter variant="sheet" className="pb-safe">
       <Button
         type="button"
         variant="primary"
@@ -76,6 +77,6 @@ export default function SheetFooterAction({
         {!isLoading && icon}
         {displayLabel}
       </Button>
-    </div>
+    </GradientFooter>
   );
 }

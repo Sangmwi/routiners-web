@@ -2,8 +2,9 @@
 
 import { CalendarIcon } from '@phosphor-icons/react';
 import { NextIcon, LoadingSpinner, AddIcon } from '@/components/ui/icons';
-import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
+import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import GradientFooter from '@/components/ui/GradientFooter';
 import { InBodyRecord } from '@/lib/types/inbody';
 import { useInBodyRecords } from '@/hooks/inbody';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
@@ -28,7 +29,26 @@ export default function InBodyListModal({
   });
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="인바디 기록" position="bottom" enableSwipe>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="인바디 기록"
+      position="bottom"
+      enableSwipe
+      stickyFooter={
+        <GradientFooter variant="sheet" className="flex gap-3">
+          <Button variant="outline" onClick={onClose} className="flex-1">
+            닫기
+          </Button>
+          {onAddNew && (
+            <Button onClick={onAddNew} className="flex-1">
+              <AddIcon size="sm" className="mr-2" />
+              새 기록 추가
+            </Button>
+          )}
+        </GradientFooter>
+      }
+    >
       <ModalBody className="min-h-[200px]">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
@@ -56,18 +76,6 @@ export default function InBodyListModal({
           </div>
         )}
       </ModalBody>
-
-      <ModalFooter>
-        <Button variant="outline" onClick={onClose} className="flex-1">
-          닫기
-        </Button>
-        {onAddNew && (
-          <Button onClick={onAddNew} className="flex-1">
-            <AddIcon size="sm" className="mr-2" />
-            새 기록 추가
-          </Button>
-        )}
-      </ModalFooter>
     </Modal>
   );
 }

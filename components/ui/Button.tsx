@@ -31,7 +31,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       secondary:
         'bg-secondary text-secondary-foreground shadow-md hover:shadow-lg hover:bg-secondary/90',
       outline:
-        'bg-card text-card-foreground ring-1 ring-border hover:ring-primary/50 shadow-sm hover:shadow-md hover:bg-primary/5',
+        'bg-card text-card-foreground ring-1 ring-border hover:ring-accent shadow-sm hover:shadow-md hover:bg-surface-accent',
       ghost: 'bg-transparent text-foreground hover:bg-muted',
       destructive:
         'bg-destructive text-destructive-foreground shadow-md shadow-destructive/20 hover:shadow-lg hover:shadow-destructive/30 hover:bg-destructive/90',

@@ -58,15 +58,18 @@
   --surface-danger: rgba(217, 115, 115, 0.1);        /* bg-destructive/10 — 에러 배경 */
   --surface-scheduled: rgba(245, 158, 11, 0.1);      /* bg-scheduled/10 — 예정 상태 */
   --surface-glass: rgba(243, 246, 243, 0.8);         /* bg-background/80 — 반투명 헤더 */
+  --surface-pressed: rgba(226, 232, 240, 0.8);       /* active/pressed 상태 */
 
   /* ===== 시맨틱 보더 토큰 ===== */
   --edge-subtle: rgba(203, 213, 225, 0.5);           /* border-border/50 — 카드 테두리 */
   --edge-faint: rgba(203, 213, 225, 0.3);            /* border-border/30 — 폼 카드 테두리 */
   --edge-divider: rgba(203, 213, 225, 0.2);          /* border-border/20 — 구분선 */
+  --edge-error: rgba(217, 115, 115, 0.5);            /* border-destructive/50 — 에러 테두리 */
 
   /* ===== 시맨틱 링 토큰 ===== */
   --ring-focus: rgba(80, 167, 108, 0.2);             /* ring-primary/20 — 입력 포커스 */
   --ring-accent: rgba(80, 167, 108, 0.3);            /* ring-primary/30 — 선택 상태 */
+  --ring-error: rgba(217, 115, 115, 0.2);            /* ring-destructive/20 — 에러 포커스 */
 }
 
 /* System 다크 모드 — data-theme 속성 없을 때 OS 설정 따름 */
@@ -118,15 +121,18 @@
     --surface-danger: rgba(232, 160, 160, 0.1);
     --surface-scheduled: rgba(251, 191, 36, 0.1);
     --surface-glass: rgba(15, 23, 42, 0.8);
+    --surface-pressed: rgba(51, 65, 85, 0.8);
 
     /* 시맨틱 보더 (다크) */
     --edge-subtle: rgba(51, 65, 85, 0.5);
     --edge-faint: rgba(51, 65, 85, 0.3);
     --edge-divider: rgba(51, 65, 85, 0.2);
+    --edge-error: rgba(232, 160, 160, 0.5);
 
     /* 시맨틱 링 (다크) */
     --ring-focus: rgba(95, 192, 127, 0.2);
     --ring-accent: rgba(95, 192, 127, 0.3);
+    --ring-error: rgba(232, 160, 160, 0.2);
   }
 }
 
@@ -179,14 +185,19 @@
   --color-surface-danger: var(--surface-danger);
   --color-surface-scheduled: var(--surface-scheduled);
   --color-surface-glass: var(--surface-glass);
+  --color-surface-pressed: var(--surface-pressed);
 
   /* 시맨틱 보더 — border-edge-*, divide-edge-* 로 사용 */
   --color-edge-subtle: var(--edge-subtle);
   --color-edge-faint: var(--edge-faint);
   --color-edge-divider: var(--edge-divider);
+  --color-edge-error: var(--edge-error);
 
   --font-sans: var(--font-pretendard-variable);
   --font-mono: var(--font-geist-mono);
+
+  /* GradientFooter 하단 여백 — 그라데이션(16) + 버튼(~40) + pb(16) + 여유 */
+  --spacing-footer-clearance: 5rem;
 }
 
 /* 명시적 라이트 모드 — OS가 다크여도 라이트 강제 */
@@ -237,11 +248,14 @@
   --surface-danger: rgba(217, 115, 115, 0.1);
   --surface-scheduled: rgba(245, 158, 11, 0.1);
   --surface-glass: rgba(243, 246, 243, 0.8);
+  --surface-pressed: rgba(226, 232, 240, 0.8);
   --edge-subtle: rgba(203, 213, 225, 0.5);
   --edge-faint: rgba(203, 213, 225, 0.3);
   --edge-divider: rgba(203, 213, 225, 0.2);
+  --edge-error: rgba(217, 115, 115, 0.5);
   --ring-focus: rgba(80, 167, 108, 0.2);
   --ring-accent: rgba(80, 167, 108, 0.3);
+  --ring-error: rgba(217, 115, 115, 0.2);
 }
 
 /* 명시적 다크 모드 — system 다크 + 사용자가 직접 dark 선택 */
@@ -292,11 +306,14 @@
   --surface-danger: rgba(232, 160, 160, 0.1);
   --surface-scheduled: rgba(251, 191, 36, 0.1);
   --surface-glass: rgba(15, 23, 42, 0.8);
+  --surface-pressed: rgba(51, 65, 85, 0.8);
   --edge-subtle: rgba(51, 65, 85, 0.5);
   --edge-faint: rgba(51, 65, 85, 0.3);
   --edge-divider: rgba(51, 65, 85, 0.2);
+  --edge-error: rgba(232, 160, 160, 0.5);
   --ring-focus: rgba(95, 192, 127, 0.2);
   --ring-accent: rgba(95, 192, 127, 0.3);
+  --ring-error: rgba(232, 160, 160, 0.2);
 }
 
 body {
@@ -555,4 +572,8 @@ main {
 
 @utility ring-accent {
   --tw-ring-color: var(--ring-accent);
+}
+
+@utility ring-error {
+  --tw-ring-color: var(--ring-error);
 }

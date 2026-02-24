@@ -151,7 +151,7 @@ export default function DietaryContent() {
         </div>
       </div>
 
-      <div className="space-y-4 pb-24">
+      <div className="space-y-4 pb-footer-clearance">
         {/* 그룹 1: 목표 & 유형 */}
         <div className="bg-card rounded-2xl p-4 space-y-5 border border-edge-faint">
           <Section title="식단 목표" description="어떤 목표로 식단을 관리하고 있나요?">
@@ -231,7 +231,7 @@ export default function DietaryContent() {
                   }))
                 }
                 placeholder="예: 100000"
-                className="flex-1 min-w-0 px-4 py-3 rounded-xl bg-surface-muted border border-edge-faint text-sm text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/40 focus:border-primary/30 outline-none transition-all"
+                className="flex-1 min-w-0 px-4 py-3 rounded-xl bg-surface-muted border border-edge-faint text-sm text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-accent focus:border-edge-faint outline-none transition-all"
               />
               <span className="text-sm text-muted-foreground">원</span>
             </div>

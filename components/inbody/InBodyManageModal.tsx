@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { CalendarIcon } from '@phosphor-icons/react';
 import { AddIcon, NextIcon, LoadingSpinner, DeleteIcon, ErrorIcon } from '@/components/ui/icons';
-import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
+import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import GradientFooter from '@/components/ui/GradientFooter';
 import { useShowError } from '@/lib/stores/errorStore';
 import { InBodyRecord } from '@/lib/types/inbody';
 import { useInBodyRecords, useDeleteInBody } from '@/hooks/inbody';
@@ -92,6 +93,52 @@ export default function InBodyManageModal({
         title="인바디 관리"
         size="lg"
         closeOnBackdrop={state === 'list'}
+        stickyFooter={
+          <GradientFooter variant="sheet" className="flex gap-3">
+            {state === 'list' && (
+              <>
+                <Button variant="outline" onClick={handleClose} className="flex-1">
+                  닫기
+                </Button>
+                <Button
+                  onClick={() => setIsScanModalOpen(true)}
+                  className="flex-1"
+                >
+                  <AddIcon size="sm" className="mr-2" />
+                  새 기록 추가
+                </Button>
+              </>
+            )}
+
+            {state === 'confirm-delete' && (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={handleCancelDelete}
+                  className="flex-1"
+                  disabled={deleteInBody.isPending}
+                >
+                  취소
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleConfirmDelete}
+                  className="flex-1"
+                  disabled={deleteInBody.isPending}
+                >
+                  {deleteInBody.isPending ? (
+                    <>
+                      <LoadingSpinner size="sm" variant="current" className="mr-2" />
+                      삭제 중...
+                    </>
+                  ) : (
+                    '삭제'
+                  )}
+                </Button>
+              </>
+            )}
+          </GradientFooter>
+        }
       >
         <ModalBody className="min-h-[300px]">
           {state === 'list' && (
@@ -171,51 +218,6 @@ export default function InBodyManageModal({
             </div>
           )}
         </ModalBody>
-
-        <ModalFooter>
-          {state === 'list' && (
-            <>
-              <Button variant="outline" onClick={handleClose} className="flex-1">
-                닫기
-              </Button>
-              <Button
-                onClick={() => setIsScanModalOpen(true)}
-                className="flex-1"
-              >
-                <AddIcon size="sm" className="mr-2" />
-                새 기록 추가
-              </Button>
-            </>
-          )}
-
-          {state === 'confirm-delete' && (
-            <>
-              <Button
-                variant="outline"
-                onClick={handleCancelDelete}
-                className="flex-1"
-                disabled={deleteInBody.isPending}
-              >
-                취소
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleConfirmDelete}
-                className="flex-1"
-                disabled={deleteInBody.isPending}
-              >
-                {deleteInBody.isPending ? (
-                  <>
-                    <LoadingSpinner size="sm" variant="current" className="mr-2" />
-                    삭제 중...
-                  </>
-                ) : (
-                  '삭제'
-                )}
-              </Button>
-            </>
-          )}
-        </ModalFooter>
       </Modal>
 
       {/* 스캔 모달 */}

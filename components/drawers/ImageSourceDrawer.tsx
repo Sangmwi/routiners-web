@@ -65,7 +65,7 @@ export default function ImageSourceDrawer({
               <button
                 type="button"
                 onClick={handleSelectCamera}
-                className="w-full flex items-center justify-center gap-3 py-4 px-5 hover:bg-surface-muted active:bg-muted/70 transition-colors"
+                className="w-full flex items-center justify-center gap-3 py-4 px-5 hover:bg-surface-muted active:bg-surface-pressed transition-colors"
               >
                 <CameraIcon size={22} className="text-muted-foreground" />
                 <span className="text-base font-medium text-foreground">카메라로 촬영</span>
@@ -76,7 +76,7 @@ export default function ImageSourceDrawer({
               <button
                 type="button"
                 onClick={handleSelectGallery}
-                className="w-full flex items-center justify-center gap-3 py-4 px-5 hover:bg-surface-muted active:bg-muted/70 transition-colors"
+                className="w-full flex items-center justify-center gap-3 py-4 px-5 hover:bg-surface-muted active:bg-surface-pressed transition-colors"
               >
                 <ImageSquareIcon size={22} className="text-muted-foreground" />
                 <span className="text-base font-medium text-foreground">앨범에서 선택</span>

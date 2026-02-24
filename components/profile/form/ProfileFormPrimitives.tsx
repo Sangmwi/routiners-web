@@ -31,8 +31,8 @@ export function ProfileFormSelectOption<T extends string | number>({
       aria-pressed={selected}
       className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-left transition-all active:scale-[0.97] ${
         selected
-          ? 'bg-surface-accent ring-1.5 ring-primary/50'
-          : 'bg-surface-muted text-muted-foreground hover:bg-muted/70'
+          ? 'bg-surface-accent ring-1.5 ring-accent'
+          : 'bg-surface-muted text-muted-foreground hover:bg-surface-pressed'
       }`}
     >
       {IconComponent && (
@@ -84,7 +84,7 @@ export function ProfileFormNumberOption({
       className={`${baseClass} text-sm font-semibold transition-all active:scale-95 ${
         selected
           ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25'
-          : 'bg-surface-muted text-muted-foreground hover:bg-muted/70'
+          : 'bg-surface-muted text-muted-foreground hover:bg-surface-pressed'
       }`}
     >
       {label}
@@ -114,8 +114,8 @@ export function ProfileFormChipOption({
       aria-pressed={selected}
       className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium transition-all active:scale-95 ${
         selected
-          ? 'bg-surface-accent-strong text-primary ring-1 ring-primary/40'
-          : 'bg-surface-muted text-muted-foreground hover:bg-muted/70'
+          ? 'bg-surface-accent-strong text-primary ring-1 ring-accent'
+          : 'bg-surface-muted text-muted-foreground hover:bg-surface-pressed'
       }`}
     >
       <span
@@ -155,7 +155,7 @@ export function ProfileFormSection({
         <div className="flex items-center gap-1.5">
           <label className="text-sm font-medium text-muted-foreground">{title}</label>
           {optional && (
-            <span className="text-[10px] text-muted-foreground/70 bg-muted/40 px-1.5 py-0.5 rounded">
+            <span className="text-[10px] text-muted-foreground/70 bg-surface-hover px-1.5 py-0.5 rounded">
               선택
             </span>
           )}
@@ -214,13 +214,13 @@ export function ProfileFormTagInput({
           onChange={(event) => setInputValue(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full pl-4 pr-10 py-3 rounded-xl bg-surface-muted border border-edge-faint text-sm text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/40 focus:border-primary/30 outline-none transition-all"
+          className="w-full pl-4 pr-10 py-3 rounded-xl bg-surface-muted border border-edge-faint text-sm text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-accent focus:border-edge-faint outline-none transition-all"
         />
         {inputValue.trim() && (
           <button
             type="button"
             onClick={addTag}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg bg-surface-accent flex items-center justify-center transition-colors hover:bg-primary/20"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg bg-surface-accent flex items-center justify-center transition-colors hover:bg-surface-accent-strong"
           >
             <PlusIcon size={14} className="text-primary" weight="bold" />
           </button>
@@ -231,13 +231,13 @@ export function ProfileFormTagInput({
           {value.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1.5 pl-3 pr-2 py-1.5 rounded-full bg-muted/60 text-sm text-foreground animate-tag-in"
+              className="inline-flex items-center gap-1.5 pl-3 pr-2 py-1.5 rounded-full bg-surface-muted text-sm text-foreground animate-tag-in"
             >
               {tag}
               <button
                 type="button"
                 onClick={() => removeTag(tag)}
-                className="w-5 h-5 rounded-full bg-muted-foreground/15 flex items-center justify-center hover:bg-destructive/20 transition-colors"
+                className="w-5 h-5 rounded-full bg-muted-foreground/15 flex items-center justify-center hover:bg-surface-danger transition-colors"
               >
                 <XIcon size={10} className="text-muted-foreground" weight="bold" />
               </button>

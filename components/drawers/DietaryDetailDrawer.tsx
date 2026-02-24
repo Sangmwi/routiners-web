@@ -1,7 +1,8 @@
 'use client';
 
-import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
+import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import GradientFooter from '@/components/ui/GradientFooter';
 import {
   DietaryProfile,
   DIETARY_GOAL_LABELS,
@@ -60,6 +61,20 @@ export default function DietaryDetailDrawer({
             {formatKoreanDate(profile.updatedAt)}
           </span>
         ) : undefined
+      }
+      stickyFooter={
+        <GradientFooter variant="sheet">
+          <Button
+            variant="primary"
+            onClick={() => {
+              onClose();
+              router.push('/profile/dietary');
+            }}
+            className="flex-1 w-full"
+          >
+            수정하기
+          </Button>
+        </GradientFooter>
       }
     >
       <ModalBody className="p-4 space-y-3">
@@ -145,19 +160,6 @@ export default function DietaryDetailDrawer({
           </div>
         )}
       </ModalBody>
-
-      <ModalFooter>
-        <Button
-          variant="primary"
-          onClick={() => {
-            onClose();
-            router.push('/profile/dietary');
-          }}
-          className="flex-1"
-        >
-          수정하기
-        </Button>
-      </ModalFooter>
     </Modal>
   );
 }

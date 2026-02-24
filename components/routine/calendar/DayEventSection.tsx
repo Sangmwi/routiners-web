@@ -123,7 +123,7 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
         )}
 
         {showWorkout && showMeal && (
-          <div className="mx-2 border-t border-border/40" />
+          <div className="mx-2 border-t border-edge-faint" />
         )}
 
         {showMeal && (

@@ -88,7 +88,7 @@ export function UnitStep({
                 ${
                   unitName
                     ? 'border-primary bg-surface-accent'
-                    : 'border-border bg-card hover:border-primary/50'
+                    : 'border-border bg-card hover:border-edge-subtle'
                 }
               `}
             >

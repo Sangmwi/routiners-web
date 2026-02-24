@@ -34,7 +34,7 @@ export default function CategoryTabs({
           className={
             selectedCategory === category.id
               ? 'bg-foreground/10 text-foreground text-sm'
-              : 'bg-surface-secondary hover:bg-muted/40 text-sm'
+              : 'bg-surface-secondary hover:bg-surface-hover text-sm'
           }
         >
           {category.label}

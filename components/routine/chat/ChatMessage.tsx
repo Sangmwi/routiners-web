@@ -98,7 +98,7 @@ export default function ChatMessage({ message, onAction, isApplyingRoutine = fal
           <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-primary text-primary-foreground">
             <RobotIcon size={16} weight="fill" />
           </div>
-          <div className="max-w-[80%] px-4 py-3 mt-2 rounded-2xl bg-muted/40 rounded-tl-none">
+          <div className="max-w-[80%] px-4 py-3 mt-2 rounded-2xl bg-surface-hover rounded-tl-none">
             <p className="text-sm text-muted-foreground">
               프로필 확인 데이터를 불러올 수 없어요.
             </p>
@@ -206,7 +206,7 @@ export default function ChatMessage({ message, onAction, isApplyingRoutine = fal
       <div
         className={`max-w-[80%] px-4 py-3 rounded-2xl wrap-break-word overflow-hidden ${
           isAssistant
-            ? 'bg-muted/40 rounded-tl-none mt-2'
+            ? 'bg-surface-hover rounded-tl-none mt-2'
             : 'bg-primary text-primary-foreground rounded-tr-none'
         }`}
       >

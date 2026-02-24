@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { CalendarIcon, PlusIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
+import GradientFooter from '@/components/ui/GradientFooter';
 import EmptyState from '@/components/common/EmptyState';
 import {
   EventActionButtons,
@@ -181,7 +182,7 @@ export default function WorkoutContent({
 
   return (
     <>
-      <div className="space-y-10">
+      <div className="space-y-10 pb-footer-clearance">
         <div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -271,7 +272,7 @@ export default function WorkoutContent({
       </div>
 
       {!isEditMode && (
-        <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 pb-safe bg-background border-t border-border">
+        <GradientFooter variant="page">
           <EventActionButtons
             status={event.status}
             date={event.date}
@@ -283,7 +284,7 @@ export default function WorkoutContent({
             startDisabled={!isToday}
             hasActiveSession={session.hasActiveSession}
           />
-        </div>
+        </GradientFooter>
       )}
 
       <AddExerciseSheet

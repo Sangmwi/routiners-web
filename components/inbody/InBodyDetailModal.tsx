@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { PencilSimpleIcon } from '@phosphor-icons/react';
 import { DeleteIcon, ErrorIcon } from '@/components/ui/icons';
-import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
+import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import GradientFooter from '@/components/ui/GradientFooter';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { InBodyRecord, InBodyUpdateData } from '@/lib/types/inbody';
 import { useUpdateInBody, useDeleteInBody } from '@/hooks/inbody';
@@ -142,6 +143,47 @@ export default function InBodyDetailModal({
           </div>
         ) : undefined
       }
+      stickyFooter={
+        <GradientFooter variant="sheet" className="flex gap-3">
+          {state === 'view' && (
+            <Button variant="outline" onClick={handleClose} className="flex-1">
+              닫기
+            </Button>
+          )}
+
+          {state === 'edit' && (
+            <>
+              <Button variant="outline" onClick={handleCancelEdit} className="flex-1" disabled={isProcessing}>
+                취소
+              </Button>
+              <Button onClick={handleSave} className="flex-1" isLoading={isSaving}>
+                저장
+              </Button>
+            </>
+          )}
+
+          {state === 'confirmDelete' && (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setState('view')}
+                className="flex-1"
+                disabled={isProcessing}
+              >
+                취소
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                className="flex-1"
+                isLoading={isDeleting}
+              >
+                삭제
+              </Button>
+            </>
+          )}
+        </GradientFooter>
+      }
     >
       <ModalBody className="relative p-6">
         {/* 저장/삭제 중 오버레이 */}
@@ -231,46 +273,6 @@ export default function InBodyDetailModal({
           </>
         )}
       </ModalBody>
-
-      <ModalFooter>
-        {state === 'view' && (
-          <Button variant="outline" onClick={handleClose} className="flex-1">
-            닫기
-          </Button>
-        )}
-
-        {state === 'edit' && (
-          <>
-            <Button variant="outline" onClick={handleCancelEdit} className="flex-1" disabled={isProcessing}>
-              취소
-            </Button>
-            <Button onClick={handleSave} className="flex-1" isLoading={isSaving}>
-              저장
-            </Button>
-          </>
-        )}
-
-        {state === 'confirmDelete' && (
-          <>
-            <Button
-              variant="outline"
-              onClick={() => setState('view')}
-              className="flex-1"
-              disabled={isProcessing}
-            >
-              취소
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              className="flex-1"
-              isLoading={isDeleting}
-            >
-              삭제
-            </Button>
-          </>
-        )}
-      </ModalFooter>
     </Modal>
   );
 }

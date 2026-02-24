@@ -15,7 +15,7 @@ export const EVENT_TYPE = {
     weight: ICON_WEIGHT.active as IconWeight,
     color: 'text-primary',
     bgColor: 'bg-surface-accent',
-    borderColor: 'border-primary/30',
+    borderColor: 'border-edge-faint',
     badgeClass: 'bg-surface-accent-strong text-primary',
   },
   meal: {
@@ -25,7 +25,7 @@ export const EVENT_TYPE = {
     weight: ICON_WEIGHT.active as IconWeight,
     color: 'text-primary',
     bgColor: 'bg-surface-accent',
-    borderColor: 'border-primary/30',
+    borderColor: 'border-edge-faint',
     badgeClass: 'bg-surface-accent-strong text-primary',
   },
   rest: {

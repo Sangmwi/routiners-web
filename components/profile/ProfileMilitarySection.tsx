@@ -20,7 +20,7 @@ export default function ProfileMilitarySection({
   renderHeader = true,
 }: ProfileMilitarySectionProps) {
   const content = (
-    <div className={renderHeader ? 'bg-surface-secondary rounded-2xl divide-y divide-border/50' : 'divide-y divide-border/50'}>
+    <div className={renderHeader ? 'bg-surface-secondary rounded-2xl divide-y divide-edge-subtle' : 'divide-y divide-edge-subtle'}>
       <InfoCard
         icon={<ShieldIcon />}
         label="계급"

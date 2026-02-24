@@ -143,7 +143,7 @@ export default function ProfileEditContent() {
 
   return (
     <>
-      <div className="space-y-6 pb-24">
+      <div className="space-y-6 pb-footer-clearance">
         {/* 프로필 사진 (탭 위에 항상 표시) */}
         <ProfilePhotoEdit
           initialImage={user.profilePhotoUrl}

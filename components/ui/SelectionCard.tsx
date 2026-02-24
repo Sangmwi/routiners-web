@@ -45,7 +45,7 @@ export function SelectionCard({
         ${
           selected
             ? 'border-primary bg-surface-accent shadow-sm'
-            : 'border-border bg-card hover:border-primary/50 hover:bg-surface-muted'
+            : 'border-border bg-card hover:border-edge-subtle hover:bg-surface-muted'
         }
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-[0.98]'}
       `}

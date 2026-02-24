@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { CheckCircleIcon } from '@phosphor-icons/react';
 import { LoadingSpinner } from '@/components/ui/icons';
 import Button from '@/components/ui/Button';
+import GradientFooter from '@/components/ui/GradientFooter';
 
 interface FloatingSaveButtonProps {
   /** 변경사항 존재 여부 - true일 때만 버튼 표시 */
@@ -54,18 +55,16 @@ export default function FloatingSaveButton({
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-20 max-w-md mx-auto animate-float-up">
-      {/* 뒤 콘텐츠와 구분을 위한 그라디언트 페이드 */}
-      <div className="bg-gradient-to-t from-background via-background/90 to-transparent pt-8 pb-6 px-4">
-        <Button
-          onClick={onSave}
-          className={`w-full shadow-xl ${
-            showSuccess
-              ? 'bg-emerald-500 hover:bg-emerald-500 shadow-emerald-500/30'
-              : 'shadow-primary/40'
-          }`}
-          disabled={isPending || showSuccess || disabled}
-        >
+    <GradientFooter variant="page" wrapperClassName="animate-float-up" className="pb-6">
+      <Button
+        onClick={onSave}
+        className={`w-full shadow-xl ${
+          showSuccess
+            ? 'bg-emerald-500 hover:bg-emerald-500 shadow-emerald-500/30'
+            : 'shadow-primary/40'
+        }`}
+        disabled={isPending || showSuccess || disabled}
+      >
         {showSuccess ? (
           <>
             <CheckCircleIcon size={18} weight="fill" className="mr-2" />
@@ -82,8 +81,7 @@ export default function FloatingSaveButton({
             {label}
           </>
         )}
-        </Button>
-      </div>
-    </div>
+      </Button>
+    </GradientFooter>
   );
 }

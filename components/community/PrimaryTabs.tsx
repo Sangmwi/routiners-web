@@ -39,7 +39,7 @@ export default function PrimaryTabs({
           onClick={onFilterOpen}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
             hasActiveFilter
-              ? 'bg-surface-accent text-primary border border-primary/30'
+              ? 'bg-surface-accent text-primary border border-edge-faint'
               : 'bg-surface-hover text-muted-foreground border border-edge-subtle hover:bg-surface-muted'
           }`}
           aria-label="필터"

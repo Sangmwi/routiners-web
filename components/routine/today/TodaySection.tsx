@@ -44,7 +44,7 @@ export function TodaySection({ workoutEvent, mealEvent, nextScheduledWorkout }: 
           <EmptyTodayCard type="workout" />
         )}
 
-        <div className="mx-2 border-t border-border/40" />
+        <div className="mx-2 border-t border-edge-faint" />
 
         {mealEvent ? (
           <TodayEventCard event={mealEvent} type="meal" />

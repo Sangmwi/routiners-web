@@ -5,6 +5,7 @@ import Modal, { ModalBody } from '@/components/ui/Modal';
 import { DatePicker } from '@/components/ui/WheelPicker';
 import { LoadingSpinner } from '@/components/ui/icons';
 import Button from '@/components/ui/Button';
+import GradientFooter from '@/components/ui/GradientFooter';
 import {
   BuildingsIcon,
   MagnifyingGlassIcon,
@@ -416,7 +417,7 @@ export default function ImportUnitMealSheet({
       height="full"
       showCloseButton={!isImporting}
       stickyFooter={
-        <div className="p-4 bg-card border-t border-edge-subtle pb-safe">
+        <GradientFooter variant="sheet" className="pb-safe">
           {step === 'select' && (
             <Button
               variant="primary"
@@ -453,7 +454,7 @@ export default function ImportUnitMealSheet({
               {isImporting ? '불러오는 중...' : '확인'}
             </Button>
           )}
-        </div>
+        </GradientFooter>
       }
     >
       <ModalBody className="p-4 space-y-5">
@@ -602,9 +603,9 @@ export default function ImportUnitMealSheet({
 
               {/* 구분선 */}
               <div className="flex items-center gap-2">
-                <div className="flex-1 h-px bg-border/50" />
+                <div className="flex-1 h-px bg-edge-subtle" />
                 <span className="text-xs text-muted-foreground">~</span>
-                <div className="flex-1 h-px bg-border/50" />
+                <div className="flex-1 h-px bg-edge-subtle" />
               </div>
 
               {/* 종료일 */}
@@ -677,7 +678,7 @@ export default function ImportUnitMealSheet({
                       <div
                         key={d}
                         className={`flex items-center gap-3 px-3 py-2 rounded-lg ${
-                          isExisting ? 'bg-surface-secondary' : 'bg-muted/5'
+                          isExisting ? 'bg-surface-secondary' : 'bg-surface-secondary'
                         }`}
                       >
                         <CalendarIcon

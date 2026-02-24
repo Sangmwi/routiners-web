@@ -282,7 +282,7 @@ export default function Modal({
               {showCloseButton && (
                 <button
                   onClick={executeClose}
-                  className="p-2 -mr-2 rounded-full hover:bg-surface-muted active:bg-muted/80 transition-colors"
+                  className="p-2 -mr-2 rounded-full hover:bg-surface-muted active:bg-surface-pressed transition-colors"
                   aria-label="닫기"
                 >
                   <CloseIcon size="md" className="text-muted-foreground" />

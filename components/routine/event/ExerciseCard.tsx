@@ -88,7 +88,7 @@ export default function ExerciseCard({
   return (
     <div
       className={`rounded-xl overflow-hidden ${
-        isCompleted ? 'bg-primary/5' : 'bg-surface-secondary'
+        isCompleted ? 'bg-surface-accent' : 'bg-surface-secondary'
       }`}
     >
       {/* 헤더: 전체 영역 탭으로 확장/축소, 편집 모드에서는 드래그도 가능 */}

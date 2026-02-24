@@ -117,7 +117,7 @@ export default function CommunityContent({
         </div>
       ) : (
         <>
-          <div className="divide-y divide-border/40">
+          <div className="divide-y divide-edge-faint">
             {posts.map((post) => (
               <PostCard
                 key={post.id}

@@ -63,7 +63,7 @@ function AvatarStack({
       {items.map((item, index, arr) => (
         <div
           key={index}
-          className="relative size-10 rounded-full bg-background ring-1 ring-muted/20 flex items-center justify-center"
+          className="relative size-10 rounded-full bg-background ring-1 ring-focus flex items-center justify-center"
           style={{
             marginLeft: index > 0 ? -10 : undefined,
             zIndex: arr.length - index,
@@ -115,7 +115,7 @@ function RoutineColumnCard({
       )}
 
       {completed && (
-        <div className="absolute inset-0 z-10 rounded-xl bg-background/70 flex items-center justify-center">
+        <div className="absolute inset-0 z-10 rounded-xl bg-surface-glass flex items-center justify-center">
           <CheckCircleIcon size={40} weight="fill" className="text-primary" />
         </div>
       )}

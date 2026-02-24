@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { CheckIcon, ClockIcon, ProhibitIcon, ArrowsClockwiseIcon, PlusCircleIcon } from '@phosphor-icons/react';
 import ChipButton from '@/components/ui/ChipButton';
 import Button from '@/components/ui/Button';
+import GradientFooter from '@/components/ui/GradientFooter';
 import Modal from '@/components/ui/Modal';
 import type { RoutinePreviewData, RoutinePreviewDay, RoutinePreviewExercise } from '@/lib/types/fitness';
 import type { RoutinePreviewStatus } from '@/lib/types/chat';
@@ -77,7 +78,7 @@ export default function PreviewDetailDrawer({
       height="full"
       showCloseButton={false}
       stickyFooter={
-        <div className="p-4 bg-card border-t border-edge-subtle space-y-3">
+        <GradientFooter variant="sheet" className="space-y-3">
           {status === 'pending' ? (
             <>
               {/* 주차 선택 */}
@@ -167,7 +168,7 @@ export default function PreviewDetailDrawer({
               </span>
             </div>
           )}
-        </div>
+        </GradientFooter>
       }
     >
       {/* 헤더 - 배지 + 타이틀 + 설명 */}

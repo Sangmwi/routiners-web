@@ -84,7 +84,7 @@ function DietProfileBanner({ targets }: { targets: NutritionTargets }) {
     : DEFAULT_MACRO_RATIO;
 
   return (
-    <div className="bg-primary/5 border-l-2 border-primary rounded-r-xl px-4 py-3">
+    <div className="bg-surface-accent border-l-2 border-primary rounded-r-xl px-4 py-3">
       <div className="flex items-center gap-2 mb-1.5">
         {targets.dietType && (
           <span className="text-xs font-medium bg-surface-accent text-primary px-2 py-0.5 rounded-full">

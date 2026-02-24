@@ -17,7 +17,7 @@ export default function ProductCard({ brand, name, price, imageUrl, badge, onCli
       onClick={onClick}
       className="rounded-2xl bg-surface-secondary overflow-hidden border border-edge-faint
                  transition-all duration-200 active:scale-[0.98] cursor-pointer
-                 hover:shadow-md hover:border-border/60"
+                 hover:shadow-md hover:border-edge-subtle"
     >
       <div className="relative w-full aspect-[4/3] bg-surface-secondary">
         <ImageWithFallback

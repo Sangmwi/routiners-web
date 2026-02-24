@@ -27,7 +27,7 @@ export default function LoadingOverlay({
   variant = 'default',
 }: LoadingOverlayProps) {
   return (
-    <div className="absolute inset-0 bg-background/60 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-xl">
+    <div className="absolute inset-0 bg-surface-glass backdrop-blur-[1px] flex items-center justify-center z-10 rounded-xl">
       <div className="flex flex-col items-center gap-3">
         <LoadingSpinner
           size="xl"

@@ -68,9 +68,9 @@ export default function ChatListDrawer({
         {/* 새 대화 버튼 */}
         <button
           onClick={handleNewChat}
-          className="w-full flex items-center gap-3 p-4 mb-4 rounded-xl bg-surface-accent hover:bg-primary/20 transition-colors"
+          className="w-full flex items-center gap-3 p-4 mb-4 rounded-xl bg-surface-accent hover:bg-surface-accent-strong transition-colors"
         >
-          <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-surface-accent-strong flex items-center justify-center">
             <PlusIcon size={20} weight="bold" className="text-primary" />
           </div>
           <span className="font-medium text-primary">새로운 대화</span>
@@ -146,7 +146,7 @@ function ConversationItem({ item, isCurrent, onSelect, onDelete }: ConversationI
       onClick={isCurrent ? undefined : onSelect}
       className={`relative w-full px-3 py-3 pr-10 flex items-center gap-3 transition-colors border-t border-edge-faint ${
         isCurrent
-          ? 'bg-primary/5 cursor-default'
+          ? 'bg-surface-accent cursor-default'
           : 'hover:bg-surface-muted active:bg-muted cursor-pointer'
       }`}
     >

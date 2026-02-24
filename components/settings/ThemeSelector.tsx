@@ -13,7 +13,7 @@ export default function ThemeSelector() {
   const { mode, setMode } = useTheme();
 
   return (
-    <div className="flex gap-1.5 bg-muted/40 rounded-xl p-1.5">
+    <div className="flex gap-1.5 bg-surface-hover rounded-xl p-1.5">
       {THEME_OPTIONS.map((option) => (
         <button
           key={option.value}

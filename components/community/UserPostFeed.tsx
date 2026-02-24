@@ -160,7 +160,7 @@ export default function UserPostFeed({ userId, startIndex }: UserPostFeedProps) 
       )}
 
       {/* 게시글 목록 */}
-      <div className="divide-y divide-border/40">
+      <div className="divide-y divide-edge-faint">
         {allPosts.map((post, index) => (
           <div
             key={post.id}

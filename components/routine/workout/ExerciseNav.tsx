@@ -1,6 +1,7 @@
 'use client';
 
 import Button from '@/components/ui/Button';
+import GradientFooter from '@/components/ui/GradientFooter';
 import {
   CaretLeftIcon,
   CaretRightIcon,
@@ -51,8 +52,7 @@ export default function ExerciseNav({
   const hasNext = currentIndex < totalExercises - 1;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-background border-t border-border">
-      <div className="p-4 pb-safe space-y-3">
+    <GradientFooter variant="page" className="space-y-3">
         {/* 메인 액션 영역 */}
         {restTimer.active ? (
           <RestTimer
@@ -126,7 +126,6 @@ export default function ExerciseNav({
             <CaretRightIcon size={16} weight="bold" />
           </button>
         </div>
-      </div>
-    </div>
+    </GradientFooter>
   );
 }

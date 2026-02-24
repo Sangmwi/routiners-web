@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { LoadingSpinner, ErrorIcon, SuccessIcon } from '@/components/ui/icons';
-import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
+import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import GradientFooter from '@/components/ui/GradientFooter';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { ImageSourceDrawer } from '@/components/drawers';
 import { InBodyCreateData } from '@/lib/types/inbody';
@@ -226,6 +227,34 @@ export default function InBodyScanModal({
       closeOnBackdrop={state === 'idle' || state === 'error'}
       position="bottom"
       enableSwipe={state === 'idle' || state === 'error'}
+      stickyFooter={
+        (state === 'preview' || state === 'error') ? (
+          <GradientFooter variant="sheet" className="flex gap-3">
+            {state === 'preview' && (
+              <>
+                <Button variant="outline" onClick={handleRetry} className="flex-1" disabled={isSaving}>
+                  다시 스캔
+                </Button>
+                <Button onClick={handleSave} className="flex-1" isLoading={isSaving}>
+                  <SuccessIcon size="sm" className="mr-2" />
+                  저장하기
+                </Button>
+              </>
+            )}
+
+            {state === 'error' && (
+              <>
+                <Button variant="outline" onClick={handleClose} className="flex-1">
+                  닫기
+                </Button>
+                <Button onClick={handleRetry} className="flex-1">
+                  다시 시도
+                </Button>
+              </>
+            )}
+          </GradientFooter>
+        ) : undefined
+      }
     >
       <ModalBody className="relative p-6 min-h-[300px]">
         {/* 저장 중 오버레이 (preview 콘텐츠 유지) */}
@@ -335,31 +364,6 @@ export default function InBodyScanModal({
           </div>
         )}
       </ModalBody>
-
-      <ModalFooter>
-        {state === 'preview' && (
-          <>
-            <Button variant="outline" onClick={handleRetry} className="flex-1" disabled={isSaving}>
-              다시 스캔
-            </Button>
-            <Button onClick={handleSave} className="flex-1" isLoading={isSaving}>
-              <SuccessIcon size="sm" className="mr-2" />
-              저장하기
-            </Button>
-          </>
-        )}
-
-        {state === 'error' && (
-          <>
-            <Button variant="outline" onClick={handleClose} className="flex-1">
-              닫기
-            </Button>
-            <Button onClick={handleRetry} className="flex-1">
-              다시 시도
-            </Button>
-          </>
-        )}
-      </ModalFooter>
     </Modal>
 
     {/* 이미지 소스 선택 드로어 */}

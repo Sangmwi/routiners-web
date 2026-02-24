@@ -102,7 +102,7 @@ export default function WorkoutAISheet({ isOpen, onClose, exerciseName }: Workou
             />
             <button
               disabled
-              className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center disabled:opacity-40"
+              className="w-10 h-10 rounded-full bg-surface-accent-strong flex items-center justify-center disabled:opacity-40"
             >
               <PaperPlaneRightIcon size={18} className="text-primary" weight="fill" />
             </button>

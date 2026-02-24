@@ -37,8 +37,8 @@ export default function ProfileSpecialtyInput({ value, onChange }: ProfileSpecia
         onClick={() => setIsSheetOpen(true)}
         className={`w-full px-4 py-3 flex items-center gap-3 rounded-xl border-1 transition-all text-left ${
           value
-            ? 'border-primary bg-primary/5'
-            : 'border-border bg-card hover:border-primary/50'
+            ? 'border-primary bg-surface-accent'
+            : 'border-border bg-card hover:border-edge-subtle'
         }`}
       >
         <MagnifyingGlassIcon size={18} className="text-muted-foreground flex-shrink-0" />
