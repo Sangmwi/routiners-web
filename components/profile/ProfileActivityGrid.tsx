@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ImageSquareIcon, ImagesIcon } from '@phosphor-icons/react';
 import { ImageWithFallback } from '@/components/ui/image';
@@ -86,14 +86,11 @@ export default function ProfileActivityGrid({ userId }: ProfileActivityGridProps
   // Infinite scroll observer
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const handleIntersect = useCallback(
-    (entries: IntersectionObserverEntry[]) => {
-      if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
-        fetchNextPage();
-      }
-    },
-    [fetchNextPage, hasNextPage, isFetchingNextPage],
-  );
+  const handleIntersect = (entries: IntersectionObserverEntry[]) => {
+    if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
 
   useEffect(() => {
     const sentinel = sentinelRef.current;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // ============================================================================
 // Constants
@@ -47,7 +47,7 @@ export function useModalState(
   // 닫기 진행 중 여부를 ref로 추적 — effect/callback 양쪽에서 중복 닫기 방지
   const isClosingRef = useRef(false);
 
-  const executeClose = useCallback(() => {
+  const executeClose = () => {
     if (isClosingRef.current) return;
     isClosingRef.current = true;
 
@@ -59,7 +59,7 @@ export function useModalState(
       isClosingRef.current = false;
       onCloseRef.current();
     }, ANIMATION_DURATION);
-  }, []);
+  };
 
   // isOpen 변화에 반응 — isAnimating은 deps에서 제외하여
   // setIsAnimating이 effect cleanup을 trigger하지 않도록 함
@@ -88,7 +88,7 @@ export function useModalState(
   }, [isOpen, isVisible]);
 
   /** 드래그 등 상호작용 시 오픈 애니메이션 재실행 방지용 */
-  const markOpened = useCallback(() => setHasOpened(true), []);
+  const markOpened = () => setHasOpened(true);
 
   return {
     isVisible,

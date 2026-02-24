@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { HeartIcon, ChatCircleIcon, ShareNetworkIcon, DotsThreeVerticalIcon } from '@phosphor-icons/react';
 import { ImageWithFallback } from '@/components/ui/image';
 import { useThrottle } from '@/hooks/useThrottle';

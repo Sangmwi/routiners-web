@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useCallback, RefObject } from 'react';
+import { useRef, useState, RefObject } from 'react';
 
 // ============================================================================
 // Types
@@ -9,11 +9,11 @@ import { useRef, useState, useCallback, RefObject } from 'react';
 interface SwipeHandlers {
   onTouchStart: (e: React.TouchEvent) => void;
   onTouchMove: (e: React.TouchEvent) => void;
-  onTouchEnd: () => void;
+  onTouchEnd: (e: React.TouchEvent) => void;
   onMouseDown: (e: React.MouseEvent) => void;
   onMouseMove: (e: React.MouseEvent) => void;
-  onMouseUp: () => void;
-  onMouseLeave: () => void;
+  onMouseUp: (e: React.MouseEvent) => void;
+  onMouseLeave: (e: React.MouseEvent) => void;
 }
 
 interface UseSwipeGestureReturn {
@@ -72,8 +72,9 @@ export function useSwipeGesture(
   const contentRef = useRef<HTMLDivElement | null>(null);
   const modalRef = useRef<HTMLDivElement | null>(null);
   const contentDraggingRef = useRef(false);
+  const contentTouchStartYRef = useRef<number | null>(null);
 
-  const applyTransform = useCallback((deltaY: number) => {
+  const applyTransform = (deltaY: number) => {
     cancelAnimationFrame(rafRef.current);
     rafRef.current = requestAnimationFrame(() => {
       if (modalRef.current) {
@@ -81,9 +82,9 @@ export function useSwipeGesture(
         modalRef.current.style.transition = 'none';
       }
     });
-  }, []);
+  };
 
-  const handleDragStart = useCallback((clientY: number) => {
+  const handleDragStart = (clientY: number) => {
     if (!enabled) return;
     startYRef.current = clientY;
     deltaYRef.current = 0;
@@ -91,9 +92,9 @@ export function useSwipeGesture(
     lastTimeRef.current = Date.now();
     isDraggingRef.current = true;
     setIsDragging(true);
-  }, [enabled]);
+  };
 
-  const handleDragMove = useCallback((clientY: number) => {
+  const handleDragMove = (clientY: number) => {
     if (!isDraggingRef.current || startYRef.current === null) return;
     const delta = clientY - startYRef.current;
     const clampedDelta = delta > 0 ? delta : 0;
@@ -101,9 +102,9 @@ export function useSwipeGesture(
     lastYRef.current = clientY;
     lastTimeRef.current = Date.now();
     applyTransform(clampedDelta);
-  }, [applyTransform]);
+  };
 
-  const handleDragEnd = useCallback(() => {
+  const handleDragEnd = () => {
     contentDraggingRef.current = false;
     if (!isDraggingRef.current) return;
 
@@ -138,11 +139,12 @@ export function useSwipeGesture(
     deltaYRef.current = 0;
     lastYRef.current = null;
     lastTimeRef.current = null;
-  }, [threshold, onSwipeClose]);
+  };
 
-  const reset = useCallback(() => {
+  const reset = () => {
     cancelAnimationFrame(rafRef.current);
     contentDraggingRef.current = false;
+    contentTouchStartYRef.current = null;
     isDraggingRef.current = false;
     startYRef.current = null;
     deltaYRef.current = 0;
@@ -155,44 +157,70 @@ export function useSwipeGesture(
       modalRef.current.style.transform = '';
       modalRef.current.style.transition = '';
     }
-  }, []);
+  };
 
   // 드래그 핸들 전용 핸들러 (항상 동작)
   const handlers: SwipeHandlers = {
     onTouchStart: (e: React.TouchEvent) => handleDragStart(e.touches[0].clientY),
     onTouchMove: (e: React.TouchEvent) => handleDragMove(e.touches[0].clientY),
-    onTouchEnd: handleDragEnd,
+    onTouchEnd: (_e: React.TouchEvent) => handleDragEnd(),
     onMouseDown: (e: React.MouseEvent) => handleDragStart(e.clientY),
     onMouseMove: (e: React.MouseEvent) => handleDragMove(e.clientY),
-    onMouseUp: handleDragEnd,
-    onMouseLeave: () => {
+    onMouseUp: (_e: React.MouseEvent) => handleDragEnd(),
+    onMouseLeave: (_e: React.MouseEvent) => {
       if (isDraggingRef.current) handleDragEnd();
     },
   };
 
-  // 콘텐츠 영역 핸들러 (scrollTop === 0에서 아래로 당길 때만 활성화)
+  // 콘텐츠 영역 핸들러
+  // - stopPropagation으로 부모 handlers 버블링 차단 (스크롤/드래그 충돌 방지)
+  // - scrollTop === 0이면 즉시 드래그, scrollTop > 0이면 네이티브 스크롤 후 0 도달 시 전환
   const contentHandlers: SwipeHandlers = {
     onTouchStart: (e: React.TouchEvent) => {
+      e.stopPropagation();
       if (!enabled) return;
+      const clientY = e.touches[0].clientY;
+      contentTouchStartYRef.current = clientY;
       const scrollEl = contentRef.current;
       if (scrollEl && scrollEl.scrollTop <= 0) {
         contentDraggingRef.current = true;
-        handleDragStart(e.touches[0].clientY);
+        handleDragStart(clientY);
       }
     },
     onTouchMove: (e: React.TouchEvent) => {
-      if (!contentDraggingRef.current) return;
-      handleDragMove(e.touches[0].clientY);
-      if (deltaYRef.current > 0) {
+      e.stopPropagation();
+      if (!enabled) return;
+      const clientY = e.touches[0].clientY;
+      if (contentDraggingRef.current) {
+        handleDragMove(clientY);
+        if (deltaYRef.current > 0) {
+          e.preventDefault();
+        }
+        return;
+      }
+      // 스크롤→스와이프 중간 전환: scrollTop이 0에 도달하고 아래로 당기는 중
+      const scrollEl = contentRef.current;
+      if (
+        scrollEl &&
+        scrollEl.scrollTop <= 0 &&
+        contentTouchStartYRef.current !== null &&
+        clientY > contentTouchStartYRef.current
+      ) {
+        contentDraggingRef.current = true;
+        handleDragStart(clientY);
         e.preventDefault();
       }
     },
-    onTouchEnd: () => {
+    onTouchEnd: (e: React.TouchEvent) => {
+      e.stopPropagation();
+      contentTouchStartYRef.current = null;
       if (!contentDraggingRef.current) return;
       handleDragEnd();
     },
     onMouseDown: (e: React.MouseEvent) => {
+      e.stopPropagation();
       if (!enabled) return;
+      contentTouchStartYRef.current = e.clientY;
       const scrollEl = contentRef.current;
       if (scrollEl && scrollEl.scrollTop <= 0) {
         contentDraggingRef.current = true;
@@ -200,14 +228,33 @@ export function useSwipeGesture(
       }
     },
     onMouseMove: (e: React.MouseEvent) => {
-      if (!contentDraggingRef.current) return;
-      handleDragMove(e.clientY);
+      e.stopPropagation();
+      if (!enabled) return;
+      const clientY = e.clientY;
+      if (contentDraggingRef.current) {
+        handleDragMove(clientY);
+        return;
+      }
+      const scrollEl = contentRef.current;
+      if (
+        scrollEl &&
+        scrollEl.scrollTop <= 0 &&
+        contentTouchStartYRef.current !== null &&
+        clientY > contentTouchStartYRef.current
+      ) {
+        contentDraggingRef.current = true;
+        handleDragStart(clientY);
+      }
     },
-    onMouseUp: () => {
+    onMouseUp: (e: React.MouseEvent) => {
+      e.stopPropagation();
+      contentTouchStartYRef.current = null;
       if (!contentDraggingRef.current) return;
       handleDragEnd();
     },
-    onMouseLeave: () => {
+    onMouseLeave: (e: React.MouseEvent) => {
+      e.stopPropagation();
+      contentTouchStartYRef.current = null;
       if (contentDraggingRef.current && isDraggingRef.current) handleDragEnd();
     },
   };

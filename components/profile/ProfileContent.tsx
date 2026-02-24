@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, useRef, useEffect, useMemo } from 'react';
+import { Suspense, useState, useRef, useEffect } from 'react';
 import { PencilSimpleIcon, LockSimpleIcon } from '@phosphor-icons/react';
 import { useCurrentUserProfileSuspense } from '@/hooks/profile';
 import type { ProfileTab } from '@/components/profile/ProfileTabBar';
@@ -29,12 +29,12 @@ export default function ProfileContent() {
     }
   }, [activeTab]);
 
-  const privateTabs = useMemo(() => {
+  const privateTabs = (() => {
     const tabs: ProfileTab[] = [];
     if (user && user.showActivityPublic === false) tabs.push('activity');
     if (user && user.showInfoPublic === false) tabs.push('info');
     return tabs;
-  }, [user]);
+  })();
 
   const isCurrentTabPrivate = privateTabs.includes(activeTab);
 

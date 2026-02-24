@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import Modal from '@/components/ui/Modal';
 import CommentSection from './comments/CommentSection';
 import CommentInput from './comments/CommentInput';
@@ -33,16 +33,16 @@ export default function CommentDrawer({
 
   const [shouldFocus, setShouldFocus] = useState(false);
 
-  const handleOpened = useCallback(() => {
+  const handleOpened = () => {
     setShouldFocus(true);
-  }, []);
+  };
 
   // 드로어 닫힐 때 포커스 상태 초기화
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     setShouldFocus(false);
     setReplyingTo(null);
     onClose();
-  }, [onClose]);
+  };
 
   return (
     <Modal
