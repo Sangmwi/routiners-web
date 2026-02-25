@@ -23,7 +23,10 @@ export function useChatAutoScroll(
   useEffect(() => {
     // 최초 렌더: 하단으로 즉시 스크롤
     if (!hasInitialScrolled.current) {
-      bottomRef.current?.scrollIntoView();
+      const container = scrollContainerRef.current;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
       hasInitialScrolled.current = true;
       return;
     }
@@ -36,7 +39,7 @@ export function useChatAutoScroll(
       container.scrollHeight - container.scrollTop - container.clientHeight < 150;
 
     if (isNearBottom) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, dependencies);

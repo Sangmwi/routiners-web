@@ -416,12 +416,8 @@ main {
   animation: fadeInAnimation 0.2s ease-in-out;
 }
 
-/* Smooth scroll */
+/* Animations */
 @media (prefers-reduced-motion: no-preference) {
-  html {
-    scroll-behavior: smooth;
-  }
-
   @supports (view-transition-name: none) {
     ::view-transition-old(root),
     ::view-transition-new(root) {
