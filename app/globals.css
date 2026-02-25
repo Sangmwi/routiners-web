@@ -25,6 +25,9 @@
   --nav-height: 4rem;            /* 64px - BottomNav 높이 */
   --nav-clearance: 6rem;         /* 96px - BottomNav + 여유 공간 */
 
+  /* FAB Clearance — BottomNav 위 플로팅 버튼 기준선 */
+  --fab-bottom: calc(var(--nav-height) + 1rem + env(safe-area-inset-bottom, 0px));
+
   /* Light Theme (기본값 — data-theme 속성 없어도 적용) */
   --background: #f3f6f3;
   --foreground: #0a2610;
@@ -215,7 +218,7 @@
   --font-mono: var(--font-geist-mono);
 
   /* GradientFooter 하단 여백 — 그라데이션(16) + 버튼(~40) + pb(16) + 여유 */
-  --spacing-footer-clearance: 5rem;
+  --spacing-footer-clearance: 4rem;
 }
 
 /*

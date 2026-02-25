@@ -30,7 +30,7 @@ export default function CounselorButton({
   return (
     <AppLink
       href={href}
-      className="fixed bottom-20 right-3 z-40 w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center hover:shadow-xl hover:scale-105 active:scale-95 transition-all"
+      className="fixed bottom-(--fab-bottom) right-3 z-40 w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center hover:shadow-xl hover:scale-105 active:scale-95 transition-all"
       aria-label="AI 상담"
     >
       <RobotIcon size={22} weight="fill" />

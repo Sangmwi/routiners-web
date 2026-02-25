@@ -85,7 +85,7 @@ export default function ProfileContent() {
       {activeTab === 'activity' && (
         <AppLink
           href="/community/write"
-          className="fixed bottom-24 right-4 z-20 w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/30"
+          className="fixed bottom-(--fab-bottom) right-4 z-20 w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/30"
         >
           <PencilSimpleIcon size={24} weight="bold" className="text-primary-foreground" />
         </AppLink>
