@@ -1,6 +1,9 @@
 'use client';
 
+import { useLayoutEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { useModalStore } from '@/lib/stores';
+import { clearOverlayStack } from '@/hooks/ui/useModalLifecycle';
 import ConfirmModal from './ConfirmModal';
 import AlertModal from './AlertModal';
 import ImagePreviewModal from './ImagePreviewModal';
@@ -76,6 +79,21 @@ export default function ModalProvider() {
   const modals = useModalStore((state) => state.modals);
   const closeModal = useModalStore((state) => state.closeModal);
   const removeModal = useModalStore((state) => state.removeModal);
+  const closeAllModals = useModalStore((state) => state.closeAllModals);
+
+  // 페이지 이동 시 모든 모달 즉시 제거 (애니메이션 스킵)
+  const pathname = usePathname();
+  const prevPathnameRef = useRef(pathname);
+
+  useLayoutEffect(() => {
+    if (prevPathnameRef.current !== pathname) {
+      prevPathnameRef.current = pathname;
+      if (modals.length > 0) {
+        clearOverlayStack();
+        closeAllModals();
+      }
+    }
+  }, [pathname, modals.length, closeAllModals]);
 
   if (modals.length === 0) return null;
 

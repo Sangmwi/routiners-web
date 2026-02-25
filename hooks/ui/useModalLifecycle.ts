@@ -55,6 +55,18 @@ function ensureListener() {
   listenerAttached = true;
 }
 
+/**
+ * 모든 오버레이를 즉시 정리 (페이지 이동 시 ModalProvider에서 호출)
+ *
+ * history.back()은 호출하지 않음 — 비동기 popstate가 Next.js 라우팅을 방해할 수 있고,
+ * 같은 URL의 pushState 엔트리이므로 사용자에게 영향 없음.
+ */
+export function clearOverlayStack() {
+  if (overlayStack.size === 0) return;
+  overlayStack.clear();
+  broadcastOverlayState();
+}
+
 /** WebView 환경이면 오버레이 상태를 앱에 전송 */
 function broadcastOverlayState() {
   if (typeof window === 'undefined' || !window.ReactNativeWebView) return;
