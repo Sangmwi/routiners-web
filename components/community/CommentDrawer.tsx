@@ -5,16 +5,16 @@ import Modal from '@/components/ui/Modal';
 import CommentSection from './comments/CommentSection';
 import CommentInput from './comments/CommentInput';
 import type { ReplyTarget } from './comments/CommentSection';
+import type { BaseModalProps } from '@/lib/types/modal';
 
-interface CommentDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
+interface CommentDrawerProps extends BaseModalProps {
   postId: string;
 }
 
 export default function CommentDrawer({
   isOpen,
   onClose,
+  onExited,
   postId,
 }: CommentDrawerProps) {
   const [replyingTo, setReplyingTo] = useState<ReplyTarget | null>(null);
@@ -48,6 +48,7 @@ export default function CommentDrawer({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
+      onExited={onExited}
       title="댓글"
       position="bottom"
       enableSwipe

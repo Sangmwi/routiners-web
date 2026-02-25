@@ -5,15 +5,13 @@ import { BackIcon, NextIcon, CloseIcon } from '@/components/ui/icons';
 import type { ModalDataMap } from '@/lib/stores/modalStore';
 import { ImageWithFallback } from '@/components/ui/image';
 import { useModalLifecycle } from '@/hooks/ui/useModalLifecycle';
+import type { BaseModalProps } from '@/lib/types/modal';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-interface ImagePreviewModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onExited?: () => void;
+interface ImagePreviewModalProps extends BaseModalProps {
   data: ModalDataMap['imagePreview'];
 }
 

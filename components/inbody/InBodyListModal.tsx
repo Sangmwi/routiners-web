@@ -9,9 +9,9 @@ import { InBodyRecord } from '@/lib/types/inbody';
 import { useInBodyRecords } from '@/hooks/inbody';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 
-interface InBodyListModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+import type { BaseModalProps } from '@/lib/types/modal';
+
+interface InBodyListModalProps extends BaseModalProps {
   /** 기록 선택 시 콜백 */
   onSelect?: (record: InBodyRecord) => void;
   /** 새로 추가 버튼 클릭 시 콜백 */

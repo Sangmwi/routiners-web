@@ -12,11 +12,9 @@ import { useInBodyRecords, useDeleteInBody } from '@/hooks/inbody';
 import InBodyScanModal from './InBodyScanModal';
 import InBodyDetailModal from './InBodyDetailModal';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
+import type { BaseModalProps } from '@/lib/types/modal';
 
-interface InBodyManageModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+interface InBodyManageModalProps extends BaseModalProps {}
 
 type ManageState = 'list' | 'confirm-delete';
 
@@ -228,16 +226,14 @@ export default function InBodyManageModal({
       />
 
       {/* 상세 모달 */}
-      {selectedRecord && (
-        <InBodyDetailModal
-          isOpen={isDetailModalOpen}
-          onClose={() => {
-            setIsDetailModalOpen(false);
-            setSelectedRecord(null);
-          }}
-          record={selectedRecord}
-        />
-      )}
+      <InBodyDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setSelectedRecord(null);
+        }}
+        record={selectedRecord!}
+      />
     </>
   );
 }

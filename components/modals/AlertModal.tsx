@@ -4,15 +4,13 @@ import { InfoIcon } from '@/components/ui/icons';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import type { ModalDataMap } from '@/lib/stores/modalStore';
+import type { BaseModalProps } from '@/lib/types/modal';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-interface AlertModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onExited?: () => void;
+interface AlertModalProps extends BaseModalProps {
   data: ModalDataMap['alert'];
 }
 

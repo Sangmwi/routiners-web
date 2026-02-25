@@ -194,24 +194,20 @@ export default function UserPostFeed({ userId, startIndex }: UserPostFeedProps) 
       )}
 
       {/* 댓글 드로어 */}
-      {commentPostId && (
-        <CommentDrawer
-          isOpen={!!commentPostId}
-          onClose={() => setCommentPostId(null)}
-          postId={commentPostId}
-        />
-      )}
+      <CommentDrawer
+        isOpen={!!commentPostId}
+        onClose={() => setCommentPostId(null)}
+        postId={commentPostId ?? ''}
+      />
 
       {/* 더보기 메뉴 */}
-      {moreMenuPostId && (
-        <PostMoreMenu
-          isOpen={!!moreMenuPostId}
-          onClose={() => setMoreMenuPostId(null)}
-          postId={moreMenuPostId}
-          isOwner={currentUser?.id === allPosts.find((p) => p.id === moreMenuPostId)?.authorId}
-          onDeleted={handleDeleted}
-        />
-      )}
+      <PostMoreMenu
+        isOpen={!!moreMenuPostId}
+        onClose={() => setMoreMenuPostId(null)}
+        postId={moreMenuPostId ?? ''}
+        isOwner={currentUser?.id === allPosts.find((p) => p.id === moreMenuPostId)?.authorId}
+        onDeleted={handleDeleted}
+      />
     </div>
   );
 }

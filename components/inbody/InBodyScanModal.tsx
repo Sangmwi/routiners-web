@@ -13,14 +13,13 @@ import { useNativeImagePicker } from '@/hooks/webview';
 import type { ImagePickerSource } from '@/lib/webview';
 import InBodyPreview from './InBodyPreview';
 import { ImageWithFallback } from '@/components/ui/image';
+import type { BaseModalProps } from '@/lib/types/modal';
 
 // ============================================================
 // Types & Constants
 // ============================================================
 
-interface InBodyScanModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+interface InBodyScanModalProps extends BaseModalProps {
   /** 저장 성공 시 콜백 */
   onSuccess?: () => void;
   /** 미리 선택된 이미지 (제공 시 idle 건너뛰고 바로 스캔 시작) */

@@ -140,13 +140,11 @@ export default function InBodyContent() {
       />
 
       {/* Detail Modal */}
-      {selectedRecord && (
-        <InBodyDetailModal
-          isOpen={isDetailModalOpen}
-          onClose={closeDetailModal}
-          record={selectedRecord}
-        />
-      )}
+      <InBodyDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={closeDetailModal}
+        record={selectedRecord!}
+      />
     </>
   );
 }

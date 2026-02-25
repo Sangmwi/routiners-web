@@ -5,16 +5,7 @@ import ConfirmModal from './ConfirmModal';
 import AlertModal from './AlertModal';
 import ImagePreviewModal from './ImagePreviewModal';
 import type { ModalInstance, ModalDataMap } from '@/lib/stores/modalStore';
-
-// ============================================================================
-// Types
-// ============================================================================
-
-interface ModalCommonProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onExited: () => void;
-}
+import type { BaseModalProps } from '@/lib/types/modal';
 
 // ============================================================================
 // Modal Renderer
@@ -23,7 +14,7 @@ interface ModalCommonProps {
 /**
  * 모달 타입에 따라 적절한 컴포넌트 렌더링
  */
-function renderModal(modal: ModalInstance, commonProps: ModalCommonProps) {
+function renderModal(modal: ModalInstance, commonProps: Required<BaseModalProps>) {
   switch (modal.type) {
     case 'confirm':
       return (

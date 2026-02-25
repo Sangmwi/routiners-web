@@ -69,8 +69,8 @@ function broadcastOverlayState() {
 // Constants
 // ============================================================================
 
-const ANIMATION_DURATION = 200;
-const OPEN_ANIMATION_DURATION = 300;
+export const ANIMATION_DURATION = 200;
+export const OPEN_ANIMATION_DURATION = 300;
 
 // ============================================================================
 // Types
@@ -168,13 +168,15 @@ export function useModalLifecycle(
 
   // ── 열림/닫힘 처리 ─────────────────────────────────────────────
   useEffect(() => {
-    if (isOpen && !isVisible && !isClosingRef.current) {
-      // 열림: 가시성 + 히스토리 등록
-      isClosingRef.current = false;
-      setIsVisible(true);
-      setIsAnimating(false);
-      setHasOpened(false);
+    if (isOpen && !isRegisteredRef.current && !isClosingRef.current) {
+      // 최초 열림일 때만 visibility 설정 (Strict Mode 재마운트 시에는 skip)
+      if (!isVisible) {
+        setIsVisible(true);
+        setIsAnimating(false);
+        setHasOpened(false);
+      }
 
+      // overlay 등록 (Strict Mode 재마운트 시에도 실행)
       const id = `overlay_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
       idRef.current = id;
       isRegisteredRef.current = true;
@@ -187,8 +189,10 @@ export function useModalLifecycle(
       history.pushState({ ...history.state, __overlay: id }, '');
       broadcastOverlayState();
 
-      const timer = setTimeout(() => setHasOpened(true), OPEN_ANIMATION_DURATION);
-      return () => clearTimeout(timer);
+      if (!isVisible) {
+        const timer = setTimeout(() => setHasOpened(true), OPEN_ANIMATION_DURATION);
+        return () => clearTimeout(timer);
+      }
     }
 
     // isOpen이 false로 변한 경우 (controlled 패턴)
@@ -204,8 +208,9 @@ export function useModalLifecycle(
         if (overlayStack.has(idRef.current)) {
           overlayStack.delete(idRef.current);
           broadcastOverlayState();
-          skipPopstateCount++;
-          history.back();
+          // history.back()은 호출하지 않음 — 언마운트 후 비동기 popstate는
+          // Next.js 페이지 이동을 유발할 수 있음. overlay용 history 엔트리가
+          // 남지만 같은 URL이므로 사용자에게 영향 없음.
         }
         isRegisteredRef.current = false;
       }

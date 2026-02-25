@@ -6,15 +6,13 @@ import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import { useShowError } from '@/lib/stores/errorStore';
 import type { ModalDataMap } from '@/lib/stores/modalStore';
+import type { BaseModalProps } from '@/lib/types/modal';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-interface ConfirmModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onExited?: () => void;
+interface ConfirmModalProps extends BaseModalProps {
   data: ModalDataMap['confirm'];
 }
 
@@ -89,7 +87,7 @@ export default function ConfirmModal({
       showCloseButton={false}
       closeOnBackdrop={false}
       closeOnEsc={false}
-      preventBackClose={isLoading}
+      preventClose={isLoading}
       size="sm"
     >
       <ModalBody className="p-6">

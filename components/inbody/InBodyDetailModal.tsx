@@ -11,10 +11,9 @@ import { InBodyRecord, InBodyUpdateData } from '@/lib/types/inbody';
 import { useUpdateInBody, useDeleteInBody } from '@/hooks/inbody';
 import InBodyPreview from './InBodyPreview';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
+import type { BaseModalProps } from '@/lib/types/modal';
 
-interface InBodyDetailModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+interface InBodyDetailModalProps extends BaseModalProps {
   record: InBodyRecord;
 }
 

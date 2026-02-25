@@ -133,13 +133,11 @@ export default function ProfileInbodySection({
         content
       )}
 
-      {selectedRecord && (
-        <InBodyDetailModal
-          isOpen={!!selectedRecord}
-          onClose={() => setSelectedRecord(null)}
-          record={selectedRecord}
-        />
-      )}
+      <InBodyDetailModal
+        isOpen={!!selectedRecord}
+        onClose={() => setSelectedRecord(null)}
+        record={selectedRecord!}
+      />
     </>
   );
 }

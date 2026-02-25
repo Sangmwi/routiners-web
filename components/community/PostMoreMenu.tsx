@@ -5,10 +5,9 @@ import { PencilSimpleIcon, TrashIcon, WarningIcon } from '@phosphor-icons/react'
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import { useDeletePost } from '@/hooks/community/mutations';
 import { useConfirmDialog } from '@/lib/stores/modalStore';
+import type { BaseModalProps } from '@/lib/types/modal';
 
-interface PostMoreMenuProps {
-  isOpen: boolean;
-  onClose: () => void;
+interface PostMoreMenuProps extends BaseModalProps {
   postId: string;
   isOwner: boolean;
   onDeleted: () => void;
@@ -17,6 +16,7 @@ interface PostMoreMenuProps {
 export default function PostMoreMenu({
   isOpen,
   onClose,
+  onExited,
   postId,
   isOwner,
   onDeleted,
@@ -49,6 +49,7 @@ export default function PostMoreMenu({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
+      onExited={onExited}
       position="bottom"
       enableSwipe
       showCloseButton={false}

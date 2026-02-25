@@ -8,7 +8,7 @@ import {
   useBodyScrollLock,
   useEscapeKey,
 } from '@/hooks/ui';
-import { useModalLifecycle } from '@/hooks/ui/useModalLifecycle';
+import { useModalLifecycle, ANIMATION_DURATION } from '@/hooks/ui/useModalLifecycle';
 
 // ============================================================================
 // Types
@@ -34,7 +34,7 @@ interface ModalProps {
   /** 모달이 열릴 때 실행할 콜백 (autoFocus 등) */
   onOpened?: () => void;
   /** true이면 뒤로가기로 닫히지 않음 (로딩 중 등) */
-  preventBackClose?: boolean;
+  preventClose?: boolean;
   /** 닫기 애니메이션 완료 후 호출 (ModalProvider에서 실제 제거 등) */
   onExited?: () => void;
 }
@@ -42,8 +42,6 @@ interface ModalProps {
 // ============================================================================
 // Constants
 // ============================================================================
-
-const ANIMATION_DURATION = 200;
 
 const SIZE_CLASSES = {
   sm: 'sm:max-w-sm',
@@ -159,7 +157,7 @@ export default function Modal({
   height = 'auto',
   stickyFooter,
   onOpened,
-  preventBackClose,
+  preventClose,
   onExited,
 }: ModalProps) {
   const isBottom = position === 'bottom';
@@ -168,7 +166,7 @@ export default function Modal({
   const { isVisible, isAnimating, hasOpened, markOpened, executeClose } = useModalLifecycle(
     isOpen,
     onClose,
-    { preventClose: preventBackClose, onExited }
+    { preventClose, onExited }
   );
 
   // 스와이프 제스처
