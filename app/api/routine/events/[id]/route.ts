@@ -77,6 +77,20 @@ export const PATCH = withAuth<NextResponse, { id: string }>(
       return handleSupabaseError(error);
     }
 
+    // 되돌리기(scheduled) 시 자동 캡처된 Big3 기록 삭제
+    if (validation.data.status === 'scheduled') {
+      await supabase
+        .from('big3_records')
+        .delete()
+        .eq('routine_event_id', id)
+        .eq('source', 'auto')
+        .then(({ error: big3Error }) => {
+          if (big3Error) {
+            console.error('[Big3 Auto-cleanup] Revert error:', big3Error);
+          }
+        });
+    }
+
     const event = toRoutineEvent(data as DbRoutineEvent);
     return NextResponse.json(event);
   }
@@ -89,6 +103,18 @@ export const PATCH = withAuth<NextResponse, { id: string }>(
 export const DELETE = withAuth<NextResponse, { id: string }>(
   async (_request: NextRequest, { supabase, params }) => {
     const { id } = await params;
+
+    // 삭제 전 자동 캡처된 Big3 기록 삭제 (FK가 CASCADE 아님)
+    await supabase
+      .from('big3_records')
+      .delete()
+      .eq('routine_event_id', id)
+      .eq('source', 'auto')
+      .then(({ error: big3Error }) => {
+        if (big3Error) {
+          console.error('[Big3 Auto-cleanup] Delete error:', big3Error);
+        }
+      });
 
     const { error } = await supabase
       .from('routine_events')

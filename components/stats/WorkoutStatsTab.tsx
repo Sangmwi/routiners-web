@@ -142,6 +142,8 @@ function WorkoutSummarySection({
 }
 
 export default function WorkoutStatsTab({ navigator }: { navigator: UseStatsPeriodNavigatorReturn }) {
+  const big3Key = `${navigator.period}-${navigator.weekDateStr}-${navigator.monthYear.year}-${navigator.monthYear.month}`;
+
   return (
     <StatsTabShell
       navigator={navigator}
@@ -149,7 +151,7 @@ export default function WorkoutStatsTab({ navigator }: { navigator: UseStatsPeri
       monthlyContent={(year, month) => <MonthlyWorkoutMetrics year={year} month={month} />}
     >
       <div className="mt-8">
-        <QueryErrorBoundary>
+        <QueryErrorBoundary key={big3Key}>
           <Suspense fallback={<PulseLoader />}>
             <Big3Section />
           </Suspense>

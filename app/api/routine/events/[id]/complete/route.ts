@@ -72,6 +72,7 @@ export const POST = withAuth<NextResponse, { id: string }>(
           .from('big3_records')
           .upsert(
             {
+              user_id: event.userId,
               recorded_at: event.date,
               lift_type: liftType,
               weight: maxWeight,

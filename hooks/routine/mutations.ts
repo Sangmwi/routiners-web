@@ -92,6 +92,11 @@ export function useUpdateRoutineEvent() {
 
     onSuccess: (updatedEvent) => {
       updateEventCacheAndInvalidate(queryClient, updatedEvent);
+      // 되돌리기 시 Big3 auto 레코드 삭제 반영
+      if (updatedEvent.status === 'scheduled') {
+        queryClient.invalidateQueries({ queryKey: queryKeys.big3.all });
+        queryClient.invalidateQueries({ queryKey: queryKeys.progress.all });
+      }
     },
 
     onError: (error) => {
@@ -115,6 +120,9 @@ export function useCompleteRoutineEvent() {
 
     onSuccess: (updatedEvent) => {
       updateEventCacheAndInvalidate(queryClient, updatedEvent);
+      // Big3 자동 캡처 반영: 운동 완료 시 big3/progress 캐시 무효화
+      queryClient.invalidateQueries({ queryKey: queryKeys.big3.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.progress.all });
     },
 
     onError: (error) => {
@@ -233,6 +241,9 @@ export function useDeleteRoutineEvent() {
 
     onSuccess: (_, { id, date, type }) => {
       removeEventCache(queryClient, id, date, type);
+      // 삭제 시 Big3 auto 레코드도 서버에서 삭제됨 → 캐시 반영
+      queryClient.invalidateQueries({ queryKey: queryKeys.big3.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.progress.all });
     },
 
     onError: (error) => {
