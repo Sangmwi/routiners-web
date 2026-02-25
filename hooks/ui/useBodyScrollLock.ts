@@ -15,7 +15,6 @@ function lock() {
   lockCount++;
   if (lockCount === 1) {
     document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
   }
 }
 
@@ -23,7 +22,6 @@ function unlock() {
   lockCount = Math.max(0, lockCount - 1);
   if (lockCount === 0) {
     document.body.style.overflow = '';
-    document.documentElement.style.overflow = '';
   }
 }
 

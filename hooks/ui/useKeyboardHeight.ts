@@ -21,10 +21,6 @@ export function useKeyboardHeight() {
         '--app-height',
         `${viewport.height}px`
       );
-      // 키보드 열림으로 인한 html 스크롤 즉시 리셋
-      if (window.scrollY > 0) {
-        window.scrollTo(0, 0);
-      }
     };
 
     // 초기값 설정
