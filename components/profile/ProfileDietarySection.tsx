@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { BowlFoodIcon, CaretRightIcon } from '@phosphor-icons/react';
+import { EMPTY_STATE } from '@/lib/config/theme';
 import { useDietaryProfileSuspense, useUserDietaryProfileSuspense, hasDietaryProfileData } from '@/hooks/dietaryProfile';
 import {
   DIETARY_GOAL_LABELS,
@@ -64,10 +65,9 @@ function DietaryDisplay({ profile, isOwnProfile, renderHeader }: DietaryDisplayP
 
   const renderEmpty = () => (
     <EmptyState
-      icon={BowlFoodIcon}
-      size={compact ? 'sm' : 'md'}
-      message="식단 프로필이 없어요"
-      hint="AI 상담사와 대화하거나 직접 등록해보세요"
+      {...EMPTY_STATE.meal.noProfile}
+      size="sm"
+      action={isOwnProfile ? { label: '등록하기', href: '/profile/dietary' } : undefined}
     />
   );
 

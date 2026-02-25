@@ -2,7 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
-import { CalendarIcon, PlusIcon } from '@phosphor-icons/react';
+import { PlusIcon } from '@phosphor-icons/react';
+import { EMPTY_STATE } from '@/lib/config/theme';
 import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
 import EmptyState from '@/components/common/EmptyState';
@@ -140,9 +141,8 @@ export default function WorkoutContent({
       <>
         <div className="mt-8">
           <EmptyState
-            icon={CalendarIcon}
-            message={`${formattedDate}에 예정된 운동이 없습니다.`}
-            showIconBackground
+            {...EMPTY_STATE.routine.noEvent}
+            message={`${formattedDate}에 예정된 운동이 없어요`}
             size="lg"
           />
           <div className="mt-6 px-4">
@@ -258,9 +258,7 @@ export default function WorkoutContent({
             )}
           </div>
         ) : (
-          <div className="bg-surface-muted rounded-xl p-6 text-center">
-            <p className="text-muted-foreground">상세 운동 정보가 없습니다.</p>
-          </div>
+          <EmptyState {...EMPTY_STATE.workout.noDetail} />
         )}
 
         {workoutData?.notes && (

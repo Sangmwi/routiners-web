@@ -12,6 +12,7 @@ import {
   TrophyIcon,
 } from '@phosphor-icons/react';
 import EmptyState from '@/components/common/EmptyState';
+import { EMPTY_STATE } from '@/lib/config/theme';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import { Big3SummaryCard } from '@/components/progress/Big3SummaryCard';
 import ProgressRateBar from '@/components/ui/ProgressRateBar';
@@ -166,7 +167,7 @@ function WeeklyWorkoutMetrics({ dateStr }: { dateStr: string }) {
   const workoutTotal = stats.workout.completed + stats.workout.scheduled;
 
   if (!stats || workoutTotal === 0) {
-    return <EmptyState icon={BarbellIcon} message="운동 기록이 없습니다." className="rounded-2xl bg-surface-secondary" />;
+    return <EmptyState {...EMPTY_STATE.workout.noRecord} />;
   }
 
   const comparison = prevStats && (prevStats.workout.completed + prevStats.workout.scheduled) > 0
@@ -197,7 +198,7 @@ function MonthlyWorkoutMetrics({ year, month }: { year: number; month: number })
   const workoutTotal = stats.workout.completed + stats.workout.scheduled;
 
   if (!stats || workoutTotal === 0) {
-    return <EmptyState icon={BarbellIcon} message="운동 기록이 없습니다." className="rounded-2xl bg-surface-secondary" />;
+    return <EmptyState {...EMPTY_STATE.workout.noRecord} />;
   }
 
   const comparison = prevStats && (prevStats.workout.completed + prevStats.workout.scheduled) > 0
@@ -227,7 +228,6 @@ function Big3Section() {
     return (
       <Big3SummaryCard
         summary={big3}
-        emptyMessage={'3대 운동 기록이 없습니다.'}
       />
     );
   }
@@ -245,9 +245,12 @@ function Big3Section() {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-base font-medium text-foreground">
-        {'3대 운동'}
-      </h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-base font-medium text-foreground">
+          {'3대 운동'}
+        </h3>
+        <a href="/profile/big3" className="text-xs text-primary font-medium">관리</a>
+      </div>
 
       {prLifts.length > 0 && (
         <div className="flex items-center gap-2 bg-amber-500/10 rounded-xl px-4 py-3">

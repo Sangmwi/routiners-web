@@ -7,4 +7,5 @@ export * from './fitness';
 export * from './chat';
 export * from './counselor';
 export * from './progress';
+export * from './big3';
 export * from './modal';

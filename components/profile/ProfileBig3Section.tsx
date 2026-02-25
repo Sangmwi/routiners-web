@@ -1,10 +1,10 @@
 'use client';
 
-import { BarbellIcon } from '@phosphor-icons/react';
 import { useProgressSummarySuspense, useUserProgressSummarySuspense } from '@/hooks/progress';
 import { Big3SummaryCard } from '@/components/progress/Big3SummaryCard';
 import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/common/EmptyState';
+import { EMPTY_STATE } from '@/lib/config/theme';
 import type { Big3Summary } from '@/lib/types/progress';
 
 interface ProfileBig3SectionProps {
@@ -49,10 +49,9 @@ function Big3Display({ big3, isOwnProfile, renderHeader }: Big3DisplayProps) {
 
   const content = !big3?.latest ? (
     <EmptyState
-      icon={BarbellIcon}
-      size={compact ? 'sm' : 'md'}
-      message="3대운동 기록이 없어요"
-      hint={isOwnProfile ? '루틴에서 스쿼트, 벤치프레스, 데드리프트를 기록해보세요' : undefined}
+      {...EMPTY_STATE.big3.noRecord}
+      size="sm"
+      hint={isOwnProfile ? EMPTY_STATE.big3.noRecord.hint : undefined}
     />
   ) : (
     <Big3SummaryCard
@@ -69,7 +68,7 @@ function Big3Display({ big3, isOwnProfile, renderHeader }: Big3DisplayProps) {
     <div className="space-y-3">
       <SectionHeader
         title="3대운동"
-        action={isOwnProfile ? { label: '통계', href: '/stats?tab=workout' } : undefined}
+        action={isOwnProfile ? { label: '관리', href: '/profile/big3' } : undefined}
       />
       <div className="bg-surface-secondary rounded-2xl p-4">
         {content}

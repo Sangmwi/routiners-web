@@ -200,6 +200,25 @@ export const queryKeys = {
   },
 
   /**
+   * Big3 (3대운동) 관련 Query Keys
+   */
+  big3: {
+    all: ['big3'] as const,
+
+    list: (liftType?: string, limit?: number, offset?: number) =>
+      [...queryKeys.big3.all, 'list', liftType, limit, offset] as const,
+
+    summary: (months?: number) =>
+      [...queryKeys.big3.all, 'summary', months] as const,
+
+    detail: (id: string) =>
+      [...queryKeys.big3.all, 'detail', id] as const,
+
+    userSummary: (userId: string, months?: number) =>
+      [...queryKeys.big3.all, 'user', userId, 'summary', months] as const,
+  },
+
+  /**
    * Progress 관련 Query Keys (3대 운동 추이 등)
    */
   progress: {

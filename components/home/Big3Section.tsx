@@ -11,11 +11,10 @@ interface Big3SectionProps {
 export default function Big3Section({ summary }: Big3SectionProps) {
   return (
     <section>
-      <SectionHeader title="3대 운동" action={{ label: '통계', href: '/stats?tab=workout' }} />
+      <SectionHeader title="3대 운동" action={{ label: '관리', href: '/profile/big3' }} />
       <div className="mt-3">
         <Big3SummaryCard
           summary={summary}
-          emptyMessage="아직 3대 운동 기록이 없어요."
           sparklineHeight={36}
           sparklineShowAllDots
         />

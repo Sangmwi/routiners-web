@@ -1,6 +1,8 @@
 'use client';
 
 import SectionHeader from '@/components/ui/SectionHeader';
+import EmptyState from '@/components/common/EmptyState';
+import { EMPTY_STATE } from '@/lib/config/theme';
 import BodyCompositionSummary from '@/components/inbody/BodyCompositionSummary';
 import { MetricItem } from '@/components/inbody/MetricItem';
 import MiniSparkline from '@/components/ui/MiniSparkline';
@@ -42,9 +44,7 @@ export default function InBodySection({ summary, history, height }: InBodySectio
 
       <div className="bg-surface-secondary rounded-2xl p-4 mt-3">
         {!hasData ? (
-          <div className="flex flex-col items-center gap-1.5 py-3">
-            <p className="text-xs text-muted-foreground">인바디 기록이 없어요</p>
-          </div>
+          <EmptyState {...EMPTY_STATE.inbody.noRecord} size="sm" />
         ) : (
           <BodyCompositionSummary
             height={height}

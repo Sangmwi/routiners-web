@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { ScalesIcon, LockIcon } from '@phosphor-icons/react';
 import { useInBodySummarySuspense, useUserInBodySummarySuspense } from '@/hooks/inbody';
+import { EMPTY_STATE } from '@/lib/config/theme';
 import { InBodyDetailModal } from '@/components/inbody';
 import { MetricItem } from '@/components/inbody/MetricItem';
 import { InBodyRecord, InBodySummary } from '@/lib/types';
@@ -75,15 +75,14 @@ function InbodyDisplay({ summary, isOwnProfile, userName, renderHeader }: Inbody
 
     return (
       <EmptyState
-        icon={LockIcon}
-        size={compact ? 'sm' : 'md'}
+        {...EMPTY_STATE.inbody.private}
+        size="sm"
         message={
           isOwnProfile
-            ? '인바디 정보가 비공개예요'
+            ? EMPTY_STATE.inbody.private.message
             : `${displayName}님이 인바디를 공유하지 않았어요`
         }
-        hint={isOwnProfile ? '프로필 편집에서 정보 공개를 설정할 수 있어요' : undefined}
-        variant="private"
+        hint={isOwnProfile ? EMPTY_STATE.inbody.private.hint : undefined}
       />
     );
   };
@@ -91,10 +90,10 @@ function InbodyDisplay({ summary, isOwnProfile, userName, renderHeader }: Inbody
   // 데이터 없음 상태 렌더링
   const renderEmptyState = () => (
     <EmptyState
-      icon={ScalesIcon}
-      size={compact ? 'sm' : 'md'}
-      message="인바디 기록이 없어요"
+      {...EMPTY_STATE.inbody.noRecord}
+      size="sm"
       hint={isOwnProfile ? '관리에서 인바디 기록을 추가해보세요' : undefined}
+      action={isOwnProfile ? { label: '등록하기', href: '/profile/inbody' } : undefined}
     />
   );
 

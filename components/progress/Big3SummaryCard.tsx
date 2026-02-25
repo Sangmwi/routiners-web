@@ -1,14 +1,14 @@
 'use client';
 
-import { BarbellIcon } from '@phosphor-icons/react';
 import ChangeIndicator, { getTrendColor } from '@/components/ui/ChangeIndicator';
 import MiniSparkline from '@/components/ui/MiniSparkline';
+import EmptyState from '@/components/common/EmptyState';
+import { EMPTY_STATE } from '@/lib/config/theme';
 import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
 import type { Big3Summary } from '@/lib/types/progress';
 
 interface Big3SummaryCardProps {
   summary: Big3Summary;
-  emptyMessage?: string;
   cardClassName?: string;
   sparklineHeight?: number;
   sparklineShowMinMax?: boolean;
@@ -19,7 +19,6 @@ interface Big3SummaryCardProps {
 
 export function Big3SummaryCard({
   summary,
-  emptyMessage = '3대 운동 기록이 없습니다.',
   cardClassName = 'bg-surface-secondary rounded-2xl p-4',
   sparklineHeight = 36,
   sparklineShowMinMax = false,
@@ -29,9 +28,8 @@ export function Big3SummaryCard({
 }: Big3SummaryCardProps) {
   if (!summary.latest) {
     return (
-      <div className="rounded-2xl bg-surface-secondary p-6 text-center">
-        <BarbellIcon size={28} weight="duotone" className="text-hint-faint mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground">{emptyMessage}</p>
+      <div className={cardClassName}>
+        <EmptyState {...EMPTY_STATE.big3.noRecord} size="sm" />
       </div>
     );
   }

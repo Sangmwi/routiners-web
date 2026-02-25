@@ -2,12 +2,13 @@
 
 import { useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ImageSquareIcon, ImagesIcon } from '@phosphor-icons/react';
+import { ImagesIcon } from '@phosphor-icons/react';
+import { EMPTY_STATE } from '@/lib/config/theme';
 import { ImageWithFallback } from '@/components/ui/image';
 import { useUserPostsSuspense } from '@/hooks/community/useUserPosts';
 import type { CommunityPost } from '@/lib/types/community';
 import { LoadingSpinner } from '@/components/ui/icons';
-import AppLink from '@/components/common/AppLink';
+import SharedEmptyState from '@/components/common/EmptyState';
 
 interface ProfileActivityGridProps {
   userId: string;
@@ -56,16 +57,11 @@ function GridCell({ post, userId, index }: { post: CommunityPost; userId: string
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center py-12 gap-3">
-      <ImageSquareIcon size={40} className="text-hint-faint" />
-      <p className="text-sm text-muted-foreground">아직 활동이 없어요</p>
-      <AppLink
-        href="/community/write"
-        className="text-sm font-medium text-primary hover:underline"
-      >
-        첫 글 작성하기
-      </AppLink>
-    </div>
+    <SharedEmptyState
+      {...EMPTY_STATE.community.noActivity}
+      action={{ label: '첫 글 작성하기', href: '/community/write' }}
+      size="lg"
+    />
   );
 }
 

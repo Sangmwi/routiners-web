@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { BarbellIcon, CaretRightIcon } from '@phosphor-icons/react';
+import { EMPTY_STATE } from '@/lib/config/theme';
 import { useFitnessProfileSuspense, useUserFitnessProfileSuspense, hasFitnessProfileData } from '@/hooks/fitnessProfile';
 import {
   FITNESS_GOAL_LABELS,
@@ -64,10 +65,9 @@ function FitnessDisplay({ profile, isOwnProfile, renderHeader }: FitnessDisplayP
 
   const renderEmpty = () => (
     <EmptyState
-      icon={BarbellIcon}
-      size={compact ? 'sm' : 'md'}
-      message="운동 프로필이 없어요"
-      hint="AI 트레이너와 대화하거나 직접 등록해보세요"
+      {...EMPTY_STATE.workout.noProfile}
+      size="sm"
+      action={isOwnProfile ? { label: '등록하기', href: '/profile/fitness' } : undefined}
     />
   );
 

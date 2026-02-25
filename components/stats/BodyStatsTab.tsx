@@ -3,10 +3,12 @@
 import { Suspense } from 'react';
 import AppLink from '@/components/common/AppLink';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
+import EmptyState from '@/components/common/EmptyState';
 import ChangeIndicator, { getTrendColor } from '@/components/ui/ChangeIndicator';
 import MiniSparkline from '@/components/ui/MiniSparkline';
 import { PulseLoader } from '@/components/ui/PulseLoader';
-import { CaretRightIcon, UserIcon } from '@phosphor-icons/react';
+import { CaretRightIcon } from '@phosphor-icons/react';
+import { EMPTY_STATE } from '@/lib/config/theme';
 import { useInBodyRecordsSuspense } from '@/hooks/inbody/queries';
 import type { InBodyRecord } from '@/lib/types';
 
@@ -72,20 +74,10 @@ function MetricCards({ limit }: { limit: number }) {
 
   if (!hasData) {
     return (
-      <div className="rounded-2xl bg-surface-secondary p-6 text-center">
-        <UserIcon size={28} weight="duotone" className="text-hint-faint mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground mb-1">인바디 기록이 없어요</p>
-        <p className="text-xs text-hint-strong mb-3">
-          체중, 골격근량, 체지방률을 기록해보세요
-        </p>
-        <AppLink
-          href="/profile/inbody"
-          className="inline-flex items-center gap-1 text-xs font-medium text-primary"
-        >
-          등록하기
-          <CaretRightIcon size={12} weight="bold" />
-        </AppLink>
-      </div>
+      <EmptyState
+        {...EMPTY_STATE.inbody.noRecord}
+        action={{ label: '등록하기', href: '/profile/inbody' }}
+      />
     );
   }
 

@@ -1,7 +1,8 @@
 'use client';
 
-import { CalendarIcon } from '@phosphor-icons/react';
 import { NextIcon, LoadingSpinner } from '@/components/ui/icons';
+import SharedEmptyState from '@/components/common/EmptyState';
+import { EMPTY_STATE } from '@/lib/config/theme';
 import { InBodyRecord } from '@/lib/types/inbody';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 
@@ -29,20 +30,8 @@ function LoadingState() {
   );
 }
 
-function EmptyState({
-  message,
-  description,
-}: {
-  message: string;
-  description: string;
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      <CalendarIcon size={48} className="text-muted-foreground mb-4" />
-      <p className="text-lg font-medium text-card-foreground">{message}</p>
-      <p className="text-sm text-muted-foreground mt-1">{description}</p>
-    </div>
-  );
+function EmptyState({ message, description }: { message: string; description: string }) {
+  return <SharedEmptyState {...EMPTY_STATE.inbody.noRecord} message={message} hint={description} size="lg" />;
 }
 
 function RecordItem({

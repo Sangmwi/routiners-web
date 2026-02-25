@@ -10,7 +10,8 @@ import { PulseLoader } from '@/components/ui/PulseLoader';
 import PrimaryTabs, { type PrimaryTab } from '@/components/community/PrimaryTabs';
 import CategoryTabs from '@/components/community/CategoryTabs';
 import FilterModal, { type DateRange } from '@/components/community/FilterModal';
-import { UserFocusIcon, PlusIcon, UsersThreeIcon } from '@phosphor-icons/react';
+import { UserFocusIcon, PlusIcon } from '@phosphor-icons/react';
+import { EMPTY_STATE } from '@/lib/config/theme';
 import type { PostCategory } from '@/lib/types/community';
 
 const CommunityContent = dynamic(
@@ -106,15 +107,12 @@ export default function CommunityPage() {
       {/* 콘텐츠 영역 */}
       {primaryTab === 'following' ? (
         <EmptyState
-          icon={UsersThreeIcon}
-          message="팔로우한 사용자의 글이 여기에 표시돼요"
-          hint="관심있는 사용자를 팔로우해보세요"
+          {...EMPTY_STATE.community.noFollowing}
           action={{
             label: '사용자 찾기',
             onClick: handleSearchUsers,
           }}
           size="lg"
-          showIconBackground
         />
       ) : (
         <div

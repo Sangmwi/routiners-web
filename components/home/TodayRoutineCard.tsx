@@ -262,7 +262,7 @@ function WorkoutColumn({
         <RoutineColumnCard
           title="쉬는 날"
           fallback={{
-            icon: <BedIcon size={40} weight="duotone" className="text-hint-strong" />,
+            icon: <BedIcon size={36} weight="duotone" className="text-hint" />,
             title: '쉬는 날',
             subLabel: `다음 운동 · ${formatKoreanDate(nextScheduledWorkout.date, {
               year: false,
@@ -278,7 +278,7 @@ function WorkoutColumn({
             emptyAction={{
               label: '오늘 운동 없음',
               subLabel: '기록 추가',
-              icon: <BarbellIcon size={40} weight="duotone" className="text-hint-strong" />,
+              icon: <BarbellIcon size={36} weight="duotone" className="text-hint" />,
               onClick: () => setIsDrawerOpen(true),
             }}
           />
@@ -337,7 +337,7 @@ function MealColumn({ event }: { event: RoutineEvent | null }) {
             emptyAction={{
               label: '오늘 식단 없음',
               subLabel: '기록 추가',
-              icon: <BowlFoodIcon size={40} weight="duotone" className="text-hint-strong" />,
+              icon: <BowlFoodIcon size={36} weight="duotone" className="text-hint" />,
               onClick: () => setIsDrawerOpen(true),
             }}
           />

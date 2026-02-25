@@ -35,7 +35,7 @@ interface InBodySummaryCardProps {
 // Sub Components
 // ============================================================
 
-function EmptyState({ onClick }: { onClick?: () => void }) {
+function EmptySummary({ onClick }: { onClick?: () => void }) {
   return (
     <div
       className={`bg-surface-secondary rounded-xl p-4 ${
@@ -87,7 +87,7 @@ export default function InBodySummaryCard({
   variant = 'flat',
 }: InBodySummaryCardProps) {
   if (!latest) {
-    return <EmptyState onClick={onClick} />;
+    return <EmptySummary onClick={onClick} />;
   }
 
   const formattedDate = formatKoreanDate(latest.measuredAt, { monthFormat: 'short' });

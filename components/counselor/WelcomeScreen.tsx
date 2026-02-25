@@ -15,7 +15,7 @@ interface WelcomeScreenProps {
  */
 export default function WelcomeScreen({ onChipClick, disabled }: WelcomeScreenProps) {
   return (
-    <div className="flex flex-col items-center justify-end h-full px-6 pb-8 text-center">
+    <div className="flex flex-col items-center justify-center h-full px-6 pb-8 text-center">
       {/* 인사말 */}
       <h2 className="text-2xl font-bold text-foreground mb-2">
         무엇을 도와드릴까요?

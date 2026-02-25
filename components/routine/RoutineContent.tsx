@@ -2,11 +2,13 @@
 
 import { Suspense, useState, useRef, useEffect, useTransition } from 'react';
 import { BarbellIcon, BowlFoodIcon } from '@phosphor-icons/react';
+import { EMPTY_STATE } from '@/lib/config/theme';
 import PeriodNav from '@/components/ui/PeriodNav';
 import UnderlineTabs from '@/components/ui/UnderlineTabs';
 import TypeFilterToggle, { type FilterValue } from '@/components/ui/TypeFilterToggle';
 import ProgressRateBar from '@/components/ui/ProgressRateBar';
 import StreakBanner from '@/components/ui/StreakBanner';
+import EmptyState from '@/components/common/EmptyState';
 import WeeklySchedule from '@/components/routine/WeeklySchedule';
 import DateJumpSheet from '@/components/ui/DateJumpSheet';
 import CalendarContent from '@/components/routine/calendar/CalendarContent';
@@ -242,6 +244,13 @@ function WeeklyContent({
       ? { diff: stats.meal.completionRate - prevStats.meal.completionRate, label: '지난주' }
       : undefined;
 
+  // 현재 주 + 이전 주 모두 빈 경우 → 신규 유저
+  const isCurrentWeekEmpty = workoutTotal === 0 && mealTotal === 0;
+  const prevWorkoutTotal = prevStats ? prevStats.workout.completed + prevStats.workout.scheduled : 0;
+  const prevMealTotal = prevStats ? prevStats.meal.completed + prevStats.meal.scheduled : 0;
+  const isPrevWeekEmpty = prevWorkoutTotal === 0 && prevMealTotal === 0;
+  const isLikelyNewUser = isCurrentWeekEmpty && isPrevWeekEmpty;
+
   return (
     <div className="space-y-6">
       {/* 스트릭 배너 */}
@@ -266,6 +275,18 @@ function WeeklyContent({
           comparison={mealComparison}
         />
       </div>
+
+      {/* 빈 주간 안내 */}
+      {isCurrentWeekEmpty && (
+        isLikelyNewUser ? (
+          <EmptyState
+            {...EMPTY_STATE.routine.noRoutine}
+            action={{ label: '루틴 만들기', href: '/routine/counselor' }}
+          />
+        ) : (
+          <EmptyState {...EMPTY_STATE.routine.emptyWeek} />
+        )
+      )}
 
       {/* 주간 스케줄 (확대 사이즈) */}
       {stats && <WeeklySchedule stats={stats} size="large" filter={filter} onDelete={handleDelete} />}
