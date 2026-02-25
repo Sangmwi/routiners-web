@@ -259,7 +259,7 @@ export default function Modal({
       {/* Modal Content */}
       <div
         ref={swipe.modalRef}
-        className={`relative w-full bg-card shadow-xl ${heightClass} flex flex-col ${modalAnimationClass} ${isBottom ? 'sm:max-w-md' : SIZE_CLASSES[size]} ${className}`}
+        className={`relative w-full bg-card shadow-xl ${heightClass} flex flex-col overflow-hidden ${modalAnimationClass} ${isBottom ? 'sm:max-w-md' : SIZE_CLASSES[size]} ${className}`}
         style={{ ...heightStyle, ...swipeStyle }}
         onClick={(e) => e.stopPropagation()}
         {...(enableSwipe ? swipe.handlers : {})}

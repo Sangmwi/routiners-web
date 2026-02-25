@@ -27,7 +27,7 @@ export default function CommentInput({
   // autoFocus: 드로어 열릴 때 인풋에 포커스 → 키보드 열림
   useEffect(() => {
     if (autoFocus && inputRef.current) {
-      inputRef.current.focus();
+      inputRef.current.focus({ preventScroll: true });
     }
   }, [autoFocus]);
 
