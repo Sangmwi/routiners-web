@@ -20,13 +20,18 @@ let skipPopstateCount = 0;
 
 let listenerAttached = false;
 
-function handlePopState() {
+function handlePopState(e: PopStateEvent) {
+  // skip 이벤트: UI 닫힘으로 인한 history.back() — Next.js에도 전파 차단
   if (skipPopstateCount > 0) {
     skipPopstateCount--;
+    e.stopImmediatePropagation();
     return;
   }
 
   if (overlayStack.size === 0) return;
+
+  // 오버레이가 열려있으면 Next.js에 전파 차단 (페이지 이동 방지)
+  e.stopImmediatePropagation();
 
   // LIFO: 마지막에 추가된 오버레이를 닫기
   const entries = Array.from(overlayStack.entries());
@@ -34,7 +39,7 @@ function handlePopState() {
 
   if (entry.preventClose) {
     // 닫기 방지 상태 — 히스토리 엔트리 복원
-    history.pushState({ overlay: id }, '');
+    history.pushState({ ...history.state, __overlay: id }, '');
     return;
   }
 
@@ -45,7 +50,8 @@ function handlePopState() {
 
 function ensureListener() {
   if (listenerAttached || typeof window === 'undefined') return;
-  window.addEventListener('popstate', handlePopState);
+  // capture phase로 등록하여 Next.js보다 먼저 실행
+  window.addEventListener('popstate', handlePopState, true);
   listenerAttached = true;
 }
 
@@ -118,7 +124,7 @@ export function useOverlayHistory(
         preventClose: options?.preventClose ?? false,
       });
 
-      history.pushState({ overlay: id }, '');
+      history.pushState({ ...history.state, __overlay: id }, '');
       broadcastOverlayState();
     } else if (!isOpen && isRegisteredRef.current) {
       // 닫힘: 스택에서 제거
@@ -144,8 +150,10 @@ export function useOverlayHistory(
         overlayStack.delete(idRef.current);
         isRegisteredRef.current = false;
         broadcastOverlayState();
-        skipPopstateCount++;
-        history.back();
+        if (!closedByPopstateRef.current) {
+          skipPopstateCount++;
+          history.back();
+        }
       }
     };
   }, []);
