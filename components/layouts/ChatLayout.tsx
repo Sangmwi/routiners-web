@@ -38,10 +38,7 @@ interface ChatContentProps {
 export function ChatLayout({ children }: ChatLayoutProps) {
   return (
     <div
-      className="fixed inset-x-0 top-0 z-40 flex flex-col bg-background overflow-hidden"
-      style={{
-        height: 'var(--app-height, 100dvh)',
-      }}
+      className="flex h-dvh flex-col bg-background overflow-hidden"
     >
       {children}
     </div>

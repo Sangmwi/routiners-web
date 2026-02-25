@@ -224,7 +224,7 @@ export default function Modal({
   const heightStyle: React.CSSProperties | undefined =
     isBottom && height === 'full'
       ? {
-          height: 'var(--app-height, 100dvh)',
+          height: '100dvh',
         }
       : undefined;
 
@@ -250,7 +250,6 @@ export default function Modal({
   return createPortal(
     <div
       className={`fixed inset-0 z-60 flex ${containerAlign} justify-center`}
-      style={heightStyle ? { bottom: 'auto', height: 'var(--app-height, 100dvh)' } : undefined}
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
