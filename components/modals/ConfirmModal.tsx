@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { LoadingSpinner } from '@/components/ui/icons';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
@@ -34,7 +34,6 @@ export default function ConfirmModal({
 }: ConfirmModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const showError = useShowError();
-  const dismissRef = useRef<(() => void) | null>(null);
 
   const {
     title,
@@ -61,9 +60,6 @@ export default function ConfirmModal({
         setIsLoading(false);
       }
     } else {
-      // dismiss: overlay history 엔트리를 먼저 제거하여
-      // onConfirm 내 router.back() 등이 오버레이 시스템에 가로채이지 않도록 함
-      dismissRef.current?.();
       onClose();
       try {
         await onConfirm();
@@ -91,7 +87,6 @@ export default function ConfirmModal({
       closeOnBackdrop={false}
       closeOnEsc={false}
       preventBackClose={isLoading}
-      dismissRef={dismissRef}
       size="sm"
     >
       <ModalBody className="p-6">

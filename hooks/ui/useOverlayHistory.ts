@@ -169,9 +169,15 @@ export function useOverlayHistory(
    */
   const dismiss = () => {
     if (!isRegisteredRef.current) return;
+    // handlePopState가 이미 제거했으면 isRegistered만 해제
+    if (!overlayStack.has(idRef.current)) {
+      isRegisteredRef.current = false;
+      return;
+    }
     overlayStack.delete(idRef.current);
     isRegisteredRef.current = false;
     broadcastOverlayState();
+    skipPopstateCount++;
     history.back();
   };
 

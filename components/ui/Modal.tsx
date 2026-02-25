@@ -1,15 +1,14 @@
 'use client';
 
-import { useEffect, type RefObject, ReactNode } from 'react';
+import { useEffect, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { CloseIcon } from '@/components/ui/icons';
 import {
-  useModalState,
   useSwipeGesture,
   useBodyScrollLock,
   useEscapeKey,
-  useOverlayHistory,
 } from '@/hooks/ui';
+import { useModalLifecycle } from '@/hooks/ui/useModalLifecycle';
 
 // ============================================================================
 // Types
@@ -36,8 +35,6 @@ interface ModalProps {
   onOpened?: () => void;
   /** true이면 뒤로가기로 닫히지 않음 (로딩 중 등) */
   preventBackClose?: boolean;
-  /** overlay history dismiss 함수를 받기 위한 ref (onConfirm 내 네비게이션 발생 시 사용) */
-  dismissRef?: RefObject<(() => void) | null>;
 }
 
 // ============================================================================
@@ -161,23 +158,15 @@ export default function Modal({
   stickyFooter,
   onOpened,
   preventBackClose,
-  dismissRef,
 }: ModalProps) {
   const isBottom = position === 'bottom';
 
-  // 모달 상태 관리
-  const { isVisible, isAnimating, hasOpened, markOpened, executeClose } = useModalState(
+  // 모달 가시성 + 애니메이션 + 히스토리 통합 관리
+  const { isVisible, isAnimating, hasOpened, markOpened, executeClose } = useModalLifecycle(
     isOpen,
-    onClose
+    onClose,
+    { preventClose: preventBackClose }
   );
-
-  // 뒤로가기 시 오버레이 닫기
-  const { dismiss } = useOverlayHistory(isOpen, onClose, { preventClose: preventBackClose });
-
-  // dismiss 함수를 부모에게 전달
-  if (dismissRef) {
-    dismissRef.current = dismiss;
-  }
 
   // 스와이프 제스처
   const swipe = useSwipeGesture(
