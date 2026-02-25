@@ -157,4 +157,23 @@ export function useOverlayHistory(
       }
     };
   }, []);
+
+  /**
+   * 오버레이 히스토리 엔트리를 즉시 제거 (onClose 호출 없이).
+   *
+   * onConfirm 내에서 router.back() 등 네비게이션이 발생할 수 있을 때,
+   * dismiss() → onClose() → onConfirm() 순서로 호출한다.
+   *
+   * skipPopstateCount를 올리지 않아 Next.js가 popstate를 처리하게 하되,
+   * 같은 페이지로의 back이므로 Next.js에서 no-op이 된다.
+   */
+  const dismiss = () => {
+    if (!isRegisteredRef.current) return;
+    overlayStack.delete(idRef.current);
+    isRegisteredRef.current = false;
+    broadcastOverlayState();
+    history.back();
+  };
+
+  return { dismiss };
 }
