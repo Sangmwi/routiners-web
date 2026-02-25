@@ -44,6 +44,7 @@ export function ChatLayout({ children }: ChatLayoutProps) {
       className="flex flex-col bg-background overflow-hidden"
       style={{
         height: 'var(--app-height, 100dvh)',
+        transition: 'height 0.3s ease-out',
       }}
     >
       {children}

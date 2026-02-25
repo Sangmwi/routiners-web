@@ -252,6 +252,7 @@ export default function Modal({
   return createPortal(
     <div
       className={`fixed inset-0 z-60 flex ${containerAlign} justify-center`}
+      style={heightStyle ? { bottom: 'auto', height: 'var(--app-height, 100dvh)' } : undefined}
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
