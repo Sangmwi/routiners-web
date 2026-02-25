@@ -18,6 +18,7 @@ interface DietaryDetailDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   profile: DietaryProfile;
+  readOnly?: boolean;
 }
 
 /**
@@ -29,6 +30,7 @@ export default function DietaryDetailDrawer({
   isOpen,
   onClose,
   profile,
+  readOnly = false,
 }: DietaryDetailDrawerProps) {
   const router = useRouter();
 
@@ -64,16 +66,23 @@ export default function DietaryDetailDrawer({
       }
       stickyFooter={
         <GradientFooter variant="sheet">
-          <Button
-            variant="primary"
-            onClick={() => {
-              onClose();
-              router.push('/profile/dietary');
-            }}
-            className="flex-1 w-full"
-          >
-            수정하기
-          </Button>
+          {readOnly ? (
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="flex-1 w-full"
+            >
+              닫기
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              onClick={() => router.push('/profile/dietary')}
+              className="flex-1 w-full"
+            >
+              수정하기
+            </Button>
+          )}
         </GradientFooter>
       }
     >

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { BowlFoodIcon, CaretRightIcon } from '@phosphor-icons/react';
-import { useDietaryProfileSuspense, hasDietaryProfileData } from '@/hooks/dietaryProfile';
+import { useDietaryProfileSuspense, useUserDietaryProfileSuspense, hasDietaryProfileData } from '@/hooks/dietaryProfile';
 import {
   DIETARY_GOAL_LABELS,
   DIET_TYPE_LABELS,
@@ -20,18 +20,46 @@ import { DietaryDetailDrawer } from '@/components/drawers';
  * Hero(목표+유형) + 요약 텍스트 라인 + 제한사항 태그
  */
 interface ProfileDietarySectionProps {
+  isOwnProfile?: boolean;
+  userId?: string;
   /** false이면 SectionHeader와 카드 컨테이너 없이 콘텐츠만 반환 */
   renderHeader?: boolean;
 }
 
 export default function ProfileDietarySection({
+  isOwnProfile = true,
+  userId,
   renderHeader = true,
 }: ProfileDietarySectionProps = {}) {
+  return isOwnProfile
+    ? <OwnDietaryData renderHeader={renderHeader} />
+    : <OtherDietaryData userId={userId!} renderHeader={renderHeader} />;
+}
+
+function OwnDietaryData({ renderHeader }: { renderHeader: boolean }) {
   const { data: profile } = useDietaryProfileSuspense();
+  return <DietaryDisplay profile={profile ?? undefined} isOwnProfile renderHeader={renderHeader} />;
+}
+
+function OtherDietaryData({ userId, renderHeader }: { userId: string; renderHeader: boolean }) {
+  const { data } = useUserDietaryProfileSuspense(userId);
+  return <DietaryDisplay profile={data.profile ?? undefined} isOwnProfile={false} renderHeader={renderHeader} />;
+}
+
+// ============================================================
+// Shared Display Component
+// ============================================================
+
+interface DietaryDisplayProps {
+  profile: DietaryProfile | undefined;
+  isOwnProfile: boolean;
+  renderHeader: boolean;
+}
+
+function DietaryDisplay({ profile, isOwnProfile, renderHeader }: DietaryDisplayProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const hasData = hasDietaryProfileData(profile);
-
   const compact = !renderHeader;
 
   const renderEmpty = () => (
@@ -44,11 +72,11 @@ export default function ProfileDietarySection({
   );
 
   // 수치 요약 텍스트 (3끼/일 · 2,500kcal)
-  const getSummaryText = (profile: DietaryProfile) => {
+  const getSummaryText = (p: DietaryProfile) => {
     const parts: string[] = [];
-    if (profile.mealsPerDay) parts.push(`${profile.mealsPerDay}끼/일`);
-    if (profile.targetCalories) parts.push(`${profile.targetCalories.toLocaleString()}kcal`);
-    if (profile.budgetPerMonth) parts.push(`월 ${profile.budgetPerMonth.toLocaleString()}원`);
+    if (p.mealsPerDay) parts.push(`${p.mealsPerDay}끼/일`);
+    if (p.targetCalories) parts.push(`${p.targetCalories.toLocaleString()}kcal`);
+    if (p.budgetPerMonth) parts.push(`월 ${p.budgetPerMonth.toLocaleString()}원`);
     return parts.join(' · ');
   };
 
@@ -149,6 +177,7 @@ export default function ProfileDietarySection({
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           profile={profile}
+          readOnly={!isOwnProfile}
         />
       )}
     </>

@@ -12,6 +12,11 @@ import { api } from './client';
 
 const ENDPOINT = '/api/fitness-profile';
 
+export interface UserFitnessProfileResponse {
+  profile: FitnessProfile | null;
+  isPrivate: boolean;
+}
+
 /**
  * Fitness Profile 관련 API
  */
@@ -55,5 +60,12 @@ export const fitnessProfileApi = {
    */
   async deleteFitnessProfile(): Promise<void> {
     await api.delete(ENDPOINT);
+  },
+
+  /**
+   * 특정 사용자의 피트니스 프로필 조회
+   */
+  async getUserProfile(userId: string): Promise<UserFitnessProfileResponse> {
+    return api.getOrThrow<UserFitnessProfileResponse>(`${ENDPOINT}/user/${userId}`);
   },
 };

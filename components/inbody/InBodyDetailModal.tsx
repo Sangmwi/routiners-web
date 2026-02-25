@@ -14,7 +14,7 @@ import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 import type { BaseModalProps } from '@/lib/types/modal';
 
 interface InBodyDetailModalProps extends BaseModalProps {
-  record: InBodyRecord;
+  record: InBodyRecord | null;
 }
 
 type ModalState = 'view' | 'edit' | 'confirmDelete';
@@ -35,6 +35,8 @@ export default function InBodyDetailModal({
   const isSaving = updateInBody.isPending;
   const isDeleting = deleteInBody.isPending;
   const isProcessing = isSaving || isDeleting;
+
+  if (!record) return null;
 
   // 모달 닫기 시 상태 초기화
   const handleClose = () => {

@@ -18,6 +18,7 @@ interface FitnessDetailDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   profile: FitnessProfile;
+  readOnly?: boolean;
 }
 
 /**
@@ -29,6 +30,7 @@ export default function FitnessDetailDrawer({
   isOpen,
   onClose,
   profile,
+  readOnly = false,
 }: FitnessDetailDrawerProps) {
   const router = useRouter();
 
@@ -62,16 +64,23 @@ export default function FitnessDetailDrawer({
       }
       stickyFooter={
         <GradientFooter variant="sheet">
-          <Button
-            variant="primary"
-            onClick={() => {
-              onClose();
-              router.push('/profile/fitness');
-            }}
-            className="flex-1 w-full"
-          >
-            수정하기
-          </Button>
+          {readOnly ? (
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="flex-1 w-full"
+            >
+              닫기
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              onClick={() => router.push('/profile/fitness')}
+              className="flex-1 w-full"
+            >
+              수정하기
+            </Button>
+          )}
         </GradientFooter>
       }
     >

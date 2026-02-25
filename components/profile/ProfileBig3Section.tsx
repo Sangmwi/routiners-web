@@ -1,32 +1,57 @@
 'use client';
 
 import { BarbellIcon } from '@phosphor-icons/react';
-import { useProgressSummarySuspense } from '@/hooks/progress';
+import { useProgressSummarySuspense, useUserProgressSummarySuspense } from '@/hooks/progress';
 import { Big3SummaryCard } from '@/components/progress/Big3SummaryCard';
 import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/common/EmptyState';
+import type { Big3Summary } from '@/lib/types/progress';
 
 interface ProfileBig3SectionProps {
   isOwnProfile?: boolean;
+  userId?: string;
   /** false이면 SectionHeader와 카드 컨테이너 없이 콘텐츠만 반환 */
   renderHeader?: boolean;
 }
 
 export default function ProfileBig3Section({
   isOwnProfile = false,
+  userId,
   renderHeader = true,
 }: ProfileBig3SectionProps) {
-  const { data: progressSummary } = useProgressSummarySuspense(6);
+  return isOwnProfile
+    ? <OwnBig3Data isOwnProfile renderHeader={renderHeader} />
+    : <OtherBig3Data userId={userId!} renderHeader={renderHeader} />;
+}
 
-  const big3 = progressSummary?.big3;
+function OwnBig3Data({ isOwnProfile, renderHeader }: { isOwnProfile: boolean; renderHeader: boolean }) {
+  const { data } = useProgressSummarySuspense(6);
+  return <Big3Display big3={data.big3} isOwnProfile={isOwnProfile} renderHeader={renderHeader} />;
+}
 
+function OtherBig3Data({ userId, renderHeader }: { userId: string; renderHeader: boolean }) {
+  const { data } = useUserProgressSummarySuspense(userId, 6);
+  return <Big3Display big3={data.big3} isOwnProfile={false} renderHeader={renderHeader} />;
+}
+
+// ============================================================
+// Shared Display Component
+// ============================================================
+
+interface Big3DisplayProps {
+  big3: Big3Summary;
+  isOwnProfile: boolean;
+  renderHeader: boolean;
+}
+
+function Big3Display({ big3, isOwnProfile, renderHeader }: Big3DisplayProps) {
   const compact = !renderHeader;
 
   const content = !big3?.latest ? (
     <EmptyState
       icon={BarbellIcon}
       size={compact ? 'sm' : 'md'}
-      message={isOwnProfile ? '3대운동 기록이 없어요' : '3대운동 기록이 없어요'}
+      message="3대운동 기록이 없어요"
       hint={isOwnProfile ? '루틴에서 스쿼트, 벤치프레스, 데드리프트를 기록해보세요' : undefined}
     />
   ) : (

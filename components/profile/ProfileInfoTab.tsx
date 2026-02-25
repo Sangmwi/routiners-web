@@ -5,13 +5,13 @@ import {
   CigaretteSlashIcon,
   CigaretteIcon,
 } from '@phosphor-icons/react';
-import { useInBodySummarySuspense } from '@/hooks/inbody';
+import { useInBodySummarySuspense, useUserInBodySummarySuspense } from '@/hooks/inbody';
 import ProfileInbodySection from '@/components/profile/ProfileInbodySection';
 import BodyCompositionSummary from '@/components/inbody/BodyCompositionSummary';
 import ProfileBig3Section from '@/components/profile/ProfileBig3Section';
 import ProfileFitnessSection from '@/components/profile/ProfileFitnessSection';
 import ProfileDietarySection from '@/components/profile/ProfileDietarySection';
-import type { User } from '@/lib/types';
+import type { User, InBodySummary } from '@/lib/types';
 
 // ============================================================
 // Sub Components
@@ -46,10 +46,38 @@ function InfoTabSection({
 
 interface ProfileInfoTabProps {
   user: User;
+  isOwnProfile?: boolean;
+  userId?: string;
 }
 
-export default function ProfileInfoTab({ user }: ProfileInfoTabProps) {
+export default function ProfileInfoTab({ user, isOwnProfile = true, userId }: ProfileInfoTabProps) {
+  return isOwnProfile
+    ? <OwnInfoTabContent user={user} />
+    : <OtherInfoTabContent user={user} userId={userId!} />;
+}
+
+function OwnInfoTabContent({ user }: { user: User }) {
   const { data: inbodySummary } = useInBodySummarySuspense();
+  return <InfoTabDisplay user={user} inbodySummary={inbodySummary} isOwnProfile />;
+}
+
+function OtherInfoTabContent({ user, userId }: { user: User; userId: string }) {
+  const { data: inbodySummary } = useUserInBodySummarySuspense(userId);
+  return <InfoTabDisplay user={user} inbodySummary={inbodySummary} isOwnProfile={false} userId={userId} />;
+}
+
+// ============================================================
+// Shared Display Component
+// ============================================================
+
+interface InfoTabDisplayProps {
+  user: User;
+  inbodySummary: InBodySummary;
+  isOwnProfile: boolean;
+  userId?: string;
+}
+
+function InfoTabDisplay({ user, inbodySummary, isOwnProfile, userId }: InfoTabDisplayProps) {
   const hasInBodyData = !!inbodySummary?.latest;
 
   const hasInterests =
@@ -73,24 +101,25 @@ export default function ProfileInfoTab({ user }: ProfileInfoTabProps) {
           )}
           <ProfileInbodySection
             renderHeader={false}
-            isOwnProfile={true}
+            isOwnProfile={isOwnProfile}
+            userId={userId}
           />
         </BodyCompositionSummary>
       </InfoTabSection>
 
       {/* 2. 3대운동 */}
       <InfoTabSection title="3대운동">
-        <ProfileBig3Section renderHeader={false} isOwnProfile={true} />
+        <ProfileBig3Section renderHeader={false} isOwnProfile={isOwnProfile} userId={userId} />
       </InfoTabSection>
 
       {/* 3. 운동 프로필 */}
       <InfoTabSection title="운동 프로필">
-        <ProfileFitnessSection renderHeader={false} />
+        <ProfileFitnessSection renderHeader={false} isOwnProfile={isOwnProfile} userId={userId} />
       </InfoTabSection>
 
       {/* 4. 식단 프로필 */}
       <InfoTabSection title="식단 프로필">
-        <ProfileDietarySection renderHeader={false} />
+        <ProfileDietarySection renderHeader={false} isOwnProfile={isOwnProfile} userId={userId} />
       </InfoTabSection>
 
       {/* 5. 라이프스타일 */}

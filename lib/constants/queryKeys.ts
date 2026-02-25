@@ -155,6 +155,10 @@ export const queryKeys = {
 
     /** 현재 사용자의 피트니스 프로필 */
     me: () => [...queryKeys.fitnessProfile.all, 'me'] as const,
+
+    /** 특정 사용자의 피트니스 프로필 */
+    user: (userId: string) =>
+      [...queryKeys.fitnessProfile.all, 'user', userId] as const,
   },
 
   /**
@@ -166,6 +170,10 @@ export const queryKeys = {
 
     /** 현재 사용자의 식단 프로필 */
     me: () => [...queryKeys.dietaryProfile.all, 'me'] as const,
+
+    /** 특정 사용자의 식단 프로필 */
+    user: (userId: string) =>
+      [...queryKeys.dietaryProfile.all, 'user', userId] as const,
   },
 
   /**
@@ -201,6 +209,10 @@ export const queryKeys = {
     /** 진행 현황 요약 */
     summary: (months?: number) =>
       [...queryKeys.progress.all, 'summary', months] as const,
+
+    /** 특정 사용자의 진행 현황 요약 */
+    userSummary: (userId: string, months?: number) =>
+      [...queryKeys.progress.all, 'user', userId, 'summary', months] as const,
   },
 
   /**

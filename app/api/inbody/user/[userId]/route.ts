@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
+import { createAdminClient } from '@/utils/supabase/admin';
 import {
   toInBodyRecord,
   DbInBodyRecord,
@@ -52,8 +53,9 @@ export const GET = withAuth(
       return NextResponse.json(summary);
     }
 
-    // 2. 공개인 경우 인바디 데이터 조회
-    const { data, error, count } = await supabase
+    // 2. 공개인 경우 인바디 데이터 조회 (RLS 우회 — service role)
+    const adminClient = createAdminClient();
+    const { data, error, count } = await adminClient
       .from('inbody_records')
       .select('*', { count: 'exact' })
       .eq('user_id', targetUserId)

@@ -12,6 +12,11 @@ import { api } from './client';
 
 const ENDPOINT = '/api/dietary-profile';
 
+export interface UserDietaryProfileResponse {
+  profile: DietaryProfile | null;
+  isPrivate: boolean;
+}
+
 /**
  * Dietary Profile 관련 API
  */
@@ -35,5 +40,12 @@ export const dietaryProfileApi = {
    */
   async updateDietaryProfile(data: DietaryProfileUpdateData): Promise<DietaryProfile> {
     return api.put<DietaryProfile>(ENDPOINT, data);
+  },
+
+  /**
+   * 특정 사용자의 식단 프로필 조회
+   */
+  async getUserProfile(userId: string): Promise<UserDietaryProfileResponse> {
+    return api.getOrThrow<UserDietaryProfileResponse>(`${ENDPOINT}/user/${userId}`);
   },
 };

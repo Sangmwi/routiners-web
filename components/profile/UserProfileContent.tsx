@@ -94,7 +94,7 @@ export default function UserProfileContent({ userId }: UserProfileContentProps) 
                     <p className="text-sm">비공개 정보에요</p>
                   </div>
                 ) : (
-                  <ProfileInfoTab user={user} />
+                  <ProfileInfoTab user={user} isOwnProfile={false} userId={userId} />
                 )
               )}
             </Suspense>

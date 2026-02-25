@@ -74,7 +74,7 @@ export default function ProfileContent() {
             <QueryErrorBoundary>
               <Suspense fallback={<PulseLoader />}>
                 {activeTab === 'activity' && <ProfileActivityGrid userId={user.id} />}
-                {activeTab === 'info' && <ProfileInfoTab user={user} />}
+                {activeTab === 'info' && <ProfileInfoTab user={user} isOwnProfile />}
               </Suspense>
             </QueryErrorBoundary>
           </div>

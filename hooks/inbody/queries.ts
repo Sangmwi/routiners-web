@@ -107,6 +107,16 @@ export function useInBodySummarySuspense() {
 }
 
 /**
+ * 특정 사용자의 InBody 요약 정보 조회 (Suspense)
+ */
+export function useUserInBodySummarySuspense(userId: string) {
+  return useSuspenseBaseQuery(
+    queryKeys.inbody.userSummary(userId),
+    () => inbodyApi.getUserSummary(userId)
+  );
+}
+
+/**
  * 특정 InBody 기록 조회 (Suspense)
  *
  * @param id - 필수: 기록 ID

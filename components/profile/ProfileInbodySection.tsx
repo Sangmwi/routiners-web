@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { ScalesIcon, LockIcon } from '@phosphor-icons/react';
-import { useInBodySummarySuspense } from '@/hooks/inbody';
+import { useInBodySummarySuspense, useUserInBodySummarySuspense } from '@/hooks/inbody';
 import { InBodyDetailModal } from '@/components/inbody';
 import { MetricItem } from '@/components/inbody/MetricItem';
-import { InBodyRecord } from '@/lib/types';
+import { InBodyRecord, InBodySummary } from '@/lib/types';
 import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/common/EmptyState';
 
@@ -20,21 +20,45 @@ interface ProfileInbodySectionProps {
   renderHeader?: boolean;
 }
 
-const INBODY_METRICS = [
-  { key: 'weight', label: '체중', unit: 'kg', positiveIsGood: false },
-  { key: 'skeletalMuscleMass', label: '골격근량', unit: 'kg', positiveIsGood: true },
-  { key: 'bodyFatPercentage', label: '체지방률', unit: '%', positiveIsGood: false },
-] as const;
-
 export default function ProfileInbodySection({
   isOwnProfile = false,
   userName,
   userId,
   renderHeader = true,
 }: ProfileInbodySectionProps) {
+  return isOwnProfile
+    ? <OwnInbodyData userName={userName} renderHeader={renderHeader} />
+    : <OtherInbodyData userId={userId!} userName={userName} renderHeader={renderHeader} />;
+}
 
+function OwnInbodyData({ userName, renderHeader }: { userName?: string; renderHeader: boolean }) {
   const { data: summary } = useInBodySummarySuspense();
+  return <InbodyDisplay summary={summary} isOwnProfile userName={userName} renderHeader={renderHeader} />;
+}
 
+function OtherInbodyData({ userId, userName, renderHeader }: { userId: string; userName?: string; renderHeader: boolean }) {
+  const { data: summary } = useUserInBodySummarySuspense(userId);
+  return <InbodyDisplay summary={summary} isOwnProfile={false} userName={userName} renderHeader={renderHeader} />;
+}
+
+// ============================================================
+// Shared Display Component
+// ============================================================
+
+const INBODY_METRICS = [
+  { key: 'weight', label: '체중', unit: 'kg', positiveIsGood: false },
+  { key: 'skeletalMuscleMass', label: '골격근량', unit: 'kg', positiveIsGood: true },
+  { key: 'bodyFatPercentage', label: '체지방률', unit: '%', positiveIsGood: false },
+] as const;
+
+interface InbodyDisplayProps {
+  summary: InBodySummary;
+  isOwnProfile: boolean;
+  userName?: string;
+  renderHeader: boolean;
+}
+
+function InbodyDisplay({ summary, isOwnProfile, userName, renderHeader }: InbodyDisplayProps) {
   // 비공개 여부 (API 응답에서 확인)
   const isPrivate = summary?.isPrivate ?? false;
   const canViewData = !isPrivate || isOwnProfile;
@@ -43,7 +67,6 @@ export default function ProfileInbodySection({
   const [selectedRecord, setSelectedRecord] = useState<InBodyRecord | null>(null);
 
   const latest = summary?.latest;
-
   const compact = !renderHeader;
 
   // 비공개 상태 렌더링
@@ -70,26 +93,23 @@ export default function ProfileInbodySection({
     <EmptyState
       icon={ScalesIcon}
       size={compact ? 'sm' : 'md'}
-      message={isOwnProfile ? '인바디 기록이 없어요' : '인바디 기록이 없어요'}
+      message="인바디 기록이 없어요"
       hint={isOwnProfile ? '관리에서 인바디 기록을 추가해보세요' : undefined}
     />
   );
 
   // 데이터 표시 렌더링
   const renderDataState = () => (
-    <>
-      <div className="grid grid-cols-3 gap-3">
-        {INBODY_METRICS.map(({ key, label, unit }) => (
-          <MetricItem
-            key={key}
-            label={label}
-            value={latest?.[key]}
-            unit={unit}
-          />
-        ))}
-      </div>
-
-    </>
+    <div className="grid grid-cols-3 gap-3">
+      {INBODY_METRICS.map(({ key, label, unit }) => (
+        <MetricItem
+          key={key}
+          label={label}
+          value={latest?.[key]}
+          unit={unit}
+        />
+      ))}
+    </div>
   );
 
   // 타인 프로필에서 카드 클릭 시 상세보기
@@ -133,13 +153,11 @@ export default function ProfileInbodySection({
         content
       )}
 
-      {selectedRecord && (
-        <InBodyDetailModal
-          isOpen
-          onClose={() => setSelectedRecord(null)}
-          record={selectedRecord}
-        />
-      )}
+      <InBodyDetailModal
+        isOpen={!!selectedRecord}
+        onClose={() => setSelectedRecord(null)}
+        record={selectedRecord}
+      />
     </>
   );
 }

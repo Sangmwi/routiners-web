@@ -9,6 +9,8 @@ import { api } from './client';
 
 const BASE_URL = '/api/routine/events/stats/progress';
 
+export type UserProgressResponse = ProgressSummary & { isPrivate: boolean };
+
 export const progressApi = {
   /**
    * 운동 진행 현황 요약 조회
@@ -18,5 +20,12 @@ export const progressApi = {
    */
   async getSummary(months = 6): Promise<ProgressSummary> {
     return api.getOrThrow<ProgressSummary>(`${BASE_URL}?months=${months}`);
+  },
+
+  /**
+   * 특정 사용자의 운동 진행 현황 조회
+   */
+  async getUserSummary(userId: string, months = 6): Promise<UserProgressResponse> {
+    return api.getOrThrow<UserProgressResponse>(`${BASE_URL}/user/${userId}?months=${months}`);
   },
 };

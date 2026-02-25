@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { BarbellIcon, CaretRightIcon } from '@phosphor-icons/react';
-import { useFitnessProfileSuspense, hasFitnessProfileData } from '@/hooks/fitnessProfile';
+import { useFitnessProfileSuspense, useUserFitnessProfileSuspense, hasFitnessProfileData } from '@/hooks/fitnessProfile';
 import {
   FITNESS_GOAL_LABELS,
   EXPERIENCE_LEVEL_LABELS,
@@ -20,18 +20,46 @@ import { FitnessDetailDrawer } from '@/components/drawers';
  * Hero(목표+경험) + 요약 텍스트 라인 + 집중 부위 태그
  */
 interface ProfileFitnessSectionProps {
+  isOwnProfile?: boolean;
+  userId?: string;
   /** false이면 SectionHeader와 카드 컨테이너 없이 콘텐츠만 반환 */
   renderHeader?: boolean;
 }
 
 export default function ProfileFitnessSection({
+  isOwnProfile = true,
+  userId,
   renderHeader = true,
 }: ProfileFitnessSectionProps = {}) {
+  return isOwnProfile
+    ? <OwnFitnessData renderHeader={renderHeader} />
+    : <OtherFitnessData userId={userId!} renderHeader={renderHeader} />;
+}
+
+function OwnFitnessData({ renderHeader }: { renderHeader: boolean }) {
   const { data: profile } = useFitnessProfileSuspense();
+  return <FitnessDisplay profile={profile} isOwnProfile renderHeader={renderHeader} />;
+}
+
+function OtherFitnessData({ userId, renderHeader }: { userId: string; renderHeader: boolean }) {
+  const { data } = useUserFitnessProfileSuspense(userId);
+  return <FitnessDisplay profile={data.profile ?? undefined} isOwnProfile={false} renderHeader={renderHeader} />;
+}
+
+// ============================================================
+// Shared Display Component
+// ============================================================
+
+interface FitnessDisplayProps {
+  profile: FitnessProfile | undefined;
+  isOwnProfile: boolean;
+  renderHeader: boolean;
+}
+
+function FitnessDisplay({ profile, isOwnProfile, renderHeader }: FitnessDisplayProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const hasData = hasFitnessProfileData(profile);
-
   const compact = !renderHeader;
 
   const renderEmpty = () => (
@@ -44,10 +72,10 @@ export default function ProfileFitnessSection({
   );
 
   // 스케줄 요약 텍스트 생성 (주 3회 · 90분/회)
-  const getScheduleText = (profile: FitnessProfile) => {
+  const getScheduleText = (p: FitnessProfile) => {
     const parts: string[] = [];
-    if (profile.preferredDaysPerWeek) parts.push(`주 ${profile.preferredDaysPerWeek}회`);
-    if (profile.sessionDurationMinutes) parts.push(`${profile.sessionDurationMinutes}분/회`);
+    if (p.preferredDaysPerWeek) parts.push(`주 ${p.preferredDaysPerWeek}회`);
+    if (p.sessionDurationMinutes) parts.push(`${p.sessionDurationMinutes}분/회`);
     return parts.join(' · ');
   };
 
@@ -138,6 +166,7 @@ export default function ProfileFitnessSection({
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           profile={profile}
+          readOnly={!isOwnProfile}
         />
       )}
     </>
