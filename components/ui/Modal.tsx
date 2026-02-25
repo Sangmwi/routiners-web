@@ -228,16 +228,13 @@ export default function Modal({
 
   // 스타일 계산
   const heightClass = isBottom ? HEIGHT_CLASSES[height] : 'max-h-[85dvh]';
-  const containerAlign = isBottom
-    ? (height === 'full' ? 'items-start' : 'items-end')
-    : 'items-center';
+  const containerAlign = isBottom ? 'items-end' : 'items-center';
 
   // full 높이일 때 가용 화면 높이를 반영한 inline style
   const heightStyle: React.CSSProperties | undefined =
     isBottom && height === 'full'
       ? {
           height: 'var(--app-height, 100dvh)',
-          transition: 'height 0.3s ease-out',
         }
       : undefined;
 
@@ -263,6 +260,7 @@ export default function Modal({
   return createPortal(
     <div
       className={`fixed inset-0 z-60 flex ${containerAlign} justify-center`}
+      style={heightStyle ? { bottom: 'auto', height: 'var(--app-height, 100dvh)' } : undefined}
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
