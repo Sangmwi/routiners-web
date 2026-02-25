@@ -79,6 +79,8 @@ const OPEN_ANIMATION_DURATION = 300;
 interface UseModalLifecycleOptions {
   /** true이면 뒤로가기로 닫히지 않음 (로딩 중 등) */
   preventClose?: boolean;
+  /** 닫기 애니메이션 완료 후 호출 (DOM에서 제거 등) */
+  onExited?: () => void;
 }
 
 interface UseModalLifecycleReturn {
@@ -117,6 +119,8 @@ export function useModalLifecycle(
   const isClosingRef = useRef(false);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+  const onExitedRef = useRef(options?.onExited);
+  onExitedRef.current = options?.onExited;
 
   // 리스너 등록 (최초 1회)
   useEffect(() => {
@@ -158,6 +162,7 @@ export function useModalLifecycle(
       setHasOpened(false);
       isClosingRef.current = false;
       onCloseRef.current();
+      onExitedRef.current?.();
     }, ANIMATION_DURATION);
   };
 

@@ -7,18 +7,23 @@ import ImagePreviewModal from './ImagePreviewModal';
 import type { ModalInstance, ModalDataMap } from '@/lib/stores/modalStore';
 
 // ============================================================================
+// Types
+// ============================================================================
+
+interface ModalCommonProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onExited: () => void;
+}
+
+// ============================================================================
 // Modal Renderer
 // ============================================================================
 
 /**
  * 모달 타입에 따라 적절한 컴포넌트 렌더링
  */
-function renderModal(modal: ModalInstance, onClose: () => void) {
-  const commonProps = {
-    isOpen: true,
-    onClose,
-  };
-
+function renderModal(modal: ModalInstance, commonProps: ModalCommonProps) {
   switch (modal.type) {
     case 'confirm':
       return (
@@ -79,13 +84,18 @@ function renderModal(modal: ModalInstance, onClose: () => void) {
 export default function ModalProvider() {
   const modals = useModalStore((state) => state.modals);
   const closeModal = useModalStore((state) => state.closeModal);
+  const removeModal = useModalStore((state) => state.removeModal);
 
   if (modals.length === 0) return null;
 
   return (
     <>
       {modals.map((modal) =>
-        renderModal(modal, () => closeModal(modal.id))
+        renderModal(modal, {
+          isOpen: !modal.isClosing,
+          onClose: () => closeModal(modal.id),
+          onExited: () => removeModal(modal.id),
+        })
       )}
     </>
   );

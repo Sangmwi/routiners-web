@@ -35,6 +35,8 @@ interface ModalProps {
   onOpened?: () => void;
   /** true이면 뒤로가기로 닫히지 않음 (로딩 중 등) */
   preventBackClose?: boolean;
+  /** 닫기 애니메이션 완료 후 호출 (ModalProvider에서 실제 제거 등) */
+  onExited?: () => void;
 }
 
 // ============================================================================
@@ -158,6 +160,7 @@ export default function Modal({
   stickyFooter,
   onOpened,
   preventBackClose,
+  onExited,
 }: ModalProps) {
   const isBottom = position === 'bottom';
 
@@ -165,7 +168,7 @@ export default function Modal({
   const { isVisible, isAnimating, hasOpened, markOpened, executeClose } = useModalLifecycle(
     isOpen,
     onClose,
-    { preventClose: preventBackClose }
+    { preventClose: preventBackClose, onExited }
   );
 
   // 스와이프 제스처

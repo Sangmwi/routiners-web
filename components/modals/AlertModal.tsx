@@ -12,6 +12,7 @@ import type { ModalDataMap } from '@/lib/stores/modalStore';
 interface AlertModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onExited?: () => void;
   data: ModalDataMap['alert'];
 }
 
@@ -27,6 +28,7 @@ interface AlertModalProps {
 export default function AlertModal({
   isOpen,
   onClose,
+  onExited,
   data,
 }: AlertModalProps) {
   const { title, message, buttonText = '확인', onClose: onCloseCallback } = data;
@@ -40,6 +42,7 @@ export default function AlertModal({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
+      onExited={onExited}
       showCloseButton={false}
       closeOnBackdrop={false}
       closeOnEsc={false}

@@ -82,9 +82,14 @@ interface ModalActions {
   openModal: <T extends ModalType>(type: T, data: ModalDataMap[T]) => string;
 
   /**
-   * 특정 모달 닫기
+   * 모달 닫기 시작 (isClosing 마킹 → isOpen이 false로 전환)
    */
   closeModal: (id: string) => void;
+
+  /**
+   * 모달 실제 제거 (애니메이션 완료 후 호출)
+   */
+  removeModal: (id: string) => void;
 
   /**
    * 최상위 모달 닫기
@@ -151,6 +156,18 @@ export const useModalStore = create<ModalStore>()(
 
       closeModal: (id) => {
         set(
+          (state) => ({
+            modals: state.modals.map((m) =>
+              m.id === id ? { ...m, isClosing: true } : m
+            ),
+          }),
+          false,
+          'closeModal'
+        );
+      },
+
+      removeModal: (id) => {
+        set(
           (state) => {
             const modals = state.modals.filter((m) => m.id !== id);
             return {
@@ -159,7 +176,7 @@ export const useModalStore = create<ModalStore>()(
             };
           },
           false,
-          'closeModal'
+          'removeModal'
         );
       },
 

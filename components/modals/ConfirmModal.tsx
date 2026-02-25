@@ -14,6 +14,7 @@ import type { ModalDataMap } from '@/lib/stores/modalStore';
 interface ConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onExited?: () => void;
   data: ModalDataMap['confirm'];
 }
 
@@ -30,6 +31,7 @@ interface ConfirmModalProps {
 export default function ConfirmModal({
   isOpen,
   onClose,
+  onExited,
   data,
 }: ConfirmModalProps) {
   const [isLoading, setIsLoading] = useState(false);
@@ -83,6 +85,7 @@ export default function ConfirmModal({
     <Modal
       isOpen={isOpen}
       onClose={handleCancel}
+      onExited={onExited}
       showCloseButton={false}
       closeOnBackdrop={false}
       closeOnEsc={false}

@@ -13,6 +13,7 @@ import { useModalLifecycle } from '@/hooks/ui/useModalLifecycle';
 interface ImagePreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onExited?: () => void;
   data: ModalDataMap['imagePreview'];
 }
 
@@ -29,13 +30,14 @@ interface ImagePreviewModalProps {
 export default function ImagePreviewModal({
   isOpen,
   onClose,
+  onExited,
   data,
 }: ImagePreviewModalProps) {
   const { images, initialIndex = 0 } = data;
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
   // 뒤로가기 시 오버레이 닫기 (isVisible 등은 자체 관리하므로 overlay 등록만 활용)
-  useModalLifecycle(isOpen, onClose);
+  useModalLifecycle(isOpen, onClose, { onExited });
 
   if (!isOpen || images.length === 0) return null;
 
