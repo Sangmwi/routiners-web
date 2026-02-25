@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { BackIcon, NextIcon, CloseIcon } from '@/components/ui/icons';
 import type { ModalDataMap } from '@/lib/stores/modalStore';
 import { ImageWithFallback } from '@/components/ui/image';
-import { useOverlayHistory } from '@/hooks/ui';
+import { useModalLifecycle } from '@/hooks/ui/useModalLifecycle';
 
 // ============================================================================
 // Types
@@ -34,8 +34,8 @@ export default function ImagePreviewModal({
   const { images, initialIndex = 0 } = data;
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
-  // 뒤로가기 시 오버레이 닫기
-  useOverlayHistory(isOpen, onClose);
+  // 뒤로가기 시 오버레이 닫기 (isVisible 등은 자체 관리하므로 overlay 등록만 활용)
+  useModalLifecycle(isOpen, onClose);
 
   if (!isOpen || images.length === 0) return null;
 
