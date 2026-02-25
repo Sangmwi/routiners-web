@@ -51,7 +51,10 @@ export default function RootLayout({
           <ErrorBoundary>
             <WebViewBridge />
             <GlobalErrorToast />
-            <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-background shadow-2xl">
+            <div
+              className="mx-auto flex max-w-md flex-col bg-background shadow-2xl overflow-hidden"
+              style={{ minHeight: 'var(--app-height, 100dvh)' }}
+            >
               <main className="flex-1">
                 {children}
               </main>
