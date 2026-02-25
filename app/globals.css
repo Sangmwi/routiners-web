@@ -51,6 +51,8 @@
   --scheduled-foreground: #ffffff;
   --positive: #10b981;
   --negative: #f87171;
+  --incomplete: #b07878;
+  --surface-incomplete: rgba(176, 120, 120, 0.12);
 
   /* ===== 시맨틱 서피스 토큰 ===== */
   --surface-secondary: rgba(226, 232, 240, 0.2);     /* bg-muted/20 — 카드, 섹션 배경 */
@@ -108,6 +110,8 @@
     --scheduled-foreground: #1e1e1e;
     --positive: #34d399;
     --negative: #fca5a5;
+    --incomplete: #c8a0a0;
+    --surface-incomplete: rgba(200, 160, 160, 0.12);
     --color-green-50: #0a2610;
     --color-green-100: #17451c;
     --color-green-200: #1a5421;
@@ -174,6 +178,7 @@
   --color-scheduled-foreground: var(--scheduled-foreground);
   --color-positive: var(--positive);
   --color-negative: var(--negative);
+  --color-incomplete: var(--incomplete);
   --color-like: var(--like);
 
   /* Green Brand Scale */
@@ -196,6 +201,7 @@
   --color-surface-accent: var(--surface-accent);
   --color-surface-accent-strong: var(--surface-accent-strong);
   --color-surface-danger: var(--surface-danger);
+  --color-surface-incomplete: var(--surface-incomplete);
   --color-surface-scheduled: var(--surface-scheduled);
   --color-surface-glass: var(--surface-glass);
   --color-surface-pressed: var(--surface-pressed);
@@ -236,6 +242,7 @@
   --warning: #d97706; --warning-foreground: #ffffff; --warning-muted: #fef3c7;
   --scheduled: #f59e0b; --scheduled-foreground: #ffffff;
   --positive: #10b981; --negative: #f87171;
+  --incomplete: #b07878; --surface-incomplete: rgba(176, 120, 120, 0.12);
   --color-green-50:#f0faf3; --color-green-100:#dbf5e2; --color-green-200:#b9eac8;
   --color-green-300:#88d9a2; --color-green-400:#5fc07f; --color-green-500:#50A76C;
   --color-green-600:#328a4d; --color-green-700:#1B6523; --color-green-800:#1a5421;
@@ -265,6 +272,7 @@
   --warning: #fbbf24; --warning-foreground: #1e1e1e; --warning-muted: #78350f;
   --scheduled: #fbbf24; --scheduled-foreground: #1e1e1e;
   --positive: #34d399; --negative: #fca5a5;
+  --incomplete: #c8a0a0; --surface-incomplete: rgba(200, 160, 160, 0.12);
   --color-green-50:#0a2610; --color-green-100:#17451c; --color-green-200:#1a5421;
   --color-green-300:#1B6523; --color-green-400:#328a4d; --color-green-500:#50A76C;
   --color-green-600:#5fc07f; --color-green-700:#88d9a2; --color-green-800:#b9eac8;

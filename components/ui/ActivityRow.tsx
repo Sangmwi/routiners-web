@@ -1,6 +1,7 @@
 'use client';
 
 import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
+import { PlusIcon } from '@phosphor-icons/react';
 import type { IconWeight } from '@/lib/config/theme/base';
 import AppLink from '@/components/common/AppLink';
 import StatusPill from './StatusPill';
@@ -34,8 +35,8 @@ const ROW_STYLE: Record<DisplayStatus | 'default', {
   incomplete: {
     iconClass: EVENT_STATUS.incomplete.eventIconClass,
     iconWeight: EVENT_STATUS.incomplete.eventIconWeight,
-    labelClass: 'text-hint',
-    metaClass: 'text-hint-faint',
+    labelClass: 'text-incomplete',
+    metaClass: 'text-incomplete/70',
   },
   default: {
     iconClass: 'text-muted-foreground',
@@ -56,6 +57,8 @@ interface ActivityRowProps {
   size?: 'default' | 'large';
   /** 롱프레스 콜백 (삭제 등) */
   onLongPress?: () => void;
+  /** 이벤트 없음 상태 — 우측에 PlusIcon 표시, StatusPill 숨김 */
+  isNone?: boolean;
 }
 
 /**
@@ -74,10 +77,11 @@ export default function ActivityRow({
   date,
   size = 'default',
   onLongPress,
+  isNone,
 }: ActivityRowProps) {
   const { gap, icon: iconSize, text } = SIZE_CONFIG[size];
   const displayStatus = status && date ? getDisplayStatus(status, date) : null;
-  const style = ROW_STYLE[displayStatus ?? 'default'];
+  const style = isNone ? ROW_STYLE['default'] : ROW_STYLE[displayStatus ?? 'default'];
   const longPressHandlers = useLongPress(onLongPress ?? (() => {}));
   const handlers = onLongPress ? longPressHandlers : {};
 
@@ -92,11 +96,15 @@ export default function ActivityRow({
           {meta}
         </span>
       )}
-      {status && date && (
+      {isNone ? (
+        <span className="flex items-center ml-auto shrink-0 pr-2">
+          <PlusIcon size={iconSize} weight="regular" className="text-hint" />
+        </span>
+      ) : status && date ? (
         <span className="flex items-center ml-auto shrink-0 pr-2">
           <StatusPill status={status} date={date} />
         </span>
-      )}
+      ) : null}
     </AppLink>
   );
 }

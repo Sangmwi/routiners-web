@@ -61,10 +61,8 @@ export default function WeeklySchedule({ stats, size = 'default', filter: extern
           const hasWorkout = day.workout !== null;
           const hasMeal = day.meal !== null;
 
-          const wantWorkout = filter === 'all' || filter === 'workout';
-          const wantMeal = filter === 'all' || filter === 'meal';
-          const showWorkout = hasWorkout && wantWorkout;
-          const showMeal = hasMeal && wantMeal;
+          const showWorkout = filter === 'all' || filter === 'workout';
+          const showMeal = filter === 'all' || filter === 'meal';
 
           const workoutMeta: string[] = [];
           if (day.workoutDuration) workoutMeta.push(`${day.workoutDuration}분`);
@@ -82,32 +80,52 @@ export default function WeeklySchedule({ stats, size = 'default', filter: extern
                 size={isLarge ? 'large' : 'default'}
               >
                 {showWorkout && (
-                  <ActivityRow
-                    icon={BarbellIcon}
-                    label={day.workoutTitle || '운동'}
-                    meta={workoutMeta.length > 0 ? workoutMeta.join(' · ') : undefined}
-                    status={day.workout!}
-                    date={day.date}
-                    href={`/routine/workout/${day.date}`}
-                    size={isLarge ? 'large' : 'default'}
-                    onLongPress={onDelete && day.workoutEventId ? () => onDelete(day.workoutEventId!, day.date, 'workout') : undefined}
-                  />
+                  hasWorkout ? (
+                    <ActivityRow
+                      icon={BarbellIcon}
+                      label={day.workoutTitle || '운동'}
+                      meta={workoutMeta.length > 0 ? workoutMeta.join(' · ') : undefined}
+                      status={day.workout!}
+                      date={day.date}
+                      href={`/routine/workout/${day.date}`}
+                      size={isLarge ? 'large' : 'default'}
+                      onLongPress={onDelete && day.workoutEventId ? () => onDelete(day.workoutEventId!, day.date, 'workout') : undefined}
+                    />
+                  ) : (
+                    <ActivityRow
+                      icon={BarbellIcon}
+                      label="없음"
+                      href={`/routine/workout/${day.date}`}
+                      size={isLarge ? 'large' : 'default'}
+                      isNone
+                    />
+                  )
                 )}
                 {showMeal && (
-                  <ActivityRow
-                    icon={BowlFoodIcon}
-                    label="식단"
-                    meta={
-                      day.mealCalories
-                        ? `${day.mealCalories.toLocaleString()}kcal`
-                        : undefined
-                    }
-                    status={day.meal!}
-                    date={day.date}
-                    href={`/routine/meal/${day.date}`}
-                    size={isLarge ? 'large' : 'default'}
-                    onLongPress={onDelete && day.mealEventId ? () => onDelete(day.mealEventId!, day.date, 'meal') : undefined}
-                  />
+                  hasMeal ? (
+                    <ActivityRow
+                      icon={BowlFoodIcon}
+                      label="식단"
+                      meta={
+                        day.mealCalories
+                          ? `${day.mealCalories.toLocaleString()}kcal`
+                          : undefined
+                      }
+                      status={day.meal!}
+                      date={day.date}
+                      href={`/routine/meal/${day.date}`}
+                      size={isLarge ? 'large' : 'default'}
+                      onLongPress={onDelete && day.mealEventId ? () => onDelete(day.mealEventId!, day.date, 'meal') : undefined}
+                    />
+                  ) : (
+                    <ActivityRow
+                      icon={BowlFoodIcon}
+                      label="없음"
+                      href={`/routine/meal/${day.date}`}
+                      size={isLarge ? 'large' : 'default'}
+                      isNone
+                    />
+                  )
                 )}
               </DayGroup>
             </div>

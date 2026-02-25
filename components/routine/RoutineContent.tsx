@@ -1,12 +1,10 @@
 'use client';
 
 import { Suspense, useState, useRef, useEffect, useTransition } from 'react';
-import { BarbellIcon, BowlFoodIcon } from '@phosphor-icons/react';
 import { EMPTY_STATE } from '@/lib/config/theme';
 import PeriodNav from '@/components/ui/PeriodNav';
 import UnderlineTabs from '@/components/ui/UnderlineTabs';
 import TypeFilterToggle, { type FilterValue } from '@/components/ui/TypeFilterToggle';
-import ProgressRateBar from '@/components/ui/ProgressRateBar';
 import StreakBanner from '@/components/ui/StreakBanner';
 import EmptyState from '@/components/common/EmptyState';
 import WeeklySchedule from '@/components/routine/WeeklySchedule';
@@ -230,21 +228,9 @@ function WeeklyContent({
   ];
   const streak = computeWorkoutStreak(allDailyStats);
 
-  // 운동 진행률 비교
+  // 현재 주 빈 경우 체크
   const workoutTotal = stats ? stats.workout.completed + stats.workout.scheduled : 0;
-  const workoutComparison =
-    prevStats && (prevStats.workout.completed + prevStats.workout.scheduled) > 0
-      ? { diff: stats.workout.completionRate - prevStats.workout.completionRate, label: '지난주' }
-      : undefined;
-
-  // 식단 진행률 비교
   const mealTotal = stats ? stats.meal.completed + stats.meal.scheduled : 0;
-  const mealComparison =
-    prevStats && (prevStats.meal.completed + prevStats.meal.scheduled) > 0
-      ? { diff: stats.meal.completionRate - prevStats.meal.completionRate, label: '지난주' }
-      : undefined;
-
-  // 현재 주 + 이전 주 모두 빈 경우 → 신규 유저
   const isCurrentWeekEmpty = workoutTotal === 0 && mealTotal === 0;
   const prevWorkoutTotal = prevStats ? prevStats.workout.completed + prevStats.workout.scheduled : 0;
   const prevMealTotal = prevStats ? prevStats.meal.completed + prevStats.meal.scheduled : 0;
@@ -255,26 +241,6 @@ function WeeklyContent({
     <div className="space-y-6">
       {/* 스트릭 배너 */}
       {streak >= 2 && <StreakBanner count={streak} />}
-
-      {/* 진행률 2열 */}
-      <div className="grid grid-cols-2 gap-3">
-        <ProgressRateBar
-          icon={BarbellIcon}
-          label="운동"
-          completionRate={stats?.workout.completionRate ?? 0}
-          completed={stats?.workout.completed ?? 0}
-          total={workoutTotal}
-          comparison={workoutComparison}
-        />
-        <ProgressRateBar
-          icon={BowlFoodIcon}
-          label="식단"
-          completionRate={stats?.meal.completionRate ?? 0}
-          completed={stats?.meal.completed ?? 0}
-          total={mealTotal}
-          comparison={mealComparison}
-        />
-      </div>
 
       {/* 빈 주간 안내 */}
       {isCurrentWeekEmpty && (

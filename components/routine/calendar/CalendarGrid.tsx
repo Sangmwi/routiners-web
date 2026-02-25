@@ -25,7 +25,7 @@ const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 const DOT_CLASS: Record<string, string> = {
   scheduled: 'bg-scheduled',
   completed: 'bg-primary',
-  incomplete: 'bg-muted-foreground',
+  incomplete: 'bg-incomplete',
 };
 
 function EventDot({

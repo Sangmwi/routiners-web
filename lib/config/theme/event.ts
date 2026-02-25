@@ -48,7 +48,7 @@ export const EVENT_STATUS = {
     weight: ICON_WEIGHT.scheduled as IconWeight,       // 상태 아이콘 weight (duotone)
     eventIconWeight: ICON_WEIGHT.active as IconWeight,  // 이벤트 타입 아이콘 weight (fill)
     badgeClass: 'bg-surface-scheduled text-warning',
-    eventIconClass: 'text-foreground/50',               // 이벤트 타입 아이콘 색상 (바벨/그릇)
+    eventIconClass: 'text-scheduled',                     // 이벤트 타입 아이콘 색상 (바벨/그릇)
     statusClass: 'text-scheduled',                      // 상태 텍스트 색상 (예정/완료/미완)
   },
   completed: {
@@ -65,9 +65,9 @@ export const EVENT_STATUS = {
     icon: XCircleIcon,
     weight: ICON_WEIGHT.inactive as IconWeight,         // regular
     eventIconWeight: ICON_WEIGHT.inactive as IconWeight, // regular
-    badgeClass: 'bg-surface-muted text-muted-foreground',
-    eventIconClass: 'text-hint-faint',
-    statusClass: 'text-hint-faint',
+    badgeClass: 'bg-surface-incomplete text-incomplete',
+    eventIconClass: 'text-incomplete',
+    statusClass: 'text-incomplete',
   },
 } as const;
 
