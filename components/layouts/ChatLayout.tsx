@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
+import { useBodyScrollLock } from '@/hooks/ui';
 
 interface ChatLayoutProps {
   /** 자식 컴포넌트 (채팅 UI) */
@@ -36,12 +37,13 @@ interface ChatContentProps {
  * </ChatLayout>
  */
 export function ChatLayout({ children }: ChatLayoutProps) {
+  useBodyScrollLock(true);
+
   return (
     <div
       className="flex flex-col bg-background overflow-hidden"
       style={{
-        height: 'calc(100dvh - var(--keyboard-height, 0px))',
-        transition: 'height 0.25s ease-out',
+        height: 'var(--app-height, 100dvh)',
       }}
     >
       {children}

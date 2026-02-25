@@ -60,6 +60,7 @@ export default function ConfirmModal({
   };
 
   const handleCancel = () => {
+    if (isLoading) return;
     onCancel?.();
     onClose();
   };
@@ -74,6 +75,7 @@ export default function ConfirmModal({
       showCloseButton={false}
       closeOnBackdrop={false}
       closeOnEsc={false}
+      preventBackClose={isLoading}
       size="sm"
     >
       <ModalBody className="p-6">

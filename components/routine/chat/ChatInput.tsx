@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
-import { PaperPlaneRightIcon } from '@phosphor-icons/react';
+import { ArrowUpIcon } from '@phosphor-icons/react';
 import { LoadingSpinner } from '@/components/ui/icons';
 
 interface ChatInputProps {
@@ -13,7 +13,11 @@ interface ChatInputProps {
 }
 
 /**
- * 채팅 입력 컴포넌트
+ * 채팅 입력 컴포넌트 — ChatGPT 스타일
+ *
+ * - rounded-2xl pill 인풋 + 내부 전송 버튼
+ * - gradient 배경으로 콘텐츠와 자연스러운 분리
+ * - textarea 자동 높이 조절 (최대 120px)
  */
 export default function ChatInput({
   onSend,
@@ -57,33 +61,38 @@ export default function ChatInput({
   const displayPlaceholder = isLoading ? '응답을 기다리는 중...' : placeholder;
 
   return (
-    <div className="shrink-0 flex items-end gap-2 p-4 pb-safe border-t border-border bg-background">
-      <textarea
-        ref={textareaRef}
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder={displayPlaceholder}
-        disabled={disabled || isLoading}
-        rows={1}
-        className="flex-1 resize-none rounded-xl border border-border bg-card px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-focus disabled:opacity-50 disabled:cursor-not-allowed"
-      />
-      <button
-        onClick={handleSend}
-        disabled={!canSend}
-        className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-all ${
-          canSend
-            ? 'bg-primary text-primary-foreground shadow-md hover:shadow-lg active:scale-95'
-            : 'bg-muted text-muted-foreground cursor-not-allowed'
-        }`}
-        aria-label="메시지 전송"
-      >
-        {isLoading ? (
-          <LoadingSpinner size="md" variant="current" />
-        ) : (
-          <PaperPlaneRightIcon size={20} weight="fill" />
-        )}
-      </button>
+    <div className="shrink-0 pb-safe bg-background">
+      <div className="h-4 bg-gradient-to-t from-background to-transparent -mt-4 pointer-events-none" />
+      <div className="px-4 pb-4">
+        <div className="relative flex items-end">
+          <textarea
+            ref={textareaRef}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={displayPlaceholder}
+            disabled={disabled || isLoading}
+            rows={1}
+            className="w-full resize-none rounded-2xl bg-surface-secondary border border-edge-subtle pl-4 pr-12 py-3 text-sm placeholder:text-hint focus:outline-none focus:ring-2 focus:ring-focus disabled:opacity-50 disabled:cursor-not-allowed"
+          />
+          <button
+            onClick={handleSend}
+            disabled={!canSend}
+            className={`absolute right-1.5 bottom-1.5 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+              canSend
+                ? 'bg-primary text-primary-foreground active:scale-95'
+                : 'bg-surface-hover text-hint-faint cursor-not-allowed'
+            }`}
+            aria-label="메시지 전송"
+          >
+            {isLoading ? (
+              <LoadingSpinner size="sm" variant="current" />
+            ) : (
+              <ArrowUpIcon size={16} weight="bold" />
+            )}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

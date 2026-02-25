@@ -8,6 +8,7 @@ import {
   useSwipeGesture,
   useBodyScrollLock,
   useEscapeKey,
+  useOverlayHistory,
 } from '@/hooks/ui';
 
 // ============================================================================
@@ -33,6 +34,8 @@ interface ModalProps {
   stickyFooter?: ReactNode;
   /** 모달이 열릴 때 실행할 콜백 (autoFocus 등) */
   onOpened?: () => void;
+  /** true이면 뒤로가기로 닫히지 않음 (로딩 중 등) */
+  preventBackClose?: boolean;
 }
 
 // ============================================================================
@@ -155,6 +158,7 @@ export default function Modal({
   height = 'auto',
   stickyFooter,
   onOpened,
+  preventBackClose,
 }: ModalProps) {
   const isBottom = position === 'bottom';
 
@@ -163,6 +167,9 @@ export default function Modal({
     isOpen,
     onClose
   );
+
+  // 뒤로가기 시 오버레이 닫기
+  useOverlayHistory(isOpen, onClose, { preventClose: preventBackClose });
 
   // 스와이프 제스처
   const swipe = useSwipeGesture(
@@ -215,12 +222,11 @@ export default function Modal({
   const heightClass = isBottom ? HEIGHT_CLASSES[height] : 'max-h-[85dvh]';
   const containerAlign = isBottom ? 'items-end' : 'items-center';
 
-  // full 높이일 때 키보드 높이를 반영한 inline style
+  // full 높이일 때 가용 화면 높이를 반영한 inline style
   const heightStyle: React.CSSProperties | undefined =
     isBottom && height === 'full'
       ? {
-          height: 'calc(100dvh - var(--keyboard-height, 0px))',
-          transition: 'height 0.25s ease-out',
+          height: 'var(--app-height, 100dvh)',
         }
       : undefined;
 

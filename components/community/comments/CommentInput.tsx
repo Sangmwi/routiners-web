@@ -62,8 +62,9 @@ export default function CommentInput({
   const hasContent = content.trim().length > 0;
 
   return (
-    <div className="border-t border-edge-faint bg-card">
-      <div className="px-4 py-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))]">
+    <div>
+      <div className="h-3 bg-gradient-to-t from-card to-transparent" />
+      <div className="px-4 py-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] bg-card">
         {/* 답글 모드 표시 */}
         {replyingTo && (
           <div className="flex items-center gap-2 px-1 mb-1.5">

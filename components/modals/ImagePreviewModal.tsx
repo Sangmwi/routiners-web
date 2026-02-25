@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { BackIcon, NextIcon, CloseIcon } from '@/components/ui/icons';
 import type { ModalDataMap } from '@/lib/stores/modalStore';
 import { ImageWithFallback } from '@/components/ui/image';
+import { useOverlayHistory } from '@/hooks/ui';
 
 // ============================================================================
 // Types
@@ -32,6 +33,9 @@ export default function ImagePreviewModal({
 }: ImagePreviewModalProps) {
   const { images, initialIndex = 0 } = data;
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+
+  // 뒤로가기 시 오버레이 닫기
+  useOverlayHistory(isOpen, onClose);
 
   if (!isOpen || images.length === 0) return null;
 
