@@ -54,7 +54,11 @@ export default function RoutineOptionBottomSheet<TOption extends string>({
               <div className="text-left">
                 <p className="text-sm font-medium">{option.title}</p>
                 {option.description && (
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <p
+                    className={`text-xs mt-0.5 ${
+                      option.primary ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                    }`}
+                  >
                     {option.description}
                   </p>
                 )}

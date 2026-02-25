@@ -115,8 +115,17 @@ function RoutineColumnCard({
       )}
 
       {completed && (
-        <div className="absolute inset-0 z-10 rounded-xl bg-surface-glass flex items-center justify-center">
-          <CheckCircleIcon size={40} weight="fill" className="text-primary" />
+        <div className="absolute inset-0 z-10 rounded-xl bg-background/60 backdrop-blur-sm flex flex-col items-center justify-center gap-2 p-4">
+          <div className="flex items-center gap-1.5">
+            <CheckCircleIcon size={20} weight="fill" className="text-primary" />
+            <span className="text-xs font-semibold text-primary">완료</span>
+          </div>
+          <h3 className="text-sm font-semibold text-foreground leading-snug line-clamp-1 text-center">
+            {title}
+          </h3>
+          {summary && (
+            <p className="text-xs text-hint-strong text-center">{summary}</p>
+          )}
         </div>
       )}
     </>
@@ -249,13 +258,6 @@ function WorkoutColumn({
 
   return (
     <div>
-      <div className="flex items-center mb-3">
-        <div className="flex items-center gap-1.5">
-          <BarbellIcon size={14} weight="fill" className="text-primary" />
-          <span className="text-xs font-medium text-muted-foreground">운동</span>
-        </div>
-      </div>
-
       {model ? (
         <RoutineColumnCard {...model} />
       ) : nextScheduledWorkout ? (
@@ -277,7 +279,7 @@ function WorkoutColumn({
             title=""
             emptyAction={{
               label: '오늘 운동 없음',
-              subLabel: '기록 추가',
+              subLabel: '추가',
               icon: <BarbellIcon size={36} weight="duotone" className="text-hint" />,
               onClick: () => setIsDrawerOpen(true),
             }}
@@ -321,13 +323,6 @@ function MealColumn({ event }: { event: RoutineEvent | null }) {
 
   return (
     <div>
-      <div className="flex items-center mb-3">
-        <div className="flex items-center gap-1.5">
-          <BowlFoodIcon size={14} weight="fill" className="text-primary" />
-          <span className="text-xs font-medium text-muted-foreground">식단</span>
-        </div>
-      </div>
-
       {model ? (
         <RoutineColumnCard {...model} />
       ) : (
@@ -336,7 +331,7 @@ function MealColumn({ event }: { event: RoutineEvent | null }) {
             title=""
             emptyAction={{
               label: '오늘 식단 없음',
-              subLabel: '기록 추가',
+              subLabel: '추가',
               icon: <BowlFoodIcon size={36} weight="duotone" className="text-hint" />,
               onClick: () => setIsDrawerOpen(true),
             }}
