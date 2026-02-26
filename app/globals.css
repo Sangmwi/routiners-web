@@ -47,7 +47,7 @@
   --warning: #d97706;
   --warning-foreground: #ffffff;
   --warning-muted: #fef3c7;
-  --scheduled: #f59e0b;
+  --scheduled: #e69e1e;
   --scheduled-foreground: #ffffff;
   --positive: #10b981;
   --negative: #f87171;
@@ -61,7 +61,7 @@
   --surface-accent: rgba(80, 167, 108, 0.1);         /* bg-primary/10 — 액센트, 선택 배경 */
   --surface-accent-strong: rgba(80, 167, 108, 0.15); /* bg-primary/15 — 강조 뱃지 */
   --surface-danger: rgba(217, 115, 115, 0.1);        /* bg-destructive/10 — 에러 배경 */
-  --surface-scheduled: rgba(245, 158, 11, 0.1);      /* bg-scheduled/10 — 예정 상태 */
+  --surface-scheduled: rgba(230, 158, 30, 0.1);      /* bg-scheduled/10 — 예정 상태 */
   --surface-glass: rgba(243, 246, 243, 0.8);         /* bg-background/80 — 반투명 헤더 */
   --surface-pressed: rgba(226, 232, 240, 0.8);       /* active/pressed 상태 */
 
@@ -106,7 +106,7 @@
     --warning: #fbbf24;
     --warning-foreground: #1e1e1e;
     --warning-muted: #78350f;
-    --scheduled: #fbbf24;
+    --scheduled: #ebbc32;
     --scheduled-foreground: #1e1e1e;
     --positive: #34d399;
     --negative: #fca5a5;
@@ -131,7 +131,7 @@
     --surface-accent: rgba(95, 192, 127, 0.1);
     --surface-accent-strong: rgba(95, 192, 127, 0.15);
     --surface-danger: rgba(232, 160, 160, 0.1);
-    --surface-scheduled: rgba(251, 191, 36, 0.1);
+    --surface-scheduled: rgba(235, 188, 50, 0.1);
     --surface-glass: rgba(15, 23, 42, 0.8);
     --surface-pressed: rgba(51, 65, 85, 0.8);
 
@@ -240,7 +240,7 @@
   --like: #dc2626;
   --success: #22c55e; --success-foreground: #ffffff;
   --warning: #d97706; --warning-foreground: #ffffff; --warning-muted: #fef3c7;
-  --scheduled: #f59e0b; --scheduled-foreground: #ffffff;
+  --scheduled: #e69e1e; --scheduled-foreground: #ffffff;
   --positive: #10b981; --negative: #f87171;
   --incomplete: #b07878; --surface-incomplete: rgba(176, 120, 120, 0.12);
   --color-green-50:#f0faf3; --color-green-100:#dbf5e2; --color-green-200:#b9eac8;
@@ -250,7 +250,7 @@
   --surface-secondary:rgba(226,232,240,0.2); --surface-hover:rgba(226,232,240,0.3);
   --surface-muted:rgba(226,232,240,0.5); --surface-accent:rgba(80,167,108,0.1);
   --surface-accent-strong:rgba(80,167,108,0.15); --surface-danger:rgba(217,115,115,0.1);
-  --surface-scheduled:rgba(245,158,11,0.1); --surface-glass:rgba(243,246,243,0.8);
+  --surface-scheduled:rgba(230,158,30,0.1); --surface-glass:rgba(243,246,243,0.8);
   --surface-pressed:rgba(226,232,240,0.8);
   --edge-subtle:rgba(203,213,225,0.5); --edge-faint:rgba(203,213,225,0.3);
   --edge-divider:rgba(203,213,225,0.2); --edge-error:rgba(217,115,115,0.5);
@@ -270,7 +270,7 @@
   --like: #f87171;
   --success: #4ade80; --success-foreground: #0f172a;
   --warning: #fbbf24; --warning-foreground: #1e1e1e; --warning-muted: #78350f;
-  --scheduled: #fbbf24; --scheduled-foreground: #1e1e1e;
+  --scheduled: #ebbc32; --scheduled-foreground: #1e1e1e;
   --positive: #34d399; --negative: #fca5a5;
   --incomplete: #c8a0a0; --surface-incomplete: rgba(200, 160, 160, 0.12);
   --color-green-50:#0a2610; --color-green-100:#17451c; --color-green-200:#1a5421;
@@ -280,7 +280,7 @@
   --surface-secondary:rgba(51,65,85,0.2); --surface-hover:rgba(51,65,85,0.3);
   --surface-muted:rgba(51,65,85,0.5); --surface-accent:rgba(95,192,127,0.1);
   --surface-accent-strong:rgba(95,192,127,0.15); --surface-danger:rgba(232,160,160,0.1);
-  --surface-scheduled:rgba(251,191,36,0.1); --surface-glass:rgba(15,23,42,0.8);
+  --surface-scheduled:rgba(235,188,50,0.1); --surface-glass:rgba(15,23,42,0.8);
   --surface-pressed:rgba(51,65,85,0.8);
   --edge-subtle:rgba(51,65,85,0.5); --edge-faint:rgba(51,65,85,0.3);
   --edge-divider:rgba(51,65,85,0.2); --edge-error:rgba(232,160,160,0.5);
