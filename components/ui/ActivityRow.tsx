@@ -35,14 +35,14 @@ const ROW_STYLE: Record<DisplayStatus | 'default', {
   incomplete: {
     iconClass: EVENT_STATUS.incomplete.eventIconClass,
     iconWeight: EVENT_STATUS.incomplete.eventIconWeight,
-    labelClass: 'text-incomplete',
-    metaClass: 'text-incomplete/70',
+    labelClass: 'text-hint',
+    metaClass: 'text-hint-faint',
   },
   default: {
-    iconClass: 'text-muted-foreground',
-    iconWeight: 'fill',
-    labelClass: 'text-muted-foreground',
-    metaClass: 'text-hint-strong',
+    iconClass: 'text-hint-faint',
+    iconWeight: 'regular',
+    labelClass: 'text-hint',
+    metaClass: 'text-hint-faint',
   },
 };
 
@@ -59,6 +59,8 @@ interface ActivityRowProps {
   onLongPress?: () => void;
   /** 이벤트 없음 상태 — 우측에 PlusIcon 표시, StatusPill 숨김 */
   isNone?: boolean;
+  /** isNone일 때 + 아이콘 클릭 콜백 */
+  onAdd?: () => void;
 }
 
 /**
@@ -78,6 +80,7 @@ export default function ActivityRow({
   size = 'default',
   onLongPress,
   isNone,
+  onAdd,
 }: ActivityRowProps) {
   const { gap, icon: iconSize, text } = SIZE_CONFIG[size];
   const displayStatus = status && date ? getDisplayStatus(status, date) : null;
@@ -97,9 +100,13 @@ export default function ActivityRow({
         </span>
       )}
       {isNone ? (
-        <span className="flex items-center ml-auto shrink-0 pr-2">
-          <PlusIcon size={iconSize} weight="regular" className="text-hint" />
-        </span>
+        <button
+          type="button"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAdd?.(); }}
+          className="flex items-center ml-auto shrink-0 pr-2 p-2 -mr-2 active:bg-surface-secondary rounded-lg"
+        >
+          <PlusIcon size={iconSize} weight="bold" className="text-hint" />
+        </button>
       ) : status && date ? (
         <span className="flex items-center ml-auto shrink-0 pr-2">
           <StatusPill status={status} date={date} />

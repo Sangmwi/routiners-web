@@ -1,10 +1,16 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { BarbellIcon, BowlFoodIcon } from '@phosphor-icons/react';
 import SegmentedControl from '@/components/ui/SegmentedControl';
 import ActivityRow from '@/components/ui/ActivityRow';
 import DayGroup from '@/components/ui/DayGroup';
+import WorkoutAddDrawer, { type WorkoutAddOption } from '@/components/routine/workout/WorkoutAddDrawer';
+import MealAddDrawer, { type MealAddOption } from '@/components/routine/meal/MealAddDrawer';
+import AddWorkoutSheet from '@/components/routine/sheets/AddWorkoutSheet';
+import AddMealSheet from '@/components/routine/sheets/AddMealSheet';
+import ImportUnitMealSheet from '@/components/routine/sheets/ImportUnitMealSheet';
 import { formatDate } from '@/lib/utils/dateHelpers';
 import type { WeeklyStats } from '@/hooks/routine';
 
@@ -33,15 +39,53 @@ const FILTER_OPTIONS: { key: ActivityFilter; label: string }[] = [
  * - 필터: 전체 / 운동 / 식단
  * - 운동: 아이콘 + 제목 + 시간/칼로리 + 상태 (→ 운동 상세 링크)
  * - 식단: 아이콘 + "식단" + 칼로리 + 상태 (→ 식단 상세 링크)
- * - 활동 없는 날은 행 자체가 표시되지 않음
+ * - 활동 없는 날은 "없음" 행 + 우측 PlusIcon → AddDrawer
  */
 export default function WeeklySchedule({ stats, size = 'default', filter: externalFilter, onDelete }: WeeklyScheduleProps) {
   const { dailyStats } = stats;
   const today = formatDate(new Date());
   const [internalFilter, setInternalFilter] = useState<ActivityFilter>('all');
+  const router = useRouter();
 
   const filter = externalFilter ?? internalFilter;
   const isLarge = size === 'large';
+
+  // 추가 드로어/시트 상태
+  const [addTarget, setAddTarget] = useState<{ date: string; type: 'workout' | 'meal' } | null>(null);
+  const [activeSheet, setActiveSheet] = useState<'workout' | 'meal' | 'import' | null>(null);
+
+  const handleOpenAdd = (date: string, type: 'workout' | 'meal') => {
+    setAddTarget({ date, type });
+  };
+
+  const handleWorkoutOption = (option: WorkoutAddOption) => {
+    const target = addTarget;
+    setAddTarget(null);
+    if (option === 'ai') {
+      router.push('/routine/counselor');
+    } else if (target) {
+      setActiveSheet('workout');
+    }
+  };
+
+  const handleMealOption = (option: MealAddOption) => {
+    const target = addTarget;
+    setAddTarget(null);
+    if (option === 'ai') {
+      router.push('/routine/counselor');
+    } else if (target) {
+      if (option === 'direct') {
+        setActiveSheet('meal');
+      } else {
+        setActiveSheet('import');
+      }
+    }
+  };
+
+  const handleCreated = () => {
+    if (addTarget) router.push(`/routine/${addTarget.type}/${addTarget.date}`);
+    setActiveSheet(null);
+  };
 
   return (
     <div>
@@ -98,6 +142,7 @@ export default function WeeklySchedule({ stats, size = 'default', filter: extern
                       href={`/routine/workout/${day.date}`}
                       size={isLarge ? 'large' : 'default'}
                       isNone
+                      onAdd={() => handleOpenAdd(day.date, 'workout')}
                     />
                   )
                 )}
@@ -124,6 +169,7 @@ export default function WeeklySchedule({ stats, size = 'default', filter: extern
                       href={`/routine/meal/${day.date}`}
                       size={isLarge ? 'large' : 'default'}
                       isNone
+                      onAdd={() => handleOpenAdd(day.date, 'meal')}
                     />
                   )
                 )}
@@ -132,6 +178,38 @@ export default function WeeklySchedule({ stats, size = 'default', filter: extern
           );
         })}
       </div>
+
+      {/* 추가 드로어 */}
+      <WorkoutAddDrawer
+        isOpen={addTarget?.type === 'workout'}
+        onClose={() => setAddTarget(null)}
+        onSelect={handleWorkoutOption}
+      />
+      <MealAddDrawer
+        isOpen={addTarget?.type === 'meal'}
+        onClose={() => setAddTarget(null)}
+        onSelect={handleMealOption}
+      />
+
+      {/* 추가 시트 */}
+      <AddWorkoutSheet
+        isOpen={activeSheet === 'workout'}
+        onClose={() => setActiveSheet(null)}
+        date={addTarget?.date ?? ''}
+        onCreated={() => handleCreated()}
+      />
+      <AddMealSheet
+        isOpen={activeSheet === 'meal'}
+        onClose={() => setActiveSheet(null)}
+        date={addTarget?.date ?? ''}
+        onCreated={() => handleCreated()}
+      />
+      <ImportUnitMealSheet
+        isOpen={activeSheet === 'import'}
+        onClose={() => setActiveSheet(null)}
+        date={addTarget?.date ?? ''}
+        onCreated={() => handleCreated()}
+      />
     </div>
   );
 }

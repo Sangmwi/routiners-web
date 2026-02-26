@@ -49,7 +49,7 @@ export const EVENT_STATUS = {
     eventIconWeight: ICON_WEIGHT.active as IconWeight,  // 이벤트 타입 아이콘 weight (fill)
     badgeClass: 'bg-surface-scheduled text-warning',
     eventIconClass: 'text-scheduled',                     // 이벤트 타입 아이콘 색상 (바벨/그릇)
-    statusClass: 'text-scheduled',                      // 상태 텍스트 색상 (예정/완료/미완)
+    statusClass: 'text-scheduled/80',                    // 상태 텍스트 색상 (예정 — 아이콘보다 약간 연하게)
   },
   completed: {
     label: '완료',
