@@ -16,6 +16,7 @@ export const ROUTES_WITHOUT_TAB = [
   '/community/write', // 게시글 작성
   '/community/search-users', // 유저 검색
   '/profile/edit',
+  '/profile/big3',    // 3대운동 관리
   '/profile/inbody',  // 인바디 관리
   '/profile/fitness', // 피트니스 관리
   '/profile/dietary', // 식단 관리
