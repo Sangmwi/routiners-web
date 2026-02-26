@@ -224,7 +224,8 @@ export default function Modal({
   const heightStyle: React.CSSProperties | undefined =
     isBottom && height === 'full'
       ? {
-          height: 'calc(100dvh - var(--keyboard-height, 0px))',
+          height: '100dvh',
+          paddingBottom: 'var(--keyboard-height, 0px)',
         }
       : undefined;
 

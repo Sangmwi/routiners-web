@@ -39,7 +39,7 @@ export function ChatLayout({ children }: ChatLayoutProps) {
   return (
     <div
       className="flex flex-col bg-background overflow-hidden"
-      style={{ height: 'calc(100dvh - var(--keyboard-height, 0px))' }}
+      style={{ height: '100dvh', paddingBottom: 'var(--keyboard-height, 0px)' }}
     >
       {children}
     </div>
