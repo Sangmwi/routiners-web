@@ -59,32 +59,29 @@ export default function WeeklySchedule({ stats, size = 'default', filter: extern
   };
 
   const handleWorkoutOption = (option: WorkoutAddOption) => {
-    const target = addTarget;
-    setAddTarget(null);
     if (option === 'ai') {
+      setAddTarget(null);
       router.push('/routine/counselor');
-    } else if (target) {
+    } else {
       setActiveSheet('workout');
     }
   };
 
   const handleMealOption = (option: MealAddOption) => {
-    const target = addTarget;
-    setAddTarget(null);
     if (option === 'ai') {
+      setAddTarget(null);
       router.push('/routine/counselor');
-    } else if (target) {
-      if (option === 'direct') {
-        setActiveSheet('meal');
-      } else {
-        setActiveSheet('import');
-      }
+    } else if (option === 'direct') {
+      setActiveSheet('meal');
+    } else {
+      setActiveSheet('import');
     }
   };
 
   const handleCreated = () => {
     if (addTarget) router.push(`/routine/${addTarget.type}/${addTarget.date}`);
     setActiveSheet(null);
+    setAddTarget(null);
   };
 
   return (
@@ -194,19 +191,19 @@ export default function WeeklySchedule({ stats, size = 'default', filter: extern
       {/* 추가 시트 */}
       <AddWorkoutSheet
         isOpen={activeSheet === 'workout'}
-        onClose={() => setActiveSheet(null)}
+        onClose={() => { setActiveSheet(null); setAddTarget(null); }}
         date={addTarget?.date ?? ''}
         onCreated={() => handleCreated()}
       />
       <AddMealSheet
         isOpen={activeSheet === 'meal'}
-        onClose={() => setActiveSheet(null)}
+        onClose={() => { setActiveSheet(null); setAddTarget(null); }}
         date={addTarget?.date ?? ''}
         onCreated={() => handleCreated()}
       />
       <ImportUnitMealSheet
         isOpen={activeSheet === 'import'}
-        onClose={() => setActiveSheet(null)}
+        onClose={() => { setActiveSheet(null); setAddTarget(null); }}
         date={addTarget?.date ?? ''}
         onCreated={() => handleCreated()}
       />
