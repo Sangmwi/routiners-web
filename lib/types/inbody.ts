@@ -228,6 +228,13 @@ export interface InBodyCreateData {
  */
 export type InBodyUpdateData = Partial<InBodyCreateData>;
 
+/** InBody 목록 API 페이지네이션 응답 */
+export interface InBodyListResponse {
+  records: InBodyRecord[];
+  page: number;
+  hasMore: boolean;
+}
+
 // ============================================================================
 // Type Transformers
 // ============================================================================

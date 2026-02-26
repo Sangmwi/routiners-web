@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef, useEffect } from 'react';
 import { NextIcon, LoadingSpinner } from '@/components/ui/icons';
 import SharedEmptyState from '@/components/common/EmptyState';
 import { EMPTY_STATE } from '@/lib/config/theme';
@@ -14,6 +15,9 @@ interface InBodyRecordListProps {
   records: InBodyRecord[];
   isLoading?: boolean;
   onRecordClick?: (record: InBodyRecord) => void;
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
+  onLoadMore?: () => void;
   emptyMessage?: string;
   emptyDescription?: string;
 }
@@ -88,9 +92,31 @@ export default function InBodyRecordList({
   records,
   isLoading = false,
   onRecordClick,
+  hasNextPage = false,
+  isFetchingNextPage = false,
+  onLoadMore,
   emptyMessage = '아직 인바디 기록이 없어요',
   emptyDescription = '인바디 결과지를 스캔해서 기록을 추가해보세요',
 }: InBodyRecordListProps) {
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !onLoadMore) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          onLoadMore();
+        }
+      },
+      { rootMargin: '200px' },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, onLoadMore]);
+
   if (isLoading) {
     return <LoadingState />;
   }
@@ -100,14 +126,23 @@ export default function InBodyRecordList({
   }
 
   return (
-    <div className="divide-y divide-edge-divider">
-      {records.map((record) => (
-        <RecordItem
-          key={record.id}
-          record={record}
-          onClick={onRecordClick}
-        />
-      ))}
+    <div>
+      <div className="divide-y divide-edge-divider">
+        {records.map((record) => (
+          <RecordItem
+            key={record.id}
+            record={record}
+            onClick={onRecordClick}
+          />
+        ))}
+      </div>
+
+      {/* 무한스크롤 sentinel */}
+      {hasNextPage && (
+        <div ref={sentinelRef} className="flex justify-center py-4">
+          {isFetchingNextPage && <LoadingSpinner size="md" />}
+        </div>
+      )}
     </div>
   );
 }

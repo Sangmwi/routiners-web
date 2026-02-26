@@ -10,20 +10,23 @@ import {
 import { parseRequestBody, handleSupabaseError, badRequest } from '@/lib/utils/apiResponse';
 
 const VALID_LIFT_TYPES: Big3LiftType[] = ['squat', 'bench', 'deadlift'];
+const DEFAULT_LIMIT = 20;
+const MAX_LIMIT = 50;
 
 /**
  * GET /api/big3
- * Big3 기록 목록 조회 (최신순)
+ * Big3 기록 목록 조회 (최신순, 페이지네이션)
  */
 export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   const { searchParams } = new URL(request.url);
-  const limit = parseInt(searchParams.get('limit') || '20', 10);
-  const offset = parseInt(searchParams.get('offset') || '0', 10);
+  const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
+  const limit = Math.min(MAX_LIMIT, Math.max(1, parseInt(searchParams.get('limit') || String(DEFAULT_LIMIT), 10)));
+  const offset = (page - 1) * limit;
   const liftType = searchParams.get('liftType') as Big3LiftType | null;
 
   let query = supabase
     .from('big3_records')
-    .select('*')
+    .select('*', { count: 'exact' })
     .order('recorded_at', { ascending: false })
     .range(offset, offset + limit - 1);
 
@@ -31,15 +34,20 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
     query = query.eq('lift_type', liftType);
   }
 
-  const { data, error } = await query;
+  const { data, error, count } = await query;
 
   if (error) {
     console.error('[Big3 GET] Error:', error);
     return handleSupabaseError(error);
   }
 
+  const total = count ?? 0;
   const records = (data as DbBig3Record[]).map(toBig3Record);
-  return NextResponse.json(records);
+  return NextResponse.json({
+    records,
+    page,
+    hasMore: offset + (data?.length ?? 0) < total,
+  });
 });
 
 /**

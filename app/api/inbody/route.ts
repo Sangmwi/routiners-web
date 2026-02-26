@@ -8,18 +8,22 @@ import {
 } from '@/lib/types/inbody';
 import { parseRequestBody, handleSupabaseError, badRequest } from '@/lib/utils/apiResponse';
 
+const DEFAULT_LIMIT = 20;
+const MAX_LIMIT = 50;
+
 /**
  * GET /api/inbody
- * InBody 기록 목록 조회 (최신순)
+ * InBody 기록 목록 조회 (최신순, 페이지네이션)
  */
 export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   const { searchParams } = new URL(request.url);
-  const limit = parseInt(searchParams.get('limit') || '20', 10);
-  const offset = parseInt(searchParams.get('offset') || '0', 10);
+  const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
+  const limit = Math.min(MAX_LIMIT, Math.max(1, parseInt(searchParams.get('limit') || String(DEFAULT_LIMIT), 10)));
+  const offset = (page - 1) * limit;
 
-  const { data, error } = await supabase
+  const { data, error, count } = await supabase
     .from('inbody_records')
-    .select('*')
+    .select('*', { count: 'exact' })
     .order('measured_at', { ascending: false })
     .range(offset, offset + limit - 1);
 
@@ -28,8 +32,13 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
     return handleSupabaseError(error);
   }
 
+  const total = count ?? 0;
   const records = (data as DbInBodyRecord[]).map(toInBodyRecord);
-  return NextResponse.json(records);
+  return NextResponse.json({
+    records,
+    page,
+    hasMore: offset + (data?.length ?? 0) < total,
+  });
 });
 
 /**

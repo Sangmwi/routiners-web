@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { PlusIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
-import SectionHeader from '@/components/ui/SectionHeader';
 import SegmentedControl from '@/components/ui/SegmentedControl';
 import ChangeIndicator from '@/components/ui/ChangeIndicator';
 import Big3RecordList from '@/components/big3/Big3RecordList';
@@ -12,7 +11,7 @@ import Big3DetailModal from '@/components/big3/Big3DetailModal';
 import Big3CreateDrawer from '@/components/big3/Big3CreateDrawer';
 import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
 import { useBig3ManagerSuspense } from '@/hooks/big3';
-import type { Big3LiftType, Big3LiftSummary } from '@/lib/types/big3';
+import type { Big3LiftType } from '@/lib/types/big3';
 
 // ============================================================
 // Constants
@@ -27,20 +26,22 @@ const LIFT_LABEL_MAP = Object.fromEntries(
   BIG3_LIFT_CONFIG.map(({ key, label }) => [key, label]),
 ) as Record<Big3LiftType, string>;
 
+function formatShortDate(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00');
+  return `${d.getMonth() + 1}.${d.getDate()}`;
+}
+
 // ============================================================
 // Main Content Component
 // ============================================================
 
-/**
- * 3대운동 관리 콘텐츠 (Suspense 내부)
- *
- * - useBig3ManagerSuspense로 데이터 + 상태 관리
- * - 상위 page.tsx의 DetailLayout에서 Header + Suspense 처리
- */
 export default function Big3Content() {
   const {
     records,
     summary,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
     selectedLiftType,
     setSelectedLiftType,
     selectedRecord,
@@ -51,55 +52,79 @@ export default function Big3Content() {
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-  // 필터값 (SegmentedControl용)
   const filterValue = selectedLiftType ?? 'all';
   const handleFilterChange = (value: string) => {
     setSelectedLiftType(value === 'all' ? undefined : (value as Big3LiftType));
   };
 
+  // 합산 PR 계산
+  const prTotal = summary.lifts.reduce((sum, l) => sum + (l.allTimePr ?? 0), 0);
+  const latestPrDate = summary.lifts
+    .map((l) => l.allTimePrDate)
+    .filter(Boolean)
+    .sort()
+    .at(-1);
+
   return (
     <>
       <div className="pb-footer-clearance -mx-(--layout-padding-x)">
         <div className="divide-y divide-edge-divider">
-          {/* 요약 섹션 */}
+          {/* 히어로: 좌측 합계 + 우측 종목별 */}
           <div className="px-(--layout-padding-x) pt-1 pb-5">
-            <SectionHeader
-              title="종목별 요약"
-              size="md"
-              className="mb-4"
-              rightSlot={
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs text-muted-foreground">합계</span>
-                  <span className="text-sm font-bold tabular-nums text-foreground">
+            <div className="flex gap-6">
+              {/* 좌측: 합계 + 메타 */}
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">3대 합계</p>
+                <div className="flex items-baseline gap-1.5 mt-1">
+                  <span className="text-2xl font-bold tabular-nums text-foreground">
                     {summary.latestTotal}
-                    <span className="text-xs font-normal text-muted-foreground ml-0.5">kg</span>
                   </span>
+                  <span className="text-sm text-muted-foreground">kg</span>
                   {summary.totalChange !== 0 && (
                     <ChangeIndicator value={summary.totalChange} positiveIsGood unit="kg" />
                   )}
                 </div>
-              }
-            />
-            <div className="grid grid-cols-3 gap-2">
-              {summary.lifts.map((lift) => (
-                <LiftSummaryCard key={lift.liftType} lift={lift} />
-              ))}
+                {prTotal > 0 && latestPrDate && (
+                  <p className="text-xs text-hint-strong mt-2">
+                    최고 {prTotal}kg · {formatShortDate(latestPrDate)} 달성
+                  </p>
+                )}
+              </div>
+
+              {/* 우측: 종목별 3행 */}
+              <div className="shrink-0 divide-y divide-edge-faint">
+                {summary.lifts.map((lift) => (
+                  <div key={lift.liftType} className="flex items-center justify-between gap-6 py-2.5">
+                    <span className="text-xs text-muted-foreground">
+                      {LIFT_LABEL_MAP[lift.liftType]}
+                    </span>
+                    <span className="text-sm font-bold tabular-nums text-foreground">
+                      {lift.latest != null ? (
+                        <>
+                          {lift.latest}
+                          <span className="text-xs font-normal text-muted-foreground ml-0.5">kg</span>
+                        </>
+                      ) : (
+                        <span className="text-hint">-</span>
+                      )}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* 필터 + 기록 헤더 */}
-          <div className="px-(--layout-padding-x) pt-5 pb-3">
-            <SectionHeader
-              title="기록"
-              size="md"
-              badge={records.length}
-              className="mb-3"
-            />
+          {/* 기록 헤더: 인라인 */}
+          <div className="flex items-center justify-between px-(--layout-padding-x) pt-5 pb-3">
+            <div className="flex items-center gap-2">
+              <h3 className="text-base font-semibold text-card-foreground">기록</h3>
+              <span className="text-xs text-muted-foreground">{records.length}개</span>
+            </div>
             <SegmentedControl
               options={FILTER_OPTIONS}
               value={filterValue}
               onChange={handleFilterChange}
-              size="md"
+              size="sm"
             />
           </div>
 
@@ -107,6 +132,9 @@ export default function Big3Content() {
           <Big3RecordList
             records={records}
             onRecordClick={openDetailModal}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            onLoadMore={fetchNextPage}
           />
         </div>
       </div>
@@ -138,34 +166,5 @@ export default function Big3Content() {
         />
       )}
     </>
-  );
-}
-
-// ============================================================
-// Lift Summary Card
-// ============================================================
-
-function LiftSummaryCard({ lift }: { lift: Big3LiftSummary }) {
-  return (
-    <div className="rounded-xl bg-surface-secondary p-3.5 text-center">
-      <p className="text-xs text-muted-foreground mb-1">
-        {LIFT_LABEL_MAP[lift.liftType]}
-      </p>
-      <p className="text-lg font-bold tabular-nums text-foreground leading-none">
-        {lift.latest != null ? (
-          <>
-            {lift.latest}
-            <span className="text-xs font-normal text-muted-foreground ml-0.5">kg</span>
-          </>
-        ) : (
-          <span className="text-sm text-hint">-</span>
-        )}
-      </p>
-      {lift.change !== 0 && (
-        <div className="mt-1.5">
-          <ChangeIndicator value={lift.change} positiveIsGood unit="kg" />
-        </div>
-      )}
-    </div>
   );
 }

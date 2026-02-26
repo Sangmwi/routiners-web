@@ -6,7 +6,7 @@
  * @throws {ApiError} 모든 API 에러는 ApiError로 통일
  */
 
-import type { Big3Record, Big3CreateData, Big3UpdateData, Big3RecordsSummary, Big3LiftType } from '@/lib/types/big3';
+import type { Big3Record, Big3CreateData, Big3UpdateData, Big3RecordsSummary, Big3LiftType, Big3ListResponse } from '@/lib/types/big3';
 import { api } from './client';
 
 const BASE_URL = '/api/big3';
@@ -22,7 +22,21 @@ export const big3Api = {
     if (options?.limit) params.set('limit', String(options.limit));
     if (options?.offset) params.set('offset', String(options.offset));
     const qs = params.toString();
-    return api.getOrThrow<Big3Record[]>(`${BASE_URL}${qs ? `?${qs}` : ''}`);
+    const res = await api.getOrThrow<Big3ListResponse>(`${BASE_URL}${qs ? `?${qs}` : ''}`);
+    return res.records;
+  },
+
+  async fetchRecords(filters: {
+    liftType?: Big3LiftType;
+    page?: number;
+    limit?: number;
+  }): Promise<Big3ListResponse> {
+    const params = new URLSearchParams();
+    if (filters.liftType) params.set('liftType', filters.liftType);
+    if (filters.page) params.set('page', String(filters.page));
+    if (filters.limit) params.set('limit', String(filters.limit));
+    const qs = params.toString();
+    return api.getOrThrow<Big3ListResponse>(`${BASE_URL}${qs ? `?${qs}` : ''}`);
   },
 
   async getRecord(id: string): Promise<Big3Record | null> {

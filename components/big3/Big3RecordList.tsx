@@ -1,7 +1,9 @@
 'use client';
 
+import { useRef, useEffect } from 'react';
 import { BarbellIcon } from '@phosphor-icons/react';
 import EmptyState from '@/components/common/EmptyState';
+import { LoadingSpinner } from '@/components/ui/icons';
 import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
 import type { Big3Record } from '@/lib/types/big3';
 
@@ -20,9 +22,37 @@ function formatDate(dateStr: string): string {
 interface Big3RecordListProps {
   records: Big3Record[];
   onRecordClick: (record: Big3Record) => void;
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  onLoadMore: () => void;
 }
 
-export default function Big3RecordList({ records, onRecordClick }: Big3RecordListProps) {
+export default function Big3RecordList({
+  records,
+  onRecordClick,
+  hasNextPage,
+  isFetchingNextPage,
+  onLoadMore,
+}: Big3RecordListProps) {
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          onLoadMore();
+        }
+      },
+      { rootMargin: '200px' },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, onLoadMore]);
+
   if (records.length === 0) {
     return (
       <div className="px-(--layout-padding-x) py-12">
@@ -86,6 +116,13 @@ export default function Big3RecordList({ records, onRecordClick }: Big3RecordLis
           </div>
         </div>
       ))}
+
+      {/* 무한스크롤 sentinel */}
+      {hasNextPage && (
+        <div ref={sentinelRef} className="flex justify-center py-4">
+          {isFetchingNextPage && <LoadingSpinner size="md" />}
+        </div>
+      )}
     </div>
   );
 }

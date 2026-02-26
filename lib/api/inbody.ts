@@ -13,6 +13,7 @@ import {
   InBodyUpdateData,
   InBodyExtractedData,
   InBodySummary,
+  InBodyListResponse,
 } from '@/lib/types';
 import { api } from './client';
 
@@ -31,7 +32,22 @@ export const inbodyApi = {
    * @returns InBody 기록 목록 (최신순)
    */
   async getRecords(limit = 20, offset = 0): Promise<InBodyRecord[]> {
-    return api.getOrThrow<InBodyRecord[]>(`${BASE_URL}?limit=${limit}&offset=${offset}`);
+    const res = await api.getOrThrow<InBodyListResponse>(`${BASE_URL}?limit=${limit}&offset=${offset}`);
+    return res.records;
+  },
+
+  /**
+   * InBody 기록 목록 조회 (페이지네이션)
+   */
+  async fetchRecords(filters: {
+    page?: number;
+    limit?: number;
+  } = {}): Promise<InBodyListResponse> {
+    const params = new URLSearchParams();
+    if (filters.page) params.set('page', String(filters.page));
+    if (filters.limit) params.set('limit', String(filters.limit));
+    const qs = params.toString();
+    return api.getOrThrow<InBodyListResponse>(`${BASE_URL}${qs ? `?${qs}` : ''}`);
   },
 
   /**

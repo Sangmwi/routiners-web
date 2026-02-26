@@ -110,6 +110,10 @@ export const queryKeys = {
     list: (limit?: number, offset?: number) =>
       [...queryKeys.inbody.all, 'list', limit, offset] as const,
 
+    /** 무한스크롤 목록 */
+    infinite: () =>
+      [...queryKeys.inbody.all, 'infinite'] as const,
+
     /** 최신 InBody 기록 */
     latest: () => [...queryKeys.inbody.all, 'latest'] as const,
 
@@ -207,6 +211,10 @@ export const queryKeys = {
 
     list: (liftType?: string, limit?: number, offset?: number) =>
       [...queryKeys.big3.all, 'list', liftType, limit, offset] as const,
+
+    /** 무한스크롤 목록 (liftType 필터별 캐시) */
+    infinite: (liftType?: string) =>
+      [...queryKeys.big3.all, 'infinite', liftType] as const,
 
     summary: (months?: number) =>
       [...queryKeys.big3.all, 'summary', months] as const,

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { InBodyRecord } from '@/lib/types/inbody';
-import { useInBodyRecordsSuspense, useInBodySummarySuspense } from './queries';
+import { useInfiniteInBodyRecordsSuspense, useInBodySummarySuspense } from './queries';
 import { useDeleteInBody } from './mutations';
 
 // ============================================================
@@ -11,15 +11,15 @@ import { useDeleteInBody } from './mutations';
 
 type ManagerView = 'list' | 'confirm-delete';
 
-interface UseInBodyManagerSuspenseOptions {
-  /** 초기 로드할 레코드 수 */
-  initialLimit?: number;
-}
-
 interface UseInBodyManagerSuspenseReturn {
   // Data (항상 존재 - Suspense가 로딩 처리)
   records: InBodyRecord[];
   summary: ReturnType<typeof useInBodySummarySuspense>['data'];
+
+  // Infinite Scroll
+  hasNextPage: boolean;
+  fetchNextPage: () => void;
+  isFetchingNextPage: boolean;
 
   // View State
   currentView: ManagerView;
@@ -52,13 +52,15 @@ interface UseInBodyManagerSuspenseReturn {
  * Suspense boundary 내부에서 사용해야 합니다.
  * data는 항상 존재합니다 (Suspense가 로딩 처리).
  */
-export function useInBodyManagerSuspense(
-  options: UseInBodyManagerSuspenseOptions = {}
-): UseInBodyManagerSuspenseReturn {
-  const { initialLimit = 50 } = options;
-
+export function useInBodyManagerSuspense(): UseInBodyManagerSuspenseReturn {
   // ========== Data Fetching (Suspense) ==========
-  const { data: records } = useInBodyRecordsSuspense(initialLimit, 0);
+  const {
+    data: recordsData,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteInBodyRecordsSuspense();
+  const records = recordsData.pages.flatMap((page) => page.records);
   const { data: summary } = useInBodySummarySuspense();
 
   const deleteInBody = useDeleteInBody();
@@ -111,6 +113,11 @@ export function useInBodyManagerSuspense(
     // Data (항상 존재)
     records,
     summary,
+
+    // Infinite Scroll
+    hasNextPage: hasNextPage ?? false,
+    fetchNextPage,
+    isFetchingNextPage,
 
     // View State
     currentView,

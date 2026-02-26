@@ -98,6 +98,13 @@ export interface Big3RecordsSummary {
   isPrivate?: boolean;
 }
 
+/** Big3 목록 API 페이지네이션 응답 */
+export interface Big3ListResponse {
+  records: Big3Record[];
+  page: number;
+  hasMore: boolean;
+}
+
 // ============================================================================
 // Type Transformers
 // ============================================================================

@@ -1,8 +1,9 @@
 'use client';
 
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import { big3Api } from '@/lib/api/big3';
 import { queryKeys } from '@/lib/constants/queryKeys';
-import { useBaseQuery, useConditionalQuery, useSuspenseBaseQuery } from '@/hooks/common';
+import { STALE_TIME, useBaseQuery, useConditionalQuery, useSuspenseBaseQuery } from '@/hooks/common';
 import type { Big3LiftType } from '@/lib/types/big3';
 
 // ============================================================================
@@ -43,6 +44,27 @@ export function useUserBig3Summary(userId: string | undefined, months = 6) {
     () => big3Api.getUserSummary(userId!, months),
     userId,
   );
+}
+
+// ============================================================================
+// Infinite Query Hooks
+// ============================================================================
+
+const PAGE_SIZE = 20;
+
+/**
+ * Big3 기록 무한스크롤 목록 조회 (Suspense)
+ */
+export function useInfiniteBig3RecordsSuspense(liftType?: Big3LiftType) {
+  return useSuspenseInfiniteQuery({
+    queryKey: queryKeys.big3.infinite(liftType),
+    queryFn: ({ pageParam = 1 }) =>
+      big3Api.fetchRecords({ liftType, page: pageParam, limit: PAGE_SIZE }),
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.page + 1 : undefined,
+    initialPageParam: 1,
+    staleTime: STALE_TIME.default,
+  });
 }
 
 // ============================================================================

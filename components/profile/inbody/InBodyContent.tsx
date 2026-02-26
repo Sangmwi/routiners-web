@@ -34,6 +34,11 @@ export default function InBodyContent() {
     records,
     summary,
 
+    // Infinite Scroll
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+
     // Selected Record State
     selectedRecord,
 
@@ -107,6 +112,9 @@ export default function InBodyContent() {
           <InBodyRecordList
             records={records}
             onRecordClick={openDetailModal}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            onLoadMore={fetchNextPage}
           />
         </div>
       </div>

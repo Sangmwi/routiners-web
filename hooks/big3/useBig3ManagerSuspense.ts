@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { Big3Record, Big3LiftType } from '@/lib/types/big3';
-import { useBig3RecordsSuspense, useBig3SummarySuspense } from './queries';
+import { useInfiniteBig3RecordsSuspense, useBig3SummarySuspense } from './queries';
 import { useDeleteBig3 } from './mutations';
 
 // ============================================================
@@ -15,6 +15,11 @@ interface UseBig3ManagerSuspenseReturn {
   // Data
   records: Big3Record[];
   summary: ReturnType<typeof useBig3SummarySuspense>['data'];
+
+  // Infinite Scroll
+  hasNextPage: boolean;
+  fetchNextPage: () => void;
+  isFetchingNextPage: boolean;
 
   // Filter State
   selectedLiftType: Big3LiftType | undefined;
@@ -53,7 +58,13 @@ export function useBig3ManagerSuspense(): UseBig3ManagerSuspenseReturn {
   const [selectedLiftType, setSelectedLiftType] = useState<Big3LiftType | undefined>(undefined);
 
   // ========== Data Fetching (Suspense) ==========
-  const { data: records } = useBig3RecordsSuspense({ liftType: selectedLiftType });
+  const {
+    data: recordsData,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteBig3RecordsSuspense(selectedLiftType);
+  const records = recordsData.pages.flatMap((page) => page.records);
   const { data: summary } = useBig3SummarySuspense();
 
   const deleteBig3 = useDeleteBig3();
@@ -104,6 +115,9 @@ export function useBig3ManagerSuspense(): UseBig3ManagerSuspenseReturn {
   return {
     records,
     summary,
+    hasNextPage: hasNextPage ?? false,
+    fetchNextPage,
+    isFetchingNextPage,
     selectedLiftType,
     setSelectedLiftType,
     currentView,

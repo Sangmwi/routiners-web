@@ -1,8 +1,9 @@
 'use client';
 
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import { inbodyApi } from '@/lib/api/inbody';
 import { queryKeys } from '@/lib/constants/queryKeys';
-import { useBaseQuery, useConditionalQuery, useSuspenseBaseQuery } from '@/hooks/common';
+import { STALE_TIME, useBaseQuery, useConditionalQuery, useSuspenseBaseQuery } from '@/hooks/common';
 
 // ============================================================================
 // Standard Query Hooks
@@ -64,6 +65,27 @@ export function useInBodyRecord(id: string | undefined) {
     () => inbodyApi.getRecord(id!),
     id
   );
+}
+
+// ============================================================================
+// Infinite Query Hooks
+// ============================================================================
+
+const PAGE_SIZE = 20;
+
+/**
+ * InBody 기록 무한스크롤 목록 조회 (Suspense)
+ */
+export function useInfiniteInBodyRecordsSuspense() {
+  return useSuspenseInfiniteQuery({
+    queryKey: queryKeys.inbody.infinite(),
+    queryFn: ({ pageParam = 1 }) =>
+      inbodyApi.fetchRecords({ page: pageParam, limit: PAGE_SIZE }),
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.page + 1 : undefined,
+    initialPageParam: 1,
+    staleTime: STALE_TIME.default,
+  });
 }
 
 // ============================================================================
