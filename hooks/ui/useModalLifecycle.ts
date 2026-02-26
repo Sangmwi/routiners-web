@@ -18,6 +18,13 @@ const overlayStack: Map<string, OverlayEntry> = new Map();
 /** UI에서 닫혀서 history.back() 호출한 횟수 — 해당 popstate를 무시하기 위함 */
 let skipPopstateCount = 0;
 
+/**
+ * prop-driven close 시 history 엔트리를 남겨두고,
+ * 새로 열리는 오버레이가 pushState 대신 replaceState로 재사용할 수 있도록 하는 슬롯.
+ * 50ms 내에 새 오버레이가 열리지 않으면 history.back()으로 직접 정리.
+ */
+let pendingSwapSlot = false;
+
 let listenerAttached = false;
 
 function handlePopState(e: PopStateEvent) {
@@ -64,6 +71,7 @@ function ensureListener() {
 export function clearOverlayStack() {
   if (overlayStack.size === 0) return;
   overlayStack.clear();
+  pendingSwapSlot = false;
   broadcastOverlayState();
 }
 
@@ -149,7 +157,7 @@ export function useModalLifecycle(
   }, [options?.preventClose]);
 
   // ── 통합 닫기 함수 ──────────────────────────────────────────────
-  const requestClose = (source: 'ui' | 'popstate') => {
+  const requestClose = (source: 'ui' | 'popstate' | 'controlled') => {
     if (isClosingRef.current) return;
     isClosingRef.current = true;
 
@@ -161,6 +169,18 @@ export function useModalLifecycle(
         if (source === 'ui') {
           skipPopstateCount++;
           history.back();
+        } else if (source === 'controlled') {
+          // prop-driven close: history.back()을 즉시 호출하지 않고 swap 슬롯으로 예약.
+          // 동일 렌더 사이클에서 새 오버레이가 열리면 replaceState로 슬롯을 재사용하여
+          // history 위치를 올바르게 유지. 새 오버레이가 없으면 50ms 후 정리.
+          pendingSwapSlot = true;
+          setTimeout(() => {
+            if (pendingSwapSlot) {
+              pendingSwapSlot = false;
+              skipPopstateCount++;
+              history.back();
+            }
+          }, 50);
         }
       }
       isRegisteredRef.current = false;
@@ -198,7 +218,14 @@ export function useModalLifecycle(
         preventClose: options?.preventClose ?? false,
       });
 
-      history.pushState({ ...history.state, __overlay: id }, '');
+      // controlled close로 인한 swap 슬롯이 있으면 replaceState로 재사용.
+      // 이렇게 하면 close→open 전환 시 history 위치가 어긋나는 race condition 방지.
+      if (pendingSwapSlot) {
+        pendingSwapSlot = false;
+        history.replaceState({ ...history.state, __overlay: id }, '');
+      } else {
+        history.pushState({ ...history.state, __overlay: id }, '');
+      }
       broadcastOverlayState();
 
       if (!isVisible) {
@@ -208,8 +235,10 @@ export function useModalLifecycle(
     }
 
     // isOpen이 false로 변한 경우 (controlled 패턴)
+    // 'controlled' source: history.back()을 즉시 호출하지 않고 swap 슬롯으로 예약하여
+    // 동일 렌더에서 새 오버레이가 열릴 때 replaceState로 깔끔하게 전환.
     if (!isOpen && isVisible && !isClosingRef.current) {
-      requestClose('ui');
+      requestClose('controlled');
     }
   }, [isOpen, isVisible]);
 

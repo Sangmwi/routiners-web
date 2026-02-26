@@ -242,13 +242,15 @@ export default function InBodyContent() {
         initialPreview={scanPreview ?? undefined}
       />
 
-      {/* 직접 입력 모달 */}
+      {/* 직접 입력 드로어 */}
       <Modal
         isOpen={isManualOpen}
         onClose={() => setIsManualOpen(false)}
         title="직접 입력"
-        size="lg"
+        position="bottom"
+        enableSwipe={!createInBody.isPending}
         closeOnBackdrop={!createInBody.isPending}
+        preventClose={createInBody.isPending}
         stickyFooter={
           <GradientFooter variant="sheet" className="flex gap-3">
             <Button
