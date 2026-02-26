@@ -47,6 +47,15 @@ export const GET = withAuth(async (request: NextRequest, { authUser, supabase })
     return notFound('현재 사용자 프로필을 찾을 수 없습니다');
   }
 
+  // 최신 InBody에서 height/weight 조회
+  const { data: latestInBody } = await supabase
+    .from('inbody_records')
+    .select('height, weight')
+    .eq('user_id', currentUser.id)
+    .order('measured_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   // Use PostgreSQL to calculate similarity scores directly in the database
   // This is much faster than fetching 200 rows and scoring in Node.js
   const { data: scoredUsers, error: candidatesError } = await supabase.rpc(
@@ -56,8 +65,8 @@ export const GET = withAuth(async (request: NextRequest, { authUser, supabase })
       p_unit_id: currentUser.unit_id,
       p_interested_exercises: currentUser.interested_exercise_types || [],
       p_interested_locations: currentUser.interested_exercise_locations || [],
-      p_height: currentUser.height_cm || null,
-      p_weight: currentUser.weight_kg || null,
+      p_height: latestInBody?.height || null,
+      p_weight: latestInBody?.weight || null,
       p_limit: limit,
     }
   );

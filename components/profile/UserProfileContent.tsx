@@ -69,7 +69,7 @@ export default function UserProfileContent({ userId }: UserProfileContentProps) 
 
       <ProfileTabBar activeTab={activeTab} onTabChange={setActiveTab} privateTabs={privateTabs} />
 
-      <div className="mt-4 overflow-hidden">
+      <div className="mt-4 [overflow-x:clip] -mx-(--layout-padding-x) px-(--layout-padding-x)">
         <div
           key={activeTab}
           className="animate-tab-slide"

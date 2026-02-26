@@ -22,10 +22,6 @@ import type { User, ProfileUpdateData, Rank, Specialty } from '@/lib/types';
 export interface ProfileFormData {
   nickname: string;
   bio: string;
-  height: string;
-  weight: string;
-  muscleMass: string;
-  bodyFatPercentage: string;
   showActivityPublic: boolean;
   showInfoPublic: boolean;
   isSmoker: boolean | undefined;
@@ -42,10 +38,6 @@ export interface ProfileFormData {
 export const INITIAL_FORM_DATA: ProfileFormData = {
   nickname: '',
   bio: '',
-  height: '',
-  weight: '',
-  muscleMass: '',
-  bodyFatPercentage: '',
   showActivityPublic: true,
   showInfoPublic: true,
   isSmoker: undefined,
@@ -83,10 +75,6 @@ export function userToFormData(user: User): ProfileFormData {
   return {
     nickname: user.nickname || '',
     bio: user.bio || '',
-    height: user.height?.toString() || '',
-    weight: user.weight?.toString() || '',
-    muscleMass: user.muscleMass?.toString() || '',
-    bodyFatPercentage: user.bodyFatPercentage?.toString() || '',
     showActivityPublic: user.showActivityPublic ?? true,
     showInfoPublic: user.showInfoPublic ?? true,
     isSmoker: user.isSmoker,
@@ -113,12 +101,6 @@ export function formDataToUpdateData(
   const result: ProfileUpdateData = {
     nickname: formData.nickname.trim() || undefined,
     bio: formData.bio.trim() || undefined,
-    height: formData.height ? Number(formData.height) : undefined,
-    weight: formData.weight ? Number(formData.weight) : undefined,
-    muscleMass: formData.muscleMass ? Number(formData.muscleMass) : undefined,
-    bodyFatPercentage: formData.bodyFatPercentage
-      ? Number(formData.bodyFatPercentage)
-      : undefined,
     showActivityPublic: formData.showActivityPublic,
     showInfoPublic: formData.showInfoPublic,
     isSmoker: formData.isSmoker,
@@ -148,10 +130,6 @@ export function hasFormChanges(formData: ProfileFormData, user: User): boolean {
   return (
     formData.nickname !== (user.nickname || '') ||
     formData.bio !== (user.bio || '') ||
-    formData.height !== (user.height?.toString() || '') ||
-    formData.weight !== (user.weight?.toString() || '') ||
-    formData.muscleMass !== (user.muscleMass?.toString() || '') ||
-    formData.bodyFatPercentage !== (user.bodyFatPercentage?.toString() || '') ||
     formData.showActivityPublic !== (user.showActivityPublic ?? true) ||
     formData.showInfoPublic !== (user.showInfoPublic ?? true) ||
     formData.isSmoker !== user.isSmoker ||

@@ -123,6 +123,13 @@ export default function InBodyPreview({
             <FormInput
               type="number"
               step="0.1"
+              label="키 (cm)"
+              value={data.height?.toString() || ''}
+              onChange={(e) => handleCoreChange('height', e.target.value)}
+            />
+            <FormInput
+              type="number"
+              step="0.1"
               label="체중 (kg)"
               value={data.weight?.toString() || ''}
               onChange={(e) => handleCoreChange('weight', e.target.value)}
@@ -157,6 +164,7 @@ export default function InBodyPreview({
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
+            <DataItem label="키" value={data.height} unit="cm" />
             <DataItem label="체중" value={data.weight} unit="kg" />
             <DataItem label="골격근량" value={data.skeletalMuscleMass} unit="kg" />
             <DataItem label="체지방률" value={data.bodyFatPercentage} unit="%" />

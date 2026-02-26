@@ -36,16 +36,16 @@ export const GET_USER_MILITARY_INFO: AIToolDefinition = {
 };
 
 /**
- * 3. 사용자 신체 정보 조회
- * - TDEE 계산에 필요한 4개 필드: 키, 몸무게, 생년월일, 성별
- * - 추가: 골격근량, 체지방률
+ * 3. 사용자 인바디 정보 조회
+ * - 체성분 데이터(키, 몸무게, 골격근량, 체지방률)는 최신 인바디 기록에서 조회
+ * - TDEE 계산에 필요한 필드: 키, 몸무게, 생년월일, 성별
  * - 인바디 상세 데이터는 get_latest_inbody 사용
  */
 export const GET_USER_BODY_METRICS: AIToolDefinition = {
   type: 'function',
   name: 'get_user_body_metrics',
   description:
-    '사용자의 신체 정보를 조회합니다. TDEE 계산에 필요한 필수 정보가 포함됩니다. 반환값: height_cm(키, cm), weight_kg(몸무게, kg), birth_date(생년월일, ISO 형식), gender(성별, "male" 또는 "female"), muscleMass(골격근량, kg), bodyFatPercentage(체지방률, %). 모든 필드는 null일 수 있으며, null인 필드는 사용자에게 질문해야 합니다.',
+    '사용자의 인바디 정보를 조회합니다. 체성분 데이터(키, 몸무게, 골격근량, 체지방률)는 최신 인바디 기록에서 가져옵니다. 반환값: height_cm(키, cm), weight_kg(몸무게, kg), birth_date(생년월일, ISO 형식), gender(성별, "male" 또는 "female"), muscleMass(골격근량, kg), bodyFatPercentage(체지방률, %). 인바디 기록이 없으면 체성분 필드가 null이며, 이 경우 사용자에게 인바디 기록 등록을 안내하세요.',
   parameters: {
     type: 'object',
     properties: {},
@@ -259,14 +259,14 @@ export const UPDATE_DIETARY_PROFILE: AIToolDefinition = {
 
 /**
  * 9. 일일 영양 필요량 계산 (TDEE 기반)
- * - 사용자 신체정보 + 식단 프로필 → 자동 계산
- * - 키, 몸무게, 생년월일, 성별이 필수
+ * - 인바디 기록의 키/몸무게 + 식단 프로필 → 자동 계산
+ * - 인바디 기록(키, 몸무게), 생년월일, 성별이 필수
  */
 export const CALCULATE_DAILY_NEEDS: AIToolDefinition = {
   type: 'function',
   name: 'calculate_daily_needs',
   description:
-    '사용자의 신체정보와 식단 프로필을 기반으로 일일 영양 필요량을 계산합니다. Mifflin-St Jeor 공식으로 TDEE를 산출하고, 식단 목표에 맞는 칼로리/단백질/탄수화물/지방 목표를 반환합니다. 필수 정보(키, 몸무게, 생년월일, 성별)가 없으면 에러와 함께 누락 필드를 알려줍니다. 식단 생성 전 반드시 호출하여 기준값을 확보하세요.',
+    '사용자의 신체정보(인바디 기록의 키/몸무게)와 식단 프로필을 기반으로 일일 영양 필요량을 계산합니다. Mifflin-St Jeor 공식으로 TDEE를 산출하고, 식단 목표에 맞는 칼로리/단백질/탄수화물/지방 목표를 반환합니다. 인바디 기록에 키/몸무게가 없으면 에러가 반환되며, 이 경우 사용자에게 인바디 기록 등록을 안내하세요. 식단 생성 전 반드시 호출하여 기준값을 확보하세요.',
   parameters: {
     type: 'object',
     properties: {},

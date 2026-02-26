@@ -218,7 +218,7 @@ export const AI_TOOL_NAMES = [
   // 사용자 기본 정보
   'get_user_basic_info',
   'get_user_military_info',
-  // 신체 정보
+  // 인바디
   'get_user_body_metrics',
   'get_latest_inbody',
   'get_inbody_history',
@@ -259,7 +259,7 @@ export type AIToolName = (typeof AI_TOOL_NAMES)[number];
 export const AI_TOOL_LABELS: Record<AIToolName, string> = {
   get_user_basic_info: '기본 정보 확인 중',
   get_user_military_info: '군 정보 확인 중',
-  get_user_body_metrics: '신체 정보 확인 중',
+  get_user_body_metrics: '인바디 정보 확인 중',
   get_latest_inbody: '최근 인바디 확인 중',
   get_inbody_history: '인바디 이력 확인 중',
   get_fitness_profile: '피트니스 프로필 확인 중',

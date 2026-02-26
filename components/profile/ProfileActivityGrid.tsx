@@ -104,7 +104,7 @@ export default function ProfileActivityGrid({ userId }: ProfileActivityGridProps
   }
 
   return (
-    <>
+    <div className="-mx-(--layout-padding-x)">
       <div className="grid grid-cols-3 gap-0.5">
         {posts.map((post, index) => (
           <GridCell key={post.id} post={post} userId={userId} index={index} />
@@ -119,6 +119,6 @@ export default function ProfileActivityGrid({ userId }: ProfileActivityGridProps
           <LoadingSpinner size="md" />
         </div>
       )}
-    </>
+    </div>
   );
 }

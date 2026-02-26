@@ -50,9 +50,9 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
   if (!result.success) return result.response;
   const body = result.data;
 
-  // 필수 필드 검증
-  if (!body.measuredAt || !body.weight || !body.skeletalMuscleMass || body.bodyFatPercentage === undefined) {
-    return badRequest('필수 항목(측정일, 체중, 골격근량, 체지방률)을 입력해주세요');
+  // 필수 필드 검증 (측정일 + 체중만 필수, 골격근량/체지방률은 선택)
+  if (!body.measuredAt || !body.weight) {
+    return badRequest('필수 항목(측정일, 체중)을 입력해주세요');
   }
 
   // DB 형식으로 변환

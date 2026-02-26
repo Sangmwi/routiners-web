@@ -8,6 +8,13 @@
 import { z } from 'zod';
 
 // ============================================================================
+// 인바디 범위 상수
+// ============================================================================
+
+export const HEIGHT_RANGE = { min: 120, max: 240 } as const; // cm
+export const WEIGHT_RANGE = { min: 20, max: 160 } as const;  // kg
+
+// ============================================================================
 // Zod Schemas (AI 응답 검증용)
 // ============================================================================
 
@@ -24,7 +31,13 @@ export const InBodyExtractedDataSchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}$/)
     .describe('측정일 (YYYY-MM-DD 형식)'),
 
-  // 핵심 지표 (필수)
+  // 핵심 지표
+  height: z
+    .number()
+    .min(120)
+    .max(240)
+    .nullable()
+    .describe('키 (cm 단위, 숫자만). 없으면 null'),
   weight: z
     .number()
     .min(30)
@@ -34,12 +47,14 @@ export const InBodyExtractedDataSchema = z.object({
     .number()
     .min(10)
     .max(80)
-    .describe('골격근량 (kg 단위, 숫자만)'),
+    .nullable()
+    .describe('골격근량 (kg 단위, 숫자만). 없으면 null'),
   body_fat_percentage: z
     .number()
     .min(3)
     .max(60)
-    .describe('체지방률 (% 단위, 숫자만)'),
+    .nullable()
+    .describe('체지방률 (% 단위, 숫자만). 없으면 null'),
   bmi: z
     .number()
     .min(10)
@@ -129,9 +144,10 @@ export interface DbInBodyRecord {
   id: string;
   user_id: string;
   measured_at: string; // DATE as string
+  height: number | null;
   weight: number;
-  skeletal_muscle_mass: number;
-  body_fat_percentage: number;
+  skeletal_muscle_mass: number | null;
+  body_fat_percentage: number | null;
   bmi: number | null;
   inbody_score: number | null;
   total_body_water: number | null;
@@ -167,9 +183,10 @@ export interface InBodyRecord {
   measuredAt: string;
 
   // 핵심 지표
+  height?: number;
   weight: number;
-  skeletalMuscleMass: number;
-  bodyFatPercentage: number;
+  skeletalMuscleMass?: number;
+  bodyFatPercentage?: number;
   bmi?: number;
   inbodyScore?: number;
 
@@ -202,9 +219,10 @@ export interface InBodyRecord {
  */
 export interface InBodyCreateData {
   measuredAt: string;
+  height?: number;
   weight: number;
-  skeletalMuscleMass: number;
-  bodyFatPercentage: number;
+  skeletalMuscleMass?: number;
+  bodyFatPercentage?: number;
   bmi?: number;
   inbodyScore?: number;
   totalBodyWater?: number;
@@ -247,9 +265,10 @@ export function toInBodyRecord(db: DbInBodyRecord): InBodyRecord {
     id: db.id,
     userId: db.user_id,
     measuredAt: db.measured_at,
+    height: db.height ?? undefined,
     weight: db.weight,
-    skeletalMuscleMass: db.skeletal_muscle_mass,
-    bodyFatPercentage: db.body_fat_percentage,
+    skeletalMuscleMass: db.skeletal_muscle_mass ?? undefined,
+    bodyFatPercentage: db.body_fat_percentage ?? undefined,
     bmi: db.bmi ?? undefined,
     inbodyScore: db.inbody_score ?? undefined,
     totalBodyWater: db.total_body_water ?? undefined,
@@ -281,9 +300,10 @@ export function transformInBodyToDbInsert(
 ): Omit<DbInBodyRecord, 'id' | 'user_id' | 'created_at' | 'updated_at'> {
   return {
     measured_at: data.measuredAt,
+    height: data.height ?? null,
     weight: data.weight,
-    skeletal_muscle_mass: data.skeletalMuscleMass,
-    body_fat_percentage: data.bodyFatPercentage,
+    skeletal_muscle_mass: data.skeletalMuscleMass ?? null,
+    body_fat_percentage: data.bodyFatPercentage ?? null,
     bmi: data.bmi ?? null,
     inbody_score: data.inbodyScore ?? null,
     total_body_water: data.totalBodyWater ?? null,
@@ -311,9 +331,10 @@ export function transformExtractedToCreateData(
 ): InBodyCreateData {
   return {
     measuredAt: extracted.measured_at,
+    height: extracted.height ?? undefined,
     weight: extracted.weight,
-    skeletalMuscleMass: extracted.skeletal_muscle_mass,
-    bodyFatPercentage: extracted.body_fat_percentage,
+    skeletalMuscleMass: extracted.skeletal_muscle_mass ?? undefined,
+    bodyFatPercentage: extracted.body_fat_percentage ?? undefined,
     bmi: extracted.bmi ?? undefined,
     inbodyScore: extracted.inbody_score ?? undefined,
     totalBodyWater: extracted.total_body_water ?? undefined,

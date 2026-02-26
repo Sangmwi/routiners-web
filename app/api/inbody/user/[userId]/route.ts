@@ -96,12 +96,14 @@ export const GET = withAuth(
 
         summary.changes = {
           weight: Number((latest.weight - previous.weight).toFixed(2)),
-          skeletalMuscleMass: Number(
-            (latest.skeletalMuscleMass - previous.skeletalMuscleMass).toFixed(2)
-          ),
-          bodyFatPercentage: Number(
-            (latest.bodyFatPercentage - previous.bodyFatPercentage).toFixed(1)
-          ),
+          skeletalMuscleMass:
+            latest.skeletalMuscleMass != null && previous.skeletalMuscleMass != null
+              ? Number((latest.skeletalMuscleMass - previous.skeletalMuscleMass).toFixed(2))
+              : 0,
+          bodyFatPercentage:
+            latest.bodyFatPercentage != null && previous.bodyFatPercentage != null
+              ? Number((latest.bodyFatPercentage - previous.bodyFatPercentage).toFixed(1))
+              : 0,
           periodDays,
         };
       }

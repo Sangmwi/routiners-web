@@ -1,7 +1,7 @@
 'use client';
 
 import { User } from '@/lib/types';
-import { RulerIcon, ScalesIcon, CalendarIcon, CigaretteIcon, CigaretteSlashIcon, GenderMaleIcon, GenderFemaleIcon } from '@phosphor-icons/react';
+import { CalendarIcon, CigaretteIcon, CigaretteSlashIcon, GenderMaleIcon, GenderFemaleIcon } from '@phosphor-icons/react';
 import SectionHeader from '@/components/ui/SectionHeader';
 import Tag from '@/components/ui/Tag';
 
@@ -33,22 +33,12 @@ export default function ProfileInfoTags({ user }: ProfileInfoTagsProps) {
 
       <div className="bg-surface-secondary rounded-2xl p-4 space-y-2">
         <div className="flex flex-wrap gap-2">
-          <Tag icon={RulerIcon} inactive={!user.height}>
-            {user.height ? `${user.height}cm` : '미입력'}
-          </Tag>
-
           <Tag icon={user.isSmoker ? CigaretteIcon : CigaretteSlashIcon} inactive={user.isSmoker === undefined}>
             {getSmokeStatus(user.isSmoker)}
           </Tag>
 
           <Tag icon={CalendarIcon} inactive>
             {getDischargeDate(user.enlistmentMonth)}
-          </Tag>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          <Tag icon={ScalesIcon} inactive={!user.weight}>
-            {user.weight ? `${user.weight}kg` : '미입력'}
           </Tag>
 
           <Tag icon={ user.gender === 'male' ? GenderMaleIcon : GenderFemaleIcon }>

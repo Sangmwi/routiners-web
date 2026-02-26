@@ -80,7 +80,7 @@ export default function HomeContent() {
       />
 
       {/* 인바디 */}
-      <InBodySection summary={inbodySummary} history={inbodyHistory} height={user.height} />
+      <InBodySection summary={inbodySummary} history={inbodyHistory} height={inbodySummary?.latest?.height} />
 
       {/* 3대 운동 */}
       <Big3Section summary={progressSummary.big3} />

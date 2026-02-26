@@ -50,6 +50,7 @@ function Big3Display({ big3, isOwnProfile, renderHeader }: Big3DisplayProps) {
       {...EMPTY_STATE.big3.noRecord}
       size="sm"
       hint={isOwnProfile ? EMPTY_STATE.big3.noRecord.hint : undefined}
+      action={isOwnProfile ? { label: '기록하기', href: '/profile/big3' } : undefined}
     />
   ) : (
     <Big3SummaryCard

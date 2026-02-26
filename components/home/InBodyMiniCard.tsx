@@ -35,7 +35,9 @@ export default function InBodyMiniCard({ summary, history = [] }: InBodyMiniCard
           {METRICS_CONFIG.map(({ key, label, unit, positiveIsGood }) => {
             const value = summary.latest?.[key];
             const change = summary.changes?.[key];
-            const sparkData = hasHistory ? history.map((r) => r[key]) : [];
+            const sparkData = hasHistory
+              ? history.map((r) => r[key]).filter((v): v is number => v != null)
+              : [];
 
             return (
               <div key={key} className="text-center">

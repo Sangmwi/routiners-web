@@ -24,10 +24,6 @@ export type DbUser = Tables<'users'>;
 
 export type Gender = 'male' | 'female';
 
-// 신체 정보 범위 상수 (UI WheelPicker + AI 검증에서 공유)
-export const HEIGHT_RANGE = { min: 120, max: 240 } as const; // cm
-export const WEIGHT_RANGE = { min: 20, max: 160 } as const;  // kg
-
 // 계급 상수 & 타입
 export const RANKS = ['이병', '일병', '상병', '병장'] as const;
 export type Rank = (typeof RANKS)[number];
@@ -106,10 +102,6 @@ export interface User {
   // Profile additional fields
   profilePhotoUrl?: string; // Single profile photo URL
   bio?: string;
-  height?: number;
-  weight?: number;
-  muscleMass?: number;
-  bodyFatPercentage?: number;
   interestedLocations?: string[]; // tags
   interestedExercises?: string[]; // tags
   isSmoker?: boolean;
@@ -147,10 +139,6 @@ export function toUser(dbUser: DbUser): User {
     specialty: dbUser.specialty as Specialty,
     profilePhotoUrl: dbUser.profile_photo_url ?? undefined,
     bio: dbUser.bio ?? undefined,
-    height: dbUser.height_cm ?? undefined,
-    weight: dbUser.weight_kg ?? undefined,
-    muscleMass: dbUser.skeletal_muscle_mass_kg ?? undefined,
-    bodyFatPercentage: dbUser.body_fat_percentage ?? undefined,
     interestedLocations: dbUser.interested_exercise_locations ?? undefined,
     interestedExercises: dbUser.interested_exercise_types ?? undefined,
     isSmoker: dbUser.is_smoker ?? undefined,
@@ -174,10 +162,6 @@ export function toPublicUser(dbUser: DbUser): User {
 
   // 정보 탭 비공개 시 민감 데이터 숨김
   if (!dbUser.show_info_public) {
-    user.muscleMass = undefined;
-    user.bodyFatPercentage = undefined;
-    user.height = undefined;
-    user.weight = undefined;
     user.isSmoker = undefined;
   }
 
@@ -227,10 +211,6 @@ export interface ProfileUpdateData {
   nickname?: string;
   profilePhotoUrl?: string;
   bio?: string;
-  height?: number;
-  weight?: number;
-  muscleMass?: number;
-  bodyFatPercentage?: number;
   interestedLocations?: string[];
   interestedExercises?: string[];
   isSmoker?: boolean;

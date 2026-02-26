@@ -134,10 +134,6 @@ export function useProfileProgress(user: User | null | undefined): number {
   const fields = [
     user.profilePhotoUrl,
     user.bio,
-    user.height,
-    user.weight,
-    user.muscleMass,
-    user.bodyFatPercentage,
     user.interestedExercises?.length,
     user.interestedLocations?.length,
     user.isSmoker !== undefined,
@@ -187,8 +183,8 @@ export function useProfileSimilarity(
     score += (commonExercises / totalExercises) * 30;
   }
 
-  // 관심 장소 겹침 (20점)
-  maxScore += 20;
+  // 관심 장소 겹침 (30점 — 체격 유사도 10점 흡수)
+  maxScore += 30;
   const commonLocations = user1.interestedLocations?.filter((loc) =>
     user2.interestedLocations?.includes(loc)
   ).length || 0;
@@ -197,19 +193,7 @@ export function useProfileSimilarity(
     user2.interestedLocations?.length || 0
   );
   if (totalLocations > 0) {
-    score += (commonLocations / totalLocations) * 20;
-  }
-
-  // 체격 유사도 (10점)
-  maxScore += 10;
-  if (user1.height && user2.height && user1.weight && user2.weight) {
-    const heightDiff = Math.abs(user1.height - user2.height);
-    const weightDiff = Math.abs(user1.weight - user2.weight);
-
-    // 신장 5cm, 체중 5kg 이내면 만점
-    const heightScore = Math.max(0, 5 - heightDiff) / 5 * 5;
-    const weightScore = Math.max(0, 5 - weightDiff) / 5 * 5;
-    score += heightScore + weightScore;
+    score += (commonLocations / totalLocations) * 30;
   }
 
   return Math.round((score / maxScore) * 100);

@@ -90,10 +90,6 @@ export interface ProfileSearchFilters {
   interestedExercises?: string[];
   /** 관심 장소 필터 (OR 조건) */
   interestedLocations?: string[];
-  /** 신장 범위 (min, max) */
-  heightRange?: [number, number];
-  /** 체중 범위 (min, max) */
-  weightRange?: [number, number];
   /** 흡연 여부 */
   isSmoker?: boolean;
   /** 페이지네이션 */
@@ -143,14 +139,6 @@ export const profileSearchApi = {
     }
     if (filters.interestedLocations?.length) {
       queryParams.append('interestedLocations', filters.interestedLocations.join(','));
-    }
-    if (filters.heightRange) {
-      queryParams.append('minHeight', filters.heightRange[0].toString());
-      queryParams.append('maxHeight', filters.heightRange[1].toString());
-    }
-    if (filters.weightRange) {
-      queryParams.append('minWeight', filters.weightRange[0].toString());
-      queryParams.append('maxWeight', filters.weightRange[1].toString());
     }
     if (filters.isSmoker !== undefined) {
       queryParams.append('isSmoker', filters.isSmoker.toString());

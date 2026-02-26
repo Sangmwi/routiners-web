@@ -151,10 +151,10 @@ export async function executeUpdateDietaryProfile(
 export async function executeCalculateDailyNeeds(
   ctx: ToolExecutorContext
 ): Promise<AIToolResult<DailyNeedsResult>> {
-  // 1. 신체정보 조회
+  // 1. users에서 birth_date, gender 조회
   const { data: user, error: userError } = await ctx.supabase
     .from('users')
-    .select('height_cm, weight_kg, birth_date, gender')
+    .select('birth_date, gender')
     .eq('id', ctx.userId)
     .single();
 
@@ -162,21 +162,30 @@ export async function executeCalculateDailyNeeds(
     return { success: false, error: '사용자 정보를 조회할 수 없습니다.' };
   }
 
+  // 2. 최신 InBody에서 키/몸무게 조회
+  const { data: inbody } = await ctx.supabase
+    .from('inbody_records')
+    .select('height, weight')
+    .eq('user_id', ctx.userId)
+    .order('measured_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   // 필수 필드 검증
   const missing: string[] = [];
-  if (!user.height_cm) missing.push('키(height_cm)');
-  if (!user.weight_kg) missing.push('몸무게(weight_kg)');
+  if (!inbody?.height) missing.push('키(height_cm)');
+  if (!inbody?.weight) missing.push('몸무게(weight_kg)');
   if (!user.birth_date) missing.push('생년월일(birth_date)');
   if (!user.gender) missing.push('성별(gender)');
 
   if (missing.length > 0) {
     return {
       success: false,
-      error: `TDEE 계산에 필요한 정보가 없습니다: ${missing.join(', ')}. 사용자에게 해당 정보를 먼저 질문하세요.`,
+      error: `TDEE 계산에 필요한 정보가 없습니다: ${missing.join(', ')}. 인바디 기록이 없다면 먼저 체성분 데이터를 등록해주세요.`,
     };
   }
 
-  // 2. 식단 프로필 조회
+  // 3. 식단 프로필 조회
   const { data: profile } = await ctx.supabase
     .from('dietary_profiles')
     .select('dietary_goal, diet_type')
@@ -185,11 +194,11 @@ export async function executeCalculateDailyNeeds(
 
   // 프로필 없어도 기본값으로 계산 가능
 
-  // 3. TDEE 계산
+  // 4. TDEE 계산
   const age = calculateAge(user.birth_date);
   const bmr = calculateBMR({
-    weightKg: user.weight_kg,
-    heightCm: user.height_cm,
+    weightKg: inbody!.weight,
+    heightCm: inbody!.height!,
     age,
     gender: user.gender as 'male' | 'female',
   });

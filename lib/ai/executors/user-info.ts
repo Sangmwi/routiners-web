@@ -1,7 +1,7 @@
 /**
  * User Info Executors
  *
- * 사용자 기본 정보, 군 정보, 신체 정보 조회
+ * 사용자 기본 정보, 군 정보, 인바디 정보 조회
  */
 
 import type { AIToolResult } from '@/lib/types';
@@ -89,32 +89,40 @@ export async function executeGetUserMilitaryInfo(
  *
  * TDEE 계산에 필요한 4개 필드 포함:
  * - height_cm, weight_kg, birth_date, gender
- * 시스템 프롬프트와 필드명 일치시킴
+ * 체성분 데이터(키, 몸무게, 골격근량, 체지방률)는 최신 InBody 기록에서 조회
  */
 export async function executeGetUserBodyMetrics(
   ctx: ToolExecutorContext
 ): Promise<AIToolResult<UserBodyMetrics>> {
-  const { data: user, error } = await ctx.supabase
+  // 1. users에서 birth_date, gender만 조회
+  const { data: user, error: userError } = await ctx.supabase
     .from('users')
-    .select('height_cm, weight_kg, birth_date, gender, skeletal_muscle_mass_kg, body_fat_percentage')
+    .select('birth_date, gender')
     .eq('id', ctx.userId)
     .single();
 
-  if (error || !user) {
-    return { success: false, error: '신체 정보를 찾을 수 없습니다.' };
+  if (userError || !user) {
+    return { success: false, error: '사용자 정보를 찾을 수 없습니다.' };
   }
+
+  // 2. 최신 InBody에서 체성분 데이터 조회
+  const { data: inbody } = await ctx.supabase
+    .from('inbody_records')
+    .select('height, weight, skeletal_muscle_mass, body_fat_percentage')
+    .eq('user_id', ctx.userId)
+    .order('measured_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
   return {
     success: true,
     data: {
-      // 필수 신체정보 (TDEE 계산용) - 시스템 프롬프트 기대값과 일치
-      height_cm: user.height_cm,
-      weight_kg: user.weight_kg,
+      height_cm: inbody?.height ?? null,
+      weight_kg: inbody?.weight ?? null,
       birth_date: user.birth_date,
       gender: user.gender as 'male' | 'female' | null,
-      // 추가 신체정보
-      muscleMass: user.skeletal_muscle_mass_kg,
-      bodyFatPercentage: user.body_fat_percentage,
+      muscleMass: inbody?.skeletal_muscle_mass ?? null,
+      bodyFatPercentage: inbody?.body_fat_percentage ?? null,
     },
   };
 }

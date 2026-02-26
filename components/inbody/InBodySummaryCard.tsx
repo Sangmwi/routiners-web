@@ -10,8 +10,8 @@ import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 
 interface InBodyLatestData {
   weight: number;
-  skeletalMuscleMass: number;
-  bodyFatPercentage: number;
+  skeletalMuscleMass?: number;
+  bodyFatPercentage?: number;
   inbodyScore?: number | null;
   measuredAt: string;
 }

@@ -35,12 +35,14 @@ function computeChanges(chronological: InBodyRecord[]) {
   );
   return {
     weight: Number((last.weight - first.weight).toFixed(2)),
-    skeletalMuscleMass: Number(
-      (last.skeletalMuscleMass - first.skeletalMuscleMass).toFixed(2),
-    ),
-    bodyFatPercentage: Number(
-      (last.bodyFatPercentage - first.bodyFatPercentage).toFixed(1),
-    ),
+    skeletalMuscleMass:
+      last.skeletalMuscleMass != null && first.skeletalMuscleMass != null
+        ? Number((last.skeletalMuscleMass - first.skeletalMuscleMass).toFixed(2))
+        : 0,
+    bodyFatPercentage:
+      last.bodyFatPercentage != null && first.bodyFatPercentage != null
+        ? Number((last.bodyFatPercentage - first.bodyFatPercentage).toFixed(1))
+        : 0,
     periodDays,
   };
 }
@@ -86,7 +88,7 @@ function MetricCards({ limit }: { limit: number }) {
       {METRICS_CONFIG.map(({ key, label, unit, positiveIsGood }) => {
         const value = latest?.[key];
         const change = changes?.[key];
-        const sparkData = chronological.map((r) => r[key]);
+        const sparkData = chronological.map((r) => r[key]).filter((v): v is number => v != null);
         const fmt = (v: number) => v.toFixed(1);
 
         return (

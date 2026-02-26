@@ -40,6 +40,10 @@ const INBODY_JSON_SCHEMA = {
       type: ['string', 'null'] as const,
       description: '측정일 (YYYY-MM-DD 형식). is_valid_inbody가 false면 null',
     },
+    height: {
+      type: ['number', 'null'] as const,
+      description: '키 (cm 단위, 숫자만). 없으면 null',
+    },
     weight: {
       type: ['number', 'null'] as const,
       description: '체중 (kg 단위, 숫자만). is_valid_inbody가 false면 null',
@@ -121,6 +125,7 @@ const INBODY_JSON_SCHEMA = {
     'is_valid_inbody',
     'rejection_reason',
     'measured_at',
+    'height',
     'weight',
     'skeletal_muscle_mass',
     'body_fat_percentage',
@@ -166,6 +171,9 @@ is_valid_inbody: true로 설정하고, rejection_reason: null로 설정한 후 �
 필수 항목:
 - measured_at: 측정일 (YYYY-MM-DD 형식으로 변환)
 - weight: 체중 (kg)
+
+선택 항목 (핵심):
+- height: 키 (cm) — 결과지 상단에 "신장" 또는 "Height"로 표시됨
 - skeletal_muscle_mass: 골격근량 (kg)
 - body_fat_percentage: 체지방률 (%)
 

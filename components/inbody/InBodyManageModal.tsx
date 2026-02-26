@@ -1,22 +1,23 @@
 'use client';
 
 import { useState } from 'react';
-import { CalendarIcon } from '@phosphor-icons/react';
+import { CalendarIcon, PencilSimpleLineIcon, CameraIcon } from '@phosphor-icons/react';
 import { AddIcon, NextIcon, LoadingSpinner, DeleteIcon, ErrorIcon } from '@/components/ui/icons';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
 import { useShowError } from '@/lib/stores/errorStore';
-import { InBodyRecord } from '@/lib/types/inbody';
-import { useInBodyRecords, useDeleteInBody } from '@/hooks/inbody';
+import { InBodyRecord, InBodyCreateData } from '@/lib/types/inbody';
+import { useInBodyRecords, useDeleteInBody, useCreateInBody } from '@/hooks/inbody';
 import InBodyScanModal from './InBodyScanModal';
 import InBodyDetailModal from './InBodyDetailModal';
+import InBodyPreview from './InBodyPreview';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 import type { BaseModalProps } from '@/lib/types/modal';
 
 interface InBodyManageModalProps extends BaseModalProps {}
 
-type ManageState = 'list' | 'confirm-delete';
+type ManageState = 'list' | 'choose-method' | 'manual-input' | 'confirm-delete';
 
 export default function InBodyManageModal({
   isOpen,
@@ -34,13 +35,50 @@ export default function InBodyManageModal({
   });
 
   const deleteInBody = useDeleteInBody();
+  const createInBody = useCreateInBody();
+
+  // 간편 입력 초기 데이터 (최신 기록에서 키 자동 채움)
+  const getManualInputInitial = (): InBodyCreateData => {
+    const latestHeight = records.length > 0 ? records[0].height : undefined;
+    return {
+      measuredAt: new Date().toISOString().split('T')[0],
+      height: latestHeight,
+      weight: 0,
+    };
+  };
+  const [manualData, setManualData] = useState<InBodyCreateData>(getManualInputInitial());
 
   // 모달 닫기 시 상태 초기화
   const handleClose = () => {
     setState('list');
     setSelectedRecord(null);
     setRecordToDelete(null);
+    setManualData(getManualInputInitial());
     onClose();
+  };
+
+  // 직접 입력 시작
+  const handleStartManualInput = () => {
+    setManualData(getManualInputInitial());
+    setState('manual-input');
+  };
+
+  // 직접 입력 저장
+  const handleSaveManualInput = () => {
+    if (!manualData.measuredAt || !manualData.weight) {
+      showError('측정일과 체중은 필수 항목이에요');
+      return;
+    }
+
+    createInBody.mutate(manualData, {
+      onSuccess: () => {
+        setState('list');
+        setManualData(getManualInputInitial());
+      },
+      onError: () => {
+        showError('기록 저장에 실패했어요');
+      },
+    });
   };
 
   // 기록 클릭 → 상세 보기
@@ -80,6 +118,7 @@ export default function InBodyManageModal({
   // 스캔 성공 시
   const handleScanSuccess = () => {
     setIsScanModalOpen(false);
+    setState('list');
   };
 
 
@@ -90,20 +129,52 @@ export default function InBodyManageModal({
         onClose={handleClose}
         title="인바디 관리"
         size="lg"
-        closeOnBackdrop={state === 'list'}
+        closeOnBackdrop={state === 'list' || state === 'choose-method'}
         stickyFooter={
           <GradientFooter variant="sheet" className="flex gap-3">
             {state === 'list' && (
+              <Button
+                onClick={() => setState('choose-method')}
+                className="flex-1"
+              >
+                <AddIcon size="sm" className="mr-2" />
+                새 기록 추가
+              </Button>
+            )}
+
+            {state === 'choose-method' && (
+              <Button
+                variant="outline"
+                onClick={() => setState('list')}
+                className="flex-1"
+              >
+                뒤로
+              </Button>
+            )}
+
+            {state === 'manual-input' && (
               <>
-                <Button variant="outline" onClick={handleClose} className="flex-1">
-                  닫기
+                <Button
+                  variant="outline"
+                  onClick={() => setState('list')}
+                  className="flex-1"
+                  disabled={createInBody.isPending}
+                >
+                  취소
                 </Button>
                 <Button
-                  onClick={() => setIsScanModalOpen(true)}
+                  onClick={handleSaveManualInput}
                   className="flex-1"
+                  disabled={createInBody.isPending || !manualData.weight}
                 >
-                  <AddIcon size="sm" className="mr-2" />
-                  새 기록 추가
+                  {createInBody.isPending ? (
+                    <>
+                      <LoadingSpinner size="sm" variant="current" className="mr-2" />
+                      저장 중...
+                    </>
+                  ) : (
+                    '저장'
+                  )}
                 </Button>
               </>
             )}
@@ -169,10 +240,12 @@ export default function InBodyManageModal({
                         </p>
                         <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
                           <span>체중 {record.weight}kg</span>
-                          <span>-</span>
-                          <span>골격근 {record.skeletalMuscleMass}kg</span>
-                          <span>-</span>
-                          <span>체지방률 {record.bodyFatPercentage}%</span>
+                          {record.skeletalMuscleMass != null && (
+                            <><span>-</span><span>골격근 {record.skeletalMuscleMass}kg</span></>
+                          )}
+                          {record.bodyFatPercentage != null && (
+                            <><span>-</span><span>체지방률 {record.bodyFatPercentage}%</span></>
+                          )}
                         </div>
                         {record.inbodyScore && (
                           <div className="mt-1">
@@ -201,6 +274,56 @@ export default function InBodyManageModal({
             </>
           )}
 
+          {state === 'choose-method' && (
+            <div className="px-4 py-6 space-y-3">
+              <p className="text-sm text-muted-foreground text-center mb-4">
+                기록 추가 방법을 선택해주세요
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsScanModalOpen(true)}
+                className="w-full flex items-center gap-4 p-4 bg-surface-secondary rounded-2xl hover:bg-surface-accent transition-colors text-left"
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-surface-accent text-primary">
+                  <CameraIcon size={24} />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-card-foreground">결과지 스캔</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    인바디 결과지를 촬영하면 자동으로 데이터를 추출해요
+                  </p>
+                </div>
+                <NextIcon size="md" className="text-muted-foreground shrink-0" />
+              </button>
+              <button
+                type="button"
+                onClick={handleStartManualInput}
+                className="w-full flex items-center gap-4 p-4 bg-surface-secondary rounded-2xl hover:bg-surface-accent transition-colors text-left"
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-surface-accent text-primary">
+                  <PencilSimpleLineIcon size={24} />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium text-card-foreground">직접 입력</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    체중, 골격근량 등을 직접 입력해요
+                  </p>
+                </div>
+                <NextIcon size="md" className="text-muted-foreground shrink-0" />
+              </button>
+            </div>
+          )}
+
+          {state === 'manual-input' && (
+            <div className="px-4 py-2">
+              <InBodyPreview
+                data={manualData}
+                onChange={setManualData}
+                initialEditing
+              />
+            </div>
+          )}
+
           {state === 'confirm-delete' && recordToDelete && (
             <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
               <ErrorIcon size="2xl" className="text-destructive mb-4" />
@@ -221,7 +344,7 @@ export default function InBodyManageModal({
       {/* 스캔 모달 */}
       <InBodyScanModal
         isOpen={isScanModalOpen}
-        onClose={() => setIsScanModalOpen(false)}
+        onClose={() => { setIsScanModalOpen(false); setState('list'); }}
         onSuccess={handleScanSuccess}
       />
 

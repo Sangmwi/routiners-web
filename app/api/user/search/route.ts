@@ -11,10 +11,6 @@ const SearchQuerySchema = z.object({
   specialties: z.string().optional().transform(val => val?.split(',').filter(Boolean)),
   interestedExercises: z.string().optional().transform(val => val?.split(',').filter(Boolean)),
   interestedLocations: z.string().optional().transform(val => val?.split(',').filter(Boolean)),
-  minHeight: z.coerce.number().min(100).max(250).optional(),
-  maxHeight: z.coerce.number().min(100).max(250).optional(),
-  minWeight: z.coerce.number().min(30).max(200).optional(),
-  maxWeight: z.coerce.number().min(30).max(200).optional(),
   isSmoker: z.enum(['true', 'false']).optional().transform(val => val === undefined ? undefined : val === 'true'),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
@@ -51,7 +47,7 @@ export async function GET(request: NextRequest) {
     // Parse and validate query parameters
     const queryObj: Record<string, string | undefined> = {};
     ['ranks', 'unitIds', 'specialties', 'interestedExercises', 'interestedLocations',
-     'minHeight', 'maxHeight', 'minWeight', 'maxWeight', 'isSmoker', 'page', 'limit', 'sortBy'
+     'isSmoker', 'page', 'limit', 'sortBy'
     ].forEach(key => {
       const val = searchParams.get(key);
       if (val !== null) queryObj[key] = val;
@@ -64,7 +60,7 @@ export async function GET(request: NextRequest) {
 
     const {
       ranks, unitIds, specialties, interestedExercises, interestedLocations,
-      minHeight, maxHeight, minWeight, maxWeight, isSmoker, page, limit, sortBy
+      isSmoker, page, limit, sortBy
     } = validation.data;
 
     // Build query with indexes
@@ -85,21 +81,6 @@ export async function GET(request: NextRequest) {
 
     if (isSmoker !== undefined) {
       query = query.eq('is_smoker', isSmoker); // Uses idx_users_is_smoker
-    }
-
-    // Range filters
-    if (minHeight !== undefined) {
-      query = query.gte('height_cm', minHeight); // Uses idx_users_height
-    }
-    if (maxHeight !== undefined) {
-      query = query.lte('height_cm', maxHeight);
-    }
-
-    if (minWeight !== undefined) {
-      query = query.gte('weight_kg', minWeight); // Uses idx_users_weight
-    }
-    if (maxWeight !== undefined) {
-      query = query.lte('weight_kg', maxWeight);
     }
 
     // Array contains filters (GIN index)

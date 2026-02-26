@@ -1,13 +1,10 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { CaretRightIcon } from '@phosphor-icons/react';
 import ProfilePhotoEdit from '@/components/profile/edit/ProfilePhotoEdit';
 import ProfileNicknameInput from '@/components/profile/edit/ProfileNicknameInput';
 import ProfileBioInput from '@/components/profile/edit/ProfileBioInput';
 import ProfileBodyInfoInput from '@/components/profile/edit/ProfileBodyInfoInput';
-import ProfileInbodyInput from '@/components/profile/edit/ProfileInbodyInput';
 import ProfileRankInput from '@/components/profile/edit/ProfileRankInput';
 import ProfileUnitInput from '@/components/profile/edit/ProfileUnitInput';
 import ProfileSpecialtyInput from '@/components/profile/edit/ProfileSpecialtyInput';
@@ -16,48 +13,11 @@ import ProfileLocationsInput from '@/components/profile/edit/ProfileLocationsInp
 import ProfileEditTabBar, { type EditTab } from '@/components/profile/edit/ProfileEditTabBar';
 import FloatingSaveButton from '@/components/ui/FloatingSaveButton';
 import { useProfileEditSuspense } from '@/hooks/profile';
-import { useFitnessProfile, hasFitnessProfileData } from '@/hooks/fitnessProfile';
-import { useDietaryProfile, hasDietaryProfileData } from '@/hooks/dietaryProfile';
-import { FITNESS_GOAL_LABELS, EXPERIENCE_LEVEL_LABELS } from '@/lib/types/fitness';
-import { DIETARY_GOAL_LABELS, DIET_TYPE_LABELS } from '@/lib/types/meal';
 import type { Rank, Specialty } from '@/lib/types';
 
 // ============================================================
 // Sub Components
 // ============================================================
-
-function LinkedSectionCard({
-  title,
-  summary,
-  emptyText,
-  href,
-}: {
-  title: string;
-  summary: string | null;
-  emptyText: string;
-  href: string;
-}) {
-  const router = useRouter();
-
-  return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-muted-foreground block">{title}</label>
-      <button
-        onClick={() => router.push(href)}
-        className="w-full rounded-xl border border-edge-subtle px-4 py-3 flex items-center gap-3 text-left hover:bg-surface-secondary transition-colors"
-      >
-        <div className="flex-1 min-w-0">
-          {summary ? (
-            <p className="text-sm text-foreground line-clamp-2">{summary}</p>
-          ) : (
-            <p className="text-sm text-muted-foreground">{emptyText}</p>
-          )}
-        </div>
-        <CaretRightIcon size={16} className="text-hint flex-shrink-0" />
-      </button>
-    </div>
-  );
-}
 
 function ToggleRow({
   label,
@@ -121,26 +81,6 @@ export default function ProfileEditContent() {
     hasChanges,
   } = useProfileEditSuspense();
 
-  // Fitness & Dietary summaries (non-blocking)
-  const { data: fitnessProfile } = useFitnessProfile();
-  const { data: dietaryProfile } = useDietaryProfile();
-
-  const fitnessSummary = hasFitnessProfileData(fitnessProfile)
-    ? [
-      fitnessProfile?.fitnessGoal && FITNESS_GOAL_LABELS[fitnessProfile.fitnessGoal],
-      fitnessProfile?.experienceLevel && EXPERIENCE_LEVEL_LABELS[fitnessProfile.experienceLevel],
-      fitnessProfile?.preferredDaysPerWeek && `주 ${fitnessProfile.preferredDaysPerWeek}일`,
-    ].filter(Boolean).join(' · ')
-    : null;
-
-  const dietarySummary = hasDietaryProfileData(dietaryProfile)
-    ? [
-      dietaryProfile?.dietaryGoal && DIETARY_GOAL_LABELS[dietaryProfile.dietaryGoal],
-      dietaryProfile?.dietType && DIET_TYPE_LABELS[dietaryProfile.dietType],
-      dietaryProfile?.targetCalories && `${dietaryProfile.targetCalories}kcal`,
-    ].filter(Boolean).join(' · ')
-    : null;
-
   return (
     <>
       <div className="pb-footer-clearance">
@@ -157,7 +97,7 @@ export default function ProfileEditContent() {
         <ProfileEditTabBar activeTab={activeTab} onTabChange={setActiveTab} />
 
         {/* 탭 콘텐츠 */}
-        <div className="mt-4 overflow-hidden">
+        <div className="mt-4 [overflow-x:clip] -mx-(--layout-padding-x) px-(--layout-padding-x)">
           <div
             key={activeTab}
             className="animate-tab-slide"
@@ -189,7 +129,7 @@ export default function ProfileEditContent() {
                   />
                   <ToggleRow
                     label="정보 공개"
-                    description="신체 정보, 운동/식단 프로필 등을 다른 사용자에게 공개해요"
+                    description="인바디, 운동/식단 프로필 등을 다른 사용자에게 공개해요"
                     value={formData.showInfoPublic}
                     onChange={(v) => updateFormField('showInfoPublic', v)}
                   />
@@ -200,14 +140,10 @@ export default function ProfileEditContent() {
             {/* === 상세 탭 === */}
             {activeTab === 'details' && (
               <div className="space-y-6">
-                {/* 신체 정보 */}
+                {/* 라이프스타일 */}
                 <div className="space-y-2">
                   <ProfileBodyInfoInput
-                    height={formData.height}
-                    weight={formData.weight}
                     isSmoker={formData.isSmoker}
-                    onHeightChange={(value: string) => updateFormField('height', value)}
-                    onWeightChange={(value: string) => updateFormField('weight', value)}
                     onSmokerChange={(value: boolean) => updateFormField('isSmoker', value)}
                   />
                 </div>
@@ -230,24 +166,6 @@ export default function ProfileEditContent() {
                   />
                 </div>
 
-                {/* 운동 프로필 (링크) */}
-                <LinkedSectionCard
-                  title="운동 프로필"
-                  summary={fitnessSummary}
-                  emptyText="운동 목표와 경험을 설정해 보세요"
-                  href="/profile/fitness"
-                />
-
-                {/* 식단 프로필 (링크) */}
-                <LinkedSectionCard
-                  title="식단 프로필"
-                  summary={dietarySummary}
-                  emptyText="식단 목표와 유형을 설정해 보세요"
-                  href="/profile/dietary"
-                />
-
-                {/* 인바디 정보 (요약 + 관리) */}
-                <ProfileInbodyInput />
               </div>
             )}
 

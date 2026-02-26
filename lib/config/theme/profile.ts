@@ -13,7 +13,7 @@ export const MILITARY = {
   verification: { icon: ShieldIcon, label: '인증' },
 } as const;
 
-// 신체 정보
+// 인바디
 export const BODY_INFO = {
   height: { icon: RulerIcon, label: '신장' },
   weight: { icon: ScalesIcon, label: '체중' },

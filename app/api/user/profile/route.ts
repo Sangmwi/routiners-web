@@ -39,10 +39,6 @@ export const PATCH = withAuth(async (request, { authUser, supabase }) => {
   if (body.nickname !== undefined) updateData.nickname = body.nickname;
   if (body.profilePhotoUrl !== undefined) updateData.profile_photo_url = body.profilePhotoUrl;
   if (body.bio !== undefined) updateData.bio = body.bio;
-  if (body.height !== undefined) updateData.height_cm = body.height;
-  if (body.weight !== undefined) updateData.weight_kg = body.weight;
-  if (body.muscleMass !== undefined) updateData.skeletal_muscle_mass_kg = body.muscleMass;
-  if (body.bodyFatPercentage !== undefined) updateData.body_fat_percentage = body.bodyFatPercentage;
   if (body.interestedLocations !== undefined) updateData.interested_exercise_locations = body.interestedLocations;
   if (body.interestedExercises !== undefined) updateData.interested_exercise_types = body.interestedExercises;
   if (body.isSmoker !== undefined) updateData.is_smoker = body.isSmoker;

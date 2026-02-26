@@ -53,7 +53,9 @@ export default function InBodySection({ summary, history, height }: InBodySectio
           >
             <div className="grid grid-cols-3 gap-2">
               {INBODY_METRICS.map(({ key, label, unit, positiveIsGood }) => {
-                const sparkData = hasHistory ? chronological.map((r) => r[key]) : [];
+                const sparkData = hasHistory
+                  ? chronological.map((r) => r[key]).filter((v): v is number => v != null)
+                  : [];
                 const change = summary.changes?.[key];
                 return (
                   <MetricItem

@@ -5,7 +5,9 @@ import {
   CigaretteSlashIcon,
   CigaretteIcon,
 } from '@phosphor-icons/react';
+import ViewMoreButton from '@/components/ui/ViewMoreButton';
 import { useInBodySummarySuspense, useUserInBodySummarySuspense } from '@/hooks/inbody';
+import { useProgressSummarySuspense, useUserProgressSummarySuspense } from '@/hooks/progress';
 import ProfileInbodySection from '@/components/profile/ProfileInbodySection';
 import BodyCompositionSummary from '@/components/inbody/BodyCompositionSummary';
 import ProfileBig3Section from '@/components/profile/ProfileBig3Section';
@@ -19,19 +21,26 @@ import type { User, InBodySummary } from '@/lib/types';
 
 function InfoTabSection({
   title,
+  action,
   className,
   children,
 }: {
   title: string;
+  action?: { label: string; href: string };
   className?: string;
   children: ReactNode;
 }) {
   return (
     <div className="space-y-2">
-      <div className="px-1">
+      <div className="px-1 flex items-center justify-between">
         <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
           {title}
         </h4>
+        {action && (
+          <ViewMoreButton href={action.href} variant="primary">
+            {action.label}
+          </ViewMoreButton>
+        )}
       </div>
       <div className={`bg-surface-secondary rounded-2xl p-4 ${className || ''}`}>
         {children}
@@ -58,12 +67,14 @@ export default function ProfileInfoTab({ user, isOwnProfile = true, userId }: Pr
 
 function OwnInfoTabContent({ user }: { user: User }) {
   const { data: inbodySummary } = useInBodySummarySuspense();
-  return <InfoTabDisplay user={user} inbodySummary={inbodySummary} isOwnProfile />;
+  const { data: progressSummary } = useProgressSummarySuspense(6);
+  return <InfoTabDisplay user={user} inbodySummary={inbodySummary} hasBig3Data={!!progressSummary.big3?.latest} isOwnProfile />;
 }
 
 function OtherInfoTabContent({ user, userId }: { user: User; userId: string }) {
   const { data: inbodySummary } = useUserInBodySummarySuspense(userId);
-  return <InfoTabDisplay user={user} inbodySummary={inbodySummary} isOwnProfile={false} userId={userId} />;
+  const { data: progressSummary } = useUserProgressSummarySuspense(userId, 6);
+  return <InfoTabDisplay user={user} inbodySummary={inbodySummary} hasBig3Data={!!progressSummary.big3?.latest} isOwnProfile={false} userId={userId} />;
 }
 
 // ============================================================
@@ -73,11 +84,12 @@ function OtherInfoTabContent({ user, userId }: { user: User; userId: string }) {
 interface InfoTabDisplayProps {
   user: User;
   inbodySummary: InBodySummary;
+  hasBig3Data: boolean;
   isOwnProfile: boolean;
   userId?: string;
 }
 
-function InfoTabDisplay({ user, inbodySummary, isOwnProfile, userId }: InfoTabDisplayProps) {
+function InfoTabDisplay({ user, inbodySummary, hasBig3Data, isOwnProfile, userId }: InfoTabDisplayProps) {
   const hasInBodyData = !!inbodySummary?.latest;
 
   const hasInterests =
@@ -86,19 +98,16 @@ function InfoTabDisplay({ user, inbodySummary, isOwnProfile, userId }: InfoTabDi
   const hasLifestyle = user.isSmoker !== undefined || hasInterests;
 
   return (
-    <div className="space-y-4">
-      {/* 1. 신체 정보 */}
-      <InfoTabSection title="신체 정보">
+    <div className="space-y-4 pt-2">
+      {/* 1. 인바디 */}
+      <InfoTabSection
+        title="인바디"
+        action={isOwnProfile && hasInBodyData ? { label: '관리', href: '/profile/inbody' } : undefined}
+      >
         <BodyCompositionSummary
-          height={user.height}
+          height={inbodySummary?.latest?.height}
           measuredAt={inbodySummary?.latest?.measuredAt}
         >
-          {/* 인바디 없을 때 직접입력 몸무게 fallback */}
-          {!hasInBodyData && user.weight && (
-            <p className="text-xs text-muted-foreground mb-3">
-              몸무게 <span className="font-medium text-foreground">{user.weight}kg</span>
-            </p>
-          )}
           <ProfileInbodySection
             renderHeader={false}
             isOwnProfile={isOwnProfile}
@@ -108,7 +117,10 @@ function InfoTabDisplay({ user, inbodySummary, isOwnProfile, userId }: InfoTabDi
       </InfoTabSection>
 
       {/* 2. 3대운동 */}
-      <InfoTabSection title="3대운동">
+      <InfoTabSection
+        title="3대운동"
+        action={isOwnProfile && hasBig3Data ? { label: '관리', href: '/profile/big3' } : undefined}
+      >
         <ProfileBig3Section renderHeader={false} isOwnProfile={isOwnProfile} userId={userId} />
       </InfoTabSection>
 

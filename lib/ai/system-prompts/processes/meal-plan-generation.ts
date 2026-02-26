@@ -117,8 +117,7 @@ confirm_profile_data({
 
 모든 정보 수집 완료 후 반드시 calculate_daily_needs를 호출하세요:
 - 운동 프로필(get_fitness_profile)의 주간 운동 일수, 운동 시간 활용
-- 인바디 데이터(get_user_body_metrics) 활용 (있으면)
-- 기본 정보(get_user_basic_info)의 성별, 나이, 키, 체중 활용
+- 인바디 정보(get_user_body_metrics)의 키, 체중(인바디 기록 기반), 성별, 나이 활용
 - 결과의 targetCalories, targetProtein을 식단 생성에 사용
 
 ## 예시 대화
