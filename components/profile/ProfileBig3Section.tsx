@@ -45,8 +45,6 @@ interface Big3DisplayProps {
 }
 
 function Big3Display({ big3, isOwnProfile, renderHeader }: Big3DisplayProps) {
-  const compact = !renderHeader;
-
   const content = !big3?.latest ? (
     <EmptyState
       {...EMPTY_STATE.big3.noRecord}
@@ -57,8 +55,6 @@ function Big3Display({ big3, isOwnProfile, renderHeader }: Big3DisplayProps) {
     <Big3SummaryCard
       summary={big3}
       cardClassName=""
-      sparklineHeight={36}
-      sparklineShowAllDots
     />
   );
 

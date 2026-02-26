@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { PlusIcon, TrophyIcon } from '@phosphor-icons/react';
+import { PlusIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
 import SectionHeader from '@/components/ui/SectionHeader';
@@ -63,29 +63,27 @@ export default function Big3Content() {
         <div className="divide-y divide-edge-divider">
           {/* 요약 섹션 */}
           <div className="px-(--layout-padding-x) pt-1 pb-5">
-            <SectionHeader title="종목별 요약" size="md" className="mb-4" />
-            <div className="grid grid-cols-3 gap-3">
+            <SectionHeader
+              title="종목별 요약"
+              size="md"
+              className="mb-4"
+              rightSlot={
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs text-muted-foreground">합계</span>
+                  <span className="text-sm font-bold tabular-nums text-foreground">
+                    {summary.latestTotal}
+                    <span className="text-xs font-normal text-muted-foreground ml-0.5">kg</span>
+                  </span>
+                  {summary.totalChange !== 0 && (
+                    <ChangeIndicator value={summary.totalChange} positiveIsGood unit="kg" />
+                  )}
+                </div>
+              }
+            />
+            <div className="grid grid-cols-3 gap-2">
               {summary.lifts.map((lift) => (
                 <LiftSummaryCard key={lift.liftType} lift={lift} />
               ))}
-            </div>
-
-            {/* 합계 */}
-            <div className="mt-3 flex items-center justify-between rounded-xl bg-surface-muted px-4 py-3">
-              <span className="text-xs font-medium text-muted-foreground">3대 합계</span>
-              <div className="flex items-center gap-2">
-                <span className="text-base font-bold tabular-nums text-foreground">
-                  {summary.latestTotal}
-                  <span className="text-xs font-normal text-muted-foreground ml-0.5">kg</span>
-                </span>
-                {summary.totalChange !== 0 && (
-                  <ChangeIndicator
-                    value={summary.totalChange}
-                    positiveIsGood
-                    unit="kg"
-                  />
-                )}
-              </div>
             </div>
           </div>
 
@@ -149,31 +147,23 @@ export default function Big3Content() {
 
 function LiftSummaryCard({ lift }: { lift: Big3LiftSummary }) {
   return (
-    <div className="rounded-xl bg-surface-secondary p-3.5">
-      <span className="text-[10px] font-medium text-muted-foreground">
+    <div className="rounded-xl bg-surface-secondary p-3.5 text-center">
+      <p className="text-xs text-muted-foreground mb-1">
         {LIFT_LABEL_MAP[lift.liftType]}
-      </span>
-      <div className="mt-1.5">
+      </p>
+      <p className="text-lg font-bold tabular-nums text-foreground leading-none">
         {lift.latest != null ? (
           <>
-            <span className="text-lg font-bold tabular-nums text-foreground leading-none">
-              {lift.latest}
-            </span>
-            <span className="text-[10px] text-muted-foreground ml-0.5">kg</span>
+            {lift.latest}
+            <span className="text-xs font-normal text-muted-foreground ml-0.5">kg</span>
           </>
         ) : (
           <span className="text-sm text-hint">-</span>
         )}
-      </div>
-      <div className="mt-1 flex items-center gap-1">
-        {lift.change !== 0 && (
+      </p>
+      {lift.change !== 0 && (
+        <div className="mt-1.5">
           <ChangeIndicator value={lift.change} positiveIsGood unit="kg" />
-        )}
-      </div>
-      {lift.allTimePr != null && lift.allTimePr > 0 && (
-        <div className="mt-2 flex items-center gap-1 text-[10px] text-hint-strong">
-          <TrophyIcon size={12} className="text-amber-500" />
-          <span className="tabular-nums">{lift.allTimePr}kg</span>
         </div>
       )}
     </div>

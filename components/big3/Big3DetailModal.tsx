@@ -142,7 +142,7 @@ export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailM
           />
         }
       >
-        <div className="space-y-4 py-2">
+        <div className="space-y-4 py-4">
           <div>
             <label className="text-xs text-muted-foreground mb-1.5 block">중량 (kg)</label>
             <input
@@ -207,24 +207,26 @@ export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailM
       height="auto"
       enableSwipe
       headerAction={
-        <div className="flex gap-2">
-          <button onClick={handleStartEdit} className="p-1.5 text-muted-foreground">
+        <div className="flex gap-1">
+          <button onClick={handleStartEdit} className="p-2 rounded-lg hover:bg-surface-muted transition-colors text-muted-foreground" aria-label="수정">
             <PencilSimpleIcon size={20} />
           </button>
-          <button onClick={() => setViewState('confirm-delete')} className="p-1.5 text-muted-foreground">
+          <button onClick={() => setViewState('confirm-delete')} className="p-2 rounded-lg hover:bg-surface-muted transition-colors text-muted-foreground" aria-label="삭제">
             <TrashIcon size={20} />
           </button>
         </div>
       }
     >
-      <div className="space-y-4 py-2">
-        <div className="grid grid-cols-2 gap-4">
-          <DetailItem label="날짜" value={dateStr} />
-          <DetailItem label="종목" value={liftLabel} />
-          <DetailItem label="중량" value={`${record.weight}kg`} />
-          <DetailItem label="횟수" value={record.reps ? `${record.reps}회` : '-'} />
-          <DetailItem label="RPE" value={record.rpe ? `${record.rpe}` : '-'} />
-          <DetailItem label="출처" value={record.source === 'auto' ? '자동 기록' : '수동 입력'} />
+      <div className="space-y-4 py-4">
+        <div className="bg-surface-hover rounded-xl p-3">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+            <DetailItem label="날짜" value={dateStr} />
+            <DetailItem label="종목" value={liftLabel} />
+            <DetailItem label="중량" value={`${record.weight}kg`} />
+            <DetailItem label="횟수" value={record.reps ? `${record.reps}회` : '-'} />
+            <DetailItem label="RPE" value={record.rpe ? `${record.rpe}` : '-'} />
+            <DetailItem label="출처" value={record.source === 'auto' ? '자동 기록' : '수동 입력'} />
+          </div>
         </div>
         {record.notes && (
           <div>

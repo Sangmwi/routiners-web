@@ -13,11 +13,7 @@ export default function Big3Section({ summary }: Big3SectionProps) {
     <section>
       <SectionHeader title="3대 운동" action={{ label: '관리', href: '/profile/big3' }} />
       <div className="mt-3">
-        <Big3SummaryCard
-          summary={summary}
-          sparklineHeight={36}
-          sparklineShowAllDots
-        />
+        <Big3SummaryCard summary={summary} />
       </div>
     </section>
   );

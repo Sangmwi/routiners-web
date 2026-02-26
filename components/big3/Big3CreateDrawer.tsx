@@ -95,7 +95,7 @@ export default function Big3CreateDrawer({
         />
       }
     >
-      <div className="space-y-5 py-2">
+      <div className="space-y-5 py-4">
         {/* 종목 선택 */}
         <div>
           <label className="text-xs text-muted-foreground mb-2 block">종목</label>

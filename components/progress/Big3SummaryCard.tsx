@@ -10,21 +10,11 @@ import type { Big3Summary } from '@/lib/types/progress';
 interface Big3SummaryCardProps {
   summary: Big3Summary;
   cardClassName?: string;
-  sparklineHeight?: number;
-  sparklineShowMinMax?: boolean;
-  sparklineShowAllDots?: boolean;
-  dateRange?: [string, string];
-  metricGridClassName?: string;
 }
 
 export function Big3SummaryCard({
   summary,
   cardClassName = 'bg-surface-secondary rounded-2xl p-4',
-  sparklineHeight = 36,
-  sparklineShowMinMax = false,
-  sparklineShowAllDots = true,
-  dateRange,
-  metricGridClassName = 'grid grid-cols-3 gap-3',
 }: Big3SummaryCardProps) {
   if (!summary.latest) {
     return (
@@ -36,45 +26,34 @@ export function Big3SummaryCard({
 
   const { latest, changes, history } = summary;
   const hasHistory = history.length >= 2;
-  const sparklineData = history.map((point) => point.total);
 
   return (
     <div className={cardClassName}>
-      <div className="flex items-center gap-3 mb-3">
-        <div className="shrink-0">
-          <p className="text-xs text-muted-foreground mb-0.5">합계</p>
-          <div className="flex items-baseline gap-1">
-            <span className="text-xl font-bold text-foreground">{latest.total}</span>
-            <span className="text-xs text-muted-foreground">kg</span>
-            {changes && changes.total !== 0 && (
-              <ChangeIndicator value={changes.total} positiveIsGood unit="kg" />
-            )}
-          </div>
-        </div>
-
-        {hasHistory && (
-          <div className="flex-1 min-w-0">
-            <MiniSparkline
-              data={sparklineData}
-              height={sparklineHeight}
-              showMinMax={sparklineShowMinMax}
-              showAllDots={sparklineShowAllDots}
-              dateRange={dateRange}
-              color={getTrendColor(changes?.total, true)}
-            />
-          </div>
+      {/* 헤더: 합계 */}
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs text-muted-foreground">
+          합계{' '}
+          <span className="font-bold text-foreground">{latest.total}kg</span>
+        </p>
+        {changes && changes.total !== 0 && (
+          <ChangeIndicator value={changes.total} positiveIsGood unit="kg" />
         )}
       </div>
+      <div className="border-t border-edge-faint mb-3" />
 
-      <div className={metricGridClassName}>
+      {/* 종목별 메트릭 */}
+      <div className="grid grid-cols-3 gap-2">
         {BIG3_LIFT_CONFIG.map(({ key, label }) => {
           const value = latest[key];
           const change = changes?.[key];
+          const sparkData = hasHistory
+            ? history.map((p) => p[key]).filter((v): v is number => v != null)
+            : [];
 
           return (
             <div key={key} className="text-center">
-              <p className="text-xs text-muted-foreground mb-0.5">{label}</p>
-              <p className="text-sm font-bold text-foreground">
+              <p className="text-xs text-muted-foreground mb-1">{label}</p>
+              <p className="text-lg font-bold text-foreground">
                 {value != null ? (
                   <>
                     {value}
@@ -84,8 +63,17 @@ export function Big3SummaryCard({
                   <span className="text-hint">-</span>
                 )}
               </p>
-              {change != null && change !== 0 && (
-                <ChangeIndicator value={change} positiveIsGood unit="kg" />
+              {sparkData.length >= 2 && (
+                <div className="mt-4">
+                  <MiniSparkline
+                    data={sparkData}
+                    height={28}
+                    showAllDots
+                    gradientFill={false}
+                    color={getTrendColor(change, true)}
+                    lineOpacity={0.7}
+                  />
+                </div>
               )}
             </div>
           );

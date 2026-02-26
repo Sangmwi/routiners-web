@@ -29,11 +29,6 @@ import type { MonthlyStats, WeeklyStats } from '@/hooks/routine';
 import type { UseStatsPeriodNavigatorReturn } from '@/hooks/routine/useStatsPeriodNavigator';
 import StatsTabShell from './StatsTabShell';
 
-function formatShortDate(dateStr: string): string {
-  const date = new Date(dateStr + 'T00:00:00');
-  return `${date.getMonth() + 1}/${date.getDate()}`;
-}
-
 type SummaryMode = 'total' | 'average';
 
 const SUMMARY_MODE_OPTIONS = [
@@ -234,12 +229,7 @@ function Big3Section() {
     );
   }
 
-  const { changes, history } = big3;
-  const hasHistory = history.length >= 2;
-
-  const dateRange: [string, string] | undefined = hasHistory
-    ? [formatShortDate(history[0].date), formatShortDate(history[history.length - 1].date)]
-    : undefined;
+  const { changes } = big3;
 
   const prLifts = changes
     ? BIG3_LIFT_CONFIG.filter(({ key }) => (changes[key] ?? 0) > 0)
@@ -266,14 +256,7 @@ function Big3Section() {
         </div>
       )}
 
-      <Big3SummaryCard
-        summary={big3}
-        sparklineHeight={48}
-        sparklineShowMinMax
-        sparklineShowAllDots
-        dateRange={dateRange}
-        metricGridClassName="grid grid-cols-3 gap-3 pt-3 border-t border-edge-divider"
-      />
+      <Big3SummaryCard summary={big3} />
     </div>
   );
 }

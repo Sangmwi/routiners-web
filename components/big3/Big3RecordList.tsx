@@ -2,7 +2,6 @@
 
 import { BarbellIcon } from '@phosphor-icons/react';
 import EmptyState from '@/components/common/EmptyState';
-import ChangeIndicator from '@/components/ui/ChangeIndicator';
 import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
 import type { Big3Record } from '@/lib/types/big3';
 
@@ -47,61 +46,44 @@ export default function Big3RecordList({ records, onRecordClick }: Big3RecordLis
     }
   }
 
-  // 변화량 계산용: 같은 종목의 직전 기록
-  const prevWeightByLift = new Map<string, number>();
-  const sortedRecords = [...records].sort(
-    (a, b) => a.recordedAt.localeCompare(b.recordedAt),
-  );
-  const changeMap = new Map<string, number>();
-  for (const record of sortedRecords) {
-    const prev = prevWeightByLift.get(record.liftType);
-    if (prev !== undefined) {
-      changeMap.set(record.id, record.weight - prev);
-    }
-    prevWeightByLift.set(record.liftType, record.weight);
-  }
-
   return (
     <div>
       {[...grouped.entries()].map(([date, dateRecords]) => (
         <div key={date}>
-          <div className="px-(--layout-padding-x) py-2.5 bg-surface-muted">
-            <span className="text-xs font-medium text-muted-foreground">
-              {formatDate(date)}
-            </span>
+          <p className="text-[10px] text-hint-strong px-(--layout-padding-x) pt-4 pb-1.5">
+            {formatDate(date)}
+          </p>
+          <div className="divide-y divide-edge-divider">
+            {dateRecords.map((record) => (
+              <button
+                key={record.id}
+                onClick={() => onRecordClick(record)}
+                className="w-full flex items-center justify-between px-(--layout-padding-x) py-3.5 active:bg-surface-secondary transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-foreground">
+                    {LIFT_LABEL_MAP[record.liftType] ?? record.liftType}
+                  </span>
+                  {record.source === 'auto' && (
+                    <span className="text-[10px] text-hint bg-surface-muted px-1.5 py-0.5 rounded">
+                      자동
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold tabular-nums text-foreground">
+                    {record.weight}
+                    <span className="text-xs font-normal text-muted-foreground ml-0.5">kg</span>
+                  </span>
+                  {record.reps && (
+                    <span className="text-xs text-muted-foreground tabular-nums">
+                      ×{record.reps}
+                    </span>
+                  )}
+                </div>
+              </button>
+            ))}
           </div>
-          {dateRecords.map((record) => (
-            <button
-              key={record.id}
-              onClick={() => onRecordClick(record)}
-              className="w-full flex items-center justify-between px-(--layout-padding-x) py-3.5 border-b border-edge-faint active:bg-surface-muted transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-foreground">
-                  {LIFT_LABEL_MAP[record.liftType] ?? record.liftType}
-                </span>
-                {record.source === 'auto' && (
-                  <span className="text-[10px] text-hint bg-surface-muted px-1.5 py-0.5 rounded">
-                    자동
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-bold tabular-nums text-foreground">
-                  {record.weight}
-                  <span className="text-xs font-normal text-muted-foreground ml-0.5">kg</span>
-                </span>
-                {record.reps && (
-                  <span className="text-xs text-muted-foreground tabular-nums">
-                    ×{record.reps}
-                  </span>
-                )}
-                {changeMap.has(record.id) && (
-                  <ChangeIndicator value={changeMap.get(record.id)!} positiveIsGood unit="kg" />
-                )}
-              </div>
-            </button>
-          ))}
         </div>
       ))}
     </div>
