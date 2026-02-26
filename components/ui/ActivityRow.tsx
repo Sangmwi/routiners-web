@@ -88,30 +88,34 @@ export default function ActivityRow({
   const longPressHandlers = useLongPress(onLongPress ?? (() => {}));
   const handlers = onLongPress ? longPressHandlers : {};
 
+  const rightSlot = isNone ? (
+    <button
+      type="button"
+      onClick={onAdd}
+      className="shrink-0 min-w-10 py-3 pr-2 flex items-center justify-end active:bg-surface-secondary rounded-lg"
+    >
+      <PlusIcon size={iconSize} weight="bold" className="text-hint" />
+    </button>
+  ) : status && date ? (
+    <span className="shrink-0 min-w-10 py-3 pr-2 flex items-center justify-end">
+      <StatusPill status={status} date={date} />
+    </span>
+  ) : null;
+
   return (
-    <AppLink href={href} className={`flex px-2 py-3 rounded-xl items-center w-full text-left active:bg-surface-secondary [.is-today_&]:active:bg-background/20 ${gap}`} {...handlers}>
-      <Icon size={iconSize} weight={style.iconWeight} className={`${style.iconClass} shrink-0`} />
-      <span className={`font-medium truncate ${style.labelClass} ${text}`}>
-        {label}
-      </span>
-      {meta && (
-        <span className={`shrink-0 ${style.metaClass} ${text}`}>
-          {meta}
+    <div className={`flex items-center rounded-xl ${gap}`}>
+      <AppLink href={href} className={`flex flex-1 min-w-0 pl-2 py-3 items-center active:bg-surface-secondary [.is-today_&]:active:bg-background/20 rounded-xl ${gap}`} {...handlers}>
+        <Icon size={iconSize} weight={style.iconWeight} className={`${style.iconClass} shrink-0`} />
+        <span className={`font-medium truncate ${style.labelClass} ${text}`}>
+          {label}
         </span>
-      )}
-      {isNone ? (
-        <button
-          type="button"
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAdd?.(); }}
-          className="flex items-center ml-auto shrink-0 pr-2 p-2 -mr-2 active:bg-surface-secondary rounded-lg"
-        >
-          <PlusIcon size={iconSize} weight="bold" className="text-hint" />
-        </button>
-      ) : status && date ? (
-        <span className="flex items-center ml-auto shrink-0 pr-2">
-          <StatusPill status={status} date={date} />
-        </span>
-      ) : null}
-    </AppLink>
+        {meta && (
+          <span className={`shrink-0 ${style.metaClass} ${text}`}>
+            {meta}
+          </span>
+        )}
+      </AppLink>
+      {rightSlot}
+    </div>
   );
 }

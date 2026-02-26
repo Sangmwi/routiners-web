@@ -46,7 +46,7 @@ export const EVENT_STATUS = {
     label: '예정',
     icon: ClockIcon,
     weight: ICON_WEIGHT.scheduled as IconWeight,       // 상태 아이콘 weight (duotone)
-    eventIconWeight: ICON_WEIGHT.active as IconWeight,  // 이벤트 타입 아이콘 weight (fill)
+    eventIconWeight: ICON_WEIGHT.inactive as IconWeight,  // 이벤트 타입 아이콘 weight (regular)
     badgeClass: 'bg-surface-scheduled text-warning',
     eventIconClass: 'text-scheduled',                     // 이벤트 타입 아이콘 색상 (바벨/그릇)
     statusClass: 'text-scheduled',                        // 상태 텍스트 색상 (예정/완료/미완)
