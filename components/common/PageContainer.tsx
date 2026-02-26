@@ -54,7 +54,7 @@ export default function PageContainer({
 }: PageContainerProps) {
   const paddingClass = padded ? 'p-(--layout-padding-x)' : '';
   const spacingClass = SPACING_MAP[spacing];
-  const bottomClass = withBottomNav ? 'pb-(--nav-clearance)' : '';
+  const bottomClass = withBottomNav ? 'pb-nav' : '';
 
   return (
     <div

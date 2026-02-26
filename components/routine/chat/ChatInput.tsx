@@ -61,7 +61,7 @@ export default function ChatInput({
   const displayPlaceholder = isLoading ? '응답을 기다리는 중...' : placeholder;
 
   return (
-    <div className="shrink-0 pb-safe bg-background">
+    <div className="shrink-0 bg-background">
       <div className="h-4 bg-gradient-to-t from-background to-transparent -mt-4 pointer-events-none" />
       <div className="px-4 pb-4">
         <div className="relative flex items-end">

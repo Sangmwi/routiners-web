@@ -225,7 +225,7 @@ export default function Modal({
     isBottom && height === 'full'
       ? {
           height: '100dvh',
-          paddingBottom: 'var(--keyboard-height, 0px)',
+          paddingBottom: 'var(--keyboard-safe-clearance)',
         }
       : undefined;
 

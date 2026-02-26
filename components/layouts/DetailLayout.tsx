@@ -22,8 +22,11 @@ interface DetailLayoutProps {
   /** 본문 패딩 (기본: true) */
   padding?: boolean;
 
-  /** 하단 여백 추가 (기본: true) - BottomNav 공간 확보 */
+  /** @deprecated bottomInset 사용 권장. false면 bottomInset='none'과 동일 */
   bottomPadding?: boolean;
+
+  /** 하단 여백 정책 (기본: safe) */
+  bottomInset?: 'none' | 'safe' | 'nav';
 
   /** 배경색 투명 여부 (기본: false) */
   headerTransparent?: boolean;
@@ -58,13 +61,22 @@ export function DetailLayout({
   action,
   centered = false,
   padding = true,
-  bottomPadding = true,
+  bottomPadding,
+  bottomInset = 'safe',
   headerTransparent = false,
   children,
 }: DetailLayoutProps) {
+  const resolvedBottomInset = bottomPadding === false ? 'none' : bottomInset;
+  const bottomClass =
+    resolvedBottomInset === 'nav'
+      ? 'pb-nav'
+      : resolvedBottomInset === 'safe'
+        ? 'pb-safe'
+        : '';
+
   return (
     <div
-      className={`min-h-screen bg-background ${bottomPadding ? 'pb-(--nav-clearance)' : ''}`}
+      className={`min-h-screen bg-background ${bottomClass}`.trim()}
     >
       <PageHeader
         title={title}

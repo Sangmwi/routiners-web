@@ -18,7 +18,7 @@ interface MainTabLayoutProps {
 export function MainTabLayout({ children, className = '' }: MainTabLayoutProps) {
   return (
     <div
-      className={`min-h-screen bg-background px-(--layout-padding-x) py-(--layout-padding-y) pb-(--nav-clearance) ${className}`.trim()}
+      className={`min-h-screen bg-background px-(--layout-padding-x) py-(--layout-padding-y) pb-nav ${className}`.trim()}
     >
       <div className="flex flex-col gap-4">{children}</div>
     </div>

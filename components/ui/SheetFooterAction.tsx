@@ -64,7 +64,7 @@ export default function SheetFooterAction({
       : '';
 
   return (
-    <GradientFooter variant="sheet" className="pb-safe">
+    <GradientFooter variant="sheet">
       <Button
         type="button"
         variant="primary"

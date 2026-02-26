@@ -23,10 +23,13 @@
 
   /* Navigation Clearance */
   --nav-height: 4rem;            /* 64px - BottomNav 높이 */
-  --nav-clearance: 6rem;         /* 96px - BottomNav + 여유 공간 */
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --nav-clearance: calc(6rem + var(--safe-bottom)); /* 96px + Safe Area */
+  --page-safe-clearance: max(1rem, var(--safe-bottom));
+  --keyboard-safe-clearance: calc(var(--keyboard-height, 0px) + var(--safe-bottom));
 
   /* FAB Clearance — BottomNav 위 플로팅 버튼 기준선 */
-  --fab-bottom: calc(var(--nav-height) + 1rem + env(safe-area-inset-bottom, 0px));
+  --fab-bottom: calc(var(--nav-height) + 1rem + var(--safe-bottom));
 
   /* Light Theme (기본값 — data-theme 속성 없어도 적용) */
   --background: #f3f6f3;
@@ -548,4 +551,16 @@ main {
 
 @utility ring-error {
   --tw-ring-color: var(--ring-error);
+}
+
+@utility pb-safe {
+  padding-bottom: var(--page-safe-clearance);
+}
+
+@utility pb-nav {
+  padding-bottom: var(--nav-clearance);
+}
+
+@utility pb-keyboard-safe {
+  padding-bottom: var(--keyboard-safe-clearance);
 }

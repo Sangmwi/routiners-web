@@ -417,7 +417,7 @@ export default function ImportUnitMealSheet({
       height="full"
       showCloseButton={!isImporting}
       stickyFooter={
-        <GradientFooter variant="sheet" className="pb-safe">
+        <GradientFooter variant="sheet">
           {step === 'select' && (
             <Button
               variant="primary"
