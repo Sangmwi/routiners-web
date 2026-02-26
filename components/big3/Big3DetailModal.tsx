@@ -5,7 +5,9 @@ import { PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import SheetFooterAction from '@/components/ui/SheetFooterAction';
+import { WheelPicker } from '@/components/ui/WheelPicker';
 import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
+import { BIG3_WEIGHT_OPTIONS, BIG3_REPS_OPTIONS, BIG3_RPE_OPTIONS } from '@/components/big3/constants';
 import { useUpdateBig3, useDeleteBig3 } from '@/hooks/big3';
 import type { Big3Record, Big3UpdateData } from '@/lib/types/big3';
 
@@ -45,9 +47,9 @@ export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailM
     const data: Big3UpdateData = {};
     const newWeight = parseFloat(editWeight);
     if (!isNaN(newWeight) && newWeight > 0) data.weight = newWeight;
-    const newReps = parseInt(editReps);
+    const newReps = editReps ? parseInt(editReps) : NaN;
     if (!isNaN(newReps) && newReps > 0) data.reps = newReps;
-    const newRpe = parseFloat(editRpe);
+    const newRpe = editRpe ? parseFloat(editRpe) : NaN;
     if (!isNaN(newRpe) && newRpe >= 1 && newRpe <= 10) data.rpe = newRpe;
     if (editNotes.trim()) data.notes = editNotes.trim();
 
@@ -143,43 +145,43 @@ export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailM
         }
       >
         <ModalBody className="p-6 space-y-4">
+          {/* 중량 · 횟수 · RPE */}
           <div>
-            <label className="text-xs text-muted-foreground mb-1.5 block">중량 (kg)</label>
-            <input
-              type="number"
-              value={editWeight}
-              onChange={(e) => setEditWeight(e.target.value)}
-              className="w-full rounded-xl border border-edge-subtle bg-surface-secondary px-4 py-3 text-sm text-foreground"
-              step="0.5"
-              min="0"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs text-muted-foreground mb-1.5 block">횟수</label>
-              <input
-                type="number"
-                value={editReps}
-                onChange={(e) => setEditReps(e.target.value)}
-                className="w-full rounded-xl border border-edge-subtle bg-surface-secondary px-4 py-3 text-sm text-foreground"
-                min="1"
-                placeholder="선택"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-muted-foreground mb-1.5 block">RPE</label>
-              <input
-                type="number"
-                value={editRpe}
-                onChange={(e) => setEditRpe(e.target.value)}
-                className="w-full rounded-xl border border-edge-subtle bg-surface-secondary px-4 py-3 text-sm text-foreground"
-                min="1"
-                max="10"
-                step="0.5"
-                placeholder="선택"
-              />
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground text-center mb-1">중량</p>
+                <WheelPicker
+                  options={BIG3_WEIGHT_OPTIONS}
+                  value={editWeight}
+                  onChange={setEditWeight}
+                  itemHeight={40}
+                  visibleItems={3}
+                />
+              </div>
+              <div className="w-20">
+                <p className="text-xs text-muted-foreground text-center mb-1">횟수</p>
+                <WheelPicker
+                  options={BIG3_REPS_OPTIONS}
+                  value={editReps}
+                  onChange={setEditReps}
+                  itemHeight={40}
+                  visibleItems={3}
+                />
+              </div>
+              <div className="w-20">
+                <p className="text-xs text-muted-foreground text-center mb-1">RPE</p>
+                <WheelPicker
+                  options={BIG3_RPE_OPTIONS}
+                  value={editRpe}
+                  onChange={setEditRpe}
+                  itemHeight={40}
+                  visibleItems={3}
+                />
+              </div>
             </div>
           </div>
+
+          {/* 메모 */}
           <div>
             <label className="text-xs text-muted-foreground mb-1.5 block">메모</label>
             <textarea

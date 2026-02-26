@@ -6,4 +6,3 @@
 
 export * from './queries';
 export * from './mutations';
-export { useBig3ManagerSuspense } from './useBig3ManagerSuspense';

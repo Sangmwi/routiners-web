@@ -4,7 +4,9 @@ import { useState } from 'react';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import SheetFooterAction from '@/components/ui/SheetFooterAction';
 import SegmentedControl from '@/components/ui/SegmentedControl';
+import { WheelPicker, DatePicker } from '@/components/ui/WheelPicker';
 import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
+import { BIG3_WEIGHT_OPTIONS, BIG3_REPS_OPTIONS, BIG3_RPE_OPTIONS } from '@/components/big3/constants';
 import { useCreateBig3 } from '@/hooks/big3';
 import type { Big3LiftType } from '@/lib/types/big3';
 
@@ -12,6 +14,10 @@ const LIFT_OPTIONS = BIG3_LIFT_CONFIG.map(({ key, label }) => ({
   key,
   label,
 }));
+
+function getToday(): string {
+  return new Date().toISOString().split('T')[0];
+}
 
 interface Big3CreateDrawerProps {
   isOpen: boolean;
@@ -26,14 +32,11 @@ export default function Big3CreateDrawer({
   defaultLiftType,
 }: Big3CreateDrawerProps) {
   const [liftType, setLiftType] = useState<Big3LiftType>(defaultLiftType ?? 'squat');
-  const [weight, setWeight] = useState('');
+  const [recordedAt, setRecordedAt] = useState(getToday);
+  const [weight, setWeight] = useState('0');
   const [reps, setReps] = useState('');
   const [rpe, setRpe] = useState('');
   const [notes, setNotes] = useState('');
-  const [recordedAt, setRecordedAt] = useState(() => {
-    const now = new Date();
-    return now.toISOString().split('T')[0];
-  });
 
   const createBig3 = useCreateBig3();
 
@@ -41,8 +44,8 @@ export default function Big3CreateDrawer({
     const parsedWeight = parseFloat(weight);
     if (isNaN(parsedWeight) || parsedWeight <= 0) return;
 
-    const parsedReps = parseInt(reps);
-    const parsedRpe = parseFloat(rpe);
+    const parsedReps = reps ? parseInt(reps) : NaN;
+    const parsedRpe = rpe ? parseFloat(rpe) : NaN;
 
     createBig3.mutate(
       {
@@ -63,11 +66,11 @@ export default function Big3CreateDrawer({
   };
 
   const resetForm = () => {
-    setWeight('');
+    setWeight('0');
     setReps('');
     setRpe('');
     setNotes('');
-    setRecordedAt(new Date().toISOString().split('T')[0]);
+    setRecordedAt(getToday());
   };
 
   const handleClose = () => {
@@ -110,56 +113,48 @@ export default function Big3CreateDrawer({
         {/* 날짜 */}
         <div>
           <label className="text-xs text-muted-foreground mb-1.5 block">날짜</label>
-          <input
-            type="date"
+          <DatePicker
             value={recordedAt}
-            onChange={(e) => setRecordedAt(e.target.value)}
-            className="w-full rounded-xl border border-edge-subtle bg-surface-secondary px-4 py-3 text-sm text-foreground"
+            onChange={setRecordedAt}
+            minDate="2020-01-01"
+            maxDate={getToday()}
+            showLabels={false}
           />
         </div>
 
-        {/* 중량 (필수) */}
+        {/* 중량 · 횟수 · RPE */}
         <div>
-          <label className="text-xs text-muted-foreground mb-1.5 block">
-            중량 (kg) <span className="text-destructive">*</span>
-          </label>
-          <input
-            type="number"
-            value={weight}
-            onChange={(e) => setWeight(e.target.value)}
-            className="w-full rounded-xl border border-edge-subtle bg-surface-secondary px-4 py-3 text-sm text-foreground"
-            step="0.5"
-            min="0"
-            placeholder="0"
-            autoFocus
-          />
-        </div>
-
-        {/* 횟수 + RPE */}
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-xs text-muted-foreground mb-1.5 block">횟수</label>
-            <input
-              type="number"
-              value={reps}
-              onChange={(e) => setReps(e.target.value)}
-              className="w-full rounded-xl border border-edge-subtle bg-surface-secondary px-4 py-3 text-sm text-foreground"
-              min="1"
-              placeholder="선택"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-muted-foreground mb-1.5 block">RPE</label>
-            <input
-              type="number"
-              value={rpe}
-              onChange={(e) => setRpe(e.target.value)}
-              className="w-full rounded-xl border border-edge-subtle bg-surface-secondary px-4 py-3 text-sm text-foreground"
-              min="1"
-              max="10"
-              step="0.5"
-              placeholder="선택"
-            />
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <p className="text-xs text-muted-foreground text-center mb-1">중량</p>
+              <WheelPicker
+                options={BIG3_WEIGHT_OPTIONS}
+                value={weight}
+                onChange={setWeight}
+                itemHeight={40}
+                visibleItems={3}
+              />
+            </div>
+            <div className="w-20">
+              <p className="text-xs text-muted-foreground text-center mb-1">횟수</p>
+              <WheelPicker
+                options={BIG3_REPS_OPTIONS}
+                value={reps}
+                onChange={setReps}
+                itemHeight={40}
+                visibleItems={3}
+              />
+            </div>
+            <div className="w-20">
+              <p className="text-xs text-muted-foreground text-center mb-1">RPE</p>
+              <WheelPicker
+                options={BIG3_RPE_OPTIONS}
+                value={rpe}
+                onChange={setRpe}
+                itemHeight={40}
+                visibleItems={3}
+              />
+            </div>
           </div>
         </div>
 

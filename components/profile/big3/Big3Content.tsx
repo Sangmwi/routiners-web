@@ -1,16 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { PlusIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
 import SegmentedControl from '@/components/ui/SegmentedControl';
 import ChangeIndicator from '@/components/ui/ChangeIndicator';
-import Big3RecordList from '@/components/big3/Big3RecordList';
-import Big3DetailModal from '@/components/big3/Big3DetailModal';
+import { PulseLoader } from '@/components/ui/PulseLoader';
+import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import Big3CreateDrawer from '@/components/big3/Big3CreateDrawer';
+import Big3RecordSection from '@/components/profile/big3/Big3RecordSection';
 import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
-import { useBig3ManagerSuspense } from '@/hooks/big3';
+import { useBig3SummarySuspense } from '@/hooks/big3';
 import type { Big3LiftType } from '@/lib/types/big3';
 
 // ============================================================
@@ -36,20 +37,8 @@ function formatShortDate(dateStr: string): string {
 // ============================================================
 
 export default function Big3Content() {
-  const {
-    records,
-    summary,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage,
-    selectedLiftType,
-    setSelectedLiftType,
-    selectedRecord,
-    isDetailModalOpen,
-    openDetailModal,
-    closeDetailModal,
-  } = useBig3ManagerSuspense();
-
+  const { data: summary } = useBig3SummarySuspense();
+  const [selectedLiftType, setSelectedLiftType] = useState<Big3LiftType | undefined>(undefined);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const filterValue = selectedLiftType ?? 'all';
@@ -94,7 +83,7 @@ export default function Big3Content() {
               {/* 우측: 종목별 3행 */}
               <div className="shrink-0 divide-y divide-edge-faint">
                 {summary.lifts.map((lift) => (
-                  <div key={lift.liftType} className="flex items-center justify-between gap-6 py-2.5">
+                  <div key={lift.liftType} className="flex items-center justify-between gap-6 p-2.5 min-w-40">
                     <span className="text-xs text-muted-foreground">
                       {LIFT_LABEL_MAP[lift.liftType]}
                     </span>
@@ -118,7 +107,6 @@ export default function Big3Content() {
           <div className="flex items-center justify-between px-(--layout-padding-x) pt-5 pb-3">
             <div className="flex items-center gap-2">
               <h3 className="text-base font-semibold text-card-foreground">기록</h3>
-              <span className="text-xs text-muted-foreground">{records.length}개</span>
             </div>
             <SegmentedControl
               options={FILTER_OPTIONS}
@@ -128,14 +116,12 @@ export default function Big3Content() {
             />
           </div>
 
-          {/* 기록 리스트 */}
-          <Big3RecordList
-            records={records}
-            onRecordClick={openDetailModal}
-            hasNextPage={hasNextPage}
-            isFetchingNextPage={isFetchingNextPage}
-            onLoadMore={fetchNextPage}
-          />
+          {/* 기록 리스트 — 필터 변경 시 이 영역만 Suspense */}
+          <QueryErrorBoundary>
+            <Suspense fallback={<PulseLoader />}>
+              <Big3RecordSection selectedLiftType={selectedLiftType} />
+            </Suspense>
+          </QueryErrorBoundary>
         </div>
       </div>
 
@@ -156,15 +142,6 @@ export default function Big3Content() {
         onClose={() => setIsCreateOpen(false)}
         defaultLiftType={selectedLiftType}
       />
-
-      {/* Detail Modal */}
-      {selectedRecord && (
-        <Big3DetailModal
-          isOpen={isDetailModalOpen}
-          onClose={closeDetailModal}
-          record={selectedRecord}
-        />
-      )}
     </>
   );
 }
