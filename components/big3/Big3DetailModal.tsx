@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react';
-import Modal from '@/components/ui/Modal';
+import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import SheetFooterAction from '@/components/ui/SheetFooterAction';
 import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
@@ -111,12 +111,12 @@ export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailM
           </div>
         }
       >
-        <div className="py-4 text-center">
+        <ModalBody className="py-6 px-6 text-center">
           <p className="text-sm text-muted-foreground">
             {dateStr} {liftLabel} {record.weight}kg 기록을 삭제할까요?
           </p>
           <p className="text-xs text-hint mt-1">삭제된 기록은 복구할 수 없어요</p>
-        </div>
+        </ModalBody>
       </Modal>
     );
   }
@@ -142,7 +142,7 @@ export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailM
           />
         }
       >
-        <div className="space-y-4 py-4">
+        <ModalBody className="p-6 space-y-4">
           <div>
             <label className="text-xs text-muted-foreground mb-1.5 block">중량 (kg)</label>
             <input
@@ -190,7 +190,7 @@ export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailM
               placeholder="선택"
             />
           </div>
-        </div>
+        </ModalBody>
       </Modal>
     );
   }
@@ -217,7 +217,7 @@ export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailM
         </div>
       }
     >
-      <div className="space-y-4 py-4">
+      <ModalBody className="p-6 space-y-4">
         <div className="bg-surface-hover rounded-xl p-3">
           <div className="grid grid-cols-2 gap-x-4 gap-y-3">
             <DetailItem label="날짜" value={dateStr} />
@@ -234,7 +234,7 @@ export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailM
             <p className="text-sm text-foreground mt-1">{record.notes}</p>
           </div>
         )}
-      </div>
+      </ModalBody>
     </Modal>
   );
 }

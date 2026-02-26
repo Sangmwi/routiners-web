@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Modal from '@/components/ui/Modal';
+import Modal, { ModalBody } from '@/components/ui/Modal';
 import SheetFooterAction from '@/components/ui/SheetFooterAction';
 import SegmentedControl from '@/components/ui/SegmentedControl';
 import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
@@ -95,7 +95,7 @@ export default function Big3CreateDrawer({
         />
       }
     >
-      <div className="space-y-5 py-4">
+      <ModalBody className="p-6 space-y-5">
         {/* 종목 선택 */}
         <div>
           <label className="text-xs text-muted-foreground mb-2 block">종목</label>
@@ -174,7 +174,7 @@ export default function Big3CreateDrawer({
             placeholder="선택"
           />
         </div>
-      </div>
+      </ModalBody>
     </Modal>
   );
 }
