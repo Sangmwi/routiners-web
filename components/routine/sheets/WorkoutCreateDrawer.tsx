@@ -24,7 +24,7 @@ import type { WorkoutExercise, WorkoutSet, RoutineEventCreateData } from '@/lib/
 // Types
 // ============================================================================
 
-interface AddWorkoutSheetProps {
+interface WorkoutCreateDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   date: string;
@@ -198,7 +198,7 @@ function SelectedExerciseCard({ exercise, onUpdate, onRemove }: SelectedExercise
 // Main Component
 // ============================================================================
 
-export default function AddWorkoutSheet({ isOpen, onClose, date, onCreated }: AddWorkoutSheetProps) {
+export default function WorkoutCreateDrawer({ isOpen, onClose, date, onCreated }: WorkoutCreateDrawerProps) {
   const showError = useShowError();
   const createEvent = useCreateRoutineEvent();
 
@@ -279,7 +279,6 @@ export default function AddWorkoutSheet({ isOpen, onClose, date, onCreated }: Ad
       onClose={handleClose}
       title="운동 추가"
       position="bottom"
-      enableSwipe
       height="full"
       showCloseButton
       stickyFooter={

@@ -13,9 +13,9 @@ import {
   MealCard,
   NutritionSummary,
 } from '@/components/routine';
-import MealAddDrawer, { type MealAddOption } from '@/components/routine/meal/MealAddDrawer';
-import AddMealSheet from '@/components/routine/sheets/AddMealSheet';
-import ImportUnitMealSheet from '@/components/routine/sheets/ImportUnitMealSheet';
+import MealAddSheet, { type MealAddOption } from '@/components/routine/meal/MealAddSheet';
+import MealCreateDrawer from '@/components/routine/sheets/MealCreateDrawer';
+import UnitMealImportDrawer from '@/components/routine/sheets/UnitMealImportDrawer';
 import { getEventConfig } from '@/lib/config/theme';
 import { useConfirmDialog } from '@/lib/stores/modalStore';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
@@ -148,17 +148,17 @@ export default function MealContent({ date, onTitleChange, onHeaderAction }: Mea
           </div>
         </div>
 
-        <MealAddDrawer
+        <MealAddSheet
           isOpen={isAddDrawerOpen}
           onClose={() => setIsAddDrawerOpen(false)}
           onSelect={handleAddOption}
         />
-        <AddMealSheet
+        <MealCreateDrawer
           isOpen={isAddSheetOpen}
           onClose={() => setIsAddSheetOpen(false)}
           date={date}
         />
-        <ImportUnitMealSheet
+        <UnitMealImportDrawer
           isOpen={isImportSheetOpen}
           onClose={() => setIsImportSheetOpen(false)}
           date={date}
@@ -270,21 +270,21 @@ export default function MealContent({ date, onTitleChange, onHeaderAction }: Mea
         </GradientFooter>
       )}
 
-      <MealAddDrawer
+      <MealAddSheet
         isOpen={isAddDrawerOpen}
         onClose={() => setIsAddDrawerOpen(false)}
         onSelect={handleAddOption}
         isAppending
       />
 
-      <AddMealSheet
+      <MealCreateDrawer
         isOpen={isAddSheetOpen}
         onClose={() => setIsAddSheetOpen(false)}
         date={date}
         existingEvent={event}
       />
 
-      <ImportUnitMealSheet
+      <UnitMealImportDrawer
         isOpen={isImportSheetOpen}
         onClose={() => setIsImportSheetOpen(false)}
         date={date}

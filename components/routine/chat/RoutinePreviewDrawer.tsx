@@ -13,7 +13,7 @@ const DAY_NAMES = ['', '월', '화', '수', '목', '금', '토', '일'];
 
 type ApplyMode = 'replace' | 'append';
 
-interface PreviewDetailDrawerProps {
+interface RoutinePreviewDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   preview: RoutinePreviewData;
@@ -35,7 +35,7 @@ interface PreviewDetailDrawerProps {
  * - 주차 탭 제거 (동일 루틴이므로 첫 주만 표시)
  * - 주차 선택 UI 하단 고정
  */
-export default function PreviewDetailDrawer({
+export default function RoutinePreviewDrawer({
   isOpen,
   onClose,
   preview,
@@ -43,7 +43,7 @@ export default function PreviewDetailDrawer({
   onApply,
   isApplying = false,
   hasExistingScheduled = false,
-}: PreviewDetailDrawerProps) {
+}: RoutinePreviewDrawerProps) {
   const [selectedWeekCount, setSelectedWeekCount] = useState(
     preview.daysPerWeek <= 2 ? 1 : 2
   ); // 빠른 루틴(1~2일) → 1주 기본, 본격 루틴(3일+) → 2주 기본

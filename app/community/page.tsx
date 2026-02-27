@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { MainTabLayout, MainTabHeader } from '@/components/layouts';
@@ -9,8 +9,8 @@ import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import EmptyState from '@/components/common/EmptyState';
 import { PulseLoader } from '@/components/ui/PulseLoader';
 import PrimaryTabs, { type PrimaryTab } from '@/components/community/PrimaryTabs';
-import CategoryTabs from '@/components/community/CategoryTabs';
-import { UserFocusIcon, PlusIcon } from '@phosphor-icons/react';
+import FilterSheet, { type DateRange } from '@/components/community/FilterSheet';
+import { UserFocusIcon, PlusIcon, FunnelIcon } from '@phosphor-icons/react';
 import { EMPTY_STATE } from '@/lib/config/theme';
 import type { PostCategory } from '@/lib/types/community';
 import { usePathname } from 'next/navigation';
@@ -31,6 +31,8 @@ export default function CommunityPage() {
   const router = useRouter();
   const pathname = usePathname();
   const routeKey = createRouteStateKey(pathname);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
   const initialCategory = (() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
@@ -41,17 +43,20 @@ export default function CommunityPage() {
     }
     return 'all';
   })();
+
   const { state, setState } = useRouteState<{
     primaryTab: PrimaryTab;
     category: PostCategory | 'all';
+    dateRange: DateRange;
   }>({
     key: routeKey,
     initialState: {
       primaryTab: 'recommended',
       category: initialCategory,
+      dateRange: 'all',
     },
   });
-  const { primaryTab, category } = state;
+  const { primaryTab, category, dateRange } = state;
 
   const handleNewPost = () => {
     router.push('/community/write');
@@ -61,14 +66,13 @@ export default function CommunityPage() {
     router.push('/community/search-users');
   };
 
-  const handleCategoryChange = (categoryId: string) => {
-    const newCategory = categoryId as PostCategory | 'all';
-    setState((prev) => ({ ...prev, category: newCategory }));
+  const handleCategoryChange = (cat: PostCategory | 'all') => {
+    setState((prev) => ({ ...prev, category: cat }));
 
     // URL 업데이트 (shallow)
     const params = new URLSearchParams();
-    if (newCategory !== 'all') {
-      params.set('category', newCategory);
+    if (cat !== 'all') {
+      params.set('category', cat);
     }
     const queryString = params.toString();
     router.push(`/community${queryString ? `?${queryString}` : ''}`, {
@@ -76,17 +80,34 @@ export default function CommunityPage() {
     });
   };
 
+  const handleDateRangeChange = (range: DateRange) => {
+    setState((prev) => ({ ...prev, dateRange: range }));
+  };
+
+  const isFilterActive = category !== 'all' || dateRange !== 'all';
+
   return (
     <MainTabLayout>
       <MainTabHeader title="커뮤니티" />
 
-      {/* sticky 컨트롤 존: 탭 + 카테고리 (검색/글쓰기 버튼 포함) */}
-      <StickyControlZone className="flex flex-col gap-4">
+      {/* sticky 컨트롤 존: 탭 + 액션 버튼 */}
+      <StickyControlZone>
         <PrimaryTabs
           activeTab={primaryTab}
           onTabChange={(nextTab) => setState((prev) => ({ ...prev, primaryTab: nextTab }))}
           actions={
             <>
+              <button
+                type="button"
+                onClick={() => setIsFilterOpen(true)}
+                className="relative p-2 rounded-xl hover:bg-surface-muted active:bg-surface-pressed transition-colors"
+                aria-label="필터"
+              >
+                <FunnelIcon size={22} className="text-muted-foreground" />
+                {isFilterActive && (
+                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-primary" />
+                )}
+              </button>
               <button
                 type="button"
                 onClick={handleSearchUsers}
@@ -105,10 +126,6 @@ export default function CommunityPage() {
               </button>
             </>
           }
-        />
-        <CategoryTabs
-          selectedCategory={category}
-          onCategoryChange={handleCategoryChange}
         />
       </StickyControlZone>
 
@@ -138,6 +155,14 @@ export default function CommunityPage() {
         </div>
       )}
 
+      <FilterSheet
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        category={category}
+        onCategoryChange={handleCategoryChange}
+        dateRange={dateRange}
+        onDateRangeChange={handleDateRangeChange}
+      />
     </MainTabLayout>
   );
 }

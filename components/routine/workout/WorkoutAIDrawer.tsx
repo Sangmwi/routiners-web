@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { RobotIcon, PaperPlaneRightIcon, LightbulbIcon, TargetIcon, WarningIcon } from '@phosphor-icons/react';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 
-interface WorkoutAISheetProps {
+interface WorkoutAIDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   exerciseName: string;
@@ -33,7 +33,7 @@ const MOCK_MESSAGES = [
   { role: 'assistant' as const, text: '안녕하세요! 현재 운동에 대해 궁금한 점이 있으면 물어보세요 💪' },
 ];
 
-export default function WorkoutAISheet({ isOpen, onClose, exerciseName }: WorkoutAISheetProps) {
+export default function WorkoutAIDrawer({ isOpen, onClose, exerciseName }: WorkoutAIDrawerProps) {
   const [inputValue, setInputValue] = useState('');
 
   return (
@@ -41,7 +41,6 @@ export default function WorkoutAISheet({ isOpen, onClose, exerciseName }: Workou
       isOpen={isOpen}
       onClose={onClose}
       position="bottom"
-      enableSwipe
       height="full"
       showCloseButton={false}
     >

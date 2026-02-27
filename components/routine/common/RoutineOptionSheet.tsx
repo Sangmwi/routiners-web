@@ -11,7 +11,7 @@ export interface RoutineOptionItem<TOption extends string> {
   primary?: boolean;
 }
 
-interface RoutineOptionBottomSheetProps<TOption extends string> {
+interface RoutineOptionSheetProps<TOption extends string> {
   isOpen: boolean;
   onClose: () => void;
   title: string;
@@ -19,13 +19,13 @@ interface RoutineOptionBottomSheetProps<TOption extends string> {
   onSelect: (option: TOption) => void;
 }
 
-export default function RoutineOptionBottomSheet<TOption extends string>({
+export default function RoutineOptionSheet<TOption extends string>({
   isOpen,
   onClose,
   title,
   options,
   onSelect,
-}: RoutineOptionBottomSheetProps<TOption>) {
+}: RoutineOptionSheetProps<TOption>) {
   return (
     <Modal
       isOpen={isOpen}

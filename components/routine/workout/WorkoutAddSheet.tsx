@@ -1,13 +1,13 @@
 'use client';
 
 import { BarbellIcon, RobotIcon } from '@phosphor-icons/react';
-import RoutineOptionBottomSheet, {
+import RoutineOptionSheet, {
   type RoutineOptionItem,
-} from '@/components/routine/common/RoutineOptionBottomSheet';
+} from '@/components/routine/common/RoutineOptionSheet';
 
 export type WorkoutAddOption = 'ai' | 'direct';
 
-interface WorkoutAddDrawerProps {
+interface WorkoutAddSheetProps {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (option: WorkoutAddOption) => void;
@@ -28,13 +28,13 @@ const OPTIONS: RoutineOptionItem<WorkoutAddOption>[] = [
   },
 ];
 
-export default function WorkoutAddDrawer({
+export default function WorkoutAddSheet({
   isOpen,
   onClose,
   onSelect,
-}: WorkoutAddDrawerProps) {
+}: WorkoutAddSheetProps) {
   return (
-    <RoutineOptionBottomSheet
+    <RoutineOptionSheet
       isOpen={isOpen}
       onClose={onClose}
       title="운동 추가하기"

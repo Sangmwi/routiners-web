@@ -13,7 +13,7 @@ import type { WorkoutExercise, WorkoutSet } from '@/lib/types/routine';
 // Types
 // ============================================================================
 
-interface AddExerciseSheetProps {
+interface ExerciseAddDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (exercises: WorkoutExercise[]) => void;
@@ -43,12 +43,12 @@ function catalogToExercise(info: ExerciseInfo): WorkoutExercise {
 // Main Component
 // ============================================================================
 
-export default function AddExerciseSheet({
+export default function ExerciseAddDrawer({
   isOpen,
   onClose,
   onAdd,
   existingNames,
-}: AddExerciseSheetProps) {
+}: ExerciseAddDrawerProps) {
   const [query, setQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<ExerciseCategory | null>(null);
   const [selected, setSelected] = useState<WorkoutExercise[]>([]);
@@ -88,7 +88,6 @@ export default function AddExerciseSheet({
       onClose={handleClose}
       title="운동 추가"
       position="bottom"
-      enableSwipe
       height="full"
       showCloseButton
       stickyFooter={

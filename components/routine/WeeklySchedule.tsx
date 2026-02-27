@@ -6,11 +6,11 @@ import { BarbellIcon, BowlFoodIcon } from '@phosphor-icons/react';
 import SegmentedControl from '@/components/ui/SegmentedControl';
 import ActivityRow from '@/components/ui/ActivityRow';
 import DayGroup from '@/components/ui/DayGroup';
-import WorkoutAddDrawer, { type WorkoutAddOption } from '@/components/routine/workout/WorkoutAddDrawer';
-import MealAddDrawer, { type MealAddOption } from '@/components/routine/meal/MealAddDrawer';
-import AddWorkoutSheet from '@/components/routine/sheets/AddWorkoutSheet';
-import AddMealSheet from '@/components/routine/sheets/AddMealSheet';
-import ImportUnitMealSheet from '@/components/routine/sheets/ImportUnitMealSheet';
+import WorkoutAddSheet, { type WorkoutAddOption } from '@/components/routine/workout/WorkoutAddSheet';
+import MealAddSheet, { type MealAddOption } from '@/components/routine/meal/MealAddSheet';
+import WorkoutCreateDrawer from '@/components/routine/sheets/WorkoutCreateDrawer';
+import MealCreateDrawer from '@/components/routine/sheets/MealCreateDrawer';
+import UnitMealImportDrawer from '@/components/routine/sheets/UnitMealImportDrawer';
 import { formatDate } from '@/lib/utils/dateHelpers';
 import type { WeeklyStats } from '@/hooks/routine';
 
@@ -177,31 +177,31 @@ export default function WeeklySchedule({ stats, size = 'default', filter: extern
       </div>
 
       {/* 추가 드로어 */}
-      <WorkoutAddDrawer
+      <WorkoutAddSheet
         isOpen={addTarget?.type === 'workout'}
         onClose={() => setAddTarget(null)}
         onSelect={handleWorkoutOption}
       />
-      <MealAddDrawer
+      <MealAddSheet
         isOpen={addTarget?.type === 'meal'}
         onClose={() => setAddTarget(null)}
         onSelect={handleMealOption}
       />
 
       {/* 추가 시트 */}
-      <AddWorkoutSheet
+      <WorkoutCreateDrawer
         isOpen={activeSheet === 'workout'}
         onClose={() => { setActiveSheet(null); setAddTarget(null); }}
         date={addTarget?.date ?? ''}
         onCreated={() => handleCreated()}
       />
-      <AddMealSheet
+      <MealCreateDrawer
         isOpen={activeSheet === 'meal'}
         onClose={() => { setActiveSheet(null); setAddTarget(null); }}
         date={addTarget?.date ?? ''}
         onCreated={() => handleCreated()}
       />
-      <ImportUnitMealSheet
+      <UnitMealImportDrawer
         isOpen={activeSheet === 'import'}
         onClose={() => { setActiveSheet(null); setAddTarget(null); }}
         date={addTarget?.date ?? ''}

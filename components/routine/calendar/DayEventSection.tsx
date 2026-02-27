@@ -8,11 +8,11 @@ import { useConfirmDialog } from '@/lib/stores/modalStore';
 import type { EventType } from '@/lib/types/routine';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 import { BarbellIcon, BowlFoodIcon, PlusIcon } from '@phosphor-icons/react';
-import AddWorkoutSheet from '@/components/routine/sheets/AddWorkoutSheet';
-import AddMealSheet from '@/components/routine/sheets/AddMealSheet';
-import ImportUnitMealSheet from '@/components/routine/sheets/ImportUnitMealSheet';
-import MealAddDrawer, { type MealAddOption } from '@/components/routine/meal/MealAddDrawer';
-import WorkoutAddDrawer, { type WorkoutAddOption } from '@/components/routine/workout/WorkoutAddDrawer';
+import WorkoutCreateDrawer from '@/components/routine/sheets/WorkoutCreateDrawer';
+import MealCreateDrawer from '@/components/routine/sheets/MealCreateDrawer';
+import UnitMealImportDrawer from '@/components/routine/sheets/UnitMealImportDrawer';
+import MealAddSheet, { type MealAddOption } from '@/components/routine/meal/MealAddSheet';
+import WorkoutAddSheet, { type WorkoutAddOption } from '@/components/routine/workout/WorkoutAddSheet';
 
 type FilterType = EventType | 'all';
 
@@ -26,7 +26,7 @@ interface DayEventSectionProps {
  *
  * - 운동/식단 독립 섹션으로 표시
  * - 운동 빈 상태: AI 상담 / 직접 추가
- * - 식단 빈 상태: 부대 식단 불러오기 / AI 추천 / 직접 입력 (MealAddDrawer)
+ * - 식단 빈 상태: 부대 식단 불러오기 / AI 추천 / 직접 입력 (MealAddSheet)
  */
 export default function DayEventSection({ date, filterType }: DayEventSectionProps) {
   const router = useRouter();
@@ -52,7 +52,7 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
     });
   };
 
-  // 운동 드로어 (WorkoutAddDrawer)
+  // 운동 옵션 시트 (WorkoutAddSheet)
   const [isWorkoutDrawerOpen, setIsWorkoutDrawerOpen] = useState(false);
   const [activeWorkoutSheet, setActiveWorkoutSheet] = useState(false);
 
@@ -65,7 +65,7 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
     }
   };
 
-  // 식단 드로어 (MealAddDrawer)
+  // 식단 옵션 시트 (MealAddSheet)
   const [isMealDrawerOpen, setIsMealDrawerOpen] = useState(false);
   const [isMealSheetOpen, setIsMealSheetOpen] = useState(false);
   const [isImportSheetOpen, setIsImportSheetOpen] = useState(false);
@@ -147,34 +147,34 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
         )}
       </div>
 
-      {/* 운동: AI / 직접 추가 드로어 */}
-      <WorkoutAddDrawer
+      {/* 운동: AI / 직접 추가 옵션 시트 */}
+      <WorkoutAddSheet
         isOpen={isWorkoutDrawerOpen}
         onClose={() => setIsWorkoutDrawerOpen(false)}
         onSelect={handleWorkoutOption}
       />
 
-      {/* 식단: 부대 식단 / AI / 직접 입력 드로어 */}
-      <MealAddDrawer
+      {/* 식단: 부대 식단 / AI / 직접 입력 옵션 시트 */}
+      <MealAddSheet
         isOpen={isMealDrawerOpen}
         onClose={() => setIsMealDrawerOpen(false)}
         onSelect={handleMealOption}
       />
 
-      {/* 시트 */}
-      <AddWorkoutSheet
+      {/* 드로어 */}
+      <WorkoutCreateDrawer
         isOpen={activeWorkoutSheet}
         onClose={() => setActiveWorkoutSheet(false)}
         date={date}
         onCreated={() => handleCreated('workout')}
       />
-      <AddMealSheet
+      <MealCreateDrawer
         isOpen={isMealSheetOpen}
         onClose={() => setIsMealSheetOpen(false)}
         date={date}
         onCreated={() => handleCreated('meal')}
       />
-      <ImportUnitMealSheet
+      <UnitMealImportDrawer
         isOpen={isImportSheetOpen}
         onClose={() => setIsImportSheetOpen(false)}
         date={date}

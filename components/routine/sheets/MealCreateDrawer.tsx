@@ -26,7 +26,7 @@ import type { FoodCategory } from '@/lib/types/meal';
 // Types
 // ============================================================================
 
-interface AddMealSheetProps {
+interface MealCreateDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   date: string;
@@ -120,7 +120,7 @@ function FoodItemRow({ food, onRemove }: FoodItemRowProps) {
 // Main Component
 // ============================================================================
 
-export default function AddMealSheet({ isOpen, onClose, date, onCreated, existingEvent }: AddMealSheetProps) {
+export default function MealCreateDrawer({ isOpen, onClose, date, onCreated, existingEvent }: MealCreateDrawerProps) {
   const router = useRouter();
   const showError = useShowError();
   const createEvent = useCreateRoutineEvent();
@@ -255,7 +255,6 @@ export default function AddMealSheet({ isOpen, onClose, date, onCreated, existin
       onClose={handleClose}
       title={existingEvent ? '식사 추가' : '식단 추가'}
       position="bottom"
-      enableSwipe
       height="full"
       showCloseButton
       stickyFooter={

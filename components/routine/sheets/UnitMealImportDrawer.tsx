@@ -39,7 +39,7 @@ import type { RoutineEventCreateData } from '@/lib/types/routine';
 // Types
 // ============================================================================
 
-interface ImportUnitMealSheetProps {
+interface UnitMealImportDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   date: string; // anchor date
@@ -157,12 +157,12 @@ function menuToEventData(menu: UnitMealMenu): RoutineEventCreateData {
 // Main Component
 // ============================================================================
 
-export default function ImportUnitMealSheet({
+export default function UnitMealImportDrawer({
   isOpen,
   onClose,
   date,
   onCreated,
-}: ImportUnitMealSheetProps) {
+}: UnitMealImportDrawerProps) {
   const showError = useShowError();
   const { data: user } = useCurrentUserProfile();
   const createBatch = useCreateMealEventsBatch();
@@ -413,7 +413,6 @@ export default function ImportUnitMealSheet({
       onClose={handleClose}
       title="부대 식단 불러오기"
       position="bottom"
-      enableSwipe={!isImporting}
       height="full"
       showCloseButton={!isImporting}
       stickyFooter={

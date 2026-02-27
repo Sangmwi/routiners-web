@@ -51,9 +51,9 @@ const SIZE_CLASSES = {
 } as const;
 
 const HEIGHT_CLASSES = {
-  auto: 'max-h-[85dvh]',
+  auto: 'max-h-[90dvh]',
   half: 'h-[50dvh]',
-  full: '', // inline style로 키보드 높이 반영
+  full: 'h-[90dvh]', // inline style로 키보드 높이 반영
 } as const;
 
 const BACKDROP_STYLE: CSSProperties = {
@@ -230,7 +230,7 @@ export default function Modal({
   const heightStyle: React.CSSProperties | undefined =
     isBottom && height === 'full'
       ? {
-          height: '100dvh',
+          height: '90dvh',
           paddingBottom: 'var(--keyboard-safe-clearance)',
         }
       : undefined;

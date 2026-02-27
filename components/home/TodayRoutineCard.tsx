@@ -10,13 +10,13 @@ import {
   PlusIcon,
 } from '@phosphor-icons/react';
 import AppLink from '@/components/common/AppLink';
-import MealAddDrawer, { type MealAddOption } from '@/components/routine/meal/MealAddDrawer';
-import WorkoutAddDrawer, {
+import MealAddSheet, { type MealAddOption } from '@/components/routine/meal/MealAddSheet';
+import WorkoutAddSheet, {
   type WorkoutAddOption,
-} from '@/components/routine/workout/WorkoutAddDrawer';
-import AddMealSheet from '@/components/routine/sheets/AddMealSheet';
-import AddWorkoutSheet from '@/components/routine/sheets/AddWorkoutSheet';
-import ImportUnitMealSheet from '@/components/routine/sheets/ImportUnitMealSheet';
+} from '@/components/routine/workout/WorkoutAddSheet';
+import MealCreateDrawer from '@/components/routine/sheets/MealCreateDrawer';
+import WorkoutCreateDrawer from '@/components/routine/sheets/WorkoutCreateDrawer';
+import UnitMealImportDrawer from '@/components/routine/sheets/UnitMealImportDrawer';
 import { MEAL_TIME } from '@/lib/config/theme/event';
 import type { RoutineEvent, WorkoutExercise } from '@/lib/types/routine';
 import { isMealData, isWorkoutData } from '@/lib/types/guards';
@@ -284,12 +284,12 @@ function WorkoutColumn({
               onClick: () => setIsDrawerOpen(true),
             }}
           />
-          <WorkoutAddDrawer
+          <WorkoutAddSheet
             isOpen={isDrawerOpen}
             onClose={() => setIsDrawerOpen(false)}
             onSelect={handleOption}
           />
-          <AddWorkoutSheet
+          <WorkoutCreateDrawer
             isOpen={isSheetOpen}
             onClose={() => setIsSheetOpen(false)}
             date={today}
@@ -336,18 +336,18 @@ function MealColumn({ event }: { event: RoutineEvent | null }) {
               onClick: () => setIsDrawerOpen(true),
             }}
           />
-          <MealAddDrawer
+          <MealAddSheet
             isOpen={isDrawerOpen}
             onClose={() => setIsDrawerOpen(false)}
             onSelect={handleOption}
           />
-          <AddMealSheet
+          <MealCreateDrawer
             isOpen={isMealSheetOpen}
             onClose={() => setIsMealSheetOpen(false)}
             date={today}
             onCreated={() => router.push(`/routine/meal/${today}`)}
           />
-          <ImportUnitMealSheet
+          <UnitMealImportDrawer
             isOpen={isImportSheetOpen}
             onClose={() => setIsImportSheetOpen(false)}
             date={today}

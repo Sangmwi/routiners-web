@@ -1,13 +1,13 @@
 'use client';
 
 import { BuildingsIcon, PlusIcon, RobotIcon } from '@phosphor-icons/react';
-import RoutineOptionBottomSheet, {
+import RoutineOptionSheet, {
   type RoutineOptionItem,
-} from '@/components/routine/common/RoutineOptionBottomSheet';
+} from '@/components/routine/common/RoutineOptionSheet';
 
 export type MealAddOption = 'import' | 'ai' | 'direct';
 
-interface MealAddDrawerProps {
+interface MealAddSheetProps {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (option: MealAddOption) => void;
@@ -34,14 +34,14 @@ const DEFAULT_OPTIONS: RoutineOptionItem<MealAddOption>[] = [
   },
 ];
 
-export default function MealAddDrawer({
+export default function MealAddSheet({
   isOpen,
   onClose,
   onSelect,
   isAppending = false,
-}: MealAddDrawerProps) {
+}: MealAddSheetProps) {
   return (
-    <RoutineOptionBottomSheet
+    <RoutineOptionSheet
       isOpen={isOpen}
       onClose={onClose}
       title={isAppending ? '식사 추가' : '식단 추가하기'}

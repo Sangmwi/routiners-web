@@ -12,9 +12,9 @@ import {
   EventStatusBadge,
   ExerciseCard,
 } from '@/components/routine';
-import AddExerciseSheet from '@/components/routine/sheets/AddExerciseSheet';
-import AddWorkoutSheet from '@/components/routine/sheets/AddWorkoutSheet';
-import WorkoutAddDrawer, { type WorkoutAddOption } from '@/components/routine/workout/WorkoutAddDrawer';
+import ExerciseAddDrawer from '@/components/routine/sheets/ExerciseAddDrawer';
+import WorkoutCreateDrawer from '@/components/routine/sheets/WorkoutCreateDrawer';
+import WorkoutAddSheet, { type WorkoutAddOption } from '@/components/routine/workout/WorkoutAddSheet';
 import { ActiveWorkout, WorkoutComplete } from '@/components/routine/workout';
 import EditableExerciseList from '@/components/routine/event/EditableExerciseList';
 import { getEventConfig } from '@/lib/config/theme';
@@ -158,12 +158,12 @@ export default function WorkoutContent({
           </div>
         </div>
 
-        <WorkoutAddDrawer
+        <WorkoutAddSheet
           isOpen={isAddDrawerOpen}
           onClose={() => setIsAddDrawerOpen(false)}
           onSelect={handleAddOption}
         />
-        <AddWorkoutSheet
+        <WorkoutCreateDrawer
           isOpen={isAddSheetOpen}
           onClose={() => setIsAddSheetOpen(false)}
           date={date}
@@ -285,7 +285,7 @@ export default function WorkoutContent({
         </GradientFooter>
       )}
 
-      <AddExerciseSheet
+      <ExerciseAddDrawer
         isOpen={isAddExerciseSheetOpen}
         onClose={() => setIsAddExerciseSheetOpen(false)}
         onAdd={handleAddExercises}

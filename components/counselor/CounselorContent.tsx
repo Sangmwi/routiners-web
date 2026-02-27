@@ -11,8 +11,8 @@ import SummarizationIndicator from './SummarizationIndicator';
 import ChatListDrawer from './ChatListDrawer';
 import ChatMessageList from '@/components/routine/chat/ChatMessageList';
 import ChatInput from '@/components/routine/chat/ChatInput';
-import PreviewDetailDrawer from '@/components/routine/chat/PreviewDetailDrawer';
-import MealPreviewDetailDrawer from '@/components/routine/chat/MealPreviewDetailDrawer';
+import RoutinePreviewDrawer from '@/components/routine/chat/RoutinePreviewDrawer';
+import MealPreviewDrawer from '@/components/routine/chat/MealPreviewDrawer';
 import { PulseLoader } from '@/components/ui/PulseLoader';
 
 interface CounselorContentProps {
@@ -247,7 +247,7 @@ export default function CounselorContent({ isDrawerOpen, onDrawerClose }: Counse
         const previewStatus = (previewMessage.metadata?.status as 'pending' | 'applied' | 'cancelled') || 'pending';
 
         return (
-          <PreviewDetailDrawer
+          <RoutinePreviewDrawer
             isOpen={preview.isOpen}
             onClose={preview.close}
             preview={previewData}
@@ -278,7 +278,7 @@ export default function CounselorContent({ isDrawerOpen, onDrawerClose }: Counse
         const mealStatus = (mealMessage.metadata?.status as 'pending' | 'applied' | 'cancelled') || 'pending';
 
         return (
-          <MealPreviewDetailDrawer
+          <MealPreviewDrawer
             isOpen={mealPreview.isOpen}
             onClose={mealPreview.close}
             preview={mealData}

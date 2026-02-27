@@ -10,7 +10,7 @@ import type { RoutinePreviewStatus } from '@/lib/types/chat';
 
 const DAY_NAMES = ['', '월', '화', '수', '목', '금', '토', '일'];
 
-interface MealPreviewDetailDrawerProps {
+interface MealPreviewDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   preview: MealPlanPreviewData;
@@ -22,17 +22,17 @@ interface MealPreviewDetailDrawerProps {
 /**
  * 식단 상세 보기 드로어
  *
- * PreviewDetailDrawer(루틴)와 병렬 구조
+ * RoutinePreviewDrawer(루틴)와 병렬 구조
  * 차이: 주차 선택 없음, 대체/추가 모드 없음 (식단 API가 미지원)
  */
-export default function MealPreviewDetailDrawer({
+export default function MealPreviewDrawer({
   isOpen,
   onClose,
   preview,
   status = 'pending',
   onApply,
   isApplying = false,
-}: MealPreviewDetailDrawerProps) {
+}: MealPreviewDrawerProps) {
   if (!preview?.weeks) return null;
 
   const firstWeek = preview.weeks[0];

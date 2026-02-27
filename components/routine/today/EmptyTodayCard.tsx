@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BarbellIcon, BowlFoodIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { formatDate } from '@/lib/utils/dateHelpers';
-import AddWorkoutSheet from '@/components/routine/sheets/AddWorkoutSheet';
-import AddMealSheet from '@/components/routine/sheets/AddMealSheet';
-import ImportUnitMealSheet from '@/components/routine/sheets/ImportUnitMealSheet';
-import MealAddDrawer, { type MealAddOption } from '@/components/routine/meal/MealAddDrawer';
-import WorkoutAddDrawer, { type WorkoutAddOption } from '@/components/routine/workout/WorkoutAddDrawer';
+import WorkoutCreateDrawer from '@/components/routine/sheets/WorkoutCreateDrawer';
+import MealCreateDrawer from '@/components/routine/sheets/MealCreateDrawer';
+import UnitMealImportDrawer from '@/components/routine/sheets/UnitMealImportDrawer';
+import MealAddSheet, { type MealAddOption } from '@/components/routine/meal/MealAddSheet';
+import WorkoutAddSheet, { type WorkoutAddOption } from '@/components/routine/workout/WorkoutAddSheet';
 
 interface EmptyTodayCardProps {
   type: 'workout' | 'meal';
@@ -34,18 +34,18 @@ const CONFIG = {
  * - 탭하면 추가 방법 선택 드로어 열림
  * - TodayEventCard와 일관된 스타일
  * - 운동: AI 상담 / 직접 추가
- * - 식단: 부대 식단 불러오기 / AI 추천 / 직접 입력 (MealAddDrawer)
+ * - 식단: 부대 식단 불러오기 / AI 추천 / 직접 입력 (MealAddSheet)
  */
 export function EmptyTodayCard({ type }: EmptyTodayCardProps) {
   const router = useRouter();
   const today = formatDate(new Date());
   const { icon: Icon, title, subtitle } = CONFIG[type];
 
-  // 운동용 드로어 (WorkoutAddDrawer)
+  // 운동용 옵션 시트 (WorkoutAddSheet)
   const [isWorkoutDrawerOpen, setIsWorkoutDrawerOpen] = useState(false);
   const [isWorkoutSheetOpen, setIsWorkoutSheetOpen] = useState(false);
 
-  // 식단용 드로어 (MealAddDrawer)
+  // 식단용 옵션 시트 (MealAddSheet)
   const [isMealDrawerOpen, setIsMealDrawerOpen] = useState(false);
   const [isMealSheetOpen, setIsMealSheetOpen] = useState(false);
   const [isImportSheetOpen, setIsImportSheetOpen] = useState(false);
@@ -95,27 +95,27 @@ export function EmptyTodayCard({ type }: EmptyTodayCardProps) {
         <CaretRightIcon size={20} weight="bold" className="text-hint shrink-0" />
       </button>
 
-      {/* 운동: AI / 직접 추가 드로어 */}
+      {/* 운동: AI / 직접 추가 시트 */}
       {type === 'workout' && (
-        <WorkoutAddDrawer
+        <WorkoutAddSheet
           isOpen={isWorkoutDrawerOpen}
           onClose={() => setIsWorkoutDrawerOpen(false)}
           onSelect={handleWorkoutOption}
         />
       )}
 
-      {/* 식단: 부대 식단 / AI / 직접 입력 드로어 */}
+      {/* 식단: 부대 식단 / AI / 직접 입력 시트 */}
       {type === 'meal' && (
-        <MealAddDrawer
+        <MealAddSheet
           isOpen={isMealDrawerOpen}
           onClose={() => setIsMealDrawerOpen(false)}
           onSelect={handleMealOption}
         />
       )}
 
-      {/* 직접 추가 시트 */}
+      {/* 직접 추가 드로어 */}
       {type === 'workout' ? (
-        <AddWorkoutSheet
+        <WorkoutCreateDrawer
           isOpen={isWorkoutSheetOpen}
           onClose={() => setIsWorkoutSheetOpen(false)}
           date={today}
@@ -123,13 +123,13 @@ export function EmptyTodayCard({ type }: EmptyTodayCardProps) {
         />
       ) : (
         <>
-          <AddMealSheet
+          <MealCreateDrawer
             isOpen={isMealSheetOpen}
             onClose={() => setIsMealSheetOpen(false)}
             date={today}
             onCreated={() => router.push(`/routine/meal/${today}`)}
           />
-          <ImportUnitMealSheet
+          <UnitMealImportDrawer
             isOpen={isImportSheetOpen}
             onClose={() => setIsImportSheetOpen(false)}
             date={today}

@@ -6,7 +6,7 @@ import { useConfirmDialog } from '@/lib/stores/modalStore';
 import HeaderShell, { HeaderBackButton } from '@/components/layouts/shared/HeaderShell';
 import ActiveExerciseView from './ActiveExerciseView';
 import ExerciseNav from './ExerciseNav';
-import WorkoutAISheet from './WorkoutAISheet';
+import WorkoutAIDrawer from './WorkoutAIDrawer';
 import { formatElapsedTime } from '@/lib/utils/dateHelpers';
 import type { WorkoutSessionReturn } from '@/hooks/routine/useWorkoutSession';
 
@@ -116,8 +116,8 @@ export default function ActiveWorkout({ session }: ActiveWorkoutProps) {
         <RobotIcon size={22} weight="fill" />
       </button>
 
-      {/* AI 트레이너 시트 */}
-      <WorkoutAISheet
+      {/* AI 트레이너 드로어 */}
+      <WorkoutAIDrawer
         isOpen={isAISheetOpen}
         onClose={() => setIsAISheetOpen(false)}
         exerciseName={currentExercise.name}
