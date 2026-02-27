@@ -14,10 +14,14 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { AppToWebMessageSchema } from "@sangmwi/shared-contracts";
 import type { AppToWebMessage } from "@/lib/webview";
 import { useWebViewAuth } from "./useWebViewAuth";
 import { useWebViewNavigation } from "./useWebViewNavigation";
 import { LOG_PREFIX } from "./useWebViewCore";
+
+const STRICT_BRIDGE_VALIDATION =
+  process.env.NEXT_PUBLIC_STRICT_BRIDGE_VALIDATION !== "false";
 
 // ============================================================================
 // Types
@@ -150,8 +154,20 @@ export const useWebViewCommands = ({ resetSessionCheck }: UseWebViewCommandsOpti
   // ──────────────────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    const handleAppCommand = async (event: CustomEvent<AppToWebMessage>) => {
-      const command = event.detail;
+    const handleAppCommand = async (event: CustomEvent<unknown>) => {
+      const parseResult = STRICT_BRIDGE_VALIDATION
+        ? AppToWebMessageSchema.safeParse(event.detail)
+        : { success: true as const, data: event.detail as AppToWebMessage };
+
+      if (!parseResult.success) {
+        console.warn(`${LOG_PREFIX} Dropped invalid app-command`, {
+          reason: parseResult.error.issues[0]?.message,
+          payloadType: typeof event.detail,
+        });
+        return;
+      }
+
+      const command = parseResult.data as AppToWebMessage;
       const handlers = globalHandlerRegistry.get(command.type);
 
       if (handlers && handlers.size > 0) {

@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "theme:generate": "node scripts/generate-theme-css.mjs",
+    "predev": "npm run theme:generate",
+    "prebuild": "npm run theme:generate",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -15,7 +18,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@phosphor-icons/react": "^2.1.10",
-    "@sangmwi/shared-contracts": "^0.1.0",
+    "@sangmwi/shared-contracts": "^0.2.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.88.0",
     "@tanstack/react-query": "^5.90.12",

@@ -1,0 +1,139 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+let THEME_TOKENS;
+try {
+  ({ THEME_TOKENS } = require('@sangmwi/shared-contracts'));
+} catch {
+  // no-op: fallback below
+}
+
+if (!THEME_TOKENS) {
+  const localDist = path.resolve(
+    process.cwd(),
+    '..',
+    'routiners-shared-contracts',
+    'dist',
+    'theme-tokens.js'
+  );
+  if (fs.existsSync(localDist)) {
+    ({ THEME_TOKENS } = require(localDist));
+  }
+}
+
+if (!THEME_TOKENS) {
+  throw new Error(
+    'THEME_TOKENS not found. Build/publish @sangmwi/shared-contracts or build local shared dist.'
+  );
+}
+
+const { semantic, surface, edge, hint, ring, brand } = THEME_TOKENS;
+
+const mapSemantic = (mode) => ({
+  '--background': semantic[mode].background,
+  '--foreground': semantic[mode].foreground,
+  '--primary': semantic[mode].primary,
+  '--primary-foreground': semantic[mode].primaryForeground,
+  '--primary-muted': semantic[mode].primaryMuted,
+  '--secondary': semantic[mode].secondary,
+  '--secondary-foreground': semantic[mode].secondaryForeground,
+  '--muted': semantic[mode].muted,
+  '--muted-foreground': semantic[mode].mutedForeground,
+  '--card': semantic[mode].card,
+  '--card-foreground': semantic[mode].cardForeground,
+  '--border': semantic[mode].border,
+  '--input': semantic[mode].input,
+  '--destructive': semantic[mode].destructive,
+  '--destructive-foreground': semantic[mode].destructiveForeground,
+  '--like': semantic[mode].like,
+  '--success': semantic[mode].success,
+  '--success-foreground': semantic[mode].successForeground,
+  '--warning': semantic[mode].warning,
+  '--warning-foreground': semantic[mode].warningForeground,
+  '--warning-muted': semantic[mode].warningMuted,
+  '--scheduled': semantic[mode].scheduled,
+  '--scheduled-foreground': semantic[mode].scheduledForeground,
+  '--positive': semantic[mode].positive,
+  '--negative': semantic[mode].negative,
+  '--incomplete': semantic[mode].incomplete,
+  '--surface-incomplete': semantic[mode].surfaceIncomplete,
+});
+
+const mapScale = (mode) => {
+  const light = brand.green;
+  if (mode === 'light') {
+    return {
+      '--color-green-50': light[50],
+      '--color-green-100': light[100],
+      '--color-green-200': light[200],
+      '--color-green-300': light[300],
+      '--color-green-400': light[400],
+      '--color-green-500': light[500],
+      '--color-green-600': light[600],
+      '--color-green-700': light[700],
+      '--color-green-800': light[800],
+      '--color-green-900': light[900],
+      '--color-green-950': light[950],
+    };
+  }
+  return {
+    '--color-green-50': light[950],
+    '--color-green-100': light[900],
+    '--color-green-200': light[800],
+    '--color-green-300': light[700],
+    '--color-green-400': light[600],
+    '--color-green-500': light[500],
+    '--color-green-600': light[400],
+    '--color-green-700': light[300],
+    '--color-green-800': light[200],
+    '--color-green-900': light[100],
+    '--color-green-950': light[50],
+  };
+};
+
+const mapDerived = (mode) => ({
+  '--surface-secondary': surface[mode].secondary,
+  '--surface-hover': surface[mode].hover,
+  '--surface-muted': surface[mode].muted,
+  '--surface-accent': surface[mode].accent,
+  '--surface-accent-strong': surface[mode].accentStrong,
+  '--surface-danger': surface[mode].danger,
+  '--surface-scheduled': surface[mode].scheduled,
+  '--surface-glass': surface[mode].glass,
+  '--surface-pressed': surface[mode].pressed,
+  '--hint-faint': hint[mode].faint,
+  '--hint': hint[mode].normal,
+  '--hint-strong': hint[mode].strong,
+  '--edge-subtle': edge[mode].subtle,
+  '--edge-faint': edge[mode].faint,
+  '--edge-divider': edge[mode].divider,
+  '--edge-error': edge[mode].error,
+  '--ring-focus': ring[mode].focus,
+  '--ring-accent': ring[mode].accent,
+  '--ring-error': ring[mode].error,
+});
+
+const toCssBlock = (selector, values) => {
+  const lines = Object.entries(values).map(([key, value]) => `  ${key}: ${value};`);
+  return `${selector} {\n${lines.join('\n')}\n}`;
+};
+
+const lightVars = { ...mapSemantic('light'), ...mapScale('light'), ...mapDerived('light') };
+const darkVars = { ...mapSemantic('dark'), ...mapScale('dark'), ...mapDerived('dark') };
+
+const content = [
+  '/* Auto-generated from @sangmwi/shared-contracts THEME_TOKENS */',
+  toCssBlock(':root', lightVars),
+  '@media (prefers-color-scheme: dark) {',
+  toCssBlock('  :root', darkVars),
+  '}',
+  toCssBlock('[data-theme=\"light\"]', lightVars),
+  toCssBlock('[data-theme=\"dark\"]', darkVars),
+  '',
+].join('\n\n');
+
+const outputPath = path.join(process.cwd(), 'app', 'theme-tokens.generated.css');
+fs.writeFileSync(outputPath, content, 'utf8');
+console.log(`Generated ${outputPath}`);
