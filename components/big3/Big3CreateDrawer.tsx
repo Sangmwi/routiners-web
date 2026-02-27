@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Modal, { ModalBody } from '@/components/ui/Modal';
-import SheetFooterAction from '@/components/ui/SheetFooterAction';
+import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
+import Button from '@/components/ui/Button';
 import SegmentedControl from '@/components/ui/SegmentedControl';
 import { WheelPicker, DatePicker } from '@/components/ui/WheelPicker';
 import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
@@ -87,15 +87,21 @@ export default function Big3CreateDrawer({
       title="새 기록 추가"
       position="bottom"
       height="auto"
-      enableSwipe
       stickyFooter={
-        <SheetFooterAction
-          onClick={handleSubmit}
-          disabled={!isValid}
-          isLoading={createBig3.isPending}
-          label="저장"
-          pendingLabel="저장 중..."
-        />
+        <ModalFooter>
+          <Button variant="outline" className="flex-1" onClick={handleClose}>
+            취소
+          </Button>
+          <Button
+            variant="primary"
+            className="flex-1"
+            onClick={handleSubmit}
+            disabled={!isValid}
+            isLoading={createBig3.isPending}
+          >
+            저장
+          </Button>
+        </ModalFooter>
       }
     >
       <ModalBody className="p-6 space-y-5">

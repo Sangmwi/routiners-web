@@ -276,13 +276,9 @@ export default function Modal({
         onClick={(e) => e.stopPropagation()}
         {...(enableSwipe ? swipe.handlers : {})}
       >
-        {/* Drag Handle (Bottom Sheet) - 스와이프 핸들러는 여기에만 적용 */}
-        {isBottom && (
-          <div
-            className={`flex justify-center pt-3 pb-2 ${
-              enableSwipe ? 'cursor-grab active:cursor-grabbing' : ''
-            }`}
-          >
+        {/* Drag Handle (Bottom Sheet) — 스와이프 가능할 때만 표시 */}
+        {isBottom && enableSwipe && (
+          <div className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
             <div className="w-10 h-1 bg-hint-faint rounded-full" />
           </div>
         )}

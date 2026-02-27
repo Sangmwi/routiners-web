@@ -249,9 +249,15 @@ export function useModalLifecycle(
         if (overlayStack.has(idRef.current)) {
           overlayStack.delete(idRef.current);
           broadcastOverlayState();
-          // history.back()은 호출하지 않음 — 언마운트 후 비동기 popstate는
-          // Next.js 페이지 이동을 유발할 수 있음. overlay용 history 엔트리가
-          // 남지만 같은 URL이므로 사용자에게 영향 없음.
+          // React Strict Mode 재마운트 지원:
+          // cleanup 직후 동일 컴포넌트가 리마운트되면 replaceState로 기존 엔트리 재사용.
+          // (Strict Mode: remount effect는 setTimeout(0)보다 먼저 동기 실행 → 슬롯 소비)
+          // 리마운트 없이 실제 언마운트 시: setTimeout(0) 후 슬롯 해제 (기존 동작 보존)
+          // history.back()은 호출하지 않음 — 비동기 popstate가 Next.js 라우팅 방해 가능
+          pendingSwapSlot = true;
+          setTimeout(() => {
+            if (pendingSwapSlot) pendingSwapSlot = false;
+          }, 0);
         }
         isRegisteredRef.current = false;
       }

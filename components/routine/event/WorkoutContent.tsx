@@ -270,7 +270,7 @@ export default function WorkoutContent({
       </div>
 
       {!isEditMode && (
-        <GradientFooter variant="page">
+        <GradientFooter variant="page" wrapperClassName="animate-float-up">
           <EventActionButtons
             status={event.status}
             date={event.date}

@@ -2,20 +2,20 @@
 
 import { useState } from 'react';
 import { PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react';
-import Modal, { ModalBody } from '@/components/ui/Modal';
+import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
-import SheetFooterAction from '@/components/ui/SheetFooterAction';
 import { WheelPicker } from '@/components/ui/WheelPicker';
 import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
 import { BIG3_WEIGHT_OPTIONS, BIG3_REPS_OPTIONS, BIG3_RPE_OPTIONS } from '@/components/big3/constants';
 import { useUpdateBig3, useDeleteBig3 } from '@/hooks/big3';
+import { useConfirmDialog } from '@/lib/stores';
 import type { Big3Record, Big3UpdateData } from '@/lib/types/big3';
 
 const LIFT_LABEL_MAP = Object.fromEntries(
   BIG3_LIFT_CONFIG.map(({ key, label }) => [key, label]),
 ) as Record<string, string>;
 
-type ViewState = 'view' | 'edit' | 'confirm-delete';
+type ViewState = 'view' | 'edit';
 
 interface Big3DetailModalProps {
   isOpen: boolean;
@@ -32,8 +32,12 @@ export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailM
 
   const updateBig3 = useUpdateBig3();
   const deleteBig3 = useDeleteBig3();
+  const confirmDialog = useConfirmDialog();
 
   if (!record) return null;
+
+  const liftLabel = LIFT_LABEL_MAP[record.liftType] ?? record.liftType;
+  const dateStr = record.recordedAt;
 
   const handleStartEdit = () => {
     setEditWeight(String(record.weight));
@@ -64,11 +68,19 @@ export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailM
     );
   };
 
-  const handleConfirmDelete = () => {
-    deleteBig3.mutate(record.id, {
-      onSuccess: () => {
-        setViewState('view');
-        onClose();
+  const handleDeleteClick = () => {
+    confirmDialog({
+      title: '기록 삭제',
+      message: `${dateStr} ${liftLabel} ${record.weight}kg 기록을 삭제할까요?\n삭제된 기록은 복구할 수 없어요.`,
+      variant: 'danger',
+      confirmText: '삭제',
+      onConfirm: () => {
+        deleteBig3.mutate(record.id, {
+          onSuccess: () => {
+            setViewState('view');
+            onClose();
+          },
+        });
       },
     });
   };
@@ -77,51 +89,6 @@ export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailM
     setViewState('view');
     onClose();
   };
-
-  const liftLabel = LIFT_LABEL_MAP[record.liftType] ?? record.liftType;
-  const dateStr = record.recordedAt;
-
-  // ============================================================
-  // Confirm Delete View
-  // ============================================================
-  if (viewState === 'confirm-delete') {
-    return (
-      <Modal
-        isOpen={isOpen}
-        onClose={handleClose}
-        title="기록 삭제"
-        position="bottom"
-        height="auto"
-        enableSwipe
-        stickyFooter={
-          <div className="flex gap-3">
-            <Button
-              variant="secondary"
-              onClick={() => setViewState('view')}
-              className="flex-1"
-            >
-              취소
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleConfirmDelete}
-              isLoading={deleteBig3.isPending}
-              className="flex-1"
-            >
-              삭제
-            </Button>
-          </div>
-        }
-      >
-        <ModalBody className="py-6 px-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            {dateStr} {liftLabel} {record.weight}kg 기록을 삭제할까요?
-          </p>
-          <p className="text-xs text-hint mt-1">삭제된 기록은 복구할 수 없어요</p>
-        </ModalBody>
-      </Modal>
-    );
-  }
 
   // ============================================================
   // Edit View
@@ -134,14 +101,20 @@ export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailM
         title="기록 수정"
         position="bottom"
         height="auto"
-        enableSwipe
         stickyFooter={
-          <SheetFooterAction
-            onClick={handleSaveEdit}
-            isLoading={updateBig3.isPending}
-            label="저장"
-            pendingLabel="저장 중..."
-          />
+          <ModalFooter>
+            <Button variant="outline" className="flex-1" onClick={handleClose}>
+              취소
+            </Button>
+            <Button
+              variant="primary"
+              className="flex-1"
+              onClick={handleSaveEdit}
+              isLoading={updateBig3.isPending}
+            >
+              저장
+            </Button>
+          </ModalFooter>
         }
       >
         <ModalBody className="p-6 space-y-4">
@@ -213,7 +186,7 @@ export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailM
           <button onClick={handleStartEdit} className="p-2 rounded-lg hover:bg-surface-muted transition-colors text-muted-foreground" aria-label="수정">
             <PencilSimpleIcon size={20} />
           </button>
-          <button onClick={() => setViewState('confirm-delete')} className="p-2 rounded-lg hover:bg-surface-muted transition-colors text-muted-foreground" aria-label="삭제">
+          <button onClick={handleDeleteClick} className="p-2 rounded-lg hover:bg-surface-muted transition-colors text-muted-foreground" aria-label="삭제">
             <TrashIcon size={20} />
           </button>
         </div>

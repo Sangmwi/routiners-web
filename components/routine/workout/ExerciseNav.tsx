@@ -52,7 +52,7 @@ export default function ExerciseNav({
   const hasNext = currentIndex < totalExercises - 1;
 
   return (
-    <GradientFooter variant="page" className="space-y-3">
+    <GradientFooter variant="page" wrapperClassName="animate-float-up" className="space-y-3">
         {/* 메인 액션 영역 */}
         {restTimer.active ? (
           <RestTimer

@@ -8,7 +8,9 @@
   --layout-padding-y: 1rem;
 
   --nav-height: 4rem;
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --native-bottom: 0px;
+  --safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--native-bottom));
   --nav-clearance: calc(6rem + var(--safe-bottom));
   --page-safe-clearance: max(1rem, var(--safe-bottom));
   --keyboard-safe-clearance: calc(var(--keyboard-height, 0px) + var(--safe-bottom));
@@ -340,6 +342,18 @@ main {
 
 @utility pb-safe {
   padding-bottom: var(--page-safe-clearance);
+}
+
+@utility pt-safe {
+  padding-top: var(--safe-top);
+}
+
+@utility top-safe {
+  top: var(--safe-top);
+}
+
+@utility pt-page {
+  padding-top: max(var(--layout-padding-y), var(--safe-top));
 }
 
 @utility pb-nav {

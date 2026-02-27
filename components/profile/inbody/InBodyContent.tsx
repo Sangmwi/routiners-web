@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { PlusIcon, CameraIcon, PencilSimpleLineIcon } from '@phosphor-icons/react';
-import { NextIcon, LoadingSpinner } from '@/components/ui/icons';
+import { NextIcon } from '@/components/ui/icons';
 import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
 import SectionHeader from '@/components/ui/SectionHeader';
-import Modal, { ModalBody } from '@/components/ui/Modal';
+import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
 import { ImageSourceDrawer } from '@/components/drawers';
 import {
   InBodyRecordList,
@@ -162,7 +162,7 @@ export default function InBodyContent() {
       </div>
 
       {/* Fixed Bottom Button */}
-      <GradientFooter variant="page">
+      <GradientFooter variant="page" wrapperClassName="animate-float-up">
         <Button
           onClick={() => setIsMethodOpen(true)}
           className="w-full"
@@ -242,17 +242,17 @@ export default function InBodyContent() {
         initialPreview={scanPreview ?? undefined}
       />
 
-      {/* 직접 입력 드로어 */}
+      {/* 직접 입력 모달 */}
       <Modal
         isOpen={isManualOpen}
         onClose={() => setIsManualOpen(false)}
         title="직접 입력"
         position="bottom"
-        enableSwipe={!createInBody.isPending}
+        height="auto"
         closeOnBackdrop={!createInBody.isPending}
         preventClose={createInBody.isPending}
         stickyFooter={
-          <GradientFooter variant="sheet" className="flex gap-3">
+          <ModalFooter>
             <Button
               variant="outline"
               onClick={() => setIsManualOpen(false)}
@@ -264,18 +264,12 @@ export default function InBodyContent() {
             <Button
               onClick={handleSaveManual}
               className="flex-1"
-              disabled={createInBody.isPending || !manualData.weight}
+              disabled={!manualData.weight}
+              isLoading={createInBody.isPending}
             >
-              {createInBody.isPending ? (
-                <>
-                  <LoadingSpinner size="sm" variant="current" className="mr-2" />
-                  저장 중...
-                </>
-              ) : (
-                '저장'
-              )}
+              저장
             </Button>
-          </GradientFooter>
+          </ModalFooter>
         }
       >
         <ModalBody>

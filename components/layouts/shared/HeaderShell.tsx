@@ -31,7 +31,7 @@ export default function HeaderShell({
     ? 'bg-transparent'
     : 'bg-background border-b border-edge-subtle';
 
-  const stickyClass = sticky ? 'sticky top-0 z-40' : '';
+  const stickyClass = sticky ? 'sticky top-safe z-40' : '';
 
   return (
     <header className={`${stickyClass} ${bgClass} ${className}`}>

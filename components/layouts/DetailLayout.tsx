@@ -76,7 +76,7 @@ export function DetailLayout({
 
   return (
     <div
-      className={`min-h-screen bg-background ${bottomClass}`.trim()}
+      className={`min-h-screen bg-background pt-safe ${bottomClass}`.trim()}
     >
       <PageHeader
         title={title}

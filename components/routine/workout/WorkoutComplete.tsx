@@ -143,7 +143,7 @@ export default function WorkoutComplete({
       </div>
 
       {/* 하단 완료 버튼 */}
-      <GradientFooter variant="page">
+      <GradientFooter variant="page" wrapperClassName="animate-float-up">
         <Button
           variant="primary"
           fullWidth

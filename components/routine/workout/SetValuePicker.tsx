@@ -87,10 +87,9 @@ export default function SetValuePicker({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      position="bottom"
-      enableSwipe
       title={title}
-      showCloseButton={false}
+      position="bottom"
+      height="auto"
     >
       <SetValuePickerContent
         key={stateKey}
