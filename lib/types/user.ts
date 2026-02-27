@@ -110,6 +110,10 @@ export interface User {
 
   createdAt: string;
   updatedAt?: string;
+
+  // Follow counts (공개 프로필 API에서 제공)
+  followersCount?: number;
+  followingCount?: number;
 }
 
 // ============================================================================

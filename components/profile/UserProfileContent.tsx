@@ -2,12 +2,14 @@
 
 import { Suspense, useState, useRef, useEffect } from 'react';
 import { useUserProfileSuspense } from '@/hooks/profile/queries';
+import { useCurrentUserProfile } from '@/hooks/profile/queries';
 import { useUserPostCount } from '@/hooks/community/useUserPostCount';
 import type { ProfileTab } from '@/components/profile/ProfileTabBar';
 import ProfileCompactHeader from '@/components/profile/ProfileCompactHeader';
 import ProfileTabBar from '@/components/profile/ProfileTabBar';
 import ProfileActivityGrid from '@/components/profile/ProfileActivityGrid';
 import ProfileInfoTab from '@/components/profile/ProfileInfoTab';
+import ProfileFollowButton from '@/components/profile/ProfileFollowButton';
 import { PulseLoader } from '@/components/ui/PulseLoader';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 
@@ -21,6 +23,7 @@ interface UserProfileContentProps {
 export default function UserProfileContent({ userId }: UserProfileContentProps) {
   const { data: user } = useUserProfileSuspense(userId);
   const { data: postCount = 0 } = useUserPostCount(userId);
+  const { data: currentUser } = useCurrentUserProfile();
   const [activeTab, setActiveTab] = useState<ProfileTab>('activity');
   const [direction, setDirection] = useState<'left' | 'right'>('right');
   const prevTab = useRef(activeTab);
@@ -57,14 +60,19 @@ export default function UserProfileContent({ userId }: UserProfileContentProps) 
             <span className="text-muted-foreground ml-1">게시글</span>
           </span>
           <span>
-            <span className="font-semibold text-foreground">0</span>
+            <span className="font-semibold text-foreground">{user.followersCount ?? 0}</span>
             <span className="text-muted-foreground ml-1">팔로워</span>
           </span>
           <span>
-            <span className="font-semibold text-foreground">0</span>
+            <span className="font-semibold text-foreground">{user.followingCount ?? 0}</span>
             <span className="text-muted-foreground ml-1">팔로잉</span>
           </span>
         </div>
+
+        {/* 팔로우 버튼 (다른 유저만) */}
+        {currentUser && currentUser.id !== userId && (
+          <ProfileFollowButton targetUserId={userId} />
+        )}
       </div>
 
       <ProfileTabBar activeTab={activeTab} onTabChange={setActiveTab} privateTabs={privateTabs} />

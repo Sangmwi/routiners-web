@@ -127,6 +127,7 @@ export default function CommunityContent({
                 onAuthorClick={() => handleAuthorClick(post.authorId)}
                 onMore={() => handleMore(post.id)}
                 showMoreButton={currentUser?.id === post.authorId}
+                showFollowButton={!!currentUser && currentUser.id !== post.authorId}
               />
             ))}
           </div>

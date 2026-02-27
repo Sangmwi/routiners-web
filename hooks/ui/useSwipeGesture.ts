@@ -38,6 +38,32 @@ interface UseSwipeGestureReturn {
 const ANIMATION_DURATION = 200;
 
 // ============================================================================
+// Helpers
+// ============================================================================
+
+/**
+ * target부터 boundary까지 DOM 트리를 올라가며 scrollTop > 0인 요소가 있으면 true
+ *
+ * 중첩된 스크롤 컨테이너(WheelPicker, 리스트 등)가 스크롤된 상태일 때
+ * 모달 drag가 잘못 시작되는 것을 방지하기 위해 사용
+ */
+function hasScrolledAncestor(target: EventTarget | null, boundary: Element): boolean {
+  let el = target as Element | null;
+  while (el && el !== boundary) {
+    if (el.scrollTop > 0) {
+      // scrollTop > 0인 요소가 실제 스크롤 컨테이너인지 확인
+      // overflow-y: visible인 일반 div는 제외 (오탐 방지)
+      const overflowY = window.getComputedStyle(el).overflowY;
+      if (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') {
+        return true;
+      }
+    }
+    el = el.parentElement;
+  }
+  return false;
+}
+
+// ============================================================================
 // Hook
 // ============================================================================
 
@@ -182,7 +208,7 @@ export function useSwipeGesture(
       const clientY = e.touches[0].clientY;
       contentTouchStartYRef.current = clientY;
       const scrollEl = contentRef.current;
-      if (scrollEl && scrollEl.scrollTop <= 0) {
+      if (scrollEl && scrollEl.scrollTop <= 0 && !hasScrolledAncestor(e.target, scrollEl)) {
         contentDraggingRef.current = true;
         handleDragStart(clientY);
       }
@@ -204,7 +230,8 @@ export function useSwipeGesture(
         scrollEl &&
         scrollEl.scrollTop <= 0 &&
         contentTouchStartYRef.current !== null &&
-        clientY > contentTouchStartYRef.current
+        clientY > contentTouchStartYRef.current &&
+        !hasScrolledAncestor(e.target, scrollEl)
       ) {
         contentDraggingRef.current = true;
         handleDragStart(clientY);
@@ -222,7 +249,7 @@ export function useSwipeGesture(
       if (!enabled) return;
       contentTouchStartYRef.current = e.clientY;
       const scrollEl = contentRef.current;
-      if (scrollEl && scrollEl.scrollTop <= 0) {
+      if (scrollEl && scrollEl.scrollTop <= 0 && !hasScrolledAncestor(e.target, scrollEl)) {
         contentDraggingRef.current = true;
         handleDragStart(e.clientY);
       }
@@ -240,7 +267,8 @@ export function useSwipeGesture(
         scrollEl &&
         scrollEl.scrollTop <= 0 &&
         contentTouchStartYRef.current !== null &&
-        clientY > contentTouchStartYRef.current
+        clientY > contentTouchStartYRef.current &&
+        !hasScrolledAncestor(e.target, scrollEl)
       ) {
         contentDraggingRef.current = true;
         handleDragStart(clientY);

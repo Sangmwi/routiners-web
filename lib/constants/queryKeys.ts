@@ -243,6 +243,17 @@ export const queryKeys = {
   },
 
   /**
+   * Follow 관련 Query Keys
+   */
+  follow: {
+    /** 모든 follow 쿼리의 기본 키 */
+    all: ['follow'] as const,
+
+    /** 특정 사용자에 대한 팔로우 상태 */
+    status: (userId: string) => ['follow', 'status', userId] as const,
+  },
+
+  /**
    * Routine Event 관련 Query Keys
    */
   routineEvent: {

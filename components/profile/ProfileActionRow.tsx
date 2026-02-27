@@ -1,8 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useModalStore } from '@/lib/stores/modalStore';
 import { useUserPostCount } from '@/hooks/community/useUserPostCount';
+import { useCurrentUserProfile } from '@/hooks/profile/queries';
 
 interface ProfileActionRowProps {
   userId: string;
@@ -13,16 +13,8 @@ interface ProfileActionRowProps {
  */
 export default function ProfileActionRow({ userId }: ProfileActionRowProps) {
   const router = useRouter();
-  const openModal = useModalStore((state) => state.openModal);
   const { data: postCount = 0 } = useUserPostCount(userId);
-
-  const handleComingSoon = () => {
-    openModal('alert', {
-      title: '준비 중',
-      message: '팔로워/팔로잉 기능을 준비하고 있어요!',
-      buttonText: '확인',
-    });
-  };
+  const { data: currentUser } = useCurrentUserProfile();
 
   return (
     <div className="space-y-3">
@@ -32,14 +24,14 @@ export default function ProfileActionRow({ userId }: ProfileActionRowProps) {
           <span className="font-semibold text-foreground">{postCount}</span>
           <span className="text-muted-foreground ml-1">게시글</span>
         </span>
-        <button onClick={handleComingSoon}>
-          <span className="font-semibold text-foreground">0</span>
+        <span>
+          <span className="font-semibold text-foreground">{currentUser?.followersCount ?? 0}</span>
           <span className="text-muted-foreground ml-1">팔로워</span>
-        </button>
-        <button onClick={handleComingSoon}>
-          <span className="font-semibold text-foreground">0</span>
+        </span>
+        <span>
+          <span className="font-semibold text-foreground">{currentUser?.followingCount ?? 0}</span>
           <span className="text-muted-foreground ml-1">팔로잉</span>
-        </button>
+        </span>
       </div>
 
       {/* 프로필 편집 버튼 */}

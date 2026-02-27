@@ -27,5 +27,21 @@ export const GET = withAuth(async (_request, { authUser, supabase }) => {
   // Use centralized transformer
   const transformedUser = toUser(user as DbUser);
 
-  return NextResponse.json(transformedUser);
+  // 팔로워/팔로잉 수 조회
+  const [{ count: followersCount }, { count: followingCount }] = await Promise.all([
+    supabase
+      .from('user_follows')
+      .select('*', { count: 'exact', head: true })
+      .eq('following_id', transformedUser.id),
+    supabase
+      .from('user_follows')
+      .select('*', { count: 'exact', head: true })
+      .eq('follower_id', transformedUser.id),
+  ]);
+
+  return NextResponse.json({
+    ...transformedUser,
+    followersCount: followersCount ?? 0,
+    followingCount: followingCount ?? 0,
+  });
 });

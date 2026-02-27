@@ -7,6 +7,7 @@ import { useThrottle } from '@/hooks/useThrottle';
 import type { CommunityPost } from '@/lib/types/community';
 import { formatTimeAgo } from '@/lib/types/community';
 import { RANK_OPTIONS } from '@/lib/constants/military';
+import PostFollowButton from './PostFollowButton';
 
 interface PostCardProps {
   post: CommunityPost;
@@ -15,6 +16,7 @@ interface PostCardProps {
   onAuthorClick?: () => void;
   onMore?: () => void;
   showMoreButton?: boolean;
+  showFollowButton?: boolean;
 }
 
 /**
@@ -24,7 +26,7 @@ interface PostCardProps {
  * - 이미지는 레이아웃 패딩 무시하고 화면 꽉 채움
  * - 텍스트/액션은 레이아웃 패딩 내에서 표시
  */
-export default function PostCard({ post, onLike, onComment, onAuthorClick, onMore, showMoreButton }: PostCardProps) {
+export default function PostCard({ post, onLike, onComment, onAuthorClick, onMore, showMoreButton, showFollowButton }: PostCardProps) {
   const { author, content, likesCount, commentsCount, imageUrls, createdAt, isLiked } = post;
 
   const authorName = author?.nickname ?? '알 수 없음';
@@ -95,6 +97,9 @@ export default function PostCard({ post, onLike, onComment, onAuthorClick, onMor
           </p>
           <p className="text-xs text-muted-foreground">{timeAgo}</p>
         </button>
+        {showFollowButton && author?.id && (
+          <PostFollowButton authorId={author.id} />
+        )}
         {showMoreButton && (
           <button
             onClick={handleMoreClick}

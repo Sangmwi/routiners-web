@@ -39,7 +39,7 @@
   --color-green-800: #1a5421;
   --color-green-900: #17451c;
   --color-green-950: #0a2610;
-  --surface-secondary: rgba(226, 232, 240, 0.24);
+  --surface-secondary: rgba(226, 232, 240, 0.36);
   --surface-hover: rgba(226, 232, 240, 0.3);
   --surface-muted: rgba(226, 232, 240, 0.5);
   --surface-accent: rgba(80, 167, 108, 0.1);
@@ -241,7 +241,7 @@
   --color-green-800: #1a5421;
   --color-green-900: #17451c;
   --color-green-950: #0a2610;
-  --surface-secondary: rgba(226, 232, 240, 0.24);
+  --surface-secondary: rgba(226, 232, 240, 0.36);
   --surface-hover: rgba(226, 232, 240, 0.3);
   --surface-muted: rgba(226, 232, 240, 0.5);
   --surface-accent: rgba(80, 167, 108, 0.1);

@@ -48,7 +48,23 @@ export async function GET(
     // Use centralized transformer with privacy settings applied
     const user = toPublicUser(userData as DbUser);
 
-    return NextResponse.json(user);
+    // 팔로워/팔로잉 수 조회
+    const [{ count: followersCount }, { count: followingCount }] = await Promise.all([
+      supabase
+        .from('user_follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('following_id', userId),
+      supabase
+        .from('user_follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('follower_id', userId),
+    ]);
+
+    return NextResponse.json({
+      ...user,
+      followersCount: followersCount ?? 0,
+      followingCount: followingCount ?? 0,
+    });
   } catch (error) {
     console.error('[GET /api/user/[userId]]', error);
     return handleError(error, '/api/user/[userId]');
