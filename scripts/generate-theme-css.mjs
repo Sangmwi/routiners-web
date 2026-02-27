@@ -141,7 +141,18 @@ const mapLayout = () => ({
   '--section-gap': `${layout.section.gap}px`,
   '--section-title-size': `${layout.section.titleSize}px`,
   '--modal-radius': `${layout.modal.cardRadius}px`,
+  '--modal-max-width': `${layout.modal.maxWidth}px`,
+  '--modal-padding-x': `${layout.modal.paddingX}px`,
+  '--modal-padding-y': `${layout.modal.paddingY}px`,
+  '--modal-title-size': `${layout.modal.titleSize}px`,
+  '--modal-message-size': `${layout.modal.messageSize}px`,
+  '--modal-message-line-height': `${layout.modal.messageLineHeight}px`,
+  '--modal-action-min-height': `${layout.modal.actionMinHeight}px`,
+  '--modal-action-min-width': `${layout.modal.actionMinWidth}px`,
+  '--modal-action-radius': `${layout.modal.actionRadius}px`,
+  '--modal-content-gap': `${layout.modal.contentGap}px`,
   '--modal-action-gap': `${layout.modal.actionGap}px`,
+  '--modal-button-gap': `${layout.modal.buttonGap}px`,
 });
 
 const toCssBlock = (selector, values) => {

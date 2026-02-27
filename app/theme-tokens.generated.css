@@ -83,7 +83,18 @@
   --section-gap: 8px;
   --section-title-size: 13px;
   --modal-radius: 22px;
+  --modal-max-width: 360px;
+  --modal-padding-x: 24px;
+  --modal-padding-y: 24px;
+  --modal-title-size: 18px;
+  --modal-message-size: 16px;
+  --modal-message-line-height: 24px;
+  --modal-action-min-height: 44px;
+  --modal-action-min-width: 120px;
+  --modal-action-radius: 14px;
+  --modal-content-gap: 16px;
   --modal-action-gap: 12px;
+  --modal-button-gap: 12px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -171,7 +182,18 @@
   --section-gap: 8px;
   --section-title-size: 13px;
   --modal-radius: 22px;
+  --modal-max-width: 360px;
+  --modal-padding-x: 24px;
+  --modal-padding-y: 24px;
+  --modal-title-size: 18px;
+  --modal-message-size: 16px;
+  --modal-message-line-height: 24px;
+  --modal-action-min-height: 44px;
+  --modal-action-min-width: 120px;
+  --modal-action-radius: 14px;
+  --modal-content-gap: 16px;
   --modal-action-gap: 12px;
+  --modal-button-gap: 12px;
 }
 
 }
@@ -259,7 +281,18 @@
   --section-gap: 8px;
   --section-title-size: 13px;
   --modal-radius: 22px;
+  --modal-max-width: 360px;
+  --modal-padding-x: 24px;
+  --modal-padding-y: 24px;
+  --modal-title-size: 18px;
+  --modal-message-size: 16px;
+  --modal-message-line-height: 24px;
+  --modal-action-min-height: 44px;
+  --modal-action-min-width: 120px;
+  --modal-action-radius: 14px;
+  --modal-content-gap: 16px;
   --modal-action-gap: 12px;
+  --modal-button-gap: 12px;
 }
 
 [data-theme="dark"] {
@@ -345,6 +378,17 @@
   --section-gap: 8px;
   --section-title-size: 13px;
   --modal-radius: 22px;
+  --modal-max-width: 360px;
+  --modal-padding-x: 24px;
+  --modal-padding-y: 24px;
+  --modal-title-size: 18px;
+  --modal-message-size: 16px;
+  --modal-message-line-height: 24px;
+  --modal-action-min-height: 44px;
+  --modal-action-min-width: 120px;
+  --modal-action-radius: 14px;
+  --modal-content-gap: 16px;
   --modal-action-gap: 12px;
+  --modal-button-gap: 12px;
 }
 
