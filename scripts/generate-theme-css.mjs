@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+﻿import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 
@@ -29,7 +29,7 @@ if (!THEME_TOKENS) {
   );
 }
 
-const { semantic, surface, edge, hint, ring, brand } = THEME_TOKENS;
+const { semantic, surface, edge, hint, ring, brand, layout } = THEME_TOKENS;
 
 const mapSemantic = (mode) => ({
   '--background': semantic[mode].background,
@@ -115,13 +115,52 @@ const mapDerived = (mode) => ({
   '--ring-error': ring[mode].error,
 });
 
+const mapLayout = () => ({
+  '--space-2': `${layout.space[2]}px`,
+  '--space-4': `${layout.space[4]}px`,
+  '--space-6': `${layout.space[6]}px`,
+  '--space-8': `${layout.space[8]}px`,
+  '--space-10': `${layout.space[10]}px`,
+  '--space-12': `${layout.space[12]}px`,
+  '--space-16': `${layout.space[16]}px`,
+  '--space-20': `${layout.space[20]}px`,
+  '--space-24': `${layout.space[24]}px`,
+  '--radius-sm': `${layout.radius.sm}px`,
+  '--radius-md': `${layout.radius.md}px`,
+  '--radius-lg': `${layout.radius.lg}px`,
+  '--radius-xl': `${layout.radius.xl}px`,
+  '--radius-2xl': `${layout.radius.x2}px`,
+  '--text-title': `${layout.typography.title}px`,
+  '--text-body': `${layout.typography.body}px`,
+  '--text-caption': `${layout.typography.caption}px`,
+  '--text-button': `${layout.typography.button}px`,
+  '--row-height': `${layout.row.height}px`,
+  '--row-padding-x': `${layout.row.paddingX}px`,
+  '--row-padding-y': `${layout.row.paddingY}px`,
+  '--row-divider-inset': `${layout.row.dividerInset}px`,
+  '--section-gap': `${layout.section.gap}px`,
+  '--section-title-size': `${layout.section.titleSize}px`,
+  '--modal-radius': `${layout.modal.cardRadius}px`,
+  '--modal-action-gap': `${layout.modal.actionGap}px`,
+});
+
 const toCssBlock = (selector, values) => {
   const lines = Object.entries(values).map(([key, value]) => `  ${key}: ${value};`);
   return `${selector} {\n${lines.join('\n')}\n}`;
 };
 
-const lightVars = { ...mapSemantic('light'), ...mapScale('light'), ...mapDerived('light') };
-const darkVars = { ...mapSemantic('dark'), ...mapScale('dark'), ...mapDerived('dark') };
+const lightVars = {
+  ...mapSemantic('light'),
+  ...mapScale('light'),
+  ...mapDerived('light'),
+  ...mapLayout(),
+};
+const darkVars = {
+  ...mapSemantic('dark'),
+  ...mapScale('dark'),
+  ...mapDerived('dark'),
+  ...mapLayout(),
+};
 
 const content = [
   '/* Auto-generated from @sangmwi/shared-contracts THEME_TOKENS */',
@@ -129,8 +168,8 @@ const content = [
   '@media (prefers-color-scheme: dark) {',
   toCssBlock('  :root', darkVars),
   '}',
-  toCssBlock('[data-theme=\"light\"]', lightVars),
-  toCssBlock('[data-theme=\"dark\"]', darkVars),
+  toCssBlock('[data-theme="light"]', lightVars),
+  toCssBlock('[data-theme="dark"]', darkVars),
   '',
 ].join('\n\n');
 

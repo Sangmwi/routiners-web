@@ -58,6 +58,32 @@
   --ring-focus: rgba(80, 167, 108, 0.2);
   --ring-accent: rgba(80, 167, 108, 0.3);
   --ring-error: rgba(217, 115, 115, 0.2);
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --text-title: 18px;
+  --text-body: 15px;
+  --text-caption: 12px;
+  --text-button: 16px;
+  --row-height: 52px;
+  --row-padding-x: 16px;
+  --row-padding-y: 14px;
+  --row-divider-inset: 46px;
+  --section-gap: 8px;
+  --section-title-size: 13px;
+  --modal-radius: 22px;
+  --modal-action-gap: 12px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -120,6 +146,32 @@
   --ring-focus: rgba(95, 192, 127, 0.2);
   --ring-accent: rgba(95, 192, 127, 0.3);
   --ring-error: rgba(232, 160, 160, 0.2);
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --text-title: 18px;
+  --text-body: 15px;
+  --text-caption: 12px;
+  --text-button: 16px;
+  --row-height: 52px;
+  --row-padding-x: 16px;
+  --row-padding-y: 14px;
+  --row-divider-inset: 46px;
+  --section-gap: 8px;
+  --section-title-size: 13px;
+  --modal-radius: 22px;
+  --modal-action-gap: 12px;
 }
 
 }
@@ -182,6 +234,32 @@
   --ring-focus: rgba(80, 167, 108, 0.2);
   --ring-accent: rgba(80, 167, 108, 0.3);
   --ring-error: rgba(217, 115, 115, 0.2);
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --text-title: 18px;
+  --text-body: 15px;
+  --text-caption: 12px;
+  --text-button: 16px;
+  --row-height: 52px;
+  --row-padding-x: 16px;
+  --row-padding-y: 14px;
+  --row-divider-inset: 46px;
+  --section-gap: 8px;
+  --section-title-size: 13px;
+  --modal-radius: 22px;
+  --modal-action-gap: 12px;
 }
 
 [data-theme="dark"] {
@@ -242,5 +320,31 @@
   --ring-focus: rgba(95, 192, 127, 0.2);
   --ring-accent: rgba(95, 192, 127, 0.3);
   --ring-error: rgba(232, 160, 160, 0.2);
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --text-title: 18px;
+  --text-body: 15px;
+  --text-caption: 12px;
+  --text-button: 16px;
+  --row-height: 52px;
+  --row-padding-x: 16px;
+  --row-padding-y: 14px;
+  --row-divider-inset: 46px;
+  --section-gap: 8px;
+  --section-title-size: 13px;
+  --modal-radius: 22px;
+  --modal-action-gap: 12px;
 }
 
