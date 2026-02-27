@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { PlusIcon } from '@phosphor-icons/react';
 import { EMPTY_STATE } from '@/lib/config/theme';
@@ -13,9 +12,7 @@ import {
   MealCard,
   NutritionSummary,
 } from '@/components/routine';
-import MealAddSheet, { type MealAddOption } from '@/components/routine/meal/MealAddSheet';
-import MealCreateDrawer from '@/components/routine/sheets/MealCreateDrawer';
-import UnitMealImportDrawer from '@/components/routine/sheets/UnitMealImportDrawer';
+import { useMealAddFlow } from '@/hooks/routine';
 import { getEventConfig } from '@/lib/config/theme';
 import { useConfirmDialog } from '@/lib/stores/modalStore';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
@@ -32,7 +29,6 @@ const MEAL_LABELS = ['아침', '점심', '저녁', '간식'] as const;
 const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack'] as const;
 
 export default function MealContent({ date, onTitleChange, onHeaderAction }: MealContentProps) {
-  const router = useRouter();
   const confirm = useConfirmDialog();
 
   const {
@@ -55,9 +51,7 @@ export default function MealContent({ date, onTitleChange, onHeaderAction }: Mea
   const [editingTitle, setEditingTitle] = useState('');
   const updateEvent = useUpdateRoutineEvent();
 
-  const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
-  const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
-  const [isImportSheetOpen, setIsImportSheetOpen] = useState(false);
+  const mealAdd = useMealAddFlow({ date, existingEvent: event ?? undefined });
 
   const enterEditMode = () => {
     if (event) {
@@ -96,23 +90,6 @@ export default function MealContent({ date, onTitleChange, onHeaderAction }: Mea
     }
   }, [event?.title, onTitleChange]);
 
-  const handleAddOption = (option: MealAddOption) => {
-      setIsAddDrawerOpen(false);
-      if (option === 'ai') {
-        router.push('/routine/counselor');
-        return;
-      }
-      // drawer close 애니메이션(200ms) 완료 후 sheet 열기 — 레이스 컨디션 방지
-      const CLOSE_DELAY = 250;
-      setTimeout(() => {
-        if (option === 'direct') {
-          setIsAddSheetOpen(true);
-        } else {
-          setIsImportSheetOpen(true);
-        }
-      }, CLOSE_DELAY);
-    };
-
   const handleRemoveMealWithConfirm = (mealIndex: number) => {
       const mealType = mealData?.meals[mealIndex]?.type;
       const typeIndex = mealType ? MEAL_TYPES.indexOf(mealType as (typeof MEAL_TYPES)[number]) : -1;
@@ -139,7 +116,7 @@ export default function MealContent({ date, onTitleChange, onHeaderAction }: Mea
             <Button
               variant="primary"
               fullWidth
-              onClick={() => setIsAddDrawerOpen(true)}
+              onClick={mealAdd.open}
               className="shadow-none hover:shadow-none"
             >
               <PlusIcon size={18} weight="bold" />
@@ -148,21 +125,7 @@ export default function MealContent({ date, onTitleChange, onHeaderAction }: Mea
           </div>
         </div>
 
-        <MealAddSheet
-          isOpen={isAddDrawerOpen}
-          onClose={() => setIsAddDrawerOpen(false)}
-          onSelect={handleAddOption}
-        />
-        <MealCreateDrawer
-          isOpen={isAddSheetOpen}
-          onClose={() => setIsAddSheetOpen(false)}
-          date={date}
-        />
-        <UnitMealImportDrawer
-          isOpen={isImportSheetOpen}
-          onClose={() => setIsImportSheetOpen(false)}
-          date={date}
-        />
+        {mealAdd.element}
       </>
     );
   }
@@ -226,7 +189,7 @@ export default function MealContent({ date, onTitleChange, onHeaderAction }: Mea
             {event.status === 'scheduled' && !isEditMode && (
               <button
                 type="button"
-                onClick={() => setIsAddDrawerOpen(true)}
+                onClick={mealAdd.open}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-border text-sm text-muted-foreground"
               >
                 <PlusIcon size={16} weight="bold" />
@@ -240,7 +203,7 @@ export default function MealContent({ date, onTitleChange, onHeaderAction }: Mea
             {event.status === 'scheduled' && (
               <button
                 type="button"
-                onClick={() => setIsAddDrawerOpen(true)}
+                onClick={mealAdd.open}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-border text-sm text-muted-foreground"
               >
                 <PlusIcon size={16} weight="bold" />
@@ -270,25 +233,7 @@ export default function MealContent({ date, onTitleChange, onHeaderAction }: Mea
         </GradientFooter>
       )}
 
-      <MealAddSheet
-        isOpen={isAddDrawerOpen}
-        onClose={() => setIsAddDrawerOpen(false)}
-        onSelect={handleAddOption}
-        isAppending
-      />
-
-      <MealCreateDrawer
-        isOpen={isAddSheetOpen}
-        onClose={() => setIsAddSheetOpen(false)}
-        date={date}
-        existingEvent={event}
-      />
-
-      <UnitMealImportDrawer
-        isOpen={isImportSheetOpen}
-        onClose={() => setIsImportSheetOpen(false)}
-        date={date}
-      />
+      {mealAdd.element}
     </>
   );
 }

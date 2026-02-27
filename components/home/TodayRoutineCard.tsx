@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import {
   BarbellIcon,
   BedIcon,
@@ -10,13 +10,8 @@ import {
   PlusIcon,
 } from '@phosphor-icons/react';
 import AppLink from '@/components/common/AppLink';
-import MealAddSheet, { type MealAddOption } from '@/components/routine/meal/MealAddSheet';
-import WorkoutAddSheet, {
-  type WorkoutAddOption,
-} from '@/components/routine/workout/WorkoutAddSheet';
-import MealCreateDrawer from '@/components/routine/sheets/MealCreateDrawer';
-import WorkoutCreateDrawer from '@/components/routine/sheets/WorkoutCreateDrawer';
-import UnitMealImportDrawer from '@/components/routine/sheets/UnitMealImportDrawer';
+import { useWorkoutAddFlow } from '@/hooks/routine/useWorkoutAddFlow';
+import { useMealAddFlow } from '@/hooks/routine/useMealAddFlow';
 import { MEAL_TIME } from '@/lib/config/theme/event';
 import type { RoutineEvent, WorkoutExercise } from '@/lib/types/routine';
 import { isMealData, isWorkoutData } from '@/lib/types/guards';
@@ -242,19 +237,12 @@ function WorkoutColumn({
 }) {
   const router = useRouter();
   const today = formatDate(new Date());
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const workoutAdd = useWorkoutAddFlow({
+    date: today,
+    onCreated: () => router.push(`/routine/workout/${today}`),
+  });
 
   const model = getWorkoutModel(event);
-
-  const handleOption = (option: WorkoutAddOption) => {
-    setIsDrawerOpen(false);
-    if (option === 'ai') {
-      router.push('/routine/counselor');
-    } else {
-      setIsSheetOpen(true);
-    }
-  };
 
   return (
     <div>
@@ -281,20 +269,10 @@ function WorkoutColumn({
               label: '오늘 운동 없음',
               subLabel: '추가',
               icon: <BarbellIcon size={36} weight="duotone" className="text-hint" />,
-              onClick: () => setIsDrawerOpen(true),
+              onClick: workoutAdd.open,
             }}
           />
-          <WorkoutAddSheet
-            isOpen={isDrawerOpen}
-            onClose={() => setIsDrawerOpen(false)}
-            onSelect={handleOption}
-          />
-          <WorkoutCreateDrawer
-            isOpen={isSheetOpen}
-            onClose={() => setIsSheetOpen(false)}
-            date={today}
-            onCreated={() => router.push(`/routine/workout/${today}`)}
-          />
+          {workoutAdd.element}
         </>
       )}
     </div>
@@ -304,22 +282,12 @@ function WorkoutColumn({
 function MealColumn({ event }: { event: RoutineEvent | null }) {
   const router = useRouter();
   const today = formatDate(new Date());
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isMealSheetOpen, setIsMealSheetOpen] = useState(false);
-  const [isImportSheetOpen, setIsImportSheetOpen] = useState(false);
+  const mealAdd = useMealAddFlow({
+    date: today,
+    onCreated: () => router.push(`/routine/meal/${today}`),
+  });
 
   const model = getMealModel(event);
-
-  const handleOption = (option: MealAddOption) => {
-    setIsDrawerOpen(false);
-    if (option === 'ai') {
-      router.push('/routine/counselor');
-    } else if (option === 'direct') {
-      setIsMealSheetOpen(true);
-    } else {
-      setIsImportSheetOpen(true);
-    }
-  };
 
   return (
     <div>
@@ -333,26 +301,10 @@ function MealColumn({ event }: { event: RoutineEvent | null }) {
               label: '오늘 식단 없음',
               subLabel: '추가',
               icon: <BowlFoodIcon size={36} weight="duotone" className="text-hint" />,
-              onClick: () => setIsDrawerOpen(true),
+              onClick: mealAdd.open,
             }}
           />
-          <MealAddSheet
-            isOpen={isDrawerOpen}
-            onClose={() => setIsDrawerOpen(false)}
-            onSelect={handleOption}
-          />
-          <MealCreateDrawer
-            isOpen={isMealSheetOpen}
-            onClose={() => setIsMealSheetOpen(false)}
-            date={today}
-            onCreated={() => router.push(`/routine/meal/${today}`)}
-          />
-          <UnitMealImportDrawer
-            isOpen={isImportSheetOpen}
-            onClose={() => setIsImportSheetOpen(false)}
-            date={today}
-            onCreated={() => router.push(`/routine/meal/${today}`)}
-          />
+          {mealAdd.element}
         </>
       )}
     </div>

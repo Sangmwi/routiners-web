@@ -20,3 +20,7 @@ export { useRoutineEventActions } from './useRoutineEventActions';
 export { useStatsPeriodNavigator } from './useStatsPeriodNavigator';
 export { useEventHeaderActions } from './useEventHeaderActions';
 export { useCatalogSelection } from './useCatalogSelection';
+
+// Add Flow Hooks
+export { useWorkoutAddFlow } from './useWorkoutAddFlow';
+export { useMealAddFlow } from './useMealAddFlow';

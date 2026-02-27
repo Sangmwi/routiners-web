@@ -1,18 +1,12 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DayEventCard } from '@/components/routine';
-import { useRoutineEventByDateSuspense, useDeleteRoutineEvent } from '@/hooks/routine';
+import { useRoutineEventByDateSuspense, useDeleteRoutineEvent, useWorkoutAddFlow, useMealAddFlow } from '@/hooks/routine';
 import { useConfirmDialog } from '@/lib/stores/modalStore';
 import type { EventType } from '@/lib/types/routine';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 import { BarbellIcon, BowlFoodIcon, PlusIcon } from '@phosphor-icons/react';
-import WorkoutCreateDrawer from '@/components/routine/sheets/WorkoutCreateDrawer';
-import MealCreateDrawer from '@/components/routine/sheets/MealCreateDrawer';
-import UnitMealImportDrawer from '@/components/routine/sheets/UnitMealImportDrawer';
-import MealAddSheet, { type MealAddOption } from '@/components/routine/meal/MealAddSheet';
-import WorkoutAddSheet, { type WorkoutAddOption } from '@/components/routine/workout/WorkoutAddSheet';
 
 type FilterType = EventType | 'all';
 
@@ -52,38 +46,8 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
     });
   };
 
-  // 운동 옵션 시트 (WorkoutAddSheet)
-  const [isWorkoutDrawerOpen, setIsWorkoutDrawerOpen] = useState(false);
-  const [activeWorkoutSheet, setActiveWorkoutSheet] = useState(false);
-
-  const handleWorkoutOption = (option: WorkoutAddOption) => {
-    setIsWorkoutDrawerOpen(false);
-    if (option === 'ai') {
-      router.push('/routine/counselor');
-    } else {
-      setActiveWorkoutSheet(true);
-    }
-  };
-
-  // 식단 옵션 시트 (MealAddSheet)
-  const [isMealDrawerOpen, setIsMealDrawerOpen] = useState(false);
-  const [isMealSheetOpen, setIsMealSheetOpen] = useState(false);
-  const [isImportSheetOpen, setIsImportSheetOpen] = useState(false);
-
-  const handleMealOption = (option: MealAddOption) => {
-    setIsMealDrawerOpen(false);
-    if (option === 'ai') {
-      router.push('/routine/counselor');
-    } else if (option === 'direct') {
-      setIsMealSheetOpen(true);
-    } else {
-      setIsImportSheetOpen(true);
-    }
-  };
-
-  const handleCreated = (type: 'workout' | 'meal') => {
-    router.push(`/routine/${type}/${date}`);
-  };
+  const workoutAdd = useWorkoutAddFlow({ date, onCreated: () => router.push(`/routine/workout/${date}`) });
+  const mealAdd = useMealAddFlow({ date, onCreated: () => router.push(`/routine/meal/${date}`) });
 
   const showWorkout = filterType === 'all' || filterType === 'workout';
   const showMeal = filterType === 'all' || filterType === 'meal';
@@ -106,7 +70,7 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
           ) : (
             <button
               type="button"
-              onClick={() => setIsWorkoutDrawerOpen(true)}
+              onClick={workoutAdd.open}
               className="w-full flex items-center gap-4 px-2 py-5 active:bg-surface-secondary transition-colors rounded-xl"
             >
               <BarbellIcon size={28} weight="duotone" className="text-hint-faint shrink-0" />
@@ -131,7 +95,7 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
           ) : (
             <button
               type="button"
-              onClick={() => setIsMealDrawerOpen(true)}
+              onClick={mealAdd.open}
               className="w-full flex items-center gap-4 px-2 py-5 active:bg-surface-secondary transition-colors rounded-xl"
             >
               <BowlFoodIcon size={28} weight="duotone" className="text-hint-faint shrink-0" />
@@ -147,39 +111,8 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
         )}
       </div>
 
-      {/* 운동: AI / 직접 추가 옵션 시트 */}
-      <WorkoutAddSheet
-        isOpen={isWorkoutDrawerOpen}
-        onClose={() => setIsWorkoutDrawerOpen(false)}
-        onSelect={handleWorkoutOption}
-      />
-
-      {/* 식단: 부대 식단 / AI / 직접 입력 옵션 시트 */}
-      <MealAddSheet
-        isOpen={isMealDrawerOpen}
-        onClose={() => setIsMealDrawerOpen(false)}
-        onSelect={handleMealOption}
-      />
-
-      {/* 드로어 */}
-      <WorkoutCreateDrawer
-        isOpen={activeWorkoutSheet}
-        onClose={() => setActiveWorkoutSheet(false)}
-        date={date}
-        onCreated={() => handleCreated('workout')}
-      />
-      <MealCreateDrawer
-        isOpen={isMealSheetOpen}
-        onClose={() => setIsMealSheetOpen(false)}
-        date={date}
-        onCreated={() => handleCreated('meal')}
-      />
-      <UnitMealImportDrawer
-        isOpen={isImportSheetOpen}
-        onClose={() => setIsImportSheetOpen(false)}
-        date={date}
-        onCreated={() => handleCreated('meal')}
-      />
+      {workoutAdd.element}
+      {mealAdd.element}
     </div>
   );
 }

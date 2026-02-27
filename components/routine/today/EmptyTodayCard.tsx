@@ -1,14 +1,10 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BarbellIcon, BowlFoodIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { formatDate } from '@/lib/utils/dateHelpers';
-import WorkoutCreateDrawer from '@/components/routine/sheets/WorkoutCreateDrawer';
-import MealCreateDrawer from '@/components/routine/sheets/MealCreateDrawer';
-import UnitMealImportDrawer from '@/components/routine/sheets/UnitMealImportDrawer';
-import MealAddSheet, { type MealAddOption } from '@/components/routine/meal/MealAddSheet';
-import WorkoutAddSheet, { type WorkoutAddOption } from '@/components/routine/workout/WorkoutAddSheet';
+import { useWorkoutAddFlow } from '@/hooks/routine/useWorkoutAddFlow';
+import { useMealAddFlow } from '@/hooks/routine/useMealAddFlow';
 
 interface EmptyTodayCardProps {
   type: 'workout' | 'meal';
@@ -19,8 +15,6 @@ const CONFIG = {
     icon: BarbellIcon,
     title: '오늘 운동 없음',
     subtitle: '기록을 추가해보세요',
-    aiLabel: 'AI 상담에게 맡기기',
-    addLabel: '운동 직접 추가',
   },
   meal: {
     icon: BowlFoodIcon,
@@ -41,44 +35,16 @@ export function EmptyTodayCard({ type }: EmptyTodayCardProps) {
   const today = formatDate(new Date());
   const { icon: Icon, title, subtitle } = CONFIG[type];
 
-  // 운동용 옵션 시트 (WorkoutAddSheet)
-  const [isWorkoutDrawerOpen, setIsWorkoutDrawerOpen] = useState(false);
-  const [isWorkoutSheetOpen, setIsWorkoutSheetOpen] = useState(false);
+  const workoutAdd = useWorkoutAddFlow({
+    date: today,
+    onCreated: () => router.push(`/routine/workout/${today}`),
+  });
+  const mealAdd = useMealAddFlow({
+    date: today,
+    onCreated: () => router.push(`/routine/meal/${today}`),
+  });
 
-  // 식단용 옵션 시트 (MealAddSheet)
-  const [isMealDrawerOpen, setIsMealDrawerOpen] = useState(false);
-  const [isMealSheetOpen, setIsMealSheetOpen] = useState(false);
-  const [isImportSheetOpen, setIsImportSheetOpen] = useState(false);
-
-  const handleCardClick = () => {
-    if (type === 'workout') {
-      setIsWorkoutDrawerOpen(true);
-    } else {
-      setIsMealDrawerOpen(true);
-    }
-  };
-
-  // 운동 드로어 핸들러
-  const handleWorkoutOption = (option: WorkoutAddOption) => {
-    setIsWorkoutDrawerOpen(false);
-    if (option === 'ai') {
-      router.push('/routine/counselor');
-    } else {
-      setIsWorkoutSheetOpen(true);
-    }
-  };
-
-  // 식단 드로어 핸들러
-  const handleMealOption = (option: MealAddOption) => {
-    setIsMealDrawerOpen(false);
-    if (option === 'ai') {
-      router.push('/routine/counselor');
-    } else if (option === 'direct') {
-      setIsMealSheetOpen(true);
-    } else {
-      setIsImportSheetOpen(true);
-    }
-  };
+  const handleCardClick = type === 'workout' ? workoutAdd.open : mealAdd.open;
 
   return (
     <>
@@ -95,48 +61,7 @@ export function EmptyTodayCard({ type }: EmptyTodayCardProps) {
         <CaretRightIcon size={20} weight="bold" className="text-hint shrink-0" />
       </button>
 
-      {/* 운동: AI / 직접 추가 시트 */}
-      {type === 'workout' && (
-        <WorkoutAddSheet
-          isOpen={isWorkoutDrawerOpen}
-          onClose={() => setIsWorkoutDrawerOpen(false)}
-          onSelect={handleWorkoutOption}
-        />
-      )}
-
-      {/* 식단: 부대 식단 / AI / 직접 입력 시트 */}
-      {type === 'meal' && (
-        <MealAddSheet
-          isOpen={isMealDrawerOpen}
-          onClose={() => setIsMealDrawerOpen(false)}
-          onSelect={handleMealOption}
-        />
-      )}
-
-      {/* 직접 추가 드로어 */}
-      {type === 'workout' ? (
-        <WorkoutCreateDrawer
-          isOpen={isWorkoutSheetOpen}
-          onClose={() => setIsWorkoutSheetOpen(false)}
-          date={today}
-          onCreated={() => router.push(`/routine/workout/${today}`)}
-        />
-      ) : (
-        <>
-          <MealCreateDrawer
-            isOpen={isMealSheetOpen}
-            onClose={() => setIsMealSheetOpen(false)}
-            date={today}
-            onCreated={() => router.push(`/routine/meal/${today}`)}
-          />
-          <UnitMealImportDrawer
-            isOpen={isImportSheetOpen}
-            onClose={() => setIsImportSheetOpen(false)}
-            date={today}
-            onCreated={() => router.push(`/routine/meal/${today}`)}
-          />
-        </>
-      )}
+      {type === 'workout' ? workoutAdd.element : mealAdd.element}
     </>
   );
 }

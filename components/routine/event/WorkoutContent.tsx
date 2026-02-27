@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { PlusIcon } from '@phosphor-icons/react';
 import { EMPTY_STATE } from '@/lib/config/theme';
@@ -13,8 +12,7 @@ import {
   ExerciseCard,
 } from '@/components/routine';
 import ExerciseAddDrawer from '@/components/routine/sheets/ExerciseAddDrawer';
-import WorkoutCreateDrawer from '@/components/routine/sheets/WorkoutCreateDrawer';
-import WorkoutAddSheet, { type WorkoutAddOption } from '@/components/routine/workout/WorkoutAddSheet';
+import { useWorkoutAddFlow } from '@/hooks/routine';
 import { ActiveWorkout, WorkoutComplete } from '@/components/routine/workout';
 import EditableExerciseList from '@/components/routine/event/EditableExerciseList';
 import { getEventConfig } from '@/lib/config/theme';
@@ -55,8 +53,7 @@ export default function WorkoutContent({
   const eventConfig = getEventConfig('workout');
   const isToday = date === getToday();
 
-  const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
-  const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
+  const workoutAdd = useWorkoutAddFlow({ date });
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingExercises, setEditingExercises] = useState<WorkoutExercise[]>([]);
   const [editingTitle, setEditingTitle] = useState('');
@@ -126,16 +123,6 @@ export default function WorkoutContent({
     onDelete: handleDelete,
   });
 
-  const handleAddOption = (option: WorkoutAddOption) => {
-    setIsAddDrawerOpen(false);
-    if (option === 'ai') {
-      router.push('/routine/counselor');
-      return;
-    }
-    // drawer close 애니메이션 완료 후 sheet 열기
-    setTimeout(() => setIsAddSheetOpen(true), 250);
-  };
-
   if (!event) {
     return (
       <>
@@ -149,7 +136,7 @@ export default function WorkoutContent({
             <Button
               variant="primary"
               fullWidth
-              onClick={() => setIsAddDrawerOpen(true)}
+              onClick={workoutAdd.open}
               className="shadow-none hover:shadow-none"
             >
               <PlusIcon size={18} weight="bold" />
@@ -158,16 +145,7 @@ export default function WorkoutContent({
           </div>
         </div>
 
-        <WorkoutAddSheet
-          isOpen={isAddDrawerOpen}
-          onClose={() => setIsAddDrawerOpen(false)}
-          onSelect={handleAddOption}
-        />
-        <WorkoutCreateDrawer
-          isOpen={isAddSheetOpen}
-          onClose={() => setIsAddSheetOpen(false)}
-          date={date}
-        />
+        {workoutAdd.element}
       </>
     );
   }
