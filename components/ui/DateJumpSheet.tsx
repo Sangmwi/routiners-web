@@ -115,7 +115,7 @@ export default function DateJumpSheet(props: DateJumpSheetProps) {
       position="bottom"
       enableSwipe
     >
-      <ModalBody className="p-4 pb-2">
+      <ModalBody className="p-4 pb-safe">
         {props.mode === 'date' ? (
           <DatePicker
             value={draftDate}

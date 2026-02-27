@@ -6,7 +6,7 @@ import { NextIcon } from '@/components/ui/icons';
 import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
 import SectionHeader from '@/components/ui/SectionHeader';
-import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
+import Modal, { ModalBody } from '@/components/ui/Modal';
 import { ImageSourceDrawer } from '@/components/drawers';
 import {
   InBodyRecordList,
@@ -20,6 +20,7 @@ import { useInBodyManagerSuspense, useCreateInBody } from '@/hooks/inbody';
 import { useNativeImagePicker } from '@/hooks/webview';
 import { useShowError } from '@/lib/stores/errorStore';
 import type { InBodyCreateData } from '@/lib/types/inbody';
+import { InBodyFormSchema, InBodyFormErrors } from '@/lib/types/inbody';
 import type { ImagePickerSource } from '@/lib/webview';
 
 // ============================================================
@@ -66,6 +67,7 @@ export default function InBodyContent() {
   // 직접 입력 플로우
   const [isManualOpen, setIsManualOpen] = useState(false);
   const [manualData, setManualData] = useState<InBodyCreateData>(() => getManualInitial(records));
+  const [manualFormErrors, setManualFormErrors] = useState<InBodyFormErrors>({});
   const createInBody = useCreateInBody();
   const showError = useShowError();
 
@@ -81,6 +83,7 @@ export default function InBodyContent() {
   const handleChooseManual = () => {
     setIsMethodOpen(false);
     setManualData(getManualInitial(records));
+    setManualFormErrors({});
     setIsManualOpen(true);
   };
 
@@ -105,18 +108,32 @@ export default function InBodyContent() {
 
   // 직접 입력 저장
   const handleSaveManual = () => {
-    if (!manualData.measuredAt || !manualData.weight) {
-      showError('측정일과 체중은 필수 항목이에요');
+    const result = InBodyFormSchema.safeParse({
+      measuredAt: manualData.measuredAt,
+      weight: manualData.weight,
+    });
+    if (!result.success) {
+      const errors: InBodyFormErrors = {};
+      result.error.errors.forEach((e) => {
+        const field = e.path[0] as keyof InBodyFormErrors;
+        if (field && !errors[field]) errors[field] = e.message;
+      });
+      setManualFormErrors(errors);
       return;
     }
+    setManualFormErrors({});
 
     createInBody.mutate(manualData, {
       onSuccess: () => {
         setIsManualOpen(false);
         setManualData(getManualInitial(records));
       },
-      onError: () => {
-        showError('기록 저장에 실패했어요');
+      onError: (err) => {
+        if ((err as { status?: number }).status === 409) {
+          setManualFormErrors({ measuredAt: '이 날짜에 이미 기록이 있어요' });
+        } else {
+          showError('기록 저장에 실패했어요');
+        }
       },
     });
   };
@@ -245,31 +262,23 @@ export default function InBodyContent() {
       {/* 직접 입력 모달 */}
       <Modal
         isOpen={isManualOpen}
-        onClose={() => setIsManualOpen(false)}
+        onClose={() => { setIsManualOpen(false); setManualFormErrors({}); }}
         title="직접 입력"
         position="bottom"
         height="auto"
         closeOnBackdrop={!createInBody.isPending}
         preventClose={createInBody.isPending}
         stickyFooter={
-          <ModalFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsManualOpen(false)}
-              className="flex-1"
-              disabled={createInBody.isPending}
-            >
-              취소
-            </Button>
+          <GradientFooter variant="sheet">
             <Button
               onClick={handleSaveManual}
-              className="flex-1"
+              fullWidth
               disabled={!manualData.weight}
               isLoading={createInBody.isPending}
             >
               저장
             </Button>
-          </ModalFooter>
+          </GradientFooter>
         }
       >
         <ModalBody>
@@ -278,6 +287,7 @@ export default function InBodyContent() {
               data={manualData}
               onChange={setManualData}
               initialEditing
+              fieldErrors={manualFormErrors}
             />
           </div>
         </ModalBody>

@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react';
-import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
+import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import GradientFooter from '@/components/ui/GradientFooter';
 import { WheelPicker } from '@/components/ui/WheelPicker';
 import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
 import { BIG3_WEIGHT_OPTIONS, BIG3_REPS_OPTIONS, BIG3_RPE_OPTIONS } from '@/components/big3/constants';
@@ -102,7 +103,7 @@ export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailM
         position="bottom"
         height="auto"
         stickyFooter={
-          <ModalFooter>
+          <GradientFooter variant="sheet" className="flex gap-3">
             <Button variant="outline" className="flex-1" onClick={handleClose}>
               취소
             </Button>
@@ -114,7 +115,7 @@ export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailM
             >
               저장
             </Button>
-          </ModalFooter>
+          </GradientFooter>
         }
       >
         <ModalBody className="p-6 space-y-4">

@@ -35,7 +35,6 @@ export default function ProfileTabBar({
       value={activeTab}
       onChange={onTabChange}
       layout="equal"
-      className="mt-6"
     />
   );
 }

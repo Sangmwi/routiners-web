@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { PencilSimpleIcon } from '@phosphor-icons/react';
 import { ExpandIcon, CollapseIcon } from '@/components/ui/icons';
 import Button from '@/components/ui/Button';
-import { InBodyCreateData } from '@/lib/types/inbody';
+import { InBodyCreateData, InBodyFormErrors } from '@/lib/types/inbody';
 import FormInput from '@/components/ui/FormInput';
 import { DatePicker } from '@/components/ui/WheelPicker';
 import { ImageWithFallback } from '@/components/ui/image';
@@ -17,6 +17,8 @@ interface InBodyPreviewProps {
   readOnly?: boolean;
   /** 초기 편집 모드 시작 여부 */
   initialEditing?: boolean;
+  /** 필드별 인라인 에러 메시지 */
+  fieldErrors?: InBodyFormErrors;
 }
 
 export default function InBodyPreview({
@@ -25,6 +27,7 @@ export default function InBodyPreview({
   onChange,
   readOnly = false,
   initialEditing = false,
+  fieldErrors,
 }: InBodyPreviewProps) {
   const [showDetails, setShowDetails] = useState(false);
   const [isEditing, setIsEditing] = useState(initialEditing);
@@ -90,25 +93,30 @@ export default function InBodyPreview({
       </div>
 
       {/* 측정일 */}
-      <div className="bg-surface-secondary rounded-xl p-4">
-        {isEditing ? (
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">측정일</p>
-            <DatePicker
-              value={data.measuredAt}
-              onChange={handleDateChange}
-              minDate="2020-01-01"
-              maxDate={new Date().toISOString().split('T')[0]}
-              showLabels={false}
-            />
-          </div>
-        ) : (
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">측정일</span>
-            <span className="font-medium text-card-foreground">
-              {data.measuredAt}
-            </span>
-          </div>
+      <div>
+        <div className="bg-surface-secondary rounded-xl p-4">
+          {isEditing ? (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">측정일</p>
+              <DatePicker
+                value={data.measuredAt}
+                onChange={handleDateChange}
+                minDate="2020-01-01"
+                maxDate={new Date().toISOString().split('T')[0]}
+                showLabels={false}
+              />
+            </div>
+            ) : (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">측정일</span>
+              <span className="font-medium text-card-foreground">
+                {data.measuredAt}
+              </span>
+            </div>
+          )}
+        </div>
+        {isEditing && fieldErrors?.measuredAt && (
+          <p className="mt-1 px-1 text-xs text-destructive">{fieldErrors.measuredAt}</p>
         )}
       </div>
 
@@ -133,6 +141,7 @@ export default function InBodyPreview({
               label="체중 (kg)"
               value={data.weight?.toString() || ''}
               onChange={(e) => handleCoreChange('weight', e.target.value)}
+              error={fieldErrors?.weight}
             />
             <FormInput
               type="number"

@@ -7,6 +7,7 @@ import type { ProfileTab } from '@/components/profile/ProfileTabBar';
 import ProfileCompactHeader from '@/components/profile/ProfileCompactHeader';
 import ProfileActionRow from '@/components/profile/ProfileActionRow';
 import ProfileTabBar from '@/components/profile/ProfileTabBar';
+import StickyControlZone from '@/components/ui/StickyControlZone';
 import ProfileActivityGrid from '@/components/profile/ProfileActivityGrid';
 import ProfileInfoTab from '@/components/profile/ProfileInfoTab';
 import AppLink from '@/components/common/AppLink';
@@ -75,7 +76,9 @@ export default function ProfileContent() {
           <ProfileActionRow userId={user.id} />
         </div>
 
-        <ProfileTabBar activeTab={activeTab} onTabChange={setActiveTab} privateTabs={privateTabs} />
+        <StickyControlZone className="mt-6">
+          <ProfileTabBar activeTab={activeTab} onTabChange={setActiveTab} privateTabs={privateTabs} />
+        </StickyControlZone>
 
         <div className="mt-4 [overflow-x:clip] -mx-(--layout-padding-x) px-(--layout-padding-x)">
           <div

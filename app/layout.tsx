@@ -6,6 +6,7 @@ import WebViewBridge from "@/components/WebViewBridge";
 import QueryProvider from "@/lib/providers/QueryProvider";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import BottomNavClient from "@/components/common/BottomNavClient";
+import { StatusBarCover } from "@/components/common/StatusBarCover";
 import { ModalProvider } from "@/components/modals";
 import GlobalErrorToast from "@/components/ui/GlobalErrorToast";
 
@@ -52,6 +53,7 @@ export default function RootLayout({
             <WebViewBridge />
             <GlobalErrorToast />
             <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-background shadow-2xl">
+              <StatusBarCover />
               <main className="flex-1">
                 {children}
               </main>

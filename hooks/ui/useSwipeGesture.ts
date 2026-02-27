@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, RefObject } from 'react';
+import { useRef, useState, useEffect, RefObject } from 'react';
 
 // ============================================================================
 // Types
@@ -24,8 +24,8 @@ interface UseSwipeGestureReturn {
   handlers: SwipeHandlers;
   /** 스크롤 콘텐츠 영역 핸들러 (scrollTop === 0일 때만 드래그 시작) */
   contentHandlers: SwipeHandlers;
-  /** 스크롤 콘텐츠 영역 ref */
-  contentRef: RefObject<HTMLDivElement | null>;
+  /** 스크롤 콘텐츠 영역 callback ref (passive: false touchmove 등록용) */
+  contentRefCallback: (el: HTMLDivElement | null) => void;
   /** 모달 컨테이너 ref — rAF로 transform을 직접 조작 */
   modalRef: RefObject<HTMLDivElement | null>;
   reset: () => void;
@@ -99,6 +99,12 @@ export function useSwipeGesture(
   const modalRef = useRef<HTMLDivElement | null>(null);
   const contentDraggingRef = useRef(false);
   const contentTouchStartYRef = useRef<number | null>(null);
+  const [contentEl, setContentEl] = useState<HTMLDivElement | null>(null);
+
+  const contentRefCallback = (el: HTMLDivElement | null) => {
+    contentRef.current = el;
+    setContentEl(el);
+  };
 
   const applyTransform = (deltaY: number) => {
     cancelAnimationFrame(rafRef.current);
@@ -167,6 +173,32 @@ export function useSwipeGesture(
     lastTimeRef.current = null;
   };
 
+  // passive: false touchmove — React synthetic onTouchMove은 passive라 preventDefault 불가
+  // contentEl이 마운트/언마운트될 때마다 리스너를 재등록
+  useEffect(() => {
+    if (!contentEl || !enabled) return;
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!e.cancelable) return;
+      const clientY = e.touches[0].clientY;
+      if (contentDraggingRef.current && deltaYRef.current > 0) {
+        e.preventDefault();
+        return;
+      }
+      if (
+        contentEl.scrollTop <= 0 &&
+        contentTouchStartYRef.current !== null &&
+        clientY > contentTouchStartYRef.current &&
+        !hasScrolledAncestor(e.target, contentEl)
+      ) {
+        e.preventDefault();
+      }
+    };
+
+    contentEl.addEventListener('touchmove', onTouchMove, { passive: false });
+    return () => contentEl.removeEventListener('touchmove', onTouchMove);
+  }, [contentEl, enabled]);
+
   const reset = () => {
     cancelAnimationFrame(rafRef.current);
     contentDraggingRef.current = false;
@@ -219,9 +251,6 @@ export function useSwipeGesture(
       const clientY = e.touches[0].clientY;
       if (contentDraggingRef.current) {
         handleDragMove(clientY);
-        if (deltaYRef.current > 0) {
-          e.preventDefault();
-        }
         return;
       }
       // 스크롤→스와이프 중간 전환: scrollTop이 0에 도달하고 아래로 당기는 중
@@ -235,7 +264,6 @@ export function useSwipeGesture(
       ) {
         contentDraggingRef.current = true;
         handleDragStart(clientY);
-        e.preventDefault();
       }
     },
     onTouchEnd: (e: React.TouchEvent) => {
@@ -293,7 +321,7 @@ export function useSwipeGesture(
     isSnappingBack,
     handlers,
     contentHandlers,
-    contentRef,
+    contentRefCallback,
     modalRef,
     reset,
   };

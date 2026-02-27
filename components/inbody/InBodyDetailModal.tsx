@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { DeleteIcon } from '@/components/ui/icons';
-import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
+import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
-import { InBodyRecord, InBodyUpdateData } from '@/lib/types/inbody';
+import { InBodyRecord, InBodyUpdateData, InBodyFormSchema, InBodyFormErrors } from '@/lib/types/inbody';
 import { useUpdateInBody, useDeleteInBody } from '@/hooks/inbody';
 import { useConfirmDialog } from '@/lib/stores';
 import InBodyPreview from './InBodyPreview';
@@ -25,6 +25,7 @@ export default function InBodyDetailModal({
   const [isEditMode, setIsEditMode] = useState(false);
   const [editData, setEditData] = useState<InBodyUpdateData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<InBodyFormErrors>({});
 
   const updateInBody = useUpdateInBody();
   const deleteInBody = useDeleteInBody();
@@ -41,6 +42,7 @@ export default function InBodyDetailModal({
       setIsEditMode(false);
       setEditData(null);
       setError(null);
+      setFormErrors({});
     }
   }, [isOpen]);
 
@@ -90,7 +92,24 @@ export default function InBodyDetailModal({
   // 수정 저장
   const handleSave = () => {
     if (!editData) return;
+
+    // Zod 클라이언트 검증 (record 기본값과 editData 병합)
+    const result = InBodyFormSchema.safeParse({
+      measuredAt: editData.measuredAt ?? record.measuredAt,
+      weight: editData.weight ?? record.weight,
+    });
+    if (!result.success) {
+      const errors: InBodyFormErrors = {};
+      result.error.errors.forEach((e) => {
+        const field = e.path[0] as keyof InBodyFormErrors;
+        if (field && !errors[field]) errors[field] = e.message;
+      });
+      setFormErrors(errors);
+      return;
+    }
+    setFormErrors({});
     setError(null);
+
     updateInBody.mutate(
       { id: record.id, data: editData },
       {
@@ -99,7 +118,11 @@ export default function InBodyDetailModal({
           onClose();
         },
         onError: (err) => {
-          setError(err instanceof Error ? err.message : '수정에 실패했어요.');
+          if ((err as { status?: number }).status === 409) {
+            setFormErrors({ measuredAt: '이 날짜에 이미 기록이 있어요' });
+          } else {
+            setError(err instanceof Error ? err.message : '수정에 실패했어요.');
+          }
         },
       }
     );
@@ -109,6 +132,8 @@ export default function InBodyDetailModal({
   const handleCancelEdit = () => {
     if (isSaving) return;
     setEditData(null);
+    setFormErrors({});
+    setError(null);
     onClose();
   };
 
@@ -178,7 +203,7 @@ export default function InBodyDetailModal({
         height="auto"
         closeOnBackdrop={!isSaving}
         stickyFooter={
-          <ModalFooter>
+          <GradientFooter variant="sheet" className="flex gap-3">
             <Button
               variant="outline"
               className="flex-1"
@@ -195,7 +220,7 @@ export default function InBodyDetailModal({
             >
               저장
             </Button>
-          </ModalFooter>
+          </GradientFooter>
         }
       >
         <ModalBody className="relative p-6">
@@ -204,6 +229,7 @@ export default function InBodyDetailModal({
           )}
           {editData && (
             <InBodyPreview
+              fieldErrors={formErrors}
               data={{
                 measuredAt: editData.measuredAt || record.measuredAt,
                 weight: editData.weight || record.weight,

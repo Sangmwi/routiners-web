@@ -311,7 +311,7 @@ export default function Modal({
 
         {/* Content */}
         <div
-          ref={enableSwipe && isBottom ? swipe.contentRef : undefined}
+          ref={enableSwipe && isBottom ? swipe.contentRefCallback : undefined}
           className="flex-1 overflow-y-auto overscroll-contain"
           {...(enableSwipe && isBottom ? swipe.contentHandlers : {})}
         >
@@ -329,21 +329,6 @@ export default function Modal({
 // ============================================================================
 // Sub-components
 // ============================================================================
-
-interface ModalFooterProps {
-  children: ReactNode;
-  className?: string;
-}
-
-export function ModalFooter({ children, className = '' }: ModalFooterProps) {
-  return (
-    <div
-      className={`flex gap-3 px-4 py-4 border-t border-edge-subtle bg-card ${className}`}
-    >
-      {children}
-    </div>
-  );
-}
 
 interface ModalBodyProps {
   children: ReactNode;

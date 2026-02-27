@@ -7,6 +7,7 @@ import { useUserPostCount } from '@/hooks/community/useUserPostCount';
 import type { ProfileTab } from '@/components/profile/ProfileTabBar';
 import ProfileCompactHeader from '@/components/profile/ProfileCompactHeader';
 import ProfileTabBar from '@/components/profile/ProfileTabBar';
+import StickyControlZone from '@/components/ui/StickyControlZone';
 import ProfileActivityGrid from '@/components/profile/ProfileActivityGrid';
 import ProfileInfoTab from '@/components/profile/ProfileInfoTab';
 import ProfileFollowButton from '@/components/profile/ProfileFollowButton';
@@ -75,7 +76,9 @@ export default function UserProfileContent({ userId }: UserProfileContentProps) 
         )}
       </div>
 
-      <ProfileTabBar activeTab={activeTab} onTabChange={setActiveTab} privateTabs={privateTabs} />
+      <StickyControlZone top="calc(var(--safe-top) + 3rem)" className="mt-6">
+        <ProfileTabBar activeTab={activeTab} onTabChange={setActiveTab} privateTabs={privateTabs} />
+      </StickyControlZone>
 
       <div className="mt-4 [overflow-x:clip] -mx-(--layout-padding-x) px-(--layout-padding-x)">
         <div

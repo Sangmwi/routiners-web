@@ -38,7 +38,7 @@ interface ChatContentProps {
 export function ChatLayout({ children }: ChatLayoutProps) {
   return (
     <div
-      className="flex flex-col bg-background overflow-hidden"
+      className="flex flex-col bg-background overflow-hidden pt-safe"
       style={{ height: '100dvh', paddingBottom: 'var(--keyboard-safe-clearance)' }}
     >
       {children}

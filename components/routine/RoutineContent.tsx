@@ -12,6 +12,7 @@ import DateJumpSheet from '@/components/ui/DateJumpSheet';
 import CalendarContent from '@/components/routine/calendar/CalendarContent';
 import { CounselorButton } from '@/components/counselor';
 import { PulseLoader } from '@/components/ui/PulseLoader';
+import StickyControlZone from '@/components/ui/StickyControlZone';
 import { useWeeklyStatsSuspense, useDeleteRoutineEvent } from '@/hooks/routine';
 import { useActiveCounselorConversation } from '@/hooks/counselor';
 import { useConfirmDialog } from '@/lib/stores/modalStore';
@@ -141,34 +142,36 @@ export default function RoutineContent() {
 
   return (
     <>
-      <UnderlineTabs
-        tabs={TABS}
-        value={tab}
-        onChange={setTab}
-        layout="auto"
-        rightSlot={
-          <TypeFilterToggle value={filter} onChange={setFilter} size="md" />
-        }
-      />
+      <StickyControlZone>
+        <UnderlineTabs
+          tabs={TABS}
+          value={tab}
+          onChange={setTab}
+          layout="auto"
+          rightSlot={
+            <TypeFilterToggle value={filter} onChange={setFilter} size="md" />
+          }
+        />
 
-      {tab === 'weekly' ? (
-        <PeriodNav
-          label={weeklyNav.label}
-          onPrev={weeklyNav.handlePrev}
-          onNext={weeklyNav.handleNext}
-          canGoNext={weeklyNav.canGoNext}
-          onLabelClick={openDateJump}
-        />
-      ) : (
-        <PeriodNav
-          label={`${calYear}년 ${calMonth}월`}
-          onPrev={handleCalPrev}
-          onNext={handleCalNext}
-          canGoNext={true}
-          onLabelClick={openDateJump}
-          labelAriaLabel="월 선택"
-        />
-      )}
+        {tab === 'weekly' ? (
+          <PeriodNav
+            label={weeklyNav.label}
+            onPrev={weeklyNav.handlePrev}
+            onNext={weeklyNav.handleNext}
+            canGoNext={weeklyNav.canGoNext}
+            onLabelClick={openDateJump}
+          />
+        ) : (
+          <PeriodNav
+            label={`${calYear}년 ${calMonth}월`}
+            onPrev={handleCalPrev}
+            onNext={handleCalNext}
+            canGoNext={true}
+            onLabelClick={openDateJump}
+            labelAriaLabel="월 선택"
+          />
+        )}
+      </StickyControlZone>
 
       <div className="[overflow-x:clip] -mx-(--layout-padding-x) px-(--layout-padding-x)">
         <div

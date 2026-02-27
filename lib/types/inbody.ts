@@ -135,6 +135,23 @@ export const InBodyExtractedDataSchema = z.object({
 /** AI에서 추출된 InBody 데이터 타입 (snake_case) */
 export type InBodyExtractedData = z.infer<typeof InBodyExtractedDataSchema>;
 
+/**
+ * 폼 입력 검증용 Zod 스키마 (클라이언트 사이드)
+ *
+ * - submit 시점에 실행 (타이핑 중엔 X)
+ * - measuredAt, weight만 필수 검증 (나머지는 선택)
+ */
+export const InBodyFormSchema = z.object({
+  measuredAt: z.string().min(1, '측정일을 입력해주세요'),
+  weight: z
+    .number({ invalid_type_error: '체중을 입력해주세요' })
+    .min(WEIGHT_RANGE.min, `체중은 ${WEIGHT_RANGE.min}kg 이상 입력해주세요`)
+    .max(WEIGHT_RANGE.max, `체중은 ${WEIGHT_RANGE.max}kg 이하 입력해주세요`),
+});
+
+/** 폼 필드별 에러 메시지 타입 */
+export type InBodyFormErrors = Partial<Record<'measuredAt' | 'weight', string>>;
+
 // ============================================================================
 // Database Types (snake_case - DB 직접 사용용)
 // ============================================================================

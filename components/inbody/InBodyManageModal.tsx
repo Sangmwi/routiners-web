@@ -7,7 +7,7 @@ import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
 import { useShowError } from '@/lib/stores/errorStore';
-import { InBodyRecord, InBodyCreateData } from '@/lib/types/inbody';
+import { InBodyRecord, InBodyCreateData, InBodyFormSchema, InBodyFormErrors } from '@/lib/types/inbody';
 import { useInBodyRecords, useDeleteInBody, useCreateInBody } from '@/hooks/inbody';
 import InBodyScanModal from './InBodyScanModal';
 import InBodyDetailModal from './InBodyDetailModal';
@@ -28,6 +28,7 @@ export default function InBodyManageModal({
   const [recordToDelete, setRecordToDelete] = useState<InBodyRecord | null>(null);
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [formErrors, setFormErrors] = useState<InBodyFormErrors>({});
   const showError = useShowError();
 
   const { data: records = [], isPending: isLoading } = useInBodyRecords(50, 0, {
@@ -54,29 +55,46 @@ export default function InBodyManageModal({
     setSelectedRecord(null);
     setRecordToDelete(null);
     setManualData(getManualInputInitial());
+    setFormErrors({});
     onClose();
   };
 
   // 직접 입력 시작
   const handleStartManualInput = () => {
     setManualData(getManualInputInitial());
+    setFormErrors({});
     setState('manual-input');
   };
 
   // 직접 입력 저장
   const handleSaveManualInput = () => {
-    if (!manualData.measuredAt || !manualData.weight) {
-      showError('측정일과 체중은 필수 항목이에요');
+    // Zod 클라이언트 검증
+    const result = InBodyFormSchema.safeParse({
+      measuredAt: manualData.measuredAt,
+      weight: manualData.weight,
+    });
+    if (!result.success) {
+      const errors: InBodyFormErrors = {};
+      result.error.errors.forEach((e) => {
+        const field = e.path[0] as keyof InBodyFormErrors;
+        if (field && !errors[field]) errors[field] = e.message;
+      });
+      setFormErrors(errors);
       return;
     }
+    setFormErrors({});
 
     createInBody.mutate(manualData, {
       onSuccess: () => {
         setState('list');
         setManualData(getManualInputInitial());
       },
-      onError: () => {
-        showError('기록 저장에 실패했어요');
+      onError: (err) => {
+        if ((err as { status?: number }).status === 409) {
+          setFormErrors({ measuredAt: '이 날짜에 이미 기록이 있어요' });
+        } else {
+          showError('기록 저장에 실패했어요');
+        }
       },
     });
   };
@@ -320,6 +338,7 @@ export default function InBodyManageModal({
                 data={manualData}
                 onChange={setManualData}
                 initialEditing
+                fieldErrors={formErrors}
               />
             </div>
           )}

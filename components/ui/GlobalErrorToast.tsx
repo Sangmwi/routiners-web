@@ -16,7 +16,7 @@ export default function GlobalErrorToast() {
   if (!message) return null;
 
   return (
-    <div className="fixed bottom-(--fab-bottom) left-4 right-4 z-50 animate-in slide-in-from-bottom-4 fade-in duration-200">
+    <div className="fixed bottom-(--fab-bottom) left-4 right-4 z-[70] animate-in slide-in-from-bottom-4 fade-in duration-200">
       <div className="bg-destructive text-destructive-foreground px-4 py-3 rounded-lg shadow-lg flex items-start gap-3">
         <ErrorIcon size="md" className="shrink-0 mt-0.5" />
         <p className="text-sm flex-1">{message}</p>

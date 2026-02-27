@@ -14,6 +14,7 @@ import { useStatsPeriodNavigator } from '@/hooks/routine/useStatsPeriodNavigator
 import { formatDate, parseDate } from '@/lib/utils/dateHelpers';
 import { createRouteStateKey } from '@/lib/route-state/keys';
 import { useRouteState } from '@/hooks/navigation';
+import StickyControlZone from '@/components/ui/StickyControlZone';
 
 type RecordCount = '5' | '15' | 'all';
 
@@ -97,36 +98,38 @@ export default function StatsPageContent() {
 
   return (
     <>
-      <DomainTabs
-        domain={domain}
-        onDomainChange={(next) => setState((prev) => ({ ...prev, domain: next }))}
-        period={navigator.period}
-        onPeriodChange={navigator.setPeriod}
-        rightSlot={
-          domain === 'inbody' ? (
-            <SegmentedControl
-              options={COUNT_OPTIONS}
-              value={recordCount}
-              onChange={(next) => setState((prev) => ({ ...prev, recordCount: next }))}
-              size="sm"
-            />
-          ) : undefined
-        }
-      />
-
-      {domain !== 'inbody' && (
-        <PeriodNav
-          label={navigator.label}
-          onPrev={navigator.handlePrev}
-          onNext={navigator.handleNext}
-          canGoNext={navigator.canGoNext}
-          onLabelClick={() => {
-            setDateJumpSession((prev) => prev + 1);
-            setIsDateJumpOpen(true);
-          }}
-          labelAriaLabel={navigator.period === 'weekly' ? '주간 날짜 선택' : '월간 날짜 선택'}
+      <StickyControlZone>
+        <DomainTabs
+          domain={domain}
+          onDomainChange={(next) => setState((prev) => ({ ...prev, domain: next }))}
+          period={navigator.period}
+          onPeriodChange={navigator.setPeriod}
+          rightSlot={
+            domain === 'inbody' ? (
+              <SegmentedControl
+                options={COUNT_OPTIONS}
+                value={recordCount}
+                onChange={(next) => setState((prev) => ({ ...prev, recordCount: next }))}
+                size="sm"
+              />
+            ) : undefined
+          }
         />
-      )}
+
+        {domain !== 'inbody' && (
+          <PeriodNav
+            label={navigator.label}
+            onPrev={navigator.handlePrev}
+            onNext={navigator.handleNext}
+            canGoNext={navigator.canGoNext}
+            onLabelClick={() => {
+              setDateJumpSession((prev) => prev + 1);
+              setIsDateJumpOpen(true);
+            }}
+            labelAriaLabel={navigator.period === 'weekly' ? '주간 날짜 선택' : '월간 날짜 선택'}
+          />
+        )}
+      </StickyControlZone>
 
       <div className="[overflow-x:clip]">
         <div

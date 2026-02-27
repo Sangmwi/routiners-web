@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { MainTabLayout, MainTabHeader } from '@/components/layouts';
+import StickyControlZone from '@/components/ui/StickyControlZone';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
 import EmptyState from '@/components/common/EmptyState';
 import { PulseLoader } from '@/components/ui/PulseLoader';
@@ -83,43 +84,41 @@ export default function CommunityPage() {
 
   return (
     <MainTabLayout>
-      <MainTabHeader
-        title="커뮤니티"
-        action={
-          <>
-            <button
-              type="button"
-              onClick={handleSearchUsers}
-              className="p-2 rounded-xl hover:bg-surface-muted active:bg-surface-pressed transition-colors"
-              aria-label="사용자 검색"
-            >
-              <UserFocusIcon size={22} className="text-muted-foreground" />
-            </button>
-            <button
-              type="button"
-              onClick={handleNewPost}
-              className="p-2 rounded-xl hover:bg-surface-muted active:bg-surface-pressed transition-colors"
-              aria-label="글쓰기"
-            >
-              <PlusIcon size={22} className="text-muted-foreground" />
-            </button>
-          </>
-        }
-      />
+      <MainTabHeader title="커뮤니티" />
 
-      {/* 필터 존: 메인탭 + 카테고리 서브탭 */}
-      <div className="flex flex-col gap-4">
+      {/* sticky 컨트롤 존: 탭 + 카테고리 (검색/글쓰기 버튼 포함) */}
+      <StickyControlZone className="flex flex-col gap-4">
         <PrimaryTabs
           activeTab={primaryTab}
           onTabChange={(nextTab) => setState((prev) => ({ ...prev, primaryTab: nextTab }))}
           hasActiveFilter={hasActiveFilter}
           onFilterOpen={() => setFilterOpen(true)}
+          actions={
+            <>
+              <button
+                type="button"
+                onClick={handleSearchUsers}
+                className="p-2 rounded-xl hover:bg-surface-muted active:bg-surface-pressed transition-colors"
+                aria-label="사용자 검색"
+              >
+                <UserFocusIcon size={22} className="text-muted-foreground" />
+              </button>
+              <button
+                type="button"
+                onClick={handleNewPost}
+                className="p-2 rounded-xl hover:bg-surface-muted active:bg-surface-pressed transition-colors"
+                aria-label="글쓰기"
+              >
+                <PlusIcon size={22} className="text-muted-foreground" />
+              </button>
+            </>
+          }
         />
         <CategoryTabs
           selectedCategory={category}
           onCategoryChange={handleCategoryChange}
         />
-      </div>
+      </StickyControlZone>
 
       {/* 콘텐츠 영역 */}
       {primaryTab === 'following' ? (

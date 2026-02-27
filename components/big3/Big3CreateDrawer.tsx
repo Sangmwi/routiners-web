@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import Modal, { ModalBody, ModalFooter } from '@/components/ui/Modal';
+import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import GradientFooter from '@/components/ui/GradientFooter';
 import SegmentedControl from '@/components/ui/SegmentedControl';
 import { WheelPicker, DatePicker } from '@/components/ui/WheelPicker';
 import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
@@ -88,20 +89,16 @@ export default function Big3CreateDrawer({
       position="bottom"
       height="auto"
       stickyFooter={
-        <ModalFooter>
-          <Button variant="outline" className="flex-1" onClick={handleClose}>
-            취소
-          </Button>
+        <GradientFooter variant="sheet">
           <Button
-            variant="primary"
-            className="flex-1"
+            fullWidth
             onClick={handleSubmit}
             disabled={!isValid}
             isLoading={createBig3.isPending}
           >
             저장
           </Button>
-        </ModalFooter>
+        </GradientFooter>
       }
     >
       <ModalBody className="p-6 space-y-5">

@@ -1,5 +1,6 @@
 'use client';
 
+import { ReactNode } from 'react';
 import { FunnelIcon } from '@phosphor-icons/react';
 import UnderlineTabs from '@/components/ui/UnderlineTabs';
 
@@ -15,6 +16,8 @@ interface PrimaryTabsProps {
   onTabChange: (tab: PrimaryTab) => void;
   hasActiveFilter: boolean;
   onFilterOpen: () => void;
+  /** 필터 버튼 왼쪽에 추가할 액션 버튼 (예: 검색, 글쓰기) */
+  actions?: ReactNode;
 }
 
 /**
@@ -25,6 +28,7 @@ export default function PrimaryTabs({
   onTabChange,
   hasActiveFilter,
   onFilterOpen,
+  actions,
 }: PrimaryTabsProps) {
   return (
     <UnderlineTabs
@@ -33,22 +37,25 @@ export default function PrimaryTabs({
       onChange={onTabChange}
       layout="auto"
       rightSlot={
-        <button
-          type="button"
-          onClick={onFilterOpen}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-            hasActiveFilter
-              ? 'bg-surface-accent text-primary border border-edge-faint'
-              : 'bg-surface-hover text-muted-foreground border border-edge-subtle hover:bg-surface-muted'
-          }`}
-          aria-label="필터"
-        >
-          <FunnelIcon
-            size={14}
-            weight={hasActiveFilter ? 'fill' : 'regular'}
-          />
-          필터
-        </button>
+        <div className="flex items-center gap-1">
+          {actions}
+          <button
+            type="button"
+            onClick={onFilterOpen}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              hasActiveFilter
+                ? 'bg-surface-accent text-primary border border-edge-faint'
+                : 'bg-surface-hover text-muted-foreground border border-edge-subtle hover:bg-surface-muted'
+            }`}
+            aria-label="필터"
+          >
+            <FunnelIcon
+              size={14}
+              weight={hasActiveFilter ? 'fill' : 'regular'}
+            />
+            필터
+          </button>
+        </div>
       }
     />
   );
