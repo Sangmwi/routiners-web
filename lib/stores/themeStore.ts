@@ -7,12 +7,12 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { ThemeMode } from '@sangmwi/shared-contracts';
+export type { ThemeMode } from '@sangmwi/shared-contracts';
 
 // ============================================================================
 // Types
 // ============================================================================
-
-export type ThemeMode = 'light' | 'dark' | 'system';
 
 interface ThemeState {
   mode: ThemeMode;

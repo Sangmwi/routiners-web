@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false, // Reduce production bundle size
 
   experimental: {
+    externalDir: true,
     // Optimize frequently used package imports automatically
     optimizePackageImports: ['@phosphor-icons/react', '@tanstack/react-query', 'zod'],
   },

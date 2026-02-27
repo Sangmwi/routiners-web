@@ -2,10 +2,10 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import Script from "next/script";
 import "./globals.css";
-import BottomNav from "@/components/common/BottomNav";
 import WebViewBridge from "@/components/WebViewBridge";
 import QueryProvider from "@/lib/providers/QueryProvider";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
+import BottomNavClient from "@/components/common/BottomNavClient";
 import { ModalProvider } from "@/components/modals";
 import GlobalErrorToast from "@/components/ui/GlobalErrorToast";
 
@@ -55,7 +55,7 @@ export default function RootLayout({
               <main className="flex-1">
                 {children}
               </main>
-              <BottomNav />
+              <BottomNavClient />
             </div>
             <ModalProvider />
           </ErrorBoundary>

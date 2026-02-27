@@ -19,6 +19,7 @@ import type { AppToWebMessage } from "@/lib/webview";
 import { useWebViewAuth } from "./useWebViewAuth";
 import { useWebViewNavigation } from "./useWebViewNavigation";
 import { LOG_PREFIX } from "./useWebViewCore";
+import { useThemeStore } from "@/lib/stores/themeStore";
 
 const STRICT_BRIDGE_VALIDATION =
   process.env.NEXT_PUBLIC_STRICT_BRIDGE_VALIDATION !== "false";
@@ -37,6 +38,7 @@ type HandlerRegistry = Map<CommandType, Set<CommandHandler>>;
 // 개별 메시지 타입 추출
 type NavigateToMessage = Extract<AppToWebMessage, { type: "NAVIGATE_TO" }>;
 type SetSessionMessage = Extract<AppToWebMessage, { type: "SET_SESSION" }>;
+type SetThemeModeMessage = Extract<AppToWebMessage, { type: "SET_THEME_MODE" }>;
 
 // ============================================================================
 // Global Registry (싱글톤)
@@ -82,6 +84,7 @@ interface UseWebViewCommandsOptions {
 
 export const useWebViewCommands = ({ resetSessionCheck }: UseWebViewCommandsOptions) => {
   const router = useRouter();
+  const setThemeMode = useThemeStore((s) => s.setMode);
 
   const { setSession, clearSession, notifySessionSet } = useWebViewAuth();
   const { sendRouteInfo } = useWebViewNavigation();
@@ -144,10 +147,17 @@ export const useWebViewCommands = ({ resetSessionCheck }: UseWebViewCommandsOpti
       })
     );
 
+    // SET_THEME_MODE
+    cleanups.push(
+      registerCommandHandler<SetThemeModeMessage>("SET_THEME_MODE", (cmd) => {
+        setThemeMode(cmd.mode);
+      })
+    );
+
     return () => {
       cleanups.forEach((cleanup) => cleanup());
     };
-  }, [router, setSession, clearSession, notifySessionSet, sendRouteInfo, resetSessionCheck]);
+  }, [router, setSession, clearSession, notifySessionSet, sendRouteInfo, resetSessionCheck, setThemeMode]);
 
   // ──────────────────────────────────────────────────────────────────────────
   // 중앙 이벤트 리스너
