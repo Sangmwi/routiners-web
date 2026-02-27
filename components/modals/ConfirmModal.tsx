@@ -114,7 +114,7 @@ export default function ConfirmModal({
                 variant="ghost"
                 onClick={handleCancel}
                 disabled={isLoading}
-                className="flex-1 bg-surface-muted"
+                className="flex-1"
               >
                 {cancelText}
               </Button>

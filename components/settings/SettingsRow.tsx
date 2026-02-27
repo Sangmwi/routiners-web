@@ -42,7 +42,7 @@ export default function SettingsRow({
   return (
     <Wrapper
       onClick={isCustom ? undefined : handleClick}
-      className="flex items-center gap-3 w-full px-4 py-3.5 text-left hover:bg-surface-secondary transition-colors"
+      className="flex items-center gap-3 w-full px-4 py-3.5 text-left transition-colors active:bg-surface-secondary"
     >
       {IconComponent && (
         <IconComponent
@@ -73,7 +73,7 @@ export default function SettingsRow({
           }`}
         >
           <div
-            className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
+            className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
               toggleValue ? 'translate-x-[22px]' : 'translate-x-0.5'
             }`}
           />

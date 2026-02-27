@@ -4,22 +4,21 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 let THEME_TOKENS;
-try {
-  ({ THEME_TOKENS } = require('@sangmwi/shared-contracts'));
-} catch {
-  // no-op: fallback below
-}
+const localDist = path.resolve(
+  process.cwd(),
+  '..',
+  'routiners-shared-contracts',
+  'dist',
+  'theme-tokens.js'
+);
 
-if (!THEME_TOKENS) {
-  const localDist = path.resolve(
-    process.cwd(),
-    '..',
-    'routiners-shared-contracts',
-    'dist',
-    'theme-tokens.js'
-  );
-  if (fs.existsSync(localDist)) {
-    ({ THEME_TOKENS } = require(localDist));
+if (fs.existsSync(localDist)) {
+  ({ THEME_TOKENS } = require(localDist));
+} else {
+  try {
+    ({ THEME_TOKENS } = require('@sangmwi/shared-contracts'));
+  } catch {
+    // no-op: handled by guard below
   }
 }
 
@@ -113,6 +112,7 @@ const mapDerived = (mode) => ({
   '--ring-focus': ring[mode].focus,
   '--ring-accent': ring[mode].accent,
   '--ring-error': ring[mode].error,
+  '--modal-backdrop': mode === 'dark' ? layout.modal.backdropDark : layout.modal.backdropLight,
 });
 
 const mapLayout = () => ({
@@ -153,6 +153,7 @@ const mapLayout = () => ({
   '--modal-content-gap': `${layout.modal.contentGap}px`,
   '--modal-action-gap': `${layout.modal.actionGap}px`,
   '--modal-button-gap': `${layout.modal.buttonGap}px`,
+  '--modal-backdrop-blur': `${Math.max(2, Math.round(layout.modal.blurIntensity / 6))}px`,
 });
 
 const toCssBlock = (selector, values) => {

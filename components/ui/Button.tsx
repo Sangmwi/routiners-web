@@ -23,18 +23,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100';
+      'inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-transform duration-150 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100';
 
     const variantStyles = {
-      primary:
-        'bg-primary text-primary-foreground shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:bg-primary/90',
-      secondary:
-        'bg-secondary text-secondary-foreground shadow-md hover:shadow-lg hover:bg-secondary/90',
-      outline:
-        'bg-card text-card-foreground ring-1 ring-border hover:ring-accent shadow-sm hover:shadow-md hover:bg-surface-accent',
-      ghost: 'bg-transparent text-foreground hover:bg-muted',
-      destructive:
-        'bg-destructive text-destructive-foreground shadow-md shadow-destructive/20 hover:shadow-lg hover:shadow-destructive/30 hover:bg-destructive/90',
+      primary: 'bg-primary text-primary-foreground',
+      secondary: 'bg-secondary text-secondary-foreground',
+      outline: 'bg-card text-card-foreground ring-1 ring-border',
+      ghost: 'bg-transparent text-foreground',
+      destructive: 'bg-destructive text-destructive-foreground',
     };
 
     const sizeStyles = {

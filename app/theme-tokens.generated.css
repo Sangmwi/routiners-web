@@ -1,7 +1,7 @@
 /* Auto-generated from @sangmwi/shared-contracts THEME_TOKENS */
 
 :root {
-  --background: #f7faf8;
+  --background: #f5f8f6;
   --foreground: #0a2610;
   --primary: #50A76C;
   --primary-foreground: #ffffff;
@@ -39,7 +39,7 @@
   --color-green-800: #1a5421;
   --color-green-900: #17451c;
   --color-green-950: #0a2610;
-  --surface-secondary: rgba(226, 232, 240, 0.2);
+  --surface-secondary: rgba(226, 232, 240, 0.24);
   --surface-hover: rgba(226, 232, 240, 0.3);
   --surface-muted: rgba(226, 232, 240, 0.5);
   --surface-accent: rgba(80, 167, 108, 0.1);
@@ -58,6 +58,7 @@
   --ring-focus: rgba(80, 167, 108, 0.2);
   --ring-accent: rgba(80, 167, 108, 0.3);
   --ring-error: rgba(217, 115, 115, 0.2);
+  --modal-backdrop: rgba(0, 0, 0, 0.45);
   --space-2: 2px;
   --space-4: 4px;
   --space-6: 6px;
@@ -95,6 +96,7 @@
   --modal-content-gap: 16px;
   --modal-action-gap: 12px;
   --modal-button-gap: 12px;
+  --modal-backdrop-blur: 4px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -157,6 +159,7 @@
   --ring-focus: rgba(95, 192, 127, 0.2);
   --ring-accent: rgba(95, 192, 127, 0.3);
   --ring-error: rgba(232, 160, 160, 0.2);
+  --modal-backdrop: rgba(0, 0, 0, 0.6);
   --space-2: 2px;
   --space-4: 4px;
   --space-6: 6px;
@@ -194,12 +197,13 @@
   --modal-content-gap: 16px;
   --modal-action-gap: 12px;
   --modal-button-gap: 12px;
+  --modal-backdrop-blur: 4px;
 }
 
 }
 
 [data-theme="light"] {
-  --background: #f7faf8;
+  --background: #f5f8f6;
   --foreground: #0a2610;
   --primary: #50A76C;
   --primary-foreground: #ffffff;
@@ -237,7 +241,7 @@
   --color-green-800: #1a5421;
   --color-green-900: #17451c;
   --color-green-950: #0a2610;
-  --surface-secondary: rgba(226, 232, 240, 0.2);
+  --surface-secondary: rgba(226, 232, 240, 0.24);
   --surface-hover: rgba(226, 232, 240, 0.3);
   --surface-muted: rgba(226, 232, 240, 0.5);
   --surface-accent: rgba(80, 167, 108, 0.1);
@@ -256,6 +260,7 @@
   --ring-focus: rgba(80, 167, 108, 0.2);
   --ring-accent: rgba(80, 167, 108, 0.3);
   --ring-error: rgba(217, 115, 115, 0.2);
+  --modal-backdrop: rgba(0, 0, 0, 0.45);
   --space-2: 2px;
   --space-4: 4px;
   --space-6: 6px;
@@ -293,6 +298,7 @@
   --modal-content-gap: 16px;
   --modal-action-gap: 12px;
   --modal-button-gap: 12px;
+  --modal-backdrop-blur: 4px;
 }
 
 [data-theme="dark"] {
@@ -353,6 +359,7 @@
   --ring-focus: rgba(95, 192, 127, 0.2);
   --ring-accent: rgba(95, 192, 127, 0.3);
   --ring-error: rgba(232, 160, 160, 0.2);
+  --modal-backdrop: rgba(0, 0, 0, 0.6);
   --space-2: 2px;
   --space-4: 4px;
   --space-6: 6px;
@@ -390,5 +397,6 @@
   --modal-content-gap: 16px;
   --modal-action-gap: 12px;
   --modal-button-gap: 12px;
+  --modal-backdrop-blur: 4px;
 }
 

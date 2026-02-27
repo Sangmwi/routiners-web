@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, ReactNode } from 'react';
+import { useEffect, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { CloseIcon } from '@/components/ui/icons';
 import {
@@ -55,6 +55,12 @@ const HEIGHT_CLASSES = {
   half: 'h-[50dvh]',
   full: '', // inline style로 키보드 높이 반영
 } as const;
+
+const BACKDROP_STYLE: CSSProperties = {
+  backgroundColor: 'var(--modal-backdrop)',
+  backdropFilter: 'blur(var(--modal-backdrop-blur))',
+  WebkitBackdropFilter: 'blur(var(--modal-backdrop-blur))',
+};
 
 // ============================================================================
 // Animation Helpers
@@ -258,7 +264,8 @@ export default function Modal({
     >
       {/* Backdrop - pointer-events-none으로 클릭이 container로 전달됨 */}
       <div
-        className={`absolute inset-0 bg-black/50 backdrop-blur-sm pointer-events-none ${backdropAnimationClass}`}
+        className={`absolute inset-0 pointer-events-none ${backdropAnimationClass}`}
+        style={BACKDROP_STYLE}
       />
 
       {/* Modal Content */}
