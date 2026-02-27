@@ -1,7 +1,7 @@
 /* Auto-generated from @sangmwi/shared-contracts THEME_TOKENS */
 
 :root {
-  --background: #f3f6f3;
+  --background: #f7faf8;
   --foreground: #0a2610;
   --primary: #50A76C;
   --primary-foreground: #ffffff;
@@ -125,7 +125,7 @@
 }
 
 [data-theme="light"] {
-  --background: #f3f6f3;
+  --background: #f7faf8;
   --foreground: #0a2610;
   --primary: #50A76C;
   --primary-foreground: #ffffff;
