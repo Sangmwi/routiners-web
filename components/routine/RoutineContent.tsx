@@ -18,6 +18,9 @@ import { useConfirmDialog } from '@/lib/stores/modalStore';
 import { useStatsPeriodNavigator } from '@/hooks/routine/useStatsPeriodNavigator';
 import { computeWorkoutStreak } from '@/lib/stats/computations';
 import { addDays, formatDate, parseDate } from '@/lib/utils/dateHelpers';
+import { createRouteStateKey } from '@/lib/route-state/keys';
+import { useRouteState } from '@/hooks/navigation';
+import { usePathname } from 'next/navigation';
 
 type RoutineTab = 'weekly' | 'calendar';
 
@@ -35,8 +38,28 @@ const TABS = [
  * [콘텐츠...]
  */
 export default function RoutineContent() {
-  const [tab, setTab] = useState<RoutineTab>('weekly');
-  const [filter, setFilter] = useState<FilterValue>('all');
+  const pathname = usePathname();
+  const routeKey = createRouteStateKey(pathname);
+  const { state, setState } = useRouteState<{
+    tab: RoutineTab;
+    filter: FilterValue;
+    weekDateStr: string;
+    calYear: number;
+    calMonth: number;
+    calSelectedDate: string;
+  }>({
+    key: routeKey,
+    initialState: {
+      tab: 'weekly',
+      filter: 'all',
+      weekDateStr: formatDate(new Date()),
+      calYear: new Date().getFullYear(),
+      calMonth: new Date().getMonth() + 1,
+      calSelectedDate: formatDate(new Date()),
+    },
+  });
+  const [tab, setTab] = useState<RoutineTab>(state.tab);
+  const [filter, setFilter] = useState<FilterValue>(state.filter);
   const [direction, setDirection] = useState<'left' | 'right'>('right');
   const prevTab = useRef(tab);
 
@@ -45,8 +68,8 @@ export default function RoutineContent() {
 
   // 캘린더 월 네비
   const todayDate = new Date();
-  const [calYear, setCalYear] = useState(todayDate.getFullYear());
-  const [calMonth, setCalMonth] = useState(todayDate.getMonth() + 1);
+  const [calYear, setCalYear] = useState(state.calYear ?? todayDate.getFullYear());
+  const [calMonth, setCalMonth] = useState(state.calMonth ?? todayDate.getMonth() + 1);
   const [isCalPending, startCalTransition] = useTransition();
 
   const handleCalPrev = () => {
@@ -74,7 +97,31 @@ export default function RoutineContent() {
   );
 
   // 캘린더 날짜 점프 시 selectedDate도 업데이트 필요
-  const [calSelectedDate, setCalSelectedDate] = useState<string>(today);
+  const [calSelectedDate, setCalSelectedDate] = useState<string>(state.calSelectedDate ?? today);
+
+  useEffect(() => {
+    setTab(state.tab);
+    setFilter(state.filter);
+    setCalYear(state.calYear);
+    setCalMonth(state.calMonth);
+    setCalSelectedDate(state.calSelectedDate);
+    weeklyNav.setWeekBaseDate(
+      parseDate(state.weekDateStr || formatDate(new Date())),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    setState((prev) => ({
+      ...prev,
+      tab,
+      filter,
+      weekDateStr: weeklyNav.weekDateStr,
+      calYear,
+      calMonth,
+      calSelectedDate,
+    }));
+  }, [tab, filter, weeklyNav.weekDateStr, calYear, calMonth, calSelectedDate, setState]);
 
   useEffect(() => {
     if (prevTab.current !== tab) {

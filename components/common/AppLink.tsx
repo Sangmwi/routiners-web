@@ -2,8 +2,10 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { saveCurrentRouteWindowScroll } from '@/lib/route-state/scroll';
 
-interface AppLinkProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type' | 'onClick'> {
+interface AppLinkProps
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type' | 'onClick'> {
   href: string;
   prefetch?: boolean;
   replace?: boolean;
@@ -11,16 +13,8 @@ interface AppLinkProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement
 }
 
 /**
- * 앱 전용 네비게이션 컴포넌트
- *
- * - button 렌더링으로 Long-press 미리보기 방지
- * - SEO 불필요한 앱 내부 네비게이션용
- * - 이벤트 핸들러(onTouchStart 등)를 button에 전달
- * - onClick에서 e.preventDefault() 호출 시 네비게이션 차단
- *
- * Prefetch 전략:
- * - 탭 라우트(/,/routine,/community,/profile)는 useTabRoutePrefetch에서 중앙 관리
- * - 그 외 라우트(상세 페이지 등)는 개별 prefetch (마운트 시 1회)
+ * App 내부에서 사용하는 버튼 기반 네비게이션 컴포넌트.
+ * 이동 직전에 현재 라우트의 스크롤 상태를 저장한다.
  */
 export default function AppLink({
   href,
@@ -34,7 +28,6 @@ export default function AppLink({
 }: AppLinkProps) {
   const router = useRouter();
 
-  // 비탭 라우트 단순 prefetch (마운트 시 1회)
   useEffect(() => {
     if (!prefetch) return;
     router.prefetch(href);
@@ -43,11 +36,15 @@ export default function AppLink({
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     onClick?.(e);
     if (e.defaultPrevented) return;
+
+    saveCurrentRouteWindowScroll();
+
     if (replace) {
       router.replace(href);
-    } else {
-      router.push(href);
+      return;
     }
+
+    router.push(href);
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {

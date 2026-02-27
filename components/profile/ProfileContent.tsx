@@ -12,22 +12,43 @@ import ProfileInfoTab from '@/components/profile/ProfileInfoTab';
 import AppLink from '@/components/common/AppLink';
 import { PulseLoader } from '@/components/ui/PulseLoader';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { createRouteStateKey } from '@/lib/route-state/keys';
+import { useRouteState, useRouteStateBridge } from '@/hooks/navigation';
 
 /**
  * 소셜 프로필 페이지 콘텐츠 (Suspense 내부)
  */
 export default function ProfileContent() {
   const { data: user } = useCurrentUserProfileSuspense();
-  const [activeTab, setActiveTab] = useState<ProfileTab>('activity');
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const routeKey = createRouteStateKey(pathname, searchParams.toString());
+  const {
+    state: profileUiState,
+    setState: setProfileUiState,
+    saveNow,
+  } = useRouteState<{ activeTab: ProfileTab }>({
+    key: routeKey,
+    initialState: { activeTab: 'activity' },
+  });
+  const { beforeNavigate } = useRouteStateBridge({ saveNow });
+
+  const [activeTab, setActiveTab] = useState<ProfileTab>(profileUiState.activeTab);
   const [direction, setDirection] = useState<'left' | 'right'>('right');
   const prevTab = useRef(activeTab);
+
+  useEffect(() => {
+    setActiveTab(profileUiState.activeTab);
+  }, [profileUiState.activeTab]);
 
   useEffect(() => {
     if (prevTab.current !== activeTab) {
       setDirection(activeTab === 'info' ? 'right' : 'left');
       prevTab.current = activeTab;
+      setProfileUiState({ activeTab });
     }
-  }, [activeTab]);
+  }, [activeTab, setProfileUiState]);
 
   const privateTabs = (() => {
     const tabs: ProfileTab[] = [];
@@ -74,7 +95,13 @@ export default function ProfileContent() {
             <QueryErrorBoundary>
               <Suspense fallback={<PulseLoader />}>
                 {activeTab === 'activity' && <ProfileActivityGrid userId={user.id} />}
-                {activeTab === 'info' && <ProfileInfoTab user={user} isOwnProfile />}
+                {activeTab === 'info' && (
+                  <ProfileInfoTab
+                    user={user}
+                    isOwnProfile
+                    beforeNavigate={beforeNavigate}
+                  />
+                )}
               </Suspense>
             </QueryErrorBoundary>
           </div>

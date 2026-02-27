@@ -1,6 +1,9 @@
 'use client';
 
 import { ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+import { createRouteStateKey } from '@/lib/route-state/keys';
+import { useScrollRestore } from '@/hooks/navigation';
 
 interface MainTabLayoutProps {
   children: ReactNode;
@@ -16,6 +19,11 @@ interface MainTabLayoutProps {
  * - min-h-screen, bg-background 자동 적용
  */
 export function MainTabLayout({ children, className = '' }: MainTabLayoutProps) {
+  const pathname = usePathname();
+  const routeKey = createRouteStateKey(pathname);
+
+  useScrollRestore({ key: routeKey, enabled: true });
+
   return (
     <div
       className={`min-h-screen bg-background px-(--layout-padding-x) py-(--layout-padding-y) pb-nav ${className}`.trim()}

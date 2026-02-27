@@ -13,6 +13,9 @@ import FilterModal, { type DateRange } from '@/components/community/FilterModal'
 import { UserFocusIcon, PlusIcon } from '@phosphor-icons/react';
 import { EMPTY_STATE } from '@/lib/config/theme';
 import type { PostCategory } from '@/lib/types/community';
+import { usePathname } from 'next/navigation';
+import { createRouteStateKey } from '@/lib/route-state/keys';
+import { useRouteState } from '@/hooks/navigation';
 
 const CommunityContent = dynamic(
   () => import('@/components/community/CommunityContent'),
@@ -26,17 +29,31 @@ const VALID_CATEGORIES = ['general', 'workout', 'meal', 'qna'] as const;
  */
 export default function CommunityPage() {
   const router = useRouter();
-  const [primaryTab, setPrimaryTab] = useState<PrimaryTab>('recommended');
-  const [category, setCategory] = useState<PostCategory | 'all'>(() => {
-    if (typeof window === 'undefined') return 'all';
-    const params = new URLSearchParams(window.location.search);
-    const urlCategory = params.get('category');
-    if (urlCategory && (VALID_CATEGORIES as readonly string[]).includes(urlCategory)) {
-      return urlCategory as PostCategory;
+  const pathname = usePathname();
+  const routeKey = createRouteStateKey(pathname);
+  const initialCategory = (() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const urlCategory = params.get('category');
+      if (urlCategory && (VALID_CATEGORIES as readonly string[]).includes(urlCategory)) {
+        return urlCategory as PostCategory;
+      }
     }
     return 'all';
+  })();
+  const { state, setState } = useRouteState<{
+    primaryTab: PrimaryTab;
+    category: PostCategory | 'all';
+    dateRange: DateRange;
+  }>({
+    key: routeKey,
+    initialState: {
+      primaryTab: 'recommended',
+      category: initialCategory,
+      dateRange: 'all',
+    },
   });
-  const [dateRange, setDateRange] = useState<DateRange>('all');
+  const { primaryTab, category, dateRange } = state;
   const [filterOpen, setFilterOpen] = useState(false);
 
   const handleNewPost = () => {
@@ -49,7 +66,7 @@ export default function CommunityPage() {
 
   const handleCategoryChange = (categoryId: string) => {
     const newCategory = categoryId as PostCategory | 'all';
-    setCategory(newCategory);
+    setState((prev) => ({ ...prev, category: newCategory }));
 
     // URL 업데이트 (shallow)
     const params = new URLSearchParams();
@@ -94,7 +111,7 @@ export default function CommunityPage() {
       <div className="flex flex-col gap-4">
         <PrimaryTabs
           activeTab={primaryTab}
-          onTabChange={setPrimaryTab}
+          onTabChange={(nextTab) => setState((prev) => ({ ...prev, primaryTab: nextTab }))}
           hasActiveFilter={hasActiveFilter}
           onFilterOpen={() => setFilterOpen(true)}
         />
@@ -135,7 +152,7 @@ export default function CommunityPage() {
         isOpen={filterOpen}
         onClose={() => setFilterOpen(false)}
         dateRange={dateRange}
-        onApply={setDateRange}
+        onApply={(nextRange) => setState((prev) => ({ ...prev, dateRange: nextRange }))}
       />
     </MainTabLayout>
   );

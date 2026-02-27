@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import PeriodNav from '@/components/ui/PeriodNav';
 import DateJumpSheet from '@/components/ui/DateJumpSheet';
 import SegmentedControl from '@/components/ui/SegmentedControl';
@@ -11,6 +12,8 @@ import BodyStatsTab from '@/components/stats/BodyStatsTab';
 import NutritionStatsTab from '@/components/stats/NutritionStatsTab';
 import { useStatsPeriodNavigator } from '@/hooks/routine/useStatsPeriodNavigator';
 import { formatDate, parseDate } from '@/lib/utils/dateHelpers';
+import { createRouteStateKey } from '@/lib/route-state/keys';
+import { useRouteState } from '@/hooks/navigation';
 
 type RecordCount = '5' | '15' | 'all';
 
@@ -29,16 +32,35 @@ const COUNT_TO_LIMIT: Record<RecordCount, number> = {
 const VALID_TABS: StatsDomain[] = ['workout', 'meal', 'inbody'];
 
 export default function StatsPageContent() {
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const routeKey = createRouteStateKey(pathname);
   const tabParam = searchParams.get('tab') as StatsDomain | null;
   const initialTab = tabParam && VALID_TABS.includes(tabParam) ? tabParam : 'workout';
-  const [domain, setDomain] = useState<StatsDomain>(initialTab);
   const [direction, setDirection] = useState<'left' | 'right'>('right');
-  const prevDomain = useRef(domain);
-
   const navigator = useStatsPeriodNavigator('weekly');
-
-  const [recordCount, setRecordCount] = useState<RecordCount>('5');
+  const { state, setState } = useRouteState<{
+    domain: StatsDomain;
+    recordCount: RecordCount;
+    period: 'weekly' | 'monthly';
+    weekDateStr: string;
+    monthYear: { year: number; month: number };
+  }>({
+    key: routeKey,
+    initialState: {
+      domain: initialTab,
+      recordCount: '5',
+      period: 'weekly',
+      weekDateStr: formatDate(new Date()),
+      monthYear: {
+        year: new Date().getFullYear(),
+        month: new Date().getMonth() + 1,
+      },
+    },
+  });
+  const domain = state.domain;
+  const recordCount = state.recordCount;
+  const prevDomain = useRef(domain);
 
   const [isDateJumpOpen, setIsDateJumpOpen] = useState(false);
   const [dateJumpSession, setDateJumpSession] = useState(0);
@@ -57,11 +79,27 @@ export default function StatsPageContent() {
     }
   }, [domain]);
 
+  useEffect(() => {
+    navigator.setPeriod(state.period);
+    navigator.setWeekBaseDate(parseDate(state.weekDateStr || formatDate(new Date())));
+    navigator.setMonthYear(state.monthYear);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    setState((prev) => ({
+      ...prev,
+      period: navigator.period,
+      weekDateStr: navigator.weekDateStr,
+      monthYear: navigator.monthYear,
+    }));
+  }, [navigator.period, navigator.weekDateStr, navigator.monthYear, setState]);
+
   return (
     <>
       <DomainTabs
         domain={domain}
-        onDomainChange={setDomain}
+        onDomainChange={(next) => setState((prev) => ({ ...prev, domain: next }))}
         period={navigator.period}
         onPeriodChange={navigator.setPeriod}
         rightSlot={
@@ -69,7 +107,7 @@ export default function StatsPageContent() {
             <SegmentedControl
               options={COUNT_OPTIONS}
               value={recordCount}
-              onChange={setRecordCount}
+              onChange={(next) => setState((prev) => ({ ...prev, recordCount: next }))}
               size="sm"
             />
           ) : undefined
