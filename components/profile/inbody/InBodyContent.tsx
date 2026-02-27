@@ -21,6 +21,7 @@ import { useNativeImagePicker } from '@/hooks/webview';
 import { useShowError } from '@/lib/stores/errorStore';
 import type { InBodyCreateData } from '@/lib/types/inbody';
 import { InBodyFormSchema, InBodyFormErrors } from '@/lib/types/inbody';
+import { collectZodErrors } from '@/lib/utils/formValidation';
 import type { ImagePickerSource } from '@/lib/webview';
 
 // ============================================================
@@ -111,14 +112,12 @@ export default function InBodyContent() {
     const result = InBodyFormSchema.safeParse({
       measuredAt: manualData.measuredAt,
       weight: manualData.weight,
+      height: manualData.height,
+      skeletalMuscleMass: manualData.skeletalMuscleMass,
+      bodyFatPercentage: manualData.bodyFatPercentage,
     });
     if (!result.success) {
-      const errors: InBodyFormErrors = {};
-      result.error.errors.forEach((e) => {
-        const field = e.path[0] as keyof InBodyFormErrors;
-        if (field && !errors[field]) errors[field] = e.message;
-      });
-      setManualFormErrors(errors);
+      setManualFormErrors(collectZodErrors<keyof InBodyFormErrors>(result.error));
       return;
     }
     setManualFormErrors({});

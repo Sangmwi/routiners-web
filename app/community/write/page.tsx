@@ -18,7 +18,7 @@ function PostWriteInner() {
   const isEdit = !!postId;
 
   return (
-    <DetailLayout title={isEdit ? '글 수정' : '글쓰기'} centered>
+    <DetailLayout title={isEdit ? '글 수정' : '글쓰기'} centered padding={false} bottomInset='none'>
       <QueryErrorBoundary>
         <Suspense fallback={<PulseLoader />}>
           <PostWriteContent editPostId={postId} />

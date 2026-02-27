@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { InBodyRecord, InBodyUpdateData, InBodyFormSchema, InBodyFormErrors } from '@/lib/types/inbody';
+import { collectZodErrors } from '@/lib/utils/formValidation';
 import { useUpdateInBody, useDeleteInBody } from '@/hooks/inbody';
 import { useConfirmDialog } from '@/lib/stores';
 import InBodyPreview from './InBodyPreview';
@@ -97,14 +98,12 @@ export default function InBodyDetailModal({
     const result = InBodyFormSchema.safeParse({
       measuredAt: editData.measuredAt ?? record.measuredAt,
       weight: editData.weight ?? record.weight,
+      height: editData.height ?? record.height,
+      skeletalMuscleMass: editData.skeletalMuscleMass ?? record.skeletalMuscleMass,
+      bodyFatPercentage: editData.bodyFatPercentage ?? record.bodyFatPercentage,
     });
     if (!result.success) {
-      const errors: InBodyFormErrors = {};
-      result.error.errors.forEach((e) => {
-        const field = e.path[0] as keyof InBodyFormErrors;
-        if (field && !errors[field]) errors[field] = e.message;
-      });
-      setFormErrors(errors);
+      setFormErrors(collectZodErrors<keyof InBodyFormErrors>(result.error));
       return;
     }
     setFormErrors({});

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ArrowUpIcon, XIcon } from '@phosphor-icons/react';
 import { useCreateComment } from '@/hooks/community/mutations';
+import { useShowError } from '@/lib/stores/errorStore';
 import type { ReplyTarget } from './CommentSection';
 
 interface CommentInputProps {
@@ -23,6 +24,7 @@ export default function CommentInput({
   const [content, setContent] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const createComment = useCreateComment();
+  const showError = useShowError();
 
   // autoFocus: 드로어 열릴 때 인풋에 포커스 → 키보드 열림
   useEffect(() => {
@@ -47,6 +49,9 @@ export default function CommentInput({
         onSuccess: () => {
           setContent('');
           onCreated();
+        },
+        onError: () => {
+          showError('댓글 작성에 실패했어요');
         },
       }
     );

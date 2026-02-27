@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { MainTabLayout, MainTabHeader } from '@/components/layouts';
@@ -10,7 +10,6 @@ import EmptyState from '@/components/common/EmptyState';
 import { PulseLoader } from '@/components/ui/PulseLoader';
 import PrimaryTabs, { type PrimaryTab } from '@/components/community/PrimaryTabs';
 import CategoryTabs from '@/components/community/CategoryTabs';
-import FilterModal, { type DateRange } from '@/components/community/FilterModal';
 import { UserFocusIcon, PlusIcon } from '@phosphor-icons/react';
 import { EMPTY_STATE } from '@/lib/config/theme';
 import type { PostCategory } from '@/lib/types/community';
@@ -45,17 +44,14 @@ export default function CommunityPage() {
   const { state, setState } = useRouteState<{
     primaryTab: PrimaryTab;
     category: PostCategory | 'all';
-    dateRange: DateRange;
   }>({
     key: routeKey,
     initialState: {
       primaryTab: 'recommended',
       category: initialCategory,
-      dateRange: 'all',
     },
   });
-  const { primaryTab, category, dateRange } = state;
-  const [filterOpen, setFilterOpen] = useState(false);
+  const { primaryTab, category } = state;
 
   const handleNewPost = () => {
     router.push('/community/write');
@@ -80,8 +76,6 @@ export default function CommunityPage() {
     });
   };
 
-  const hasActiveFilter = dateRange !== 'all';
-
   return (
     <MainTabLayout>
       <MainTabHeader title="커뮤니티" />
@@ -91,8 +85,6 @@ export default function CommunityPage() {
         <PrimaryTabs
           activeTab={primaryTab}
           onTabChange={(nextTab) => setState((prev) => ({ ...prev, primaryTab: nextTab }))}
-          hasActiveFilter={hasActiveFilter}
-          onFilterOpen={() => setFilterOpen(true)}
           actions={
             <>
               <button
@@ -140,19 +132,12 @@ export default function CommunityPage() {
             <Suspense fallback={<PulseLoader />}>
               <CommunityContent
                 category={category}
-                dateRange={dateRange}
               />
             </Suspense>
           </QueryErrorBoundary>
         </div>
       )}
 
-      <FilterModal
-        isOpen={filterOpen}
-        onClose={() => setFilterOpen(false)}
-        dateRange={dateRange}
-        onApply={(nextRange) => setState((prev) => ({ ...prev, dateRange: nextRange }))}
-      />
     </MainTabLayout>
   );
 }

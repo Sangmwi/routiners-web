@@ -134,6 +134,7 @@ export default function InBodyPreview({
               label="키 (cm)"
               value={data.height?.toString() || ''}
               onChange={(e) => handleCoreChange('height', e.target.value)}
+              error={fieldErrors?.height}
             />
             <FormInput
               type="number"
@@ -149,6 +150,7 @@ export default function InBodyPreview({
               label="골격근량 (kg)"
               value={data.skeletalMuscleMass?.toString() || ''}
               onChange={(e) => handleCoreChange('skeletalMuscleMass', e.target.value)}
+              error={fieldErrors?.skeletalMuscleMass}
             />
             <FormInput
               type="number"
@@ -156,6 +158,7 @@ export default function InBodyPreview({
               label="체지방률 (%)"
               value={data.bodyFatPercentage?.toString() || ''}
               onChange={(e) => handleCoreChange('bodyFatPercentage', e.target.value)}
+              error={fieldErrors?.bodyFatPercentage}
             />
             <FormInput
               type="number"

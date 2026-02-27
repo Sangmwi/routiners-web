@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CameraIcon, XCircleIcon } from '@phosphor-icons/react';
+import { CameraIcon, XIcon } from '@phosphor-icons/react';
 import { ImageWithFallback } from '@/components/ui/image';
 import { ImageSourceDrawer } from '@/components/drawers';
 import { useNativeImagePicker } from '@/hooks/webview';
@@ -72,73 +72,73 @@ export default function ImageUploader({
     setIsProcessing(false);
   };
 
-  // 새 파일의 미리보기 URL 생성
   const newFilePreviewUrls = newFiles.map((file) => URL.createObjectURL(file));
+  const allThumbnails = [
+    ...existingUrls.map((url, i) => ({ url, type: 'existing' as const, index: i })),
+    ...newFilePreviewUrls.map((url, i) => ({ url, type: 'new' as const, index: i })),
+  ];
 
   return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-foreground">
-        사진 ({totalCount}/{maxCount})
-      </label>
+    <>
+      {/* 카메라 버튼 */}
+      <button
+        type="button"
+        onClick={() => setIsDrawerOpen(true)}
+        disabled={isProcessing || !canAddMore}
+        className="shrink-0 p-2 rounded-full hover:bg-surface-secondary transition-colors disabled:opacity-40"
+        aria-label="사진 추가"
+      >
+        <CameraIcon size={22} className="text-muted-foreground" />
+      </button>
 
-      <div className="grid grid-cols-4 gap-2">
-        {/* 기존 이미지 */}
-        {existingUrls.map((url, index) => (
-          <div
-            key={`existing-${index}`}
-            className="relative aspect-square rounded-xl overflow-hidden"
-          >
-            <ImageWithFallback
-              src={url}
-              alt={`이미지 ${index + 1}`}
-              fill
-              className="object-cover"
-            />
+      {/* 가로 스크롤 썸네일 */}
+      {allThumbnails.length > 0 && (
+        <div className="flex gap-1.5 overflow-x-auto flex-1 scrollbar-hide py-0.5">
+          {allThumbnails.map(({ url, type, index }) => (
+            <div
+              key={`${type}-${index}`}
+              className="relative shrink-0 w-10 h-10 rounded-lg overflow-hidden"
+            >
+              <ImageWithFallback
+                src={url}
+                alt={`이미지 ${index + 1}`}
+                fill
+                className="object-cover"
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  type === 'existing'
+                    ? onRemoveExisting(index)
+                    : onRemoveNew(index)
+                }
+                className="absolute -top-0.5 -right-0.5 w-[18px] h-[18px] rounded-full bg-foreground/70 flex items-center justify-center"
+              >
+                <XIcon size={10} className="text-background" weight="bold" />
+              </button>
+            </div>
+          ))}
+
+          {/* 추가 버튼 (이미지가 있고 더 추가 가능할 때) */}
+          {canAddMore && (
             <button
               type="button"
-              onClick={() => onRemoveExisting(index)}
-              className="absolute top-1 right-1 text-white drop-shadow-md"
+              onClick={() => setIsDrawerOpen(true)}
+              disabled={isProcessing}
+              className="shrink-0 w-10 h-10 rounded-lg border border-dashed border-edge-subtle flex items-center justify-center hover:bg-surface-secondary transition-colors disabled:opacity-40"
             >
-              <XCircleIcon size={22} weight="fill" />
+              <span className="text-hint text-lg leading-none">+</span>
             </button>
-          </div>
-        ))}
+          )}
+        </div>
+      )}
 
-        {/* 새 파일 미리보기 */}
-        {newFilePreviewUrls.map((url, index) => (
-          <div
-            key={`new-${index}`}
-            className="relative aspect-square rounded-xl overflow-hidden"
-          >
-            <ImageWithFallback
-              src={url}
-              alt={`새 이미지 ${index + 1}`}
-              fill
-              className="object-cover"
-            />
-            <button
-              type="button"
-              onClick={() => onRemoveNew(index)}
-              className="absolute top-1 right-1 text-white drop-shadow-md"
-            >
-              <XCircleIcon size={22} weight="fill" />
-            </button>
-          </div>
-        ))}
-
-        {/* 추가 버튼 */}
-        {canAddMore && (
-          <button
-            type="button"
-            onClick={() => setIsDrawerOpen(true)}
-            disabled={isProcessing}
-            className="aspect-square rounded-xl border-2 border-dashed border-edge-subtle flex flex-col items-center justify-center gap-1 hover:bg-surface-secondary transition-colors disabled:opacity-50"
-          >
-            <CameraIcon size={24} className="text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">추가</span>
-          </button>
-        )}
-      </div>
+      {/* 이미지 카운터 */}
+      {totalCount > 0 && (
+        <span className="text-xs text-hint shrink-0 tabular-nums">
+          {totalCount}/{maxCount}
+        </span>
+      )}
 
       {/* 이미지 소스 선택 드로어 */}
       <ImageSourceDrawer
@@ -155,6 +155,6 @@ export default function ImageUploader({
           onClose={() => setErrorMessage(null)}
         />
       )}
-    </div>
+    </>
   );
 }

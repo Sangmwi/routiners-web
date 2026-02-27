@@ -36,11 +36,6 @@ export default function CommunityClient() {
     router.push('/community/write');
   };
 
-  const handleFilter = () => {
-    // TODO: 필터 모달 열기
-    console.log('필터');
-  };
-
   const handleCategoryChange = (categoryId: string) => {
     const newCategory = categoryId as PostCategory | 'all';
     setCategory(newCategory);
@@ -58,7 +53,7 @@ export default function CommunityClient() {
 
   return (
     <MainTabLayout>
-      <CommunityHeader onNewPost={handleNewPost} onFilter={handleFilter} />
+      <CommunityHeader onNewPost={handleNewPost} />
       <CategoryTabs
         selectedCategory={category}
         onCategoryChange={handleCategoryChange}

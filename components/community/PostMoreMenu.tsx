@@ -5,6 +5,7 @@ import { PencilSimpleIcon, TrashIcon, WarningIcon } from '@phosphor-icons/react'
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import { useDeletePost } from '@/hooks/community/mutations';
 import { useConfirmDialog } from '@/lib/stores/modalStore';
+import { clearOverlayStack } from '@/hooks/ui/useModalLifecycle';
 import type { BaseModalProps } from '@/lib/types/modal';
 
 interface PostMoreMenuProps extends BaseModalProps {
@@ -27,6 +28,7 @@ export default function PostMoreMenu({
 
   const handleEdit = () => {
     onClose();
+    clearOverlayStack();
     router.push(`/community/write?postId=${postId}`);
   };
 

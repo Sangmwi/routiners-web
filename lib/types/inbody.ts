@@ -139,7 +139,7 @@ export type InBodyExtractedData = z.infer<typeof InBodyExtractedDataSchema>;
  * 폼 입력 검증용 Zod 스키마 (클라이언트 사이드)
  *
  * - submit 시점에 실행 (타이핑 중엔 X)
- * - measuredAt, weight만 필수 검증 (나머지는 선택)
+ * - measuredAt, weight 필수 / height·skeletalMuscleMass·bodyFatPercentage 범위 검증
  */
 export const InBodyFormSchema = z.object({
   measuredAt: z.string().min(1, '측정일을 입력해주세요'),
@@ -147,10 +147,29 @@ export const InBodyFormSchema = z.object({
     .number({ invalid_type_error: '체중을 입력해주세요' })
     .min(WEIGHT_RANGE.min, `체중은 ${WEIGHT_RANGE.min}kg 이상 입력해주세요`)
     .max(WEIGHT_RANGE.max, `체중은 ${WEIGHT_RANGE.max}kg 이하 입력해주세요`),
+  // 선택 필드 — 값이 있을 때만 범위 검증
+  height: z
+    .number()
+    .min(HEIGHT_RANGE.min, `키는 ${HEIGHT_RANGE.min}cm 이상 입력해주세요`)
+    .max(HEIGHT_RANGE.max, `키는 ${HEIGHT_RANGE.max}cm 이하 입력해주세요`)
+    .optional(),
+  skeletalMuscleMass: z
+    .number()
+    .min(0, '골격근량은 0kg 이상이어야 해요')
+    .max(80, '골격근량은 80kg 이하 입력해주세요')
+    .optional(),
+  bodyFatPercentage: z
+    .number()
+    .min(0, '체지방률은 0% 이상이어야 해요')
+    .max(100, '체지방률은 100% 이하 입력해주세요')
+    .optional(),
 });
 
 /** 폼 필드별 에러 메시지 타입 */
-export type InBodyFormErrors = Partial<Record<'measuredAt' | 'weight', string>>;
+export type InBodyFormErrors = Partial<Record<
+  'measuredAt' | 'weight' | 'height' | 'skeletalMuscleMass' | 'bodyFatPercentage',
+  string
+>>;
 
 // ============================================================================
 // Database Types (snake_case - DB 직접 사용용)

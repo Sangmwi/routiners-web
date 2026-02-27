@@ -5,6 +5,8 @@
  * snake_case (DB) ↔ camelCase (Domain) 변환
  */
 
+import { z } from 'zod';
+
 // ============================================================================
 // Database Types (snake_case)
 // ============================================================================
@@ -218,3 +220,28 @@ export function formatTimeAgo(dateString: string): string {
     day: 'numeric',
   });
 }
+
+// ============================================================================
+// Form Validation (클라이언트 사이드 Zod 스키마)
+// ============================================================================
+
+export const POST_CONTENT_MAX = 2000;
+export const POST_CONTENT_MIN = 1;
+
+/**
+ * 게시글 폼 검증 스키마
+ * - submit 시점에 실행
+ * - PostWriteContent의 MAX_CONTENT_LENGTH와 동일값 사용
+ */
+export const PostFormSchema = z.object({
+  content: z
+    .string()
+    .min(POST_CONTENT_MIN, '내용을 입력해주세요')
+    .max(POST_CONTENT_MAX, `내용은 ${POST_CONTENT_MAX}자 이하로 입력해주세요`),
+  category: z.enum(['general', 'workout', 'meal', 'qna'], {
+    required_error: '카테고리를 선택해주세요',
+  }),
+});
+
+/** 게시글 폼 필드별 에러 메시지 타입 */
+export type PostFormErrors = Partial<Record<'content' | 'category', string>>;
