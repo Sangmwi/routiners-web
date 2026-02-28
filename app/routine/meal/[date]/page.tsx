@@ -29,7 +29,7 @@ export default function MealPage({ params }: MealPageProps) {
   const [headerAction, setHeaderAction] = useState<ReactNode>(null);
 
   return (
-    <DetailLayout title={title} centered action={headerAction}>
+    <DetailLayout title={title} centered action={headerAction} bottomInset="footer">
       <QueryErrorBoundary>
         <Suspense fallback={<PulseLoader />}>
           <MealContent

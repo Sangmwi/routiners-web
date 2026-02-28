@@ -3,7 +3,7 @@ import { LoadingSpinner } from '@/components/ui/icons';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive';
-  size?: 'xs' | 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   isLoading?: boolean;
   fullWidth?: boolean;
 }
@@ -38,6 +38,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       sm: 'px-3 py-2 text-sm',
       md: 'px-4 py-3 text-sm',
       lg: 'px-6 py-4 text-base',
+      xl: 'px-6 py-5 text-base',
     };
 
     const widthStyles = fullWidth ? 'w-full' : '';
@@ -49,8 +50,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || isLoading}
         {...props}
       >
-        {isLoading && <LoadingSpinner size="sm" variant="current" />}
-        {children}
+        {isLoading ? <LoadingSpinner size="sm" variant="current" /> : children}
       </button>
     );
   }

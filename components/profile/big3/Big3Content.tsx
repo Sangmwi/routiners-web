@@ -128,6 +128,7 @@ export default function Big3Content() {
       {/* Fixed Bottom Button */}
       <GradientFooter variant="page" wrapperClassName="animate-float-up">
         <Button
+          size="lg"
           onClick={() => setIsCreateOpen(true)}
           className="w-full"
         >

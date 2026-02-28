@@ -26,7 +26,7 @@ interface DetailLayoutProps {
   bottomPadding?: boolean;
 
   /** 하단 여백 정책 (기본: safe) */
-  bottomInset?: 'none' | 'safe' | 'nav';
+  bottomInset?: 'none' | 'safe' | 'nav' | 'footer';
 
   /** 배경색 투명 여부 (기본: false) */
   headerTransparent?: boolean;
@@ -70,9 +70,11 @@ export function DetailLayout({
   const bottomClass =
     resolvedBottomInset === 'nav'
       ? 'pb-nav'
-      : resolvedBottomInset === 'safe'
-        ? 'pb-safe'
-        : '';
+      : resolvedBottomInset === 'footer'
+        ? 'pb-footer'
+        : resolvedBottomInset === 'safe'
+          ? 'pb-safe'
+          : '';
 
   return (
     <div

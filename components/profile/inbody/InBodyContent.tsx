@@ -176,6 +176,7 @@ export default function InBodyContent() {
       {/* Fixed Bottom Button */}
       <GradientFooter variant="page" wrapperClassName="animate-float-up">
         <Button
+          size="lg"
           onClick={() => setIsMethodOpen(true)}
           className="w-full"
         >

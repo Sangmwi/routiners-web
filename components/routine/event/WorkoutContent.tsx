@@ -161,7 +161,7 @@ export default function WorkoutContent({
 
   return (
     <>
-      <div className="space-y-10 pb-footer-clearance">
+      <div className="space-y-10 pb-footer">
         <div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -207,9 +207,16 @@ export default function WorkoutContent({
           </div>
         ) : workoutData && workoutData.exercises.length > 0 ? (
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-foreground">
-              운동 목록 ({workoutData.exercises.length}개)
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-foreground">
+                운동 목록 ({workoutData.exercises.length}개)
+              </h2>
+              <span className="text-sm text-hint-strong">
+                {workoutData.exercises.filter(
+                  (ex) => ex.sets.length > 0 && ex.sets.every((s) => s.completed),
+                ).length}/{workoutData.exercises.length} 완료
+              </span>
+            </div>
             <div className="space-y-3">
               {workoutData.exercises.map((exercise, index) => (
                 <ExerciseCard

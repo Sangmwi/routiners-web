@@ -33,7 +33,7 @@ export default function WorkoutPage({ params }: WorkoutPageProps) {
   };
 
   return (
-    <DetailLayout title={title} centered action={headerAction}>
+    <DetailLayout title={title} centered action={headerAction} bottomInset="footer">
       <QueryErrorBoundary>
         <Suspense fallback={<PulseLoader />}>
           <WorkoutContent
