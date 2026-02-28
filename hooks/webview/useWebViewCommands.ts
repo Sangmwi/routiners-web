@@ -14,7 +14,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { AppToWebMessageSchema } from "@sangmwi/shared-contracts";
+import { AppToWebMessageSchema } from "@sauhi/shared-contracts";
 import type { AppToWebMessage } from "@/lib/webview";
 import { useWebViewAuth } from "./useWebViewAuth";
 import { useWebViewNavigation } from "./useWebViewNavigation";

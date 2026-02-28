@@ -1,4 +1,4 @@
-﻿import { TAB_ROUTES } from '@sangmwi/shared-contracts';
+﻿import { TAB_ROUTES } from '@sauhi/shared-contracts';
 
 // ============================================================================
 // Route Configuration

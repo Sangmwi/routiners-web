@@ -16,7 +16,7 @@ if (fs.existsSync(localDist)) {
   ({ THEME_TOKENS } = require(localDist));
 } else {
   try {
-    ({ THEME_TOKENS } = require('@sangmwi/shared-contracts'));
+    ({ THEME_TOKENS } = require('@sauhi/shared-contracts'));
   } catch {
     // no-op: handled by guard below
   }
@@ -24,7 +24,7 @@ if (fs.existsSync(localDist)) {
 
 if (!THEME_TOKENS) {
   throw new Error(
-    'THEME_TOKENS not found. Build/publish @sangmwi/shared-contracts or build local shared dist.'
+    'THEME_TOKENS not found. Build/publish @sauhi/shared-contracts or build local shared dist.'
   );
 }
 
@@ -175,7 +175,7 @@ const darkVars = {
 };
 
 const content = [
-  '/* Auto-generated from @sangmwi/shared-contracts THEME_TOKENS */',
+  '/* Auto-generated from @sauhi/shared-contracts THEME_TOKENS */',
   toCssBlock(':root', lightVars),
   '@media (prefers-color-scheme: dark) {',
   toCssBlock('  :root', darkVars),

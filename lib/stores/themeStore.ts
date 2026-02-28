@@ -7,8 +7,8 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { ThemeMode } from '@sangmwi/shared-contracts';
-export type { ThemeMode } from '@sangmwi/shared-contracts';
+import type { ThemeMode } from '@sauhi/shared-contracts';
+export type { ThemeMode } from '@sauhi/shared-contracts';
 
 // ============================================================================
 // Types
