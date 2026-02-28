@@ -326,7 +326,7 @@ function NutritionBalanceSection({
 function DonutChart({
   macros,
 }: {
-  macros: { label: string; value: number; pct: number }[];
+  macros: { label: keyof typeof MACRO_COLORS; value: number; pct: number }[];
 }) {
   const size = 100;
   const strokeWidth = 14;
