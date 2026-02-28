@@ -27,7 +27,7 @@ const PAGE_SIZE = 12;
  * 위로 스크롤하면 최신 게시글, 아래로 스크롤하면 과거 게시글 로드
  */
 export default function UserPostFeed({ userId, startIndex }: UserPostFeedProps) {
-  const { push } = useNavigate();
+  const { push, prefetch } = useNavigate();
   const toggleLike = useToggleLike();
   const { data: currentUser } = useCurrentUserProfile();
 
@@ -115,6 +115,13 @@ export default function UserPostFeed({ userId, startIndex }: UserPostFeedProps) 
   }, [hasPreviousPage, isFetchingPreviousPage, fetchPreviousPage]);
 
   const allPosts = data?.pages.flatMap((page) => page.posts) ?? [];
+
+  // 피드에 보이는 작성자 프로필 페이지 prefetch (탭 시 즉시 전환)
+  useEffect(() => {
+    if (!allPosts.length) return;
+    const uniqueAuthorIds = [...new Set(allPosts.map((p) => p.authorId))];
+    uniqueAuthorIds.forEach((id) => prefetch(`/profile/user/${id}`));
+  }, [allPosts]);
 
   // initialPage의 첫 번째 페이지에서 indexInPage번째가 타겟
   // pages는 initialPage부터 시작하므로 첫 페이지의 indexInPage가 타겟

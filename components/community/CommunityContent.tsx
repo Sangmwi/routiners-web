@@ -27,7 +27,7 @@ export default function CommunityContent({
   search,
   dateRange,
 }: CommunityContentProps) {
-  const { push } = useNavigate();
+  const { push, prefetch } = useNavigate();
   const sentinelRef = useRef<HTMLDivElement>(null);
   const toggleLike = useToggleLike();
   const { data: currentUser } = useCurrentUserProfile();
@@ -89,12 +89,19 @@ export default function CommunityContent({
     setMoreMenuPostId(null);
   };
 
+  const posts = data?.pages.flatMap((page) => page.posts) ?? [];
+
+  // 피드에 보이는 작성자 프로필 페이지 prefetch (탭 시 즉시 전환)
+  useEffect(() => {
+    if (!posts.length) return;
+    const uniqueAuthorIds = [...new Set(posts.map((p) => p.authorId))];
+    uniqueAuthorIds.forEach((id) => prefetch(`/profile/user/${id}`));
+  }, [posts]);
+
   // 초기 로딩
   if (isLoading) {
     return <PulseLoader />;
   }
-
-  const posts = data?.pages.flatMap((page) => page.posts) ?? [];
 
   return (
     <div>
