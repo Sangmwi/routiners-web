@@ -550,7 +550,7 @@ function NutritionMetrics({
   }
 
   // DonutChart 폴백용 매크로 데이터
-  const macros: { label: string; value: number; pct: number }[] = [];
+  const macros: { label: keyof typeof MACRO_COLORS; value: number; pct: number }[] = [];
   const totalCarbs = meal.totalCarbs || 0;
   const totalProtein = meal.totalProtein || 0;
   const totalFat = meal.totalFat || 0;
