@@ -7,7 +7,6 @@ import { useUserPostCount } from '@/hooks/community/useUserPostCount';
 import type { ProfileTab } from '@/components/profile/ProfileTabBar';
 import ProfileCompactHeader from '@/components/profile/ProfileCompactHeader';
 import ProfileTabBar from '@/components/profile/ProfileTabBar';
-import StickyControlZone from '@/components/ui/StickyControlZone';
 import ProfileActivityGrid from '@/components/profile/ProfileActivityGrid';
 import ProfileInfoTab from '@/components/profile/ProfileInfoTab';
 import ProfileFollowButton from '@/components/profile/ProfileFollowButton';
