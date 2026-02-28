@@ -62,7 +62,7 @@ export default function Big3Content() {
           <div className="px-(--layout-padding-x) pt-1 pb-5">
             <div className="flex gap-6">
               {/* 좌측: 합계 + 메타 */}
-              <div className="flex-1 min-w-0">
+              <div className="flex flex-col justify-center flex-1 min-w-0">
                 <p className="text-xs text-muted-foreground">3대 합계</p>
                 <div className="flex items-baseline gap-1.5 mt-1">
                   <span className="text-2xl font-bold tabular-nums text-foreground">

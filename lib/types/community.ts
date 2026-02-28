@@ -201,25 +201,7 @@ export interface CommentListResponse {
 // Time Helpers
 // ============================================================================
 
-/**
- * ISO 날짜를 한국어 상대시간으로 변환
- * @example "1시간 전", "2일 전"
- */
-export function formatTimeAgo(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (diffInSeconds < 60) return '방금 전';
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}분 전`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}시간 전`;
-  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}일 전`;
-
-  return date.toLocaleDateString('ko-KR', {
-    month: 'short',
-    day: 'numeric',
-  });
-}
+export { formatTimeAgo } from '@/lib/utils/dateHelpers';
 
 // ============================================================================
 // Form Validation (클라이언트 사이드 Zod 스키마)

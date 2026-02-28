@@ -3,17 +3,15 @@
 import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/common/EmptyState';
 import { EMPTY_STATE } from '@/lib/config/theme';
-import BodyCompositionSummary from '@/components/inbody/BodyCompositionSummary';
 import { MetricItem } from '@/components/inbody/MetricItem';
 import MiniSparkline from '@/components/ui/MiniSparkline';
 import { getTrendColor } from '@/components/ui/ChangeIndicator';
+import { formatTimeAgo } from '@/lib/utils/dateHelpers';
 import type { InBodySummary, InBodyRecord } from '@/lib/types';
 
 interface InBodySectionProps {
   summary: InBodySummary;
   history: InBodyRecord[];
-  /** 유저 키 (cm) */
-  height?: number | null;
 }
 
 const INBODY_METRICS = [
@@ -27,10 +25,13 @@ const INBODY_METRICS = [
  *
  * SectionHeader + 3열 MetricItem + 미니 스파크라인
  */
-export default function InBodySection({ summary, history, height }: InBodySectionProps) {
+export default function InBodySection({ summary, history }: InBodySectionProps) {
   const hasData = !!summary.latest;
   const hasHistory = history.length >= 2;
   const chronological = hasHistory ? [...history].reverse() : [];
+
+  const score = summary.latest?.inbodyScore;
+  const measuredAt = summary.latest?.measuredAt;
 
   return (
     <section>
@@ -46,11 +47,24 @@ export default function InBodySection({ summary, history, height }: InBodySectio
         {!hasData ? (
           <EmptyState {...EMPTY_STATE.inbody.noRecord} size="sm" />
         ) : (
-          <BodyCompositionSummary
-            height={height}
-            measuredAt={summary.latest?.measuredAt}
-            score={summary.latest?.inbodyScore}
-          >
+          <>
+            {/* 헤더: 점수 | 최근 측정 */}
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs text-muted-foreground">
+                {score != null
+                  ? <>점수 <span className="font-medium text-foreground">{score}점</span></>
+                  : <span className="text-hint">점수 없음</span>
+                }
+              </p>
+              {measuredAt && (
+                <p className="text-xs text-muted-foreground">
+                  {formatTimeAgo(measuredAt)}
+                </p>
+              )}
+            </div>
+            <div className="border-t border-edge-faint mb-3" />
+
+            {/* 메트릭 그리드 */}
             <div className="grid grid-cols-3 gap-2">
               {INBODY_METRICS.map(({ key, label, unit, positiveIsGood }) => {
                 const sparkData = hasHistory
@@ -81,7 +95,7 @@ export default function InBodySection({ summary, history, height }: InBodySectio
                 );
               })}
             </div>
-          </BodyCompositionSummary>
+          </>
         )}
       </div>
     </section>

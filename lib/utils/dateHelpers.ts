@@ -258,3 +258,23 @@ export function formatElapsedTime(totalSeconds: number): string {
   }
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
+
+/**
+ * 날짜 문자열을 한국어 상대시간으로 변환
+ * @example "방금 전", "3시간 전", "2일 전", "1주일 전", "3달 전"
+ */
+export function formatTimeAgo(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return '방금 전';
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}분 전`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}시간 전`;
+
+  const diffInDays = Math.floor(diffInSeconds / 86400);
+  if (diffInDays < 7) return `${diffInDays}일 전`;
+  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)}주일 전`;
+  if (diffInDays < 365) return `${Math.floor(diffInDays / 30)}달 전`;
+  return `${Math.floor(diffInDays / 365)}년 전`;
+}
