@@ -8,7 +8,7 @@ import { PulseLoader } from '@/components/ui/PulseLoader';
 
 const UserPostFeedWrapper = dynamic(
   () => import('@/components/community/UserPostFeedWrapper'),
-  { ssr: false }
+  { ssr: false, loading: () => <PulseLoader /> }
 );
 
 export default function UserPostFeedPage({

@@ -98,7 +98,7 @@ export default function PostCard({ post, onLike, onComment, onAuthorClick, onMor
           <p className="text-xs text-muted-foreground">{timeAgo}</p>
         </button>
         {showFollowButton && author?.id && (
-          <PostFollowButton authorId={author.id} />
+          <PostFollowButton authorId={author.id} initialIsFollowing={post.isFollowing} />
         )}
         {showMoreButton && (
           <button

@@ -71,7 +71,11 @@ export default function UserProfileContent({ userId }: UserProfileContentProps) 
 
         {/* 팔로우 버튼 (다른 유저만) */}
         {currentUser && currentUser.id !== userId && (
-          <ProfileFollowButton targetUserId={userId} />
+          <Suspense fallback={
+            <div className="w-full h-[38px] rounded-xl bg-surface-accent animate-pulse" />
+          }>
+            <ProfileFollowButton targetUserId={userId} />
+          </Suspense>
         )}
       </div>
 

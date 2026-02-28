@@ -8,7 +8,7 @@ import { PulseLoader } from '@/components/ui/PulseLoader';
 
 const RoutineContent = dynamic(
   () => import('@/components/routine/RoutineContent'),
-  { ssr: false }
+  { ssr: false, loading: () => <PulseLoader /> }
 );
 
 export default function RoutinePage() {

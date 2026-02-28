@@ -8,7 +8,7 @@ import { PulseLoader } from '@/components/ui/PulseLoader';
 
 const UserProfileContent = dynamic(
   () => import('@/components/profile/UserProfileContent'),
-  { ssr: false }
+  { ssr: false, loading: () => <PulseLoader /> }
 );
 
 export default function UserProfilePage({

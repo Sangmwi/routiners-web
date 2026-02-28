@@ -256,7 +256,7 @@ export interface InBodyRecord {
 export interface InBodyCreateData {
   measuredAt: string;
   height?: number;
-  weight: number;
+  weight?: number;
   skeletalMuscleMass?: number;
   bodyFatPercentage?: number;
   bmi?: number;
@@ -337,7 +337,7 @@ export function transformInBodyToDbInsert(
   return {
     measured_at: data.measuredAt,
     height: data.height ?? null,
-    weight: data.weight,
+    weight: data.weight!,
     skeletal_muscle_mass: data.skeletalMuscleMass ?? null,
     body_fat_percentage: data.bodyFatPercentage ?? null,
     bmi: data.bmi ?? null,

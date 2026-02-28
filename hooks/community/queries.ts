@@ -6,7 +6,7 @@
 
 import {
   useSuspenseQuery,
-  useInfiniteQuery,
+  useSuspenseInfiniteQuery,
   useQuery,
 } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/constants/queryKeys';
@@ -30,7 +30,10 @@ export function useCommunityPosts(filters: PostFilters = {}) {
 }
 
 /**
- * 게시글 목록 무한스크롤
+ * 게시글 목록 무한스크롤 (Suspense)
+ *
+ * 첫 페이지 로드 시 suspend → 부모 <Suspense> fallback 표시
+ * 추가 페이지(fetchNextPage)는 suspend 없이 isFetchingNextPage로 처리
  */
 export function useInfiniteCommunityPosts(
   category?: PostCategory | 'all',
@@ -42,7 +45,7 @@ export function useInfiniteCommunityPosts(
   const effectiveDateRange =
     dateRange && dateRange !== 'all' ? dateRange : undefined;
 
-  return useInfiniteQuery({
+  return useSuspenseInfiniteQuery({
     queryKey: queryKeys.post.list({
       category,
       limit,

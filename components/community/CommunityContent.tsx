@@ -4,7 +4,6 @@ import { useRef, useEffect, useState } from 'react';
 import PostCard from './PostCard';
 import PostMoreMenu from './PostMoreMenu';
 import CommentDrawer from './CommentDrawer';
-import { PulseLoader } from '@/components/ui/PulseLoader';
 import { LoadingSpinner } from '@/components/ui/icons';
 import { useInfiniteCommunityPosts } from '@/hooks/community/queries';
 import { useToggleLike } from '@/hooks/community/mutations';
@@ -40,7 +39,6 @@ export default function CommunityContent({
 
   const {
     data,
-    isLoading,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
@@ -89,7 +87,7 @@ export default function CommunityContent({
     setMoreMenuPostId(null);
   };
 
-  const posts = data?.pages.flatMap((page) => page.posts) ?? [];
+  const posts = data.pages.flatMap((page) => page.posts);
 
   // 피드에 보이는 작성자 프로필 페이지 prefetch (탭 시 즉시 전환)
   useEffect(() => {
@@ -97,11 +95,6 @@ export default function CommunityContent({
     const uniqueAuthorIds = [...new Set(posts.map((p) => p.authorId))];
     uniqueAuthorIds.forEach((id) => prefetch(`/profile/user/${id}`));
   }, [posts]);
-
-  // 초기 로딩
-  if (isLoading) {
-    return <PulseLoader />;
-  }
 
   return (
     <div>

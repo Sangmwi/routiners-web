@@ -10,13 +10,8 @@ import { PulseLoader } from '@/components/ui/PulseLoader';
 import { CaretRightIcon } from '@phosphor-icons/react';
 import { EMPTY_STATE } from '@/lib/config/theme';
 import { useInBodyRecordsSuspense } from '@/hooks/inbody/queries';
+import { INBODY_METRICS } from '@/lib/constants/inbody';
 import type { InBodyRecord } from '@/lib/types';
-
-const METRICS_CONFIG = [
-  { key: 'weight', label: '체중', unit: 'kg', positiveIsGood: false },
-  { key: 'skeletalMuscleMass', label: '골격근량', unit: 'kg', positiveIsGood: true },
-  { key: 'bodyFatPercentage', label: '체지방률', unit: '%', positiveIsGood: false },
-] as const;
 
 /** "2024-03-15" → "24.3.15" (연도 포함 간결 포맷) */
 function formatFullDate(dateStr: string): string {
@@ -85,7 +80,7 @@ function MetricCards({ limit }: { limit: number }) {
 
   return (
     <div className="space-y-4">
-      {METRICS_CONFIG.map(({ key, label, unit, positiveIsGood }) => {
+      {INBODY_METRICS.map(({ key, label, unit, positiveIsGood }) => {
         const value = latest?.[key];
         const change = changes?.[key];
         const sparkData = chronological.map((r) => r[key]).filter((v): v is number => v != null);
@@ -100,7 +95,7 @@ function MetricCards({ limit }: { limit: number }) {
                   <span className="text-xs text-hint">
                     {chronological.length}회 측정
                   </span>
-                  <ChangeIndicator value={change} positiveIsGood={positiveIsGood} unit={unit} />
+                  <ChangeIndicator value={change} positiveIsGood={positiveIsGood} unit={unit} showIcon />
                 </div>
               )}
             </div>

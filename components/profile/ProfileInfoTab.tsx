@@ -133,6 +133,7 @@ function InfoTabDisplay({
         <BodyCompositionSummary
           height={inbodySummary?.latest?.height}
           measuredAt={inbodySummary?.latest?.measuredAt}
+          score={inbodySummary?.latest?.inbodyScore}
         >
           <ProfileInbodySection renderHeader={false} isOwnProfile={isOwnProfile} userId={userId} />
         </BodyCompositionSummary>

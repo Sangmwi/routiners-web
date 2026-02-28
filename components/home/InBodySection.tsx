@@ -2,23 +2,19 @@
 
 import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/common/EmptyState';
-import { EMPTY_STATE } from '@/lib/config/theme';
+import BodyCompositionSummary from '@/components/inbody/BodyCompositionSummary';
 import { MetricItem } from '@/components/inbody/MetricItem';
 import MiniSparkline from '@/components/ui/MiniSparkline';
 import { getTrendColor } from '@/components/ui/ChangeIndicator';
 import { formatTimeAgo } from '@/lib/utils/dateHelpers';
+import { EMPTY_STATE } from '@/lib/config/theme';
+import { INBODY_METRICS } from '@/lib/constants/inbody';
 import type { InBodySummary, InBodyRecord } from '@/lib/types';
 
 interface InBodySectionProps {
   summary: InBodySummary;
   history: InBodyRecord[];
 }
-
-const INBODY_METRICS = [
-  { key: 'weight', label: '체중', unit: 'kg', positiveIsGood: false },
-  { key: 'skeletalMuscleMass', label: '골격근량', unit: 'kg', positiveIsGood: true },
-  { key: 'bodyFatPercentage', label: '체지방률', unit: '%', positiveIsGood: false },
-] as const;
 
 /**
  * 홈 화면 인바디 독립 섹션
@@ -47,24 +43,12 @@ export default function InBodySection({ summary, history }: InBodySectionProps) 
         {!hasData ? (
           <EmptyState {...EMPTY_STATE.inbody.noRecord} size="sm" />
         ) : (
-          <>
-            {/* 헤더: 점수 | 최근 측정 */}
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs text-muted-foreground">
-                {score != null
-                  ? <>점수 <span className="font-medium text-foreground">{score}점</span></>
-                  : <span className="text-hint">점수 없음</span>
-                }
-              </p>
-              {measuredAt && (
-                <p className="text-xs text-muted-foreground">
-                  {formatTimeAgo(measuredAt)}
-                </p>
-              )}
-            </div>
-            <div className="border-t border-edge-faint mb-3" />
-
-            {/* 메트릭 그리드 */}
+          <BodyCompositionSummary
+            height={summary.latest?.height}
+            measuredAt={summary.latest?.measuredAt}
+            score={score}
+            dateText={measuredAt ? formatTimeAgo(measuredAt) : undefined}
+          >
             <div className="grid grid-cols-3 gap-2">
               {INBODY_METRICS.map(({ key, label, unit, positiveIsGood }) => {
                 const sparkData = hasHistory
@@ -95,7 +79,7 @@ export default function InBodySection({ summary, history }: InBodySectionProps) 
                 );
               })}
             </div>
-          </>
+          </BodyCompositionSummary>
         )}
       </div>
     </section>

@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 
 const WorkoutContent = dynamic(
   () => import('@/components/routine/event/WorkoutContent'),
-  { ssr: false }
+  { ssr: false, loading: () => <PulseLoader /> }
 );
 import { DetailLayout } from '@/components/layouts';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';

@@ -43,6 +43,16 @@ export default function InBodyPreview({
     inbodyScore: data.inbodyScore?.toString() ?? '',
   });
 
+  // 필드별 최대값 (DB DECIMAL 정밀도 기반)
+  const FIELD_MAX: Partial<Record<keyof typeof localValues, number>> = {
+    height: 250,          // cm
+    weight: 300,          // kg — DECIMAL(5,2)
+    skeletalMuscleMass: 100, // kg — DECIMAL(5,2)
+    bodyFatPercentage: 99.9, // % — DECIMAL(4,1)
+    bmi: 99.9,            // DECIMAL(4,1)
+    inbodyScore: 100,     // INTEGER
+  };
+
   // 부모가 initialEditing을 변경하면 동기화
   useEffect(() => {
     setIsEditing(initialEditing);
@@ -61,6 +71,17 @@ export default function InBodyPreview({
       onChange({ ...data, [field]: numValue });
     } else if (normalized === '') {
       onChange({ ...data, [field]: undefined });
+    }
+  };
+
+  // blur 시 최대값 초과 값 클램핑
+  const handleCoreBlur = (field: keyof typeof localValues) => {
+    const numValue = parseFloat(localValues[field]);
+    const max = FIELD_MAX[field];
+    if (!isNaN(numValue) && max !== undefined && numValue > max) {
+      const clamped = max.toString();
+      setLocalValues(prev => ({ ...prev, [field]: clamped }));
+      onChange({ ...data, [field]: max });
     }
   };
 
@@ -146,6 +167,7 @@ export default function InBodyPreview({
               label="키 (cm)"
               value={localValues.height}
               onChange={(e) => handleCoreChange('height', e.target.value)}
+              onBlur={() => handleCoreBlur('height')}
               maxLength={5}
               error={fieldErrors?.height}
             />
@@ -154,6 +176,7 @@ export default function InBodyPreview({
               label="체중 (kg)"
               value={localValues.weight}
               onChange={(e) => handleCoreChange('weight', e.target.value)}
+              onBlur={() => handleCoreBlur('weight')}
               maxLength={5}
               error={fieldErrors?.weight}
             />
@@ -162,7 +185,8 @@ export default function InBodyPreview({
               label="골격근량 (kg)"
               value={localValues.skeletalMuscleMass}
               onChange={(e) => handleCoreChange('skeletalMuscleMass', e.target.value)}
-              maxLength={4}
+              onBlur={() => handleCoreBlur('skeletalMuscleMass')}
+              maxLength={5}
               error={fieldErrors?.skeletalMuscleMass}
             />
             <FormInput
@@ -170,7 +194,8 @@ export default function InBodyPreview({
               label="체지방률 (%)"
               value={localValues.bodyFatPercentage}
               onChange={(e) => handleCoreChange('bodyFatPercentage', e.target.value)}
-              maxLength={5}
+              onBlur={() => handleCoreBlur('bodyFatPercentage')}
+              maxLength={4}
               error={fieldErrors?.bodyFatPercentage}
             />
             <FormInput
@@ -178,6 +203,7 @@ export default function InBodyPreview({
               label="BMI"
               value={localValues.bmi}
               onChange={(e) => handleCoreChange('bmi', e.target.value)}
+              onBlur={() => handleCoreBlur('bmi')}
               maxLength={4}
             />
             <FormInput
@@ -185,6 +211,7 @@ export default function InBodyPreview({
               label="인바디 점수"
               value={localValues.inbodyScore}
               onChange={(e) => handleCoreChange('inbodyScore', e.target.value)}
+              onBlur={() => handleCoreBlur('inbodyScore')}
               maxLength={3}
             />
           </div>

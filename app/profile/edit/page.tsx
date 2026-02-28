@@ -8,7 +8,7 @@ import { PulseLoader } from '@/components/ui/PulseLoader';
 
 const ProfileEditContent = dynamic(
   () => import('@/components/profile/edit/ProfileEditContent'),
-  { ssr: false }
+  { ssr: false, loading: () => <PulseLoader /> }
 );
 
 export default function ProfileEditPage() {

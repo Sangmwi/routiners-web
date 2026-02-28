@@ -99,24 +99,42 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
     console.warn('[GET /api/community/posts] current_user_id RPC failed:', e);
   }
 
-  // 좋아요 여부 확인
+  // 좋아요 + 팔로우 여부 병렬 확인
   const postIds = posts.map((p) => p.id);
-  const { data: likes } = currentUserId
-    ? await supabase
-        .from('community_likes')
-        .select('post_id')
-        .eq('user_id', currentUserId)
-        .in('post_id', postIds)
-    : { data: null };
+  const authorIds = [...new Set(
+    posts.map((p) => p.author_id).filter((id) => id !== currentUserId)
+  )];
+
+  const [{ data: likes }, { data: follows }] = await Promise.all([
+    currentUserId
+      ? supabase
+          .from('community_likes')
+          .select('post_id')
+          .eq('user_id', currentUserId)
+          .in('post_id', postIds)
+      : Promise.resolve({ data: null }),
+    currentUserId && authorIds.length > 0
+      ? supabase
+          .from('user_follows')
+          .select('following_id')
+          .eq('follower_id', currentUserId)
+          .in('following_id', authorIds)
+      : Promise.resolve({ data: null }),
+  ]);
 
   const likedPostIds = new Set(likes?.map((l) => l.post_id) ?? []);
+  const followingAuthorIds = new Set(follows?.map((f) => f.following_id) ?? []);
 
   // 응답 변환
   const transformedPosts = posts.map((post) =>
     toCommunityPost(
       post as DbCommunityPost,
       post.author,
-      likedPostIds.has(post.id)
+      likedPostIds.has(post.id),
+      // 본인 글이면 undefined (팔로우 버튼 자체가 표시되지 않음)
+      currentUserId && post.author_id !== currentUserId
+        ? followingAuthorIds.has(post.author_id)
+        : undefined
     )
   );
 
@@ -186,6 +204,6 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
   }
 
   return NextResponse.json(
-    toCommunityPost(post as DbCommunityPost, post.author, false)
+    toCommunityPost(post as DbCommunityPost, post.author, false, undefined)
   );
 });

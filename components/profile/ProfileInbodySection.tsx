@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useInBodySummarySuspense, useUserInBodySummarySuspense } from '@/hooks/inbody';
 import { EMPTY_STATE } from '@/lib/config/theme';
 import { InBodyDetailModal } from '@/components/inbody';
-import { MetricItem } from '@/components/inbody/MetricItem';
+import { MetricsGrid } from '@/components/inbody/MetricsGrid';
 import { InBodyRecord, InBodySummary } from '@/lib/types';
 import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/common/EmptyState';
@@ -44,12 +44,6 @@ function OtherInbodyData({ userId, userName, renderHeader }: { userId: string; u
 // ============================================================
 // Shared Display Component
 // ============================================================
-
-const INBODY_METRICS = [
-  { key: 'weight', label: '체중', unit: 'kg', positiveIsGood: false },
-  { key: 'skeletalMuscleMass', label: '골격근량', unit: 'kg', positiveIsGood: true },
-  { key: 'bodyFatPercentage', label: '체지방률', unit: '%', positiveIsGood: false },
-] as const;
 
 interface InbodyDisplayProps {
   summary: InBodySummary;
@@ -98,18 +92,9 @@ function InbodyDisplay({ summary, isOwnProfile, userName, renderHeader }: Inbody
     />
   );
 
-  // 데이터 표시 렌더링
+  // 데이터 표시 렌더링 — 메트릭 그리드 (헤더는 ProfileInfoTab의 BodyCompositionSummary에서 처리)
   const renderDataState = () => (
-    <div className="grid grid-cols-3 gap-3">
-      {INBODY_METRICS.map(({ key, label, unit }) => (
-        <MetricItem
-          key={key}
-          label={label}
-          value={latest?.[key]}
-          unit={unit}
-        />
-      ))}
-    </div>
+    <MetricsGrid data={latest} />
   );
 
   // 타인 프로필에서 카드 클릭 시 상세보기

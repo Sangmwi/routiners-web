@@ -64,6 +64,7 @@ export interface CommunityPost {
   createdAt: string;
   updatedAt: string;
   isLiked?: boolean;
+  isFollowing?: boolean;
 }
 
 export interface CommunityComment {
@@ -120,7 +121,8 @@ export function toPostAuthor(dbAuthor: DbAuthorJoin): PostAuthor {
 export function toCommunityPost(
   dbPost: DbCommunityPost,
   author?: DbAuthorJoin | null,
-  isLiked?: boolean
+  isLiked?: boolean,
+  isFollowing?: boolean
 ): CommunityPost {
   return {
     id: dbPost.id,
@@ -134,6 +136,7 @@ export function toCommunityPost(
     createdAt: dbPost.created_at,
     updatedAt: dbPost.updated_at,
     isLiked,
+    isFollowing,
   };
 }
 

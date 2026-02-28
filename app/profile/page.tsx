@@ -9,7 +9,7 @@ import ProfileHeader from '@/components/profile/ProfileHeader';
 
 const ProfileContent = dynamic(
   () => import('@/components/profile/ProfileContent'),
-  { ssr: false }
+  { ssr: false, loading: () => <PulseLoader /> }
 );
 
 export default function ProfilePage() {

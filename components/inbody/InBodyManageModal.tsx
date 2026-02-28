@@ -46,7 +46,7 @@ export default function InBodyManageModal({
     return {
       measuredAt: new Date().toISOString().split('T')[0],
       height: latestHeight,
-      weight: 0,
+      weight: undefined,
     };
   };
   const [manualData, setManualData] = useState<InBodyCreateData>(getManualInputInitial());

@@ -70,7 +70,7 @@ export default function Big3Content() {
                   </span>
                   <span className="text-base text-muted-foreground">kg</span>
                   {summary.totalChange !== 0 && (
-                    <ChangeIndicator value={summary.totalChange} positiveIsGood unit="kg" />
+                    <ChangeIndicator value={summary.totalChange} positiveIsGood unit="kg" showIcon />
                   )}
                 </div>
                 {prTotal > 0 && latestPrDate && (

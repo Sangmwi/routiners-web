@@ -302,11 +302,12 @@ export default function InBodyContent() {
   );
 }
 
-function getManualInitial(records: { height?: number }[]): InBodyCreateData {
+function getManualInitial(records: { height?: number; weight?: number }[]): InBodyCreateData {
   const latestHeight = records.length > 0 ? records[0].height : undefined;
+  const latestWeight = records.length > 0 ? records[0].weight : undefined;
   return {
     measuredAt: new Date().toISOString().split('T')[0],
     height: latestHeight,
-    weight: 0,
+    weight: latestWeight,
   };
 }

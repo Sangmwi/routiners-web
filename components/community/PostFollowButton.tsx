@@ -5,6 +5,7 @@ import { useModalStore } from '@/lib/stores/modalStore';
 
 interface PostFollowButtonProps {
   authorId: string;
+  initialIsFollowing?: boolean;
 }
 
 /**
@@ -13,9 +14,10 @@ interface PostFollowButtonProps {
  * - 배경/보더 없는 텍스트 버튼
  * - "팔로우" → primary 색상 / "팔로잉" → muted 색상
  * - 팔로잉 취소 시 confirm 모달
+ * - initialIsFollowing: 피드 API에서 embed된 초기값 (flash 방지)
  */
-export default function PostFollowButton({ authorId }: PostFollowButtonProps) {
-  const { data } = useFollowStatus(authorId);
+export default function PostFollowButton({ authorId, initialIsFollowing }: PostFollowButtonProps) {
+  const { data } = useFollowStatus(authorId, initialIsFollowing);
   const toggleFollow = useToggleFollow();
   const openModal = useModalStore((state) => state.openModal);
 

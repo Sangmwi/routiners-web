@@ -6,7 +6,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 
 const CommunityContent = dynamic(
   () => import('@/components/community/CommunityContent'),
-  { ssr: false }
+  { ssr: false, loading: () => <PulseLoader /> }
 );
 import { MainTabLayout, MainTabHeader } from '@/components/layouts';
 import StickyControlZone from '@/components/ui/StickyControlZone';

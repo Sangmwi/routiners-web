@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useShowError } from '@/lib/stores/errorStore';
 import { isWorkoutData } from '@/lib/types/guards';
 import { useRoutineEventByDateSuspense } from './queries';
@@ -11,7 +10,6 @@ import { useRoutineEventDataMutation } from './useRoutineEventDataMutation';
 import type { WorkoutData, WorkoutSet } from '@/lib/types/routine';
 
 export function useWorkoutEvent(date: string) {
-  const router = useRouter();
   const showError = useShowError();
 
   const { data: event } = useRoutineEventByDateSuspense(date, 'workout');
@@ -38,7 +36,6 @@ export function useWorkoutEvent(date: string) {
     completeEvent.mutate(event.id, {
       onSuccess: () => {
         clearPersistedTimer();
-        router.back();
       },
       onError: () => showError('운동 완료에 실패했어요.'),
     });
