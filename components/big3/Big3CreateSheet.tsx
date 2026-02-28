@@ -12,27 +12,27 @@ import { useCreateBig3 } from '@/hooks/big3';
 import { useShowError } from '@/lib/stores/errorStore';
 import type { Big3LiftType } from '@/lib/types/big3';
 
-const LIFT_OPTIONS = BIG3_LIFT_CONFIG.map(({ key, label }) => ({
-  key,
-  label,
-}));
+const LIFT_OPTIONS = BIG3_LIFT_CONFIG.map(({ key, label }) => ({ key, label }));
+const LIFT_LABEL_MAP = Object.fromEntries(
+  BIG3_LIFT_CONFIG.map(({ key, label }) => [key, label]),
+) as Record<string, string>;
 
 function getToday(): string {
   return new Date().toISOString().split('T')[0];
 }
 
-interface Big3CreateDrawerProps {
+interface Big3CreateSheetProps {
   isOpen: boolean;
   onClose: () => void;
   /** 필터에서 선택된 종목으로 기본값 설정 */
   defaultLiftType?: Big3LiftType;
 }
 
-export default function Big3CreateDrawer({
+export default function Big3CreateSheet({
   isOpen,
   onClose,
   defaultLiftType,
-}: Big3CreateDrawerProps) {
+}: Big3CreateSheetProps) {
   const [liftType, setLiftType] = useState<Big3LiftType>(defaultLiftType ?? 'squat');
   const [recordedAt, setRecordedAt] = useState(getToday);
   const [weight, setWeight] = useState('0');
@@ -64,8 +64,12 @@ export default function Big3CreateDrawer({
           resetForm();
           onClose();
         },
-        onError: () => {
-          showError('기록 저장에 실패했어요');
+        onError: (err) => {
+          if ((err as { status?: number }).status === 409) {
+            showError(`이 날짜에 이미 ${LIFT_LABEL_MAP[liftType]} 기록이 있어요`);
+          } else {
+            showError('기록 저장에 실패했어요');
+          }
         },
       },
     );

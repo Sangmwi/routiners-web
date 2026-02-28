@@ -8,7 +8,7 @@ import SegmentedControl from '@/components/ui/SegmentedControl';
 import ChangeIndicator from '@/components/ui/ChangeIndicator';
 import { PulseLoader } from '@/components/ui/PulseLoader';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
-import Big3CreateDrawer from '@/components/big3/Big3CreateDrawer';
+import Big3CreateSheet from '@/components/big3/Big3CreateSheet';
 import Big3RecordSection from '@/components/profile/big3/Big3RecordSection';
 import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
 import { useBig3SummarySuspense } from '@/hooks/big3';
@@ -137,7 +137,7 @@ export default function Big3Content() {
       </GradientFooter>
 
       {/* Create Drawer */}
-      <Big3CreateDrawer
+      <Big3CreateSheet
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
         defaultLiftType={selectedLiftType}

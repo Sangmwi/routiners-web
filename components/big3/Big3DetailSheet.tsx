@@ -10,6 +10,7 @@ import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
 import { BIG3_WEIGHT_OPTIONS, BIG3_REPS_OPTIONS, BIG3_RPE_OPTIONS } from '@/components/big3/constants';
 import { useUpdateBig3, useDeleteBig3 } from '@/hooks/big3';
 import { useConfirmDialog } from '@/lib/stores';
+import { useShowError } from '@/lib/stores/errorStore';
 import type { Big3Record, Big3UpdateData } from '@/lib/types/big3';
 
 const LIFT_LABEL_MAP = Object.fromEntries(
@@ -18,13 +19,13 @@ const LIFT_LABEL_MAP = Object.fromEntries(
 
 type ViewState = 'view' | 'edit';
 
-interface Big3DetailModalProps {
+interface Big3DetailSheetProps {
   isOpen: boolean;
   onClose: () => void;
   record: Big3Record;
 }
 
-export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailModalProps) {
+export default function Big3DetailSheet({ isOpen, onClose, record }: Big3DetailSheetProps) {
   const [viewState, setViewState] = useState<ViewState>('view');
   const [editWeight, setEditWeight] = useState('');
   const [editReps, setEditReps] = useState('');
@@ -34,6 +35,7 @@ export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailM
   const updateBig3 = useUpdateBig3();
   const deleteBig3 = useDeleteBig3();
   const confirmDialog = useConfirmDialog();
+  const showError = useShowError();
 
   if (!record) return null;
 
@@ -65,6 +67,9 @@ export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailM
           setViewState('view');
           onClose();
         },
+        onError: () => {
+          showError('기록 수정에 실패했어요');
+        },
       },
     );
   };
@@ -80,6 +85,9 @@ export default function Big3DetailModal({ isOpen, onClose, record }: Big3DetailM
           onSuccess: () => {
             setViewState('view');
             onClose();
+          },
+          onError: () => {
+            showError('기록 삭제에 실패했어요');
           },
         });
       },

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Big3RecordList from '@/components/big3/Big3RecordList';
-import Big3DetailModal from '@/components/big3/Big3DetailModal';
+import Big3DetailSheet from '@/components/big3/Big3DetailSheet';
 import { useInfiniteBig3RecordsSuspense } from '@/hooks/big3';
 import type { Big3Record, Big3LiftType } from '@/lib/types/big3';
 
@@ -42,7 +42,7 @@ export default function Big3RecordSection({ selectedLiftType }: Big3RecordSectio
         onLoadMore={fetchNextPage}
       />
       {selectedRecord && (
-        <Big3DetailModal
+        <Big3DetailSheet
           isOpen={isDetailModalOpen}
           onClose={closeDetailModal}
           record={selectedRecord}
