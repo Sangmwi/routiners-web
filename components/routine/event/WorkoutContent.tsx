@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import { PlusIcon } from '@phosphor-icons/react';
 import { EMPTY_STATE } from '@/lib/config/theme';
 import Button from '@/components/ui/Button';
