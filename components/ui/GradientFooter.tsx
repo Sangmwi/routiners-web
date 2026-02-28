@@ -31,9 +31,12 @@ export default function GradientFooter({
 }: GradientFooterProps) {
   if (variant === 'page') {
     return (
-      <div className={`fixed bottom-0 left-0 right-0 z-20 max-w-md mx-auto ${wrapperClassName}`}>
+      <div
+        className={`fixed left-0 right-0 z-20 max-w-md mx-auto ${wrapperClassName}`}
+        style={{ bottom: 'var(--safe-bottom)' }}
+      >
         <div className="h-4 bg-gradient-to-t from-background to-transparent" />
-        <div className={`px-4 pb-safe bg-background ${className}`}>
+        <div className={`px-4 pb-4 bg-background ${className}`}>
           {children}
         </div>
       </div>
