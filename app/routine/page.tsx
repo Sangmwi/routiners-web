@@ -8,16 +8,9 @@ import { PulseLoader } from '@/components/ui/PulseLoader';
 
 const RoutineContent = dynamic(
   () => import('@/components/routine/RoutineContent'),
-  { ssr: false, loading: () => <PulseLoader /> }
+  { ssr: false }
 );
 
-/**
- * 루틴 페이지
- *
- * - Layout + Header: 즉시 렌더링 (Suspense 밖)
- * - 단일 Suspense: 번들 + 데이터 로딩 모두 처리
- * - 깜빡임 없는 로딩 UX
- */
 export default function RoutinePage() {
   return (
     <MainTabLayout>

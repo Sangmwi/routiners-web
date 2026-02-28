@@ -8,7 +8,7 @@ import { PulseLoader } from '@/components/ui/PulseLoader';
 
 const StatsPageContent = dynamic(
   () => import('@/components/stats/StatsPageContent'),
-  { ssr: false, loading: () => <PulseLoader /> }
+  { ssr: false }
 );
 
 /**

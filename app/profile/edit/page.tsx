@@ -8,16 +8,9 @@ import { PulseLoader } from '@/components/ui/PulseLoader';
 
 const ProfileEditContent = dynamic(
   () => import('@/components/profile/edit/ProfileEditContent'),
-  { ssr: false, loading: () => <PulseLoader /> }
+  { ssr: false }
 );
 
-/**
- * 프로필 수정 페이지
- *
- * - DetailLayout + Header: 즉시 렌더링
- * - QueryErrorBoundary: 에러 처리
- * - Suspense: 데이터 로딩 처리
- */
 export default function ProfileEditPage() {
   return (
     <DetailLayout title="프로필 편집" centered>

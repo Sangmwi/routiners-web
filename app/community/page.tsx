@@ -2,7 +2,12 @@
 
 import { Suspense, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+
+const CommunityContent = dynamic(
+  () => import('@/components/community/CommunityContent'),
+  { ssr: false }
+);
 import { MainTabLayout, MainTabHeader } from '@/components/layouts';
 import StickyControlZone from '@/components/ui/StickyControlZone';
 import { QueryErrorBoundary } from '@/components/common/QueryErrorBoundary';
@@ -13,14 +18,8 @@ import FilterSheet, { type DateRange } from '@/components/community/FilterSheet'
 import { UserFocusIcon, PlusIcon, FunnelIcon } from '@phosphor-icons/react';
 import { EMPTY_STATE } from '@/lib/config/theme';
 import type { PostCategory } from '@/lib/types/community';
-import { usePathname } from 'next/navigation';
 import { createRouteStateKey } from '@/lib/route-state/keys';
 import { useRouteState } from '@/hooks/navigation';
-
-const CommunityContent = dynamic(
-  () => import('@/components/community/CommunityContent'),
-  { ssr: false, loading: () => <PulseLoader /> }
-);
 
 const VALID_CATEGORIES = ['general', 'workout', 'meal', 'qna'] as const;
 
@@ -31,18 +30,14 @@ export default function CommunityPage() {
   const router = useRouter();
   const pathname = usePathname();
   const routeKey = createRouteStateKey(pathname);
+  const searchParams = useSearchParams();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const initialCategory = (() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const urlCategory = params.get('category');
-      if (urlCategory && (VALID_CATEGORIES as readonly string[]).includes(urlCategory)) {
-        return urlCategory as PostCategory;
-      }
-    }
-    return 'all';
-  })();
+  const urlCategory = searchParams.get('category');
+  const initialCategory: PostCategory | 'all' =
+    urlCategory && (VALID_CATEGORIES as readonly string[]).includes(urlCategory)
+      ? (urlCategory as PostCategory)
+      : 'all';
 
   const { state, setState } = useRouteState<{
     primaryTab: PrimaryTab;
