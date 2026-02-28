@@ -46,7 +46,7 @@ export default function GradientFooter({
   return (
     <div className="relative -mt-4">
       <div className="h-4 bg-gradient-to-t from-card to-transparent" />
-      <div className={`px-4 pb-safe bg-card ${className}`}>
+      <div className={`px-4 pb-4 bg-card ${className}`}>
         {children}
       </div>
     </div>

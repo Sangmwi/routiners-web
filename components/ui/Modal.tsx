@@ -227,13 +227,11 @@ export default function Modal({
   const containerAlign = isBottom ? 'items-end' : 'items-center';
 
   // full 높이일 때 가용 화면 높이를 반영한 inline style
-  const heightStyle: React.CSSProperties | undefined =
-    isBottom && height === 'full'
-      ? {
-          height: '90dvh',
-          paddingBottom: 'var(--keyboard-safe-clearance)',
-        }
-      : undefined;
+  const heightStyle: React.CSSProperties | undefined = isBottom
+    ? height === 'full'
+      ? { height: '90dvh', paddingBottom: 'var(--keyboard-safe-clearance)' }
+      : { paddingBottom: 'var(--safe-bottom)' }
+    : undefined;
 
   const modalAnimationClass = getModalAnimationClass(
     isBottom,
