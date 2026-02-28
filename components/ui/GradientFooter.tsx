@@ -33,7 +33,7 @@ export default function GradientFooter({
     return (
       <div
         className={`fixed left-0 right-0 z-20 max-w-md mx-auto ${wrapperClassName}`}
-        style={{ bottom: 'var(--safe-bottom)' }}
+        style={{ bottom: 'max(var(--safe-bottom), 1rem)' }}
       >
         <div className="h-4 bg-gradient-to-t from-background to-transparent" />
         <div className={`px-4 bg-background ${className}`}>
