@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { DeleteIcon, CheckIcon } from '@/components/ui/icons';
+import { DeleteIcon } from '@/components/ui/icons';
+import { CheckIcon } from '@phosphor-icons/react';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
@@ -28,6 +29,8 @@ export default function InBodyDetailModal({
   const [isEditMode, setIsEditMode] = useState(false);
   const [editData, setEditData] = useState<InBodyUpdateData | null>(null);
   const [formErrors, setFormErrors] = useState<InBodyFormErrors>({});
+  const [isSaved, setIsSaved] = useState(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const updateInBody = useUpdateInBody();
   const deleteInBody = useDeleteInBody();
@@ -39,12 +42,18 @@ export default function InBodyDetailModal({
   // view → edit 전환 중 부모 onClose 전파 차단용 ref
   const isTransitioningToEditRef = useRef(false);
 
+  // 언마운트 시 타이머 정리
+  useEffect(() => {
+    return () => { if (closeTimerRef.current !== null) clearTimeout(closeTimerRef.current); };
+  }, []);
+
   // 모달 닫힐 때 편집 모드 초기화
   useEffect(() => {
     if (!isOpen) {
       setIsEditMode(false);
       setEditData(null);
       setFormErrors({});
+      setIsSaved(false);
     }
   }, [isOpen]);
 
@@ -107,8 +116,11 @@ export default function InBodyDetailModal({
       { id: record.id, data: editData },
       {
         onSuccess: () => {
-          setEditData(null);
-          onClose();
+          setIsSaved(true);
+          closeTimerRef.current = setTimeout(() => {
+            setEditData(null);
+            onClose();
+          }, 500);
         },
         onError: (err) => {
           if (isApiError(err) && err.code === 'CONFLICT') {
@@ -193,14 +205,14 @@ export default function InBodyDetailModal({
         title="측정 기록 수정"
         position="bottom"
         height="auto"
-        closeOnBackdrop={!isSaving}
+        closeOnBackdrop={!isSaving && !isSaved}
         stickyFooter={
           <GradientFooter variant="sheet" className="flex gap-3">
             <Button
               variant="outline"
               className="flex-1"
               onClick={handleCancelEdit}
-              disabled={isSaving}
+              disabled={isSaving || isSaved}
             >
               취소
             </Button>
@@ -209,8 +221,9 @@ export default function InBodyDetailModal({
               className="flex-1"
               onClick={handleSave}
               isLoading={isSaving}
+              disabled={isSaving || isSaved}
             >
-              저장
+              {isSaved ? <><CheckIcon size={16} className="mr-1" />완료</> : '저장'}
             </Button>
           </GradientFooter>
         }
