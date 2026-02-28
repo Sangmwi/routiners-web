@@ -2,6 +2,7 @@
 
 import { FireIcon, BarbellIcon, BreadIcon, DropIcon } from '@phosphor-icons/react';
 import type { MealData } from '@/lib/types/meal';
+import { MACRO_COLORS } from '@/lib/config/theme';
 
 interface NutritionSummaryProps {
   /** 식단 데이터 */
@@ -13,9 +14,9 @@ interface NutritionSummaryProps {
 // ============================================================================
 
 const MACRO_CONFIG = [
-  { key: 'protein', label: '단백질', unit: 'g' },
-  { key: 'carbs', label: '탄수화물', unit: 'g' },
-  { key: 'fat', label: '지방', unit: 'g' },
+  { key: 'protein', label: '단백질', unit: 'g', dotColor: MACRO_COLORS['단백질'].bg },
+  { key: 'carbs', label: '탄수화물', unit: 'g', dotColor: MACRO_COLORS['탄수화물'].bg },
+  { key: 'fat', label: '지방', unit: 'g', dotColor: MACRO_COLORS['지방'].bg },
 ] as const;
 
 interface NutritionOverviewProps {
@@ -35,7 +36,7 @@ function NutritionOverview({ calories, protein, carbs, fat }: NutritionOverviewP
   return (
     <div>
       {/* 히어로 칼로리 */}
-      <div className="flex items-center gap-2 mb-5">
+      <div className="flex justify-center items-center gap-2 mt-2 mb-6">
         <FireIcon size={20} className="text-orange-500" weight="fill" />
         <div className="flex items-baseline gap-1">
           <span className="text-2xl font-bold text-foreground tabular-nums">
@@ -47,9 +48,12 @@ function NutritionOverview({ calories, protein, carbs, fat }: NutritionOverviewP
 
       {/* 3대 영양소 3열 그리드 */}
       <div className="grid grid-cols-3 gap-3">
-        {MACRO_CONFIG.map(({ key, label, unit }) => (
+        {MACRO_CONFIG.map(({ key, label, unit, dotColor }) => (
           <div key={key} className="text-center">
-            <p className="text-xs text-muted-foreground mb-1">{label}</p>
+            <p className="flex items-center justify-center gap-1 text-xs text-muted-foreground mb-1">
+              <span className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
+              {label}
+            </p>
             <p className="text-base font-bold text-foreground tabular-nums">
               {macros[key]}
               <span className="text-xs font-normal text-muted-foreground ml-1">{unit}</span>
@@ -71,6 +75,7 @@ interface NutrientRowProps {
   current: number;
   target?: number;
   unit: string;
+  dotColor?: string;
 }
 
 /**
@@ -78,7 +83,7 @@ interface NutrientRowProps {
  * - target 있으면: 현재/목표 + 프로그레스 바
  * - target 없으면: 값만 표시
  */
-function NutrientRow({ icon: Icon, label, current, target, unit }: NutrientRowProps) {
+function NutrientRow({ icon: Icon, label, current, target, unit, dotColor }: NutrientRowProps) {
   const hasTarget = !!target && target > 0;
   const percentage = hasTarget ? Math.min((current / target!) * 100, 100) : 0;
   const isOver = hasTarget && current > target!;
@@ -87,7 +92,11 @@ function NutrientRow({ icon: Icon, label, current, target, unit }: NutrientRowPr
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Icon size={16} className="text-muted-foreground" weight="fill" />
+          {dotColor ? (
+            <span className={`w-3 h-3 rounded-full shrink-0 ${dotColor}`} />
+          ) : (
+            <Icon size={16} className="text-muted-foreground" weight="fill" />
+          )}
           <span className="text-sm font-medium text-foreground">{label}</span>
         </div>
         <div className="text-sm tabular-nums">
@@ -165,8 +174,8 @@ export default function NutritionSummary({ data }: NutritionSummaryProps) {
   );
 
   return (
-    <div className="bg-surface-secondary rounded-2xl p-4">
-      <h3 className="text-sm font-semibold text-foreground mb-4">
+    <div>
+      <h3 className="text-xs font-medium text-muted-foreground mb-4">
         하루 총 영양소
       </h3>
 
@@ -186,6 +195,7 @@ export default function NutritionSummary({ data }: NutritionSummaryProps) {
             current={totals.protein}
             target={data.targetProtein}
             unit="g"
+            dotColor={MACRO_COLORS['단백질'].bg}
           />
           <NutrientRow
             icon={BreadIcon}
@@ -193,6 +203,7 @@ export default function NutritionSummary({ data }: NutritionSummaryProps) {
             current={totals.carbs}
             target={data.targetCarbs}
             unit="g"
+            dotColor={MACRO_COLORS['탄수화물'].bg}
           />
           <NutrientRow
             icon={DropIcon}
@@ -200,6 +211,7 @@ export default function NutritionSummary({ data }: NutritionSummaryProps) {
             current={totals.fat}
             target={data.targetFat}
             unit="g"
+            dotColor={MACRO_COLORS['지방'].bg}
           />
         </div>
       ) : (

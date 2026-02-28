@@ -1,9 +1,17 @@
 'use client';
 
 import { CheckCircleIcon, CircleIcon, ClockIcon, FireIcon, TrashIcon } from '@phosphor-icons/react';
-import { getMealTimeConfig } from '@/lib/config/theme';
+import { getMealTimeConfig, MACRO_COLORS } from '@/lib/config/theme';
 import type { Meal, FoodItem } from '@/lib/types/meal';
 import { MEAL_TYPE_LABELS } from '@/lib/types/meal';
+
+type MacroKey = 'totalProtein' | 'totalCarbs' | 'totalFat';
+
+const MEAL_MACRO_CONFIG: { key: MacroKey; label: string; dotClass: string }[] = [
+  { key: 'totalProtein', label: '단', dotClass: MACRO_COLORS['단백질'].bg },
+  { key: 'totalCarbs',   label: '탄', dotClass: MACRO_COLORS['탄수화물'].bg },
+  { key: 'totalFat',     label: '지', dotClass: MACRO_COLORS['지방'].bg },
+];
 
 interface MealCardProps {
   /** 식사 데이터 */
@@ -29,13 +37,10 @@ function FoodItemRow({ food }: { food: FoodItem }) {
       <div className="flex-1 min-w-0">
         <span className="text-sm text-foreground truncate block">{food.name}</span>
       </div>
-      <div className="flex items-center gap-3 text-xs text-muted-foreground shrink-0 ml-2">
-        <span className="text-hint-strong">{food.portion}</span>
+      <div className="flex items-center gap-3 text-xs shrink-0 ml-2">
+        <span className="text-hint">{food.portion}</span>
         {food.calories && (
-          <span className="text-foreground/80">{food.calories}kcal</span>
-        )}
-        {food.protein && (
-          <span className="text-primary font-medium">P{food.protein}g</span>
+          <span className="text-hint-strong tabular-nums">{food.calories}kcal</span>
         )}
       </div>
     </div>
@@ -111,11 +116,23 @@ export default function MealCard({
             {meal.totalCalories}kcal
           </span>
         ) : null}
-        {meal.totalProtein ? (
-          <span className="text-primary font-medium">
-            단백질 {meal.totalProtein}g
-          </span>
-        ) : null}
+
+        {/* 탄단지 3색 도트 — 계층 유지를 위해 채도 낮춤 */}
+        {MEAL_MACRO_CONFIG.some(({ key }) => meal[key]) && (
+          <div className="flex items-center gap-2">
+            {MEAL_MACRO_CONFIG.map(({ key, label, dotClass }) => {
+              const value = meal[key];
+              if (!value) return null;
+              return (
+                <span key={key} className="flex items-center gap-1 text-hint-strong tabular-nums">
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 opacity-60 ${dotClass}`} />
+                  <span className="text-hint text-[10px]">{label}</span>
+                  {value}g
+                </span>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* 음식 목록 */}

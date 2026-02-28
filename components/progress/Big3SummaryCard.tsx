@@ -2,6 +2,7 @@
 
 import ChangeIndicator, { getTrendColor } from '@/components/ui/ChangeIndicator';
 import MiniSparkline from '@/components/ui/MiniSparkline';
+import { MetricItem } from '@/components/inbody/MetricItem';
 import EmptyState from '@/components/common/EmptyState';
 import { EMPTY_STATE } from '@/lib/config/theme';
 import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
@@ -26,6 +27,7 @@ export function Big3SummaryCard({
 
   const { latest, changes, history } = summary;
   const hasHistory = history.length >= 2;
+  const chronological = hasHistory ? [...history].reverse() : [];
 
   return (
     <div className={cardClassName}>
@@ -47,27 +49,17 @@ export function Big3SummaryCard({
           const value = latest[key];
           const change = changes?.[key];
           const sparkData = hasHistory
-            ? history.map((p) => p[key]).filter((v): v is number => v != null)
+            ? chronological.map((p) => p[key]).filter((v): v is number => v != null)
             : [];
 
           return (
-            <div key={key} className="text-center">
-              <p className="text-xs text-muted-foreground mb-1">{label}</p>
-              <p className="text-lg font-bold text-foreground">
-                {value != null ? (
-                  <>
-                    {value}
-                    <span className="text-xs font-normal text-muted-foreground ml-1">kg</span>
-                  </>
-                ) : (
-                  <span className="text-hint">-</span>
-                )}
-              </p>
+            <MetricItem key={key} label={label} value={value} unit="kg">
               {sparkData.length >= 2 && (
-                <div className="mt-4">
+                <div className="mt-6">
                   <MiniSparkline
                     data={sparkData}
                     height={28}
+                    showEndDot
                     showAllDots
                     gradientFill={false}
                     color={getTrendColor(change, true)}
@@ -75,11 +67,10 @@ export function Big3SummaryCard({
                   />
                 </div>
               )}
-            </div>
+            </MetricItem>
           );
         })}
       </div>
     </div>
   );
 }
-

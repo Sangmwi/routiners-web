@@ -18,3 +18,4 @@ export { AI, MEDIA, CHAT_STATUS, CHAT_ICON } from './ai';
 export { STATUS, ACTION, CONTROL, SOCIAL, BUTTON_ICON } from './common';
 export { EMPTY_STATE } from './emptyState';
 export type { EmptyStateDomain } from './emptyState';
+export { MACRO_COLORS } from './nutrition';

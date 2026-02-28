@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { BowlFoodIcon, CheckCircleIcon, ClockIcon, FireIcon, XCircleIcon } from '@phosphor-icons/react';
 import EmptyState from '@/components/common/EmptyState';
-import { EMPTY_STATE } from '@/lib/config/theme';
+import { EMPTY_STATE, MACRO_COLORS } from '@/lib/config/theme';
 import ComparisonBadge from '@/components/ui/ComparisonBadge';
 import ProgressRateBar from '@/components/ui/ProgressRateBar';
 import SegmentedControl from '@/components/ui/SegmentedControl';
@@ -32,11 +32,6 @@ import { getDisplayStatus } from '@/lib/config/theme';
 import type { UseStatsPeriodNavigatorReturn } from '@/hooks/routine/useStatsPeriodNavigator';
 import StatsTabShell from './StatsTabShell';
 
-const MACRO_COLORS: Record<string, { bg: string; stroke: string }> = {
-  탄수화물: { bg: 'bg-amber-400', stroke: '#fbbf24' },
-  단백질: { bg: 'bg-sky-400', stroke: '#38bdf8' },
-  지방: { bg: 'bg-rose-400', stroke: '#fb7185' },
-};
 
 function getAdherenceColor(percent: number): string {
   if (percent >= 80 && percent <= 120) return 'bg-primary';

@@ -1,8 +1,7 @@
 'use client';
 
 import SectionHeader from '@/components/ui/SectionHeader';
-import ChangeIndicator from '@/components/ui/ChangeIndicator';
-import MiniSparkline from '@/components/ui/MiniSparkline';
+import MetricCell from '@/components/ui/MetricCell';
 import type { InBodySummary, InBodyRecord } from '@/lib/types';
 
 interface InBodyMiniCardProps {
@@ -40,24 +39,15 @@ export default function InBodyMiniCard({ summary, history = [] }: InBodyMiniCard
               : [];
 
             return (
-              <div key={key} className="text-center">
-                <p className="text-xs text-muted-foreground mb-1">{label}</p>
-                <p className="text-base font-bold text-foreground">
-                  {value != null ? (
-                    <>{value}<span className="text-xs font-normal text-muted-foreground ml-1">{unit}</span></>
-                  ) : (
-                    <span className="text-hint">-</span>
-                  )}
-                </p>
-                {change != null && change !== 0 && (
-                  <ChangeIndicator value={change} positiveIsGood={positiveIsGood} unit={unit} />
-                )}
-                {hasHistory && (
-                  <div className="mt-1">
-                    <MiniSparkline data={sparkData} height={28} showEndDot={false} />
-                  </div>
-                )}
-              </div>
+              <MetricCell
+                key={key}
+                label={label}
+                value={value}
+                unit={unit}
+                change={change}
+                positiveIsGood={positiveIsGood}
+                sparkData={sparkData}
+              />
             );
           })}
         </div>
