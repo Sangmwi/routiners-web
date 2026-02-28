@@ -172,7 +172,7 @@ export default function Modal({
   const { isVisible, isAnimating, hasOpened, markOpened, executeClose } = useModalLifecycle(
     isOpen,
     onClose,
-    { preventClose, onExited }
+    { preventClose, onExited, coversNativeNav: isBottom }
   );
 
   // 스와이프 제스처

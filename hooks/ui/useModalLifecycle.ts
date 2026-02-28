@@ -10,6 +10,7 @@ import type { WebToAppMessage } from '@/lib/webview/types';
 type OverlayEntry = {
   close: () => void;
   preventClose: boolean;
+  coversNativeNav: boolean;
 };
 
 /** 열린 오버레이를 LIFO 순서로 추적 */
@@ -78,9 +79,11 @@ export function clearOverlayStack() {
 /** WebView 환경이면 오버레이 상태를 앱에 전송 */
 function broadcastOverlayState() {
   if (typeof window === 'undefined' || !window.ReactNativeWebView) return;
+  const hasOverlay = overlayStack.size > 0;
+  const coversNav = [...overlayStack.values()].some((e) => e.coversNativeNav);
   const message: WebToAppMessage = {
     type: 'OVERLAY_STATE',
-    payload: { hasOverlay: overlayStack.size > 0 },
+    payload: { hasOverlay, coversNav },
   };
   window.ReactNativeWebView.postMessage(JSON.stringify(message));
 }
@@ -101,6 +104,8 @@ interface UseModalLifecycleOptions {
   preventClose?: boolean;
   /** 닫기 애니메이션 완료 후 호출 (DOM에서 제거 등) */
   onExited?: () => void;
+  /** true이면 네이티브 하단 탭 내비게이션을 숨김 (bottom sheet 전용, center 다이얼로그는 false) */
+  coversNativeNav?: boolean;
 }
 
 interface UseModalLifecycleReturn {
@@ -216,6 +221,7 @@ export function useModalLifecycle(
       overlayStack.set(id, {
         close: () => requestClose('popstate'),
         preventClose: options?.preventClose ?? false,
+        coversNativeNav: options?.coversNativeNav ?? false,
       });
 
       // controlled close로 인한 swap 슬롯이 있으면 replaceState로 재사용.
