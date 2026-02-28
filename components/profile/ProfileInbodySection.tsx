@@ -65,6 +65,7 @@ function InbodyDisplay({ summary, isOwnProfile, userName, renderHeader }: Inbody
 
   // 모달 상태 (타인 프로필에서만 사용 - 상세보기만)
   const [selectedRecord, setSelectedRecord] = useState<InBodyRecord | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const latest = summary?.latest;
   const compact = !renderHeader;
@@ -115,6 +116,7 @@ function InbodyDisplay({ summary, isOwnProfile, userName, renderHeader }: Inbody
   const handleCardClick = () => {
     if (!isOwnProfile && canViewData && latest) {
       setSelectedRecord(latest);
+      setIsModalOpen(true);
     }
   };
 
@@ -153,8 +155,8 @@ function InbodyDisplay({ summary, isOwnProfile, userName, renderHeader }: Inbody
       )}
 
       <InBodyDetailModal
-        isOpen={!!selectedRecord}
-        onClose={() => setSelectedRecord(null)}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         record={selectedRecord}
       />
     </>

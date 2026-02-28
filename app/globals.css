@@ -12,7 +12,7 @@
   --native-bottom: 0px;
   --safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--native-bottom));
   --nav-clearance: calc(6rem + var(--safe-bottom));
-  --page-safe-clearance: max(1rem, var(--safe-bottom));
+  --page-safe-clearance: max(1.25rem, var(--safe-bottom));
   --keyboard-safe-clearance: max(var(--keyboard-height, 0px), var(--safe-bottom));
   --fab-bottom: calc(var(--nav-height) + 1rem + var(--safe-bottom));
 }

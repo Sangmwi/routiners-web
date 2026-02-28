@@ -226,14 +226,12 @@ export default function Modal({
   const heightClass = isBottom ? HEIGHT_CLASSES[height] : 'max-h-[85dvh]';
   const containerAlign = isBottom ? 'items-end' : 'items-center';
 
-  // full 높이일 때 가용 화면 높이를 반영한 inline style
-  const heightStyle: React.CSSProperties | undefined =
-    isBottom && height === 'full'
-      ? {
-          height: '90dvh',
-          paddingBottom: 'var(--keyboard-safe-clearance)',
-        }
-      : undefined;
+  // 바텀시트 높이별 inline style: full은 키보드 safe area, auto/half는 기본 safe-bottom
+  const heightStyle: React.CSSProperties | undefined = isBottom
+    ? height === 'full'
+      ? { height: '90dvh', paddingBottom: 'var(--keyboard-safe-clearance)' }
+      : { paddingBottom: 'var(--safe-bottom)' }
+    : undefined;
 
   const modalAnimationClass = getModalAnimationClass(
     isBottom,

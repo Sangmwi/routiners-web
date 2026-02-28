@@ -83,7 +83,10 @@ export function useInBodyManagerSuspense(): UseInBodyManagerSuspenseReturn {
 
   const closeDetailModal = () => {
     setIsDetailModalOpen(false);
-    setSelectedRecord(null);
+    // selectedRecord는 즉시 초기화하지 않음 — 배치 렌더에서 record=null이 되면
+    // InBodyDetailModal이 조기 null 반환하여 Modal이 isOpen=false를 받기 전 언마운트됨.
+    // → history.back() 미호출로 히스토리 엔트리 누수 발생.
+    // 다음 openDetailModal 호출 시 setSelectedRecord(record)로 덮어써짐.
   };
 
   // ========== Delete Actions ==========

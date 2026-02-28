@@ -64,7 +64,6 @@ export default function Big3DetailSheet({ isOpen, onClose, record }: Big3DetailS
       { id: record.id, data },
       {
         onSuccess: () => {
-          setViewState('view');
           onClose();
         },
         onError: () => {
@@ -83,7 +82,6 @@ export default function Big3DetailSheet({ isOpen, onClose, record }: Big3DetailS
       onConfirm: () => {
         deleteBig3.mutate(record.id, {
           onSuccess: () => {
-            setViewState('view');
             onClose();
           },
           onError: () => {
