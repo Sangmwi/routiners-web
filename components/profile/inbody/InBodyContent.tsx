@@ -22,7 +22,7 @@ import { useShowError } from '@/lib/stores/errorStore';
 import { isApiError } from '@/lib/types';
 import type { InBodyCreateData } from '@/lib/types/inbody';
 import { InBodyFormSchema, InBodyFormErrors } from '@/lib/types/inbody';
-import { collectZodErrors } from '@/lib/utils/formValidation';
+import { validateForm } from '@/lib/utils/formValidation';
 import type { ImagePickerSource } from '@/lib/webview';
 
 // ============================================================
@@ -110,18 +110,13 @@ export default function InBodyContent() {
 
   // 직접 입력 저장
   const handleSaveManual = () => {
-    const result = InBodyFormSchema.safeParse({
+    if (!validateForm<keyof InBodyFormErrors>(InBodyFormSchema, {
       measuredAt: manualData.measuredAt,
       weight: manualData.weight,
       height: manualData.height,
       skeletalMuscleMass: manualData.skeletalMuscleMass,
       bodyFatPercentage: manualData.bodyFatPercentage,
-    });
-    if (!result.success) {
-      setManualFormErrors(collectZodErrors<keyof InBodyFormErrors>(result.error));
-      return;
-    }
-    setManualFormErrors({});
+    }, setManualFormErrors)) return;
 
     createInBody.mutate(manualData, {
       onSuccess: () => {

@@ -8,7 +8,8 @@ import GradientFooter from '@/components/ui/GradientFooter';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { isApiError } from '@/lib/types';
 import { InBodyRecord, InBodyUpdateData, InBodyFormSchema, InBodyFormErrors } from '@/lib/types/inbody';
-import { collectZodErrors } from '@/lib/utils/formValidation';
+import { validateForm } from '@/lib/utils/formValidation';
+import { useShowError } from '@/lib/stores/errorStore';
 import { useUpdateInBody, useDeleteInBody } from '@/hooks/inbody';
 import { useConfirmDialog } from '@/lib/stores';
 import InBodyPreview from './InBodyPreview';
@@ -26,12 +27,12 @@ export default function InBodyDetailModal({
 }: InBodyDetailModalProps) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editData, setEditData] = useState<InBodyUpdateData | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<InBodyFormErrors>({});
 
   const updateInBody = useUpdateInBody();
   const deleteInBody = useDeleteInBody();
   const confirmDialog = useConfirmDialog();
+  const showError = useShowError();
 
   const isSaving = updateInBody.isPending;
 
@@ -43,7 +44,6 @@ export default function InBodyDetailModal({
     if (!isOpen) {
       setIsEditMode(false);
       setEditData(null);
-      setError(null);
       setFormErrors({});
     }
   }, [isOpen]);
@@ -95,20 +95,13 @@ export default function InBodyDetailModal({
   const handleSave = () => {
     if (!editData) return;
 
-    // Zod 클라이언트 검증 (record 기본값과 editData 병합)
-    const result = InBodyFormSchema.safeParse({
+    if (!validateForm<keyof InBodyFormErrors>(InBodyFormSchema, {
       measuredAt: editData.measuredAt ?? record.measuredAt,
       weight: editData.weight ?? record.weight,
       height: editData.height ?? record.height,
       skeletalMuscleMass: editData.skeletalMuscleMass ?? record.skeletalMuscleMass,
       bodyFatPercentage: editData.bodyFatPercentage ?? record.bodyFatPercentage,
-    });
-    if (!result.success) {
-      setFormErrors(collectZodErrors<keyof InBodyFormErrors>(result.error));
-      return;
-    }
-    setFormErrors({});
-    setError(null);
+    }, setFormErrors)) return;
 
     updateInBody.mutate(
       { id: record.id, data: editData },
@@ -121,7 +114,7 @@ export default function InBodyDetailModal({
           if (isApiError(err) && err.code === 'CONFLICT') {
             setFormErrors({ measuredAt: '이 날짜에 이미 기록이 있어요' });
           } else {
-            setError(err instanceof Error ? err.message : '수정에 실패했어요.');
+            showError('수정에 실패했어요');
           }
         },
       }
@@ -133,7 +126,6 @@ export default function InBodyDetailModal({
     if (isSaving) return;
     setEditData(null);
     setFormErrors({});
-    setError(null);
     onClose();
   };
 
@@ -147,8 +139,8 @@ export default function InBodyDetailModal({
       onConfirm: () => {
         deleteInBody.mutate(record.id, {
           onSuccess: () => onClose(),
-          onError: (err) => {
-            setError(err instanceof Error ? err.message : '삭제에 실패했어요.');
+          onError: () => {
+            showError('삭제에 실패했어요');
           },
         });
       },
@@ -256,9 +248,6 @@ export default function InBodyDetailModal({
               readOnly={false}
               initialEditing={true}
             />
-          )}
-          {error && (
-            <p className="mt-4 text-sm text-center text-destructive">{error}</p>
           )}
         </ModalBody>
       </Modal>

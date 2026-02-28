@@ -12,7 +12,7 @@ import {
 import type { PostCategory } from '@/lib/types/community';
 import { PostFormSchema, PostFormErrors, POST_CONTENT_MAX } from '@/lib/types/community';
 import { useShowError } from '@/lib/stores/errorStore';
-import { collectZodErrors } from '@/lib/utils/formValidation';
+import { validateForm } from '@/lib/utils/formValidation';
 import CategorySelector from './CategorySelector';
 import ImageUploader from './ImageUploader';
 
@@ -148,13 +148,7 @@ export default function PostWriteContent({ editPostId }: PostWriteContentProps) 
   const handleSubmit = async () => {
     if (isSubmitting) return;
 
-    // Zod 클라이언트 검증
-    const result = PostFormSchema.safeParse({ content: content.trim(), category });
-    if (!result.success) {
-      setPostFormErrors(collectZodErrors<keyof PostFormErrors>(result.error));
-      return;
-    }
-    setPostFormErrors({});
+    if (!validateForm<keyof PostFormErrors>(PostFormSchema, { content: content.trim(), category }, setPostFormErrors)) return;
 
     try {
       let uploadedUrls: string[] = [];

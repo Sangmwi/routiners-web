@@ -1,4 +1,4 @@
-import { ZodError } from 'zod';
+import { ZodError, ZodSchema } from 'zod';
 
 /**
  * Zod 에러 → 필드별 에러 맵 변환
@@ -22,4 +22,30 @@ export function collectZodErrors<TFields extends string>(
     if (field && !errors[field]) errors[field] = e.message;
   });
   return errors;
+}
+
+/**
+ * Zod 스키마 검증 + 필드 에러 세터 통합 유틸리티
+ *
+ * 검증 실패 시 필드 에러를 세팅하고 false 반환.
+ * 검증 성공 시 에러를 초기화하고 true 반환.
+ *
+ * @example
+ * const handleSave = () => {
+ *   if (!validateForm(MySchema, data, setFormErrors)) return;
+ *   mutate(data, { ... });
+ * };
+ */
+export function validateForm<TFields extends string>(
+  schema: ZodSchema,
+  data: unknown,
+  setFormErrors: (errors: Partial<Record<TFields, string>>) => void,
+): boolean {
+  const result = schema.safeParse(data);
+  if (!result.success) {
+    setFormErrors(collectZodErrors<TFields>(result.error));
+    return false;
+  }
+  setFormErrors({} as Partial<Record<TFields, string>>);
+  return true;
 }

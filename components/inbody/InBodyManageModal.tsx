@@ -9,7 +9,7 @@ import GradientFooter from '@/components/ui/GradientFooter';
 import { useShowError } from '@/lib/stores/errorStore';
 import { isApiError } from '@/lib/types';
 import { InBodyRecord, InBodyCreateData, InBodyFormSchema, InBodyFormErrors } from '@/lib/types/inbody';
-import { collectZodErrors } from '@/lib/utils/formValidation';
+import { validateForm } from '@/lib/utils/formValidation';
 import { useInBodyRecords, useDeleteInBody, useCreateInBody } from '@/hooks/inbody';
 import InBodyScanModal from './InBodyScanModal';
 import InBodyDetailModal from './InBodyDetailModal';
@@ -70,19 +70,13 @@ export default function InBodyManageModal({
 
   // 직접 입력 저장
   const handleSaveManualInput = () => {
-    // Zod 클라이언트 검증
-    const result = InBodyFormSchema.safeParse({
+    if (!validateForm<keyof InBodyFormErrors>(InBodyFormSchema, {
       measuredAt: manualData.measuredAt,
       weight: manualData.weight,
       height: manualData.height,
       skeletalMuscleMass: manualData.skeletalMuscleMass,
       bodyFatPercentage: manualData.bodyFatPercentage,
-    });
-    if (!result.success) {
-      setFormErrors(collectZodErrors<keyof InBodyFormErrors>(result.error));
-      return;
-    }
-    setFormErrors({});
+    }, setFormErrors)) return;
 
     createInBody.mutate(manualData, {
       onSuccess: () => {
