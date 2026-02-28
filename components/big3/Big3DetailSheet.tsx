@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react';
+import { useState, useEffect, useRef } from 'react';
+import { PencilSimpleIcon, TrashIcon, CheckIcon } from '@phosphor-icons/react';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
@@ -31,6 +31,12 @@ export default function Big3DetailSheet({ isOpen, onClose, record }: Big3DetailS
   const [editReps, setEditReps] = useState('');
   const [editRpe, setEditRpe] = useState('');
   const [editNotes, setEditNotes] = useState('');
+  const [isSaved, setIsSaved] = useState(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => { if (closeTimerRef.current !== null) clearTimeout(closeTimerRef.current); };
+  }, []);
 
   const updateBig3 = useUpdateBig3();
   const deleteBig3 = useDeleteBig3();
@@ -64,7 +70,8 @@ export default function Big3DetailSheet({ isOpen, onClose, record }: Big3DetailS
       { id: record.id, data },
       {
         onSuccess: () => {
-          onClose();
+          setIsSaved(true);
+          closeTimerRef.current = setTimeout(() => onClose(), 500);
         },
         onError: () => {
           showError('기록 수정에 실패했어요');
@@ -118,8 +125,9 @@ export default function Big3DetailSheet({ isOpen, onClose, record }: Big3DetailS
               className="flex-1"
               onClick={handleSaveEdit}
               isLoading={updateBig3.isPending}
+              disabled={updateBig3.isPending || isSaved}
             >
-              저장
+              {isSaved ? <><CheckIcon size={16} className="mr-1" />완료</> : '저장'}
             </Button>
           </GradientFooter>
         }
