@@ -19,6 +19,7 @@ import {
 import { useInBodyManagerSuspense, useCreateInBody } from '@/hooks/inbody';
 import { useNativeImagePicker } from '@/hooks/webview';
 import { useShowError } from '@/lib/stores/errorStore';
+import { isApiError } from '@/lib/types';
 import type { InBodyCreateData } from '@/lib/types/inbody';
 import { InBodyFormSchema, InBodyFormErrors } from '@/lib/types/inbody';
 import { collectZodErrors } from '@/lib/utils/formValidation';
@@ -128,7 +129,7 @@ export default function InBodyContent() {
         setManualData(getManualInitial(records));
       },
       onError: (err) => {
-        if ((err as { status?: number }).status === 409) {
+        if (isApiError(err) && err.code === 'CONFLICT') {
           setManualFormErrors({ measuredAt: '이 날짜에 이미 기록이 있어요' });
         } else {
           showError('기록 저장에 실패했어요');

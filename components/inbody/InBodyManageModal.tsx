@@ -7,6 +7,7 @@ import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
 import { useShowError } from '@/lib/stores/errorStore';
+import { isApiError } from '@/lib/types';
 import { InBodyRecord, InBodyCreateData, InBodyFormSchema, InBodyFormErrors } from '@/lib/types/inbody';
 import { collectZodErrors } from '@/lib/utils/formValidation';
 import { useInBodyRecords, useDeleteInBody, useCreateInBody } from '@/hooks/inbody';
@@ -89,7 +90,7 @@ export default function InBodyManageModal({
         setManualData(getManualInputInitial());
       },
       onError: (err) => {
-        if ((err as { status?: number }).status === 409) {
+        if (isApiError(err) && err.code === 'CONFLICT') {
           setFormErrors({ measuredAt: '이 날짜에 이미 기록이 있어요' });
         } else {
           showError('기록 저장에 실패했어요');

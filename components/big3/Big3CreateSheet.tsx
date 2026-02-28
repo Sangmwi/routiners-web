@@ -10,6 +10,7 @@ import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
 import { BIG3_WEIGHT_OPTIONS, BIG3_REPS_OPTIONS, BIG3_RPE_OPTIONS } from '@/components/big3/constants';
 import { useCreateBig3 } from '@/hooks/big3';
 import { useShowError } from '@/lib/stores/errorStore';
+import { isApiError } from '@/lib/types';
 import type { Big3LiftType } from '@/lib/types/big3';
 
 const LIFT_OPTIONS = BIG3_LIFT_CONFIG.map(({ key, label }) => ({ key, label }));
@@ -65,7 +66,7 @@ export default function Big3CreateSheet({
           onClose();
         },
         onError: (err) => {
-          if ((err as { status?: number }).status === 409) {
+          if (isApiError(err) && err.code === 'CONFLICT') {
             showError(`이 날짜에 이미 ${LIFT_LABEL_MAP[liftType]} 기록이 있어요`);
           } else {
             showError('기록 저장에 실패했어요');

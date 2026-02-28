@@ -6,6 +6,7 @@ import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import { isApiError } from '@/lib/types';
 import { InBodyRecord, InBodyUpdateData, InBodyFormSchema, InBodyFormErrors } from '@/lib/types/inbody';
 import { collectZodErrors } from '@/lib/utils/formValidation';
 import { useUpdateInBody, useDeleteInBody } from '@/hooks/inbody';
@@ -117,7 +118,7 @@ export default function InBodyDetailModal({
           onClose();
         },
         onError: (err) => {
-          if ((err as { status?: number }).status === 409) {
+          if (isApiError(err) && err.code === 'CONFLICT') {
             setFormErrors({ measuredAt: '이 날짜에 이미 기록이 있어요' });
           } else {
             setError(err instanceof Error ? err.message : '수정에 실패했어요.');
