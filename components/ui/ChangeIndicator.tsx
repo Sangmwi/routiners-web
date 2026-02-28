@@ -1,3 +1,5 @@
+import { CaretUpIcon, CaretDownIcon } from '@phosphor-icons/react';
+
 /**
  * 변화량 표시 컴포넌트
  *
@@ -20,18 +22,24 @@ interface ChangeIndicatorProps {
   positiveIsGood: boolean;
   /** 단위 (예: "kg", "%") */
   unit?: string;
+  /** 삼각 아이콘(▲▼) 표시 여부 */
+  showIcon?: boolean;
 }
 
-export default function ChangeIndicator({ value, positiveIsGood, unit }: ChangeIndicatorProps) {
+export default function ChangeIndicator({ value, positiveIsGood, unit, showIcon }: ChangeIndicatorProps) {
   if (value === 0) return null;
 
   const isPositive = value > 0;
   const isGood = positiveIsGood ? isPositive : !isPositive;
-  const formatted = Number.isInteger(value) ? value : value.toFixed(1);
+  const formatted = Number.isInteger(value) ? Math.abs(value) : Math.abs(value).toFixed(1);
+  const colorClass = isGood ? 'text-positive' : 'text-negative';
+  const Icon = isPositive ? CaretUpIcon : CaretDownIcon;
 
   return (
-    <span className={`text-[10px] font-medium ${isGood ? 'text-positive' : 'text-negative'}`}>
-      {isPositive ? '+' : ''}{formatted}{unit ?? ''}
+    <span className={`inline-flex items-center gap-0.5 text-[10px] font-medium ${colorClass}`}>
+      {showIcon && <Icon size={9} weight="fill" />}
+      {!showIcon && (isPositive ? '+' : '-')}
+      {formatted}{unit ?? ''}
     </span>
   );
 }

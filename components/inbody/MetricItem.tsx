@@ -13,6 +13,8 @@ export interface MetricItemProps {
   change?: number;
   /** 양수가 긍정적인지 (체중, 체지방률은 false) */
   positiveIsGood?: boolean;
+  /** ChangeIndicator에 삼각 아이콘 표시 여부 */
+  showDeltaIcon?: boolean;
   /** 하단 슬롯 (스파크라인 등) */
   children?: React.ReactNode;
 }
@@ -29,6 +31,7 @@ export function MetricItem({
   unit = '',
   change,
   positiveIsGood = true,
+  showDeltaIcon,
   children,
 }: MetricItemProps) {
   const hasValue = value !== undefined && value !== null;
@@ -59,7 +62,7 @@ export function MetricItem({
       </p>
       {change != null && change !== 0 && (
         <div className="mt-2.5">
-          <ChangeIndicator value={change} positiveIsGood={positiveIsGood} unit={unit} />
+          <ChangeIndicator value={change} positiveIsGood={positiveIsGood} unit={unit} showIcon={showDeltaIcon} />
         </div>
       )}
       {children}

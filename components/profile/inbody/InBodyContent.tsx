@@ -138,23 +138,26 @@ export default function InBodyContent() {
       <div className="pb-footer-clearance -mx-(--layout-padding-x)">
         <div className="divide-y divide-edge-divider">
           {/* 최근 측정 */}
-          <div className="px-(--layout-padding-x) pt-1 pb-5">
-            <SectionHeader title="최근 측정" size="md" className="mb-4" />
+          <div className="px-(--layout-padding-x) pt-3 pb-7">
+            <SectionHeader title="최근 측정" size="md" className="mb-5" />
             <BodyCompositionSummary
               height={summary?.latest?.height}
               measuredAt={summary?.latest?.measuredAt}
               score={summary?.latest?.inbodyScore}
+              periodDays={summary?.changes?.periodDays}
             >
               <InBodySummaryCard
                 latest={summary?.latest}
                 totalRecords={summary?.totalRecords}
+                changes={summary?.changes}
+                showDeltaIcons
                 variant="inline"
               />
             </BodyCompositionSummary>
           </div>
 
           {/* 측정 기록 헤더 */}
-          <div className="px-(--layout-padding-x) pt-5 pb-2">
+          <div className="px-(--layout-padding-x) pt-5 pb-3">
             <SectionHeader
               title="측정 기록"
               size="md"

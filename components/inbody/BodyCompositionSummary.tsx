@@ -10,6 +10,8 @@ interface BodyCompositionSummaryProps {
   measuredAt?: string | null;
   /** 인바디 점수 */
   score?: number | null;
+  /** 이전 측정과의 기간 차이 (일) — 있으면 "N일 전 대비" 표시 */
+  periodDays?: number;
   /** 메트릭 그리드 + 추가 콘텐츠 (MetricItem, 스파크라인 등) */
   children: ReactNode;
 }
@@ -24,6 +26,7 @@ export default function BodyCompositionSummary({
   height,
   measuredAt,
   score,
+  periodDays,
   children,
 }: BodyCompositionSummaryProps) {
   const hasHeader = !!height || !!measuredAt;
@@ -53,6 +56,11 @@ export default function BodyCompositionSummary({
               {score != null && (
                 <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-surface-accent text-primary">
                   {score}점
+                </span>
+              )}
+              {periodDays != null && periodDays > 0 && (
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-surface-secondary text-hint-strong">
+                  {periodDays}일 전 대비
                 </span>
               )}
             </div>

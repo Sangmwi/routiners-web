@@ -212,9 +212,12 @@ export default function WorkoutContent({
                 운동 목록 ({workoutData.exercises.length}개)
               </h2>
               <span className="text-sm text-hint-strong">
-                {workoutData.exercises.filter(
-                  (ex) => ex.sets.length > 0 && ex.sets.every((s) => s.completed),
-                ).length}/{workoutData.exercises.length} 완료
+                {event.status === 'completed'
+                  ? workoutData.exercises.length
+                  : workoutData.exercises.filter(
+                      (ex) => ex.sets.length > 0 && ex.sets.every((s) => s.completed),
+                    ).length
+                }/{workoutData.exercises.length} 완료
               </span>
             </div>
             <div className="space-y-3">

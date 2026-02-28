@@ -19,6 +19,8 @@ export interface MetricsGridProps {
   data: InBodyMetricsData | null | undefined;
   /** 변화량 (선택) */
   changes?: InBodyChanges;
+  /** MetricItem에 삼각 아이콘 표시 여부 */
+  showDeltaIcons?: boolean;
 }
 
 /**
@@ -34,7 +36,7 @@ export interface MetricsGridProps {
  * />
  * ```
  */
-export function MetricsGrid({ data, changes }: MetricsGridProps) {
+export function MetricsGrid({ data, changes, showDeltaIcons }: MetricsGridProps) {
   return (
     <div className="grid grid-cols-3 gap-4">
       <MetricItem
@@ -43,6 +45,7 @@ export function MetricsGrid({ data, changes }: MetricsGridProps) {
         unit="kg"
         change={changes?.weight}
         positiveIsGood={false}
+        showDeltaIcon={showDeltaIcons}
       />
       <MetricItem
         label="골격근량"
@@ -50,6 +53,7 @@ export function MetricsGrid({ data, changes }: MetricsGridProps) {
         unit="kg"
         change={changes?.skeletalMuscleMass}
         positiveIsGood={true}
+        showDeltaIcon={showDeltaIcons}
       />
       <MetricItem
         label="체지방률"
@@ -57,6 +61,7 @@ export function MetricsGrid({ data, changes }: MetricsGridProps) {
         unit="%"
         change={changes?.bodyFatPercentage}
         positiveIsGood={false}
+        showDeltaIcon={showDeltaIcons}
       />
     </div>
   );

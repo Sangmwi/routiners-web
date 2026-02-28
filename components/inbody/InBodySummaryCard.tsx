@@ -23,6 +23,8 @@ interface InBodySummaryCardProps {
   totalRecords?: number;
   /** 이전 측정 대비 변화량 (선택) */
   changes?: InBodyChanges;
+  /** MetricItem에 삼각 아이콘 표시 여부 */
+  showDeltaIcons?: boolean;
   /** 클릭 핸들러 */
   onClick?: () => void;
   /** 간소화 모드 (프로필 페이지용) */
@@ -82,6 +84,7 @@ function EmptySummary({ onClick }: { onClick?: () => void }) {
 export default function InBodySummaryCard({
   latest,
   changes,
+  showDeltaIcons,
   onClick,
   compact = false,
   variant = 'flat',
@@ -106,7 +109,7 @@ export default function InBodySummaryCard({
       onClick={onClick}
     >
       {/* 메트릭 그리드 */}
-      <MetricsGrid data={latest} changes={changes} />
+      <MetricsGrid data={latest} changes={changes} showDeltaIcons={showDeltaIcons} />
 
       {/* Footer: Date (left) + Score badge (right) — inline variant는 외부에서 헤더 처리 */}
       {variant !== 'inline' && (

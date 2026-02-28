@@ -165,10 +165,10 @@ export default function MealContent({ date, onTitleChange, onHeaderAction }: Mea
               <h2 className="text-lg font-semibold text-foreground">
                 식사 목록 ({mealData.meals.length}개)
               </h2>
-              {!isEditMode && event.status === 'scheduled' && mealData.meals.some((meal) => meal.completed) && (
-                <p className="text-xs text-muted-foreground">
+              {!isEditMode && (
+                <span className="text-sm text-hint-strong">
                   {mealData.meals.filter((meal) => meal.completed).length}/{mealData.meals.length}개 완료
-                </p>
+                </span>
               )}
             </div>
 

@@ -59,22 +59,22 @@ export default function Big3Content() {
       <div className="pb-footer-clearance -mx-(--layout-padding-x)">
         <div className="divide-y divide-edge-divider">
           {/* 히어로: 좌측 합계 + 우측 종목별 */}
-          <div className="px-(--layout-padding-x) pt-1 pb-5">
-            <div className="flex gap-6">
+          <div className="px-(--layout-padding-x) pt-4 pb-8">
+            <div className="flex gap-8">
               {/* 좌측: 합계 + 메타 */}
               <div className="flex flex-col justify-center flex-1 min-w-0">
-                <p className="text-xs text-muted-foreground">3대 합계</p>
-                <div className="flex items-baseline gap-1.5 mt-1">
-                  <span className="text-2xl font-bold tabular-nums text-foreground">
+                <p className="text-sm text-muted-foreground">3대 합계</p>
+                <div className="flex items-baseline gap-1.5 mt-1.5">
+                  <span className="text-4xl font-bold tabular-nums text-foreground">
                     {summary.latestTotal}
                   </span>
-                  <span className="text-sm text-muted-foreground">kg</span>
+                  <span className="text-base text-muted-foreground">kg</span>
                   {summary.totalChange !== 0 && (
                     <ChangeIndicator value={summary.totalChange} positiveIsGood unit="kg" />
                   )}
                 </div>
                 {prTotal > 0 && latestPrDate && (
-                  <p className="text-xs text-hint-strong mt-2">
+                  <p className="text-xs text-hint-strong mt-2.5">
                     최고 {prTotal}kg · {formatShortDate(latestPrDate)} 달성
                   </p>
                 )}
@@ -83,11 +83,11 @@ export default function Big3Content() {
               {/* 우측: 종목별 3행 */}
               <div className="shrink-0 divide-y divide-edge-faint">
                 {summary.lifts.map((lift) => (
-                  <div key={lift.liftType} className="flex items-center justify-between gap-6 p-2.5 min-w-40">
-                    <span className="text-xs text-muted-foreground">
+                  <div key={lift.liftType} className="flex items-center justify-between gap-6 p-3.5 min-w-40">
+                    <span className="text-sm text-muted-foreground">
                       {LIFT_LABEL_MAP[lift.liftType]}
                     </span>
-                    <span className="text-sm font-bold tabular-nums text-foreground">
+                    <span className="text-base font-bold tabular-nums text-foreground">
                       {lift.latest != null ? (
                         <>
                           {lift.latest}
@@ -118,7 +118,7 @@ export default function Big3Content() {
 
           {/* 기록 리스트 — 필터 변경 시 이 영역만 Suspense */}
           <QueryErrorBoundary>
-            <Suspense fallback={<PulseLoader />}>
+            <Suspense fallback={<PulseLoader className="px-(--layout-padding-x) pt-5 pb-4" />}>
               <Big3RecordSection selectedLiftType={selectedLiftType} />
             </Suspense>
           </QueryErrorBoundary>
