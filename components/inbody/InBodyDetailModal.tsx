@@ -237,6 +237,7 @@ export default function InBodyDetailModal({
               fieldErrors={formErrors}
               data={{
                 measuredAt: editData.measuredAt || record.measuredAt,
+                height: editData.height ?? record.height,
                 weight: editData.weight || record.weight,
                 skeletalMuscleMass: editData.skeletalMuscleMass || record.skeletalMuscleMass,
                 bodyFatPercentage: editData.bodyFatPercentage || record.bodyFatPercentage,
