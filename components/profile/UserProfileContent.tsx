@@ -76,9 +76,9 @@ export default function UserProfileContent({ userId }: UserProfileContentProps) 
         )}
       </div>
 
-      <StickyControlZone top="calc(var(--safe-top) + 3rem)" className="mt-6">
-        <ProfileTabBar activeTab={activeTab} onTabChange={setActiveTab} privateTabs={privateTabs} />
-      </StickyControlZone>
+
+      <ProfileTabBar activeTab={activeTab} onTabChange={setActiveTab} privateTabs={privateTabs} className="mt-2" />
+
 
       <div className="mt-4 [overflow-x:clip] -mx-(--layout-padding-x) px-(--layout-padding-x)">
         <div

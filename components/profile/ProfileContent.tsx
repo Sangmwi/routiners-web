@@ -75,9 +75,9 @@ export default function ProfileContent() {
           <ProfileActionRow userId={user.id} />
         </div>
 
-        
-          <ProfileTabBar activeTab={activeTab} onTabChange={setActiveTab} privateTabs={privateTabs} />
-        
+
+        <ProfileTabBar activeTab={activeTab} onTabChange={setActiveTab} privateTabs={privateTabs} className="mt-2" />
+
 
         <div className="mt-4 [overflow-x:clip] -mx-(--layout-padding-x) px-(--layout-padding-x)">
           <div

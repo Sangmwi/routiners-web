@@ -15,12 +15,14 @@ interface ProfileTabBarProps {
   onTabChange: (tab: ProfileTab) => void;
   /** 비공개 상태인 탭 목록 */
   privateTabs?: ProfileTab[];
+  className?: string;
 }
 
 export default function ProfileTabBar({
   activeTab,
   onTabChange,
   privateTabs = [],
+  className,
 }: ProfileTabBarProps) {
   const tabs = BASE_TABS.map((tab) => ({
     ...tab,
@@ -35,6 +37,7 @@ export default function ProfileTabBar({
       value={activeTab}
       onChange={onTabChange}
       layout="equal"
+      className={className}
     />
   );
 }
