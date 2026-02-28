@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import type { WebToAppMessage } from '@/lib/webview/types';
 
 // ============================================================================
 // Module-level overlay stack
@@ -80,11 +81,11 @@ function broadcastOverlayState() {
   if (typeof window === 'undefined' || !window.ReactNativeWebView) return;
   const hasOverlay = overlayStack.size > 0;
   const coversNav = [...overlayStack.values()].some((e) => e.coversNativeNav);
-  // coversNav는 @sauhi/shared-contracts 다음 릴리즈에 포함될 확장 필드
-  // JSON.stringify에는 타입 제약이 없으므로 직접 인라인 전송
-  window.ReactNativeWebView.postMessage(
-    JSON.stringify({ type: 'OVERLAY_STATE', payload: { hasOverlay, coversNav } }),
-  );
+  const message: WebToAppMessage = {
+    type: 'OVERLAY_STATE',
+    payload: { hasOverlay, coversNav },
+  };
+  window.ReactNativeWebView.postMessage(JSON.stringify(message));
 }
 
 // ============================================================================
