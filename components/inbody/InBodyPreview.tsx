@@ -32,6 +32,17 @@ export default function InBodyPreview({
   const [showDetails, setShowDetails] = useState(false);
   const [isEditing, setIsEditing] = useState(initialEditing);
 
+  // 입력 필드 표시용 로컬 문자열 상태 — 부모의 숫자 상태와 분리하여
+  // 마지막 자리 삭제 시 이전 값으로 복원되는 문제를 방지
+  const [localValues, setLocalValues] = useState({
+    height: data.height?.toString() ?? '',
+    weight: data.weight?.toString() ?? '',
+    skeletalMuscleMass: data.skeletalMuscleMass?.toString() ?? '',
+    bodyFatPercentage: data.bodyFatPercentage?.toString() ?? '',
+    bmi: data.bmi?.toString() ?? '',
+    inbodyScore: data.inbodyScore?.toString() ?? '',
+  });
+
   // 부모가 initialEditing을 변경하면 동기화
   useEffect(() => {
     setIsEditing(initialEditing);
@@ -41,13 +52,15 @@ export default function InBodyPreview({
   const canEdit = !readOnly;
 
   // 핵심 지표 수정 핸들러
-  const handleCoreChange = (field: keyof InBodyCreateData, value: string) => {
-    const numValue = parseFloat(value);
-    if (!isNaN(numValue) || value === '') {
-      onChange({
-        ...data,
-        [field]: value === '' ? undefined : numValue,
-      });
+  const handleCoreChange = (field: keyof typeof localValues, value: string) => {
+    // 쉼표 → 소숫점 자동 변환
+    const normalized = value.replace(',', '.');
+    setLocalValues(prev => ({ ...prev, [field]: normalized }));
+    const numValue = parseFloat(normalized);
+    if (!isNaN(numValue)) {
+      onChange({ ...data, [field]: numValue });
+    } else if (normalized === '') {
+      onChange({ ...data, [field]: undefined });
     }
   };
 
@@ -129,49 +142,50 @@ export default function InBodyPreview({
         {isEditing ? (
           <div className="space-y-3">
             <FormInput
-              type="number"
-              step="0.1"
+              inputMode="decimal"
               label="키 (cm)"
-              value={data.height?.toString() || ''}
+              value={localValues.height}
               onChange={(e) => handleCoreChange('height', e.target.value)}
+              maxLength={5}
               error={fieldErrors?.height}
             />
             <FormInput
-              type="number"
-              step="0.1"
+              inputMode="decimal"
               label="체중 (kg)"
-              value={data.weight?.toString() || ''}
+              value={localValues.weight}
               onChange={(e) => handleCoreChange('weight', e.target.value)}
+              maxLength={5}
               error={fieldErrors?.weight}
             />
             <FormInput
-              type="number"
-              step="0.1"
+              inputMode="decimal"
               label="골격근량 (kg)"
-              value={data.skeletalMuscleMass?.toString() || ''}
+              value={localValues.skeletalMuscleMass}
               onChange={(e) => handleCoreChange('skeletalMuscleMass', e.target.value)}
+              maxLength={4}
               error={fieldErrors?.skeletalMuscleMass}
             />
             <FormInput
-              type="number"
-              step="0.1"
+              inputMode="decimal"
               label="체지방률 (%)"
-              value={data.bodyFatPercentage?.toString() || ''}
+              value={localValues.bodyFatPercentage}
               onChange={(e) => handleCoreChange('bodyFatPercentage', e.target.value)}
+              maxLength={5}
               error={fieldErrors?.bodyFatPercentage}
             />
             <FormInput
-              type="number"
-              step="0.1"
+              inputMode="decimal"
               label="BMI"
-              value={data.bmi?.toString() || ''}
+              value={localValues.bmi}
               onChange={(e) => handleCoreChange('bmi', e.target.value)}
+              maxLength={4}
             />
             <FormInput
-              type="number"
+              inputMode="numeric"
               label="인바디 점수"
-              value={data.inbodyScore?.toString() || ''}
+              value={localValues.inbodyScore}
               onChange={(e) => handleCoreChange('inbodyScore', e.target.value)}
+              maxLength={3}
             />
           </div>
         ) : (

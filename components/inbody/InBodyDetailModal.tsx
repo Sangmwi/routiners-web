@@ -63,6 +63,7 @@ export default function InBodyDetailModal({
 
   const recordData = {
     measuredAt: record.measuredAt,
+    height: record.height,
     weight: record.weight,
     skeletalMuscleMass: record.skeletalMuscleMass,
     bodyFatPercentage: record.bodyFatPercentage,
@@ -238,9 +239,9 @@ export default function InBodyDetailModal({
               data={{
                 measuredAt: editData.measuredAt || record.measuredAt,
                 height: editData.height ?? record.height,
-                weight: editData.weight || record.weight,
-                skeletalMuscleMass: editData.skeletalMuscleMass || record.skeletalMuscleMass,
-                bodyFatPercentage: editData.bodyFatPercentage || record.bodyFatPercentage,
+                weight: editData.weight ?? record.weight,
+                skeletalMuscleMass: editData.skeletalMuscleMass ?? record.skeletalMuscleMass,
+                bodyFatPercentage: editData.bodyFatPercentage ?? record.bodyFatPercentage,
                 bmi: editData.bmi,
                 inbodyScore: editData.inbodyScore,
                 totalBodyWater: editData.totalBodyWater,
