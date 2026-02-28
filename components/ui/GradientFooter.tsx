@@ -36,7 +36,7 @@ export default function GradientFooter({
         style={{ bottom: 'var(--safe-bottom)' }}
       >
         <div className="h-4 bg-gradient-to-t from-background to-transparent" />
-        <div className={`px-4 pb-4 bg-background ${className}`}>
+        <div className={`px-4 bg-background ${className}`}>
           {children}
         </div>
       </div>
