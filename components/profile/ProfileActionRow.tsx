@@ -1,8 +1,8 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useUserPostCount } from '@/hooks/community/useUserPostCount';
 import { useCurrentUserProfile } from '@/hooks/profile/queries';
+import AppLink from '@/components/common/AppLink';
 
 interface ProfileActionRowProps {
   userId: string;
@@ -12,7 +12,6 @@ interface ProfileActionRowProps {
  * 프로필 액션 로우: 게시글/팔로워/팔로잉 스탯 + 프로필 편집 버튼
  */
 export default function ProfileActionRow({ userId }: ProfileActionRowProps) {
-  const router = useRouter();
   const { data: postCount = 0 } = useUserPostCount(userId);
   const { data: currentUser } = useCurrentUserProfile();
 
@@ -35,12 +34,12 @@ export default function ProfileActionRow({ userId }: ProfileActionRowProps) {
       </div>
 
       {/* 프로필 편집 버튼 */}
-      <button
-        onClick={() => router.push('/profile/edit')}
+      <AppLink
+        href="/profile/edit"
         className="w-full border border-border rounded-xl py-2.5 text-sm font-medium text-foreground hover:bg-surface-muted transition-colors"
       >
         프로필 편집
-      </button>
+      </AppLink>
     </div>
   );
 }

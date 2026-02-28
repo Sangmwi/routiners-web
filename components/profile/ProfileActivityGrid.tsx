@@ -1,8 +1,8 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { ImagesIcon } from '@phosphor-icons/react';
+import AppLink from '@/components/common/AppLink';
 import { EMPTY_STATE } from '@/lib/config/theme';
 import { ImageWithFallback } from '@/components/ui/image';
 import { useUserPostsSuspense } from '@/hooks/community/useUserPosts';
@@ -19,13 +19,12 @@ interface ProfileActivityGridProps {
 // ============================================================
 
 function GridCell({ post, userId, index }: { post: CommunityPost; userId: string; index: number }) {
-  const router = useRouter();
   const hasImages = post.imageUrls.length > 0;
   const hasMultipleImages = post.imageUrls.length > 1;
 
   return (
-    <button
-      onClick={() => router.push(`/profile/user/${userId}/posts?startIndex=${index}`)}
+    <AppLink
+      href={`/profile/user/${userId}/posts?startIndex=${index}`}
       className="aspect-square relative overflow-hidden bg-surface-secondary"
     >
       {hasImages ? (
@@ -51,7 +50,7 @@ function GridCell({ post, userId, index }: { post: CommunityPost; userId: string
           </p>
         </div>
       )}
-    </button>
+    </AppLink>
   );
 }
 

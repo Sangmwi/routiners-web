@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { saveCurrentRouteWindowScroll } from '@/lib/route-state/scroll';
+import { useNavigate } from '@/hooks/navigation';
 
 interface AppLinkProps
   extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type' | 'onClick'> {
@@ -14,7 +14,7 @@ interface AppLinkProps
 
 /**
  * App 내부에서 사용하는 버튼 기반 네비게이션 컴포넌트.
- * 이동 직전에 현재 라우트의 스크롤 상태를 저장한다.
+ * 이동 직전에 현재 라우트의 스크롤 상태를 저장한다 (useNavigate 내부 처리).
  */
 export default function AppLink({
   href,
@@ -27,6 +27,7 @@ export default function AppLink({
   ...rest
 }: AppLinkProps) {
   const router = useRouter();
+  const { push, replace: replaceRoute } = useNavigate();
 
   useEffect(() => {
     if (!prefetch) return;
@@ -37,14 +38,7 @@ export default function AppLink({
     onClick?.(e);
     if (e.defaultPrevented) return;
 
-    saveCurrentRouteWindowScroll();
-
-    if (replace) {
-      router.replace(href);
-      return;
-    }
-
-    router.push(href);
+    replace ? replaceRoute(href) : push(href);
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {

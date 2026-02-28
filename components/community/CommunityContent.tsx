@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import PostCard from './PostCard';
 import PostMoreMenu from './PostMoreMenu';
 import CommentDrawer from './CommentDrawer';
@@ -10,6 +9,8 @@ import { LoadingSpinner } from '@/components/ui/icons';
 import { useInfiniteCommunityPosts } from '@/hooks/community/queries';
 import { useToggleLike } from '@/hooks/community/mutations';
 import { useCurrentUserProfile } from '@/hooks/profile/queries';
+import { useNavigate } from '@/hooks/navigation';
+import AppLink from '@/components/common/AppLink';
 import type { PostCategory } from '@/lib/types/community';
 
 interface CommunityContentProps {
@@ -26,7 +27,7 @@ export default function CommunityContent({
   search,
   dateRange,
 }: CommunityContentProps) {
-  const router = useRouter();
+  const { push } = useNavigate();
   const sentinelRef = useRef<HTMLDivElement>(null);
   const toggleLike = useToggleLike();
   const { data: currentUser } = useCurrentUserProfile();
@@ -68,10 +69,6 @@ export default function CommunityContent({
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const handleNewPost = () => {
-    router.push('/community/write');
-  };
-
   const handleLike = (postId: string) => {
     toggleLike.mutate(postId);
   };
@@ -81,7 +78,7 @@ export default function CommunityContent({
   };
 
   const handleAuthorClick = (authorId: string) => {
-    router.push(`/profile/user/${authorId}`);
+    push(`/profile/user/${authorId}`);
   };
 
   const handleMore = (postId: string) => {
@@ -107,12 +104,12 @@ export default function CommunityContent({
             {search ? '검색 결과가 없어요' : '아직 게시글이 없어요'}
           </p>
           {!search && (
-            <button
-              onClick={handleNewPost}
+            <AppLink
+              href="/community/write"
               className="text-sm text-primary hover:underline"
             >
               첫 번째 글을 작성해보세요
-            </button>
+            </AppLink>
           )}
         </div>
       ) : (

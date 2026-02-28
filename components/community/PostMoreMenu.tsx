@@ -1,11 +1,12 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { PencilSimpleIcon, TrashIcon, WarningIcon } from '@phosphor-icons/react';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import { useDeletePost } from '@/hooks/community/mutations';
 import { useConfirmDialog } from '@/lib/stores/modalStore';
 import { clearOverlayStack } from '@/hooks/ui/useModalLifecycle';
+import { useNavigate } from '@/hooks/navigation';
 import type { BaseModalProps } from '@/lib/types/modal';
 
 interface PostMoreMenuProps extends BaseModalProps {
@@ -22,14 +23,18 @@ export default function PostMoreMenu({
   isOwner,
   onDeleted,
 }: PostMoreMenuProps) {
-  const router = useRouter();
+  const { push, prefetch } = useNavigate();
   const deletePost = useDeletePost();
   const confirm = useConfirmDialog();
+
+  useEffect(() => {
+    if (isOwner) prefetch(`/community/write?postId=${postId}`);
+  }, [postId, isOwner]);
 
   const handleEdit = () => {
     onClose();
     clearOverlayStack();
-    router.push(`/community/write?postId=${postId}`);
+    push(`/community/write?postId=${postId}`);
   };
 
   const handleDelete = () => {

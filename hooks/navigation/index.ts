@@ -1,3 +1,4 @@
+export { useNavigate } from './useNavigate';
 export { useTabRoutePrefetch } from './useTabRoutePrefetch';
 export { useRouteState } from './useRouteState';
 export { useScrollRestore } from './useScrollRestore';

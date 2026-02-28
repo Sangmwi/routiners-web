@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/constants/queryKeys';
 import { STALE_TIME } from '@/hooks/common';
@@ -12,6 +11,7 @@ import PostCard from './PostCard';
 import PostMoreMenu from './PostMoreMenu';
 import CommentDrawer from './CommentDrawer';
 import { LoadingSpinner } from '@/components/ui/icons';
+import { useNavigate } from '@/hooks/navigation';
 
 interface UserPostFeedProps {
   userId: string;
@@ -27,7 +27,7 @@ const PAGE_SIZE = 12;
  * 위로 스크롤하면 최신 게시글, 아래로 스크롤하면 과거 게시글 로드
  */
 export default function UserPostFeed({ userId, startIndex }: UserPostFeedProps) {
-  const router = useRouter();
+  const { push } = useNavigate();
   const toggleLike = useToggleLike();
   const { data: currentUser } = useCurrentUserProfile();
 
@@ -129,7 +129,7 @@ export default function UserPostFeed({ userId, startIndex }: UserPostFeedProps) 
   };
 
   const handleAuthorClick = (authorId: string) => {
-    router.push(`/profile/user/${authorId}`);
+    push(`/profile/user/${authorId}`);
   };
 
   const handleMore = (postId: string) => {
