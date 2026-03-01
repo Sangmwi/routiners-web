@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect, RefObject } from 'react';
+import { ANIMATION_DURATION } from '@/hooks/ui/useModalLifecycle';
 
 // ============================================================================
 // Types
@@ -30,12 +31,6 @@ interface UseSwipeGestureReturn {
   modalRef: RefObject<HTMLDivElement | null>;
   reset: () => void;
 }
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-const ANIMATION_DURATION = 200;
 
 // ============================================================================
 // Helpers

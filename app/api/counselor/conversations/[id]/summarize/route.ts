@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
 import { DbChatMessage } from '@/lib/types/chat';
+import { notFound, internalError } from '@/lib/utils/apiResponse';
 import { AI_MODEL } from '@/lib/constants/aiChat';
 import OpenAI from 'openai';
 
@@ -32,16 +33,10 @@ export const POST = withAuth(
 
     if (convError) {
       if (convError.code === 'PGRST116') {
-        return NextResponse.json(
-          { error: '대화를 찾을 수 없습니다.', code: 'NOT_FOUND' },
-          { status: 404 }
-        );
+        return notFound('대화를 찾을 수 없습니다.');
       }
       console.error('[Counselor Summarize POST] Conv Error:', convError);
-      return NextResponse.json(
-        { error: '대화를 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 }
-      );
+      return internalError('대화를 불러오는데 실패했습니다.');
     }
 
     // 요약 대상 메시지 조회 (summarized_until 이후, text + tool_result 포함)
@@ -70,10 +65,7 @@ export const POST = withAuth(
 
     if (msgError) {
       console.error('[Counselor Summarize POST] Message Error:', msgError);
-      return NextResponse.json(
-        { error: '메시지를 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 }
-      );
+      return internalError('메시지를 불러오는데 실패했습니다.');
     }
 
     // text 메시지만 기준으로 threshold 체크
@@ -155,10 +147,7 @@ export const POST = withAuth(
 
       if (updateError) {
         console.error('[Counselor Summarize POST] Update Error:', updateError);
-        return NextResponse.json(
-          { error: '요약 저장에 실패했습니다.', code: 'DATABASE_ERROR' },
-          { status: 500 }
-        );
+        return internalError('요약 저장에 실패했습니다.');
       }
 
       return NextResponse.json({
@@ -168,10 +157,7 @@ export const POST = withAuth(
       });
     } catch (error) {
       console.error('[Counselor Summarize POST] OpenAI Error:', error);
-      return NextResponse.json(
-        { error: '요약 생성에 실패했습니다.', code: 'SUMMARIZATION_FAILED' },
-        { status: 500 }
-      );
+      return internalError('요약 생성에 실패했습니다.');
     }
   }
 );
@@ -196,16 +182,10 @@ export const GET = withAuth(
 
     if (convError) {
       if (convError.code === 'PGRST116') {
-        return NextResponse.json(
-          { error: '대화를 찾을 수 없습니다.', code: 'NOT_FOUND' },
-          { status: 404 }
-        );
+        return notFound('대화를 찾을 수 없습니다.');
       }
       console.error('[Counselor Summarize GET] Conv Error:', convError);
-      return NextResponse.json(
-        { error: '대화를 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 }
-      );
+      return internalError('대화를 불러오는데 실패했습니다.');
     }
 
     // 메시지 개수 조회
@@ -218,10 +198,7 @@ export const GET = withAuth(
 
     if (countError) {
       console.error('[Counselor Summarize GET] Count Error:', countError);
-      return NextResponse.json(
-        { error: '메시지 개수 조회에 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 }
-      );
+      return internalError('메시지 개수 조회에 실패했습니다.');
     }
 
     return NextResponse.json({

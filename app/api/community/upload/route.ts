@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
+import { badRequest, internalError } from '@/lib/utils/apiResponse';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_FILES = 4;
@@ -20,33 +21,21 @@ export const POST = withAuth(async (request: NextRequest, { authUser, supabase }
   const files = formData.getAll('files') as File[];
 
   if (!files || files.length === 0) {
-    return NextResponse.json(
-      { error: '업로드할 파일이 없습니다.' },
-      { status: 400 }
-    );
+    return badRequest('업로드할 파일이 없습니다.');
   }
 
   if (files.length > MAX_FILES) {
-    return NextResponse.json(
-      { error: `최대 ${MAX_FILES}개의 파일만 업로드할 수 있습니다.` },
-      { status: 400 }
-    );
+    return badRequest(`최대 ${MAX_FILES}개의 파일만 업로드할 수 있습니다.`);
   }
 
   // 파일 유효성 검사
   for (const file of files) {
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json(
-        { error: 'JPG, PNG, WebP, GIF 형식의 이미지만 업로드할 수 있습니다.' },
-        { status: 400 }
-      );
+      return badRequest('JPG, PNG, WebP, GIF 형식의 이미지만 업로드할 수 있습니다.');
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { error: '파일 크기는 5MB를 초과할 수 없습니다.' },
-        { status: 400 }
-      );
+      return badRequest('파일 크기는 5MB를 초과할 수 없습니다.');
     }
   }
 
@@ -69,10 +58,7 @@ export const POST = withAuth(async (request: NextRequest, { authUser, supabase }
 
     if (error) {
       console.error('[POST /api/community/upload] Storage error:', error);
-      return NextResponse.json(
-        { error: '이미지 업로드에 실패했습니다.' },
-        { status: 500 }
-      );
+      return internalError('이미지 업로드에 실패했습니다.');
     }
 
     // Public URL 생성

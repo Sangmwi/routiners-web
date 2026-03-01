@@ -46,5 +46,9 @@ export const TIMING = {
     SCROLL_DELAY: 100,
     /** 에러 토스트 자동 해제: 5000ms */
     ERROR_TOAST: 5000,
+    /** 모달/스와이프 닫힘 애니메이션: 200ms */
+    MODAL_CLOSE: 200,
+    /** 모달 오픈 애니메이션: 300ms */
+    MODAL_OPEN: 300,
   },
 } as const;

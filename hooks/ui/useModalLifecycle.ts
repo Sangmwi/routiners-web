@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { WebToAppMessage } from '@/lib/webview/types';
+import { TIMING } from '@/lib/constants/timing';
 
 // ============================================================================
 // Module-level overlay stack
@@ -92,8 +93,8 @@ function broadcastOverlayState() {
 // Constants
 // ============================================================================
 
-export const ANIMATION_DURATION = 200;
-export const OPEN_ANIMATION_DURATION = 300;
+export const ANIMATION_DURATION = TIMING.UI.MODAL_CLOSE;
+export const OPEN_ANIMATION_DURATION = TIMING.UI.MODAL_OPEN;
 
 // ============================================================================
 // Types

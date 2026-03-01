@@ -7,10 +7,9 @@
 import {
   useSuspenseQuery,
   useSuspenseInfiniteQuery,
-  useQuery,
 } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/constants/queryKeys';
-import { STALE_TIME } from '@/hooks/common';
+import { STALE_TIME, useConditionalQuery } from '@/hooks/common';
 import {
   fetchCommunityPosts,
   fetchCommunityPost,
@@ -84,22 +83,22 @@ export function useCommunityPost(postId: string) {
  * 게시글 상세 조회 (Non-Suspense)
  */
 export function useCommunityPostQuery(postId: string | null) {
-  return useQuery({
-    queryKey: queryKeys.post.detail(postId ?? ''),
-    queryFn: () => fetchCommunityPost(postId!),
-    enabled: !!postId,
-    staleTime: STALE_TIME.medium,
-  });
+  return useConditionalQuery(
+    queryKeys.post.detail(postId ?? ''),
+    () => fetchCommunityPost(postId!),
+    postId,
+    { staleTime: 'medium' }
+  );
 }
 
 /**
  * 댓글 목록 조회
  */
 export function usePostComments(postId: string) {
-  return useQuery({
-    queryKey: queryKeys.post.comments(postId),
-    queryFn: () => fetchPostComments(postId),
-    enabled: !!postId,
-    staleTime: STALE_TIME.short,
-  });
+  return useConditionalQuery(
+    queryKeys.post.comments(postId),
+    () => fetchPostComments(postId),
+    postId,
+    { staleTime: 'short' }
+  );
 }
