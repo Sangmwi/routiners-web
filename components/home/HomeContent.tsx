@@ -52,21 +52,13 @@ export default function HomeContent() {
     progressSummary,
   } = useHomeDataSuspense();
 
-  const handleViewMoreProducts = () => {
-    console.log('PX 상품 더보기');
-  };
+  const handleViewMoreProducts = () => {};
 
-  const handleViewMoreInfluencers = () => {
-    console.log('인플루언서 더보기');
-  };
+  const handleViewMoreInfluencers = () => {};
 
-  const handleProductClick = (productId: string) => {
-    console.log('상품 클릭:', productId);
-  };
+  const handleProductClick = (_productId: string) => {};
 
-  const handleInfluencerClick = (influencerId: string) => {
-    console.log('인플루언서 클릭:', influencerId);
-  };
+  const handleInfluencerClick = (_influencerId: string) => {};
 
   return (
     <div className="space-y-10">

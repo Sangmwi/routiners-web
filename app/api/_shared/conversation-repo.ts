@@ -1,4 +1,4 @@
-import { jsonError } from './route-helpers';
+import { notFound, internalError } from '@/lib/utils/apiResponse';
 
 type ConversationType = 'ai' | 'direct' | 'group' | string;
 
@@ -44,21 +44,13 @@ export async function getConversationOr404<TConversation = unknown>(
     if (error.code === 'PGRST116') {
       return {
         ok: false as const,
-        response: jsonError({
-          status: 404,
-          code: 'NOT_FOUND',
-          error: '대화를 찾을 수 없습니다.',
-        }),
+        response: notFound('대화를 찾을 수 없습니다.'),
       };
     }
 
     return {
       ok: false as const,
-      response: jsonError({
-        status: 500,
-        code: 'DATABASE_ERROR',
-        error: '대화 조회에 실패했습니다.',
-      }),
+      response: internalError('대화 조회에 실패했습니다.'),
     };
   }
 

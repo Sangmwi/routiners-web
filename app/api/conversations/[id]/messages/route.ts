@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { withAuth } from '@/utils/supabase/auth';
 import { DbChatMessage, transformDbMessage } from '@/lib/types/chat';
 import { getConversationOr404 } from '@/app/api/_shared/conversation-repo';
-import { jsonError, parseJsonBody, validateBody } from '@/app/api/_shared/route-helpers';
+import { internalError, validateRequest } from '@/lib/utils/apiResponse';
 
 const MessageCreateSchema = z.object({
   content: z.string().min(1, '메시지를 입력해주세요.'),
@@ -44,11 +44,7 @@ export const GET = withAuth(async (request: NextRequest, { supabase, params }) =
 
   if (error) {
     console.error('[Messages GET] Error:', error);
-    return jsonError({
-      status: 500,
-      code: 'DATABASE_ERROR',
-      error: '메시지 목록 조회에 실패했습니다.',
-    });
+    return internalError('메시지 목록 조회에 실패했습니다.');
   }
 
   const messages = data as DbChatMessage[];
@@ -66,17 +62,10 @@ export const GET = withAuth(async (request: NextRequest, { supabase, params }) =
 export const POST = withAuth(async (request: NextRequest, { supabase, params }) => {
   const { id: conversationId } = await params;
 
-  const parsed = await parseJsonBody(request);
-  if (!parsed.ok) {
-    return parsed.response;
-  }
+  const result = await validateRequest(request, MessageCreateSchema);
+  if (!result.success) return result.response;
 
-  const validated = validateBody(MessageCreateSchema, parsed.data);
-  if (!validated.ok) {
-    return validated.response;
-  }
-
-  const { content, contentType, mediaUrl, replyToId } = validated.data;
+  const { content, contentType, mediaUrl, replyToId } = result.data;
 
   const found = await getConversationOr404(supabase, {
     id: conversationId,
@@ -101,11 +90,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase, params }) 
 
   if (error) {
     console.error('[Messages POST] Error:', error);
-    return jsonError({
-      status: 500,
-      code: 'DATABASE_ERROR',
-      error: '메시지 전송에 실패했습니다.',
-    });
+    return internalError('메시지 전송에 실패했습니다.');
   }
 
   await supabase

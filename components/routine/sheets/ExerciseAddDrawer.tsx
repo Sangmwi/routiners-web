@@ -6,37 +6,18 @@ import { MagnifyingGlassIcon, PlusIcon } from '@phosphor-icons/react';
 import ChipButton from '@/components/ui/ChipButton';
 import SheetFooterAction from '@/components/ui/SheetFooterAction';
 import { searchExercises, EXERCISE_CATEGORIES } from '@/lib/data/exercises';
+import { catalogToExercise } from '@/lib/utils/workoutHelpers';
 import type { ExerciseCategory, ExerciseInfo } from '@/lib/data/exercises';
-import type { WorkoutExercise, WorkoutSet } from '@/lib/types/routine';
+import type { WorkoutExercise } from '@/lib/types/routine';
+import type { BaseModalProps } from '@/lib/types/modal';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-interface ExerciseAddDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
+interface ExerciseAddDrawerProps extends BaseModalProps {
   onAdd: (exercises: WorkoutExercise[]) => void;
   existingNames: Set<string>;
-}
-
-// ============================================================================
-// Helpers
-// ============================================================================
-
-function createWorkoutSet(setNumber: number): WorkoutSet {
-  return { setNumber, targetReps: 10, targetWeight: 20 };
-}
-
-function catalogToExercise(info: ExerciseInfo): WorkoutExercise {
-  return {
-    id: crypto.randomUUID(),
-    name: info.name,
-    category: info.category,
-    targetMuscle: info.targetMuscle,
-    sets: [createWorkoutSet(1), createWorkoutSet(2), createWorkoutSet(3)],
-    restSeconds: 60,
-  };
 }
 
 // ============================================================================

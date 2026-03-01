@@ -250,7 +250,7 @@ export const queryKeys = {
     all: ['follow'] as const,
 
     /** 특정 사용자에 대한 팔로우 상태 */
-    status: (userId: string) => ['follow', 'status', userId] as const,
+    status: (userId: string) => [...queryKeys.follow.all, 'status', userId] as const,
   },
 
   /**

@@ -24,6 +24,15 @@ export { useCatalogSelection } from './useCatalogSelection';
 // Add Flow Hooks
 export { useWorkoutAddFlow } from './useWorkoutAddFlow';
 export { useMealAddFlow } from './useMealAddFlow';
+export { useSheetAddFlow } from './useSheetAddFlow';
 
 // State Hooks
 export { useUnitMealImportState } from './useUnitMealImportState';
+
+// Confirm/Mutation Hooks
+export { useRoutineEventConfirmActions } from './useRoutineEventConfirmActions';
+export { useRoutineEventDataMutation } from './useRoutineEventDataMutation';
+
+// Workout Session Hooks
+export { useWorkoutSession } from './useWorkoutSession';
+export { useSetValuePicker } from './useSetValuePicker';

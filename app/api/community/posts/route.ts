@@ -6,12 +6,22 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { withAuth } from '@/utils/supabase/auth';
 import {
   toCommunityPost,
   type DbCommunityPost,
 } from '@/lib/types/community';
 import { parsePaginationParams } from '@/lib/utils/queryParams';
+import { validateRequest } from '@/lib/utils/apiResponse';
+
+const CreatePostSchema = z.object({
+  category: z.enum(['general', 'workout', 'meal', 'qna'], {
+    errorMap: () => ({ message: '올바른 카테고리를 선택해주세요.' }),
+  }),
+  content: z.string().trim().min(1, '내용을 입력해주세요.').max(2000, '내용은 2000자를 초과할 수 없습니다.'),
+  imageUrls: z.array(z.string().url()).optional(),
+});
 
 /**
  * GET /api/community/posts
@@ -146,31 +156,10 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
  * 게시글 작성
  */
 export const POST = withAuth(async (request: NextRequest, { supabase }) => {
-  const body = await request.json();
-  const { category, content, imageUrls } = body;
+  const result = await validateRequest(request, CreatePostSchema);
+  if (!result.success) return result.response;
 
-  // 유효성 검사
-  if (!content || content.trim().length === 0) {
-    return NextResponse.json(
-      { error: '내용을 입력해주세요.' },
-      { status: 400 }
-    );
-  }
-
-  if (content.length > 2000) {
-    return NextResponse.json(
-      { error: '내용은 2000자를 초과할 수 없습니다.' },
-      { status: 400 }
-    );
-  }
-
-  const validCategories = ['general', 'workout', 'meal', 'qna'];
-  if (!validCategories.includes(category)) {
-    return NextResponse.json(
-      { error: '올바른 카테고리를 선택해주세요.' },
-      { status: 400 }
-    );
-  }
+  const { category, content, imageUrls } = result.data;
 
   // 게시글 생성 (author_id는 DEFAULT current_user_id()가 자동 채움)
   const { data: post, error } = await supabase

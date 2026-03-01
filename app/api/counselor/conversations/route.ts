@@ -8,7 +8,7 @@ import {
   transformDbCounselorConversation,
 } from '@/lib/types/counselor';
 import { DbChatMessage, transformDbMessage } from '@/lib/types/chat';
-import { jsonError, parseJsonBody, validateBody } from '@/app/api/_shared/route-helpers';
+import { internalError, validationError } from '@/lib/utils/apiResponse';
 
 const CreateConversationSchema = z.object({
   activePurpose: z
@@ -32,11 +32,7 @@ export const GET = withAuth(async (_request: NextRequest, { supabase }) => {
 
   if (error) {
     console.error('[CounselorConversations GET] Error:', error);
-    return jsonError({
-      status: 500,
-      code: 'DATABASE_ERROR',
-      error: '상담 대화 목록 조회에 실패했습니다.',
-    });
+    return internalError('상담 대화 목록 조회에 실패했습니다.');
   }
 
   const conversationIds = conversations.map((conversation) => conversation.id);
@@ -79,17 +75,19 @@ export const GET = withAuth(async (_request: NextRequest, { supabase }) => {
 });
 
 export const POST = withAuth(async (request: NextRequest, { supabase }) => {
-  const parsed = await parseJsonBody(request, { allowEmpty: true });
-  if (!parsed.ok) {
-    return parsed.response;
+  let body: unknown = {};
+  try {
+    body = await request.json();
+  } catch {
+    // empty body is valid — activePurpose is optional
   }
 
-  const validated = validateBody(CreateConversationSchema, parsed.data);
-  if (!validated.ok) {
-    return validated.response;
+  const validation = CreateConversationSchema.safeParse(body);
+  if (!validation.success) {
+    return validationError(validation.error);
   }
 
-  const { activePurpose } = validated.data;
+  const { activePurpose } = validation.data;
   const metadata = activePurpose
     ? {
         activePurpose: {
@@ -112,11 +110,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
 
   if (convError) {
     console.error('[Counselor POST] Create Error:', convError);
-    return jsonError({
-      status: 500,
-      code: 'DATABASE_ERROR',
-      error: '상담 대화 생성에 실패했습니다.',
-    });
+    return internalError('상담 대화 생성에 실패했습니다.');
   }
 
   const { error: participantError } = await supabase
@@ -129,11 +123,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
   if (participantError) {
     console.error('[Counselor POST] Participant Error:', participantError);
     await supabase.from('conversations').delete().eq('id', conversation.id);
-    return jsonError({
-      status: 500,
-      code: 'DATABASE_ERROR',
-      error: '참여자 추가에 실패했습니다.',
-    });
+    return internalError('참여자 추가에 실패했습니다.');
   }
 
   return NextResponse.json(

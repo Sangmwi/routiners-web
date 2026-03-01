@@ -7,7 +7,7 @@ import {
   transformDbCounselorConversation,
 } from '@/lib/types/counselor';
 import { ensureAICounselorConversation } from '@/app/api/_shared/conversation-repo';
-import { jsonError, parseJsonBody, validateBody } from '@/app/api/_shared/route-helpers';
+import { internalError, validateRequest } from '@/lib/utils/apiResponse';
 
 const ActivePurposeSchema = z.object({
   activePurpose: z
@@ -40,15 +40,8 @@ export const GET = withAuth(async (_request: NextRequest, { supabase, params }) 
 export const POST = withAuth(async (request: NextRequest, { supabase, params }) => {
   const { id } = await params;
 
-  const parsed = await parseJsonBody(request);
-  if (!parsed.ok) {
-    return parsed.response;
-  }
-
-  const validated = validateBody(ActivePurposeSchema, parsed.data);
-  if (!validated.ok) {
-    return validated.response;
-  }
+  const result = await validateRequest(request, ActivePurposeSchema);
+  if (!result.success) return result.response;
 
   const current = await ensureAICounselorConversation<{ metadata: CounselorConversationMetadata | null }>(
     supabase,
@@ -59,13 +52,14 @@ export const POST = withAuth(async (request: NextRequest, { supabase, params }) 
     return current.response;
   }
 
-  const { activePurpose } = validated.data;
+  const { activePurpose } = result.data;
   const currentMetadata = current.conversation.metadata || {};
   const newMetadata: CounselorConversationMetadata = {
     ...currentMetadata,
     activePurpose: activePurpose
       ? {
           ...activePurpose,
+          collectedData: activePurpose.collectedData ?? {},
           startedAt: activePurpose.startedAt || new Date().toISOString(),
         }
       : null,
@@ -83,11 +77,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase, params }) 
 
   if (updateError) {
     console.error('[Counselor Purpose POST] Update Error:', updateError);
-    return jsonError({
-      status: 500,
-      code: 'DATABASE_ERROR',
-      error: '목적 업데이트에 실패했습니다.',
-    });
+    return internalError('목적 업데이트에 실패했습니다.');
   }
 
   return NextResponse.json(
@@ -127,11 +117,7 @@ export const DELETE = withAuth(async (_request: NextRequest, { supabase, params 
 
   if (updateError) {
     console.error('[Counselor Purpose DELETE] Update Error:', updateError);
-    return jsonError({
-      status: 500,
-      code: 'DATABASE_ERROR',
-      error: '목적 삭제에 실패했습니다.',
-    });
+    return internalError('목적 삭제에 실패했습니다.');
   }
 
   return NextResponse.json(

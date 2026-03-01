@@ -1,8 +1,9 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/constants/queryKeys';
 import { authApi } from '@/lib/api';
+import { useBaseQuery } from '@/hooks/common/useBaseQuery';
 
 // React Query hooks
 
@@ -10,11 +11,11 @@ import { authApi } from '@/lib/api';
  * Check if nickname is available
  */
 export function useCheckNickname(nickname: string, enabled: boolean = true, excludeUserId?: string) {
-  return useQuery({
-    queryKey: queryKeys.user.checkNickname(nickname),
-    queryFn: () => authApi.checkNickname(nickname, excludeUserId),
-    enabled: enabled && nickname.length >= 2,
-  });
+  return useBaseQuery(
+    queryKeys.user.checkNickname(nickname),
+    () => authApi.checkNickname(nickname, excludeUserId),
+    { enabled: enabled && nickname.length >= 2, staleTime: 'search' },
+  );
 }
 
 /**

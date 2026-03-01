@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { fitnessProfileApi } from '@/lib/api/fitnessProfile';
 import { FitnessProfileUpdateData } from '@/lib/types/fitness';
 import { queryKeys } from '@/lib/constants/queryKeys';
+import { invalidateFitnessProfileCaches } from './cacheHelpers';
 
 /**
  * 피트니스 프로필 업데이트 mutation (PATCH)
@@ -44,7 +45,7 @@ export function useDeleteFitnessProfile() {
   return useMutation({
     mutationFn: () => fitnessProfileApi.deleteFitnessProfile(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.fitnessProfile.all });
+      invalidateFitnessProfileCaches(queryClient);
     },
   });
 }

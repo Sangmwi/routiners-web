@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { withAuth } from '@/utils/supabase/auth';
 import { DbConversation, transformDbConversation } from '@/lib/types/chat';
-import { jsonError, parseJsonBody, validateBody } from '@/app/api/_shared/route-helpers';
+import { internalError, validateRequest } from '@/lib/utils/apiResponse';
 
 const ConversationCreateSchema = z.object({
   type: z.enum(['ai', 'direct', 'group']),
@@ -31,11 +31,7 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
 
   if (error) {
     console.error('[Conversations GET] Error:', error);
-    return jsonError({
-      status: 500,
-      code: 'DATABASE_ERROR',
-      error: '대화 목록 조회에 실패했습니다.',
-    });
+    return internalError('대화 목록 조회에 실패했습니다.');
   }
 
   const conversations = (data as DbConversation[]).map(transformDbConversation);
@@ -43,17 +39,10 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
 });
 
 export const POST = withAuth(async (request: NextRequest, { supabase }) => {
-  const parsed = await parseJsonBody(request);
-  if (!parsed.ok) {
-    return parsed.response;
-  }
+  const result = await validateRequest(request, ConversationCreateSchema);
+  if (!result.success) return result.response;
 
-  const validated = validateBody(ConversationCreateSchema, parsed.data);
-  if (!validated.ok) {
-    return validated.response;
-  }
-
-  const { type, title } = validated.data;
+  const { type, title } = result.data;
 
   const { data: conversation, error: convError } = await supabase
     .from('conversations')
@@ -67,11 +56,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
 
   if (convError) {
     console.error('[Conversations POST] Error:', convError);
-    return jsonError({
-      status: 500,
-      code: 'DATABASE_ERROR',
-      error: '대화 생성에 실패했습니다.',
-    });
+    return internalError('대화 생성에 실패했습니다.');
   }
 
   const conv = conversation as DbConversation;
@@ -85,11 +70,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
   if (participantError) {
     console.error('[Conversations POST] Participant Error:', participantError);
     await supabase.from('conversations').delete().eq('id', conv.id);
-    return jsonError({
-      status: 500,
-      code: 'DATABASE_ERROR',
-      error: '참여자 추가에 실패했습니다.',
-    });
+    return internalError('참여자 추가에 실패했습니다.');
   }
 
   return NextResponse.json(transformDbConversation(conv), { status: 201 });

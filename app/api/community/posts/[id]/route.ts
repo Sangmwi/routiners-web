@@ -8,7 +8,54 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
+import { createClient } from '@/utils/supabase/server';
 import { toCommunityPost, type DbCommunityPost } from '@/lib/types/community';
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+type SupabaseInRoute = Awaited<ReturnType<typeof createClient>>;
+
+type AssertOwnerResult =
+  | { ok: true; currentUserId: string }
+  | { ok: false; response: NextResponse };
+
+async function assertPostOwner(
+  supabase: SupabaseInRoute,
+  id: string,
+): Promise<AssertOwnerResult> {
+  const { data: currentUserId } = await supabase.rpc('current_user_id');
+  if (!currentUserId) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: '사용자를 찾을 수 없습니다.' }, { status: 404 }),
+    };
+  }
+
+  const { data: existing } = await supabase
+    .from('community_posts')
+    .select('author_id')
+    .eq('id', id)
+    .is('deleted_at', null)
+    .single();
+
+  if (!existing) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: '게시글을 찾을 수 없습니다.' }, { status: 404 }),
+    };
+  }
+
+  if (existing.author_id !== currentUserId) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: '본인의 게시글만 접근할 수 있습니다.' }, { status: 403 }),
+    };
+  }
+
+  return { ok: true, currentUserId };
+}
 
 /**
  * GET /api/community/posts/[id]
@@ -61,36 +108,9 @@ export const GET = withAuth<NextResponse, { id: string }>(async (_request: NextR
 export const PATCH = withAuth<NextResponse, { id: string }>(async (request: NextRequest, { supabase, params }) => {
   const { id } = await params;
 
-  // 현재 사용자의 public.users.id 조회
-  const { data: currentUserId } = await supabase.rpc('current_user_id');
-  if (!currentUserId) {
-    return NextResponse.json(
-      { error: '사용자를 찾을 수 없습니다.' },
-      { status: 404 }
-    );
-  }
-
-  // 게시글 소유자 확인
-  const { data: existing } = await supabase
-    .from('community_posts')
-    .select('author_id')
-    .eq('id', id)
-    .is('deleted_at', null)
-    .single();
-
-  if (!existing) {
-    return NextResponse.json(
-      { error: '게시글을 찾을 수 없습니다.' },
-      { status: 404 }
-    );
-  }
-
-  if (existing.author_id !== currentUserId) {
-    return NextResponse.json(
-      { error: '본인의 게시글만 수정할 수 있습니다.' },
-      { status: 403 }
-    );
-  }
+  const ownerCheck = await assertPostOwner(supabase, id);
+  if (!ownerCheck.ok) return ownerCheck.response;
+  const { currentUserId } = ownerCheck;
 
   const body = await request.json();
   const { content, imageUrls } = body;
@@ -163,36 +183,8 @@ export const PATCH = withAuth<NextResponse, { id: string }>(async (request: Next
 export const DELETE = withAuth<NextResponse, { id: string }>(async (_request: NextRequest, { supabase, params }) => {
   const { id } = await params;
 
-  // 현재 사용자의 public.users.id 조회
-  const { data: currentUserId } = await supabase.rpc('current_user_id');
-  if (!currentUserId) {
-    return NextResponse.json(
-      { error: '사용자를 찾을 수 없습니다.' },
-      { status: 404 }
-    );
-  }
-
-  // 게시글 소유자 확인
-  const { data: existing } = await supabase
-    .from('community_posts')
-    .select('author_id')
-    .eq('id', id)
-    .is('deleted_at', null)
-    .single();
-
-  if (!existing) {
-    return NextResponse.json(
-      { error: '게시글을 찾을 수 없습니다.' },
-      { status: 404 }
-    );
-  }
-
-  if (existing.author_id !== currentUserId) {
-    return NextResponse.json(
-      { error: '본인의 게시글만 삭제할 수 있습니다.' },
-      { status: 403 }
-    );
-  }
+  const ownerCheck = await assertPostOwner(supabase, id);
+  if (!ownerCheck.ok) return ownerCheck.response;
 
   // Soft delete
   const { error } = await supabase

@@ -18,7 +18,7 @@ import { useActiveCounselorConversation } from '@/hooks/counselor';
 import { useConfirmDelete } from '@/hooks/common';
 import { useStatsPeriodNavigator } from '@/hooks/routine/useStatsPeriodNavigator';
 import { computeWorkoutStreak } from '@/lib/stats/computations';
-import { addDays, formatDate, parseDate } from '@/lib/utils/dateHelpers';
+import { addDays, formatDate, getToday, parseDate } from '@/lib/utils/dateHelpers';
 import { createRouteStateKey } from '@/lib/route-state/keys';
 import { useRouteState } from '@/hooks/navigation';
 import { usePathname } from 'next/navigation';
@@ -53,10 +53,10 @@ export default function RoutineContent() {
     initialState: {
       tab: 'weekly',
       filter: 'all',
-      weekDateStr: formatDate(new Date()),
+      weekDateStr: getToday(),
       calYear: new Date().getFullYear(),
       calMonth: new Date().getMonth() + 1,
-      calSelectedDate: formatDate(new Date()),
+      calSelectedDate: getToday(),
     },
   });
   const [tab, setTab] = useState<RoutineTab>(state.tab);
@@ -91,7 +91,7 @@ export default function RoutineContent() {
   const [isDateJumpOpen, setIsDateJumpOpen] = useState(false);
   const [dateJumpSession, setDateJumpSession] = useState(0);
 
-  const today = formatDate(new Date());
+  const today = getToday();
   const minDate = `${new Date().getFullYear() - 5}-01-01`;
   const calMaxDate = formatDate(
     new Date(todayDate.getFullYear() + 2, todayDate.getMonth(), todayDate.getDate()),
@@ -107,7 +107,7 @@ export default function RoutineContent() {
     setCalMonth(state.calMonth);
     setCalSelectedDate(state.calSelectedDate);
     weeklyNav.setWeekBaseDate(
-      parseDate(state.weekDateStr || formatDate(new Date())),
+      parseDate(state.weekDateStr || getToday()),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

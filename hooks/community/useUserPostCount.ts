@@ -9,7 +9,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/constants/queryKeys';
-import { STALE_TIME } from '@/hooks/common';
+import { STALE_TIME } from '@/hooks/common/useBaseQuery';
 import { fetchCommunityPosts } from '@/lib/api/community';
 
 export function useUserPostCount(userId: string) {

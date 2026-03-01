@@ -16,38 +16,18 @@ import { useCatalogSelection, useCreateRoutineEvent } from '@/hooks/routine';
 import { useSetValuePicker } from '@/hooks/routine/useSetValuePicker';
 import { useShowError } from '@/lib/stores/errorStore';
 import { searchExercises, generateWorkoutTitle, EXERCISE_CATEGORIES } from '@/lib/data/exercises';
-import { REST_OPTIONS, formatRestSeconds } from '@/lib/utils/workoutHelpers';
+import { REST_OPTIONS, formatRestSeconds, createWorkoutSet, catalogToExercise } from '@/lib/utils/workoutHelpers';
 import type { ExerciseCategory, ExerciseInfo } from '@/lib/data/exercises';
 import type { WorkoutExercise, WorkoutSet, RoutineEventCreateData } from '@/lib/types/routine';
+import type { BaseModalProps } from '@/lib/types/modal';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-interface WorkoutCreateDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
+interface WorkoutCreateDrawerProps extends BaseModalProps {
   date: string;
   onCreated?: () => void;
-}
-
-// ============================================================================
-// Helpers
-// ============================================================================
-
-function createWorkoutSet(setNumber: number): WorkoutSet {
-  return { setNumber, targetReps: 10, targetWeight: 20 };
-}
-
-function catalogToExercise(info: ExerciseInfo): WorkoutExercise {
-  return {
-    id: crypto.randomUUID(),
-    name: info.name,
-    category: info.category,
-    targetMuscle: info.targetMuscle,
-    sets: [createWorkoutSet(1), createWorkoutSet(2), createWorkoutSet(3)],
-    restSeconds: 60,
-  };
 }
 
 // ============================================================================

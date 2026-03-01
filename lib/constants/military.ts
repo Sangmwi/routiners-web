@@ -1,28 +1,16 @@
-import { Rank, Specialty } from '@/lib/types';
+import { RANKS, RANK_LABELS, SPECIALTIES, SPECIALTY_LABELS, type Rank, type Specialty } from '@/lib/types/user';
 
-// Rank options (이병/일병/상병/병장)
-export const RANK_OPTIONS: { value: Rank; label: string }[] = [
-  { value: '이병', label: '이병' },
-  { value: '일병', label: '일병' },
-  { value: '상병', label: '상병' },
-  { value: '병장', label: '병장' },
-];
+// Rank options — user.ts RANKS + RANK_LABELS에서 파생 (단일 소스)
+export const RANK_OPTIONS: { value: Rank; label: string }[] = RANKS.map((rank) => ({
+  value: rank,
+  label: RANK_LABELS[rank],
+}));
 
-// Specialty options
-export const SPECIALTY_OPTIONS: { value: Specialty; label: string }[] = [
-  { value: '보병', label: '보병' },
-  { value: '포병', label: '포병' },
-  { value: '기갑', label: '기갑' },
-  { value: '공병', label: '공병' },
-  { value: '정보통신', label: '정보통신' },
-  { value: '항공', label: '항공' },
-  { value: '화생방', label: '화생방' },
-  { value: '병참', label: '병참' },
-  { value: '의무', label: '의무' },
-  { value: '법무', label: '법무' },
-  { value: '행정', label: '행정' },
-  { value: '기타', label: '기타' },
-];
+// Specialty options — user.ts SPECIALTIES + SPECIALTY_LABELS에서 파생 (단일 소스)
+export const SPECIALTY_OPTIONS: { value: Specialty; label: string }[] = SPECIALTIES.map((specialty) => ({
+  value: specialty,
+  label: SPECIALTY_LABELS[specialty],
+}));
 
 // Generate years for enlistment (last 3 years + current year + next year)
 export const getEnlistmentYears = (): number[] => {

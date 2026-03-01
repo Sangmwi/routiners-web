@@ -8,6 +8,6 @@ export const BIG3_LIFT_CONFIG: readonly { key: Big3LiftType; label: string }[] =
 
 export const LIFT_LABEL_MAP = Object.fromEntries(
   BIG3_LIFT_CONFIG.map(({ key, label }) => [key, label]),
-) as Record<string, string>;
+) as Record<Big3LiftType, string>;
 
 
