@@ -18,6 +18,9 @@ export function useUpdateFitnessProfile() {
     onSuccess: (updatedProfile) => {
       queryClient.setQueryData(queryKeys.fitnessProfile.me(), updatedProfile);
     },
+    onError: (error) => {
+      console.error('[FitnessProfile] Update failed:', error);
+    },
   });
 }
 
@@ -33,6 +36,9 @@ export function useReplaceFitnessProfile() {
     onSuccess: (updatedProfile) => {
       queryClient.setQueryData(queryKeys.fitnessProfile.me(), updatedProfile);
     },
+    onError: (error) => {
+      console.error('[FitnessProfile] Replace failed:', error);
+    },
   });
 }
 
@@ -46,6 +52,9 @@ export function useDeleteFitnessProfile() {
     mutationFn: () => fitnessProfileApi.deleteFitnessProfile(),
     onSuccess: () => {
       invalidateFitnessProfileCaches(queryClient);
+    },
+    onError: (error) => {
+      console.error('[FitnessProfile] Delete failed:', error);
     },
   });
 }

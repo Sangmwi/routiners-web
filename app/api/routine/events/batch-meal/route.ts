@@ -7,6 +7,7 @@ import {
 } from '@/lib/types/routine';
 import { MealBatchCreateSchema } from '@/lib/schemas/routine.schema';
 import { simulateDelay } from '@/lib/utils/simulateDelay';
+import { internalError, validateRequest } from '@/lib/utils/apiResponse';
 
 /**
  * POST /api/routine/events/batch-meal
@@ -16,29 +17,10 @@ import { simulateDelay } from '@/lib/utils/simulateDelay';
  * 충돌 시 409 대신 해당 날짜를 스킵하고 나머지만 생성
  */
 export const POST = withAuth(async (request: NextRequest, { supabase }) => {
-  let body;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { error: '잘못된 요청 형식입니다.', code: 'BAD_REQUEST' },
-      { status: 400 },
-    );
-  }
+  const result = await validateRequest(request, MealBatchCreateSchema);
+  if (!result.success) return result.response;
 
-  const validation = MealBatchCreateSchema.safeParse(body);
-  if (!validation.success) {
-    return NextResponse.json(
-      {
-        error: '입력값이 유효하지 않습니다.',
-        code: 'VALIDATION_ERROR',
-        details: validation.error.flatten(),
-      },
-      { status: 400 },
-    );
-  }
-
-  const { events } = validation.data;
+  const { events } = result.data;
   const dates = events.map((e) => e.date);
 
   // 기존 식단 이벤트 조회 (충돌 날짜 파악)
@@ -68,10 +50,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
 
   if (error) {
     console.error('[Batch Meal] Error:', error);
-    return NextResponse.json(
-      { error: '식단 일괄 생성에 실패했습니다.', code: 'DATABASE_ERROR' },
-      { status: 500 },
-    );
+    return internalError('식단 일괄 생성에 실패했습니다.');
   }
 
   const createdEvents = (data as DbRoutineEvent[]).map(toRoutineEvent);

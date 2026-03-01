@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from 'react';
 import { TIMING } from '@/lib/constants/timing';
+import { clampDate } from '@/lib/utils/dateHelpers';
 
 interface WheelPickerProps {
   /** 선택 가능한 옵션들 */
@@ -267,22 +268,16 @@ export function DatePicker({
     return `${yr}-${mo}-${String(clampedDay).padStart(2, '0')}`;
   };
 
-  const clampToRange = (date: string): string => {
-    if (minDate && date < minDate) return minDate;
-    if (maxDate && date > maxDate) return maxDate;
-    return date;
-  };
-
   const handleYearChange = (yr: string) => {
-    onChange(clampToRange(buildDate(yr, m, d)));
+    onChange(clampDate(buildDate(yr, m, d), minDate, maxDate));
   };
 
   const handleMonthChange = (mo: string) => {
-    onChange(clampToRange(buildDate(y, mo, d)));
+    onChange(clampDate(buildDate(y, mo, d), minDate, maxDate));
   };
 
   const handleDayChange = (dy: string) => {
-    onChange(clampToRange(buildDate(y, m, dy)));
+    onChange(clampDate(buildDate(y, m, dy), minDate, maxDate));
   };
 
   return (

@@ -17,5 +17,8 @@ export function useUpdateDietaryProfile() {
     onSuccess: (updatedProfile) => {
       queryClient.setQueryData(queryKeys.dietaryProfile.me(), updatedProfile);
     },
+    onError: (error) => {
+      console.error('[DietaryProfile] Update failed:', error);
+    },
   });
 }

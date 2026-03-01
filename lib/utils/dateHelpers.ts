@@ -289,3 +289,16 @@ export function formatTimeAgo(dateString: string): string {
   if (diffInDays < 365) return `${Math.floor(diffInDays / 30)}달 전`;
   return `${Math.floor(diffInDays / 365)}년 전`;
 }
+
+/**
+ * 날짜를 min/max 범위로 클램핑
+ *
+ * @param date - 검사할 날짜 (YYYY-MM-DD)
+ * @param minDate - 최솟값 (YYYY-MM-DD, optional)
+ * @param maxDate - 최댓값 (YYYY-MM-DD, optional)
+ */
+export function clampDate(date: string, minDate?: string, maxDate?: string): string {
+  if (minDate && date < minDate) return minDate;
+  if (maxDate && date > maxDate) return maxDate;
+  return date;
+}

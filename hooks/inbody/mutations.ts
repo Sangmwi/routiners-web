@@ -32,6 +32,10 @@ export function useCreateInBody() {
       queryClient.setQueryData(queryKeys.inbody.latest(), newRecord);
       invalidateInBodyCaches(queryClient);
     },
+
+    onError: (error) => {
+      console.error('[InBody] Create failed:', error);
+    },
   });
 }
 
@@ -58,6 +62,10 @@ export function useUpdateInBody() {
       }
       invalidateInBodyCaches(queryClient);
     },
+
+    onError: (error) => {
+      console.error('[InBody] Update failed:', error);
+    },
   });
 }
 
@@ -83,6 +91,10 @@ export function useDeleteInBody() {
       queryClient.removeQueries({ queryKey: queryKeys.inbody.detail(deletedId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.inbody.latest() });
       invalidateInBodyCaches(queryClient);
+    },
+
+    onError: (error) => {
+      console.error('[InBody] Delete failed:', error);
     },
   });
 }

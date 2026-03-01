@@ -67,6 +67,10 @@ export function useCreateCounselorConversation() {
         newConversation
       );
     },
+
+    onError: (error) => {
+      console.error('[Counselor] Create conversation failed:', error);
+    },
   });
 }
 
@@ -112,6 +116,10 @@ export function useDeleteCounselorConversation() {
       queryClient.removeQueries({
         queryKey: queryKeys.counselor.messages(conversationId),
       });
+    },
+
+    onError: (error) => {
+      console.error('[Counselor] Delete conversation failed:', error);
     },
   });
 }
@@ -185,6 +193,10 @@ export function useApplyRoutine() {
     onSuccess: (_, { conversationId }) => {
       handleApplySuccess(queryClient, conversationId);
     },
+
+    onError: (error) => {
+      console.error('[Counselor] Apply routine failed:', error);
+    },
   });
 }
 
@@ -214,6 +226,10 @@ export function useApplyMealPlan() {
 
     onSuccess: (_, { conversationId }) => {
       handleApplySuccess(queryClient, conversationId);
+    },
+
+    onError: (error) => {
+      console.error('[Counselor] Apply meal plan failed:', error);
     },
   });
 }
@@ -275,6 +291,10 @@ export function useSetActivePurpose() {
         }
       );
     },
+
+    onError: (error) => {
+      console.error('[Counselor] Set active purpose failed:', error);
+    },
   });
 }
 
@@ -312,6 +332,10 @@ export function useClearActivePurpose() {
         }
       );
     },
+
+    onError: (error) => {
+      console.error('[Counselor] Clear active purpose failed:', error);
+    },
   });
 }
 
@@ -334,6 +358,10 @@ export function useTriggerSummarization() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.counselor.conversation(conversationId),
       });
+    },
+
+    onError: (error) => {
+      console.error('[Counselor] Trigger summarization failed:', error);
     },
   });
 }

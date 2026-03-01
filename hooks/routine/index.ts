@@ -10,9 +10,6 @@ export * from './queries';
 // Mutation Hooks
 export * from './mutations';
 
-// Cache Utilities
-export { useSeedEventCache } from './useSeedEventCache';
-
 // Event-specific Hooks
 export { useMealEvent } from './useMealEvent';
 export { useWorkoutEvent } from './useWorkoutEvent';

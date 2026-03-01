@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
+import { badRequest, internalError, notFound } from '@/lib/utils/apiResponse';
 
 /**
  * PATCH /api/conversations/[id]/metadata
@@ -12,7 +13,12 @@ export const PATCH = withAuth(
   ) => {
     const conversationId = (await params).id;
 
-    const body = await request.json();
+    let body: Record<string, boolean> = {};
+    try {
+      body = await request.json();
+    } catch {
+      return badRequest('잘못된 요청 형식입니다.');
+    }
     const { clearProfileConfirmation, clearPendingPreview, clearPendingMealPreview } = body;
 
     // RLS가 권한 필터링을 처리
@@ -23,10 +29,7 @@ export const PATCH = withAuth(
       .single();
 
     if (convError || !conversation) {
-      return NextResponse.json(
-        { error: '대화를 찾을 수 없습니다.', code: 'NOT_FOUND' },
-        { status: 404 }
-      );
+      return notFound('대화를 찾을 수 없습니다.');
     }
 
     // 기존 메타데이터 복사
@@ -52,10 +55,7 @@ export const PATCH = withAuth(
 
     if (updateError) {
       console.error('[Metadata PATCH] Update error:', updateError);
-      return NextResponse.json(
-        { error: '메타데이터 업데이트에 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 }
-      );
+      return internalError('메타데이터 업데이트에 실패했습니다.');
     }
 
     return NextResponse.json({ success: true, metadata: updatedMetadata });

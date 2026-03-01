@@ -18,6 +18,10 @@ export function useCreateBig3() {
     onSuccess: () => {
       invalidateBig3Caches(queryClient);
     },
+
+    onError: (error) => {
+      console.error('[Big3] Create failed:', error);
+    },
   });
 }
 
@@ -35,6 +39,10 @@ export function useUpdateBig3() {
       queryClient.setQueryData(queryKeys.big3.detail(updatedRecord.id), updatedRecord);
       invalidateBig3Caches(queryClient);
     },
+
+    onError: (error) => {
+      console.error('[Big3] Update failed:', error);
+    },
   });
 }
 
@@ -50,6 +58,10 @@ export function useDeleteBig3() {
     onSuccess: (_, deletedId) => {
       queryClient.removeQueries({ queryKey: queryKeys.big3.detail(deletedId) });
       invalidateBig3Caches(queryClient);
+    },
+
+    onError: (error) => {
+      console.error('[Big3] Delete failed:', error);
     },
   });
 }

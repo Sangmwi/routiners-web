@@ -6,12 +6,19 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { withAuth } from '@/utils/supabase/auth';
 import {
   toCommunityComment,
   type DbCommunityComment,
   type CommunityComment,
 } from '@/lib/types/community';
+import { internalError, notFound, validateRequest } from '@/lib/utils/apiResponse';
+
+const CreateCommentSchema = z.object({
+  content: z.string().trim().min(1, '댓글 내용을 입력해주세요.').max(500, '댓글은 500자를 초과할 수 없습니다.'),
+  parentId: z.string().uuid().optional(),
+});
 
 /**
  * GET /api/community/posts/[id]/comments
@@ -29,10 +36,7 @@ export const GET = withAuth<NextResponse, { id: string }>(async (_request: NextR
     .single();
 
   if (!post) {
-    return NextResponse.json(
-      { error: '게시글을 찾을 수 없습니다.' },
-      { status: 404 }
-    );
+    return notFound('게시글을 찾을 수 없습니다.');
   }
 
   // 댓글 조회 (부모 댓글만 - parent_id가 null인 것)
@@ -122,29 +126,12 @@ export const POST = withAuth<NextResponse, { id: string }>(async (request: NextR
     .single();
 
   if (!post) {
-    return NextResponse.json(
-      { error: '게시글을 찾을 수 없습니다.' },
-      { status: 404 }
-    );
+    return notFound('게시글을 찾을 수 없습니다.');
   }
 
-  const body = await request.json();
-  const { content, parentId } = body;
-
-  // 유효성 검사
-  if (!content || content.trim().length === 0) {
-    return NextResponse.json(
-      { error: '댓글 내용을 입력해주세요.' },
-      { status: 400 }
-    );
-  }
-
-  if (content.length > 500) {
-    return NextResponse.json(
-      { error: '댓글은 500자를 초과할 수 없습니다.' },
-      { status: 400 }
-    );
-  }
+  const result = await validateRequest(request, CreateCommentSchema);
+  if (!result.success) return result.response;
+  const { content, parentId } = result.data;
 
   // 부모 댓글 확인 (대댓글인 경우)
   if (parentId) {
@@ -157,10 +144,7 @@ export const POST = withAuth<NextResponse, { id: string }>(async (request: NextR
       .single();
 
     if (!parentComment) {
-      return NextResponse.json(
-        { error: '부모 댓글을 찾을 수 없습니다.' },
-        { status: 404 }
-      );
+      return notFound('부모 댓글을 찾을 수 없습니다.');
     }
   }
 
@@ -182,10 +166,7 @@ export const POST = withAuth<NextResponse, { id: string }>(async (request: NextR
 
   if (error) {
     console.error('[POST /api/community/posts/[id]/comments] Error:', error);
-    return NextResponse.json(
-      { error: '댓글 작성에 실패했습니다.' },
-      { status: 500 }
-    );
+    return internalError('댓글 작성에 실패했습니다.');
   }
 
   return NextResponse.json(toCommunityComment(comment as DbCommunityComment, comment.author));

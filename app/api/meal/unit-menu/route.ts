@@ -4,6 +4,7 @@ import { UNITS } from '@/lib/constants/units';
 import { getUnitMealTemplate } from '@/lib/data/unitMeals';
 import { simulateDelay } from '@/lib/utils/simulateDelay';
 import type { UnitMealMenu } from '@/lib/types/unitMeal';
+import { badRequest, notFound } from '@/lib/utils/apiResponse';
 
 /**
  * GET /api/meal/unit-menu?unitId=xxx&date=YYYY-MM-DD
@@ -17,25 +18,16 @@ export const GET = withAuth(async (request: NextRequest) => {
   const date = searchParams.get('date');
 
   if (!unitId || !date) {
-    return NextResponse.json(
-      { error: 'unitId와 date는 필수 파라미터입니다.', code: 'BAD_REQUEST' },
-      { status: 400 },
-    );
+    return badRequest('unitId와 date는 필수 파라미터입니다.');
   }
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    return NextResponse.json(
-      { error: '날짜 형식은 YYYY-MM-DD여야 합니다.', code: 'BAD_REQUEST' },
-      { status: 400 },
-    );
+    return badRequest('날짜 형식은 YYYY-MM-DD여야 합니다.');
   }
 
   const unit = UNITS.find((u) => u.id === unitId);
   if (!unit) {
-    return NextResponse.json(
-      { error: '해당 부대를 찾을 수 없습니다.', code: 'NOT_FOUND' },
-      { status: 404 },
-    );
+    return notFound('해당 부대를 찾을 수 없습니다.');
   }
 
   // MVP: 실제 API 호출처럼 보이도록 지연 시뮬레이션

@@ -3,6 +3,7 @@
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
+import ProfileTagSection from './ProfileTagSection';
 import {
   DietaryProfile,
   DIETARY_GOAL_LABELS,
@@ -43,12 +44,6 @@ export default function DietaryDetailSheet({
     { label: '목표 단백질', value: profile.targetProtein ? `${profile.targetProtein}g` : null },
     { label: '월 예산', value: profile.budgetPerMonth ? `${profile.budgetPerMonth.toLocaleString()}원` : null },
   ].filter(item => item.value);
-
-  const foodRestrictions = profile.foodRestrictions?.filter(r => r !== 'none');
-  const hasRestrictions = foodRestrictions && foodRestrictions.length > 0;
-  const hasSources = profile.availableSources && profile.availableSources.length > 0;
-  const hasHabits = profile.eatingHabits && profile.eatingHabits.length > 0;
-  const hasPreferences = profile.preferences && profile.preferences.length > 0;
 
   return (
     <Modal
@@ -102,73 +97,29 @@ export default function DietaryDetailSheet({
           </div>
         )}
 
-        {/* 음식 제한사항 - warning 틴트 */}
-        {hasRestrictions && (
-          <div className="bg-surface-hover rounded-xl p-3">
-            <p className="text-xs font-medium text-muted-foreground mb-2">음식 제한사항</p>
-            <div className="flex flex-wrap gap-1.5">
-              {foodRestrictions!.map((restriction) => (
-                <span
-                  key={restriction}
-                  className="px-2.5 py-1 text-xs rounded-full bg-warning/10 text-warning font-medium"
-                >
-                  {FOOD_RESTRICTION_LABELS[restriction] || restriction}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* 이용 가능한 출처 - primary 틴트 */}
-        {hasSources && (
-          <div className="bg-surface-hover rounded-xl p-3">
-            <p className="text-xs font-medium text-muted-foreground mb-2">이용 가능한 출처</p>
-            <div className="flex flex-wrap gap-1.5">
-              {profile.availableSources!.map((source) => (
-                <span
-                  key={source}
-                  className="px-2.5 py-1 text-xs rounded-full bg-surface-accent text-primary font-medium"
-                >
-                  {AVAILABLE_SOURCE_LABELS[source] || source}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* 식습관 */}
-        {hasHabits && (
-          <div className="bg-surface-hover rounded-xl p-3">
-            <p className="text-xs font-medium text-muted-foreground mb-2">식습관</p>
-            <div className="flex flex-wrap gap-1.5">
-              {profile.eatingHabits!.map((habit) => (
-                <span
-                  key={habit}
-                  className="px-2.5 py-1 text-xs rounded-full bg-muted text-foreground"
-                >
-                  {EATING_HABIT_LABELS[habit] || habit}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* 선호사항 */}
-        {hasPreferences && (
-          <div className="bg-surface-hover rounded-xl p-3">
-            <p className="text-xs font-medium text-muted-foreground mb-2">선호사항</p>
-            <div className="flex flex-wrap gap-1.5">
-              {profile.preferences!.map((pref) => (
-                <span
-                  key={pref}
-                  className="px-2.5 py-1 text-xs rounded-full bg-muted text-foreground"
-                >
-                  {pref}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
+        <ProfileTagSection
+          title="음식 제한사항"
+          items={profile.foodRestrictions?.filter(r => r !== 'none')}
+          labelFn={(r) => FOOD_RESTRICTION_LABELS[r as keyof typeof FOOD_RESTRICTION_LABELS] || r}
+          variant="warning"
+        />
+        <ProfileTagSection
+          title="이용 가능한 출처"
+          items={profile.availableSources}
+          labelFn={(s) => AVAILABLE_SOURCE_LABELS[s as keyof typeof AVAILABLE_SOURCE_LABELS] || s}
+          variant="primary"
+        />
+        <ProfileTagSection
+          title="식습관"
+          items={profile.eatingHabits}
+          labelFn={(h) => EATING_HABIT_LABELS[h as keyof typeof EATING_HABIT_LABELS] || h}
+          variant="default"
+        />
+        <ProfileTagSection
+          title="선호사항"
+          items={profile.preferences}
+          variant="default"
+        />
       </ModalBody>
     </Modal>
   );

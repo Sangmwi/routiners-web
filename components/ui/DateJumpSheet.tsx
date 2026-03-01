@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Button from '@/components/ui/Button';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import { DatePicker, YearMonthPicker } from '@/components/ui/WheelPicker';
-import { formatDate } from '@/lib/utils/dateHelpers';
+import { clampDate, formatDate } from '@/lib/utils/dateHelpers';
 
 interface DateJumpSheetBaseProps {
   isOpen: boolean;
@@ -35,11 +35,6 @@ export type DateJumpSheetProps =
   | DateJumpSheetDateProps
   | DateJumpSheetYearMonthProps;
 
-function clampDate(date: string, minDate?: string, maxDate?: string) {
-  if (minDate && date < minDate) return minDate;
-  if (maxDate && date > maxDate) return maxDate;
-  return date;
-}
 
 export default function DateJumpSheet(props: DateJumpSheetProps) {
   const {

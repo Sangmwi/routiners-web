@@ -36,6 +36,9 @@ export function useCreatePost() {
     onSuccess: () => {
       invalidatePostCaches(queryClient);
     },
+    onError: (error) => {
+      console.error('[Community] Create post failed:', error);
+    },
   });
 }
 
@@ -57,6 +60,9 @@ export function useUpdatePost() {
       queryClient.setQueryData(queryKeys.post.detail(postId), updatedPost);
       invalidatePostCaches(queryClient);
     },
+    onError: (error) => {
+      console.error('[Community] Update post failed:', error);
+    },
   });
 }
 
@@ -71,6 +77,9 @@ export function useDeletePost() {
     onSuccess: (_, postId) => {
       queryClient.removeQueries({ queryKey: queryKeys.post.detail(postId) });
       invalidatePostCaches(queryClient);
+    },
+    onError: (error) => {
+      console.error('[Community] Delete post failed:', error);
     },
   });
 }
@@ -281,6 +290,9 @@ export function useCreateComment() {
     onSuccess: (_, { postId }) => {
       invalidateCommentCaches(queryClient, postId);
     },
+    onError: (error) => {
+      console.error('[Community] Create comment failed:', error);
+    },
   });
 }
 
@@ -301,6 +313,9 @@ export function useDeleteComment() {
     onSuccess: (_, { postId }) => {
       invalidateCommentCaches(queryClient, postId);
     },
+    onError: (error) => {
+      console.error('[Community] Delete comment failed:', error);
+    },
   });
 }
 
@@ -310,5 +325,8 @@ export function useDeleteComment() {
 export function useUploadImages() {
   return useMutation({
     mutationFn: (files: File[]) => uploadPostImages(files),
+    onError: (error) => {
+      console.error('[Community] Upload images failed:', error);
+    },
   });
 }

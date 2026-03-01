@@ -6,6 +6,7 @@ import {
   transformEventToDbInsert,
 } from '@/lib/types/routine';
 import { RoutineEventCreateSchema } from '@/lib/schemas/routine.schema';
+import { conflict, internalError, validateRequest } from '@/lib/utils/apiResponse';
 
 /**
  * GET /api/routine/events
@@ -43,10 +44,7 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
 
   if (error) {
     console.error('[Routine Events GET] Error:', error);
-    return NextResponse.json(
-      { error: '이벤트 목록을 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
-      { status: 500 }
-    );
+    return internalError('이벤트 목록을 불러오는데 실패했습니다.');
   }
 
   const events = (data as DbRoutineEvent[]).map(toRoutineEvent);
@@ -58,30 +56,10 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
  * 루틴 이벤트 생성 (단일)
  */
 export const POST = withAuth(async (request: NextRequest, { supabase }) => {
-  let body;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { error: '잘못된 요청 형식입니다.', code: 'BAD_REQUEST' },
-      { status: 400 }
-    );
-  }
+  const result = await validateRequest(request, RoutineEventCreateSchema);
+  if (!result.success) return result.response;
 
-  // 유효성 검사
-  const validation = RoutineEventCreateSchema.safeParse(body);
-  if (!validation.success) {
-    return NextResponse.json(
-      {
-        error: '입력값이 유효하지 않습니다.',
-        code: 'VALIDATION_ERROR',
-        details: validation.error.flatten(),
-      },
-      { status: 400 }
-    );
-  }
-
-  const insertData = transformEventToDbInsert(validation.data);
+  const insertData = transformEventToDbInsert(result.data);
 
   const { data, error } = await supabase
     .from('routine_events')
@@ -94,16 +72,10 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
 
     // 중복 날짜 체크
     if (error.code === '23505') {
-      return NextResponse.json(
-        { error: '해당 날짜에 이미 루틴이 존재합니다.', code: 'ALREADY_EXISTS' },
-        { status: 409 }
-      );
+      return conflict('해당 날짜에 이미 루틴이 존재합니다.');
     }
 
-    return NextResponse.json(
-      { error: '이벤트 생성에 실패했습니다.', code: 'DATABASE_ERROR' },
-      { status: 500 }
-    );
+    return internalError('이벤트 생성에 실패했습니다.');
   }
 
   const event = toRoutineEvent(data as DbRoutineEvent);
