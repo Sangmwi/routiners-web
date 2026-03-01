@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { LoadingSpinner, ErrorIcon, SuccessIcon } from '@/components/ui/icons';
+import { ErrorIcon, SuccessIcon, LoadingSpinner } from '@/components/ui/icons';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { ImageSourceDrawer } from '@/components/drawers';
 import { InBodyCreateData } from '@/lib/types/inbody';
-import { useCreateInBody } from '@/hooks/inbody';
+import { useCreateInBody, useInBodyScanStream } from '@/hooks/inbody';
 import { useNativeImagePicker } from '@/hooks/webview';
 import type { ImagePickerSource } from '@/lib/webview';
 import InBodyPreview from './InBodyPreview';
@@ -45,16 +45,23 @@ export default function InBodyScanModal({
   const [createData, setCreateData] = useState<InBodyCreateData | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isImageSourceOpen, setIsImageSourceOpen] = useState(false);
-  const [scanProgress, setScanProgress] = useState(0);
-  const [scanMessage, setScanMessage] = useState('');
-
-  const abortRef = useRef<AbortController | null>(null);
 
   const createInBody = useCreateInBody();
   const { pickImage, base64ToFile, isPickerOpen } = useNativeImagePicker();
 
   const isSaving = createInBody.isPending;
   const autoStartedRef = useRef(false);
+
+  const { start: startScan, abort: abortScan, progress: scanProgress, message: scanMessage } = useInBodyScanStream({
+    onComplete: (data) => {
+      setCreateData(data);
+      setState('preview');
+    },
+    onError: (msg) => {
+      setError(msg);
+      setState('error');
+    },
+  });
 
   // initialFile 제공 시 모달 열릴 때 바로 스캔 시작
   useEffect(() => {
@@ -71,94 +78,21 @@ export default function InBodyScanModal({
   // 모달 닫기 시 상태 초기화
   const handleClose = () => {
     if (isSaving) return;
-    abortRef.current?.abort();
-    abortRef.current = null;
+    abortScan();
     setState('idle');
     setError(null);
     setCreateData(null);
     setImagePreview(null);
     setIsImageSourceOpen(false);
-    setScanProgress(0);
-    setScanMessage('');
     onClose();
   };
 
-  // 이미지 스캔 처리 (SSE 소비)
+  // 이미지 스캔 시작
   const handleScanImage = async (file: File, previewUrl: string) => {
     setImagePreview(previewUrl);
-    setState('scanning');
-    setScanProgress(0);
-    setScanMessage('이미지 업로드 중...');
     setError(null);
-
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    try {
-      const formData = new FormData();
-      formData.append('image', file);
-
-      const response = await fetch('/api/inbody/scan', {
-        method: 'POST',
-        body: formData,
-        signal: controller.signal,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '스캔에 실패했어요.');
-      }
-
-      if (!response.body) {
-        throw new Error('스트리밍 응답을 받을 수 없습니다.');
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const chunks = buffer.split('\n\n');
-        buffer = chunks.pop() || '';
-
-        for (const chunk of chunks) {
-          if (!chunk.trim()) continue;
-
-          const eventMatch = chunk.match(/^event: (.+)\ndata: (.+)$/m);
-          if (!eventMatch) continue;
-
-          const [, event, data] = eventMatch;
-          const parsed = JSON.parse(data);
-
-          switch (event) {
-            case 'progress':
-              setScanProgress(parsed.progress);
-              setScanMessage(parsed.message);
-              break;
-            case 'complete':
-              setScanProgress(100);
-              setScanMessage('완료!');
-              // 완료 애니메이션
-              await new Promise((resolve) => setTimeout(resolve, 300));
-              setCreateData(parsed.createData);
-              setState('preview');
-              break;
-            case 'error':
-              throw new Error(parsed.error);
-          }
-        }
-      }
-    } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') return;
-      setError(err instanceof Error ? err.message : '스캔 중 오류가 발생했어요.');
-      setState('error');
-    } finally {
-      abortRef.current = null;
-    }
+    setState('scanning');
+    await startScan(file);
   };
 
   // 이미지 선택 처리
@@ -206,14 +140,11 @@ export default function InBodyScanModal({
 
   // 다시 스캔 (바로 이미지 소스 선택 열기)
   const handleRetry = () => {
-    abortRef.current?.abort();
-    abortRef.current = null;
+    abortScan();
     setState('idle');
     setError(null);
     setCreateData(null);
     setImagePreview(null);
-    setScanProgress(0);
-    setScanMessage('');
     setIsImageSourceOpen(true);
   };
 

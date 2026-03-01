@@ -1,5 +1,21 @@
 import { ZodError, ZodSchema } from 'zod';
 
+// ============================================================================
+// Nickname Validation
+// ============================================================================
+
+/**
+ * 닉네임 검증 규칙
+ *
+ * ProfileNicknameInput, NicknameStep 등 닉네임 입력 컴포넌트에서 공통 사용.
+ */
+export const NICKNAME_RULES = {
+  MIN_LENGTH: 2,
+  MAX_LENGTH: 12,
+  /** 유효하지 않은 문자 감지 패턴 (한글, 영문, 숫자, 밑줄 외 문자) */
+  INVALID_CHARS_PATTERN: /[^가-힣a-zA-Z0-9_]/,
+} as const;
+
 /**
  * Zod 에러 → 필드별 에러 맵 변환
  *

@@ -14,7 +14,7 @@ import {
 } from '@/components/routine';
 import { useMealAddFlow } from '@/hooks/routine';
 import { getEventConfig } from '@/lib/config/theme';
-import { useConfirmDialog } from '@/lib/stores/modalStore';
+import { useConfirmDelete } from '@/hooks/common';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 import { useEventHeaderActions } from '@/hooks/routine/useEventHeaderActions';
 import { useMealEvent, useUpdateRoutineEvent } from '@/hooks/routine';
@@ -29,7 +29,7 @@ const MEAL_LABELS = ['아침', '점심', '저녁', '간식'] as const;
 const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack'] as const;
 
 export default function MealContent({ date, onTitleChange, onHeaderAction }: MealContentProps) {
-  const confirm = useConfirmDialog();
+  const confirmDelete = useConfirmDelete();
 
   const {
     event,
@@ -95,10 +95,9 @@ export default function MealContent({ date, onTitleChange, onHeaderAction }: Mea
       const typeIndex = mealType ? MEAL_TYPES.indexOf(mealType as (typeof MEAL_TYPES)[number]) : -1;
       const mealLabel = typeIndex >= 0 ? MEAL_LABELS[typeIndex] : '식사';
 
-      confirm({
+      confirmDelete({
         title: `${mealLabel}을 삭제할까요?`,
         message: '삭제한 식사는 복구할 수 없습니다.',
-        confirmText: '삭제',
         onConfirm: () => handleRemoveMeal(mealIndex),
       });
     };

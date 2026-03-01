@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { BriefcaseIcon, MagnifyingGlassIcon, CheckIcon } from '@phosphor-icons/react';
 import Button from '@/components/ui/Button';
-import Modal, { ModalBody } from '@/components/ui/Modal';
+import SearchablePickerSheet from '@/components/ui/SearchablePickerSheet';
 import { SPECIALTIES, SPECIALTY_LABELS, SPECIALTY_DESCRIPTIONS, type Specialty } from '@/lib/types/user';
 
 interface SpecialtyStepProps {
@@ -24,23 +24,6 @@ export function SpecialtyStep({
 }: SpecialtyStepProps) {
   const [specialty, setSpecialty] = useState<Specialty | null>(selectedSpecialty);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredSpecialties = searchQuery.trim()
-    ? SPECIALTIES.filter((s) => {
-        const query = searchQuery.toLowerCase();
-        return (
-          SPECIALTY_LABELS[s].toLowerCase().includes(query) ||
-          SPECIALTY_DESCRIPTIONS[s].toLowerCase().includes(query)
-        );
-      })
-    : SPECIALTIES;
-
-  const handleSelect = (value: Specialty) => {
-    setSpecialty(value);
-    setIsSheetOpen(false);
-    setSearchQuery('');
-  };
 
   const isValid = specialty !== null;
 
@@ -128,65 +111,33 @@ export function SpecialtyStep({
         </Button>
       </div>
 
-      {/* Bottom Sheet Modal */}
-      <Modal
+      <SearchablePickerSheet
         isOpen={isSheetOpen}
-        onClose={() => {
-          setIsSheetOpen(false);
-          setSearchQuery('');
-        }}
+        onClose={() => setIsSheetOpen(false)}
         title="병과 선택"
-        position="bottom"
-        enableSwipe
+        items={SPECIALTIES}
+        filterFn={(s, q) =>
+          SPECIALTY_LABELS[s].toLowerCase().includes(q) ||
+          SPECIALTY_DESCRIPTIONS[s].toLowerCase().includes(q)
+        }
+        getKey={(s) => s}
+        renderItem={(s) => (
+          <button
+            type="button"
+            onClick={() => { setSpecialty(s); setIsSheetOpen(false); }}
+            className={`w-full px-4 py-3 rounded-xl text-left transition-all ${
+              s === specialty
+                ? 'bg-surface-accent border-2 border-primary'
+                : 'bg-surface-secondary border-2 border-transparent hover:bg-surface-muted'
+            }`}
+          >
+            <p className="font-medium text-foreground">{SPECIALTY_LABELS[s]}</p>
+            <p className="text-sm text-muted-foreground">{SPECIALTY_DESCRIPTIONS[s]}</p>
+          </button>
+        )}
+        placeholder="병과명으로 검색"
         height="half"
-      >
-        <ModalBody>
-          {/* Search input */}
-          <div className="sticky top-0 bg-card px-4 pb-4 pt-2 border-b border-border">
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="병과명으로 검색"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-focus focus:border-primary"
-                autoFocus
-              />
-            </div>
-          </div>
-
-          {/* Specialty list */}
-          <div className="space-y-2 p-4">
-            {filteredSpecialties.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                검색 결과가 없어요
-              </div>
-            ) : (
-              filteredSpecialties.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => handleSelect(s)}
-                  className={`
-                    w-full px-4 py-3 rounded-xl text-left transition-all
-                    ${
-                      s === specialty
-                        ? 'bg-surface-accent border-2 border-primary'
-                        : 'bg-surface-secondary border-2 border-transparent hover:bg-surface-muted'
-                    }
-                  `}
-                >
-                  <p className="font-medium text-foreground">{SPECIALTY_LABELS[s]}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {SPECIALTY_DESCRIPTIONS[s]}
-                  </p>
-                </button>
-              ))
-            )}
-          </div>
-        </ModalBody>
-      </Modal>
+      />
     </div>
   );
 }

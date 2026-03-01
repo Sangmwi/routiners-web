@@ -11,6 +11,7 @@ import {
 } from '@/components/profile/form/ProfileFormPrimitives';
 import FloatingSaveButton from '@/components/ui/FloatingSaveButton';
 import { useDietaryProfileSuspense, useUpdateDietaryProfile } from '@/hooks/dietaryProfile';
+import { TIMING } from '@/lib/constants/timing';
 import {
   DietaryGoal,
   DietType,
@@ -101,7 +102,7 @@ export default function DietaryContent() {
     updateProfile.mutate(formData, {
       onSuccess: () => {
         setShowSuccess(true);
-        setTimeout(() => router.back(), 600);
+        setTimeout(() => router.back(), TIMING.UI.SAVE_AND_CLOSE);
       },
       onError: () => setSaveError('저장에 실패했어요.'),
     });

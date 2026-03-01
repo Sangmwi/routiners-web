@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { useApplyMealPlan } from './mutations';
 import { usePreviewLifecycle } from './usePreviewLifecycle';
+import { usePreviewUIState } from './usePreviewUIState';
 import type { MealPlanPreviewData } from '@/lib/types/meal';
 
 interface UseMealPreviewOptions {
@@ -16,20 +16,8 @@ export function useMealPreview({
   sendMessage,
   refetchMessages,
 }: UseMealPreviewOptions) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [currentPreviewMessageId, setCurrentPreviewMessageId] = useState<string | null>(null);
-
+  const { isOpen, currentPreviewMessageId, open, close } = usePreviewUIState();
   const applyMealPlan = useApplyMealPlan();
-
-  const open = (messageId?: string) => {
-    if (messageId) setCurrentPreviewMessageId(messageId);
-    setIsOpen(true);
-  };
-
-  const close = () => {
-    setIsOpen(false);
-    setCurrentPreviewMessageId(null);
-  };
 
   const {
     isApplying,

@@ -1,15 +1,13 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { type ReactNode } from 'react';
 import MealAddSheet, { type MealAddOption } from '@/components/routine/meal/MealAddSheet';
 import MealCreateDrawer from '@/components/routine/sheets/MealCreateDrawer';
 import UnitMealImportDrawer from '@/components/routine/sheets/UnitMealImportDrawer';
 import type { RoutineEvent } from '@/lib/types/routine';
+import { useSheetAddFlow } from './useSheetAddFlow';
 
-type MealFlowStep = 'closed' | 'options' | 'create' | 'import';
-
-const CLOSE_DELAY = 250;
+type MealFlowStep = 'create' | 'import';
 
 interface UseMealAddFlowOptions {
   date: string;
@@ -32,20 +30,12 @@ interface MealAddFlow {
  *                            → (AI 추천) → /routine/counselor
  */
 export function useMealAddFlow({ date, existingEvent, onCreated }: UseMealAddFlowOptions): MealAddFlow {
-  const router = useRouter();
-  const [step, setStep] = useState<MealFlowStep>('closed');
-
-  const open = () => setStep('options');
-  const close = () => setStep('closed');
-
-  const handleOption = (option: MealAddOption) => {
-    setStep('closed');
-    if (option === 'ai') {
-      router.push('/routine/counselor');
-      return;
-    }
-    setTimeout(() => setStep(option === 'direct' ? 'create' : 'import'), CLOSE_DELAY);
-  };
+  const { step, open, close, handleOption } = useSheetAddFlow<MealAddOption, MealFlowStep>({
+    getNextStep: (option) => {
+      if (option === 'ai') return null;
+      return option === 'direct' ? 'create' : 'import';
+    },
+  });
 
   const element = (
     <>

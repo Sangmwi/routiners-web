@@ -1,13 +1,11 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { type ReactNode } from 'react';
 import WorkoutAddSheet, { type WorkoutAddOption } from '@/components/routine/workout/WorkoutAddSheet';
 import WorkoutCreateDrawer from '@/components/routine/sheets/WorkoutCreateDrawer';
+import { useSheetAddFlow } from './useSheetAddFlow';
 
-type WorkoutFlowStep = 'closed' | 'options' | 'create';
-
-const CLOSE_DELAY = 250;
+type WorkoutFlowStep = 'create';
 
 interface UseWorkoutAddFlowOptions {
   date: string;
@@ -27,20 +25,9 @@ interface WorkoutAddFlow {
  *                            → (AI 상담) → /routine/counselor
  */
 export function useWorkoutAddFlow({ date, onCreated }: UseWorkoutAddFlowOptions): WorkoutAddFlow {
-  const router = useRouter();
-  const [step, setStep] = useState<WorkoutFlowStep>('closed');
-
-  const open = () => setStep('options');
-  const close = () => setStep('closed');
-
-  const handleOption = (option: WorkoutAddOption) => {
-    setStep('closed');
-    if (option === 'ai') {
-      router.push('/routine/counselor');
-      return;
-    }
-    setTimeout(() => setStep('create'), CLOSE_DELAY);
-  };
+  const { step, open, close, handleOption } = useSheetAddFlow<WorkoutAddOption, WorkoutFlowStep>({
+    getNextStep: (option) => (option === 'ai' ? null : 'create'),
+  });
 
   const element = (
     <>

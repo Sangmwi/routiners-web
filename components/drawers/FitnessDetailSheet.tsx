@@ -14,7 +14,7 @@ import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 import { useRouter } from 'next/navigation';
 import { BarbellIcon } from '@phosphor-icons/react';
 
-interface FitnessDetailDrawerProps {
+interface FitnessDetailSheetProps {
   isOpen: boolean;
   onClose: () => void;
   profile: FitnessProfile;
@@ -22,16 +22,16 @@ interface FitnessDetailDrawerProps {
 }
 
 /**
- * 피트니스 프로필 상세 드로어
+ * 피트니스 프로필 상세 시트
  *
  * 그룹화된 정보 표시 + 틴트 태그 스타일
  */
-export default function FitnessDetailDrawer({
+export default function FitnessDetailSheet({
   isOpen,
   onClose,
   profile,
   readOnly = false,
-}: FitnessDetailDrawerProps) {
+}: FitnessDetailSheetProps) {
   const router = useRouter();
 
   // 기본 정보 아이템
@@ -54,6 +54,7 @@ export default function FitnessDetailDrawer({
       onClose={onClose}
       title="운동 프로필 상세"
       position="bottom"
+      height="auto"
       enableSwipe
       headerAction={
         profile.updatedAt ? (

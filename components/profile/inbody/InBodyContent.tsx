@@ -23,6 +23,7 @@ import { isApiError } from '@/lib/types';
 import type { InBodyCreateData } from '@/lib/types/inbody';
 import { InBodyFormSchema, InBodyFormErrors } from '@/lib/types/inbody';
 import { validateForm } from '@/lib/utils/formValidation';
+import { getToday } from '@/lib/utils/dateHelpers';
 import type { ImagePickerSource } from '@/lib/webview';
 
 // ============================================================
@@ -282,7 +283,7 @@ function getManualInitial(records: { height?: number; weight?: number }[]): InBo
   const latestHeight = records.length > 0 ? records[0].height : undefined;
   const latestWeight = records.length > 0 ? records[0].weight : undefined;
   return {
-    measuredAt: new Date().toISOString().split('T')[0],
+    measuredAt: getToday(),
     height: latestHeight,
     weight: latestWeight,
   };

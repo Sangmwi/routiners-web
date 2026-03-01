@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { TimerIcon, RobotIcon } from '@phosphor-icons/react';
-import { useConfirmDialog } from '@/lib/stores/modalStore';
+import { useConfirmDialog } from '@/lib/stores';
 import HeaderShell, { HeaderBackButton } from '@/components/layouts/shared/HeaderShell';
 import ActiveExerciseView from './ActiveExerciseView';
 import ExerciseNav from './ExerciseNav';

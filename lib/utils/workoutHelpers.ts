@@ -1,4 +1,4 @@
-export const REST_OPTIONS = [0, 30, 60, 90, 120, 180];
+export { REST_OPTIONS } from '@/lib/constants/workout';
 
 export function formatRestSeconds(seconds: number): string {
   if (seconds === 0) return '없음';

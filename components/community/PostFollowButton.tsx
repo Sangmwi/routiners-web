@@ -1,7 +1,7 @@
 'use client';
 
 import { useFollowStatus, useToggleFollow } from '@/hooks/community/useFollow';
-import { useModalStore } from '@/lib/stores/modalStore';
+import { useModalStore } from '@/lib/stores';
 
 interface PostFollowButtonProps {
   authorId: string;

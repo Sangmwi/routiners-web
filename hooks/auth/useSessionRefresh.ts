@@ -3,13 +3,14 @@
 import { useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useDocumentEventListener } from '@/hooks/common/useEventListener';
+import { TIMING } from '@/lib/constants/timing';
 
 // ============================================================================
 // Constants
 // ============================================================================
 
-const REFRESH_COOLDOWN_MS = 5 * 60 * 1000; // 5분
-const REFRESH_THRESHOLD_MS = 10 * 60 * 1000; // 만료 10분 전
+const REFRESH_COOLDOWN_MS = TIMING.SESSION.REFRESH_COOLDOWN;  // 5분
+const REFRESH_THRESHOLD_MS = TIMING.SESSION.REFRESH_THRESHOLD; // 만료 10분 전
 
 // ============================================================================
 // Hook

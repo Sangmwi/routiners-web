@@ -18,7 +18,7 @@ import SettingsGroup from './SettingsGroup';
 import SettingsRow from './SettingsRow';
 import ThemeSelector from './ThemeSelector';
 import { useLogout, useWithdrawal } from '@/hooks/webview';
-import { useModalStore } from '@/lib/stores/modalStore';
+import { useModalStore } from '@/lib/stores';
 
 export default function SettingsContent() {
   const { logout, isLoggingOut } = useLogout();

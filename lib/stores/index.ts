@@ -33,3 +33,12 @@ export {
   useShowError,
   useError,
 } from './errorStore';
+
+// Theme Store - 테마 관리
+export {
+  useThemeStore,
+  useThemeMode,
+  useSetTheme,
+} from './themeStore';
+
+export type { ThemeMode } from './themeStore';

@@ -6,6 +6,31 @@ import { queryKeys } from '@/lib/constants/queryKeys';
 import { useBaseQuery, useConditionalQuery, useSuspenseBaseQuery } from '@/hooks/common';
 
 // ============================================================================
+// Query Config Factories
+// ============================================================================
+
+function currentUserProfileConfig() {
+  return {
+    queryKey: queryKeys.user.me(),
+    queryFn: profileApi.getCurrentUserProfile,
+  };
+}
+
+function userProfileConfig(userId: string) {
+  return {
+    queryKey: queryKeys.user.detail(userId),
+    queryFn: () => profileApi.getUserProfile(userId),
+  };
+}
+
+function searchProfilesConfig(filters?: ProfileSearchFilters) {
+  return {
+    queryKey: queryKeys.user.search(filters),
+    queryFn: () => profileSearchApi.searchProfiles(filters || {}),
+  };
+}
+
+// ============================================================================
 // Standard Query Hooks
 // ============================================================================
 
@@ -16,10 +41,8 @@ import { useBaseQuery, useConditionalQuery, useSuspenseBaseQuery } from '@/hooks
  * const { data: user, isPending, error } = useCurrentUserProfile();
  */
 export function useCurrentUserProfile() {
-  return useBaseQuery(
-    queryKeys.user.me(),
-    profileApi.getCurrentUserProfile
-  );
+  const { queryKey, queryFn } = currentUserProfileConfig();
+  return useBaseQuery(queryKey, queryFn);
 }
 
 /**
@@ -38,11 +61,8 @@ export function useUserProfile(userId: string | undefined) {
  * 프로필 검색
  */
 export function useSearchProfiles(filters?: ProfileSearchFilters) {
-  return useBaseQuery<ProfileSearchResult>(
-    queryKeys.user.search(filters),
-    () => profileSearchApi.searchProfiles(filters || {}),
-    { staleTime: 'search' }
-  );
+  const { queryKey, queryFn } = searchProfilesConfig(filters);
+  return useBaseQuery<ProfileSearchResult>(queryKey, queryFn, { staleTime: 'search' });
 }
 
 /**
@@ -84,10 +104,8 @@ export function useSameUnitUsers(unitId: string | undefined, limit: number = 20)
  * }
  */
 export function useCurrentUserProfileSuspense() {
-  return useSuspenseBaseQuery(
-    queryKeys.user.me(),
-    profileApi.getCurrentUserProfile
-  );
+  const { queryKey, queryFn } = currentUserProfileConfig();
+  return useSuspenseBaseQuery(queryKey, queryFn);
 }
 
 /**
@@ -96,22 +114,16 @@ export function useCurrentUserProfileSuspense() {
  * @param userId - 필수: 사용자 ID (Suspense에서는 조건부 쿼리 지양)
  */
 export function useUserProfileSuspense(userId: string) {
-  return useSuspenseBaseQuery(
-    queryKeys.user.detail(userId),
-    () => profileApi.getUserProfile(userId),
-    { staleTime: 'short' }
-  );
+  const { queryKey, queryFn } = userProfileConfig(userId);
+  return useSuspenseBaseQuery(queryKey, queryFn, { staleTime: 'short' });
 }
 
 /**
  * 프로필 검색 (Suspense)
  */
 export function useSearchProfilesSuspense(filters?: ProfileSearchFilters) {
-  return useSuspenseBaseQuery<ProfileSearchResult>(
-    queryKeys.user.search(filters),
-    () => profileSearchApi.searchProfiles(filters || {}),
-    { staleTime: 'search' }
-  );
+  const { queryKey, queryFn } = searchProfilesConfig(filters);
+  return useSuspenseBaseQuery<ProfileSearchResult>(queryKey, queryFn, { staleTime: 'search' });
 }
 
 // ============================================================================

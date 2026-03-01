@@ -7,9 +7,7 @@ import {
   DbInBodyRecord,
 } from '@/lib/types/inbody';
 import { parseRequestBody, handleSupabaseError, badRequest } from '@/lib/utils/apiResponse';
-
-const DEFAULT_LIMIT = 20;
-const MAX_LIMIT = 50;
+import { parsePaginationParams } from '@/lib/utils/queryParams';
 
 /**
  * GET /api/inbody
@@ -17,9 +15,7 @@ const MAX_LIMIT = 50;
  */
 export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   const { searchParams } = new URL(request.url);
-  const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-  const limit = Math.min(MAX_LIMIT, Math.max(1, parseInt(searchParams.get('limit') || String(DEFAULT_LIMIT), 10)));
-  const offset = (page - 1) * limit;
+  const { page, limit, offset } = parsePaginationParams(searchParams);
 
   const { data, error, count } = await supabase
     .from('inbody_records')

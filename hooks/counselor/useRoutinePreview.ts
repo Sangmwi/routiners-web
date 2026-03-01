@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { useApplyRoutine } from './mutations';
 import { usePreviewLifecycle } from './usePreviewLifecycle';
+import { usePreviewUIState } from './usePreviewUIState';
 import type { RoutinePreviewData } from '@/lib/types/fitness';
 
 interface UseRoutinePreviewOptions {
@@ -22,20 +22,8 @@ export function useRoutinePreview({
   sendMessage,
   refetchMessages,
 }: UseRoutinePreviewOptions) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [currentPreviewMessageId, setCurrentPreviewMessageId] = useState<string | null>(null);
-
+  const { isOpen, currentPreviewMessageId, open, close } = usePreviewUIState();
   const applyRoutine = useApplyRoutine();
-
-  const open = (messageId?: string) => {
-    if (messageId) setCurrentPreviewMessageId(messageId);
-    setIsOpen(true);
-  };
-
-  const close = () => {
-    setIsOpen(false);
-    setCurrentPreviewMessageId(null);
-  };
 
   const {
     isApplying,

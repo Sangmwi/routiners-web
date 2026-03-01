@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { DayEventCard } from '@/components/routine';
 import { useRoutineEventByDateSuspense, useDeleteRoutineEvent, useWorkoutAddFlow, useMealAddFlow } from '@/hooks/routine';
-import { useConfirmDialog } from '@/lib/stores/modalStore';
+import { useConfirmDelete } from '@/hooks/common';
 import type { EventType } from '@/lib/types/routine';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 import { BarbellIcon, BowlFoodIcon, PlusIcon } from '@phosphor-icons/react';
@@ -29,13 +29,12 @@ export default function DayEventSection({ date, filterType }: DayEventSectionPro
   const { data: mealEvent } = useRoutineEventByDateSuspense(date, 'meal');
 
   const deleteEvent = useDeleteRoutineEvent();
-  const confirm = useConfirmDialog();
+  const confirmDelete = useConfirmDelete();
 
   const handleLongPressDelete = (eventId: string, eventDate: string, eventType: 'workout' | 'meal') => {
-    confirm({
+    confirmDelete({
       title: '루틴을 삭제하시겠어요?',
       message: '삭제하면 되돌릴 수 없어요.',
-      confirmText: '삭제',
       onConfirm: async () => {
         await deleteEvent.mutateAsync({
           id: eventId,

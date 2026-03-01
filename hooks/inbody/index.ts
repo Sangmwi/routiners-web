@@ -12,3 +12,9 @@ export * from './mutations';
 
 // Page-level State Management
 export { useInBodyManagerSuspense } from './useInBodyManagerSuspense';
+
+// Detail Edit Hook
+export { useInBodyDetailEdit } from './useInBodyDetailEdit';
+
+// Scan Stream Hook
+export { useInBodyScanStream } from './useInBodyScanStream';

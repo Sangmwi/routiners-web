@@ -48,6 +48,7 @@ export function useRoutineEventConfirmActions() {
     const copy = buildConfirmCopy(DEFAULT_DELETE_CONFIRM_COPY, options.copy);
     confirm({
       ...copy,
+      variant: 'danger',
       onConfirm: () =>
         deleteEventAndGoBack(event, {
           errorMessage: options.errorMessage,

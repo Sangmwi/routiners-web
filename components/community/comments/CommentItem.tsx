@@ -4,7 +4,7 @@ import { TrashIcon } from '@phosphor-icons/react';
 import { ImageWithFallback } from '@/components/ui/image';
 import { useDeleteComment } from '@/hooks/community/mutations';
 import { useCurrentUserProfile } from '@/hooks/profile/queries';
-import { useConfirmDialog } from '@/lib/stores/modalStore';
+import { useConfirmDelete } from '@/hooks/common';
 import { formatTimeAgo } from '@/lib/types/community';
 import { RANK_OPTIONS } from '@/lib/constants/military';
 import type { CommunityComment } from '@/lib/types/community';
@@ -24,7 +24,7 @@ export default function CommentItem({
 }: CommentItemProps) {
   const { data: currentUser } = useCurrentUserProfile();
   const deleteComment = useDeleteComment();
-  const confirm = useConfirmDialog();
+  const confirmDelete = useConfirmDelete();
 
   const author = comment.author;
   const authorName = author?.nickname ?? '알 수 없음';
@@ -35,11 +35,9 @@ export default function CommentItem({
   const isOwner = currentUser?.id === comment.authorId;
 
   const handleDelete = () => {
-    confirm({
+    confirmDelete({
       title: '댓글 삭제',
       message: '이 댓글을 삭제하시겠습니까?',
-      confirmText: '삭제',
-      variant: 'danger',
       onConfirm: async () => {
         await deleteComment.mutateAsync({ postId, commentId: comment.id });
       },

@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, createContext, useContext } from 'react';
+import { TIMING } from '@/lib/constants/timing';
 
 /**
  * Query Client 설정
@@ -20,8 +21,8 @@ function createQueryClient() {
     defaultOptions: {
       queries: {
         // 캐싱 시간 설정
-        staleTime: 5 * 60 * 1000, // 5분: 데이터가 신선한 것으로 간주
-        gcTime: 30 * 60 * 1000,   // 30분: 캐시 유지 시간 (기존 10분에서 연장)
+        staleTime: TIMING.CACHE.STALE_DEFAULT, // 5분: 데이터가 신선한 것으로 간주
+        gcTime: TIMING.CACHE.GC,              // 30분: 캐시 유지 시간 (기존 10분에서 연장)
 
         // 리패치 정책
         refetchOnWindowFocus: false,  // WebView에서 불필요한 리패치 방지

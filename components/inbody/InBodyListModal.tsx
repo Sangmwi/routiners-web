@@ -64,7 +64,7 @@ export default function InBodyListModal({
             size="lg"
           />
         ) : (
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-edge-divider">
             {records.map((record) => (
               <InBodyListItem
                 key={record.id}

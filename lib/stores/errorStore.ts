@@ -9,6 +9,7 @@
 
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { TIMING } from '@/lib/constants/timing';
 
 // ============================================================================
 // Types
@@ -46,7 +47,7 @@ type ErrorStore = ErrorState & ErrorActions;
 // Constants
 // ============================================================================
 
-const DEFAULT_DURATION = 5000;
+const DEFAULT_DURATION = TIMING.UI.ERROR_TOAST;
 
 // ============================================================================
 // Initial State

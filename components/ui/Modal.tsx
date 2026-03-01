@@ -9,6 +9,7 @@ import {
   useEscapeKey,
 } from '@/hooks/ui';
 import { useModalLifecycle, ANIMATION_DURATION } from '@/hooks/ui/useModalLifecycle';
+import { TIMING } from '@/lib/constants/timing';
 
 // ============================================================================
 // Types
@@ -185,7 +186,7 @@ export default function Modal({
   // 모달 열림 콜백
   useEffect(() => {
     if (isVisible && onOpened) {
-      const timer = setTimeout(onOpened, 100);
+      const timer = setTimeout(onOpened, TIMING.UI.ANIMATION_DELAY);
       return () => clearTimeout(timer);
     }
   }, [isVisible, onOpened]);

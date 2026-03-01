@@ -15,7 +15,7 @@ import { PulseLoader } from '@/components/ui/PulseLoader';
 import StickyControlZone from '@/components/ui/StickyControlZone';
 import { useWeeklyStatsSuspense, useDeleteRoutineEvent } from '@/hooks/routine';
 import { useActiveCounselorConversation } from '@/hooks/counselor';
-import { useConfirmDialog } from '@/lib/stores/modalStore';
+import { useConfirmDelete } from '@/hooks/common';
 import { useStatsPeriodNavigator } from '@/hooks/routine/useStatsPeriodNavigator';
 import { computeWorkoutStreak } from '@/lib/stats/computations';
 import { addDays, formatDate, parseDate } from '@/lib/utils/dateHelpers';
@@ -260,13 +260,12 @@ function WeeklyContent({
 
   // 롱프레스 삭제
   const deleteEvent = useDeleteRoutineEvent();
-  const confirm = useConfirmDialog();
+  const confirmDelete = useConfirmDelete();
 
   const handleDelete = (id: string, date: string, type: 'workout' | 'meal') => {
-    confirm({
+    confirmDelete({
       title: '루틴을 삭제하시겠어요?',
       message: '삭제하면 되돌릴 수 없어요.',
-      confirmText: '삭제',
       onConfirm: async () => { await deleteEvent.mutateAsync({ id, date, type }); },
     });
   };

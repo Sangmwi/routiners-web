@@ -6,6 +6,7 @@ import { LoadingSpinner } from '@/components/ui/icons';
 import Button from '@/components/ui/Button';
 import { useCheckNickname, useDebounce } from '@/hooks';
 import { generatePersonalizedNicknames } from '@/lib/utils/nickname';
+import { TIMING } from '@/lib/constants/timing';
 
 interface NicknameStepProps {
   initialNickname: string;
@@ -46,7 +47,7 @@ export function NicknameStep({
   useEffect(() => {
     const timer = setTimeout(() => {
       inputRef.current?.focus();
-    }, 300);
+    }, TIMING.UI.FOCUS_DELAY);
     return () => clearTimeout(timer);
   }, []);
 

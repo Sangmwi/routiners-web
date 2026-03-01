@@ -4,20 +4,9 @@ import { useRef, useEffect } from 'react';
 import { BarbellIcon } from '@phosphor-icons/react';
 import EmptyState from '@/components/common/EmptyState';
 import { LoadingSpinner } from '@/components/ui/icons';
-import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
+import { LIFT_LABEL_MAP } from '@/lib/constants/big3';
+import { formatDateDot } from '@/lib/utils/dateHelpers';
 import type { Big3Record } from '@/lib/types/big3';
-
-const LIFT_LABEL_MAP = Object.fromEntries(
-  BIG3_LIFT_CONFIG.map(({ key, label }) => [key, label]),
-) as Record<string, string>;
-
-function formatDate(dateStr: string): string {
-  const date = new Date(dateStr + 'T00:00:00');
-  const y = date.getFullYear();
-  const m = date.getMonth() + 1;
-  const d = date.getDate();
-  return `${y}.${m}.${d}`;
-}
 
 interface Big3RecordListProps {
   records: Big3Record[];
@@ -81,7 +70,7 @@ export default function Big3RecordList({
       {[...grouped.entries()].map(([date, dateRecords]) => (
         <div key={date}>
           <p className="text-[10px] text-hint-strong px-(--layout-padding-x) pt-4 pb-1.5">
-            {formatDate(date)}
+            {formatDateDot(date)}
           </p>
           <div className="divide-y divide-edge-divider">
             {dateRecords.map((record) => (

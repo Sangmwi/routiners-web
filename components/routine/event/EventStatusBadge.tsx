@@ -21,7 +21,7 @@ export default function EventStatusBadge({
   const config = EVENT_STATUS[displayStatus];
   const Icon = config.icon;
 
-  const sizeClass = size === 'sm' ? 'text-xs px-2 py-0.5' : 'text-xs px-2 py-0.5';
+  const sizeClass = 'text-xs px-2 py-0.5';
 
   return (
     <span

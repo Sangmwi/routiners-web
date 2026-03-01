@@ -1,21 +1,19 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { PencilSimpleIcon, TrashIcon, CheckIcon } from '@phosphor-icons/react';
+import { useSaveAnimation } from '@/hooks/common';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
+import LabelValue from '@/components/ui/LabelValue';
 import { WheelPicker } from '@/components/ui/WheelPicker';
-import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
+import { LIFT_LABEL_MAP } from '@/lib/constants/big3';
 import { BIG3_WEIGHT_OPTIONS, BIG3_REPS_OPTIONS, BIG3_RPE_OPTIONS } from '@/components/big3/constants';
-import { useUpdateBig3, useDeleteBig3 } from '@/hooks/big3';
-import { useConfirmDialog } from '@/lib/stores';
+import { useUpdateBig3, useDeleteBig3, useBig3Form } from '@/hooks/big3';
+import { useConfirmDelete } from '@/hooks/common';
 import { useShowError } from '@/lib/stores/errorStore';
-import type { Big3Record, Big3UpdateData } from '@/lib/types/big3';
-
-const LIFT_LABEL_MAP = Object.fromEntries(
-  BIG3_LIFT_CONFIG.map(({ key, label }) => [key, label]),
-) as Record<string, string>;
+import type { Big3Record } from '@/lib/types/big3';
 
 type ViewState = 'view' | 'edit';
 
@@ -27,21 +25,14 @@ interface Big3DetailSheetProps {
 
 export default function Big3DetailSheet({ isOpen, onClose, record }: Big3DetailSheetProps) {
   const [viewState, setViewState] = useState<ViewState>('view');
-  const [editWeight, setEditWeight] = useState('');
-  const [editReps, setEditReps] = useState('');
-  const [editRpe, setEditRpe] = useState('');
-  const [editNotes, setEditNotes] = useState('');
-  const [isSaved, setIsSaved] = useState(false);
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => { if (closeTimerRef.current !== null) clearTimeout(closeTimerRef.current); };
-  }, []);
-
+  const { weight: editWeight, reps: editReps, rpe: editRpe, notes: editNotes,
+    setWeight: setEditWeight, setReps: setEditReps, setRpe: setEditRpe, setNotes: setEditNotes,
+    reset: resetEditForm, buildUpdateData } = useBig3Form();
   const updateBig3 = useUpdateBig3();
   const deleteBig3 = useDeleteBig3();
-  const confirmDialog = useConfirmDialog();
+  const confirmDelete = useConfirmDelete();
   const showError = useShowError();
+  const { isSaved, triggerSave } = useSaveAnimation(() => { setViewState('view'); onClose(); });
 
   if (!record) return null;
 
@@ -49,29 +40,21 @@ export default function Big3DetailSheet({ isOpen, onClose, record }: Big3DetailS
   const dateStr = record.recordedAt;
 
   const handleStartEdit = () => {
-    setEditWeight(String(record.weight));
-    setEditReps(record.reps ? String(record.reps) : '');
-    setEditRpe(record.rpe ? String(record.rpe) : '');
-    setEditNotes(record.notes ?? '');
+    resetEditForm({
+      weight: String(record.weight),
+      reps: record.reps ? String(record.reps) : '',
+      rpe: record.rpe ? String(record.rpe) : '',
+      notes: record.notes ?? '',
+    });
     setViewState('edit');
   };
 
   const handleSaveEdit = () => {
-    const data: Big3UpdateData = {};
-    const newWeight = parseFloat(editWeight);
-    if (!isNaN(newWeight) && newWeight > 0) data.weight = newWeight;
-    const newReps = editReps ? parseInt(editReps) : NaN;
-    if (!isNaN(newReps) && newReps > 0) data.reps = newReps;
-    const newRpe = editRpe ? parseFloat(editRpe) : NaN;
-    if (!isNaN(newRpe) && newRpe >= 1 && newRpe <= 10) data.rpe = newRpe;
-    if (editNotes.trim()) data.notes = editNotes.trim();
-
     updateBig3.mutate(
-      { id: record.id, data },
+      { id: record.id, data: buildUpdateData() },
       {
         onSuccess: () => {
-          setIsSaved(true);
-          closeTimerRef.current = setTimeout(() => onClose(), 500);
+          triggerSave();
         },
         onError: () => {
           showError('기록 수정에 실패했어요');
@@ -81,11 +64,9 @@ export default function Big3DetailSheet({ isOpen, onClose, record }: Big3DetailS
   };
 
   const handleDeleteClick = () => {
-    confirmDialog({
+    confirmDelete({
       title: '기록 삭제',
       message: `${dateStr} ${liftLabel} ${record.weight}kg 기록을 삭제할까요?\n삭제된 기록은 복구할 수 없어요.`,
-      variant: 'danger',
-      confirmText: '삭제',
       onConfirm: () => {
         deleteBig3.mutate(record.id, {
           onSuccess: () => {
@@ -210,12 +191,12 @@ export default function Big3DetailSheet({ isOpen, onClose, record }: Big3DetailS
       <ModalBody className="p-6 space-y-4">
         <div className="bg-surface-hover rounded-xl p-3">
           <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-            <DetailItem label="날짜" value={dateStr} />
-            <DetailItem label="종목" value={liftLabel} />
-            <DetailItem label="중량" value={`${record.weight}kg`} />
-            <DetailItem label="횟수" value={record.reps ? `${record.reps}회` : '-'} />
-            <DetailItem label="RPE" value={record.rpe ? `${record.rpe}` : '-'} />
-            <DetailItem label="출처" value={record.source === 'auto' ? '자동 기록' : '수동 입력'} />
+            <LabelValue label="날짜" value={dateStr} />
+            <LabelValue label="종목" value={liftLabel} />
+            <LabelValue label="중량" value={`${record.weight}kg`} />
+            <LabelValue label="횟수" value={record.reps ? `${record.reps}회` : '-'} />
+            <LabelValue label="RPE" value={record.rpe ? `${record.rpe}` : '-'} />
+            <LabelValue label="출처" value={record.source === 'auto' ? '자동 기록' : '수동 입력'} />
           </div>
         </div>
         {record.notes && (
@@ -229,11 +210,3 @@ export default function Big3DetailSheet({ isOpen, onClose, record }: Big3DetailS
   );
 }
 
-function DetailItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <p className="text-sm font-medium text-foreground mt-0.5">{value}</p>
-    </div>
-  );
-}

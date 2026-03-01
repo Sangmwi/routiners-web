@@ -11,6 +11,38 @@ import { computeWeeklyStats, computeMonthlyStats } from '@/lib/stats/computation
 export type { WeeklyStats, MonthlyStats } from '@/lib/stats/computations';
 
 // ============================================================================
+// Query Config Factories (queryKey + queryFn 공유 — Suspense/non-Suspense 중복 제거)
+// ============================================================================
+
+function routineEventsConfig(params: EventListParams) {
+  return {
+    queryKey: queryKeys.routineEvent.list(params),
+    queryFn: () => routineEventApi.getEvents(params),
+  };
+}
+
+function routineEventByDateConfig(date: string, type?: EventType) {
+  return {
+    queryKey: queryKeys.routineEvent.byDate(date, type),
+    queryFn: () => routineEventApi.getEventByDate(date, type),
+  };
+}
+
+function routineEventConfig(id: string) {
+  return {
+    queryKey: queryKeys.routineEvent.detail(id),
+    queryFn: () => routineEventApi.getEvent(id),
+  };
+}
+
+function calendarEventsConfig(year: number, month: number) {
+  return {
+    queryKey: queryKeys.routineEvent.monthSummary(year, month),
+    queryFn: () => routineEventApi.getMonthSummary(year, month),
+  };
+}
+
+// ============================================================================
 // Standard Query Hooks
 // ============================================================================
 
@@ -18,10 +50,8 @@ export type { WeeklyStats, MonthlyStats } from '@/lib/stats/computations';
  * 루틴 이벤트 목록 조회
  */
 export function useRoutineEvents(params: EventListParams = {}) {
-  return useBaseQuery(
-    queryKeys.routineEvent.list(params),
-    () => routineEventApi.getEvents(params)
-  );
+  const { queryKey, queryFn } = routineEventsConfig(params);
+  return useBaseQuery(queryKey, queryFn);
 }
 
 /**
@@ -64,10 +94,8 @@ export function useRoutineEvent(id: string | undefined) {
  * 월별 캘린더 요약 조회
  */
 export function useCalendarEvents(year: number, month: number) {
-  return useBaseQuery(
-    queryKeys.routineEvent.monthSummary(year, month),
-    () => routineEventApi.getMonthSummary(year, month)
-  );
+  const { queryKey, queryFn } = calendarEventsConfig(year, month);
+  return useBaseQuery(queryKey, queryFn);
 }
 
 // ============================================================================
@@ -78,40 +106,32 @@ export function useCalendarEvents(year: number, month: number) {
  * 루틴 이벤트 목록 조회 (Suspense)
  */
 export function useRoutineEventsSuspense(params: EventListParams = {}) {
-  return useSuspenseBaseQuery(
-    queryKeys.routineEvent.list(params),
-    () => routineEventApi.getEvents(params)
-  );
+  const { queryKey, queryFn } = routineEventsConfig(params);
+  return useSuspenseBaseQuery(queryKey, queryFn);
 }
 
 /**
  * 특정 날짜의 이벤트 조회 (Suspense)
  */
 export function useRoutineEventByDateSuspense(date: string, type?: EventType) {
-  return useSuspenseBaseQuery(
-    queryKeys.routineEvent.byDate(date, type),
-    () => routineEventApi.getEventByDate(date, type)
-  );
+  const { queryKey, queryFn } = routineEventByDateConfig(date, type);
+  return useSuspenseBaseQuery(queryKey, queryFn);
 }
 
 /**
  * 특정 이벤트 상세 조회 (Suspense)
  */
 export function useRoutineEventSuspense(id: string) {
-  return useSuspenseBaseQuery(
-    queryKeys.routineEvent.detail(id),
-    () => routineEventApi.getEvent(id)
-  );
+  const { queryKey, queryFn } = routineEventConfig(id);
+  return useSuspenseBaseQuery(queryKey, queryFn);
 }
 
 /**
  * 월별 캘린더 요약 조회 (Suspense)
  */
 export function useCalendarEventsSuspense(year: number, month: number) {
-  return useSuspenseBaseQuery(
-    queryKeys.routineEvent.monthSummary(year, month),
-    () => routineEventApi.getMonthSummary(year, month)
-  );
+  const { queryKey, queryFn } = calendarEventsConfig(year, month);
+  return useSuspenseBaseQuery(queryKey, queryFn);
 }
 
 /**

@@ -6,6 +6,8 @@ import { LoadingSpinner } from '@/components/ui/icons';
 import FormSection from '@/components/ui/FormSection';
 import FormInput from '@/components/ui/FormInput';
 import { useCheckNickname, useDebounce } from '@/hooks';
+import { NICKNAME_RULES } from '@/lib/utils/formValidation';
+import { TIMING } from '@/lib/constants/timing';
 
 function FieldStatus({
   variant,
@@ -33,9 +35,6 @@ function FieldStatus({
   );
 }
 
-const MIN_LENGTH = 2;
-const MAX_LENGTH = 12;
-
 interface ProfileNicknameInputProps {
   value: string;
   originalNickname: string;
@@ -53,12 +52,12 @@ export default function ProfileNicknameInput({
 }: ProfileNicknameInputProps) {
   const trimmed = value.trim();
   const isUnchanged = trimmed === originalNickname;
-  const isValidLength = trimmed.length >= MIN_LENGTH && trimmed.length <= MAX_LENGTH;
-  const hasInvalidChars = /[^가-힣a-zA-Z0-9_]/.test(trimmed);
+  const isValidLength = trimmed.length >= NICKNAME_RULES.MIN_LENGTH && trimmed.length <= NICKNAME_RULES.MAX_LENGTH;
+  const hasInvalidChars = NICKNAME_RULES.INVALID_CHARS_PATTERN.test(trimmed);
   const isFormatValid = isValidLength && !hasInvalidChars;
 
   // 변경된 경우에만 디바운스 중복체크
-  const debouncedNickname = useDebounce(trimmed, 500);
+  const debouncedNickname = useDebounce(trimmed, TIMING.UI.DEBOUNCE_NICKNAME);
   const shouldCheck = isFormatValid && !isUnchanged;
   const {
     data: checkResult,
@@ -71,14 +70,14 @@ export default function ProfileNicknameInput({
   const isUnavailable = isCheckValid && isFetched && checkResult?.available === false;
 
   const renderStatus = () => {
-    if (!trimmed || trimmed.length < MIN_LENGTH) return null;
+    if (!trimmed || trimmed.length < NICKNAME_RULES.MIN_LENGTH) return null;
 
     if (hasInvalidChars) {
       return <FieldStatus variant="error">한글, 영문, 숫자, 밑줄(_)만 사용할 수 있어요</FieldStatus>;
     }
 
-    if (trimmed.length > MAX_LENGTH) {
-      return <FieldStatus variant="error">최대 {MAX_LENGTH}자까지 입력할 수 있어요</FieldStatus>;
+    if (trimmed.length > NICKNAME_RULES.MAX_LENGTH) {
+      return <FieldStatus variant="error">최대 {NICKNAME_RULES.MAX_LENGTH}자까지 입력할 수 있어요</FieldStatus>;
     }
 
     if (isUnchanged) return null;

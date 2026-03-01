@@ -7,11 +7,9 @@ import {
   type DbBig3Record,
   type Big3LiftType,
 } from '@/lib/types/big3';
+import { BIG3_LIFT_TYPES } from '@/lib/data/exercises';
 import { parseRequestBody, handleSupabaseError, badRequest } from '@/lib/utils/apiResponse';
-
-const VALID_LIFT_TYPES: Big3LiftType[] = ['squat', 'bench', 'deadlift'];
-const DEFAULT_LIMIT = 20;
-const MAX_LIMIT = 50;
+import { parsePaginationParams } from '@/lib/utils/queryParams';
 
 /**
  * GET /api/big3
@@ -19,9 +17,7 @@ const MAX_LIMIT = 50;
  */
 export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   const { searchParams } = new URL(request.url);
-  const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-  const limit = Math.min(MAX_LIMIT, Math.max(1, parseInt(searchParams.get('limit') || String(DEFAULT_LIMIT), 10)));
-  const offset = (page - 1) * limit;
+  const { page, limit, offset } = parsePaginationParams(searchParams);
   const liftType = searchParams.get('liftType') as Big3LiftType | null;
 
   let query = supabase
@@ -30,7 +26,7 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
     .order('recorded_at', { ascending: false })
     .range(offset, offset + limit - 1);
 
-  if (liftType && VALID_LIFT_TYPES.includes(liftType)) {
+  if (liftType && BIG3_LIFT_TYPES.includes(liftType as (typeof BIG3_LIFT_TYPES)[number])) {
     query = query.eq('lift_type', liftType);
   }
 
@@ -63,7 +59,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
     return badRequest('필수 항목(기록일, 종목, 중량)을 입력해주세요');
   }
 
-  if (!VALID_LIFT_TYPES.includes(body.liftType)) {
+  if (!BIG3_LIFT_TYPES.includes(body.liftType)) {
     return badRequest('유효하지 않은 종목입니다');
   }
 

@@ -16,6 +16,12 @@ import {
   ChatMessage,
   MessageCreateData,
   ProfileConfirmationRequest,
+  ToolEvent,
+  RoutineAppliedEvent,
+  MealPlanAppliedEvent,
+  RoutineProgressEvent,
+  CompleteEventMessage,
+  CompleteEventData,
 } from '@/lib/types/chat';
 import type { MealPlanPreviewData } from '@/lib/types/meal';
 import { api } from './client';
@@ -107,21 +113,10 @@ export const conversationApi = {
     content: string,
     metadata?: Record<string, unknown>
   ): Promise<void> {
-    const response = await authFetch(`/api/counselor/conversations/${conversationId}/messages/system`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content, metadata }),
+    await api.post(`/api/counselor/conversations/${conversationId}/messages/system`, {
+      content,
+      metadata,
     });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('[insertSystemMessage] API Error:', {
-        status: response.status,
-        error: errorData,
-        conversationId,
-      });
-      throw new Error(errorData.error || '시스템 메시지 추가 실패');
-    }
   },
 };
 
@@ -173,46 +168,15 @@ export const messageApi = {
 // AI Chat API (SSE Streaming) - 새 스키마용
 // ============================================================================
 
-export interface ToolEvent {
-  toolCallId: string;
-  name: string;
-  success?: boolean;
-  data?: unknown;
-  error?: string;
-  errorType?: 'missing_data' | 'not_found' | 'system';
-}
-
-export interface RoutineAppliedEvent {
-  previewId: string;
-  eventsCreated: number;
-  startDate: string;
-}
-
-export interface MealPlanAppliedEvent {
-  previewId: string;
-  eventsCreated: number;
-  startDate: string;
-}
-
-export interface RoutineProgressEvent {
-  progress: number;
-  stage: string;
-}
-
-/** Phase 16: SSE complete 이벤트 메시지 형식 */
-export interface CompleteEventMessage {
-  id: string;
-  content: string;
-  contentType: string;
-  createdAt: string;
-  metadata?: Record<string, unknown>;  // Phase 21: 트랜지언트 UI 상태 포함
-}
-
-/** Phase 16: SSE complete 이벤트 데이터 (ISP: 옵셔널 파라미터) */
-export interface CompleteEventData {
-  userMessage?: CompleteEventMessage;
-  aiMessages?: CompleteEventMessage[];
-}
+// SSE 이벤트 타입은 lib/types/chat.ts에 정의 (re-export for backward compat)
+export type {
+  ToolEvent,
+  RoutineAppliedEvent,
+  MealPlanAppliedEvent,
+  RoutineProgressEvent,
+  CompleteEventMessage,
+  CompleteEventData,
+} from '@/lib/types/chat';
 
 export interface ChatStreamCallbacks {
   onMessage: (chunk: string) => void;

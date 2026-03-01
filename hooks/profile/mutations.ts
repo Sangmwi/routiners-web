@@ -67,14 +67,11 @@ export function useUpdateProfile() {
       // 현재 사용자 캐시 즉시 업데이트 (깜빡임 방지)
       queryClient.setQueryData(queryKeys.user.me(), updatedUser);
 
-      // 검색 결과 백그라운드 무효화 (refetch 지연)
-      // 페이지 이동 후 처리되므로 UI에 영향 없음
-      setTimeout(() => {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.user.search(),
-          exact: false,
-        });
-      }, 100);
+      // 검색 결과 백그라운드 무효화
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.user.search(),
+        exact: false,
+      });
     },
 
     // 성공/실패 무관하게 서버 데이터와 최종 재동기화

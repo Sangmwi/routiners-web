@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/constants/queryKeys';
 import { STALE_TIME } from '@/hooks/common';
+import { TIMING } from '@/lib/constants/timing';
 import { fetchCommunityPosts } from '@/lib/api/community';
 import { useToggleLike } from '@/hooks/community/mutations';
 import { useCurrentUserProfile } from '@/hooks/profile/queries';
@@ -73,7 +74,7 @@ export default function UserPostFeed({ userId, startIndex }: UserPostFeedProps) 
     const timer = setTimeout(() => {
       targetPostRef.current?.scrollIntoView({ block: 'start' });
       hasScrolled.current = true;
-    }, 100);
+    }, TIMING.UI.SCROLL_DELAY);
 
     return () => clearTimeout(timer);
   }, [data?.pages.length]);

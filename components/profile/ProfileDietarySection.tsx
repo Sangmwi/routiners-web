@@ -15,7 +15,7 @@ import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/common/EmptyState';
 import Surface from '@/components/ui/Surface';
 import Tag from '@/components/ui/Tag';
-import { DietaryDetailDrawer } from '@/components/drawers';
+import { DietaryDetailSheet } from '@/components/drawers';
 
 /**
  * 프로필 식단 섹션
@@ -169,7 +169,7 @@ function DietaryDisplay({ profile, isOwnProfile, renderHeader }: DietaryDisplayP
       )}
 
       {profile && hasData && (
-        <DietaryDetailDrawer
+        <DietaryDetailSheet
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           profile={profile}

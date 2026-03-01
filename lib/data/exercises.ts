@@ -45,6 +45,7 @@ export type Equipment =
   | 'other';
 
 export type Big3LiftType = 'squat' | 'bench' | 'deadlift';
+export const BIG3_LIFT_TYPES = ['squat', 'bench', 'deadlift'] as const satisfies Big3LiftType[];
 
 export interface ExerciseInfo {
   id: string;

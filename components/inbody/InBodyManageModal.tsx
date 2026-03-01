@@ -17,7 +17,7 @@ import { useInBodyRecords, useDeleteInBody, useCreateInBody } from '@/hooks/inbo
 import InBodyScanModal from './InBodyScanModal';
 import InBodyDetailModal from './InBodyDetailModal';
 import InBodyPreview from './InBodyPreview';
-import { formatKoreanDate } from '@/lib/utils/dateHelpers';
+import { formatKoreanDate, getToday } from '@/lib/utils/dateHelpers';
 import type { BaseModalProps } from '@/lib/types/modal';
 
 interface InBodyManageModalProps extends BaseModalProps {}
@@ -65,7 +65,7 @@ export default function InBodyManageModal({
   const getManualInputInitial = (): InBodyCreateData => {
     const latestHeight = records.length > 0 ? records[0].height : undefined;
     return {
-      measuredAt: new Date().toISOString().split('T')[0],
+      measuredAt: getToday(),
       height: latestHeight,
       weight: undefined,
     };
@@ -257,7 +257,7 @@ export default function InBodyManageModal({
                   size="lg"
                 />
               ) : (
-                <div className="divide-y divide-border">
+                <div className="divide-y divide-edge-divider">
                   {records.map((record) => (
                     <div
                       key={record.id}

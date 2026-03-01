@@ -15,7 +15,7 @@ import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/common/EmptyState';
 import Surface from '@/components/ui/Surface';
 import Tag from '@/components/ui/Tag';
-import { FitnessDetailDrawer } from '@/components/drawers';
+import { FitnessDetailSheet } from '@/components/drawers';
 
 /**
  * 프로필 피트니스 섹션
@@ -161,7 +161,7 @@ function FitnessDisplay({ profile, isOwnProfile, renderHeader }: FitnessDisplayP
       )}
 
       {profile && hasData && (
-        <FitnessDetailDrawer
+        <FitnessDetailSheet
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           profile={profile}

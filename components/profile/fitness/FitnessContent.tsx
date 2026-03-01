@@ -11,6 +11,7 @@ import {
 } from '@/components/profile/form/ProfileFormPrimitives';
 import FloatingSaveButton from '@/components/ui/FloatingSaveButton';
 import { useFitnessProfileSuspense, useUpdateFitnessProfile } from '@/hooks/fitnessProfile';
+import { TIMING } from '@/lib/constants/timing';
 import {
   FocusArea,
   FITNESS_GOALS,
@@ -90,7 +91,7 @@ export default function FitnessContent() {
     updateProfile.mutate(formData, {
       onSuccess: () => {
         setShowSuccess(true);
-        setTimeout(() => router.back(), 600);
+        setTimeout(() => router.back(), TIMING.UI.SAVE_AND_CLOSE);
       },
       onError: () => setSaveError('저장에 실패했어요.'),
     });

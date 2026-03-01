@@ -17,7 +17,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable';
 import SortableExerciseCard from './SortableExerciseCard';
-import { useConfirmDialog } from '@/lib/stores/modalStore';
+import { useConfirmDelete } from '@/hooks/common';
 import type { WorkoutExercise, WorkoutSet } from '@/lib/types/routine';
 
 interface EditableExerciseListProps {
@@ -38,7 +38,7 @@ export default function EditableExerciseList({
   onExercisesChange,
   onSetsChange,
 }: EditableExerciseListProps) {
-  const confirm = useConfirmDialog();
+  const confirmDelete = useConfirmDelete();
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -62,10 +62,9 @@ export default function EditableExerciseList({
   };
 
   const handleDelete = (exercise: WorkoutExercise) => {
-    confirm({
+    confirmDelete({
       title: '운동을 삭제할까요?',
       message: `${exercise.name}을(를) 목록에서 삭제합니다`,
-      confirmText: '삭제',
       onConfirm: () => {
         onExercisesChange(exercises.filter((e) => e.id !== exercise.id));
       },

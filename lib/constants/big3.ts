@@ -6,6 +6,8 @@ export const BIG3_LIFT_CONFIG: readonly { key: Big3LiftType; label: string }[] =
   { key: 'deadlift', label: '데드' },
 ] as const;
 
-/** @deprecated Big3LiftType from '@/lib/data/exercises' 사용 */
-export type Big3LiftKey = Big3LiftType;
+export const LIFT_LABEL_MAP = Object.fromEntries(
+  BIG3_LIFT_CONFIG.map(({ key, label }) => [key, label]),
+) as Record<string, string>;
+
 

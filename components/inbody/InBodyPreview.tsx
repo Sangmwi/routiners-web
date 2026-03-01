@@ -8,11 +8,12 @@ import { InBodyCreateData, InBodyFormErrors } from '@/lib/types/inbody';
 import FormInput from '@/components/ui/FormInput';
 import { DatePicker } from '@/components/ui/WheelPicker';
 import { ImageWithFallback } from '@/components/ui/image';
+import { getToday } from '@/lib/utils/dateHelpers';
 
 interface InBodyPreviewProps {
   data: InBodyCreateData;
   imagePreview?: string | null;
-  onChange: (data: InBodyCreateData) => void;
+  onChange?: (data: InBodyCreateData) => void;
   /** 읽기 전용 모드 (수정 버튼 숨김) */
   readOnly?: boolean;
   /** 초기 편집 모드 시작 여부 */
@@ -68,9 +69,9 @@ export default function InBodyPreview({
     setLocalValues(prev => ({ ...prev, [field]: normalized }));
     const numValue = parseFloat(normalized);
     if (!isNaN(numValue)) {
-      onChange({ ...data, [field]: numValue });
+      onChange?.({ ...data, [field]: numValue });
     } else if (normalized === '') {
-      onChange({ ...data, [field]: undefined });
+      onChange?.({ ...data, [field]: undefined });
     }
   };
 
@@ -81,13 +82,13 @@ export default function InBodyPreview({
     if (!isNaN(numValue) && max !== undefined && numValue > max) {
       const clamped = max.toString();
       setLocalValues(prev => ({ ...prev, [field]: clamped }));
-      onChange({ ...data, [field]: max });
+      onChange?.({ ...data, [field]: max });
     }
   };
 
   // 날짜 수정 핸들러
   const handleDateChange = (value: string) => {
-    onChange({
+    onChange?.({
       ...data,
       measuredAt: value,
     });
@@ -136,7 +137,7 @@ export default function InBodyPreview({
                 value={data.measuredAt}
                 onChange={handleDateChange}
                 minDate="2020-01-01"
-                maxDate={new Date().toISOString().split('T')[0]}
+                maxDate={getToday()}
                 showLabels={false}
               />
             </div>

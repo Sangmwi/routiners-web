@@ -1,7 +1,7 @@
 'use client';
 
 import { useSuspenseFollowStatus, useToggleFollow } from '@/hooks/community/useFollow';
-import { useModalStore } from '@/lib/stores/modalStore';
+import { useModalStore } from '@/lib/stores';
 
 interface ProfileFollowButtonProps {
   targetUserId: string;

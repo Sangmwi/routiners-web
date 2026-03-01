@@ -312,6 +312,51 @@ export function transformDbReaction(db: DbMessageReaction): MessageReaction {
 }
 
 // ============================================================================
+// SSE Streaming Event Types (AI 채팅 스트리밍)
+// ============================================================================
+
+export interface ToolEvent {
+  toolCallId: string;
+  name: string;
+  success?: boolean;
+  data?: unknown;
+  error?: string;
+  errorType?: 'missing_data' | 'not_found' | 'system';
+}
+
+export interface RoutineAppliedEvent {
+  previewId: string;
+  eventsCreated: number;
+  startDate: string;
+}
+
+export interface MealPlanAppliedEvent {
+  previewId: string;
+  eventsCreated: number;
+  startDate: string;
+}
+
+export interface RoutineProgressEvent {
+  progress: number;
+  stage: string;
+}
+
+/** SSE complete 이벤트 메시지 형식 */
+export interface CompleteEventMessage {
+  id: string;
+  content: string;
+  contentType: string;
+  createdAt: string;
+  metadata?: Record<string, unknown>;
+}
+
+/** SSE complete 이벤트 데이터 */
+export interface CompleteEventData {
+  userMessage?: CompleteEventMessage;
+  aiMessages?: CompleteEventMessage[];
+}
+
+// ============================================================================
 // Metadata Types
 // ============================================================================
 

@@ -14,7 +14,7 @@ import {
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
 import { useRouter } from 'next/navigation';
 
-interface DietaryDetailDrawerProps {
+interface DietaryDetailSheetProps {
   isOpen: boolean;
   onClose: () => void;
   profile: DietaryProfile;
@@ -22,16 +22,16 @@ interface DietaryDetailDrawerProps {
 }
 
 /**
- * 식단 프로필 상세 드로어
+ * 식단 프로필 상세 시트
  *
  * 그룹화된 정보 표시 + 틴트 태그 스타일
  */
-export default function DietaryDetailDrawer({
+export default function DietaryDetailSheet({
   isOpen,
   onClose,
   profile,
   readOnly = false,
-}: DietaryDetailDrawerProps) {
+}: DietaryDetailSheetProps) {
   const router = useRouter();
 
   // 기본 정보 아이템
@@ -56,6 +56,7 @@ export default function DietaryDetailDrawer({
       onClose={onClose}
       title="식단 프로필 상세"
       position="bottom"
+      height="auto"
       enableSwipe
       headerAction={
         profile.updatedAt ? (

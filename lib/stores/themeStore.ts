@@ -39,3 +39,13 @@ export const useThemeStore = create<ThemeStore>()(
     }
   )
 );
+
+// ============================================================================
+// Convenience Hooks
+// ============================================================================
+
+/** 현재 테마 모드 반환 */
+export const useThemeMode = () => useThemeStore((s) => s.mode);
+
+/** 테마 모드 변경 액션 반환 */
+export const useSetTheme = () => useThemeStore((s) => s.setMode);

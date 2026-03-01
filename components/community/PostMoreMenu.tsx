@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { PencilSimpleIcon, TrashIcon, WarningIcon } from '@phosphor-icons/react';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import { useDeletePost } from '@/hooks/community/mutations';
-import { useConfirmDialog } from '@/lib/stores/modalStore';
+import { useConfirmDelete } from '@/hooks/common';
 import { clearOverlayStack } from '@/hooks/ui/useModalLifecycle';
 import { useNavigate } from '@/hooks/navigation';
 import type { BaseModalProps } from '@/lib/types/modal';
@@ -25,7 +25,7 @@ export default function PostMoreMenu({
 }: PostMoreMenuProps) {
   const { push, prefetch } = useNavigate();
   const deletePost = useDeletePost();
-  const confirm = useConfirmDialog();
+  const confirmDelete = useConfirmDelete();
 
   useEffect(() => {
     if (isOwner) prefetch(`/community/write?postId=${postId}`);
@@ -39,12 +39,9 @@ export default function PostMoreMenu({
 
   const handleDelete = () => {
     onClose();
-    confirm({
+    confirmDelete({
       title: '게시글 삭제',
       message: '이 게시글을 삭제하시겠습니까? 삭제된 글은 복구할 수 없어요.',
-      confirmText: '삭제',
-      cancelText: '취소',
-      variant: 'danger',
       onConfirm: async () => {
         await deletePost.mutateAsync(postId);
         onDeleted();

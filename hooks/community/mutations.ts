@@ -6,6 +6,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/constants/queryKeys';
+import { invalidateCommentCaches, invalidatePostCaches } from './cacheHelpers';
 import {
   createCommunityPost,
   updateCommunityPost,
@@ -33,10 +34,7 @@ export function useCreatePost() {
   return useMutation({
     mutationFn: (data: CreatePostRequest) => createCommunityPost(data),
     onSuccess: () => {
-      // 게시글 목록 캐시 무효화
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.post.lists(),
-      });
+      invalidatePostCaches(queryClient);
     },
   });
 }
@@ -56,12 +54,8 @@ export function useUpdatePost() {
       data: UpdatePostRequest;
     }) => updateCommunityPost(postId, data),
     onSuccess: (updatedPost, { postId }) => {
-      // 해당 게시글 캐시 업데이트
       queryClient.setQueryData(queryKeys.post.detail(postId), updatedPost);
-      // 목록 캐시 무효화
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.post.lists(),
-      });
+      invalidatePostCaches(queryClient);
     },
   });
 }
@@ -75,14 +69,8 @@ export function useDeletePost() {
   return useMutation({
     mutationFn: (postId: string) => deleteCommunityPost(postId),
     onSuccess: (_, postId) => {
-      // 해당 게시글 캐시 제거
-      queryClient.removeQueries({
-        queryKey: queryKeys.post.detail(postId),
-      });
-      // 목록 캐시 무효화
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.post.lists(),
-      });
+      queryClient.removeQueries({ queryKey: queryKeys.post.detail(postId) });
+      invalidatePostCaches(queryClient);
     },
   });
 }
@@ -291,17 +279,7 @@ export function useCreateComment() {
       data: CreateCommentRequest;
     }) => createComment(postId, data),
     onSuccess: (_, { postId }) => {
-      // 댓글 목록 캐시 무효화
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.post.comments(postId),
-      });
-      // 게시글의 댓글 수 업데이트를 위해 목록도 무효화
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.post.lists(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.post.detail(postId),
-      });
+      invalidateCommentCaches(queryClient, postId);
     },
   });
 }
@@ -321,17 +299,7 @@ export function useDeleteComment() {
       commentId: string;
     }) => deleteComment(postId, commentId),
     onSuccess: (_, { postId }) => {
-      // 댓글 목록 캐시 무효화
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.post.comments(postId),
-      });
-      // 게시글의 댓글 수 업데이트를 위해 목록도 무효화
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.post.lists(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.post.detail(postId),
-      });
+      invalidateCommentCaches(queryClient, postId);
     },
   });
 }

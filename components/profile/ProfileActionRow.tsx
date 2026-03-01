@@ -8,6 +8,15 @@ interface ProfileActionRowProps {
   userId: string;
 }
 
+function StatItem({ value, label }: { value: number; label: string }) {
+  return (
+    <span>
+      <span className="font-semibold text-foreground">{value}</span>
+      <span className="text-muted-foreground ml-1">{label}</span>
+    </span>
+  );
+}
+
 /**
  * 프로필 액션 로우: 게시글/팔로워/팔로잉 스탯 + 프로필 편집 버튼
  */
@@ -19,18 +28,9 @@ export default function ProfileActionRow({ userId }: ProfileActionRowProps) {
     <div className="space-y-3">
       {/* 스탯 인라인 */}
       <div className="flex items-center gap-3 text-sm">
-        <span>
-          <span className="font-semibold text-foreground">{postCount}</span>
-          <span className="text-muted-foreground ml-1">게시글</span>
-        </span>
-        <span>
-          <span className="font-semibold text-foreground">{currentUser?.followersCount ?? 0}</span>
-          <span className="text-muted-foreground ml-1">팔로워</span>
-        </span>
-        <span>
-          <span className="font-semibold text-foreground">{currentUser?.followingCount ?? 0}</span>
-          <span className="text-muted-foreground ml-1">팔로잉</span>
-        </span>
+        <StatItem value={postCount} label="게시글" />
+        <StatItem value={currentUser?.followersCount ?? 0} label="팔로워" />
+        <StatItem value={currentUser?.followingCount ?? 0} label="팔로잉" />
       </div>
 
       {/* 프로필 편집 버튼 */}

@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { big3Api } from '@/lib/api/big3';
 import { queryKeys } from '@/lib/constants/queryKeys';
 import type { Big3UpdateData } from '@/lib/types/big3';
+import { invalidateBig3Caches } from './cacheHelpers';
 
 /**
  * Big3 기록 생성 Mutation
@@ -15,13 +16,7 @@ export function useCreateBig3() {
     mutationFn: big3Api.createRecord,
 
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.big3.all,
-      });
-      // progress 캐시도 무효화 (기존 홈/프로필/통계 소비자용)
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.progress.all,
-      });
+      invalidateBig3Caches(queryClient);
     },
   });
 }
@@ -37,16 +32,8 @@ export function useUpdateBig3() {
       big3Api.updateRecord(id, data),
 
     onSuccess: (updatedRecord) => {
-      queryClient.setQueryData(
-        queryKeys.big3.detail(updatedRecord.id),
-        updatedRecord,
-      );
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.big3.all,
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.progress.all,
-      });
+      queryClient.setQueryData(queryKeys.big3.detail(updatedRecord.id), updatedRecord);
+      invalidateBig3Caches(queryClient);
     },
   });
 }
@@ -61,15 +48,8 @@ export function useDeleteBig3() {
     mutationFn: big3Api.deleteRecord,
 
     onSuccess: (_, deletedId) => {
-      queryClient.removeQueries({
-        queryKey: queryKeys.big3.detail(deletedId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.big3.all,
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.progress.all,
-      });
+      queryClient.removeQueries({ queryKey: queryKeys.big3.detail(deletedId) });
+      invalidateBig3Caches(queryClient);
     },
   });
 }

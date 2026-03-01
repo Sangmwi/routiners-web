@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
+import { TIMING } from '@/lib/constants/timing';
 
 interface WheelPickerProps {
   /** 선택 가능한 옵션들 */
@@ -57,6 +58,7 @@ export function WheelPicker({
     // debounce scroll end detection
     clearTimeout((container as unknown as { scrollTimeout?: number }).scrollTimeout);
     (container as unknown as { scrollTimeout?: number }).scrollTimeout = window.setTimeout(() => {
+
       const scrollTop = container.scrollTop;
       const selectedIndex = Math.round(scrollTop / itemHeight);
       const clampedIndex = Math.max(0, Math.min(selectedIndex, options.length - 1));
@@ -73,8 +75,8 @@ export function WheelPicker({
 
       setTimeout(() => {
         isScrollingRef.current = false;
-      }, 100);
-    }, 100);
+      }, TIMING.UI.ANIMATION_DELAY);
+    }, TIMING.UI.SCROLL_END_DEBOUNCE);
   };
 
   const containerHeight = itemHeight * visibleItems;

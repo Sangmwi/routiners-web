@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery, UseQueryOptions, UseQueryResult, QueryKey } from '@tanstack/react-query';
+import { TIMING } from '@/lib/constants/timing';
 
 /**
  * 공통 staleTime 설정
@@ -12,11 +13,11 @@ import { useQuery, UseQueryOptions, UseQueryResult, QueryKey } from '@tanstack/r
  * - medium: 3분 (같은 부대 사용자 목록 등)
  */
 export const STALE_TIME = {
-  default: 5 * 60 * 1000,    // 5분
-  active: 30 * 1000,         // 30초
-  search: 1 * 60 * 1000,     // 1분
-  short: 2 * 60 * 1000,      // 2분
-  medium: 3 * 60 * 1000,     // 3분
+  default: TIMING.CACHE.STALE_DEFAULT,  // 5분
+  active: TIMING.CACHE.STALE_ACTIVE,   // 30초
+  search: TIMING.CACHE.STALE_SEARCH,   // 1분
+  short: TIMING.CACHE.STALE_SHORT,     // 2분
+  medium: TIMING.CACHE.STALE_MEDIUM,   // 3분
 } as const;
 
 export type StaleTimeKey = keyof typeof STALE_TIME;

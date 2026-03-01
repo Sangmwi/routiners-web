@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { MagnifyingGlassIcon, CheckIcon, XIcon } from '@phosphor-icons/react';
-import Modal, { ModalBody } from '@/components/ui/Modal';
+import { MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
+import SearchablePickerSheet from '@/components/ui/SearchablePickerSheet';
 import { UNITS } from '@/lib/constants/units';
 
 interface ProfileUnitInputProps {
@@ -12,29 +12,7 @@ interface ProfileUnitInputProps {
 
 export default function ProfileUnitInput({ value, onChange }: ProfileUnitInputProps) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-
   const activeUnits = UNITS.filter((u) => u.isActive);
-
-  const filteredUnits = searchQuery.trim()
-    ? activeUnits.filter((unit) => {
-        const query = searchQuery.toLowerCase();
-        return (
-          unit.name.toLowerCase().includes(query) ||
-          unit.region?.toLowerCase().includes(query)
-        );
-      })
-    : activeUnits;
-
-  const handleSelect = (name: string) => {
-    onChange(name);
-    setIsSheetOpen(false);
-    setSearchQuery('');
-  };
-
-  const handleClear = () => {
-    onChange('');
-  };
 
   return (
     <div>
@@ -58,8 +36,8 @@ export default function ProfileUnitInput({ value, onChange }: ProfileUnitInputPr
           <span
             role="button"
             tabIndex={0}
-            onClick={(e) => { e.stopPropagation(); handleClear(); }}
-            onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); handleClear(); } }}
+            onClick={(e) => { e.stopPropagation(); onChange(''); }}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); onChange(''); } }}
             className="p-0.5 rounded-full hover:bg-muted cursor-pointer"
           >
             <XIcon size={14} className="text-muted-foreground" />
@@ -67,63 +45,36 @@ export default function ProfileUnitInput({ value, onChange }: ProfileUnitInputPr
         ) : null}
       </button>
 
-      {/* 바텀시트 모달 */}
-      <Modal
+      <SearchablePickerSheet
         isOpen={isSheetOpen}
-        onClose={() => { setIsSheetOpen(false); setSearchQuery(''); }}
+        onClose={() => setIsSheetOpen(false)}
         title="소속 부대 검색"
-        position="bottom"
-        enableSwipe
+        items={activeUnits}
+        filterFn={(unit, q) =>
+          unit.name.toLowerCase().includes(q) ||
+          (unit.region?.toLowerCase().includes(q) ?? false)
+        }
+        getKey={(unit) => unit.id}
+        renderItem={(unit) => (
+          <button
+            type="button"
+            onClick={() => { onChange(unit.name); setIsSheetOpen(false); }}
+            className={`w-full px-4 py-3 rounded-xl text-left transition-all ${
+              unit.name === value
+                ? 'bg-surface-accent border-2 border-primary'
+                : 'bg-surface-secondary border-2 border-transparent hover:bg-surface-muted'
+            }`}
+          >
+            <p className="font-medium text-foreground">{unit.name}</p>
+            {unit.region && (
+              <p className="text-sm text-muted-foreground">{unit.region}</p>
+            )}
+          </button>
+        )}
+        placeholder="부대명 또는 지역으로 검색"
+        maxResults={50}
         height="full"
-      >
-        <ModalBody>
-          <div className="sticky top-0 bg-card px-4 pb-4 pt-2 border-b border-border">
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="부대명 또는 지역으로 검색"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-focus focus:border-primary"
-                autoFocus
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2 p-4">
-            {filteredUnits.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                검색 결과가 없어요
-              </div>
-            ) : (
-              filteredUnits.slice(0, 50).map((unit) => (
-                <button
-                  key={unit.id}
-                  type="button"
-                  onClick={() => handleSelect(unit.name)}
-                  className={`w-full px-4 py-3 rounded-xl text-left transition-all ${
-                    unit.name === value
-                      ? 'bg-surface-accent border-2 border-primary'
-                      : 'bg-surface-secondary border-2 border-transparent hover:bg-surface-muted'
-                  }`}
-                >
-                  <p className="font-medium text-foreground">{unit.name}</p>
-                  {unit.region && (
-                    <p className="text-sm text-muted-foreground">{unit.region}</p>
-                  )}
-                </button>
-              ))
-            )}
-
-            {filteredUnits.length > 50 && (
-              <p className="text-center text-xs text-muted-foreground py-2">
-                검색어를 더 입력해 주세요 ({filteredUnits.length - 50}개 더 있음)
-              </p>
-            )}
-          </div>
-        </ModalBody>
-      </Modal>
+      />
     </div>
   );
 }

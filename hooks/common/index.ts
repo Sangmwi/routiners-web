@@ -18,3 +18,8 @@ export {
   useWindowEventListener,
   useCustomEventListener,
 } from './useEventListener';
+
+// Utilities
+export { useFilteredList } from './useFilteredList';
+export { useSaveAnimation } from './useSaveAnimation';
+export { useConfirmDelete } from './useConfirmDelete';

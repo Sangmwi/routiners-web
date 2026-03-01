@@ -263,6 +263,17 @@ export function formatElapsedTime(totalSeconds: number): string {
  * 날짜 문자열을 한국어 상대시간으로 변환
  * @example "방금 전", "3시간 전", "2일 전", "1주일 전", "3달 전"
  */
+/**
+ * 날짜를 `YYYY.M.D` 형식(점 구분자)으로 포맷
+ *
+ * @param dateStr - YYYY-MM-DD 형식 문자열
+ * @returns `2025.1.3` 형식 문자열
+ */
+export function formatDateDot(dateStr: string): string {
+  const date = parseDate(dateStr);
+  return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}`;
+}
+
 export function formatTimeAgo(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();

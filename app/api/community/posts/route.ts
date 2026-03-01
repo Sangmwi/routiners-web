@@ -11,9 +11,7 @@ import {
   toCommunityPost,
   type DbCommunityPost,
 } from '@/lib/types/community';
-
-const DEFAULT_LIMIT = 20;
-const MAX_LIMIT = 50;
+import { parsePaginationParams } from '@/lib/utils/queryParams';
 
 /**
  * GET /api/community/posts
@@ -25,12 +23,7 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   const authorId = searchParams.get('authorId');
   const search = searchParams.get('search');
   const dateRange = searchParams.get('dateRange');
-  const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10));
-  const limit = Math.min(
-    MAX_LIMIT,
-    Math.max(1, parseInt(searchParams.get('limit') ?? String(DEFAULT_LIMIT), 10))
-  );
-  const offset = (page - 1) * limit;
+  const { page, limit, offset } = parsePaginationParams(searchParams);
 
   // 기본 쿼리
   let query = supabase

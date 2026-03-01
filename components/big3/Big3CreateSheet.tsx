@@ -6,21 +6,15 @@ import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
 import SegmentedControl from '@/components/ui/SegmentedControl';
 import { WheelPicker, DatePicker } from '@/components/ui/WheelPicker';
-import { BIG3_LIFT_CONFIG } from '@/lib/constants/big3';
+import { BIG3_LIFT_CONFIG, LIFT_LABEL_MAP } from '@/lib/constants/big3';
 import { BIG3_WEIGHT_OPTIONS, BIG3_REPS_OPTIONS, BIG3_RPE_OPTIONS } from '@/components/big3/constants';
-import { useCreateBig3 } from '@/hooks/big3';
+import { useCreateBig3, useBig3Form } from '@/hooks/big3';
 import { useShowError } from '@/lib/stores/errorStore';
+import { getToday } from '@/lib/utils/dateHelpers';
 import { isApiError } from '@/lib/types';
 import type { Big3LiftType } from '@/lib/types/big3';
 
 const LIFT_OPTIONS = BIG3_LIFT_CONFIG.map(({ key, label }) => ({ key, label }));
-const LIFT_LABEL_MAP = Object.fromEntries(
-  BIG3_LIFT_CONFIG.map(({ key, label }) => [key, label]),
-) as Record<string, string>;
-
-function getToday(): string {
-  return new Date().toISOString().split('T')[0];
-}
 
 interface Big3CreateSheetProps {
   isOpen: boolean;
@@ -36,33 +30,28 @@ export default function Big3CreateSheet({
 }: Big3CreateSheetProps) {
   const [liftType, setLiftType] = useState<Big3LiftType>(defaultLiftType ?? 'squat');
   const [recordedAt, setRecordedAt] = useState(getToday);
-  const [weight, setWeight] = useState('0');
-  const [reps, setReps] = useState('');
-  const [rpe, setRpe] = useState('');
-  const [notes, setNotes] = useState('');
+  const { weight, reps, rpe, notes, setWeight, setReps, setRpe, setNotes, reset, buildUpdateData, isValid } = useBig3Form();
 
   const createBig3 = useCreateBig3();
   const showError = useShowError();
 
   const handleSubmit = () => {
-    const parsedWeight = parseFloat(weight);
-    if (isNaN(parsedWeight) || parsedWeight <= 0) return;
+    if (!isValid) return;
 
-    const parsedReps = reps ? parseInt(reps) : NaN;
-    const parsedRpe = rpe ? parseFloat(rpe) : NaN;
-
+    const d = buildUpdateData();
     createBig3.mutate(
       {
         recordedAt,
         liftType,
-        weight: parsedWeight,
-        reps: !isNaN(parsedReps) && parsedReps > 0 ? parsedReps : undefined,
-        rpe: !isNaN(parsedRpe) && parsedRpe >= 1 && parsedRpe <= 10 ? parsedRpe : undefined,
-        notes: notes.trim() || undefined,
+        weight: d.weight!,
+        reps: d.reps,
+        rpe: d.rpe,
+        notes: d.notes,
       },
       {
         onSuccess: () => {
-          resetForm();
+          reset();
+          setRecordedAt(getToday());
           onClose();
         },
         onError: (err) => {
@@ -76,20 +65,11 @@ export default function Big3CreateSheet({
     );
   };
 
-  const resetForm = () => {
-    setWeight('0');
-    setReps('');
-    setRpe('');
-    setNotes('');
-    setRecordedAt(getToday());
-  };
-
   const handleClose = () => {
-    resetForm();
+    reset();
+    setRecordedAt(getToday());
     onClose();
   };
-
-  const isValid = parseFloat(weight) > 0;
 
   return (
     <Modal
