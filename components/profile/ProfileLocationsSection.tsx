@@ -4,6 +4,7 @@ import { MapPinIcon } from '@phosphor-icons/react';
 import SectionHeader from '@/components/ui/SectionHeader';
 import Tag from '@/components/ui/Tag';
 import EmptyState from '@/components/common/EmptyState';
+import Surface from '@/components/ui/Surface';
 
 interface ProfileLocationsSectionProps {
   locations?: string[];
@@ -14,7 +15,7 @@ export default function ProfileLocationsSection({ locations }: ProfileLocationsS
     <div className="space-y-3">
       <SectionHeader title="자주 가는 운동 장소" />
 
-      <div className="bg-surface-secondary rounded-2xl p-4">
+      <Surface rounded="2xl">
         {locations && locations.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {locations.map((location, index) => (
@@ -29,7 +30,7 @@ export default function ProfileLocationsSection({ locations }: ProfileLocationsS
             size="sm"
           />
         )}
-      </div>
+      </Surface>
     </div>
   );
 }

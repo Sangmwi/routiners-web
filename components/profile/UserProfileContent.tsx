@@ -3,6 +3,7 @@
 import { Suspense, useState, useRef, useEffect } from 'react';
 import { useUserProfileSuspense } from '@/hooks/profile/queries';
 import { useCurrentUserProfile } from '@/hooks/profile/queries';
+import EmptyState from '@/components/common/EmptyState';
 import { useUserPostCount } from '@/hooks/community/useUserPostCount';
 import type { ProfileTab } from '@/components/profile/ProfileTabBar';
 import ProfileCompactHeader from '@/components/profile/ProfileCompactHeader';
@@ -41,11 +42,7 @@ export default function UserProfileContent({ userId }: UserProfileContentProps) 
   if (user.showInfoPublic === false) privateTabs.push('info');
 
   if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-        <p>사용자를 찾을 수 없어요.</p>
-      </div>
-    );
+    return <EmptyState message="사용자를 찾을 수 없어요." size="lg" />;
   }
 
   return (
@@ -95,18 +92,14 @@ export default function UserProfileContent({ userId }: UserProfileContentProps) 
             <Suspense fallback={<PulseLoader />}>
               {activeTab === 'activity' && (
                 privateTabs.includes('activity') ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                    <p className="text-sm">비공개 활동이에요</p>
-                  </div>
+                  <EmptyState message="비공개 활동이에요" size="lg" variant="private" />
                 ) : (
                   <ProfileActivityGrid userId={userId} />
                 )
               )}
               {activeTab === 'info' && (
                 privateTabs.includes('info') ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                    <p className="text-sm">비공개 정보에요</p>
-                  </div>
+                  <EmptyState message="비공개 정보에요" size="lg" variant="private" />
                 ) : (
                   <ProfileInfoTab user={user} isOwnProfile={false} userId={userId} />
                 )

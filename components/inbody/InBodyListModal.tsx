@@ -5,6 +5,8 @@ import { NextIcon, LoadingSpinner, AddIcon } from '@/components/ui/icons';
 import Modal, { ModalBody } from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
+import EmptyState from '@/components/common/EmptyState';
+import Tag from '@/components/ui/Tag';
 import { InBodyRecord } from '@/lib/types/inbody';
 import { useInBodyRecords } from '@/hooks/inbody';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
@@ -55,15 +57,12 @@ export default function InBodyListModal({
             <LoadingSpinner size="xl" />
           </div>
         ) : records.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <CalendarIcon size={48} className="text-muted-foreground mb-4" />
-            <p className="text-lg font-medium text-card-foreground">
-              아직 인바디 기록이 없어요
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              인바디 결과지를 스캔해서 기록을 추가해보세요
-            </p>
-          </div>
+          <EmptyState
+            icon={CalendarIcon}
+            message="아직 인바디 기록이 없어요"
+            hint="인바디 결과지를 스캔해서 기록을 추가해보세요"
+            size="lg"
+          />
         ) : (
           <div className="divide-y divide-border">
             {records.map((record) => (
@@ -107,9 +106,7 @@ function InBodyListItem({
         </div>
         {record.inbodyScore && (
           <div className="mt-1">
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-surface-accent text-primary">
-              점수 {record.inbodyScore}점
-            </span>
+            <Tag colorScheme="primary" size="sm">점수 {record.inbodyScore}점</Tag>
           </div>
         )}
       </div>

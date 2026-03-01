@@ -4,6 +4,9 @@ import { useState } from 'react';
 import { CalendarIcon, PencilSimpleLineIcon, CameraIcon } from '@phosphor-icons/react';
 import { AddIcon, NextIcon, LoadingSpinner, DeleteIcon, ErrorIcon } from '@/components/ui/icons';
 import Modal, { ModalBody } from '@/components/ui/Modal';
+import OptionSheet, { type OptionItem } from '@/components/ui/OptionSheet';
+import EmptyState from '@/components/common/EmptyState';
+import Tag from '@/components/ui/Tag';
 import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
 import { useShowError } from '@/lib/stores/errorStore';
@@ -19,7 +22,24 @@ import type { BaseModalProps } from '@/lib/types/modal';
 
 interface InBodyManageModalProps extends BaseModalProps {}
 
-type ManageState = 'list' | 'choose-method' | 'manual-input' | 'confirm-delete';
+type ManageState = 'list' | 'manual-input' | 'confirm-delete';
+
+type InBodyAddOption = 'scan' | 'manual';
+
+const INBODY_ADD_OPTIONS: OptionItem<InBodyAddOption>[] = [
+  {
+    value: 'scan',
+    title: '결과지 스캔',
+    description: '인바디 결과지를 촬영하면 자동으로 데이터를 추출해요',
+    icon: <CameraIcon size={24} />,
+  },
+  {
+    value: 'manual',
+    title: '직접 입력',
+    description: '체중, 골격근량 등을 직접 입력해요',
+    icon: <PencilSimpleLineIcon size={24} />,
+  },
+];
 
 export default function InBodyManageModal({
   isOpen,
@@ -28,6 +48,7 @@ export default function InBodyManageModal({
   const [state, setState] = useState<ManageState>('list');
   const [selectedRecord, setSelectedRecord] = useState<InBodyRecord | null>(null);
   const [recordToDelete, setRecordToDelete] = useState<InBodyRecord | null>(null);
+  const [isAddMethodOpen, setIsAddMethodOpen] = useState(false);
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [formErrors, setFormErrors] = useState<InBodyFormErrors>({});
@@ -58,7 +79,17 @@ export default function InBodyManageModal({
     setRecordToDelete(null);
     setManualData(getManualInputInitial());
     setFormErrors({});
+    setIsAddMethodOpen(false);
     onClose();
+  };
+
+  const handleAddMethodSelect = (value: InBodyAddOption) => {
+    setIsAddMethodOpen(false);
+    if (value === 'scan') {
+      setIsScanModalOpen(true);
+    } else {
+      handleStartManualInput();
+    }
   };
 
   // 직접 입력 시작
@@ -141,26 +172,16 @@ export default function InBodyManageModal({
         onClose={handleClose}
         title="인바디 관리"
         size="lg"
-        closeOnBackdrop={state === 'list' || state === 'choose-method'}
+        closeOnBackdrop={state === 'list'}
         stickyFooter={
           <GradientFooter variant="sheet" className="flex gap-3">
             {state === 'list' && (
               <Button
-                onClick={() => setState('choose-method')}
+                onClick={() => setIsAddMethodOpen(true)}
                 className="flex-1"
               >
                 <AddIcon size="sm" className="mr-2" />
                 새 기록 추가
-              </Button>
-            )}
-
-            {state === 'choose-method' && (
-              <Button
-                variant="outline"
-                onClick={() => setState('list')}
-                className="flex-1"
-              >
-                뒤로
               </Button>
             )}
 
@@ -229,15 +250,12 @@ export default function InBodyManageModal({
                   <LoadingSpinner size="xl" />
                 </div>
               ) : records.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center px-4">
-                  <CalendarIcon size={48} className="text-muted-foreground mb-4" />
-                  <p className="text-lg font-medium text-card-foreground">
-                    아직 인바디 기록이 없어요
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    인바디 결과지를 스캔해서 기록을 추가해보세요
-                  </p>
-                </div>
+                <EmptyState
+                  icon={CalendarIcon}
+                  message="아직 인바디 기록이 없어요"
+                  hint="인바디 결과지를 스캔해서 기록을 추가해보세요"
+                  size="lg"
+                />
               ) : (
                 <div className="divide-y divide-border">
                   {records.map((record) => (
@@ -261,9 +279,7 @@ export default function InBodyManageModal({
                         </div>
                         {record.inbodyScore && (
                           <div className="mt-1">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-surface-accent text-primary">
-                              점수 {record.inbodyScore}점
-                            </span>
+                            <Tag colorScheme="primary" size="sm">점수 {record.inbodyScore}점</Tag>
                           </div>
                         )}
                       </div>
@@ -284,46 +300,6 @@ export default function InBodyManageModal({
                 </div>
               )}
             </>
-          )}
-
-          {state === 'choose-method' && (
-            <div className="px-4 py-6 space-y-3">
-              <p className="text-sm text-muted-foreground text-center mb-4">
-                기록 추가 방법을 선택해주세요
-              </p>
-              <button
-                type="button"
-                onClick={() => setIsScanModalOpen(true)}
-                className="w-full flex items-center gap-4 p-4 bg-surface-secondary rounded-2xl hover:bg-surface-accent transition-colors text-left"
-              >
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-surface-accent text-primary">
-                  <CameraIcon size={24} />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-card-foreground">결과지 스캔</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    인바디 결과지를 촬영하면 자동으로 데이터를 추출해요
-                  </p>
-                </div>
-                <NextIcon size="md" className="text-muted-foreground shrink-0" />
-              </button>
-              <button
-                type="button"
-                onClick={handleStartManualInput}
-                className="w-full flex items-center gap-4 p-4 bg-surface-secondary rounded-2xl hover:bg-surface-accent transition-colors text-left"
-              >
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-surface-accent text-primary">
-                  <PencilSimpleLineIcon size={24} />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-card-foreground">직접 입력</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    체중, 골격근량 등을 직접 입력해요
-                  </p>
-                </div>
-                <NextIcon size="md" className="text-muted-foreground shrink-0" />
-              </button>
-            </div>
           )}
 
           {state === 'manual-input' && (
@@ -353,6 +329,17 @@ export default function InBodyManageModal({
           )}
         </ModalBody>
       </Modal>
+
+      {/* 추가 방법 선택 */}
+      <OptionSheet<InBodyAddOption>
+        variant="card"
+        isOpen={isAddMethodOpen}
+        onClose={() => setIsAddMethodOpen(false)}
+        title="추가 방법 선택"
+        description="기록 추가 방법을 선택해주세요"
+        options={INBODY_ADD_OPTIONS}
+        onSelect={handleAddMethodSelect}
+      />
 
       {/* 스캔 모달 */}
       <InBodyScanModal

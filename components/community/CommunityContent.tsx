@@ -9,7 +9,7 @@ import { useInfiniteCommunityPosts } from '@/hooks/community/queries';
 import { useToggleLike } from '@/hooks/community/mutations';
 import { useCurrentUserProfile } from '@/hooks/profile/queries';
 import { useNavigate } from '@/hooks/navigation';
-import AppLink from '@/components/common/AppLink';
+import EmptyState from '@/components/common/EmptyState';
 import type { PostCategory } from '@/lib/types/community';
 
 interface CommunityContentProps {
@@ -99,19 +99,11 @@ export default function CommunityContent({
   return (
     <div>
       {posts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <p className="text-muted-foreground mb-2">
-            {search ? '검색 결과가 없어요' : '아직 게시글이 없어요'}
-          </p>
-          {!search && (
-            <AppLink
-              href="/community/write"
-              className="text-sm text-primary hover:underline"
-            >
-              첫 번째 글을 작성해보세요
-            </AppLink>
-          )}
-        </div>
+        <EmptyState
+          message={search ? '검색 결과가 없어요' : '아직 게시글이 없어요'}
+          action={!search ? { label: '첫 번째 글을 작성해보세요', href: '/community/write' } : undefined}
+          size="lg"
+        />
       ) : (
         <>
           <div className="divide-y divide-edge-faint">

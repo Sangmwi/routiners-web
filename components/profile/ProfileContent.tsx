@@ -3,6 +3,7 @@
 import { Suspense, useState, useRef, useEffect } from 'react';
 import { PencilSimpleIcon, LockSimpleIcon } from '@phosphor-icons/react';
 import { useCurrentUserProfileSuspense } from '@/hooks/profile';
+import EmptyState from '@/components/common/EmptyState';
 import type { ProfileTab } from '@/components/profile/ProfileTabBar';
 import ProfileCompactHeader from '@/components/profile/ProfileCompactHeader';
 import ProfileActionRow from '@/components/profile/ProfileActionRow';
@@ -60,11 +61,7 @@ export default function ProfileContent() {
   const isCurrentTabPrivate = privateTabs.includes(activeTab);
 
   if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-        <p>프로필 정보를 불러올 수 없어요.</p>
-      </div>
-    );
+    return <EmptyState message="프로필 정보를 불러올 수 없어요." size="lg" />;
   }
 
   return (

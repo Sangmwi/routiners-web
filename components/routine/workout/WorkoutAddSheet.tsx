@@ -1,9 +1,7 @@
 'use client';
 
 import { BarbellIcon, RobotIcon } from '@phosphor-icons/react';
-import RoutineOptionSheet, {
-  type RoutineOptionItem,
-} from '@/components/routine/common/RoutineOptionSheet';
+import OptionSheet, { type OptionItem } from '@/components/ui/OptionSheet';
 
 export type WorkoutAddOption = 'ai' | 'direct';
 
@@ -13,13 +11,13 @@ interface WorkoutAddSheetProps {
   onSelect: (option: WorkoutAddOption) => void;
 }
 
-const OPTIONS: RoutineOptionItem<WorkoutAddOption>[] = [
+const OPTIONS: OptionItem<WorkoutAddOption>[] = [
   {
     value: 'ai',
     title: 'AI 상담사에게 맡기기',
     description: '맞춤 루틴 자동 생성',
     icon: <RobotIcon size={18} />,
-    primary: true,
+    tone: 'primary',
   },
   {
     value: 'direct',
@@ -34,7 +32,7 @@ export default function WorkoutAddSheet({
   onSelect,
 }: WorkoutAddSheetProps) {
   return (
-    <RoutineOptionSheet
+    <OptionSheet
       isOpen={isOpen}
       onClose={onClose}
       title="운동 추가하기"

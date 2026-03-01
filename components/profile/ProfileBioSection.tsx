@@ -2,6 +2,7 @@
 
 import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/common/EmptyState';
+import Surface from '@/components/ui/Surface';
 
 interface ProfileBioSectionProps {
   bio?: string;
@@ -11,7 +12,7 @@ export default function ProfileBioSection({ bio }: ProfileBioSectionProps) {
   return (
     <div className="space-y-3">
       <SectionHeader title="소개" />
-      <div className="bg-surface-secondary rounded-2xl p-4">
+      <Surface rounded="2xl">
         {bio ? (
           <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">
             {bio}
@@ -22,7 +23,7 @@ export default function ProfileBioSection({ bio }: ProfileBioSectionProps) {
             size="sm"
           />
         )}
-      </div>
+      </Surface>
     </div>
   );
 }

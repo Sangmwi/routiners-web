@@ -13,6 +13,8 @@ import {
 } from '@/lib/types/fitness';
 import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/common/EmptyState';
+import Surface from '@/components/ui/Surface';
+import Tag from '@/components/ui/Tag';
 import { FitnessDetailDrawer } from '@/components/drawers';
 
 /**
@@ -128,12 +130,9 @@ function FitnessDisplay({ profile, isOwnProfile, renderHeader }: FitnessDisplayP
             {focusAreas.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {focusAreas.map((area) => (
-                  <span
-                    key={area}
-                    className="px-2 py-0.5 text-xs rounded-md bg-surface-muted text-muted-foreground"
-                  >
+                  <Tag key={area} colorScheme="muted" size="sm">
                     {FOCUS_AREA_LABELS[area]}
-                  </span>
+                  </Tag>
                 ))}
               </div>
             )}
@@ -153,9 +152,9 @@ function FitnessDisplay({ profile, isOwnProfile, renderHeader }: FitnessDisplayP
             title="운동 프로필"
             action={{ label: '관리', href: '/profile/fitness' }}
           />
-          <div className="bg-surface-secondary rounded-2xl p-4">
+          <Surface rounded="2xl">
             {content}
-          </div>
+          </Surface>
         </div>
       ) : (
         content

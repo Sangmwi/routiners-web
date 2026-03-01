@@ -8,6 +8,7 @@ import { MetricsGrid } from '@/components/inbody/MetricsGrid';
 import { InBodyRecord, InBodySummary } from '@/lib/types';
 import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/common/EmptyState';
+import Surface from '@/components/ui/Surface';
 
 interface ProfileInbodySectionProps {
   /** 내 프로필인지 여부 */
@@ -131,9 +132,9 @@ function InbodyDisplay({ summary, isOwnProfile, userName, renderHeader }: Inbody
             title="인바디 정보"
             action={isOwnProfile ? { label: '관리', href: '/profile/inbody' } : undefined}
           />
-          <div className="bg-surface-secondary rounded-2xl p-4">
+          <Surface rounded="2xl">
             {content}
-          </div>
+          </Surface>
         </div>
       ) : (
         content

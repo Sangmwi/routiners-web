@@ -4,6 +4,7 @@ import { useProgressSummarySuspense, useUserProgressSummarySuspense } from '@/ho
 import { Big3SummaryCard } from '@/components/progress/Big3SummaryCard';
 import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/common/EmptyState';
+import Surface from '@/components/ui/Surface';
 import { EMPTY_STATE } from '@/lib/config/theme';
 import type { Big3Summary } from '@/lib/types/progress';
 
@@ -67,9 +68,9 @@ function Big3Display({ big3, isOwnProfile, renderHeader }: Big3DisplayProps) {
         title="3대운동"
         action={isOwnProfile ? { label: '관리', href: '/profile/big3' } : undefined}
       />
-      <div className="bg-surface-secondary rounded-2xl p-4">
+      <Surface rounded="2xl">
         {content}
-      </div>
+      </Surface>
     </div>
   );
 }

@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { PlusIcon, CameraIcon, PencilSimpleLineIcon } from '@phosphor-icons/react';
-import { NextIcon } from '@/components/ui/icons';
 import Button from '@/components/ui/Button';
 import GradientFooter from '@/components/ui/GradientFooter';
 import SectionHeader from '@/components/ui/SectionHeader';
 import Modal, { ModalBody } from '@/components/ui/Modal';
+import OptionSheet, { type OptionItem } from '@/components/ui/OptionSheet';
 import { ImageSourceDrawer } from '@/components/drawers';
 import {
   InBodyRecordList,
@@ -24,6 +24,27 @@ import type { InBodyCreateData } from '@/lib/types/inbody';
 import { InBodyFormSchema, InBodyFormErrors } from '@/lib/types/inbody';
 import { validateForm } from '@/lib/utils/formValidation';
 import type { ImagePickerSource } from '@/lib/webview';
+
+// ============================================================
+// Constants
+// ============================================================
+
+type InBodyAddOption = 'scan' | 'manual';
+
+const INBODY_ADD_OPTIONS: OptionItem<InBodyAddOption>[] = [
+  {
+    value: 'scan',
+    title: '결과지 스캔',
+    description: '인바디 결과지를 촬영하면 자동으로 추출해요',
+    icon: <CameraIcon size={24} />,
+  },
+  {
+    value: 'manual',
+    title: '직접 입력',
+    description: '체중, 골격근량 등을 직접 입력해요',
+    icon: <PencilSimpleLineIcon size={24} />,
+  },
+];
 
 // ============================================================
 // Main Content Component
@@ -75,18 +96,15 @@ export default function InBodyContent() {
 
   const { pickImage, base64ToFile, isPickerOpen } = useNativeImagePicker();
 
-  // 스캔 선택
-  const handleChooseScan = () => {
+  const handleMethodSelect = (option: 'scan' | 'manual') => {
     setIsMethodOpen(false);
-    setIsImageSourceOpen(true);
-  };
-
-  // 직접 입력 선택
-  const handleChooseManual = () => {
-    setIsMethodOpen(false);
-    setManualData(getManualInitial(records));
-    setManualFormErrors({});
-    setIsManualOpen(true);
+    if (option === 'scan') {
+      setIsImageSourceOpen(true);
+    } else {
+      setManualData(getManualInitial(records));
+      setManualFormErrors({});
+      setIsManualOpen(true);
+    }
   };
 
   const handleSelectSource = async (source: ImagePickerSource) => {
@@ -189,57 +207,15 @@ export default function InBodyContent() {
       </GradientFooter>
 
       {/* 방법 선택 드로어 (스캔/직접입력) */}
-      <Modal
+      <OptionSheet
+        variant="card"
         isOpen={isMethodOpen}
         onClose={() => setIsMethodOpen(false)}
-        position="bottom"
-        enableSwipe
-        showCloseButton={false}
-      >
-        <ModalBody className="p-4 pb-safe">
-          <div className="space-y-3">
-            <div className="text-center py-1">
-              <h3 className="text-base font-semibold text-foreground">새 기록 추가</h3>
-              <p className="text-sm text-muted-foreground mt-1">어떻게 기록할까요?</p>
-            </div>
-
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={handleChooseScan}
-                className="w-full flex items-center gap-4 p-4 bg-surface-secondary rounded-2xl hover:bg-surface-accent transition-colors text-left"
-              >
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-surface-accent text-primary">
-                  <CameraIcon size={24} />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-card-foreground">결과지 스캔</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    인바디 결과지를 촬영하면 자동으로 추출해요
-                  </p>
-                </div>
-                <NextIcon size="md" className="text-muted-foreground shrink-0" />
-              </button>
-              <button
-                type="button"
-                onClick={handleChooseManual}
-                className="w-full flex items-center gap-4 p-4 bg-surface-secondary rounded-2xl hover:bg-surface-accent transition-colors text-left"
-              >
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-surface-accent text-primary">
-                  <PencilSimpleLineIcon size={24} />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-card-foreground">직접 입력</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    체중, 골격근량 등을 직접 입력해요
-                  </p>
-                </div>
-                <NextIcon size="md" className="text-muted-foreground shrink-0" />
-              </button>
-            </div>
-          </div>
-        </ModalBody>
-      </Modal>
+        title="새 기록 추가"
+        description="어떻게 기록할까요?"
+        options={INBODY_ADD_OPTIONS}
+        onSelect={handleMethodSelect}
+      />
 
       {/* 이미지 소스 선택 드로어 (카메라/갤러리) */}
       <ImageSourceDrawer

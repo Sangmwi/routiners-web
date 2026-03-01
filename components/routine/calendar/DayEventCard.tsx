@@ -3,7 +3,8 @@
 import type { RoutineEvent, WorkoutExercise } from '@/lib/types/routine';
 import type { MealData } from '@/lib/types/meal';
 import { BarbellIcon, BowlFoodIcon } from '@phosphor-icons/react';
-import { getDisplayStatus, getStatusConfig, EVENT_STATUS, type DisplayStatus } from '@/lib/config/theme';
+import { getDisplayStatus, EVENT_STATUS, type DisplayStatus } from '@/lib/config/theme';
+import EventStatusBadge from '@/components/routine/event/EventStatusBadge';
 import { isMealData, isWorkoutData } from '@/lib/types/guards';
 import AppLink from '@/components/common/AppLink';
 import { useLongPress } from '@/hooks/ui';
@@ -23,8 +24,6 @@ function EventTypeIcon({ type, displayStatus }: { type: RoutineEvent['type']; di
 
 export default function DayEventCard({ event, date, onLongPress }: DayEventCardProps) {
   const displayStatus = getDisplayStatus(event.status, event.date);
-  const status = getStatusConfig(displayStatus);
-  const StatusIcon = status.icon;
   const longPressHandlers = useLongPress(onLongPress ?? (() => {}));
   const handlers = onLongPress ? longPressHandlers : {};
 
@@ -39,12 +38,7 @@ export default function DayEventCard({ event, date, onLongPress }: DayEventCardP
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
           <h3 className="text-base font-semibold text-foreground truncate">{event.title}</h3>
-          <span
-            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${status.badgeClass}`}
-          >
-            {StatusIcon && <StatusIcon className="w-3 h-3" />}
-            {status.label}
-          </span>
+          <EventStatusBadge status={event.status} date={event.date} />
         </div>
 
         <div className="text-sm text-muted-foreground">

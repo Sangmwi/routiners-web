@@ -1,9 +1,7 @@
 'use client';
 
 import { BuildingsIcon, PlusIcon, RobotIcon } from '@phosphor-icons/react';
-import RoutineOptionSheet, {
-  type RoutineOptionItem,
-} from '@/components/routine/common/RoutineOptionSheet';
+import OptionSheet, { type OptionItem } from '@/components/ui/OptionSheet';
 
 export type MealAddOption = 'import' | 'ai' | 'direct';
 
@@ -14,12 +12,12 @@ interface MealAddSheetProps {
   isAppending?: boolean;
 }
 
-const DEFAULT_OPTIONS: RoutineOptionItem<MealAddOption>[] = [
+const DEFAULT_OPTIONS: OptionItem<MealAddOption>[] = [
   {
     value: 'import',
     title: '부대 식단 불러오기',
     icon: <BuildingsIcon size={18} />,
-    primary: true,
+    tone: 'primary',
   },
   {
     value: 'ai',
@@ -41,7 +39,7 @@ export default function MealAddSheet({
   isAppending = false,
 }: MealAddSheetProps) {
   return (
-    <RoutineOptionSheet
+    <OptionSheet
       isOpen={isOpen}
       onClose={onClose}
       title={isAppending ? '식사 추가' : '식단 추가하기'}

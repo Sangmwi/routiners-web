@@ -1,10 +1,37 @@
 'use client';
 
+import { ReactNode } from 'react';
 import { WarningCircleIcon, CheckCircleIcon } from '@phosphor-icons/react';
 import { LoadingSpinner } from '@/components/ui/icons';
 import FormSection from '@/components/ui/FormSection';
 import FormInput from '@/components/ui/FormInput';
 import { useCheckNickname, useDebounce } from '@/hooks';
+
+function FieldStatus({
+  variant,
+  children,
+}: {
+  variant: 'error' | 'checking' | 'success';
+  children: ReactNode;
+}) {
+  const colorClass =
+    variant === 'error' ? 'text-destructive' :
+    variant === 'success' ? 'text-primary' :
+    'text-muted-foreground';
+
+  return (
+    <div className={`flex items-center gap-1 text-xs mt-1 ${colorClass}`}>
+      {variant === 'checking' ? (
+        <LoadingSpinner size="sm" variant="muted" />
+      ) : variant === 'success' ? (
+        <CheckCircleIcon size={14} />
+      ) : (
+        <WarningCircleIcon size={14} />
+      )}
+      <span>{children}</span>
+    </div>
+  );
+}
 
 const MIN_LENGTH = 2;
 const MAX_LENGTH = 12;
@@ -47,50 +74,25 @@ export default function ProfileNicknameInput({
     if (!trimmed || trimmed.length < MIN_LENGTH) return null;
 
     if (hasInvalidChars) {
-      return (
-        <div className="flex items-center gap-1 text-destructive text-xs mt-1">
-          <WarningCircleIcon size={14} />
-          <span>한글, 영문, 숫자, 밑줄(_)만 사용할 수 있어요</span>
-        </div>
-      );
+      return <FieldStatus variant="error">한글, 영문, 숫자, 밑줄(_)만 사용할 수 있어요</FieldStatus>;
     }
 
     if (trimmed.length > MAX_LENGTH) {
-      return (
-        <div className="flex items-center gap-1 text-destructive text-xs mt-1">
-          <WarningCircleIcon size={14} />
-          <span>최대 {MAX_LENGTH}자까지 입력할 수 있어요</span>
-        </div>
-      );
+      return <FieldStatus variant="error">최대 {MAX_LENGTH}자까지 입력할 수 있어요</FieldStatus>;
     }
 
     if (isUnchanged) return null;
 
     if (isChecking || !isCheckValid) {
-      return (
-        <div className="flex items-center gap-1 text-muted-foreground text-xs mt-1">
-          <LoadingSpinner size="sm" variant="muted" />
-          <span>확인 중...</span>
-        </div>
-      );
+      return <FieldStatus variant="checking">확인 중...</FieldStatus>;
     }
 
     if (isUnavailable) {
-      return (
-        <div className="flex items-center gap-1 text-destructive text-xs mt-1">
-          <WarningCircleIcon size={14} />
-          <span>이미 사용 중인 닉네임이에요</span>
-        </div>
-      );
+      return <FieldStatus variant="error">이미 사용 중인 닉네임이에요</FieldStatus>;
     }
 
     if (isAvailable) {
-      return (
-        <div className="flex items-center gap-1 text-primary text-xs mt-1">
-          <CheckCircleIcon size={14} />
-          <span>사용 가능한 닉네임이에요</span>
-        </div>
-      );
+      return <FieldStatus variant="success">사용 가능한 닉네임이에요</FieldStatus>;
     }
 
     return null;

@@ -4,6 +4,7 @@ import { User } from '@/lib/types';
 import { CalendarIcon, CigaretteIcon, CigaretteSlashIcon, GenderMaleIcon, GenderFemaleIcon } from '@phosphor-icons/react';
 import SectionHeader from '@/components/ui/SectionHeader';
 import Tag from '@/components/ui/Tag';
+import Surface from '@/components/ui/Surface';
 
 interface ProfileInfoTagsProps {
   user: User;
@@ -31,7 +32,7 @@ export default function ProfileInfoTags({ user }: ProfileInfoTagsProps) {
     <div className="space-y-3">
       <SectionHeader title="내 정보" />
 
-      <div className="bg-surface-secondary rounded-2xl p-4 space-y-2">
+      <Surface rounded="2xl" className="space-y-2">
         <div className="flex flex-wrap gap-2">
           <Tag icon={user.isSmoker ? CigaretteIcon : CigaretteSlashIcon} inactive={user.isSmoker === undefined}>
             {getSmokeStatus(user.isSmoker)}
@@ -45,7 +46,7 @@ export default function ProfileInfoTags({ user }: ProfileInfoTagsProps) {
             {user.gender === 'male' ? '남성' : '여성'}
           </Tag>
         </div>
-      </div>
+      </Surface>
     </div>
   );
 }

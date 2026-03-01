@@ -3,6 +3,7 @@
 import { CameraIcon, ImageSquareIcon } from '@phosphor-icons/react';
 import { LoadingSpinner } from '@/components/ui/icons';
 import Modal, { ModalBody } from '@/components/ui/Modal';
+import OptionSheet, { type OptionItem } from '@/components/ui/OptionSheet';
 
 interface ImageSourceDrawerProps {
   isOpen: boolean;
@@ -12,14 +13,21 @@ interface ImageSourceDrawerProps {
   isLoading?: boolean;
 }
 
-/**
- * 이미지 소스 선택 드로어
- *
- * 네이티브 ActionSheet 스타일 바텀시트
- * - 제목 + 설명 헤더
- * - 세로 리스트 (아이콘 + 텍스트)
- * - 스와이프/배경 클릭으로 닫기
- */
+type ImageSource = 'camera' | 'gallery';
+
+const IMAGE_SOURCE_OPTIONS: OptionItem<ImageSource>[] = [
+  {
+    value: 'camera',
+    title: '카메라로 촬영',
+    icon: <CameraIcon size={22} />,
+  },
+  {
+    value: 'gallery',
+    title: '앨범에서 선택',
+    icon: <ImageSquareIcon size={22} />,
+  },
+];
+
 export default function ImageSourceDrawer({
   isOpen,
   onClose,
@@ -27,64 +35,40 @@ export default function ImageSourceDrawer({
   onSelectGallery,
   isLoading = false,
 }: ImageSourceDrawerProps) {
-  const handleSelectCamera = () => {
-    if (isLoading) return;
-    onSelectCamera();
+  const handleSelect = (value: ImageSource) => {
+    if (value === 'camera') onSelectCamera();
+    else onSelectGallery();
   };
 
-  const handleSelectGallery = () => {
-    if (isLoading) return;
-    onSelectGallery();
-  };
-
-  return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      position="bottom"
-      enableSwipe
-      showCloseButton={false}
-      closeOnBackdrop={!isLoading}
-    >
-      <ModalBody className="p-4 pb-safe">
-        {isLoading ? (
+  if (isLoading) {
+    return (
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        position="bottom"
+        height="auto"
+        showCloseButton={false}
+        closeOnBackdrop={false}
+      >
+        <ModalBody className="p-4 pb-safe">
           <div className="flex flex-col items-center justify-center py-8 gap-3">
             <LoadingSpinner size="xl" />
             <p className="text-sm text-muted-foreground">이미지 처리 중...</p>
           </div>
-        ) : (
-          <div className="space-y-3">
-            {/* 헤더 */}
-            <div className="text-center py-1">
-              <h3 className="text-base font-semibold text-foreground">사진 선택</h3>
-              <p className="text-sm text-muted-foreground mt-1">사진을 어떻게 가져올까요?</p>
-            </div>
+        </ModalBody>
+      </Modal>
+    );
+  }
 
-            {/* 옵션 목록 */}
-            <div className="bg-surface-hover rounded-2xl overflow-hidden">
-              <button
-                type="button"
-                onClick={handleSelectCamera}
-                className="w-full flex items-center justify-center gap-3 py-4 px-5 hover:bg-surface-muted active:bg-surface-pressed transition-colors"
-              >
-                <CameraIcon size={22} className="text-muted-foreground" />
-                <span className="text-base font-medium text-foreground">카메라로 촬영</span>
-              </button>
-
-              <div className="mx-5 border-t border-edge-subtle" />
-
-              <button
-                type="button"
-                onClick={handleSelectGallery}
-                className="w-full flex items-center justify-center gap-3 py-4 px-5 hover:bg-surface-muted active:bg-surface-pressed transition-colors"
-              >
-                <ImageSquareIcon size={22} className="text-muted-foreground" />
-                <span className="text-base font-medium text-foreground">앨범에서 선택</span>
-              </button>
-            </div>
-          </div>
-        )}
-      </ModalBody>
-    </Modal>
+  return (
+    <OptionSheet<ImageSource>
+      variant="grouped"
+      isOpen={isOpen}
+      onClose={onClose}
+      title="사진 선택"
+      description="사진을 어떻게 가져올까요?"
+      options={IMAGE_SOURCE_OPTIONS}
+      onSelect={handleSelect}
+    />
   );
 }

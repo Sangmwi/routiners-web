@@ -3,6 +3,7 @@
 import { useRef, useEffect } from 'react';
 import { NextIcon, LoadingSpinner } from '@/components/ui/icons';
 import SharedEmptyState from '@/components/common/EmptyState';
+import Tag from '@/components/ui/Tag';
 import { EMPTY_STATE } from '@/lib/config/theme';
 import { InBodyRecord } from '@/lib/types/inbody';
 import { formatKoreanDate } from '@/lib/utils/dateHelpers';
@@ -57,9 +58,7 @@ function RecordItem({
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium text-muted-foreground">{formattedDate}</p>
           {record.inbodyScore && (
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-surface-accent text-primary">
-              {record.inbodyScore}점
-            </span>
+            <Tag colorScheme="primary" size="sm">{record.inbodyScore}점</Tag>
           )}
         </div>
         {/* Row 2: Metrics with emphasized values */}

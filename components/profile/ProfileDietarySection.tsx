@@ -13,6 +13,8 @@ import {
 } from '@/lib/types/meal';
 import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/common/EmptyState';
+import Surface from '@/components/ui/Surface';
+import Tag from '@/components/ui/Tag';
 import { DietaryDetailDrawer } from '@/components/drawers';
 
 /**
@@ -125,12 +127,9 @@ function DietaryDisplay({ profile, isOwnProfile, renderHeader }: DietaryDisplayP
             {restrictions.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {restrictions.map((r) => (
-                  <span
-                    key={r}
-                    className="px-2 py-0.5 text-xs rounded-md bg-warning/10 text-warning"
-                  >
+                  <Tag key={r} colorScheme="scheduled" size="sm">
                     {FOOD_RESTRICTION_LABELS[r]}
-                  </span>
+                  </Tag>
                 ))}
               </div>
             )}
@@ -139,12 +138,9 @@ function DietaryDisplay({ profile, isOwnProfile, renderHeader }: DietaryDisplayP
             {sources.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {sources.map((s) => (
-                  <span
-                    key={s}
-                    className="px-2 py-0.5 text-xs rounded-md bg-surface-muted text-muted-foreground"
-                  >
+                  <Tag key={s} colorScheme="muted" size="sm">
                     {AVAILABLE_SOURCE_LABELS[s]}
-                  </span>
+                  </Tag>
                 ))}
               </div>
             )}
@@ -164,9 +160,9 @@ function DietaryDisplay({ profile, isOwnProfile, renderHeader }: DietaryDisplayP
             title="식단 프로필"
             action={{ label: '관리', href: '/profile/dietary' }}
           />
-          <div className="bg-surface-secondary rounded-2xl p-4">
+          <Surface rounded="2xl">
             {content}
-          </div>
+          </Surface>
         </div>
       ) : (
         content

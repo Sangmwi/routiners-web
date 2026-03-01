@@ -3,6 +3,8 @@
 import { ReactNode } from 'react';
 import { CigaretteSlashIcon, CigaretteIcon } from '@phosphor-icons/react';
 import ViewMoreButton from '@/components/ui/ViewMoreButton';
+import Surface from '@/components/ui/Surface';
+import Tag from '@/components/ui/Tag';
 import { useInBodySummarySuspense, useUserInBodySummarySuspense } from '@/hooks/inbody';
 import { useProgressSummarySuspense, useUserProgressSummarySuspense } from '@/hooks/progress';
 import ProfileInbodySection from '@/components/profile/ProfileInbodySection';
@@ -35,7 +37,7 @@ function InfoTabSection({
           </ViewMoreButton>
         ) : null}
       </div>
-      <div className={`bg-surface-secondary rounded-2xl p-4 ${className || ''}`}>{children}</div>
+      <Surface rounded="2xl" className={className}>{children}</Surface>
     </div>
   );
 }
@@ -180,9 +182,7 @@ function InfoTabDisplay({
               <p className="text-xs text-muted-foreground mb-1.5">관심 종목</p>
               <div className="flex flex-wrap gap-1.5">
                 {user.interestedExercises!.map((exercise) => (
-                  <span key={exercise} className="px-2.5 py-1 rounded-full bg-muted text-xs text-foreground">
-                    {exercise}
-                  </span>
+                  <Tag key={exercise} variant="muted">{exercise}</Tag>
                 ))}
               </div>
             </div>
@@ -193,9 +193,7 @@ function InfoTabDisplay({
               <p className="text-xs text-muted-foreground mb-1.5">선호 장소</p>
               <div className="flex flex-wrap gap-1.5">
                 {user.interestedLocations!.map((location) => (
-                  <span key={location} className="px-2.5 py-1 rounded-full bg-muted text-xs text-foreground">
-                    {location}
-                  </span>
+                  <Tag key={location} variant="muted">{location}</Tag>
                 ))}
               </div>
             </div>

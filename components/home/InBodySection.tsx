@@ -2,6 +2,7 @@
 
 import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/common/EmptyState';
+import Surface from '@/components/ui/Surface';
 import BodyCompositionSummary from '@/components/inbody/BodyCompositionSummary';
 import { MetricItem } from '@/components/inbody/MetricItem';
 import MiniSparkline from '@/components/ui/MiniSparkline';
@@ -39,7 +40,7 @@ export default function InBodySection({ summary, history }: InBodySectionProps) 
         }
       />
 
-      <div className="bg-surface-secondary rounded-2xl p-4 mt-3">
+      <Surface rounded="2xl" className="mt-3">
         {!hasData ? (
           <EmptyState {...EMPTY_STATE.inbody.noRecord} size="sm" />
         ) : (
@@ -81,7 +82,7 @@ export default function InBodySection({ summary, history }: InBodySectionProps) 
             </div>
           </BodyCompositionSummary>
         )}
-      </div>
+      </Surface>
     </section>
   );
 }

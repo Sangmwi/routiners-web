@@ -12,7 +12,7 @@ export default function ProfileHeader() {
     <button
       type="button"
       onClick={() => sendMessage({ type: 'OPEN_NATIVE_SETTINGS' })}
-      className="p-1.5 hover:bg-surface-muted rounded-lg transition-colors"
+      className="p-1 hover:bg-surface-muted rounded-lg transition-colors"
       aria-label="설정"
     >
       <GearSixIcon size={20} className="text-muted-foreground" />
@@ -20,10 +20,10 @@ export default function ProfileHeader() {
   ) : (
     <AppLink
       href="/settings"
-      className="p-1.5 hover:bg-surface-muted rounded-lg transition-colors"
+      className="p-1 hover:bg-surface-muted rounded-lg transition-colors"
       aria-label="설정"
     >
-      <GearSixIcon size={20} className="text-muted-foreground" />
+      <GearSixIcon size={24} className="text-muted-foreground" />
     </AppLink>
   );
 

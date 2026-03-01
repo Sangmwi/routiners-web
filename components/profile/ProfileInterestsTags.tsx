@@ -3,6 +3,7 @@
 import SectionHeader from '@/components/ui/SectionHeader';
 import Tag from '@/components/ui/Tag';
 import EmptyState from '@/components/common/EmptyState';
+import Surface from '@/components/ui/Surface';
 
 interface ProfileInterestsTagsProps {
   interests?: string[];
@@ -13,7 +14,7 @@ export default function ProfileInterestsTags({ interests }: ProfileInterestsTags
     <div className="space-y-3">
       <SectionHeader title="관심 종목" />
 
-      <div className="bg-surface-secondary rounded-2xl p-4">
+      <Surface rounded="2xl">
         {interests && interests.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {interests.map((interest, index) => (
@@ -28,7 +29,7 @@ export default function ProfileInterestsTags({ interests }: ProfileInterestsTags
             size="sm"
           />
         )}
-      </div>
+      </Surface>
     </div>
   );
 }
