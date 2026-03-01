@@ -12,6 +12,7 @@ import {
 } from '@/lib/utils/rateLimiter';
 import { AI_MODEL } from '@/lib/constants/aiChat';
 import { SSEWriter } from '@/lib/ai/stream/SSEWriter';
+import { badRequest, internalError } from '@/lib/utils/apiResponse';
 
 // OpenAI 클라이언트 초기화
 const openai = new OpenAI({
@@ -215,34 +216,22 @@ export const POST = withAuth<Response>(async (request: NextRequest, { authUser }
     const image = formData.get('image') as File | null;
 
     if (!image) {
-      return NextResponse.json(
-        { error: '이미지가 제공되지 않았습니다.', code: 'MISSING_FIELD' },
-        { status: 400 }
-      );
+      return badRequest('이미지가 제공되지 않았습니다.');
     }
 
     if (!image.type.startsWith('image/')) {
-      return NextResponse.json(
-        { error: '유효한 이미지 파일이 아닙니다.', code: 'INVALID_FORMAT' },
-        { status: 400 }
-      );
+      return badRequest('유효한 이미지 파일이 아닙니다.');
     }
 
     if (image.size > 10 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: '이미지 크기는 10MB 이하여야 합니다.', code: 'VALIDATION_ERROR' },
-        { status: 400 }
-      );
+      return badRequest('이미지 크기는 10MB 이하여야 합니다.');
     }
 
     const bytes = await image.arrayBuffer();
     base64 = Buffer.from(bytes).toString('base64');
     mimeType = image.type;
   } catch {
-    return NextResponse.json(
-      { error: '이미지 처리 중 오류가 발생했어요.', code: 'INTERNAL_ERROR' },
-      { status: 400 }
-    );
+    return internalError('이미지 처리 중 오류가 발생했어요.');
   }
 
   // SSE 스트림 시작

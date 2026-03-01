@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
 import { createAdminClient } from '@/utils/supabase/admin';
+import { badRequest, notFound, internalError } from '@/lib/utils/apiResponse';
 import {
   toInBodyRecord,
   DbInBodyRecord,
@@ -24,10 +25,7 @@ export const GET = withAuth(
     const targetUserId = url.pathname.split('/').pop();
 
     if (!targetUserId) {
-      return NextResponse.json(
-        { error: '사용자 ID가 필요합니다.', code: 'MISSING_USER_ID' },
-        { status: 400 }
-      );
+      return badRequest('사용자 ID가 필요합니다.');
     }
 
     // 1. 대상 사용자의 공개 설정 확인
@@ -38,10 +36,7 @@ export const GET = withAuth(
       .single();
 
     if (userError || !targetUser) {
-      return NextResponse.json(
-        { error: '사용자를 찾을 수 없습니다.', code: 'USER_NOT_FOUND' },
-        { status: 404 }
-      );
+      return notFound('사용자를 찾을 수 없습니다.');
     }
 
     // 비공개인 경우 빈 summary 반환
@@ -64,10 +59,7 @@ export const GET = withAuth(
 
     if (error) {
       console.error('[InBody User Summary] Error:', error);
-      return NextResponse.json(
-        { error: '기록을 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 }
-      );
+      return internalError('기록을 불러오는데 실패했습니다.');
     }
 
     const records = (data as DbInBodyRecord[]).map(toInBodyRecord);

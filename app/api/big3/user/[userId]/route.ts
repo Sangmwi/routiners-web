@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
 import { createAdminClient } from '@/utils/supabase/admin';
+import { badRequest, notFound } from '@/lib/utils/apiResponse';
 import type { DbBig3Record, Big3LiftType, Big3LiftSummary, Big3RecordsSummary } from '@/lib/types/big3';
 import type { Big3DataPoint } from '@/lib/types/progress';
 
@@ -22,10 +23,7 @@ export const GET = withAuth(
     const months = Math.min(Math.max(parseInt(searchParams.get('months') || '6', 10), 1), 24);
 
     if (!targetUserId) {
-      return NextResponse.json(
-        { error: '사용자 ID가 필요합니다.', code: 'MISSING_USER_ID' },
-        { status: 400 },
-      );
+      return badRequest('사용자 ID가 필요합니다.');
     }
 
     // 1. 공개 설정 확인
@@ -36,10 +34,7 @@ export const GET = withAuth(
       .single();
 
     if (userError || !targetUser) {
-      return NextResponse.json(
-        { error: '사용자를 찾을 수 없습니다.', code: 'USER_NOT_FOUND' },
-        { status: 404 },
-      );
+      return notFound('사용자를 찾을 수 없습니다.');
     }
 
     if (!targetUser.show_info_public) {

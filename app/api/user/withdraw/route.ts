@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { withAuth } from '@/utils/supabase/auth';
+import { notFound, internalError } from '@/lib/utils/apiResponse';
 
 /**
  * DELETE /api/user/withdraw
@@ -21,10 +22,7 @@ export const DELETE = withAuth(async (_request, { authUser, supabase }) => {
       .single();
 
     if (userError || !currentUser) {
-      return NextResponse.json(
-        { error: '사용자를 찾을 수 없습니다.' },
-        { status: 404 }
-      );
+      return notFound('사용자를 찾을 수 없습니다.');
     }
 
     const userId = currentUser.id;
@@ -47,10 +45,7 @@ export const DELETE = withAuth(async (_request, { authUser, supabase }) => {
 
     if (deleteError) {
       console.error('[Withdraw] DB delete error:', deleteError);
-      return NextResponse.json(
-        { error: '탈퇴 처리에 실패했습니다.' },
-        { status: 500 }
-      );
+      return internalError('탈퇴 처리에 실패했습니다.');
     }
 
     // 3. Supabase Auth에서 사용자 삭제 (service role key가 있는 경우에만)
@@ -81,9 +76,6 @@ export const DELETE = withAuth(async (_request, { authUser, supabase }) => {
     return response;
   } catch (error) {
     console.error('[Withdraw] Unexpected error:', error);
-    return NextResponse.json(
-      { error: '탈퇴 처리 중 오류가 발생했습니다.' },
-      { status: 500 }
-    );
+    return internalError('탈퇴 처리 중 오류가 발생했습니다.');
   }
 });

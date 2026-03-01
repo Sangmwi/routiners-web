@@ -48,6 +48,7 @@ import {
   AI_RATE_LIMIT,
   rateLimitExceeded,
 } from '@/lib/utils/rateLimiter';
+import { validateRequest, notFound, internalError } from '@/lib/utils/apiResponse';
 
 import {
   SSEWriter,
@@ -112,29 +113,9 @@ export const POST = withAuth<Response>(
       return NextResponse.json(rateLimitExceeded(rateLimitResult), { status: 429 });
     }
 
-    let body;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        { error: '잘못된 요청 형식입니다.', code: 'BAD_REQUEST' },
-        { status: 400 }
-      );
-    }
-
-    const validation = MessageSchema.safeParse(body);
-    if (!validation.success) {
-      return NextResponse.json(
-        {
-          error: '입력값이 유효하지 않습니다.',
-          code: 'VALIDATION_ERROR',
-          details: validation.error.flatten(),
-        },
-        { status: 400 }
-      );
-    }
-
-    const { message } = validation.data;
+    const result = await validateRequest(request, MessageSchema);
+    if (!result.success) return result.response;
+    const { message } = result.data;
 
     const { data: conversation, error: convError } = await supabase
       .from('conversations')
@@ -145,10 +126,7 @@ export const POST = withAuth<Response>(
       .single();
 
     if (convError || !conversation) {
-      return NextResponse.json(
-        { error: '대화를 찾을 수 없습니다.', code: 'NOT_FOUND' },
-        { status: 404 }
-      );
+      return notFound('대화를 찾을 수 없습니다.');
     }
 
     const conv = conversation as DbConversation;
@@ -186,10 +164,7 @@ export const POST = withAuth<Response>(
     } else {
       savedUserMessage = await saveUserMessage(supabase, conversationId, message);
       if (!savedUserMessage) {
-        return NextResponse.json(
-          { error: '메시지 저장에 실패했습니다.', code: 'DATABASE_ERROR' },
-          { status: 500 }
-        );
+        return internalError('메시지 저장에 실패했습니다.');
       }
 
       await clearMetadataKeys(supabase, conversationId, [

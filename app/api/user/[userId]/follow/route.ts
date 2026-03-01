@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
+import { notFound, badRequest, internalError } from '@/lib/utils/apiResponse';
 
 /**
  * POST /api/user/[userId]/follow
@@ -17,18 +18,12 @@ export const POST = withAuth<NextResponse, { userId: string }>(async (_request: 
   // 현재 사용자 ID 조회
   const { data: currentUserId } = await supabase.rpc('current_user_id');
   if (!currentUserId) {
-    return NextResponse.json(
-      { error: '사용자를 찾을 수 없습니다.' },
-      { status: 404 }
-    );
+    return notFound('사용자를 찾을 수 없습니다.');
   }
 
   // 자기 자신은 팔로우 불가
   if (currentUserId === targetUserId) {
-    return NextResponse.json(
-      { error: '자기 자신을 팔로우할 수 없습니다.' },
-      { status: 400 }
-    );
+    return badRequest('자기 자신을 팔로우할 수 없습니다.');
   }
 
   // 현재 팔로우 상태 확인
@@ -51,10 +46,7 @@ export const POST = withAuth<NextResponse, { userId: string }>(async (_request: 
 
     if (error) {
       console.error('[POST /api/user/[userId]/follow] Delete error:', error);
-      return NextResponse.json(
-        { error: '팔로잉 취소에 실패했습니다.' },
-        { status: 500 }
-      );
+      return internalError('팔로잉 취소에 실패했습니다.');
     }
 
     isFollowing = false;
@@ -66,10 +58,7 @@ export const POST = withAuth<NextResponse, { userId: string }>(async (_request: 
 
     if (error) {
       console.error('[POST /api/user/[userId]/follow] Insert error:', error);
-      return NextResponse.json(
-        { error: '팔로우에 실패했습니다.' },
-        { status: 500 }
-      );
+      return internalError('팔로우에 실패했습니다.');
     }
 
     isFollowing = true;

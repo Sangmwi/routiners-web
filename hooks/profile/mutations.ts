@@ -57,6 +57,7 @@ export function useUpdateProfile() {
 
     // 에러 발생 시 롤백
     onError: (error, variables, context) => {
+      console.error('[Profile] Update failed:', error);
       if (context?.previousUser) {
         queryClient.setQueryData(queryKeys.user.me(), context.previousUser);
       }
