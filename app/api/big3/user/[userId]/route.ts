@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
 import { createAdminClient } from '@/utils/supabase/admin';
-import { badRequest, notFound } from '@/lib/utils/apiResponse';
+import { notFound } from '@/lib/utils/apiResponse';
 import type { DbBig3Record, Big3LiftType, Big3LiftSummary, Big3RecordsSummary } from '@/lib/types/big3';
 import type { Big3DataPoint } from '@/lib/types/progress';
 
@@ -14,17 +14,11 @@ const LIFT_TYPES: Big3LiftType[] = ['squat', 'bench', 'deadlift'];
  * - show_info_public이 true인 경우에만 데이터 반환
  * - 비공개인 경우 빈 summary + isPrivate: true 반환
  */
-export const GET = withAuth(
-  async (request: NextRequest, { supabase }) => {
-    const url = new URL(request.url);
-    const segments = url.pathname.split('/');
-    const targetUserId = segments[segments.length - 1];
-    const { searchParams } = url;
+export const GET = withAuth<NextResponse, { userId: string }>(
+  async (request: NextRequest, { supabase, params }) => {
+    const { userId: targetUserId } = await params;
+    const { searchParams } = new URL(request.url);
     const months = Math.min(Math.max(parseInt(searchParams.get('months') || '6', 10), 1), 24);
-
-    if (!targetUserId) {
-      return badRequest('사용자 ID가 필요합니다.');
-    }
 
     // 1. 공개 설정 확인
     const { data: targetUser, error: userError } = await supabase

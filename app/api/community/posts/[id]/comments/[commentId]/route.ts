@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
+import { notFound, forbidden, internalError } from '@/lib/utils/apiResponse';
 
 /**
  * DELETE /api/community/posts/[id]/comments/[commentId]
@@ -17,10 +18,7 @@ export const DELETE = withAuth<NextResponse, { id: string; commentId: string }>(
   // 현재 사용자의 public.users.id 조회
   const { data: currentUserId } = await supabase.rpc('current_user_id');
   if (!currentUserId) {
-    return NextResponse.json(
-      { error: '사용자를 찾을 수 없습니다.' },
-      { status: 404 }
-    );
+    return notFound('사용자를 찾을 수 없습니다.');
   }
 
   // 댓글 존재 및 소유자 확인
@@ -33,17 +31,11 @@ export const DELETE = withAuth<NextResponse, { id: string; commentId: string }>(
     .single();
 
   if (!comment) {
-    return NextResponse.json(
-      { error: '댓글을 찾을 수 없습니다.' },
-      { status: 404 }
-    );
+    return notFound('댓글을 찾을 수 없습니다.');
   }
 
   if (comment.author_id !== currentUserId) {
-    return NextResponse.json(
-      { error: '본인의 댓글만 삭제할 수 있습니다.' },
-      { status: 403 }
-    );
+    return forbidden('본인의 댓글만 삭제할 수 있습니다.');
   }
 
   // Soft delete
@@ -54,10 +46,7 @@ export const DELETE = withAuth<NextResponse, { id: string; commentId: string }>(
 
   if (error) {
     console.error('[DELETE /api/community/posts/[id]/comments/[commentId]] Error:', error);
-    return NextResponse.json(
-      { error: '댓글 삭제에 실패했습니다.' },
-      { status: 500 }
-    );
+    return internalError('댓글 삭제에 실패했습니다.');
   }
 
   return NextResponse.json({ success: true });

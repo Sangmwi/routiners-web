@@ -11,14 +11,9 @@ import { badRequest, parseRequestBody, handleSupabaseError } from '@/lib/utils/a
  * GET /api/inbody/[id]
  * 특정 InBody 기록 조회
  */
-export const GET = withAuth(
-  async (request: NextRequest, { supabase }) => {
-    const url = new URL(request.url);
-    const id = url.pathname.split('/').pop();
-
-    if (!id) {
-      return badRequest('기록 ID가 필요합니다');
-    }
+export const GET = withAuth<NextResponse, { id: string }>(
+  async (_request: NextRequest, { supabase, params }) => {
+    const { id } = await params;
 
     const { data, error } = await supabase
       .from('inbody_records')
@@ -40,14 +35,9 @@ export const GET = withAuth(
  * PATCH /api/inbody/[id]
  * InBody 기록 수정
  */
-export const PATCH = withAuth(
-  async (request: NextRequest, { supabase }) => {
-    const url = new URL(request.url);
-    const id = url.pathname.split('/').pop();
-
-    if (!id) {
-      return badRequest('기록 ID가 필요합니다');
-    }
+export const PATCH = withAuth<NextResponse, { id: string }>(
+  async (request: NextRequest, { supabase, params }) => {
+    const { id } = await params;
 
     const result = await parseRequestBody<InBodyUpdateData>(request);
     if (!result.success) return result.response;
@@ -101,14 +91,9 @@ export const PATCH = withAuth(
  * DELETE /api/inbody/[id]
  * InBody 기록 삭제
  */
-export const DELETE = withAuth(
-  async (request: NextRequest, { supabase }) => {
-    const url = new URL(request.url);
-    const id = url.pathname.split('/').pop();
-
-    if (!id) {
-      return badRequest('기록 ID가 필요합니다');
-    }
+export const DELETE = withAuth<NextResponse, { id: string }>(
+  async (_request: NextRequest, { supabase, params }) => {
+    const { id } = await params;
 
     const { error } = await supabase
       .from('inbody_records')

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
 import { createAdminClient } from '@/utils/supabase/admin';
-import { badRequest, notFound, internalError } from '@/lib/utils/apiResponse';
+import { notFound, internalError } from '@/lib/utils/apiResponse';
 import {
   toInBodyRecord,
   DbInBodyRecord,
@@ -15,18 +15,12 @@ import {
  * - 해당 사용자의 showInfoPublic이 true인 경우에만 데이터 반환
  * - 비공개인 경우 빈 summary 반환
  */
-export const GET = withAuth(
+export const GET = withAuth<NextResponse, { userId: string }>(
   async (
-    request: NextRequest,
-    { supabase }
+    _request: NextRequest,
+    { supabase, params }
   ) => {
-    // URL에서 userId 추출 (기존 패턴 따름)
-    const url = new URL(request.url);
-    const targetUserId = url.pathname.split('/').pop();
-
-    if (!targetUserId) {
-      return badRequest('사용자 ID가 필요합니다.');
-    }
+    const { userId: targetUserId } = await params;
 
     // 1. 대상 사용자의 공개 설정 확인
     const { data: targetUser, error: userError } = await supabase

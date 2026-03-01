@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
+import { notFound, internalError } from '@/lib/utils/apiResponse';
 
 /**
  * POST /api/community/posts/[id]/like
@@ -17,10 +18,7 @@ export const POST = withAuth<NextResponse, { id: string }>(async (_request: Next
   // 현재 사용자의 public.users.id 조회
   const { data: currentUserId } = await supabase.rpc('current_user_id');
   if (!currentUserId) {
-    return NextResponse.json(
-      { error: '사용자를 찾을 수 없습니다.' },
-      { status: 404 }
-    );
+    return notFound('사용자를 찾을 수 없습니다.');
   }
 
   // 게시글 존재 확인
@@ -32,10 +30,7 @@ export const POST = withAuth<NextResponse, { id: string }>(async (_request: Next
     .single();
 
   if (!post) {
-    return NextResponse.json(
-      { error: '게시글을 찾을 수 없습니다.' },
-      { status: 404 }
-    );
+    return notFound('게시글을 찾을 수 없습니다.');
   }
 
   // 현재 좋아요 상태 확인
@@ -59,10 +54,7 @@ export const POST = withAuth<NextResponse, { id: string }>(async (_request: Next
 
     if (error) {
       console.error('[POST /api/community/posts/[id]/like] Delete error:', error);
-      return NextResponse.json(
-        { error: '좋아요 취소에 실패했습니다.' },
-        { status: 500 }
-      );
+      return internalError('좋아요 취소에 실패했습니다.');
     }
 
     isLiked = false;
@@ -75,10 +67,7 @@ export const POST = withAuth<NextResponse, { id: string }>(async (_request: Next
 
     if (error) {
       console.error('[POST /api/community/posts/[id]/like] Insert error:', error);
-      return NextResponse.json(
-        { error: '좋아요에 실패했습니다.' },
-        { status: 500 }
-      );
+      return internalError('좋아요에 실패했습니다.');
     }
 
     isLiked = true;

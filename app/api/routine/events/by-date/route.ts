@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
 import { DbRoutineEvent, toRoutineEvent } from '@/lib/types/routine';
+import { badRequest, internalError } from '@/lib/utils/apiResponse';
 
 /**
  * GET /api/routine/events/by-date
@@ -12,10 +13,7 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   const type = searchParams.get('type');
 
   if (!date) {
-    return NextResponse.json(
-      { error: 'date 파라미터가 필요합니다.', code: 'BAD_REQUEST' },
-      { status: 400 }
-    );
+    return badRequest('date 파라미터가 필요합니다.');
   }
 
   let query = supabase
@@ -34,10 +32,7 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
       return NextResponse.json(null, { status: 404 });
     }
     console.error('[Routine Events by-date GET] Error:', error);
-    return NextResponse.json(
-      { error: '이벤트를 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
-      { status: 500 }
-    );
+    return internalError('이벤트를 불러오는데 실패했습니다.');
   }
 
   const event = toRoutineEvent(data as DbRoutineEvent);

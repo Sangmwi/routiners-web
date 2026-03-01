@@ -12,6 +12,7 @@ import {
   CounselorMessagePage,
 } from '@/lib/types/counselor';
 import { DbChatMessage, transformDbMessage } from '@/lib/types/chat';
+import { notFound, internalError } from '@/lib/utils/apiResponse';
 
 // ============================================================================
 // GET /api/counselor/conversations/[id]/messages
@@ -36,16 +37,10 @@ export const GET = withAuth(
 
     if (convError) {
       if (convError.code === 'PGRST116') {
-        return NextResponse.json(
-          { error: '대화를 찾을 수 없습니다.', code: 'NOT_FOUND' },
-          { status: 404 }
-        );
+        return notFound('대화를 찾을 수 없습니다.');
       }
       console.error('[Counselor Messages GET] Conv Error:', convError);
-      return NextResponse.json(
-        { error: '대화를 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 }
-      );
+      return internalError('대화를 불러오는데 실패했습니다.');
     }
 
     // 메시지 조회 (최신순 → 역정렬하여 반환)
@@ -66,10 +61,7 @@ export const GET = withAuth(
 
     if (msgError) {
       console.error('[Counselor Messages GET] Msg Error:', msgError);
-      return NextResponse.json(
-        { error: '메시지를 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 }
-      );
+      return internalError('메시지를 불러오는데 실패했습니다.');
     }
 
     const dbMessages = messages as DbChatMessage[];

@@ -10,6 +10,7 @@ import {
   DbCounselorConversation,
   transformDbCounselorConversation,
 } from '@/lib/types/counselor';
+import { internalError } from '@/lib/utils/apiResponse';
 
 // ============================================================================
 // GET /api/counselor/conversations/active
@@ -29,10 +30,7 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
 
   if (error) {
     console.error('[Counselor Active GET] Error:', error);
-    return NextResponse.json(
-      { error: '대화를 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
-      { status: 500 }
-    );
+    return internalError('대화를 불러오는데 실패했습니다.');
   }
 
   // 대화가 없으면 null 반환

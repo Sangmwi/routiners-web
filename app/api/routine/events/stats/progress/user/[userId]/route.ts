@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
 import { createAdminClient } from '@/utils/supabase/admin';
+import { notFound, internalError } from '@/lib/utils/apiResponse';
 import type { Big3DataPoint, Big3Summary, ProgressSummary } from '@/lib/types/progress';
 import type { Big3LiftType } from '@/lib/types/big3';
 
@@ -8,17 +9,9 @@ import type { Big3LiftType } from '@/lib/types/big3';
  * GET /api/routine/events/stats/progress/user/[userId]
  * 특정 사용자의 3대 운동 진행 현황 조회 (big3_records 테이블 기반)
  */
-export const GET = withAuth(
-  async (request: NextRequest, { supabase }) => {
-    const url = new URL(request.url);
-    const targetUserId = url.pathname.split('/').pop();
-
-    if (!targetUserId) {
-      return NextResponse.json(
-        { error: '사용자 ID가 필요합니다.', code: 'MISSING_USER_ID' },
-        { status: 400 },
-      );
-    }
+export const GET = withAuth<NextResponse, { userId: string }>(
+  async (request: NextRequest, { supabase, params }) => {
+    const { userId: targetUserId } = await params;
 
     // 1. 공개 설정 확인
     const { data: targetUser, error: userError } = await supabase
@@ -28,10 +21,7 @@ export const GET = withAuth(
       .single();
 
     if (userError || !targetUser) {
-      return NextResponse.json(
-        { error: '사용자를 찾을 수 없습니다.', code: 'USER_NOT_FOUND' },
-        { status: 404 },
-      );
+      return notFound('사용자를 찾을 수 없습니다.');
     }
 
     if (!targetUser.show_info_public) {
@@ -60,10 +50,7 @@ export const GET = withAuth(
 
     if (error) {
       console.error('[Progress User] Error:', error);
-      return NextResponse.json(
-        { error: '기록을 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 },
-      );
+      return internalError('기록을 불러오는데 실패했습니다.');
     }
 
     const records = (data ?? []) as { recorded_at: string; lift_type: Big3LiftType; weight: number }[];

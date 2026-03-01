@@ -5,6 +5,7 @@ import {
   toRoutineEvent,
   transformEventToCalendarSummary,
 } from '@/lib/types/routine';
+import { badRequest, internalError } from '@/lib/utils/apiResponse';
 
 /**
  * GET /api/routine/events/calendar
@@ -16,20 +17,14 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
   const monthParam = searchParams.get('month');
 
   if (!yearParam || !monthParam) {
-    return NextResponse.json(
-      { error: 'year와 month 파라미터가 필요합니다.', code: 'BAD_REQUEST' },
-      { status: 400 }
-    );
+    return badRequest('year와 month 파라미터가 필요합니다.');
   }
 
   const year = parseInt(yearParam, 10);
   const month = parseInt(monthParam, 10);
 
   if (isNaN(year) || isNaN(month) || month < 1 || month > 12) {
-    return NextResponse.json(
-      { error: '유효하지 않은 year 또는 month입니다.', code: 'BAD_REQUEST' },
-      { status: 400 }
-    );
+    return badRequest('유효하지 않은 year 또는 month입니다.');
   }
 
   // 해당 월의 시작일과 종료일 계산
@@ -46,10 +41,7 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
 
   if (error) {
     console.error('[Routine Events Calendar] Error:', error);
-    return NextResponse.json(
-      { error: '캘린더 데이터를 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
-      { status: 500 }
-    );
+    return internalError('캘린더 데이터를 불러오는데 실패했습니다.');
   }
 
   const events = (data as DbRoutineEvent[])
