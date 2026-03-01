@@ -16,6 +16,7 @@ import {
   APPLY_RATE_LIMIT,
   rateLimitExceeded,
 } from '@/lib/utils/rateLimiter';
+import { badRequest, notFound, internalError } from '@/lib/utils/apiResponse';
 
 interface ApplyRoutineRequest {
   conversationId: string;
@@ -41,10 +42,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
     const { conversationId, previewId, forceOverwrite = false, weekCount, appendMode = false } = body;
 
     if (!conversationId || !previewId) {
-      return NextResponse.json(
-        { success: false, error: 'conversationId와 previewId가 필요합니다.' },
-        { status: 400 }
-      );
+      return badRequest('conversationId와 previewId가 필요합니다.');
     }
 
     // 2. conversation 조회 (RLS가 자동으로 권한 필터링)
@@ -55,10 +53,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
       .single();
 
     if (convError || !conversation) {
-      return NextResponse.json(
-        { success: false, error: '대화를 찾을 수 없습니다.' },
-        { status: 404 }
-      );
+      return notFound('대화를 찾을 수 없습니다.');
     }
 
     // 3. 재적용 여부 확인 (이전에 적용한 적이 있으면 재적용 모드)
@@ -75,19 +70,13 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
       .single();
 
     if (msgError || !previewMessage) {
-      return NextResponse.json(
-        { success: false, error: '미리보기 데이터를 찾을 수 없습니다. 다시 루틴을 생성해주세요.' },
-        { status: 400 }
-      );
+      return notFound('미리보기 데이터를 찾을 수 없습니다. 다시 루틴을 생성해주세요.');
     }
 
     // 5. 메시지 상태 확인 (취소됨만 차단, applied는 재적용 허용)
     const msgMetadata = previewMessage.metadata as { status?: string } | null;
     if (msgMetadata?.status === 'cancelled') {
-      return NextResponse.json(
-        { success: false, error: '취소된 루틴입니다. 다시 루틴을 생성해주세요.' },
-        { status: 400 }
-      );
+      return badRequest('취소된 루틴입니다. 다시 루틴을 생성해주세요.');
     }
 
     // 6. content에서 preview 데이터 파싱
@@ -95,18 +84,12 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
     try {
       previewData = JSON.parse(previewMessage.content) as RoutinePreviewData;
     } catch {
-      return NextResponse.json(
-        { success: false, error: '미리보기 데이터 파싱에 실패했습니다.' },
-        { status: 500 }
-      );
+      return internalError('미리보기 데이터 파싱에 실패했습니다.');
     }
 
     // 7. previewId 일치 확인 (보안 검증)
     if (previewData.id !== previewId) {
-      return NextResponse.json(
-        { success: false, error: '미리보기 ID가 일치하지 않습니다.' },
-        { status: 400 }
-      );
+      return badRequest('미리보기 ID가 일치하지 않습니다.');
     }
 
     // 8. appendMode: 마지막 scheduled 이벤트 날짜 조회 (이어붙이기)
@@ -190,10 +173,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
 
           if (deleteError) {
             console.error('[Apply Routine API] Delete existing events error:', deleteError);
-            return NextResponse.json(
-              { success: false, error: '기존 루틴 삭제에 실패했습니다.' },
-              { status: 500 }
-            );
+            return internalError('기존 루틴 삭제에 실패했습니다.');
           }
         }
       }
@@ -214,10 +194,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
     );
 
     if (!applyResult.success) {
-      return NextResponse.json(
-        { success: false, error: applyResult.error || '루틴 적용에 실패했습니다.' },
-        { status: 500 }
-      );
+      return internalError(applyResult.error || '루틴 적용에 실패했습니다.');
     }
 
     // 10. Phase 9: 메시지 상태를 'applied'로 업데이트
@@ -280,9 +257,6 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
     });
   } catch (error) {
     console.error('[Apply Routine API] Error:', error);
-    return NextResponse.json(
-      { success: false, error: '루틴 적용 중 오류가 발생했습니다.' },
-      { status: 500 }
-    );
+    return internalError('루틴 적용 중 오류가 발생했습니다.');
   }
 });

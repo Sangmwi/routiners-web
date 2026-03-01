@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/utils/supabase/auth';
-import { badRequest, internalError, notFound } from '@/lib/utils/apiResponse';
+import { internalError, notFound, parseRequestBody } from '@/lib/utils/apiResponse';
 
 /**
  * PATCH /api/conversations/[id]/metadata
@@ -13,13 +13,9 @@ export const PATCH = withAuth(
   ) => {
     const conversationId = (await params).id;
 
-    let body: Record<string, boolean> = {};
-    try {
-      body = await request.json();
-    } catch {
-      return badRequest('잘못된 요청 형식입니다.');
-    }
-    const { clearProfileConfirmation, clearPendingPreview, clearPendingMealPreview } = body;
+    const parsed = await parseRequestBody<Record<string, boolean>>(request);
+    if (!parsed.success) return parsed.response;
+    const { clearProfileConfirmation, clearPendingPreview, clearPendingMealPreview } = parsed.data;
 
     // RLS가 권한 필터링을 처리
     const { data: conversation, error: convError } = await supabase

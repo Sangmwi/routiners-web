@@ -30,6 +30,9 @@ export function useCompleteSignup() {
       // 캐시 업데이트
       queryClient.setQueryData(queryKeys.user.me(), data);
     },
+    onError: (error) => {
+      console.error('[Auth] Signup failed:', error);
+    },
   });
 }
 
@@ -48,6 +51,9 @@ export function useSignOut() {
       if (typeof window !== 'undefined' && window.ReactNativeWebView) {
         window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'LOGOUT' }));
       }
+    },
+    onError: (error) => {
+      console.error('[Auth] Sign out failed:', error);
     },
   });
 }

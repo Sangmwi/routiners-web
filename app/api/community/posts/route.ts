@@ -13,7 +13,7 @@ import {
   type DbCommunityPost,
 } from '@/lib/types/community';
 import { parsePaginationParams } from '@/lib/utils/queryParams';
-import { validateRequest } from '@/lib/utils/apiResponse';
+import { validateRequest, internalError } from '@/lib/utils/apiResponse';
 
 const CreatePostSchema = z.object({
   category: z.enum(['general', 'workout', 'meal', 'qna'], {
@@ -78,10 +78,7 @@ export const GET = withAuth(async (request: NextRequest, { supabase }) => {
 
   if (error) {
     console.error('[GET /api/community/posts] Supabase error:', error.message, error.details, error.hint);
-    return NextResponse.json(
-      { error: '게시글 목록을 불러오는데 실패했습니다.' },
-      { status: 500 }
-    );
+    return internalError('게시글 목록을 불러오는데 실패했습니다.');
   }
 
   if (!posts || posts.length === 0) {
@@ -179,10 +176,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase }) => {
 
   if (error) {
     console.error('[POST /api/community/posts] Error:', error);
-    return NextResponse.json(
-      { error: '게시글 작성에 실패했습니다.' },
-      { status: 500 }
-    );
+    return internalError('게시글 작성에 실패했습니다.');
   }
 
   return NextResponse.json(

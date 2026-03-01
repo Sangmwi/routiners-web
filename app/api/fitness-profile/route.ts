@@ -6,7 +6,7 @@ import {
   transformDbFitnessProfile,
   transformFitnessProfileToDb,
 } from '@/lib/types/fitness';
-import { validateRequest, handleSupabaseError, badRequest } from '@/lib/utils/apiResponse';
+import { validateRequest, handleSupabaseError, badRequest, internalError } from '@/lib/utils/apiResponse';
 
 /**
  * GET /api/fitness-profile
@@ -39,10 +39,7 @@ export const GET = withAuth(async (_request: NextRequest, { supabase }) => {
     }
 
     console.error('[Fitness Profile GET] Error:', error);
-    return NextResponse.json(
-      { error: '피트니스 프로필을 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
-      { status: 500 }
-    );
+    return internalError('피트니스 프로필을 불러오는데 실패했습니다.');
   }
 
   return NextResponse.json(transformDbFitnessProfile(data as DbFitnessProfile));

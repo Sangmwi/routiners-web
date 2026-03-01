@@ -56,10 +56,7 @@ export const GET = withAuth<NextResponse, { id: string }>(async (_request: NextR
 
   if (error) {
     console.error('[GET /api/community/posts/[id]/comments] Error:', error);
-    return NextResponse.json(
-      { error: '댓글을 불러오는데 실패했습니다.' },
-      { status: 500 }
-    );
+    return internalError('댓글을 불러오는데 실패했습니다.');
   }
 
   if (!comments || comments.length === 0) {

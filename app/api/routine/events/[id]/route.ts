@@ -4,8 +4,7 @@ import { DbRoutineEvent, toRoutineEvent } from '@/lib/types/routine';
 import { RoutineEventUpdateSchema } from '@/lib/schemas/routine.schema';
 import {
   notFound,
-  badRequest,
-  validationError,
+  validateRequest,
   handleSupabaseError,
 } from '@/lib/utils/apiResponse';
 
@@ -44,23 +43,13 @@ export const PATCH = withAuth<NextResponse, { id: string }>(
   async (request: NextRequest, { supabase, params }) => {
     const { id } = await params;
 
-    let body;
-    try {
-      body = await request.json();
-    } catch {
-      return badRequest('잘못된 요청 형식입니다');
-    }
-
-    // 유효성 검사
-    const validation = RoutineEventUpdateSchema.safeParse(body);
-    if (!validation.success) {
-      return validationError(validation.error);
-    }
+    const result = await validateRequest(request, RoutineEventUpdateSchema);
+    if (!result.success) return result.response;
 
     const updateData: Record<string, unknown> = {};
-    if (validation.data.title !== undefined) updateData.title = validation.data.title;
-    if (validation.data.data !== undefined) updateData.data = validation.data.data;
-    if (validation.data.status !== undefined) updateData.status = validation.data.status;
+    if (result.data.title !== undefined) updateData.title = result.data.title;
+    if (result.data.data !== undefined) updateData.data = result.data.data;
+    if (result.data.status !== undefined) updateData.status = result.data.status;
 
     const { data, error } = await supabase
       .from('routine_events')
@@ -78,7 +67,7 @@ export const PATCH = withAuth<NextResponse, { id: string }>(
     }
 
     // 되돌리기(scheduled) 시 자동 캡처된 Big3 기록 삭제
-    if (validation.data.status === 'scheduled') {
+    if (result.data.status === 'scheduled') {
       await supabase
         .from('big3_records')
         .delete()

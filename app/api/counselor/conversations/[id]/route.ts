@@ -11,6 +11,7 @@ import {
   DbCounselorConversation,
   transformDbCounselorConversation,
 } from '@/lib/types/counselor';
+import { notFound, internalError } from '@/lib/utils/apiResponse';
 
 // ============================================================================
 // GET /api/counselor/conversations/[id]
@@ -31,16 +32,10 @@ export const GET = withAuth(
 
     if (error) {
       if (error.code === 'PGRST116') {
-        return NextResponse.json(
-          { error: '대화를 찾을 수 없습니다.', code: 'NOT_FOUND' },
-          { status: 404 }
-        );
+        return notFound('대화를 찾을 수 없습니다.');
       }
       console.error('[Counselor Conversation GET] Error:', error);
-      return NextResponse.json(
-        { error: '대화를 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 }
-      );
+      return internalError('대화를 불러오는데 실패했습니다.');
     }
 
     return NextResponse.json(
@@ -66,10 +61,7 @@ export const DELETE = withAuth(
 
     if (error) {
       console.error('[Counselor Conversation DELETE] Error:', error);
-      return NextResponse.json(
-        { error: '삭제에 실패했습니다.', code: 'DATABASE_ERROR' },
-        { status: 500 }
-      );
+      return internalError('삭제에 실패했습니다.');
     }
 
     return NextResponse.json({ success: true });

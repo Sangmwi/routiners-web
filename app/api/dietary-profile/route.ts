@@ -6,7 +6,7 @@ import {
   transformDbDietaryProfile,
   transformDietaryProfileToDb,
 } from '@/lib/types/meal';
-import { validateRequest, handleSupabaseError, badRequest } from '@/lib/utils/apiResponse';
+import { validateRequest, handleSupabaseError, badRequest, internalError } from '@/lib/utils/apiResponse';
 
 /**
  * GET /api/dietary-profile
@@ -24,10 +24,7 @@ export const GET = withAuth(async (_request: NextRequest, { supabase }) => {
     }
 
     console.error('[Dietary Profile GET] Error:', error);
-    return NextResponse.json(
-      { error: '식단 프로필을 불러오는데 실패했습니다.', code: 'DATABASE_ERROR' },
-      { status: 500 }
-    );
+    return internalError('식단 프로필을 불러오는데 실패했습니다.');
   }
 
   return NextResponse.json(transformDbDietaryProfile(data as DbDietaryProfile));

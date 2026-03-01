@@ -18,6 +18,7 @@ import {
   APPLY_RATE_LIMIT,
   rateLimitExceeded,
 } from '@/lib/utils/rateLimiter';
+import { badRequest, notFound, internalError } from '@/lib/utils/apiResponse';
 
 interface ApplyMealPlanRequest {
   conversationId: string;
@@ -35,10 +36,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
     const { conversationId, previewId } = body;
 
     if (!conversationId || !previewId) {
-      return NextResponse.json(
-        { success: false, error: 'conversationId와 previewId가 필요합니다.' },
-        { status: 400 },
-      );
+      return badRequest('conversationId와 previewId가 필요합니다.');
     }
 
     const { data: conversation, error: convError } = await supabase
@@ -48,35 +46,23 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
       .single();
 
     if (convError || !conversation) {
-      return NextResponse.json(
-        { success: false, error: '대화를 찾을 수 없습니다.' },
-        { status: 404 },
-      );
+      return notFound('대화를 찾을 수 없습니다.');
     }
 
     const previewLookup = await findMealPreviewMessageById(supabase, conversationId, previewId);
     if (!previewLookup.success || !previewLookup.data) {
-      return NextResponse.json(
-        { success: false, error: previewLookup.error ?? '식단 미리보기를 찾을 수 없습니다.' },
-        { status: 400 },
-      );
+      return badRequest(previewLookup.error ?? '식단 미리보기를 찾을 수 없습니다.');
     }
 
     const { messageId, metadata, previewData } = previewLookup.data;
     const status = getMealPreviewStatus(metadata);
 
     if (status === 'cancelled') {
-      return NextResponse.json(
-        { success: false, error: '취소된 식단입니다. 다시 식단을 생성해 주세요.' },
-        { status: 400 },
-      );
+      return badRequest('취소된 식단입니다. 다시 식단을 생성해 주세요.');
     }
 
     if (status === 'applied') {
-      return NextResponse.json(
-        { success: false, error: '이미 적용된 식단입니다.' },
-        { status: 400 },
-      );
+      return badRequest('이미 적용된 식단입니다.');
     }
 
     const toolCtx: ToolExecutorContext = {
@@ -87,10 +73,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
     const applyResult = await executeApplyMealPlan(toolCtx, previewData);
 
     if (!applyResult.success) {
-      return NextResponse.json(
-        { success: false, error: applyResult.error || '식단 적용에 실패했습니다.' },
-        { status: 500 },
-      );
+      return internalError(applyResult.error || '식단 적용에 실패했습니다.');
     }
 
     const appliedAt = new Date().toISOString();
@@ -132,10 +115,7 @@ export const POST = withAuth(async (request: NextRequest, { supabase, authUser }
     });
   } catch (error) {
     console.error('[Apply Meal Plan API] Error:', error);
-    return NextResponse.json(
-      { success: false, error: '식단 적용 중 오류가 발생했습니다.' },
-      { status: 500 },
-    );
+    return internalError('식단 적용 중 오류가 발생했습니다.');
   }
 });
 
